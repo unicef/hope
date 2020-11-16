@@ -1,6 +1,7 @@
 import { Box, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { householdDetailed } from '../../apollo/fragments/HouseholdFragments';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
@@ -58,56 +59,77 @@ export const OtherRelatedTickets = ({
   console.log('😎: householdTickets', householdTickets);
 
   const renderIds = (tickets) =>
-    tickets.map((edge) => (
-      <Box mb={1}>
-        <ContentLink
-          href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-        >
-          {decodeIdString(edge.node.id)}
-        </ContentLink>
-      </Box>
-    ));
+    tickets.length
+      ? tickets.map((edge) => (
+          <Box key={edge.node.id} mb={1}>
+            <ContentLink
+              href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
+            >
+              {decodeIdString(edge.node.id)}
+            </ContentLink>
+          </Box>
+        ))
+      : '-';
 
-  const openTickets =
-    linkedTickets.length &&
-    linkedTickets.filter(
-      (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
-    );
-  const closedTickets =
-    linkedTickets.length &&
-    linkedTickets.filter(
-      (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
-    );
+  const openHouseholdTickets = householdTickets.length
+    ? householdTickets.filter(
+        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+      )
+    : [];
+  const closedHouseholdTickets = householdTickets.length
+    ? householdTickets.filter(
+        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+      )
+    : [];
 
-  return linkedTickets.length ? (
+  const openTickets = linkedTickets.length
+    ? linkedTickets.filter(
+        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+      )
+    : [];
+  const closedTickets = linkedTickets.length
+    ? linkedTickets.filter(
+        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+      )
+    : [];
+
+  return linkedTickets.length || householdTickets.length ? (
     <StyledBox>
       <Title>
         <Typography variant='h6'>Other Related Tickets</Typography>
       </Title>
       <Box display='flex' flexDirection='column'>
+        <LabelizedField label='For Household'>
+          <>{renderIds(openHouseholdTickets)}</>
+        </LabelizedField>
         <LabelizedField label='Tickets'>
           <>{renderIds(openTickets)}</>
         </LabelizedField>
-        {!show && closedTickets.length && (
+        {!show && (closedTickets.length || closedHouseholdTickets.length) ? (
           <Box mt={3}>
             <BlueBold onClick={() => setShow(true)}>
-              SHOW CLOSED TICKETS ({closedTickets.length})
+              SHOW CLOSED TICKETS (
+              {closedTickets.length + closedHouseholdTickets.length})
             </BlueBold>
           </Box>
-        )}
+        ) : null}
         {show && (
           <Box mb={3} mt={3}>
             <Typography>Closed Tickets</Typography>
+            <LabelizedField label='For Household'>
+              <>{renderIds(closedHouseholdTickets)}</>
+            </LabelizedField>
             <LabelizedField label='Tickets'>
               <>{renderIds(closedTickets)}</>
             </LabelizedField>
           </Box>
         )}
-        {show && closedTickets.length && (
+        {show && (closedTickets.length || closedHouseholdTickets.length) ? (
           <BlueBold onClick={() => setShow(false)}>
-            HIDE CLOSED TICKETS ({closedTickets.length})
+            HIDE CLOSED TICKETS (
+            {closedTickets.length + closedHouseholdTickets.length})
           </BlueBold>
-        )}
+        ) : null}
       </Box>
     </StyledBox>
   ) : null;
