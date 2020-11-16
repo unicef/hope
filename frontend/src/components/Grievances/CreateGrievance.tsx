@@ -133,7 +133,6 @@ export function CreateGrievance(): React.ReactElement {
       language: values.language,
       admin: values.admin,
       area: values.area,
-      issueType: values.issueType,
     };
 
     if (
@@ -175,6 +174,7 @@ export function CreateGrievance(): React.ReactElement {
         variables: {
           input: {
             ...requiredVariables,
+            issueType: values.issueType,
             linkedTickets: values.selectedRelatedTickets,
             extras: {
               category: {
@@ -230,13 +230,18 @@ export function CreateGrievance(): React.ReactElement {
                       <Field
                         name='category'
                         label='Category*'
+                        onChange={(e) => {
+                          setFieldValue('category', e.target.value);
+                          setFieldValue('issueType', null);
+                        }}
                         variant='outlined'
                         choices={choicesData.grievanceTicketCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
                     {values.category ===
-                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE && (
+                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
                       <Grid item xs={6}>
                         <Field
                           name='issueType'
@@ -246,7 +251,7 @@ export function CreateGrievance(): React.ReactElement {
                           component={FormikSelectField}
                         />
                       </Grid>
-                    )}
+                    ) : null}
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
