@@ -795,7 +795,6 @@ export type GrievanceTicketNode = Node & {
   consent: Scalars['Boolean'],
   businessArea: UserBusinessAreaNode,
   linkedTickets: GrievanceTicketNodeConnection,
-  grievanceticketSet: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
   sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
@@ -810,14 +809,6 @@ export type GrievanceTicketNode = Node & {
 
 
 export type GrievanceTicketNodeLinkedTicketsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type GrievanceTicketNodeGrievanceticketSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5413,7 +5404,20 @@ export type GrievanceTicketQuery = (
     )>, paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id'>
-    )>, ticketNotes: (
+    )>, linkedTickets: (
+      { __typename?: 'GrievanceTicketNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'GrievanceTicketNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'GrievanceTicketNode' }
+          & Pick<GrievanceTicketNode, 'id' | 'status'>
+          & { household: Maybe<(
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId'>
+          )> }
+        )> }
+      )>> }
+    ), ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
         { __typename?: 'TicketNoteNodeEdge' }
@@ -9378,6 +9382,18 @@ export const GrievanceTicketDocument = gql`
     paymentRecord {
       id
     }
+    linkedTickets {
+      edges {
+        node {
+          id
+          status
+          household {
+            id
+            unicefId
+          }
+        }
+      }
+    }
     issueType
     ticketNotes {
       edges {
@@ -12547,7 +12563,6 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
-  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeGrievanceticketSetArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
   sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,

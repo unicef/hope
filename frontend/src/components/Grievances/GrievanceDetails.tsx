@@ -212,18 +212,6 @@ export function GrievanceDetails(): React.ReactElement {
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
   const renderRightSection = (): React.ReactElement => {
-    if (isFeedbackType) {
-      return (
-        <PaddingContainer>
-          <Box display='flex' flexDirection='column'>
-            <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
-            <Box mt={6}>
-              <OtherRelatedTickets />
-            </Box>
-          </Box>
-        </PaddingContainer>
-      );
-    }
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
     )
@@ -231,11 +219,17 @@ export function GrievanceDetails(): React.ReactElement {
         <Box display='flex' flexDirection='column'>
           <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
           <Box mt={6}>
-            <OtherRelatedTickets />
+            <OtherRelatedTickets linkedTickets={ticket.linkedTickets.edges} />
           </Box>
         </Box>
       );
-    return <RedBox>Some other case</RedBox>;
+    return (
+      <PaddingContainer>
+        <Box display='flex' flexDirection='column'>
+          <OtherRelatedTickets linkedTickets={ticket.linkedTickets.edges} />
+        </Box>
+      </PaddingContainer>
+    );
   };
 
   return (
