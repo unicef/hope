@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -19,12 +19,14 @@ import {
 } from '../../__generated__/graphql';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
-import { MiśTheme } from '../../theme';
 import { Notes } from './Notes';
-import { PastTickets } from './PastTickets';
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { PaymentIds } from './PaymentIds';
+import { ContentLink } from '../ContentLink';
+import { OtherRelatedTickets } from './OtherRelatedTickets';
 
-const NotesContainer = styled.div`
+const PaddingContainer = styled.div`
   padding: 22px;
 `;
 
@@ -37,12 +39,9 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-const ContentLink = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 14px;
-  line-height: 19px;
+const RedBox = styled.div`
+  padding: 30px;
+  border: 3px solid red;
 `;
 
 export function GrievanceDetails(): React.ReactElement {
@@ -207,7 +206,37 @@ export function GrievanceDetails(): React.ReactElement {
     },
   ];
 
-  const tickets: string[] = ['189-19-15311', '183-19-82649'];
+  const isFeedbackType =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
+
+  const renderRightSection = (): React.ReactElement => {
+    if (isFeedbackType) {
+      return (
+        <PaddingContainer>
+          <Box display='flex' flexDirection='column'>
+            <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
+            <Box mt={6}>
+              <OtherRelatedTickets />
+            </Box>
+          </Box>
+        </PaddingContainer>
+      );
+    }
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
+    )
+      return (
+        <Box display='flex' flexDirection='column'>
+          <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
+          <Box mt={6}>
+            <OtherRelatedTickets />
+          </Box>
+        </Box>
+      );
+    return <RedBox>Some other case</RedBox>;
+  };
 
   return (
     <div>
@@ -230,12 +259,12 @@ export function GrievanceDetails(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
-          <NotesContainer>
+          <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
-          </NotesContainer>
+          </PaddingContainer>
         </Grid>
         <Grid item xs={5}>
-          <PastTickets tickets={tickets} />
+          {renderRightSection()}
         </Grid>
       </Grid>
     </div>

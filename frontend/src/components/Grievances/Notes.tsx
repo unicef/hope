@@ -6,7 +6,6 @@ import { Field, Form, Formik } from 'formik';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
 import {
   GrievanceTicketQuery,
@@ -28,6 +27,17 @@ const Date = styled.span`
 `;
 const DescMargin = styled.div`
   margin-bottom: 35px;
+`;
+const StyledBox = styled.div`
+  border-color: #b1b1b5;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-radius: 3px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 26px 22px;
 `;
 
 export function Notes({
@@ -104,7 +114,7 @@ export function Notes({
       validationSchema={validationSchema}
     >
       {({ submitForm }) => (
-        <ContainerColumnWithBorder>
+        <StyledBox>
           <Title>
             <Typography variant='h6'>Notes</Typography>
           </Title>
@@ -149,7 +159,7 @@ export function Notes({
               </Grid>
             </Grid>
           </OverviewContainerColumn>
-        </ContainerColumnWithBorder>
+        </StyledBox>
       )}
     </Formik>
   );
