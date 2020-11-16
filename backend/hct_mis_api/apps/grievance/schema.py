@@ -132,9 +132,9 @@ class ExistingGrievanceTicketFilter(FilterSet):
     def filter_queryset(self, queryset):
         cleaned_data = self.form.cleaned_data
 
-        payment_record_objects = cleaned_data.pop("payment_record")
-        household_object = cleaned_data.pop("household")
-        individual_object = cleaned_data.pop("individual")
+        payment_record_objects = cleaned_data.pop("payment_record", None)
+        household_object = cleaned_data.pop("household", None)
+        individual_object = cleaned_data.pop("individual", None)
 
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
