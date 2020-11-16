@@ -8,8 +8,8 @@ import {
 } from '../../__generated__/graphql';
 import { choicesToDict, formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { MiśTheme } from '../../theme';
 import { Missing } from '../Missing';
+import { ContentLink } from '../ContentLink';
 
 const Container = styled.div`
   display: flex;
@@ -42,14 +42,6 @@ const OverviewPaper = styled(Paper)`
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const ContentLink = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 14px;
-  line-height: 19px;
 `;
 
 interface HouseholdDetailsProps {
