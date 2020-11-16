@@ -146,8 +146,6 @@ class SendTPToDatahubTask:
             for dh_collector_household in collectors_households_to_bulk_create
             if str(dh_collector_household.mis_id) not in households_to_bulk_create_mis_ids
         ]
-        print(households_to_bulk_create)
-        print(collectors_households_to_bulk_create)
         dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
         dh_mis_models.Household.objects.bulk_create(collectors_households_to_bulk_create)
         dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
