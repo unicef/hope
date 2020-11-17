@@ -196,6 +196,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data")
+    birth_date = individual_data.get("birth_date")
+    if birth_date:
+        individual_data["birth_date"] = birth_date.isoformat()
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data,
         household=household,

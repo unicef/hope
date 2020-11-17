@@ -48,6 +48,14 @@ export const GrievanceTicket = gql`
           }
         }
       }
+      addIndividualTicketDetails{
+        id
+        individualData
+        household{
+          id
+          unicefId
+        }
+      }
       issueType
       ticketNotes {
         edges {

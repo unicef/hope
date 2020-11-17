@@ -233,6 +233,13 @@ export function GrievanceDetails(): React.ReactElement {
     );
   };
 
+  const addDetails = Object.entries(
+    ticket.addIndividualTicketDetails?.individualData || {},
+  ).map(([key, value]) => (
+    <Grid item xs={4}>
+      <LabelizedField label={key} value={value} />
+    </Grid>
+  ));
   return (
     <div>
       <GrievanceDetailsToolbar ticket={ticket} />
@@ -249,6 +256,7 @@ export function GrievanceDetails(): React.ReactElement {
                     <LabelizedField label={el.label}>{el.value}</LabelizedField>
                   </Grid>
                 ))}
+                {addDetails}
               </Grid>
             </OverviewContainer>
           </ContainerColumnWithBorder>
