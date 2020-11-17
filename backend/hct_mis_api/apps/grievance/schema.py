@@ -15,10 +15,11 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
-from core.models import AdminArea
-from core.schema import ChoiceObject
+from core.models import AdminArea, FlexibleAttribute
+from core.schema import ChoiceObject, FieldAttributeNode
 from core.utils import to_choice_object, choices_to_dict
 from grievance.models import (
     GrievanceTicket,
@@ -138,9 +139,12 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(queryset, models.QuerySet), (
-                "Expected '%s.%s' to return a QuerySet, but got a %s instead."
-                % (type(self).__name__, name, type(queryset).__name__)
+            assert isinstance(
+                queryset, models.QuerySet
+            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+                type(self).__name__,
+                name,
+                type(queryset).__name__,
             )
 
         if payment_record_objects:
@@ -268,6 +272,14 @@ class IssueTypesObject(graphene.ObjectType):
         return [{"name": value, "value": key} for key, value in self.get("sub_categories").items()]
 
 
+class AddIndividualFiledObjectType(graphene.ObjectType):
+    name = graphene.String()
+    label = graphene.String()
+    required = graphene.Boolean()
+    type = graphene.String()
+    flex_field = graphene.Boolean()
+
+
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
@@ -282,7 +294,14 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
+    all_ticket_notes = DjangoPermissionFilterConnectionField(
+        TicketNoteNode,
+        filterset_class=TicketNoteFilter,
+    )
+    add_individuals_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        description="All field datatype meta.",
+    )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
@@ -298,4 +317,38 @@ class Query(graphene.ObjectType):
         return [
             {"category": key, "label": categories[key], "sub_categories": value}
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
+        ]
+
+    def resolve_add_individuals_fields_attributes(self, info, **kwargs):
+        ACCEPTABLE_FIELDS = [
+            "full_name",
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "estimated_birth_date",
+            "marital_status",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+            "disability",
+            "work_status",
+            "enrolled_in_nutrition_programme",
+            "administration_of_rutf",
+            "pregnant",
+            "observed_disability",
+            "seeing_disability",
+            "hearing_disability",
+            "physical_disability",
+            "memory_disability",
+            "selfcare_disability",
+            "comms_disability",
+            "who_answers_phone",
+            "who_answers_alt_phone",
+        ]
+
+        # yield from FlexibleAttribute.objects.order_by("name").all()
+        yield from [
+            x for x in CORE_FIELDS_ATTRIBUTES if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
