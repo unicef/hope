@@ -17,13 +17,13 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { PaymentIds } from './PaymentIds';
-import { ContentLink } from '../ContentLink';
 import { OtherRelatedTickets } from './OtherRelatedTickets';
 
 const PaddingContainer = styled.div`
@@ -37,11 +37,6 @@ const Title = styled.div`
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
-`;
-
-const RedBox = styled.div`
-  padding: 30px;
-  border: 3px solid red;
 `;
 
 export function GrievanceDetails(): React.ReactElement {
