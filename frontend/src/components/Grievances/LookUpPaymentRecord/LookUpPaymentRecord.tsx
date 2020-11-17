@@ -9,6 +9,10 @@ export const LookUpPaymentRecord = ({
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
+  const shouldDisplayPlaceholder = (): boolean => {
+    return !values.selectedHousehold;
+  };
+
   return (
     <>
       {values.selectedPaymentRecords.length ? (
@@ -19,6 +23,7 @@ export const LookUpPaymentRecord = ({
         />
       ) : (
         <LookUpButton
+          placeholder={shouldDisplayPlaceholder()}
           title='Look up Payment Record'
           handleClick={() => setLookUpDialogOpen(true)}
         />

@@ -10,7 +10,6 @@ import {
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
-import { Missing } from '../../Missing';
 import { UniversalMoment } from '../../UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
 
