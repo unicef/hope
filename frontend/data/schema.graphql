@@ -1830,6 +1830,7 @@ type Query {
   allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String!, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
+  allAddIndividualsFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
@@ -1851,6 +1852,7 @@ type Query {
   allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allGroupsWithFields: [GroupAttributeNode]
   koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
   allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection

@@ -2525,6 +2525,7 @@ export type Query = {
   allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   allTicketNotes?: Maybe<TicketNoteNodeConnection>,
+  allAddIndividualsFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
@@ -2546,6 +2547,7 @@ export type Query = {
   allAdminAreas?: Maybe<AdminAreaNodeConnection>,
   allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
   allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allIndividualFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
   koboProject?: Maybe<KoboAssetObject>,
   allKoboProjects?: Maybe<KoboAssetObjectConnection>,
@@ -2729,6 +2731,11 @@ export type QueryAllBusinessAreasArgs = {
 
 
 export type QueryAllFieldsAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
+
+export type QueryAllIndividualFieldsAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>
 };
 
@@ -4888,6 +4895,28 @@ export type CashPlanVerificationSamplingChoicesQuery = (
   & { cashPlanVerificationSamplingChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllAddIndividualFieldsQueryVariables = {};
+
+
+export type AllAddIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allAddIndividualsFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
   )>>> }
 );
 
@@ -8241,6 +8270,76 @@ export function useCashPlanVerificationSamplingChoicesLazyQuery(baseOptions?: Ap
 export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesQuery>;
 export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
 export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
+export const AllAddIndividualFieldsDocument = gql`
+    query AllAddIndividualFields {
+  allAddIndividualsFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllAddIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>, 'query'>;
+
+    export const AllAddIndividualFieldsComponent = (props: AllAddIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables> query={AllAddIndividualFieldsDocument} {...props} />
+    );
+    
+export type AllAddIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables> & TChildProps;
+export function withAllAddIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAddIndividualFieldsQuery,
+  AllAddIndividualFieldsQueryVariables,
+  AllAddIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables, AllAddIndividualFieldsProps<TChildProps>>(AllAddIndividualFieldsDocument, {
+      alias: 'allAddIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAddIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllAddIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAddIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAddIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllAddIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, baseOptions);
+      }
+export function useAllAddIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, baseOptions);
+        }
+export type AllAddIndividualFieldsQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsQuery>;
+export type AllAddIndividualFieldsLazyQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsLazyQuery>;
+export type AllAddIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
   allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
@@ -13312,6 +13411,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea' | 'category'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
+  allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
@@ -13333,6 +13433,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
   allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
   allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
+  allIndividualFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllIndividualFieldsAttributesArgs>,
   allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
   koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
   allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
