@@ -172,6 +172,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             created_by=user,
             user_modified=timezone.now(),
             assigned_to=assigned_to,
+            status=GrievanceTicket.STATUS_ASSIGNED
         )
         grievance_ticket.linked_tickets.set(linked_tickets)
         return grievance_ticket, extras

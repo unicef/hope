@@ -5,11 +5,11 @@ import {
   useAllTargetPopulationsQuery,
   AllTargetPopulationsQueryVariables,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
+import { decodeIdString } from '../../../utils/utils';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { UniversalTable } from '../UniversalTable';
 import { headCells } from './TargetPopulationTableHeadCells';
 import { TargetPopulationTableRow } from './TargetPopulationTableRow';
-import {decodeIdString} from "../../../utils/utils";
 
 const TableWrapper = styled.div`
   padding: 20px;
@@ -32,9 +32,11 @@ export const TargetPopulationTable = ({
   };
   if (filter.program) {
     if (Array.isArray(filter.program)) {
-      initialVariables.program = filter.program.map(programId => decodeIdString(programId));
+      initialVariables.program = filter.program.map((programId) =>
+        decodeIdString(programId),
+      );
     } else {
-      initialVariables.program = [decodeIdString(filter.program)]
+      initialVariables.program = [decodeIdString(filter.program)];
     }
   }
   return (

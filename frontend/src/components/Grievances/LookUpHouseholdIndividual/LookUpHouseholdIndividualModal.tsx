@@ -141,7 +141,6 @@ export const LookUpHouseholdIndividualModal = ({
                 programs={programs as ProgramNode[]}
                 filter={debouncedFilterIndividual}
                 onFilterChange={setFilterIndividual}
-                choicesData={choicesData}
               />
               <LookUpIndividualTable
                 filter={debouncedFilterIndividual}

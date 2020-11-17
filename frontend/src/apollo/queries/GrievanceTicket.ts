@@ -25,6 +25,46 @@ export const GrievanceTicket = gql`
         lastName
         email
       }
+      individual {
+        id
+        unicefId
+      }
+      household {
+        id
+        unicefId
+      }
+      paymentRecord {
+        id
+      }
+      linkedTickets {
+        edges {
+          node {
+            id
+            status
+            household {
+              id
+              unicefId
+            }
+          }
+        }
+      }
+      issueType
+      ticketNotes {
+        edges {
+          node {
+            id
+            createdAt
+            updatedAt
+            description
+            createdBy {
+              id
+              firstName
+              lastName
+              email
+            }
+          }
+        }
+      }
     }
   }
 `;

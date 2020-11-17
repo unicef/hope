@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
-import { Box, Button, DialogActions, Grid } from '@material-ui/core';
+import moment from 'moment';
+import {
+  Box,
+  Button,
+  DialogActions,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -18,10 +25,15 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+import { AddIndividualDataChange } from './AddIndividualDataChange';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -63,6 +75,13 @@ export function CreateGrievance(): React.ReactElement {
     selectedRelatedTickets: [],
     identityVerified: false,
     issueType: null,
+    givenName: '',
+    middleName: '',
+    familyName: '',
+    sex: '',
+    birthDate: '',
+    // idType: '',
+    // idNumber: ''
   };
 
   const validationSchema = Yup.object().shape({
@@ -133,7 +152,6 @@ export function CreateGrievance(): React.ReactElement {
       language: values.language,
       admin: values.admin,
       area: values.area,
-      issueType: values.issueType,
     };
 
     if (
@@ -175,6 +193,7 @@ export function CreateGrievance(): React.ReactElement {
         variables: {
           input: {
             ...requiredVariables,
+            issueType: values.issueType,
             linkedTickets: values.selectedRelatedTickets,
             extras: {
               category: {
@@ -182,6 +201,34 @@ export function CreateGrievance(): React.ReactElement {
                   household: values.selectedHousehold,
                   individual: values.selectedIndividual,
                   paymentRecord: values.selectedPaymentRecords,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    if (
+      category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            issueType: values.issueType,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              issueType: {
+                addIndividualIssueTypeExtras: {
+                  household: values.selectedHousehold,
+                  individualData: {
+                    fullName: `${values.givenName} ${values.middleName} ${values.familyName}`,
+                    givenName: values.givenName,
+                    familyName: values.familyName,
+                    sex: values.sex,
+                    birthDate: moment(values.birthDate).toISOString(),
+                  },
                 },
               },
             },
@@ -202,23 +249,25 @@ export function CreateGrievance(): React.ReactElement {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
-        mutate(prepareVariables(values.category, values)).then(
-          (res) => {
-            return showMessage('Grievance Ticket created.', {
-              pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
-              historyMethod: 'push',
-            });
-          },
-          () => {
-            return showMessage('Something went wrong.');
-          },
-        );
+      onSubmit={async (values) => {
+        try {
+          await mutate(prepareVariables(values.category, values)).then(
+            (res) => {
+              return showMessage('Grievance Ticket created.', {
+                pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                historyMethod: 'push',
+              });
+            },
+          );
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue }) => (
         <>
+          {console.log('vaaaalues', values)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>
@@ -229,13 +278,18 @@ export function CreateGrievance(): React.ReactElement {
                       <Field
                         name='category'
                         label='Category*'
+                        onChange={(e) => {
+                          setFieldValue('category', e.target.value);
+                          setFieldValue('issueType', null);
+                        }}
                         variant='outlined'
                         choices={choicesData.grievanceTicketCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
                     {values.category ===
-                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE && (
+                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
                       <Grid item xs={6}>
                         <Field
                           name='issueType'
@@ -245,7 +299,7 @@ export function CreateGrievance(): React.ReactElement {
                           component={FormikSelectField}
                         />
                       </Grid>
-                    )}
+                    ) : null}
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
@@ -311,11 +365,18 @@ export function CreateGrievance(): React.ReactElement {
                           multiline
                           fullWidth
                           variant='outlined'
-                          label='Languages Spoken'
+                          label='Languages Spoken*'
                           component={FormikTextField}
                         />
                       </Grid>
                     </Grid>
+                  </BoxPadding>
+                  <BoxPadding>
+                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType ===
+                        GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                        <AddIndividualDataChange />
+                      )}
                   </BoxPadding>
 
                   <DialogFooter>
@@ -336,6 +397,13 @@ export function CreateGrievance(): React.ReactElement {
                     </DialogActions>
                   </DialogFooter>
                 </ContainerColumnWithBorder>
+              </NewTicket>
+            </Grid>
+            <Grid item xs={4}>
+              <NewTicket>
+                {values.category && values.selectedHousehold ? (
+                  <OtherRelatedTicketsCreate values={values} />
+                ) : null}
               </NewTicket>
             </Grid>
           </Grid>

@@ -18,7 +18,7 @@ class HouseholdAdmin(admin.ModelAdmin):
 
 @admin.register(Individual)
 class IndividualAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("unicef_id", "family_name", "given_name")
 
 
 @admin.register(IndividualRoleInHousehold)

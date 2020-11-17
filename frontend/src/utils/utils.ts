@@ -5,7 +5,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_TICKET_STATES, TARGETING_STATES } from './constants';
+import { TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -197,17 +197,17 @@ export function grievanceTicketStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case GRIEVANCE_TICKET_STATES.NEW:
+    case 'New':
       return theme.hctPalette.oragne;
-    case GRIEVANCE_TICKET_STATES.ASSIGNED:
-      return theme.hctPalette.blue;
-    case GRIEVANCE_TICKET_STATES.IN_PROGRESS:
+    case 'Assigned':
+      return theme.hctPalette.darkerBlue;
+    case 'In Progress':
       return theme.hctPalette.green;
-    case GRIEVANCE_TICKET_STATES.ON_HOLD:
+    case 'On Hold':
       return theme.palette.error.main;
-    case GRIEVANCE_TICKET_STATES.FOR_APPROVAL:
-      return theme.hctPalette.brown;
-    case GRIEVANCE_TICKET_STATES.CLOSED:
+    case 'For Approval':
+      return theme.hctPalette.darkBrown;
+    case 'Closed':
       return theme.hctPalette.gray;
     default:
       return theme.palette.error.main;

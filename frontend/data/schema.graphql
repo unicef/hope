@@ -379,6 +379,15 @@ type CreateTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
 }
 
+input CreateTicketNoteInput {
+  description: String!
+  ticket: ID!
+}
+
+type CreateTicketNoteMutation {
+  grievanceTicketNote: TicketNoteNode
+}
+
 scalar Date
 
 scalar DateTime
@@ -561,13 +570,16 @@ type GrievanceTicketNode implements Node {
   consent: Boolean!
   businessArea: UserBusinessAreaNode!
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
   householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNode
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
   addIndividualTicketDetails: TicketAddIndividualDetailsNode
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
+  household: HouseholdNode
+  individual: IndividualNode
+  paymentRecord: PaymentRecordNode
 }
 
 type GrievanceTicketNodeConnection {
@@ -1604,6 +1616,7 @@ type MergeRegistrationDataImportMutation {
 type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
+  createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
@@ -1816,6 +1829,7 @@ type Query {
   grievanceTicket(id: ID!): GrievanceTicketNode
   allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String!, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
+  allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
@@ -2377,7 +2391,7 @@ type TicketNoteNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  description: String
+  description: String!
   createdBy: UserNode
 }
 
