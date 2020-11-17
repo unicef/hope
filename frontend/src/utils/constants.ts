@@ -25,3 +25,7 @@ export const GRIEVANCE_CATEGORIES = {
   DEDUPLICATION: '8',
   //system flagging missing
 };
+
+export const GRIEVANCE_ISSUE_TYPES = {
+  ADD_INDIVIDUAL: '16',
+};
