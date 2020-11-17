@@ -5488,7 +5488,14 @@ export type GrievanceTicketQuery = (
           )> }
         )> }
       )>> }
-    ), ticketNotes: (
+    ), addIndividualTicketDetails: Maybe<(
+      { __typename?: 'TicketAddIndividualDetailsNode' }
+      & Pick<TicketAddIndividualDetailsNode, 'id' | 'individualData'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
+    )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
         { __typename?: 'TicketNoteNodeEdge' }
@@ -9619,6 +9626,14 @@ export const GrievanceTicketDocument = gql`
             unicefId
           }
         }
+      }
+    }
+    addIndividualTicketDetails {
+      id
+      individualData
+      household {
+        id
+        unicefId
       }
     }
     issueType

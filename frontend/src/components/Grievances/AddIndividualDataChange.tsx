@@ -3,6 +3,7 @@ import { Grid, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { Field } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import camelCase from 'lodash/camelCase';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
@@ -69,7 +70,7 @@ export const AddIndividualDataChangeField = ({
     <>
       <Grid item xs={6}>
         <Field
-          name={field.name}
+          name={`individualData.${camelCase(field.name)}`}
           fullWidth
           variant='outlined'
           label={field.labelEn}
@@ -77,7 +78,7 @@ export const AddIndividualDataChangeField = ({
           {...fieldProps}
         />
       </Grid>
-      <Grid item xs={6}/>
+      <Grid item xs={6} />
     </>
   );
 };

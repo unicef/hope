@@ -143,6 +143,7 @@ export function CreateGrievance(): React.ReactElement {
     {},
   );
   const prepareVariables = (category: string, values) => {
+    console.log('-> values', values);
     const requiredVariables = {
       businessArea,
       description: values.description,
@@ -222,13 +223,7 @@ export function CreateGrievance(): React.ReactElement {
               issueType: {
                 addIndividualIssueTypeExtras: {
                   household: values.selectedHousehold,
-                  individualData: {
-                    fullName: `${values.givenName} ${values.middleName} ${values.familyName}`,
-                    givenName: values.givenName,
-                    familyName: values.familyName,
-                    sex: values.sex,
-                    birthDate: moment(values.birthDate).toISOString(),
-                  },
+                  individualData: values.individualData,
                 },
               },
             },
@@ -267,7 +262,6 @@ export function CreateGrievance(): React.ReactElement {
     >
       {({ submitForm, values, setFieldValue }) => (
         <>
-          {console.log('vaaaalues', values)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>
