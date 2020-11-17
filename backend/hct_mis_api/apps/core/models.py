@@ -138,6 +138,8 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+    ASSOCIATED_WITH_HOUSEHOLD = 0
+    ASSOCIATED_WITH_INDIVIDUAL = 1
     TYPE_CHOICE = Choices(
         ("STRING", _("String")),
         ("IMAGE", _("Image")),
