@@ -6,97 +6,96 @@ import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import {
+  AllAddIndividualFieldsQuery,
+  useAllAddIndividualFieldsQuery,
+} from '../../__generated__/graphql';
+import { LoadingComponent } from '../LoadingComponent';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
+
+export interface AddIndividualDataChangeFieldProps {
+  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+}
+export const AddIndividualDataChangeField = ({
+  field,
+}: AddIndividualDataChangeFieldProps): React.ReactElement => {
+  let fieldProps;
+  switch (field.type) {
+    case 'STRING':
+      fieldProps = {
+        component: FormikTextField,
+      };
+      break;
+    case 'SELECT_ONE':
+      fieldProps = {
+        choices: field.choices,
+        component: FormikSelectField,
+      };
+      break;
+    case 'SELECT_MANY':
+      fieldProps = {
+        choices: field.choices,
+        component: FormikSelectField,
+        multiple: true,
+      };
+      break;
+    case 'SELECT_MULTIPLE':
+      fieldProps = {
+        choices: field.choices,
+        component: FormikSelectField,
+      };
+      break;
+    case 'DATE':
+      fieldProps = {
+        component: FormikDateField,
+        decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
+      };
+      break;
+
+    case 'BOOL':
+      fieldProps = {
+        component: FormikCheckboxField,
+      };
+      break;
+    default:
+      fieldProps = {};
+  }
+  return (
+    <>
+      <Grid item xs={6}>
+        <Field
+          name={field.name}
+          fullWidth
+          variant='outlined'
+          label={field.labelEn}
+          required={field.required}
+          {...fieldProps}
+        />
+      </Grid>
+      <Grid item xs={6}/>
+    </>
+  );
+};
+
 export const AddIndividualDataChange = (): React.ReactElement => {
+  const { data, loading } = useAllAddIndividualFieldsQuery();
+  if (loading) {
+    return <LoadingComponent />;
+  }
   return (
     <>
       <Title>
         <Typography variant='h6'>Individual Data</Typography>
       </Title>
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Grid item xs={6}>
-            <Field
-              name='givenName'
-              fullWidth
-              variant='outlined'
-              label='First Name'
-              component={FormikTextField}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid item xs={6}>
-            <Field
-              name='middleName'
-              fullWidth
-              variant='outlined'
-              label='Middle Name'
-              component={FormikTextField}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid item xs={6}>
-            <Field
-              name='familyName'
-              fullWidth
-              variant='outlined'
-              label='Last Name'
-              component={FormikTextField}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid item xs={6}>
-            <Field
-              name='sex'
-              label='Gender'
-              color='primary'
-              choices={[
-                { value: 'FEMALE', name: 'Female' },
-                { value: 'MALE', name: 'Male' },
-              ]}
-              component={FormikSelectField}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={12}>
-          <Grid item xs={6}>
-            <Field
-              name='birthDate'
-              label='Date of Birth'
-              component={FormikDateField}
-              fullWidth
-              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
-            />
-          </Grid>
-        </Grid>
-        <Grid item xs={6}>
-          <Field
-            name='idType'
-            label='ID Type'
-            color='primary'
-            choices={[
-              { value: 'PASSPORT', name: 'Passport' },
-              { value: 'ID DOCUMENT', name: 'ID Document' },
-            ]}
-            component={FormikSelectField}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <Field
-            name='idNumber'
-            label='ID Number'
-            fullWidth
-            variant='outlined'
-            component={FormikTextField}
-          />
-        </Grid>
+        {data.allAddIndividualsFieldsAttributes.map((item) => (
+          <AddIndividualDataChangeField field={item} />
+        ))}
       </Grid>
     </>
   );
