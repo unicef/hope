@@ -119,7 +119,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
     language = models.TextField()
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
-    linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough")
+    linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough", related_name="+")
 
     class Meta:
         ordering = (
