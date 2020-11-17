@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.db.models.signals import post_save, pre_save, m2m_changed
 from django.dispatch import receiver
 
@@ -22,7 +22,9 @@ def calculate_candidate_counts(target_population):
     else:
         households = target_population.vulnerability_score_filtered_households
     households_count = households.count()
-    individuals_count = households.aggregate(individuals_count=Sum("size")).get("individuals_count")
+    individuals_count = (
+        households.annotate(individuals_count=Count("individuals")).aggregate(sum=Sum("individuals_count")).get("sum")
+    )
     target_population.candidate_list_total_households = households_count
     target_population.candidate_list_total_individuals = individuals_count
 
@@ -42,7 +44,9 @@ def calculate_final_counts(target_population):
     else:
         households = target_population.final_list
     households_count = households.count()
-    individuals_count = households.aggregate(individuals_count=Sum("size")).get("individuals_count")
+    individuals_count = (
+        households.annotate(individuals_count=Count("individuals")).aggregate(sum=Sum("individuals_count")).get("sum")
+    )
     target_population.final_list_total_households = households_count
     target_population.final_list_total_individuals = individuals_count
 
