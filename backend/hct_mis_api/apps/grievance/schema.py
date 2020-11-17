@@ -298,7 +298,7 @@ class Query(graphene.ObjectType):
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
     )
-    add_individuals_fields_attributes = graphene.List(
+    all_add_individuals_fields_attributes = graphene.List(
         FieldAttributeNode,
         description="All field datatype meta.",
     )
@@ -319,7 +319,7 @@ class Query(graphene.ObjectType):
             for (key, value) in GrievanceTicket.ISSUE_TYPES_CHOICES.items()
         ]
 
-    def resolve_add_individuals_fields_attributes(self, info, **kwargs):
+    def resolve_all_add_individuals_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
             "full_name",
             "given_name",

@@ -10,9 +10,13 @@ import {
 export const FormikSelectField = ({
   field,
   form,
+  multiple,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid = form.errors[field.name] && form.touched[field.name];
+  const value = multiple
+    ? field.value || otherProps.value || []
+    : field.value || otherProps.value || '';
   return (
     <>
       <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
@@ -21,7 +25,8 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value || otherProps.value || ''}
+          multiple={multiple}
+          value={value}
           id={`textField-${field.name}`}
           error={isInvalid}
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
