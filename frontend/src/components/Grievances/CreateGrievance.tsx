@@ -18,10 +18,11 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
+import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -133,7 +134,6 @@ export function CreateGrievance(): React.ReactElement {
       language: values.language,
       admin: values.admin,
       area: values.area,
-      issueType: values.issueType,
     };
 
     if (
@@ -175,6 +175,7 @@ export function CreateGrievance(): React.ReactElement {
         variables: {
           input: {
             ...requiredVariables,
+            issueType: values.issueType,
             linkedTickets: values.selectedRelatedTickets,
             extras: {
               category: {
@@ -202,18 +203,19 @@ export function CreateGrievance(): React.ReactElement {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
-        mutate(prepareVariables(values.category, values)).then(
-          (res) => {
-            return showMessage('Grievance Ticket created.', {
-              pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
-              historyMethod: 'push',
-            });
-          },
-          () => {
-            return showMessage('Something went wrong.');
-          },
-        );
+      onSubmit={async (values) => {
+        try {
+          await mutate(prepareVariables(values.category, values)).then(
+            (res) => {
+              return showMessage('Grievance Ticket created.', {
+                pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
+                historyMethod: 'push',
+              });
+            },
+          );
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
       validationSchema={validationSchema}
     >
@@ -229,13 +231,18 @@ export function CreateGrievance(): React.ReactElement {
                       <Field
                         name='category'
                         label='Category*'
+                        onChange={(e) => {
+                          setFieldValue('category', e.target.value);
+                          setFieldValue('issueType', null);
+                        }}
                         variant='outlined'
                         choices={choicesData.grievanceTicketCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
                     {values.category ===
-                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE && (
+                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
                       <Grid item xs={6}>
                         <Field
                           name='issueType'
@@ -245,7 +252,7 @@ export function CreateGrievance(): React.ReactElement {
                           component={FormikSelectField}
                         />
                       </Grid>
-                    )}
+                    ) : null}
                   </Grid>
                   <BoxWithBorders>
                     <Box display='flex' flexDirection='column'>
@@ -336,6 +343,13 @@ export function CreateGrievance(): React.ReactElement {
                     </DialogActions>
                   </DialogFooter>
                 </ContainerColumnWithBorder>
+              </NewTicket>
+            </Grid>
+            <Grid item xs={4}>
+              <NewTicket>
+                {values.category && values.selectedHousehold && (
+                  <OtherRelatedTicketsCreate values={values} />
+                )}
               </NewTicket>
             </Grid>
           </Grid>

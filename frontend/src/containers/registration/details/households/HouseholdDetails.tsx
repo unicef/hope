@@ -6,11 +6,11 @@ import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
 } from '../../../../__generated__/graphql';
-import { MiśTheme } from '../../../../theme';
 import { Missing } from '../../../../components/Missing';
 import { choicesToDict } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
+import { ContentLink } from '../../../../components/ContentLink';
 
 const Overview = styled.div`
   display: flex;
@@ -21,13 +21,7 @@ const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
-const ContentLink = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 14px;
-  line-height: 19px;
-`;
+
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
   choicesData: HouseholdChoiceDataQuery;

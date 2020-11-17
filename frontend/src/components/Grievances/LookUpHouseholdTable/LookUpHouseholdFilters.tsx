@@ -22,7 +22,6 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { Missing } from '../../Missing';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
