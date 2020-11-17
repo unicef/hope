@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
-import { Box, Button, DialogActions, Grid } from '@material-ui/core';
+import moment from 'moment';
+import {
+  Box,
+  Button,
+  DialogActions,
+  Grid,
+  Typography,
+} from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -19,10 +26,14 @@ import {
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+import { AddIndividualDataChange } from './AddIndividualDataChange';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -64,6 +75,13 @@ export function CreateGrievance(): React.ReactElement {
     selectedRelatedTickets: [],
     identityVerified: false,
     issueType: null,
+    givenName: '',
+    middleName: '',
+    familyName: '',
+    sex: '',
+    birthDate: '',
+    // idType: '',
+    // idNumber: ''
   };
 
   const validationSchema = Yup.object().shape({
@@ -190,6 +208,34 @@ export function CreateGrievance(): React.ReactElement {
         },
       };
     }
+    if (
+      category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            issueType: values.issueType,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              issueType: {
+                addIndividualIssueTypeExtras: {
+                  household: values.selectedHousehold,
+                  individualData: {
+                    fullName: `${values.givenName} ${values.middleName} ${values.familyName}`,
+                    givenName: values.givenName,
+                    familyName: values.familyName,
+                    sex: values.sex,
+                    birthDate: moment(values.birthDate).toISOString(),
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+    }
     return {
       variables: {
         input: {
@@ -221,6 +267,7 @@ export function CreateGrievance(): React.ReactElement {
     >
       {({ submitForm, values, setFieldValue }) => (
         <>
+          {console.log('vaaaalues', values)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>
@@ -323,6 +370,13 @@ export function CreateGrievance(): React.ReactElement {
                         />
                       </Grid>
                     </Grid>
+                  </BoxPadding>
+                  <BoxPadding>
+                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType ===
+                        GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+                        <AddIndividualDataChange />
+                      )}
                   </BoxPadding>
 
                   <DialogFooter>
