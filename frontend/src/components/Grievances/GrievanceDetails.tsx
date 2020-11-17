@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -14,6 +14,8 @@ import {
 } from '../../utils/utils';
 import { LoadingComponent } from '../LoadingComponent';
 import {
+  GrievanceTicketQuery,
+  useAllAddIndividualFieldsQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
@@ -29,6 +31,12 @@ import { OtherRelatedTickets } from './OtherRelatedTickets';
 const PaddingContainer = styled.div`
   padding: 22px;
 `;
+const StyledBox = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 26px 22px;
+`;
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -38,6 +46,50 @@ const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
+
+export function AddIndividualGrievanceDetails({
+  ticket,
+}: {
+  ticket: GrievanceTicketQuery['grievanceTicket'];
+}): React.ReactElement {
+  const { data, loading } = useAllAddIndividualFieldsQuery();
+  if (loading) {
+    return null;
+  }
+  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
+    (previousValue, currentValue) => {
+      // eslint-disable-next-line no-param-reassign
+      previousValue[currentValue.name] = currentValue;
+      return previousValue;
+    },
+    {},
+  );
+  const labels = Object.entries(
+    ticket.addIndividualTicketDetails?.individualData || {},
+  ).map(([key, value]) => {
+    let textValue = value;
+    const fieldAttribute = fieldsDict[key];
+    if (fieldAttribute.type === 'SELECT_ONE') {
+      textValue = fieldAttribute.choices.find((item) => item.value === value)
+        .labelEn;
+    }
+    return (
+      <Grid key={key} item xs={6}>
+        <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
+      </Grid>
+    );
+  });
+  return (
+    <StyledBox>
+      <Title>
+        <Typography variant='h6'>Individual Data</Typography>
+      </Title>
+      <Grid container spacing={6}>
+        {labels}
+      </Grid>
+    </StyledBox>
+  );
+}
 
 export function GrievanceDetails(): React.ReactElement {
   const { id } = useParams();
@@ -233,13 +285,6 @@ export function GrievanceDetails(): React.ReactElement {
     );
   };
 
-  const addDetails = Object.entries(
-    ticket.addIndividualTicketDetails?.individualData || {},
-  ).map(([key, value]) => (
-    <Grid item xs={4}>
-      <LabelizedField label={key} value={value} />
-    </Grid>
-  ));
   return (
     <div>
       <GrievanceDetailsToolbar ticket={ticket} />
@@ -256,12 +301,15 @@ export function GrievanceDetails(): React.ReactElement {
                     <LabelizedField label={el.label}>{el.value}</LabelizedField>
                   </Grid>
                 ))}
-                {addDetails}
               </Grid>
             </OverviewContainer>
           </ContainerColumnWithBorder>
         </Grid>
+
         <Grid item xs={7}>
+          <PaddingContainer>
+            <AddIndividualGrievanceDetails ticket={ticket} />
+          </PaddingContainer>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
           </PaddingContainer>
