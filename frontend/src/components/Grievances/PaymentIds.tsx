@@ -19,16 +19,18 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export const PaymentIds = ({ ids }: { ids: string[] }) => {
+export const PaymentIds = ({ ids }: { ids: string[] }): React.ReactElement => {
   const businessArea = useBusinessArea();
 
-  const mappedIds = ids.map((id) => (
-    <Box mb={1}>
-      <ContentLink href={`/${businessArea}/payment-records/${id}`}>
-        {id}
-      </ContentLink>
-    </Box>
-  ));
+  const mappedIds = ids.map(
+    (id): React.ReactElement => (
+      <Box mb={1}>
+        <ContentLink href={`/${businessArea}/payment-records/${id}`}>
+          {id}
+        </ContentLink>
+      </Box>
+    ),
+  );
   return (
     <StyledBox>
       <Title>

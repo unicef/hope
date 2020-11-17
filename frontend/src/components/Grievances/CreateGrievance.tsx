@@ -22,6 +22,7 @@ import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminArea
 import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
+import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -342,6 +343,13 @@ export function CreateGrievance(): React.ReactElement {
                     </DialogActions>
                   </DialogFooter>
                 </ContainerColumnWithBorder>
+              </NewTicket>
+            </Grid>
+            <Grid item xs={4}>
+              <NewTicket>
+                {values.category && values.selectedHousehold && (
+                  <OtherRelatedTicketsCreate values={values} />
+                )}
               </NewTicket>
             </Grid>
           </Grid>

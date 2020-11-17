@@ -5625,7 +5625,7 @@ export type PaymentRecordQuery = (
     & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
     & { household: (
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'size'>
+      & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
       & { headOfHousehold: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
@@ -9972,6 +9972,7 @@ export const PaymentRecordDocument = gql`
     household {
       id
       size
+      unicefId
       headOfHousehold {
         id
         phoneNo
@@ -10032,6 +10033,7 @@ export const PaymentRecordDocument = gql`
     household {
       id
       size
+      unicefId
       headOfHousehold {
         id
         phoneNo
