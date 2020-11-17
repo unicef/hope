@@ -1,14 +1,11 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { BreadCrumbsItem } from '../BreadCrumbs';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
-import { Missing } from '../Missing';
 import { OverviewContainer } from '../OverviewContainer';
-import { PageHeader } from '../PageHeader';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
@@ -20,12 +17,16 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
 import { Notes } from './Notes';
-import { PastTickets } from './PastTickets';
+import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
+import { PaymentIds } from './PaymentIds';
+import { OtherRelatedTickets } from './OtherRelatedTickets';
 
-const NotesContainer = styled.div`
+const PaddingContainer = styled.div`
   padding: 22px;
 `;
 
@@ -49,6 +50,7 @@ export function GrievanceDetails(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
+
   if (choicesLoading) {
     return null;
   }
@@ -59,12 +61,6 @@ export function GrievanceDetails(): React.ReactElement {
   if (!data || !choicesData) {
     return null;
   }
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Grievance and Feedback',
-      to: `/${businessArea}/grievance-and-feedback/`,
-    },
-  ];
 
   const statusChoices: {
     [id: number]: string;
@@ -75,6 +71,14 @@ export function GrievanceDetails(): React.ReactElement {
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
   const ticket = data.grievanceTicket;
+
+  const issueType = ticket.issueType
+    ? choicesData.grievanceTicketIssueTypeChoices
+        .filter((el) => el.category === ticket.category.toString())[0]
+        .subCategories.filter(
+          (el) => el.value === ticket.issueType.toString(),
+        )[0].name
+    : '-';
 
   const FieldsArray: {
     label: string;
@@ -98,8 +102,62 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{categoryChoices[ticket.category]}</span>,
       size: 3,
     },
-    { label: 'HOUSEHOLD ID', value: <Missing />, size: 3 },
-    { label: 'PAYMENT ID', value: <Missing />, size: 3 },
+    {
+      label: 'Issue Type',
+      value: <span>{issueType}</span>,
+      size: 6,
+    },
+    {
+      label: 'HOUSEHOLD ID',
+      value: (
+        <span>
+          {ticket.household?.id ? (
+            <ContentLink
+              href={`/${businessArea}/population/household/${ticket.household.id}`}
+            >
+              {ticket.household.unicefId}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: 'INDIVIDUAL ID',
+      value: (
+        <span>
+          {ticket.individual?.id ? (
+            <ContentLink
+              href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+            >
+              {ticket.individual.unicefId}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 3,
+    },
+    {
+      label: 'PAYMENT ID',
+      value: (
+        <span>
+          {ticket.paymentRecord?.id ? (
+            <ContentLink
+              href={`/${businessArea}/payment-records/${ticket.paymentRecord.id}`}
+            >
+              {decodeIdString(ticket.paymentRecord.id)}
+            </ContentLink>
+          ) : (
+            '-'
+          )}
+        </span>
+      ),
+      size: 6,
+    },
     {
       label: 'CONSENT',
       value: <span>{ticket.consent ? 'Yes' : 'No'}</span>,
@@ -126,7 +184,11 @@ export function GrievanceDetails(): React.ReactElement {
       value: <span>{renderUserName(ticket.assignedTo)}</span>,
       size: 6,
     },
-    { label: 'ADMIN 2', value: <span>{ticket.admin || '-'}</span>, size: 3 },
+    {
+      label: 'ADMINISTRATIVE LEVEL 2',
+      value: <span>{ticket.admin || '-'}</span>,
+      size: 3,
+    },
     {
       label: 'AREA / VILLAGE / PAY POINT',
       value: <span>{ticket.area || '-'}</span>,
@@ -139,14 +201,41 @@ export function GrievanceDetails(): React.ReactElement {
     },
   ];
 
-  const tickets: string[] = ['189-19-15311', '183-19-82649'];
+  const isFeedbackType =
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
+
+  const renderRightSection = (): React.ReactElement => {
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
+    )
+      return (
+        <Box display='flex' flexDirection='column'>
+          <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
+          <Box mt={6}>
+            <OtherRelatedTickets
+              ticket={ticket}
+              linkedTickets={ticket.linkedTickets.edges}
+            />
+          </Box>
+        </Box>
+      );
+    return (
+      <PaddingContainer>
+        <Box display='flex' flexDirection='column'>
+          <OtherRelatedTickets
+            ticket={ticket}
+            linkedTickets={ticket.linkedTickets.edges}
+          />
+        </Box>
+      </PaddingContainer>
+    );
+  };
 
   return (
     <div>
-      <PageHeader
-        title={`Ticket #${decodeIdString(id)}`}
-        breadCrumbs={breadCrumbsItems}
-      />
+      <GrievanceDetailsToolbar ticket={ticket} />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
@@ -165,12 +254,12 @@ export function GrievanceDetails(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
-          <NotesContainer>
-            <Notes />
-          </NotesContainer>
+          <PaddingContainer>
+            <Notes notes={ticket.ticketNotes} />
+          </PaddingContainer>
         </Grid>
         <Grid item xs={5}>
-          <PastTickets tickets={tickets} />
+          {renderRightSection()}
         </Grid>
       </Grid>
     </div>

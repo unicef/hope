@@ -27,8 +27,8 @@ class TestIndividualQuery(APITestCase):
     }
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
-    query AllIndividuals {
-      allIndividuals(programs: "Test program TWO") {
+    query AllIndividuals($programs: [ID]) {
+      allIndividuals(programs: $programs, orderBy: "birth_date") {
         edges {
           node {
             givenName
@@ -66,7 +66,7 @@ class TestIndividualQuery(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory()
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
-        program_two = ProgramFactory(name="Test program TWO", business_area=BusinessArea.objects.first(),)
+        self.program_two = ProgramFactory(name="Test program TWO", business_area=BusinessArea.objects.first(),)
 
         household_one = HouseholdFactory.build()
         household_two = HouseholdFactory.build()
@@ -75,7 +75,7 @@ class TestIndividualQuery(APITestCase):
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
-        household_two.programs.add(program_two)
+        household_two.programs.add(self.program_two)
 
         self.individuals_to_create = [
             {
@@ -138,5 +138,7 @@ class TestIndividualQuery(APITestCase):
 
     def test_individual_programme_filter(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY, context={"user": self.user},
+            request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
+            context={"user": self.user},
+            variables={"programs": [self.program_two.id]},
         )
