@@ -1,13 +1,19 @@
+import React from 'react';
 import { Avatar, Box, Button, Grid, Typography } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
-import React from 'react';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
-import { Missing } from '../Missing';
+import {
+  GrievanceTicketQuery,
+  useCreateGrievanceTicketNoteMutation,
+  useMeQuery,
+} from '../../__generated__/graphql';
+import { renderUserName } from '../../utils/utils';
+import { GrievanceTicket } from '../../apollo/queries/GrievanceTicket';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -22,23 +28,50 @@ const Date = styled.span`
 const DescMargin = styled.div`
   margin-bottom: 35px;
 `;
+const StyledBox = styled.div`
+  border-color: #b1b1b5;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-radius: 3px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 26px 22px;
+`;
 
-export function Notes(): React.ReactElement {
+export function Notes({
+  notes,
+}: {
+  notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+}): React.ReactElement {
+  const { data: meData, loading: meLoading } = useMeQuery({
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const { id } = useParams();
+  const [mutate] = useCreateGrievanceTicketNoteMutation();
+
+  if (meLoading) {
+    return null;
+  }
+
   const note = (
-    avatar: string,
     name: string,
     date: string,
     description: string,
   ): React.ReactElement => (
     <Grid container>
       <Grid item xs={2}>
-        <Avatar src={avatar} alt={`${name} picture`} />
+        <Avatar alt={`${name} picture`} src='/static/images/avatar/1.jpg' />
       </Grid>
       <Grid item xs={10}>
         <Grid item xs={12}>
           <Box display='flex' justifyContent='space-between'>
             <Name>{name}</Name>
-            <Date>{date}</Date>
+            <Date>
+              <UniversalMoment withTime>{date}</UniversalMoment>
+            </Date>
           </Box>
         </Grid>
         <Grid item xs={12}>
@@ -49,23 +82,14 @@ export function Notes(): React.ReactElement {
       </Grid>
     </Grid>
   );
-  const d = new window.Date();
-  const now = <UniversalMoment withTime>{`${d}`}</UniversalMoment>;
 
-  const mappedNotes = [
-    {
-      name: 'Martin Scott',
-      avatar: 'picture',
-      date: '07/15/2020, 4:46 PM',
-      description: 'Lorem lorem lorem ipsum',
-    },
-    {
-      name: 'Ben Johnson',
-      avatar: 'picture',
-      date: '02/10/2020, 4:46 PM',
-      description: 'Lorem lorem lorem ipsum',
-    },
-  ].map((el) => note(el.avatar, el.name, el.date, el.description));
+  const mappedNotes = notes?.edges?.map((el) =>
+    note(
+      renderUserName(el.node.createdBy),
+      el.node.createdAt,
+      el.node.description,
+    ),
+  );
 
   const initialValues: { [key: string]: string } = {
     newNote: '',
@@ -78,27 +102,35 @@ export function Notes(): React.ReactElement {
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
-        console.log(values);
+      onSubmit={(values, { resetForm }) => {
+        mutate({
+          variables: {
+            noteInput: { ticket: id, description: values.newNote },
+          },
+          refetchQueries: () => [{ query: GrievanceTicket, variables: { id } }],
+        });
+        resetForm({});
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values }) => (
-        <ContainerColumnWithBorder>
+      {({ submitForm }) => (
+        <StyledBox>
           <Title>
             <Typography variant='h6'>Notes</Typography>
-            <Missing />
           </Title>
           <OverviewContainerColumn>
             {mappedNotes}
             <Grid container>
               <Grid item xs={2}>
-                <Avatar src='me' alt={`${'me'} picture`} />
+                <Avatar
+                  src={`${meData.me.firstName || meData.me.email}`}
+                  alt={`${meData.me.firstName || meData.me.email} picture`}
+                />
               </Grid>
               <Grid item xs={10}>
                 <Grid item xs={12}>
                   <Box display='flex' justifyContent='space-between'>
-                    <Name>My name</Name>
+                    <Name>{renderUserName(meData.me)}</Name>
                   </Box>
                 </Grid>
                 <Grid item xs={12}>
@@ -127,7 +159,7 @@ export function Notes(): React.ReactElement {
               </Grid>
             </Grid>
           </OverviewContainerColumn>
-        </ContainerColumnWithBorder>
+        </StyledBox>
       )}
     </Formik>
   );

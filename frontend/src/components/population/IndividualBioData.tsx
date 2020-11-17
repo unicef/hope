@@ -15,6 +15,7 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
+import { ContentLink } from '../ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,11 +25,6 @@ const Overview = styled(Paper)`
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const ContentLink = styled.div`
-  text-decoration: underline;
-  cursor: pointer;
 `;
 
 const BorderBox = styled.div`
@@ -49,12 +45,6 @@ export function IndividualsBioData({
   if (birthDate) {
     age = getAgeFromDob(birthDate);
   }
-
-  const openHousehold = (): void => {
-    history.push(
-      `/${businessArea}/population/household/${individual.household.id}`,
-    );
-  };
 
   const {
     data: choicesData,
@@ -150,7 +140,9 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink onClick={() => openHousehold()}>
+            <ContentLink
+              href={`/${businessArea}/population/household/${individual.household.id}`}
+            >
               {individual.household.unicefId}
             </ContentLink>
           </LabelizedField>

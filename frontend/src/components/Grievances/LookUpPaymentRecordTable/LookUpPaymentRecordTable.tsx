@@ -1,5 +1,6 @@
 import React, { ReactElement, useState } from 'react';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { decodeIdString } from '../../../utils/utils';
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordNode,
@@ -18,7 +19,9 @@ export function LookUpPaymentRecordTable({
   setFieldValue,
   initialValues,
 }: LookUpPaymentRecordTableProps): ReactElement {
-  const initialVariables = {};
+  const initialVariables = {
+    household: decodeIdString(initialValues.selectedHousehold),
+  };
   const [selected, setSelected] = useState(
     initialValues.selectedPaymentRecords,
   );

@@ -1,35 +1,33 @@
 import { gql } from 'apollo-boost';
 
-export const AllGrievanceTicket = gql`
-  query AllGrievanceTicket(
+export const ExistingGrievanceTickets = gql`
+  query ExistingGrievanceTickets(
     $before: String
     $after: String
     $first: Int
     $last: Int
     $id: UUID
-    $category: String
     $businessArea: String!
-    $search: String
-    $status: [String]
-    $fsp: [ID]
-    $createdAtRange: String
-    $admin: [ID]
+    $category: String!
+    $issueType: String
+    $household: ID
+    $individual: ID
+    $paymentRecord: [ID]
     $orderBy: String
   ) {
-    allGrievanceTicket(
+    existingGrievanceTickets(
       before: $before
       after: $after
       first: $first
       last: $last
       id: $id
-      category: $category
       businessArea: $businessArea
-      search: $search
-      status: $status
-      fsp: $fsp
-      createdAtRange: $createdAtRange
+      category: $category
+      issueType: $issueType
+      household: $household
+      individual: $individual
+      paymentRecord: $paymentRecord
       orderBy: $orderBy
-      admin: $admin
     ) {
       totalCount
       pageInfo {
