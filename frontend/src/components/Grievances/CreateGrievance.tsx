@@ -401,9 +401,9 @@ export function CreateGrievance(): React.ReactElement {
             </Grid>
             <Grid item xs={4}>
               <NewTicket>
-                {values.category && values.selectedHousehold && (
+                {values.category && values.selectedHousehold ? (
                   <OtherRelatedTicketsCreate values={values} />
-                )}
+                ) : null}
               </NewTicket>
             </Grid>
           </Grid>
