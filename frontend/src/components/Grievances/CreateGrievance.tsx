@@ -143,7 +143,6 @@ export function CreateGrievance(): React.ReactElement {
     {},
   );
   const prepareVariables = (category: string, values) => {
-    console.log('-> values', values);
     const requiredVariables = {
       businessArea,
       description: values.description,
@@ -224,6 +223,27 @@ export function CreateGrievance(): React.ReactElement {
                 addIndividualIssueTypeExtras: {
                   household: values.selectedHousehold,
                   individualData: values.individualData,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    if (
+      category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            issueType: values.issueType,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              issueType: {
+                individualDeleteIssueTypeExtras: {
+                  individual: values.selectedIndividual,
                 },
               },
             },
