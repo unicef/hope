@@ -28,4 +28,5 @@ export const GRIEVANCE_CATEGORIES = {
 
 export const GRIEVANCE_ISSUE_TYPES = {
   ADD_INDIVIDUAL: '16',
+  DELETE_INDIVIDUAL: '15',
 };
