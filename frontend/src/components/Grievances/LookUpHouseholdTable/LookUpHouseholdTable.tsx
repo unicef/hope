@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
 import {
+  AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -45,15 +46,15 @@ export const LookUpHouseholdTable = ({
   const [selectedHousehold, setSelectedHousehold] = useState(
     initialValues.selectedHousehold,
   );
-  const handleRadioChange = (event): void => {
-    setSelectedHousehold(event.target.value);
-    setFieldValue('selectedHousehold', event.target.value);
-    setFieldValue('selectedIndividual', '');
+  const handleRadioChange = (household:AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"]): void => {
+    setSelectedHousehold(household);
+    setFieldValue('selectedHousehold', household);
+    setFieldValue('selectedIndividual', null);
     setFieldValue('identityVerified', false);
   };
   return (
     <TableWrapper>
-      <UniversalTable<HouseholdNode, AllHouseholdsQueryVariables>
+      <UniversalTable<AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"], AllHouseholdsQueryVariables>
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsQuery}
