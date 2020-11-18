@@ -24,6 +24,7 @@ import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdF
 import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -116,7 +117,13 @@ export const LookUpHouseholdIndividualModal = ({
                 aria-label='look up tabs'
               >
                 <Tab label='LOOK UP HOUSEHOLD' />
-                <Tab label='LOOK UP INDIVIDUAL' />
+                <Tab
+                  disabled={
+                    initialValues.issueType ===
+                    GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+                  }
+                  label='LOOK UP INDIVIDUAL'
+                />
               </StyledTabs>
             </DialogTitle>
           </DialogTitleWrapper>
