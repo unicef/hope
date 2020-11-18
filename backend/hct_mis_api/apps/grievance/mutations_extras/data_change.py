@@ -161,6 +161,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data")
+    birth_date = individual_data.get("birth_date")
+    if birth_date:
+        individual_data["birth_date"] = birth_date.isoformat()
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
         individual_data=individual_data,
         individual=individual,

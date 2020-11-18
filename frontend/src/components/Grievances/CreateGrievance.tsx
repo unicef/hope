@@ -3,14 +3,8 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
-import moment from 'moment';
-import {
-  Box,
-  Button,
-  DialogActions,
-  Grid,
-  Typography,
-} from '@material-ui/core';
+import { Box, Button, DialogActions, Grid } from '@material-ui/core';
+import camelCase from 'lodash/camelCase';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -34,7 +28,7 @@ import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
-import {EditIndividualDataChange} from "./EditIndividualDataChange";
+import { EditIndividualDataChange } from './EditIndividualDataChange';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -70,8 +64,8 @@ export function CreateGrievance(): React.ReactElement {
     consent: false,
     admin: '',
     area: '',
-    selectedHousehold: '',
-    selectedIndividual: '',
+    selectedHousehold: null,
+    selectedIndividual: null,
     selectedPaymentRecords: [],
     selectedRelatedTickets: [],
     identityVerified: false,
@@ -95,8 +89,6 @@ export function CreateGrievance(): React.ReactElement {
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedHousehold: Yup.string(),
-    selectedIndividual: Yup.string(),
     selectedPaymentRecords: Yup.array()
       .of(Yup.string())
       .nullable(),
@@ -179,8 +171,8 @@ export function CreateGrievance(): React.ReactElement {
             extras: {
               category: {
                 grievanceComplaintTicketExtras: {
-                  household: values.selectedHousehold,
-                  individual: values.selectedIndividual,
+                  household: values.selectedHousehold?.id,
+                  individual: values.selectedIndividual?.id,
                   paymentRecord: values.selectedPaymentRecords,
                 },
               },
@@ -199,8 +191,8 @@ export function CreateGrievance(): React.ReactElement {
             extras: {
               category: {
                 sensitiveGrievanceTicketExtras: {
-                  household: values.selectedHousehold,
-                  individual: values.selectedIndividual,
+                  household: values.selectedHousehold?.id,
+                  individual: values.selectedIndividual?.id,
                   paymentRecord: values.selectedPaymentRecords,
                 },
               },
@@ -222,7 +214,7 @@ export function CreateGrievance(): React.ReactElement {
             extras: {
               issueType: {
                 addIndividualIssueTypeExtras: {
-                  household: values.selectedHousehold,
+                  household: values.selectedHousehold?.id,
                   individualData: values.individualData,
                 },
               },
@@ -244,7 +236,35 @@ export function CreateGrievance(): React.ReactElement {
             extras: {
               issueType: {
                 individualDeleteIssueTypeExtras: {
-                  individual: values.selectedIndividual,
+                  individual: values.selectedIndividual?.id,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+    if (
+      category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            issueType: values.issueType,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              issueType: {
+                individualDataUpdateIssueTypeExtras: {
+                  individual: values.selectedIndividual?.id,
+                  individualData: values.individualDataUpdateFields
+                    .filter((item) => item.fieldName)
+                    .reduce((prev, current) => {
+                      // eslint-disable-next-line no-param-reassign
+                      prev[camelCase(current.fieldName)] = current.fieldValue;
+                      return prev;
+                    }, {}),
                 },
               },
             },
@@ -393,11 +413,14 @@ export function CreateGrievance(): React.ReactElement {
                         <AddIndividualDataChange />
                       )}
                     {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                    values.issueType ===
-                    GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
-                      <EditIndividualDataChange />
-                    )}
-
+                      values.issueType ===
+                        GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+                        <EditIndividualDataChange
+                          individual={values.selectedIndividual}
+                          values={values}
+                          setFieldValue={setFieldValue}
+                        />
+                      )}
                   </BoxPadding>
 
                   <DialogFooter>
@@ -422,7 +445,7 @@ export function CreateGrievance(): React.ReactElement {
             </Grid>
             <Grid item xs={4}>
               <NewTicket>
-                {values.category && values.selectedHousehold ? (
+                {values.category && values.selectedHousehold?.id ? (
                   <OtherRelatedTicketsCreate values={values} />
                 ) : null}
               </NewTicket>
