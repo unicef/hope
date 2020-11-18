@@ -34,6 +34,7 @@ import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
+import {EditIndividualDataChange} from "./EditIndividualDataChange";
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -371,6 +372,12 @@ export function CreateGrievance(): React.ReactElement {
                         GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
                         <AddIndividualDataChange />
                       )}
+                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                    values.issueType ===
+                    GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+                      <EditIndividualDataChange />
+                    )}
+
                   </BoxPadding>
 
                   <DialogFooter>
