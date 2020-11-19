@@ -42,14 +42,14 @@ export function CurrentValue({
   }
   return <>{displayValue || '-'}</>;
 }
-interface EditIndividualGrievanceDetailsProps {
+interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
 }
-export function EditIndividualGrievanceDetailsTable({
+export function RequestedIndividualDataChangeTable({
   setFieldValue,
   ticket,
-}: EditIndividualGrievanceDetailsProps): ReactElement {
+}: RequestedIndividualDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
       minWidth: 100,
