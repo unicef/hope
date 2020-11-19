@@ -42,7 +42,8 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
       businessArea,
       category: values.category?.toString(),
       household:
-        decodeIdString(values.selectedHousehold) ||
+      //TODO Janek to jeszcze kiedyś wymyśli
+        decodeIdString(values?.selectedHousehold?.id) ||
         '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
       //adding some random ID to get 0 results if there is no household id.
     },
@@ -51,8 +52,6 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
   if (!data) return null;
 
   const householdTickets = data.existingGrievanceTickets.edges;
-  console.log('😎: householdTickets', householdTickets);
-
   const renderIds = (tickets) =>
     tickets.length
       ? tickets.map((edge) => (
@@ -77,42 +76,40 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
       )
     : [];
 
-  return (
-    householdTickets.length && (
-      <StyledBox>
-        <Title>
-          <Typography variant='h6'>Other Related Tickets</Typography>
-        </Title>
-        <Box display='flex' flexDirection='column'>
-          <LabelizedField
-            label={`For Household ${householdTickets[0].node.household?.unicefId} `}
-          >
-            <>{renderIds(openHouseholdTickets)}</>
-          </LabelizedField>
-          {!show && closedHouseholdTickets.length ? (
-            <Box mt={3}>
-              <BlueBold onClick={() => setShow(true)}>
-                SHOW CLOSED TICKETS ({closedHouseholdTickets.length})
-              </BlueBold>
-            </Box>
-          ) : null}
-          {show && (
-            <Box mb={3} mt={3}>
-              <Typography>Closed Tickets</Typography>
-              <LabelizedField
-                label={`For Household ${householdTickets[0].node.household?.unicefId} `}
-              >
-                <>{renderIds(closedHouseholdTickets)}</>
-              </LabelizedField>
-            </Box>
-          )}
-          {show && closedHouseholdTickets.length ? (
-            <BlueBold onClick={() => setShow(false)}>
-              HIDE CLOSED TICKETS ({closedHouseholdTickets.length})
+  return householdTickets.length ? (
+    <StyledBox>
+      <Title>
+        <Typography variant='h6'>Other Related Tickets</Typography>
+      </Title>
+      <Box display='flex' flexDirection='column'>
+        <LabelizedField
+          label={`For Household ${householdTickets[0].node.household?.unicefId} `}
+        >
+          <>{renderIds(openHouseholdTickets)}</>
+        </LabelizedField>
+        {!show && closedHouseholdTickets.length ? (
+          <Box mt={3}>
+            <BlueBold onClick={() => setShow(true)}>
+              SHOW CLOSED TICKETS ({closedHouseholdTickets.length})
             </BlueBold>
-          ) : null}
-        </Box>
-      </StyledBox>
-    )
-  );
+          </Box>
+        ) : null}
+        {show && (
+          <Box mb={3} mt={3}>
+            <Typography>Closed Tickets</Typography>
+            <LabelizedField
+              label={`For Household ${householdTickets[0].node.household?.unicefId} `}
+            >
+              <>{renderIds(closedHouseholdTickets)}</>
+            </LabelizedField>
+          </Box>
+        )}
+        {show && closedHouseholdTickets.length ? (
+          <BlueBold onClick={() => setShow(false)}>
+            HIDE CLOSED TICKETS ({closedHouseholdTickets.length})
+          </BlueBold>
+        ) : null}
+      </Box>
+    </StyledBox>
+  ) : null;
 };

@@ -42,24 +42,6 @@ export const LookUpHouseholdIndividualDisplay = ({
     onValueChange('selectedIndividual', '');
   };
 
-  const { data, loading } = useHouseholdQuery({
-    variables: {
-      id: values.selectedHousehold,
-    },
-  });
-
-  const {
-    data: individualData,
-    loading: individualLoading,
-  } = useIndividualQuery({
-    variables: {
-      id: values.selectedIndividual,
-    },
-  });
-
-  if (loading || individualLoading) return null;
-  const { household } = data;
-  const { individual } = individualData;
 
   return (
     <StyledBox>
@@ -68,11 +50,11 @@ export const LookUpHouseholdIndividualDisplay = ({
           <Box display='flex' flexDirection='column'>
             <span>
               Household ID:
-              <BlueText>{household?.unicefId || '-'}</BlueText>
+              <BlueText> {values?.selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
               Individual ID:
-              <BlueText>{individual?.unicefId || '-'}</BlueText>
+              <BlueText> {values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>

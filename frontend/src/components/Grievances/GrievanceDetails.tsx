@@ -1,4 +1,4 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -17,7 +17,10 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
@@ -25,9 +28,17 @@ import { Notes } from './Notes';
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { PaymentIds } from './PaymentIds';
 import { OtherRelatedTickets } from './OtherRelatedTickets';
+import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
+import { EditIndividualGrievanceDetails } from './EditIndividualGrievanceDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
+`;
+const StyledBox = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 26px 22px;
 `;
 
 const Title = styled.div`
@@ -201,11 +212,6 @@ export function GrievanceDetails(): React.ReactElement {
     },
   ];
 
-  const isFeedbackType =
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
-    ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
-
   const renderRightSection = (): React.ReactElement => {
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.PAYMENT_VERIFICATION
@@ -254,6 +260,16 @@ export function GrievanceDetails(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
+          <PaddingContainer>
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+              <AddIndividualGrievanceDetails ticket={ticket} />
+            )}
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+              <EditIndividualGrievanceDetails ticket={ticket} />
+            )}
+          </PaddingContainer>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
           </PaddingContainer>
