@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
