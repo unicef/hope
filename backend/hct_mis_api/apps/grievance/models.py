@@ -228,6 +228,7 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         "household.Household", related_name="add_individual_ticket_details", on_delete=models.CASCADE, null=True,
     )
     individual_data = JSONField(null=True)
+    approve_status = models.BooleanField(default=False)
 
 
 class TicketDeleteIndividualDetails(TimeStampedUUIDModel):

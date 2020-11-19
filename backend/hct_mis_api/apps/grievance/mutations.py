@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from graphene.utils.str_converters import to_snake_case
 from graphql import GraphQLError
 
 from account.schema import UserNode
@@ -17,6 +18,7 @@ from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
 from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
 from grievance.schema import GrievanceTicketNode, TicketNoteNode
+from grievance.validators import DataChangeValidator
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -172,7 +174,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
             created_by=user,
             user_modified=timezone.now(),
             assigned_to=assigned_to,
-            status=GrievanceTicket.STATUS_ASSIGNED
+            status=GrievanceTicket.STATUS_ASSIGNED,
         )
         grievance_ticket.linked_tickets.set(linked_tickets)
         return grievance_ticket, extras
@@ -265,14 +267,102 @@ class CreateTicketNoteMutation(graphene.Mutation):
         description = note_input["description"]
         created_by = info.context.user
 
-        ticket_note = TicketNote.objects.create(
-            ticket=grievance_ticket, description=description, created_by=created_by
-        )
+        ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
 
         return cls(grievance_ticket_note=ticket_note)
+
+
+class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        """
+        individual_approve_data have to be a dictionary with field name as key and boolean as a value,
+        indicating whether field change is approved or not.
+        """
+        individual_approve_data = graphene.JSONString()
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, individual_approve_data, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.verify_approve_data(individual_approve_data)
+        individual_approve_data = {to_snake_case(key): value for key, value in individual_approve_data.items()}
+        individual_data_details = grievance_ticket.individual_data_update_ticket_details
+        individual_data = individual_data_details.individual_data
+        cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
+
+        for field_name, approve_status in individual_approve_data.items():
+            individual_data[field_name] = approve_status
+
+        individual_data_details.individual_data = individual_data
+        individual_data_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return cls(grievance_ticket=grievance_ticket)
+
+
+class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        """
+        household_approve_data have to be a dictionary with field name as key and boolean as a value,
+        indicating whether field change is approved or not.
+        """
+        household_approve_data = graphene.JSONString()
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, household_approve_data, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.verify_approve_data(household_approve_data)
+        household_approve_data = {to_snake_case(key): value for key, value in household_approve_data.items()}
+        household_data_details = grievance_ticket.household_data_update_ticket_details
+        household_data = household_data_details.household_data
+        cls.verify_approve_data_against_object_data(household_data, household_approve_data)
+
+        for field_name, approve_status in household_approve_data.items():
+            household_data[field_name] = approve_status
+
+        household_data_details.household_data = household_data
+        household_data_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return cls(grievance_ticket=grievance_ticket)
+
+
+class AddIndividualApproveMutation(graphene.Mutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        approve_status = graphene.Boolean(required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        individual_details = grievance_ticket.add_individual_ticket_details
+        individual_details.approve_status = approve_status
+        individual_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return cls(grievance_ticket=grievance_ticket)
 
 
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     grievance_status_change = GrievanceStatusChangeMutation.Field()
     create_ticket_note = CreateTicketNoteMutation.Field()
+    approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
+    approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
+    approve_add_individual = AddIndividualApproveMutation.Field()
