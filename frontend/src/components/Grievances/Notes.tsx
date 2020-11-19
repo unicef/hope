@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Box, Button, Grid, Typography } from '@material-ui/core';
+import {Avatar, Box, Button, Grid, Paper, Typography} from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
@@ -28,12 +28,7 @@ const Date = styled.span`
 const DescMargin = styled.div`
   margin-bottom: 35px;
 `;
-const StyledBox = styled.div`
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-radius: 3px;
-  background-color: #fff;
+const StyledBox = styled(Paper)`
   display: flex;
   flex-direction: column;
   width: 100%;

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
 import {
+  AllIndividualsQuery,
   AllIndividualsQueryVariables,
   IndividualNode,
   useAllIndividualsQuery,
@@ -32,9 +33,9 @@ export const LookUpIndividualTable = ({
   const [selectedIndividual, setSelectedIndividual] = useState(
     initialValues.selectedIndividual,
   );
-  const handleRadioChange = (event): void => {
-    setSelectedIndividual(event.target.value);
-    setFieldValue('selectedIndividual', event.target.value);
+  const handleRadioChange = (individual): void => {
+    setSelectedIndividual(individual);
+    setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
 
@@ -47,13 +48,16 @@ export const LookUpIndividualTable = ({
     admin2: [decodeIdString(filter.admin2)],
     sex: [filter.sex],
     householdId: valuesInner.selectedHousehold
-      ? decodeIdString(valuesInner.selectedHousehold)
+      ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
   };
 
   return (
     <TableWrapper>
-      <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
+      <UniversalTable<
+        AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
+        AllIndividualsQueryVariables
+      >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsQuery}
