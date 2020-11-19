@@ -116,7 +116,7 @@ export function CurrentValue({
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
-      displayValue = value === null ? '-' : value ? 'YES' : 'NO';
+      displayValue = value === null ? '-' : value ? 'Yes' : 'No';
       break;
     default:
       displayValue = value;
@@ -208,7 +208,6 @@ export const EditIndividualDataChange = ({
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  console.log('values', values);
   const { data, loading } = useAllAddIndividualFieldsQuery();
   if (loading || fullIndividualLoading) {
     return <LoadingComponent />;
