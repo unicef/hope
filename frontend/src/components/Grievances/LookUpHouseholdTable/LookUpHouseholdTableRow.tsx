@@ -3,6 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
+  AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../../__generated__/graphql';
@@ -11,9 +12,9 @@ import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
-  household: HouseholdNode;
-  radioChangeHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedHousehold: string;
+  household: AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"];
+  radioChangeHandler: (household:AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"]) => void;
+  selectedHousehold: AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"];
   choicesData: HouseholdChoiceDataQuery;
 }
 
@@ -49,8 +50,8 @@ export function LookUpHouseholdTableRow({
       <TableCell padding='checkbox'>
         <Radio
           color='primary'
-          checked={selectedHousehold === household.id}
-          onChange={radioChangeHandler}
+          checked={selectedHousehold?.id === household.id}
+          onChange={()=>{radioChangeHandler(household)}}
           value={household.id}
           name='radio-button-household'
           inputProps={{ 'aria-label': household.id }}

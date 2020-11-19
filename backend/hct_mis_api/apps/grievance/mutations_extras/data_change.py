@@ -164,6 +164,10 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_encoded_id = individual_data_update_issue_type_extras.get("individual")
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
+    individual_data = individual_data_update_issue_type_extras.get("individual_data")
+    birth_date = individual_data.get("birth_date")
+    if birth_date:
+        individual_data["birth_date"] = birth_date.isoformat()
     individual_data = {
         to_snake_case(key): value
         for key, value in individual_data_update_issue_type_extras.get("individual_data", {}).items()
@@ -199,6 +203,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data")
+    birth_date = individual_data.get("birth_date")
+    if birth_date:
+        individual_data["birth_date"] = birth_date.isoformat()
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data
     }

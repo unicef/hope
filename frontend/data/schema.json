@@ -462,6 +462,22 @@
             "deprecationReason": null
           },
           {
+            "name": "allAddIndividualsFieldsAttributes",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FieldAttributeNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "grievanceTicketStatusChoices",
             "description": null,
             "args": [],
@@ -1163,6 +1179,33 @@
           },
           {
             "name": "allFieldsAttributes",
+            "description": null,
+            "args": [
+              {
+                "name": "flexField",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "FieldAttributeNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "allIndividualFieldsAttributes",
             "description": null,
             "args": [
               {
