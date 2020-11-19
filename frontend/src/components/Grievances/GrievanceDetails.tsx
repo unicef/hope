@@ -30,6 +30,7 @@ import { PaymentIds } from './PaymentIds';
 import { OtherRelatedTickets } from './OtherRelatedTickets';
 import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
 import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
+import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 
 const PaddingContainer = styled.div`
   padding: 22px;
