@@ -89,6 +89,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         "sensitive_ticket_details": ("individual", "household", "payment_record",),
         "individual_data_update_ticket_details": ("individual",),
         "add_individual_ticket_details": ("household",),
+        "household_data_update_ticket_details": ("household",),
     }
 
     user_modified = models.DateTimeField(

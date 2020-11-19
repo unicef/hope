@@ -8,8 +8,10 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import {
   AllAddIndividualFieldsQuery,
+  AllEditHouseholdFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
 } from '../../__generated__/graphql';
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
@@ -19,7 +21,7 @@ const Capitalize = styled.span`
 `;
 
 export interface CurrentValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
 }
 
@@ -27,6 +29,30 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
+  let displayValue = value;
+  if (field?.name === 'country' || field?.name === 'country_origin') {
+    displayValue = value || '-';
+  } else {
+    switch (field?.type) {
+      case 'SELECT_ONE':
+        displayValue =
+          field.choices.find((item) => item.value === value).labelEn || '-';
+        break;
+      case 'BOOL':
+        /* eslint-disable-next-line no-nested-ternary */
+        displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+        break;
+      default:
+        displayValue = value;
+    }
+  }
+  return <>{displayValue || '-'}</>;
+}
+export function NewValue({
+  field,
+  value,
+}: CurrentValueProps): React.ReactElement {
+  console.log('field', field, value);
   let displayValue = value;
   switch (field?.type) {
     case 'SELECT_ONE':
@@ -57,13 +83,13 @@ export function RequestedHouseholdDataChangeTable({
   }));
   const classes = useStyles();
   const [selected, setSelected] = useState([]);
-  const { data, loading } = useAllAddIndividualFieldsQuery();
+  const { data, loading } = useAllEditHouseholdFieldsQuery();
 
   if (loading) {
     return <LoadingComponent />;
   }
 
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
+  const fieldsDict = data.allEditHouseholdFieldsAttributes.reduce(
     (previousValue, currentValue) => {
       // eslint-disable-next-line no-param-reassign
       previousValue[currentValue.name] = currentValue;
@@ -139,7 +165,7 @@ export function RequestedHouseholdDataChangeTable({
                   <CurrentValue field={field} value={currentValue} />
                 </TableCell>
                 <TableCell align='left'>
-                  <CurrentValue field={field} value={row[1]} />
+                  <NewValue field={field} value={row[1]} />
                 </TableCell>
               </TableRow>
             );
