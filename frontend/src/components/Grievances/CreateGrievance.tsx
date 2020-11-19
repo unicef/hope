@@ -332,7 +332,6 @@ export function CreateGrievance(): React.ReactElement {
     >
       {({ submitForm, values, setFieldValue }) => (
         <>
-          {console.log('vaaaalues', values)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>

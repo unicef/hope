@@ -2526,6 +2526,7 @@ export type Query = {
   existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
   allTicketNotes?: Maybe<TicketNoteNodeConnection>,
   allAddIndividualsFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
@@ -5003,6 +5004,28 @@ export type AllCashPlansQuery = (
   )> }
 );
 
+export type AllEditHouseholdFieldsQueryVariables = {};
+
+
+export type AllEditHouseholdFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allEditHouseholdFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
 export type AllGrievanceTicketQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -5501,6 +5524,13 @@ export type GrievanceTicketQuery = (
       & { individual: Maybe<(
         { __typename?: 'IndividualNode' }
         & IndividualDetailedFragment
+      )> }
+    )>, householdDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+      & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & HouseholdDetailedFragment
       )> }
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
@@ -8570,6 +8600,76 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllEditHouseholdFieldsDocument = gql`
+    query AllEditHouseholdFields {
+  allEditHouseholdFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllEditHouseholdFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>, 'query'>;
+
+    export const AllEditHouseholdFieldsComponent = (props: AllEditHouseholdFieldsComponentProps) => (
+      <ApolloReactComponents.Query<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables> query={AllEditHouseholdFieldsDocument} {...props} />
+    );
+    
+export type AllEditHouseholdFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables> & TChildProps;
+export function withAllEditHouseholdFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllEditHouseholdFieldsQuery,
+  AllEditHouseholdFieldsQueryVariables,
+  AllEditHouseholdFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables, AllEditHouseholdFieldsProps<TChildProps>>(AllEditHouseholdFieldsDocument, {
+      alias: 'allEditHouseholdFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllEditHouseholdFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllEditHouseholdFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllEditHouseholdFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllEditHouseholdFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllEditHouseholdFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, baseOptions);
+      }
+export function useAllEditHouseholdFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, baseOptions);
+        }
+export type AllEditHouseholdFieldsQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsQuery>;
+export type AllEditHouseholdFieldsLazyQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsLazyQuery>;
+export type AllEditHouseholdFieldsQueryResult = ApolloReactCommon.QueryResult<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
     query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $admin: [ID], $orderBy: String) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin) {
@@ -9650,6 +9750,13 @@ export const GrievanceTicketDocument = gql`
       }
       individualData
     }
+    householdDataUpdateTicketDetails {
+      id
+      household {
+        ...householdDetailed
+      }
+      householdData
+    }
     issueType
     ticketNotes {
       edges {
@@ -9669,7 +9776,8 @@ export const GrievanceTicketDocument = gql`
     }
   }
 }
-    ${IndividualDetailedFragmentDoc}`;
+    ${IndividualDetailedFragmentDoc}
+${HouseholdDetailedFragmentDoc}`;
 export type GrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>, 'query'> & ({ variables: GrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const GrievanceTicketComponent = (props: GrievanceTicketComponentProps) => (
@@ -13441,6 +13549,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea' | 'category'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
   allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,

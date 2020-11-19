@@ -8,10 +8,10 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import {
-  AllAddIndividualFieldsQuery,
+  AllEditHouseholdFieldsQuery,
   AllHouseholdsQuery,
   HouseholdQuery,
-  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
   useHouseholdQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -28,7 +28,7 @@ const AddIcon = styled(AddCircleOutline)`
 `;
 
 export interface EditHouseholdDataChangeField {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   name: string;
 }
 export const EditHouseholdDataChangeField = ({
@@ -93,7 +93,7 @@ export const EditHouseholdDataChangeField = ({
 };
 
 export interface CurrentValueProps {
-  field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  field: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'][number];
   value;
 }
 
@@ -101,18 +101,22 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
-  switch (field?.type) {
-    case 'SELECT_ONE':
-      displayValue =
-        field.choices.find((item) => item.value === value).labelEn || '-';
-      break;
-    case 'BOOL':
-      /* eslint-disable-next-line no-nested-ternary */
-      displayValue = value === null ? '-' : value ? 'Yes' : 'No';
-      break;
-    default:
-      displayValue = value;
+  let displayValue;
+  if (field?.name === 'country' || field?.name === 'country_origin') {
+    displayValue = value || '-';
+  } else {
+    switch (field?.type) {
+      case 'SELECT_ONE':
+        displayValue =
+          field.choices.find((item) => item.value === value).labelEn || '-';
+        break;
+      case 'BOOL':
+        /* eslint-disable-next-line no-nested-ternary */
+        displayValue = value === null ? '-' : value ? 'Yes' : 'No';
+        break;
+      default:
+        displayValue = value;
+    }
   }
   return (
     <Grid item xs={3}>
@@ -122,7 +126,7 @@ export function CurrentValue({
 }
 
 export interface EditHouseholdDataChangeFieldRowProps {
-  fields: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'];
+  fields: AllEditHouseholdFieldsQuery['allEditHouseholdFieldsAttributes'];
   household: HouseholdQuery['household'];
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
@@ -167,7 +171,7 @@ export const EditHouseholdDataChangeFieldRow = ({
       />
       {itemValue.fieldName ? (
         <EditHouseholdDataChangeField
-          name={`householdlDataUpdateFields[${index}].fieldValue`}
+          name={`householdDataUpdateFields[${index}].fieldValue`}
           field={field}
         />
       ) : (
@@ -201,8 +205,11 @@ export const EditHouseholdDataChange = ({
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullHouseholdLoading) {
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
+  if (fullHouseholdLoading || householdFieldsLoading) {
     return <LoadingComponent />;
   }
   if (!household) {
@@ -221,12 +228,12 @@ export const EditHouseholdDataChange = ({
           name='householdDataUpdateFields'
           render={(arrayHelpers) => (
             <>
-              {(values.individualDataUpdateFields || []).map((item, index) => (
+              {(values.householdDataUpdateFields || []).map((item, index) => (
                 <EditHouseholdDataChangeFieldRow
                   itemValue={item}
                   index={index}
                   household={fullHousehold.household}
-                  fields={data.allAddIndividualsFieldsAttributes}
+                  fields={householdFieldsData.allEditHouseholdFieldsAttributes}
                   notAvailableFields={notAvailableItems}
                   onDelete={() => arrayHelpers.remove(index)}
                 />

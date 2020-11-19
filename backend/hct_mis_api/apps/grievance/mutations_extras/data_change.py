@@ -6,7 +6,8 @@ from grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
-    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
 )
 from household.models import Individual, Household
 from household.schema import HouseholdNode, IndividualNode
@@ -124,6 +125,12 @@ class IndividualDeleteIssueTypeExtras(graphene.InputObjectType):
     individual = graphene.GlobalID(node=IndividualNode, required=True)
 
 
+def to_date_string(dict, field_name):
+    date = dict.get(field_name)
+    if date:
+        dict[field_name] = date.isoformat()
+
+
 def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
@@ -144,6 +151,8 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     household_data = individual_data_update_issue_type_extras.get("household_data")
+    to_date_string(household_data, "start")
+    to_date_string(household_data, "end")
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
         household_data=household_data,
         household=household,
@@ -153,6 +162,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
 
+
 def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_data_update_issue_type_extras")
@@ -161,9 +171,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data")
-    birth_date = individual_data.get("birth_date")
-    if birth_date:
-        individual_data["birth_date"] = birth_date.isoformat()
+    to_date_string(individual_data, "birth_date")
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
         individual_data=individual_data,
         individual=individual,
@@ -199,9 +207,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data")
-    birth_date = individual_data.get("birth_date")
-    if birth_date:
-        individual_data["birth_date"] = birth_date.isoformat()
+    to_date_string(individual_data, "birth_date")
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data,
         household=household,
