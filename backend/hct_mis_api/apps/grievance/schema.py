@@ -15,7 +15,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea, FlexibleAttribute
@@ -302,6 +302,10 @@ class Query(graphene.ObjectType):
         FieldAttributeNode,
         description="All field datatype meta.",
     )
+    all_edit_household_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        description="All field datatype meta.",
+    )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
@@ -350,5 +354,51 @@ class Query(graphene.ObjectType):
 
         # yield from FlexibleAttribute.objects.order_by("name").all()
         yield from [
-            x for x in CORE_FIELDS_ATTRIBUTES if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+            x
+            for x in CORE_FIELDS_ATTRIBUTES
+            if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+        ]
+
+    def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
+        ACCEPTABLE_FIELDS = [
+            "status",
+            "consent",
+            "residence_status",
+            "country_origin",
+            "country",
+            "size",
+            "address",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_adults_count",
+            "pregnant_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_adults_count",
+            "female_age_group_0_5_disabled_count",
+            "female_age_group_6_11_disabled_count",
+            "female_age_group_12_17_disabled_count",
+            "female_adults_disabled_count",
+            "male_age_group_0_5_disabled_count",
+            "male_age_group_6_11_disabled_count",
+            "male_age_group_12_17_disabled_count",
+            "male_adults_disabled_count",
+            "returnee",
+            "fchild_hoh",
+            "child_hoh",
+            "start",
+            "end",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "village",
+        ]
+
+        # yield from FlexibleAttribute.objects.order_by("name").all()
+        yield from [
+            x
+            for x in CORE_FIELDS_ATTRIBUTES
+            if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
         ]
