@@ -1,7 +1,9 @@
 import { HeadCell } from '../../table/EnhancedTableHead';
-import {AllHouseholdsQuery, HouseholdNode} from '../../../__generated__/graphql';
+import { AllHouseholdsQuery } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"]>[] = [
+export const headCells: HeadCell<
+  AllHouseholdsQuery['allHouseholds']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: '',

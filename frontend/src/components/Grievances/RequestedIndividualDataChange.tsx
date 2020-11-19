@@ -2,8 +2,8 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { EditIndividualGrievanceDetailsTable } from './EditIndividualGrievanceDetailsTable';
 import { Formik } from 'formik';
+import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -16,7 +16,7 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export function EditIndividualGrievanceDetails({
+export function RequestedIndividualDataChange({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
@@ -38,7 +38,7 @@ export function EditIndividualGrievanceDetails({
               </Button>
             </Box>
           </Title>
-          <EditIndividualGrievanceDetailsTable
+          <RequestedIndividualDataChangeTable
             ticket={ticket}
             setFieldValue={setFieldValue}
           />
