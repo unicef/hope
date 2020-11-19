@@ -269,6 +269,10 @@ export function GrievanceDetails(): React.ReactElement {
               GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
               <RequestedIndividualDataChange ticket={ticket} />
             )}
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
+              <RequestedHouseholdDataChange ticket={ticket} />
+            )}
           </PaddingContainer>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
