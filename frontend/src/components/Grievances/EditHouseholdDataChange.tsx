@@ -9,10 +9,10 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import {
   AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-  IndividualQuery,
+  AllHouseholdsQuery,
+  HouseholdQuery,
   useAllAddIndividualFieldsQuery,
-  useIndividualQuery,
+  useHouseholdQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -27,14 +27,14 @@ const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
 
-export interface EditIndividualDataChangeField {
+export interface EditHouseholdDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   name: string;
 }
-export const EditIndividualDataChangeField = ({
+export const EditHouseholdDataChangeField = ({
   name,
   field,
-}: EditIndividualDataChangeField): React.ReactElement => {
+}: EditHouseholdDataChangeField): React.ReactElement => {
   let fieldProps;
   switch (field.type) {
     case 'STRING':
@@ -121,28 +121,28 @@ export function CurrentValue({
   );
 }
 
-export interface EditIndividualDataChangeFieldRowProps {
+export interface EditHouseholdDataChangeFieldRowProps {
   fields: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'];
-  individual: IndividualQuery['individual'];
+  household: HouseholdQuery['household'];
   itemValue: { fieldName: string; fieldValue: string | number | Date };
   index: number;
   notAvailableFields: string[];
   onDelete: () => {};
 }
-export const EditIndividualDataChangeFieldRow = ({
+export const EditHouseholdDataChangeFieldRow = ({
   fields,
-  individual,
+  household,
   index,
   itemValue,
   notAvailableFields,
   onDelete,
-}: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
+}: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
   return (
     <>
       <Grid item xs={4}>
         <Field
-          name={`individualDataUpdateFields[${index}].fieldName`}
+          name={`householdDataUpdateFields[${index}].fieldName`}
           fullWidth
           variant='outlined'
           label='Field'
@@ -163,11 +163,11 @@ export const EditIndividualDataChangeFieldRow = ({
 
       <CurrentValue
         field={field}
-        value={individual[camelCase(itemValue.fieldName)]}
+        value={household[camelCase(itemValue.fieldName)]}
       />
       {itemValue.fieldName ? (
-        <EditIndividualDataChangeField
-          name={`individualDataUpdateFields[${index}].fieldValue`}
+        <EditHouseholdDataChangeField
+          name={`householdlDataUpdateFields[${index}].fieldValue`}
           field={field}
         />
       ) : (
@@ -181,51 +181,51 @@ export const EditIndividualDataChangeFieldRow = ({
     </>
   );
 };
-export interface EditIndividualDataChangeProps {
-  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+export interface EditHouseholdDataChangeProps {
+  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
   values;
   setFieldValue;
 }
-export const EditIndividualDataChange = ({
-  individual,
+export const EditHouseholdDataChange = ({
+  household,
   values,
   setFieldValue,
-}: EditIndividualDataChangeProps): React.ReactElement => {
+}: EditHouseholdDataChangeProps): React.ReactElement => {
   const {
-    data: fullIndividual,
-    loading: fullIndividualLoading,
-  } = useIndividualQuery({ variables: { id: individual?.id } });
+    data: fullHousehold,
+    loading: fullHouseholdLoading,
+  } = useHouseholdQuery({ variables: { id: household?.id } });
   useEffect(() => {
-    setFieldValue('individualDataUpdateFields', [
+    setFieldValue('householdDataUpdateFields', [
       { fieldName: null, fieldValue: null },
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullIndividualLoading) {
+  if (loading || fullHouseholdLoading) {
     return <LoadingComponent />;
   }
-  if (!individual) {
-    return <div>You have to select an individual earlier</div>;
+  if (!household) {
+    return <div>You have to select a household earlier</div>;
   }
-  const notAvailableItems = (values.individualDataUpdateFields || []).map(
+  const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
   );
   return (
     <>
       <Title>
-        <Typography variant='h6'>Individual Data</Typography>
+        <Typography variant='h6'>Household Data</Typography>
       </Title>
       <Grid container spacing={3}>
         <FieldArray
-          name='individualDataUpdateFields'
+          name='householdDataUpdateFields'
           render={(arrayHelpers) => (
             <>
               {(values.individualDataUpdateFields || []).map((item, index) => (
-                <EditIndividualDataChangeFieldRow
+                <EditHouseholdDataChangeFieldRow
                   itemValue={item}
                   index={index}
-                  individual={fullIndividual.individual}
+                  household={fullHousehold.household}
                   fields={data.allAddIndividualsFieldsAttributes}
                   notAvailableFields={notAvailableItems}
                   onDelete={() => arrayHelpers.remove(index)}
