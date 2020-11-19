@@ -1,12 +1,14 @@
 import graphene
 from django.shortcuts import get_object_or_404
+from graphene.utils.str_converters import to_snake_case
 
 from core.utils import decode_id_string
 from grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
-    TicketDeleteIndividualDetails, TicketHouseholdDataUpdateDetails,
+    TicketDeleteIndividualDetails,
+    TicketHouseholdDataUpdateDetails,
 )
 from household.models import Individual, Household
 from household.schema import HouseholdNode, IndividualNode
@@ -138,20 +140,22 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
 
 def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
     data_change_extras = extras.get("issue_type")
-    individual_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
+    household_data_update_issue_type_extras = data_change_extras.get("household_data_update_issue_type_extras")
 
-    household_encoded_id = individual_data_update_issue_type_extras.get("household")
+    household_encoded_id = household_data_update_issue_type_extras.get("household")
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
-    household_data = individual_data_update_issue_type_extras.get("household_data")
+    household_data = {
+        to_snake_case(key): value
+        for key, value in household_data_update_issue_type_extras.get("household_data", {}).items()
+    }
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data,
-        household=household,
-        ticket=grievance_ticket,
+        household_data=household_data, household=household, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
+
 
 def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
     data_change_extras = extras.get("issue_type")
@@ -160,11 +164,12 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_encoded_id = individual_data_update_issue_type_extras.get("individual")
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
-    individual_data = individual_data_update_issue_type_extras.get("individual_data")
+    individual_data = {
+        to_snake_case(key): value
+        for key, value in individual_data_update_issue_type_extras.get("individual_data", {}).items()
+    }
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data,
-        individual=individual,
-        ticket=grievance_ticket,
+        individual_data=individual_data, individual=individual, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -172,7 +177,6 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
 
 
 def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
-
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
 
@@ -180,8 +184,7 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     ticket_individual_data_update_details = TicketDeleteIndividualDetails(
-        individual=individual,
-        ticket=grievance_ticket,
+        individual=individual, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -196,10 +199,11 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data")
+    individual_data_with_approve_status = {
+        to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data
+    }
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data,
-        household=household,
-        ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status, household=household, ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
