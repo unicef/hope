@@ -57,7 +57,6 @@ export const OtherRelatedTickets = ({
   if (!data) return null;
 
   const householdTickets = data.existingGrievanceTickets.edges;
-  console.log('😎: householdTickets', householdTickets);
 
   const renderIds = (tickets) =>
     tickets.length
