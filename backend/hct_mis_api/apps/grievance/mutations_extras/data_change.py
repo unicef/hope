@@ -151,10 +151,12 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     household_encoded_id = household_data_update_issue_type_extras.get("household")
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
+    print(household_data_update_issue_type_extras.get("household_data", {}))
     household_data = {
         to_snake_case(key): value
         for key, value in household_data_update_issue_type_extras.get("household_data", {}).items()
     }
+    print(household_data)
     to_date_string(household_data, "start")
     to_date_string(household_data, "end")
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
