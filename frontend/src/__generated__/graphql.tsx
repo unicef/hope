@@ -5495,6 +5495,13 @@ export type GrievanceTicketQuery = (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'id' | 'unicefId'>
       )> }
+    )>, individualDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+      & { individual: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & IndividualDetailedFragment
+      )> }
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -9636,6 +9643,13 @@ export const GrievanceTicketDocument = gql`
         unicefId
       }
     }
+    individualDataUpdateTicketDetails {
+      id
+      individual {
+        ...individualDetailed
+      }
+      individualData
+    }
     issueType
     ticketNotes {
       edges {
@@ -9655,7 +9669,7 @@ export const GrievanceTicketDocument = gql`
     }
   }
 }
-    `;
+    ${IndividualDetailedFragmentDoc}`;
 export type GrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>, 'query'> & ({ variables: GrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const GrievanceTicketComponent = (props: GrievanceTicketComponentProps) => (

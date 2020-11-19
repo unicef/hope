@@ -17,7 +17,10 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
@@ -26,6 +29,7 @@ import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { PaymentIds } from './PaymentIds';
 import { OtherRelatedTickets } from './OtherRelatedTickets';
 import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
+import { EditIndividualGrievanceDetails } from './EditIndividualGrievanceDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -257,7 +261,14 @@ export function GrievanceDetails(): React.ReactElement {
         </Grid>
         <Grid item xs={7}>
           <PaddingContainer>
-            <AddIndividualGrievanceDetails ticket={ticket} />
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+              <AddIndividualGrievanceDetails ticket={ticket} />
+            )}
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+              <EditIndividualGrievanceDetails ticket={ticket} />
+            )}
           </PaddingContainer>
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
