@@ -139,9 +139,12 @@ class ExistingGrievanceTicketFilter(FilterSet):
 
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(queryset, models.QuerySet), (
-                "Expected '%s.%s' to return a QuerySet, but got a %s instead."
-                % (type(self).__name__, name, type(queryset).__name__,)
+            assert isinstance(
+                queryset, models.QuerySet
+            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+                type(self).__name__,
+                name,
+                type(queryset).__name__,
             )
 
         if payment_record_objects:
@@ -229,9 +232,6 @@ class TicketIndividualDataUpdateDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info, **kwargs):
-        return dict_to_camel_case(self.individual_data)
-
 
 class TicketAddIndividualDetailsNode(DjangoObjectType):
     individual_data = Arg()
@@ -241,9 +241,6 @@ class TicketAddIndividualDetailsNode(DjangoObjectType):
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-    def resolve_individual_data(self, info, **kwargs):
-        return dict_to_camel_case(self.individual_data)
 
 
 class TicketDeleteIndividualDetailsNode(DjangoObjectType):
@@ -255,9 +252,6 @@ class TicketDeleteIndividualDetailsNode(DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_individual_data(self, info, **kwargs):
-        return dict_to_camel_case(self.individual_data)
-
 
 class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
     household_data = Arg()
@@ -267,9 +261,6 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-    def resolve_household_data(self, info, **kwargs):
-        return dict_to_camel_case(self.household_data)
 
 
 class IssueTypesObject(graphene.ObjectType):
@@ -303,8 +294,14 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
-    all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.",)
+    all_ticket_notes = DjangoPermissionFilterConnectionField(
+        TicketNoteNode,
+        filterset_class=TicketNoteFilter,
+    )
+    all_add_individuals_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        description="All field datatype meta.",
+    )
     all_edit_household_fields_attributes = graphene.List(
         FieldAttributeNode,
         description="All field datatype meta.",
@@ -357,7 +354,9 @@ class Query(graphene.ObjectType):
 
         # yield from FlexibleAttribute.objects.order_by("name").all()
         yield from [
-            x for x in CORE_FIELDS_ATTRIBUTES if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
+            x
+            for x in CORE_FIELDS_ATTRIBUTES
+            if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
