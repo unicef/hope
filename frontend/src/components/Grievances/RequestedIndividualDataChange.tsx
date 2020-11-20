@@ -24,8 +24,9 @@ export function RequestedIndividualDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const getConfirmationText = (values) => {
-    return `You approved ${values.selected.length ||
-      0} changes, remaining proposed changes will be automatically rejected upon ticket closure.`;
+    return `You approved ${values.selected.length || 0} change${
+      values.selected.length === 1 ? '' : 's'
+    }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   return (
     <Formik
