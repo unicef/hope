@@ -17,10 +17,22 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'individualData': {
-                            'family_name': 'Romaniak',
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'sex': 'MALE'
+                            'family_name': {
+                                'approve_status': False,
+                                'value': 'Romaniak'
+                            },
+                            'full_name': {
+                                'approve_status': False,
+                                'value': 'Test Test'
+                            },
+                            'given_name': {
+                                'approve_status': False,
+                                'value': 'Test'
+                            },
+                            'sex': {
+                                'approve_status': False,
+                                'value': 'MALE'
+                            }
                         }
                     },
                     'category': 2,
@@ -28,33 +40,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 16,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': {
-                        'individual': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'individualData': {
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'sex': 'MALE'
-                        }
-                    },
-                    'issueType': 14,
                     'sensitiveTicketDetails': None
                 }
             ]
@@ -98,6 +83,33 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                     },
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 13,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': {
+                        'individual': {
+                            'fullName': 'Benjamin Butler'
+                        },
+                        'individualData': {
+                            'full_name': 'Test Test',
+                            'given_name': 'Test',
+                            'sex': 'MALE'
+                        }
+                    },
+                    'issueType': 14,
                     'sensitiveTicketDetails': None
                 }
             ]
