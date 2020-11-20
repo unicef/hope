@@ -347,7 +347,7 @@ export function CreateGrievance(): React.ReactElement {
                           setFieldValue('issueType', null);
                         }}
                         variant='outlined'
-                        choices={choicesData.grievanceTicketCategoryChoices}
+                        choices={choicesData.grievanceTicketManualCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>

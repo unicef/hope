@@ -32,6 +32,11 @@ export type ActivateCashPlanVerificationMutation = {
   cashPlan?: Maybe<CashPlanNode>,
 };
 
+export type AddIndividualApproveMutation = {
+   __typename?: 'AddIndividualApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export type AddIndividualDataObjectType = {
   fullName: Scalars['String'],
   givenName: Scalars['String'],
@@ -857,6 +862,11 @@ export enum HouseholdConsentSharing {
   PrivatePartner = 'PRIVATE_PARTNER',
   GovernmentPartner = 'GOVERNMENT_PARTNER'
 }
+
+export type HouseholdDataChangeApproveMutation = {
+   __typename?: 'HouseholdDataChangeApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
 
 export type HouseholdDataUpdateIssueTypeExtras = {
   household: Scalars['ID'],
@@ -1685,6 +1695,11 @@ export enum IndividualCommsDisability {
   CannotDo = 'CANNOT_DO'
 }
 
+export type IndividualDataChangeApproveMutation = {
+   __typename?: 'IndividualDataChangeApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export type IndividualDataUpdateIssueTypeExtras = {
   individual: Scalars['ID'],
   individualData: IndividualUpdateDataObjectType,
@@ -2061,6 +2076,9 @@ export type Mutations = {
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
   createTicketNote?: Maybe<CreateTicketNoteMutation>,
+  approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
+  approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
+  approveAddIndividual?: Maybe<AddIndividualApproveMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
@@ -2104,6 +2122,24 @@ export type MutationsGrievanceStatusChangeArgs = {
 
 export type MutationsCreateTicketNoteArgs = {
   noteInput: CreateTicketNoteInput
+};
+
+
+export type MutationsApproveIndividualDataChangeArgs = {
+  grievanceTicketId: Scalars['ID'],
+  individualApproveData?: Maybe<Scalars['JSONString']>
+};
+
+
+export type MutationsApproveHouseholdDataChangeArgs = {
+  grievanceTicketId: Scalars['ID'],
+  householdApproveData?: Maybe<Scalars['JSONString']>
+};
+
+
+export type MutationsApproveAddIndividualArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID']
 };
 
 
@@ -2529,6 +2565,7 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -3535,6 +3572,7 @@ export type TicketAddIndividualDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   household?: Maybe<HouseholdNode>,
   individualData?: Maybe<Scalars['Arg']>,
+  approveStatus: Scalars['Boolean'],
 };
 
 export type TicketAddIndividualDetailsNodeConnection = {
@@ -5558,6 +5596,9 @@ export type GrievancesChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
@@ -9831,6 +9872,10 @@ export const GrievancesChoiceDataDocument = gql`
     name
     value
   }
+  grievanceTicketManualCategoryChoices {
+    name
+    value
+  }
   grievanceTicketIssueTypeChoices {
     category
     label
@@ -12213,6 +12258,9 @@ export type ResolversTypes = {
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
+  IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
+  HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
+  AddIndividualApproveMutation: ResolverTypeWrapper<AddIndividualApproveMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
@@ -12491,6 +12539,9 @@ export type ResolversParentTypes = {
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: CreateTicketNoteMutation,
+  IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
+  HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
+  AddIndividualApproveMutation: AddIndividualApproveMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
@@ -12540,6 +12591,10 @@ export type ResolversParentTypes = {
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type AddIndividualApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['AddIndividualApproveMutation'] = ResolversParentTypes['AddIndividualApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type AdminAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNode'] = ResolversParentTypes['AdminAreaNode']> = {
@@ -12961,6 +13016,10 @@ export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends Re
   labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
+export type HouseholdDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdDataChangeApproveMutation'] = ResolversParentTypes['HouseholdDataChangeApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
 export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -13225,6 +13284,10 @@ export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentTyp
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
 };
 
+export type IndividualDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
 export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
@@ -13391,6 +13454,9 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
+  approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
+  approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
+  approveAddIndividual?: Resolver<Maybe<ResolversTypes['AddIndividualApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
@@ -13552,6 +13618,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
@@ -13902,6 +13969,7 @@ export type TicketAddIndividualDetailsNodeResolvers<ContextType = any, ParentTyp
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
 };
 
 export type TicketAddIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketAddIndividualDetailsNodeConnection']> = {
@@ -14193,6 +14261,7 @@ export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends Reso
 
 export type Resolvers<ContextType = any> = {
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
+  AddIndividualApproveMutation?: AddIndividualApproveMutationResolvers<ContextType>,
   AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
   AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
   AdminAreaNodeEdge?: AdminAreaNodeEdgeResolvers<ContextType>,
@@ -14247,6 +14316,7 @@ export type Resolvers<ContextType = any> = {
   GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
   GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>,
   GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
+  HouseholdDataChangeApproveMutation?: HouseholdDataChangeApproveMutationResolvers<ContextType>,
   HouseholdNode?: HouseholdNodeResolvers<ContextType>,
   HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
   HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
@@ -14264,6 +14334,7 @@ export type Resolvers<ContextType = any> = {
   ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
   ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
   ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
+  IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
   IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
   IndividualNode?: IndividualNodeResolvers<ContextType>,
   IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,

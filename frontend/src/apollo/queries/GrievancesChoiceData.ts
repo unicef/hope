@@ -10,6 +10,11 @@ export const GrievancesChoiceData = gql`
       name
       value
     }
+
+    grievanceTicketManualCategoryChoices {
+      name
+      value
+    }
     grievanceTicketIssueTypeChoices {
       category
       label
