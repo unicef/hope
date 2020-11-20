@@ -1,7 +1,10 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  useApproveHouseholdDataChangeMutation,
+} from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
@@ -28,11 +31,18 @@ export function RequestedHouseholdDataChange({
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
+  const [mutate] = useApproveHouseholdDataChangeMutation();
   return (
     <Formik
       initialValues={{ selected: [] }}
       onSubmit={(values) => {
         console.log(values);
+        // mutate({
+        //   variables: {
+        //     grievanceTicketId: ticket.id,
+        //     householdApproveData: JSON.stringify(values.selected),
+        //   },
+        // });
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
