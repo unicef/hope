@@ -52,7 +52,6 @@ export function NewValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  console.log('field', field, value);
   let displayValue = value;
   switch (field?.type) {
     case 'SELECT_ONE':
