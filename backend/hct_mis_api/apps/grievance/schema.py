@@ -308,6 +308,7 @@ class Query(graphene.ObjectType):
     )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
@@ -315,6 +316,13 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_category_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_manual_category_choices(self, info, **kwargs):
+        return [
+            {"name": name, "value": value}
+            for value, name in GrievanceTicket.CATEGORY_CHOICES
+            if value in GrievanceTicket.MANUAL_CATEGORIES
+        ]
 
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
