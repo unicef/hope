@@ -6,6 +6,7 @@ import { Formik } from 'formik';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { selectFields } from '../../utils/utils';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -49,7 +50,10 @@ export function RequestedIndividualDataChange({
                     onClick={confirm(() => submitForm())}
                     variant='contained'
                     color='primary'
-                    disabled={!values.selected.length}
+                    disabled={
+                      !values.selected.length ||
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                   >
                     Approve
                   </Button>
