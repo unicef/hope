@@ -5,6 +5,7 @@ import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -48,7 +49,10 @@ export function RequestedHouseholdDataChange({
                     onClick={confirm(() => submitForm())}
                     variant='contained'
                     color='primary'
-                    disabled={!values.selected.length}
+                    disabled={
+                      !values.selected.length ||
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                   >
                     Approve
                   </Button>

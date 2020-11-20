@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import camelCase from 'lodash/camelCase';
@@ -13,6 +13,7 @@ import {
 } from '../../__generated__/graphql';
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
@@ -58,6 +59,10 @@ export function RequestedIndividualDataChangeTable({
   const classes = useStyles();
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllAddIndividualFieldsQuery();
+
+  useEffect(() => {
+    setSelected([]);
+  }, [ticket.status]);
 
   if (loading) {
     return <LoadingComponent />;
@@ -120,14 +125,17 @@ export function RequestedIndividualDataChangeTable({
             const field = fieldsDict[row[0]];
             return (
               <TableRow
-                onClick={(event) => handleClick(event, fieldName)}
                 role='checkbox'
                 aria-checked={isItemSelected}
                 key={fieldName}
               >
                 <TableCell>
                   <Checkbox
+                    onClick={(event) => handleClick(event, fieldName)}
                     color='primary'
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                     checked={isItemSelected}
                     inputProps={{ 'aria-labelledby': labelId }}
                   />
