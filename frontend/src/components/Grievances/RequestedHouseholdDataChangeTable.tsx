@@ -122,7 +122,7 @@ export function RequestedHouseholdDataChangeTable({
         selected.slice(selectedIndex + 1),
       );
     }
-
+    // {"givenName": True, "fullName": True, "familyName": True, "sex": False}
     setSelected(newSelected);
     setFieldValue('selected', newSelected);
   };
