@@ -43,9 +43,9 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTphY2Q1N2FhMS1lZmQ4LTRjODEtYWMxOS1iOGNhYmViZTgwODk=',
                 'individualDataUpdateTicketDetails': {
                     'individualData': {
-                        'familyName': True,
-                        'fullName': True,
-                        'givenName': True,
+                        'family_name': True,
+                        'full_name': True,
+                        'given_name': True,
                         'sex': False
                     }
                 }
