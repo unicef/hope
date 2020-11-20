@@ -17,22 +17,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'individualData': {
-                            'family_name': {
-                                'approve_status': False,
-                                'value': 'Romaniak'
-                            },
-                            'full_name': {
-                                'approve_status': False,
-                                'value': 'Test Test'
-                            },
-                            'given_name': {
-                                'approve_status': False,
-                                'value': 'Test'
-                            },
-                            'sex': {
-                                'approve_status': False,
-                                'value': 'MALE'
-                            }
+                            'family_name': 'Romaniak',
+                            'full_name': 'Test Test',
+                            'given_name': 'Test',
+                            'sex': 'MALE'
                         }
                     },
                     'category': 2,
@@ -78,7 +66,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'householdData': {
-                            'female_age_group_6_11_count': 14
+                            'female_age_group_6_11_count': {
+                                'approve_status': False,
+                                'value': 14
+                            }
                         }
                     },
                     'individualDataUpdateTicketDetails': None,
@@ -104,9 +95,18 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'sex': 'MALE'
+                            'full_name': {
+                                'approve_status': False,
+                                'value': 'Test Test'
+                            },
+                            'given_name': {
+                                'approve_status': False,
+                                'value': 'Test'
+                            },
+                            'sex': {
+                                'approve_status': False,
+                                'value': 'MALE'
+                            }
                         }
                     },
                     'issueType': 14,

@@ -151,14 +151,14 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     household_encoded_id = household_data_update_issue_type_extras.get("household")
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
-    household_data = {
-        to_snake_case(key): value
-        for key, value in household_data_update_issue_type_extras.get("household_data", {}).items()
-    }
+    household_data = household_data_update_issue_type_extras.get("household_data", {})
     to_date_string(household_data, "start")
     to_date_string(household_data, "end")
+    household_data_with_approve_status = {
+        to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
+    }
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data, household=household, ticket=grievance_ticket,
+        household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -174,12 +174,11 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
     to_date_string(individual_data, "birth_date")
-    individual_data = {
-        to_snake_case(key): value
-        for key, value in individual_data.items()
+    individual_data_with_approve_status = {
+        to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data, individual=individual, ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -210,11 +209,12 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data", {})
     to_date_string(individual_data, "birth_date")
-    individual_data_with_approve_status = {
-        to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
+    individual_data = {
+        to_snake_case(key): value
+        for key, value in individual_data.items()
     }
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data_with_approve_status, household=household, ticket=grievance_ticket,
+        individual_data=individual_data, household=household, ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
