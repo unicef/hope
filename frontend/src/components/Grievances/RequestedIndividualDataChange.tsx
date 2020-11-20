@@ -4,6 +4,8 @@ import React from 'react';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { selectFields } from '../../utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -21,6 +23,10 @@ export function RequestedIndividualDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const getConfirmationText = (values) => {
+    return `You approved ${values.selected.length ||
+      0} changes, remaining proposed changes will be automatically rejected upon ticket closure.`;
+  };
   return (
     <Formik
       initialValues={{ selected: [] }}
@@ -28,14 +34,26 @@ export function RequestedIndividualDataChange({
         console.log(values);
       }}
     >
-      {({ submitForm, setFieldValue }) => (
+      {({ submitForm, setFieldValue, values }) => (
         <StyledBox>
           <Title>
             <Box display='flex' justifyContent='space-between'>
               <Typography variant='h6'>Requested Data Change</Typography>
-              <Button onClick={submitForm} variant='contained' color='primary'>
-                Approve
-              </Button>
+              <ConfirmationDialog
+                title='Warning'
+                content={getConfirmationText(values)}
+              >
+                {(confirm) => (
+                  <Button
+                    onClick={confirm(() => submitForm())}
+                    variant='contained'
+                    color='primary'
+                    disabled={!values.selected.length}
+                  >
+                    Approve
+                  </Button>
+                )}
+              </ConfirmationDialog>
             </Box>
           </Title>
           <RequestedIndividualDataChangeTable
