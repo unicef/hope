@@ -2565,6 +2565,7 @@ export type Query = {
   allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
@@ -5629,6 +5630,9 @@ export type GrievancesChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
@@ -10008,6 +10012,10 @@ export const GrievancesChoiceDataDocument = gql`
     name
     value
   }
+  grievanceTicketManualCategoryChoices {
+    name
+    value
+  }
   grievanceTicketIssueTypeChoices {
     category
     label
@@ -13750,6 +13758,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
