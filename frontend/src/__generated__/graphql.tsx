@@ -4524,6 +4524,40 @@ export type ActivateCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type ApproveHouseholdDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  householdApproveData?: Maybe<Scalars['JSONString']>
+};
+
+
+export type ApproveHouseholdDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveHouseholdDataChange: Maybe<(
+    { __typename?: 'HouseholdDataChangeApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveIndividualDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  individualApproveData?: Maybe<Scalars['JSONString']>
+};
+
+
+export type ApproveIndividualDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveIndividualDataChange: Maybe<(
+    { __typename?: 'IndividualDataChangeApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ApproveTpMutationVariables = {
   id: Scalars['ID']
 };
@@ -6961,6 +6995,112 @@ export function useActivateCashPlanPaymentVerificationMutation(baseOptions?: Apo
 export type ActivateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useActivateCashPlanPaymentVerificationMutation>;
 export type ActivateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<ActivateCashPlanPaymentVerificationMutation>;
 export type ActivateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
+export const ApproveHouseholdDataChangeDocument = gql`
+    mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString) {
+  approveHouseholdDataChange(grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveHouseholdDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
+export type ApproveHouseholdDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveHouseholdDataChangeComponent = (props: ApproveHouseholdDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables> mutation={ApproveHouseholdDataChangeDocument} {...props} />
+    );
+    
+export type ApproveHouseholdDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables> & TChildProps;
+export function withApproveHouseholdDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveHouseholdDataChangeMutation,
+  ApproveHouseholdDataChangeMutationVariables,
+  ApproveHouseholdDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables, ApproveHouseholdDataChangeProps<TChildProps>>(ApproveHouseholdDataChangeDocument, {
+      alias: 'approveHouseholdDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveHouseholdDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveHouseholdDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveHouseholdDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveHouseholdDataChangeMutation, { data, loading, error }] = useApproveHouseholdDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      householdApproveData: // value for 'householdApproveData'
+ *   },
+ * });
+ */
+export function useApproveHouseholdDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>(ApproveHouseholdDataChangeDocument, baseOptions);
+      }
+export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof useApproveHouseholdDataChangeMutation>;
+export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
+export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
+export const ApproveIndividualDataChangeDocument = gql`
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
+export type ApproveIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveIndividualDataChangeComponent = (props: ApproveIndividualDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables> mutation={ApproveIndividualDataChangeDocument} {...props} />
+    );
+    
+export type ApproveIndividualDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables> & TChildProps;
+export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveIndividualDataChangeMutation,
+  ApproveIndividualDataChangeMutationVariables,
+  ApproveIndividualDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables, ApproveIndividualDataChangeProps<TChildProps>>(ApproveIndividualDataChangeDocument, {
+      alias: 'approveIndividualDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveIndividualDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveIndividualDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveIndividualDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveIndividualDataChangeMutation, { data, loading, error }] = useApproveIndividualDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      individualApproveData: // value for 'individualApproveData'
+ *   },
+ * });
+ */
+export function useApproveIndividualDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>(ApproveIndividualDataChangeDocument, baseOptions);
+      }
+export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveIndividualDataChangeMutation>;
+export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
+export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export const ApproveTpDocument = gql`
     mutation ApproveTP($id: ID!) {
   approveTargetPopulation(id: $id) {
