@@ -7,6 +7,10 @@ type ActivateCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type AddIndividualApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 input AddIndividualDataObjectType {
   fullName: String!
   givenName: String!
@@ -607,6 +611,10 @@ enum HouseholdConsentSharing {
   HUMANITARIAN_PARTNER
   PRIVATE_PARTNER
   GOVERNMENT_PARTNER
+}
+
+type HouseholdDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 input HouseholdDataUpdateIssueTypeExtras {
@@ -1303,6 +1311,10 @@ enum IndividualCommsDisability {
   CANNOT_DO
 }
 
+type IndividualDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 input IndividualDataUpdateIssueTypeExtras {
   individual: ID!
   individualData: IndividualUpdateDataObjectType!
@@ -1617,6 +1629,9 @@ type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
+  approveIndividualDataChange(grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
@@ -2295,6 +2310,7 @@ type TicketAddIndividualDetailsNode implements Node {
   updatedAt: DateTime!
   household: HouseholdNode
   individualData: Arg
+  approveStatus: Boolean!
 }
 
 type TicketAddIndividualDetailsNodeConnection {
