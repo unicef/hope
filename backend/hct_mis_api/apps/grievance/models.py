@@ -83,17 +83,36 @@ class GrievanceTicket(TimeStampedUUIDModel):
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
         (CATEGORY_DEDUPLICATION, _("Deduplication")),
     )
+    MANUAL_CATEGORIES = (
+        CATEGORY_DATA_CHANGE,
+        CATEGORY_SENSITIVE_GRIEVANCE,
+        CATEGORY_GRIEVANCE_COMPLAINT,
+        CATEGORY_NEGATIVE_FEEDBACK,
+        CATEGORY_REFERRAL,
+        CATEGORY_POSITIVE_FEEDBACK,
+    )
 
     SEARCH_TICKET_TYPES_LOOKUPS = {
-        "complaint_ticket_details": ("individual", "household", "payment_record",),
-        "sensitive_ticket_details": ("individual", "household", "payment_record",),
+        "complaint_ticket_details": (
+            "individual",
+            "household",
+            "payment_record",
+        ),
+        "sensitive_ticket_details": (
+            "individual",
+            "household",
+            "payment_record",
+        ),
         "individual_data_update_ticket_details": ("individual",),
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
     }
 
     user_modified = models.DateTimeField(
-        verbose_name=_("Modified"), null=True, blank=True, help_text=_("Date this ticket was most recently changed."),
+        verbose_name=_("Modified"),
+        null=True,
+        blank=True,
+        help_text=_("Date this ticket was most recently changed."),
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -113,7 +132,9 @@ class GrievanceTicket(TimeStampedUUIDModel):
     category = models.IntegerField(verbose_name=_("Category"), choices=CATEGORY_CHOICES)
     issue_type = models.IntegerField(verbose_name=_("Type"), null=True, blank=True)
     description = models.TextField(
-        verbose_name=_("Description"), blank=True, help_text=_("The content of the customers query."),
+        verbose_name=_("Description"),
+        blank=True,
+        help_text=_("The content of the customers query."),
     )
     admin = models.CharField(max_length=250, blank=True)
     area = models.CharField(max_length=250, blank=True)
@@ -152,11 +173,10 @@ class GrievanceTicketThrough(TimeStampedUUIDModel):
 
 class TicketNote(TimeStampedUUIDModel):
     description = models.TextField(
-        verbose_name=_("Description"), help_text=_("The content of the customers query."),
+        verbose_name=_("Description"),
+        help_text=_("The content of the customers query."),
     )
-    ticket = models.ForeignKey(
-        "grievance.GrievanceTicket", related_name="ticket_notes", on_delete=models.CASCADE
-    )
+    ticket = models.ForeignKey("grievance.GrievanceTicket", related_name="ticket_notes", on_delete=models.CASCADE)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -172,13 +192,22 @@ class TicketComplaintDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="complaint_ticket_details", on_delete=models.CASCADE
     )
     payment_record = models.ForeignKey(
-        "payment.PaymentRecord", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "payment.PaymentRecord",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     household = models.ForeignKey(
-        "household.Household", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual = models.ForeignKey(
-        "household.Individual", related_name="complaint_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Individual",
+        related_name="complaint_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
 
 
@@ -187,13 +216,22 @@ class TicketSensitiveDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="sensitive_ticket_details", on_delete=models.CASCADE
     )
     payment_record = models.ForeignKey(
-        "payment.PaymentRecord", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "payment.PaymentRecord",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     household = models.ForeignKey(
-        "household.Household", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual = models.ForeignKey(
-        "household.Individual", related_name="sensitive_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Individual",
+        related_name="sensitive_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
 
 
@@ -202,7 +240,10 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="household_data_update_ticket_details", on_delete=models.CASCADE
     )
     household = models.ForeignKey(
-        "household.Household", related_name="household_data_update_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="household_data_update_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     household_data = JSONField(null=True)
 
@@ -225,7 +266,10 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="add_individual_ticket_details", on_delete=models.CASCADE
     )
     household = models.ForeignKey(
-        "household.Household", related_name="add_individual_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Household",
+        related_name="add_individual_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
     individual_data = JSONField(null=True)
     approve_status = models.BooleanField(default=False)
@@ -236,5 +280,8 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="delete_individual_ticket_details", on_delete=models.CASCADE
     )
     individual = models.ForeignKey(
-        "household.Individual", related_name="delete_individual_ticket_details", on_delete=models.CASCADE, null=True,
+        "household.Individual",
+        related_name="delete_individual_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
     )
