@@ -38,6 +38,7 @@ input AddIndividualDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String
+  documents: [IndividualDocumentObjectType]
 }
 
 input AddIndividualIssueTypeExtras {
@@ -1339,6 +1340,12 @@ input IndividualDeleteIssueTypeExtras {
   individual: ID!
 }
 
+input IndividualDocumentObjectType {
+  country: String
+  type: String
+  number: String
+}
+
 enum IndividualHearingDisability {
   SOME_DIFFICULTY
   LOT_DIFFICULTY
@@ -1534,6 +1541,7 @@ input IndividualUpdateDataObjectType {
   commsDisability: String
   whoAnswersPhone: String
   whoAnswersAltPhone: String
+  role: String
 }
 
 enum IndividualWorkStatus {
@@ -1899,6 +1907,8 @@ type Query {
   maritalStatusChoices: [ChoiceObject]
   relationshipChoices: [ChoiceObject]
   roleChoices: [ChoiceObject]
+  documentTypeChoices: [ChoiceObject]
+  countriesChoices: [ChoiceObject]
   me: UserObjectType
   allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
