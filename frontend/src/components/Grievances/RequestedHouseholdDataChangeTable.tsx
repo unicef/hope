@@ -16,6 +16,7 @@ import {
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import mapKeys from 'lodash/mapKeys';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
@@ -57,7 +58,7 @@ export function NewValue({
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value).labelEn || '-';
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
@@ -85,9 +86,22 @@ export function RequestedHouseholdDataChangeTable({
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllEditHouseholdFieldsQuery();
 
+  const entries = Object.entries(
+    ticket.householdDataUpdateTicketDetails.householdData,
+  );
   useEffect(() => {
-    setSelected([]);
-  }, [ticket.status]);
+    const localSelected = entries
+      .filter((row) => {
+        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          value: string;
+          approveStatus: boolean;
+        };
+        return valueDetails.approveStatus;
+      })
+      .map((row) => camelCase(row[0]));
+    setSelected(localSelected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket]);
 
   if (loading) {
     return <LoadingComponent />;
@@ -100,10 +114,6 @@ export function RequestedHouseholdDataChangeTable({
       return previousValue;
     },
     {},
-  );
-
-  const entries = Object.entries(
-    ticket.householdDataUpdateTicketDetails.householdData,
   );
 
   const handleClick = (event, name) => {
@@ -148,7 +158,7 @@ export function RequestedHouseholdDataChangeTable({
             const currentValue =
               ticket.householdDataUpdateTicketDetails.household[fieldName];
             const field = fieldsDict[row[0]];
-            const valueDetails =camelCase(row[1]) as {
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
               value: string;
               approveStatus: boolean;
             };
