@@ -66,17 +66,16 @@ export function RequestedIndividualDataChangeTable({
     ticket.individualDataUpdateTicketDetails.individualData,
   );
   useEffect(() => {
-    setSelected(
-      entries
-        .filter((row) => {
-          const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-            value: string;
-            approveStatus: boolean;
-          };
-          return valueDetails.approveStatus;
-        })
-        .map((row) => row[0]),
-    );
+    const localSelected = entries
+      .filter((row) => {
+        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          value: string;
+          approveStatus: boolean;
+        };
+        return valueDetails.approveStatus;
+      })
+      .map((row) => camelCase(row[0]));
+    setSelected(localSelected);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket]);
 

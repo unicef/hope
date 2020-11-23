@@ -303,9 +303,11 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         individual_data_details = grievance_ticket.individual_data_update_ticket_details
         individual_data = individual_data_details.individual_data
         cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
-
-        for field_name, approve_status in individual_approve_data.items():
-            individual_data[field_name]["approve_status"] = approve_status
+        for field_name, item in individual_data.items():
+            if individual_approve_data.get(field_name):
+                individual_data[field_name]["approve_status"] = True
+            else:
+                individual_data[field_name]["approve_status"] = False
 
         individual_data_details.individual_data = individual_data
         individual_data_details.save()
@@ -337,8 +339,11 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
         household_data = household_data_details.household_data
         cls.verify_approve_data_against_object_data(household_data, household_approve_data)
 
-        for field_name, approve_status in household_approve_data.items():
-            individual_data[field_name]["approve_status"] = approve_status
+        for field_name, item in household_data.items():
+            if household_approve_data.get(field_name):
+                household_data[field_name]["approve_status"] = True
+            else:
+                household_data[field_name]["approve_status"] = False
 
         household_data_details.household_data = household_data
         household_data_details.save()
