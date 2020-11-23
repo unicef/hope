@@ -205,6 +205,9 @@ export const EditIndividualDataChange = ({
     setFieldValue('individualDataUpdateFields', [
       { fieldName: null, fieldValue: null },
     ]);
+    setFieldValue('individualDataUpdateFields.documents', [
+      { fieldName: null, fieldValue: null },
+    ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
@@ -283,7 +286,7 @@ export const EditIndividualDataChange = ({
                   )}
 
                   <Grid item xs={8} />
-                  <Grid item xs={4}>
+                  <Grid item xs={12}>
                     <Button
                       color='primary'
                       onClick={() => {

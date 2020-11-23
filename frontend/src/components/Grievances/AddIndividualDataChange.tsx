@@ -126,7 +126,7 @@ export const AddIndividualDataChange = ({
                 ))}
 
                 <Grid item xs={8} />
-                <Grid item xs={4}>
+                <Grid item xs={12}>
                   <Button
                     color='primary'
                     onClick={() => {
