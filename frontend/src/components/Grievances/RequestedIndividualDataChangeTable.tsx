@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import camelCase from 'lodash/camelCase';
@@ -10,9 +10,12 @@ import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
+  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
+import mapKeys from 'lodash/mapKeys';
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
@@ -31,7 +34,7 @@ export function CurrentValue({
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value).labelEn || '-';
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
@@ -56,8 +59,25 @@ export function RequestedIndividualDataChangeTable({
     },
   }));
   const classes = useStyles();
+
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllAddIndividualFieldsQuery();
+  const entries = Object.entries(
+    ticket.individualDataUpdateTicketDetails.individualData,
+  );
+  useEffect(() => {
+    const localSelected = entries
+      .filter((row) => {
+        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          value: string;
+          approveStatus: boolean;
+        };
+        return valueDetails.approveStatus;
+      })
+      .map((row) => camelCase(row[0]));
+    setSelected(localSelected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket]);
 
   if (loading) {
     return <LoadingComponent />;
@@ -70,10 +90,6 @@ export function RequestedIndividualDataChangeTable({
       return previousValue;
     },
     {},
-  );
-
-  const entries = Object.entries(
-    ticket.individualDataUpdateTicketDetails.individualData,
   );
 
   const handleClick = (event, name) => {
@@ -118,16 +134,23 @@ export function RequestedIndividualDataChangeTable({
             const currentValue =
               ticket.individualDataUpdateTicketDetails.individual[fieldName];
             const field = fieldsDict[row[0]];
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
             return (
               <TableRow
-                onClick={(event) => handleClick(event, fieldName)}
                 role='checkbox'
                 aria-checked={isItemSelected}
                 key={fieldName}
               >
                 <TableCell>
                   <Checkbox
+                    onClick={(event) => handleClick(event, fieldName)}
                     color='primary'
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                     checked={isItemSelected}
                     inputProps={{ 'aria-labelledby': labelId }}
                   />
@@ -139,7 +162,7 @@ export function RequestedIndividualDataChangeTable({
                   <CurrentValue field={field} value={currentValue} />
                 </TableCell>
                 <TableCell align='left'>
-                  <CurrentValue field={field} value={row[1]} />
+                  <CurrentValue field={field} value={valueDetails.value} />
                 </TableCell>
               </TableRow>
             );

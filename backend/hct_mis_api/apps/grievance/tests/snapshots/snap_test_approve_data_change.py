@@ -26,8 +26,14 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_household
             'grievanceTicket': {
                 'householdDataUpdateTicketDetails': {
                     'householdData': {
-                        'size': False,
-                        'village': True
+                        'size': {
+                            'approve_status': False,
+                            'value': 19
+                        },
+                        'village': {
+                            'approve_status': True,
+                            'value': 'Test Village'
+                        }
                     }
                 },
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo3MmVlN2Q5OC02MTA4LTRlZjAtODViZC0yZWYyMGUxZDU0MTA='
@@ -43,12 +49,22 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTphY2Q1N2FhMS1lZmQ4LTRjODEtYWMxOS1iOGNhYmViZTgwODk=',
                 'individualDataUpdateTicketDetails': {
                     'individualData': {
-                        'birth_date': '1980-02-01',
-                        'family_name': True,
-                        'full_name': True,
-                        'given_name': True,
-                        'marital_status': 'SINGLE',
-                        'sex': False
+                        'family_name': {
+                            'approve_status': True,
+                            'value': 'Example'
+                        },
+                        'full_name': {
+                            'approve_status': True,
+                            'value': 'Test Example'
+                        },
+                        'given_name': {
+                            'approve_status': True,
+                            'value': 'Test'
+                        },
+                        'sex': {
+                            'approve_status': False,
+                            'value': 'MALE'
+                        }
                     }
                 }
             }

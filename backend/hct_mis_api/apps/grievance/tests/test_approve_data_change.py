@@ -68,10 +68,17 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        program_one = ProgramFactory(
+            name="Test program ONE",
+            business_area=BusinessArea.objects.first(),
+        )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
@@ -134,12 +141,12 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ticket=self.individual_data_change_grievance_ticket,
             individual=self.individuals[0],
             individual_data={
-                "given_name": "Test",
-                "full_name": "Test Example",
-                "family_name": "Example",
-                "sex": "MALE",
-                "birth_date": date(year=1980, month=2, day=1).isoformat(),
-                "marital_status": SINGLE,
+                "given_name": {"value": "Test"},
+                "full_name": {"value": "Test Example"},
+                "family_name": {"value": "Example"},
+                "sex": {"value": "MALE"},
+                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat()},
+                "marital_status": {"value": SINGLE},
             },
         )
 
@@ -153,7 +160,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         TicketHouseholdDataUpdateDetailsFactory(
             ticket=self.household_data_change_grievance_ticket,
             household=self.household_one,
-            household_data={"village": "Test Village", "size": 19},
+            household_data={"village": {"value": "Test Village"}, "size": {"value": 19}},
         )
 
     def test_approve_add_individual(self):
@@ -174,9 +181,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "grievanceTicketId": self.id_to_base64(
                     self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
-                "individualApproveData": json.dumps(
-                    {"givenName": True, "fullName": True, "familyName": True, "sex": False}
-                ),
+                "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
             },
         )
 
@@ -188,6 +193,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "grievanceTicketId": self.id_to_base64(
                     self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
-                "householdApproveData": json.dumps({"size": False, "village": True}),
+                "householdApproveData": json.dumps({"village": True}),
             },
         )

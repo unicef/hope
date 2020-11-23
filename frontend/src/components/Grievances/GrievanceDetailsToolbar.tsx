@@ -14,7 +14,6 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { Missing } from '../Missing';
 import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -86,7 +85,7 @@ export const GrievanceDetailsToolbar = ({
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
             >
-              ASSIGN TO ME <Missing />
+              ASSIGN TO ME
             </Button>
           </Box>
         )}

@@ -15,7 +15,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD, KOBO_COLLECTOR_FIELD
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea
@@ -125,8 +125,14 @@ class ExistingGrievanceTicketFilter(FilterSet):
         q_obj = Q()
         for ticket_type in ticket_types:
             has_lookup = lookup in types_and_lookups[ticket_type]
+            real_lookup = lookup
+            if not has_lookup:
+                for lookup_obj in types_and_lookups[ticket_type]:
+                    if isinstance(lookup_obj, dict):
+                        real_lookup = lookup_obj.get(lookup)
+                        break
             if has_lookup:
-                q_obj |= Q(**{f"{ticket_type}__{lookup}": obj})
+                q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
 
         return q_obj
 
@@ -177,7 +183,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
-        for field, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+        for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
             extras_field = getattr(grievance_ticket_obj, field, {})
             obj = getattr(extras_field, lookup_name, None)
             if obj is not None:
@@ -308,6 +314,7 @@ class Query(graphene.ObjectType):
     )
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
+    grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_issue_type_choices = graphene.List(IssueTypesObject)
 
     def resolve_grievance_ticket_status_choices(self, info, **kwargs):
@@ -315,6 +322,13 @@ class Query(graphene.ObjectType):
 
     def resolve_grievance_ticket_category_choices(self, info, **kwargs):
         return to_choice_object(GrievanceTicket.CATEGORY_CHOICES)
+
+    def resolve_grievance_ticket_manual_category_choices(self, info, **kwargs):
+        return [
+            {"name": name, "value": value}
+            for value, name in GrievanceTicket.CATEGORY_CHOICES
+            if value in GrievanceTicket.MANUAL_CATEGORIES
+        ]
 
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
@@ -358,6 +372,7 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
+        yield from [KOBO_COLLECTOR_FIELD.get("role_i_c")]
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [

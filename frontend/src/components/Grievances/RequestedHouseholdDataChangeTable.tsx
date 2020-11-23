@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import camelCase from 'lodash/camelCase';
@@ -15,6 +15,8 @@ import {
 } from '../../__generated__/graphql';
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import mapKeys from 'lodash/mapKeys';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
@@ -36,7 +38,7 @@ export function CurrentValue({
     switch (field?.type) {
       case 'SELECT_ONE':
         displayValue =
-          field.choices.find((item) => item.value === value).labelEn || '-';
+          field.choices.find((item) => item.value === value)?.labelEn || '-';
         break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */
@@ -56,7 +58,7 @@ export function NewValue({
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value).labelEn || '-';
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
@@ -84,6 +86,23 @@ export function RequestedHouseholdDataChangeTable({
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllEditHouseholdFieldsQuery();
 
+  const entries = Object.entries(
+    ticket.householdDataUpdateTicketDetails.householdData,
+  );
+  useEffect(() => {
+    const localSelected = entries
+      .filter((row) => {
+        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+          value: string;
+          approveStatus: boolean;
+        };
+        return valueDetails.approveStatus;
+      })
+      .map((row) => camelCase(row[0]));
+    setSelected(localSelected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket]);
+
   if (loading) {
     return <LoadingComponent />;
   }
@@ -95,10 +114,6 @@ export function RequestedHouseholdDataChangeTable({
       return previousValue;
     },
     {},
-  );
-
-  const entries = Object.entries(
-    ticket.householdDataUpdateTicketDetails.householdData,
   );
 
   const handleClick = (event, name) => {
@@ -117,7 +132,7 @@ export function RequestedHouseholdDataChangeTable({
         selected.slice(selectedIndex + 1),
       );
     }
-
+    // {"givenName": True, "fullName": True, "familyName": True, "sex": False}
     setSelected(newSelected);
     setFieldValue('selected', newSelected);
   };
@@ -143,16 +158,23 @@ export function RequestedHouseholdDataChangeTable({
             const currentValue =
               ticket.householdDataUpdateTicketDetails.household[fieldName];
             const field = fieldsDict[row[0]];
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
             return (
               <TableRow
-                onClick={(event) => handleClick(event, fieldName)}
                 role='checkbox'
                 aria-checked={isItemSelected}
                 key={fieldName}
               >
                 <TableCell>
                   <Checkbox
+                    onClick={(event) => handleClick(event, fieldName)}
                     color='primary'
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                     checked={isItemSelected}
                     inputProps={{ 'aria-labelledby': labelId }}
                   />
@@ -164,7 +186,7 @@ export function RequestedHouseholdDataChangeTable({
                   <CurrentValue field={field} value={currentValue} />
                 </TableCell>
                 <TableCell align='left'>
-                  <NewValue field={field} value={row[1]} />
+                  <NewValue field={field} value={valueDetails.value} />
                 </TableCell>
               </TableRow>
             );
