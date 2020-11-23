@@ -1,6 +1,8 @@
 from datetime import date
 
 from django.core.management import call_command
+from django_countries.data import COUNTRIES
+from django_countries.fields import Country
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
@@ -14,7 +16,8 @@ from grievance.fixtures import (
 )
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE, Individual
+from household.models import SINGLE, Individual, ROLE_PRIMARY, IDENTIFICATION_TYPE_NATIONAL_ID, Document, \
+    IDENTIFICATION_TYPE_CHOICE, DocumentType
 from program.fixtures import ProgramFactory
 
 
@@ -33,9 +36,21 @@ class TestCloseDataChangeTickets(APITestCase):
     }
     """
 
+    def generate_document_types_for_all_countries(self):
+        identification_type_choice = tuple(
+            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
+        )
+        document_types = []
+        for alpha2 in COUNTRIES:
+            for doc_type, label in identification_type_choice:
+                document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
+
+        DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
+
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
@@ -90,6 +105,8 @@ class TestCloseDataChangeTickets(APITestCase):
                 "sex": "MALE",
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
+                "role": ROLE_PRIMARY,
+                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321",}],
             },
             approve_status=True,
         )
@@ -112,6 +129,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "sex": {"value": "MALE", "approve_status": False},
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
+                "role": {"value": ROLE_PRIMARY, "approve_status": True},
             },
         )
 
@@ -143,6 +161,14 @@ class TestCloseDataChangeTickets(APITestCase):
         )
         self.assertTrue(created_individual.exists())
 
+        created_individual = created_individual.first()
+
+        document = Document.objects.get(document_number="123-123-UX-321")
+        self.assertEqual(document.type.country, Country("POL"))
+
+        role = created_individual.households_and_roles.get(role=ROLE_PRIMARY, individual=created_individual)
+        self.assertEqual(str(role.household.id), str(self.household_one.id))
+
     def test_close_update_individual(self):
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
@@ -162,3 +188,6 @@ class TestCloseDataChangeTickets(APITestCase):
         self.assertEqual(individual.family_name, "Example")
         self.assertEqual(individual.marital_status, SINGLE)
         self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
+
+        role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
+        self.assertEqual(str(role.household.id), str(self.household_one.id))
