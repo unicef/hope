@@ -42,6 +42,12 @@ export const EditHouseholdDataChangeField = ({
         component: FormikTextField,
       };
       break;
+    case 'INTEGER':
+      fieldProps = {
+        component: FormikTextField,
+        type: 'number',
+      };
+      break;
     case 'SELECT_ONE':
       fieldProps = {
         choices: field.choices,
@@ -108,7 +114,7 @@ export function CurrentValue({
     switch (field?.type) {
       case 'SELECT_ONE':
         displayValue =
-          field.choices.find((item) => item.value === value).labelEn || '-';
+          field.choices.find((item) => item.value === value)?.labelEn || '-';
         break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */

@@ -103,11 +103,17 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
-            "not_allowed": ["individual_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
             "required": ["extras.issue_type.add_individual_issue_type_extras"],
@@ -119,7 +125,10 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
             "required": ["extras.issue_type.individual_delete_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "individual_data_update_issue_type_extras",],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_data_update_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
@@ -337,9 +346,11 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         individual_data_details = grievance_ticket.individual_data_update_ticket_details
         individual_data = individual_data_details.individual_data
         cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
-
-        for field_name, approve_status in individual_approve_data.items():
-            individual_data[field_name] = approve_status
+        for field_name, item in individual_data.items():
+            if individual_approve_data.get(field_name):
+                individual_data[field_name]["approve_status"] = True
+            else:
+                individual_data[field_name]["approve_status"] = False
 
         individual_data_details.individual_data = individual_data
         individual_data_details.save()
@@ -371,8 +382,11 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
         household_data = household_data_details.household_data
         cls.verify_approve_data_against_object_data(household_data, household_approve_data)
 
-        for field_name, approve_status in household_approve_data.items():
-            household_data[field_name] = approve_status
+        for field_name, item in household_data.items():
+            if household_approve_data.get(field_name):
+                household_data[field_name]["approve_status"] = True
+            else:
+                household_data[field_name]["approve_status"] = False
 
         household_data_details.household_data = household_data
         household_data_details.save()

@@ -1,11 +1,17 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  useApproveIndividualDataChangeMutation,
+} from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { selectFields } from '../../utils/utils';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { stringify } from 'querystring';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -23,16 +29,33 @@ export function RequestedIndividualDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const { showMessage } = useSnackbar();
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
+  const [mutate] = useApproveIndividualDataChangeMutation();
   return (
     <Formik
       initialValues={{ selected: [] }}
-      onSubmit={(values) => {
-        console.log(values);
+      onSubmit={async (values) => {
+        const individualApproveData = values.selected.reduce((prev, curr) => {
+          // eslint-disable-next-line no-param-reassign
+          prev[curr] = true;
+          return prev;
+        }, {});
+        try {
+          await mutate({
+            variables: {
+              grievanceTicketId: ticket.id,
+              individualApproveData: JSON.stringify(individualApproveData),
+            },
+          });
+          showMessage('Changes Approved');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
@@ -49,7 +72,10 @@ export function RequestedIndividualDataChange({
                     onClick={confirm(() => submitForm())}
                     variant='contained'
                     color='primary'
-                    disabled={!values.selected.length}
+                    disabled={
+                      !values.selected.length ||
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                   >
                     Approve
                   </Button>
