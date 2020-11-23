@@ -125,8 +125,14 @@ class ExistingGrievanceTicketFilter(FilterSet):
         q_obj = Q()
         for ticket_type in ticket_types:
             has_lookup = lookup in types_and_lookups[ticket_type]
+            real_lookup = lookup
+            if not has_lookup:
+                for lookup_obj in types_and_lookups[ticket_type]:
+                    if isinstance(lookup_obj, dict):
+                        real_lookup = lookup_obj.get(lookup)
+                        break
             if has_lookup:
-                q_obj |= Q(**{f"{ticket_type}__{lookup}": obj})
+                q_obj |= Q(**{f"{ticket_type}__{real_lookup}": obj})
 
         return q_obj
 
@@ -177,7 +183,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
-        for field, lookups in GrievanceTicket.SEARCH_TICKET_TYPES_LOOKUPS.items():
+        for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
             extras_field = getattr(grievance_ticket_obj, field, {})
             obj = getattr(extras_field, lookup_name, None)
             if obj is not None:
