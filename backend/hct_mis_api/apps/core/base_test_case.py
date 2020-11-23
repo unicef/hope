@@ -26,6 +26,14 @@ class APITestCase(SnapshotTestTestCase):
 
         self.assertMatchSnapshot(graphql_request)
 
+    def graphql_request(self, request_string, context=None, variables=None):
+        if context is None:
+            context = {}
+
+        return self.client.execute(
+            request_string, variables=variables, context=self.generate_context(**context),
+        )
+
     def generate_context(self, user=None, files=None):
         request = RequestFactory()
         context_value = request.get("/api/graphql/")
