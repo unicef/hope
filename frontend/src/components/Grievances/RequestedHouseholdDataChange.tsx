@@ -9,6 +9,7 @@ import { Formik } from 'formik';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -26,6 +27,7 @@ export function RequestedHouseholdDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const { showMessage } = useSnackbar();
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
@@ -35,14 +37,23 @@ export function RequestedHouseholdDataChange({
   return (
     <Formik
       initialValues={{ selected: [] }}
-      onSubmit={(values) => {
-        console.log(values);
-        // mutate({
-        //   variables: {
-        //     grievanceTicketId: ticket.id,
-        //     householdApproveData: JSON.stringify(values.selected),
-        //   },
-        // });
+      onSubmit={async (values) => {
+        const householdApproveData = values.selected.reduce((prev, curr) => {
+          // eslint-disable-next-line no-param-reassign
+          prev[curr] = true;
+          return prev;
+        }, {});
+        try {
+          await mutate({
+            variables: {
+              grievanceTicketId: ticket.id,
+              householdApproveData: JSON.stringify(householdApproveData),
+            },
+          });
+          showMessage('Changes Approved');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
