@@ -27,6 +27,11 @@ const Title = styled.div`
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
+const BoxWithBorders = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  padding: 15px 0;
+`;
 
 export interface EditIndividualDataChangeField {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
@@ -222,7 +227,7 @@ export const EditIndividualDataChange = ({
   );
   return (
     <>
-      <>
+      <BoxWithBorders>
         <Title>
           <Typography variant='h6'>Bio Data</Typography>
         </Title>
@@ -258,7 +263,7 @@ export const EditIndividualDataChange = ({
             )}
           />
         </Grid>
-      </>
+      </BoxWithBorders>
       <Box mt={3}>
         <Title>
           <Typography variant='h6'>Documents</Typography>
