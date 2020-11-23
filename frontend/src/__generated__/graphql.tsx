@@ -5564,10 +5564,10 @@ export type GrievanceTicketQuery = (
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, individual: Maybe<(
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id' | 'unicefId'>
+      & IndividualDetailedFragment
     )>, household: Maybe<(
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'unicefId'>
+      & HouseholdDetailedFragment
     )>, paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id'>
@@ -9895,12 +9895,10 @@ export const GrievanceTicketDocument = gql`
       email
     }
     individual {
-      id
-      unicefId
+      ...individualDetailed
     }
     household {
-      id
-      unicefId
+      ...householdDetailed
     }
     paymentRecord {
       id
