@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { Field, FieldArray } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -14,6 +14,7 @@ import {
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
+import { DocumentField } from './DocumentField';
 
 const Title = styled.div`
   width: 100%;
@@ -86,62 +87,6 @@ export const AddIndividualDataChangeField = ({
     </>
   );
 };
-
-export interface DocumentFieldProps {
-  index: number;
-  onDelete: () => {};
-  countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
-  documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
-}
-
-export function DocumentField({
-  index,
-  onDelete,
-  countryChoices,
-  documentTypeChoices,
-}: DocumentFieldProps): React.ReactElement {
-  return (
-    <>
-      <Grid item xs={4}>
-        <Field
-          name={`individualData.documents[${index}].country`}
-          fullWidth
-          variant='outlined'
-          label='Country'
-          component={FormikSelectField}
-          choices={countryChoices}
-          required
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <Field
-          name={`individualData.documents[${index}].type`}
-          fullWidth
-          variant='outlined'
-          label='Type'
-          component={FormikSelectField}
-          choices={documentTypeChoices}
-          required
-        />
-      </Grid>
-      <Grid item xs={3}>
-        <Field
-          name={`individualData.documents[${index}].number`}
-          fullWidth
-          variant='outlined'
-          label='Document Number'
-          component={FormikTextField}
-          required
-        />
-      </Grid>
-      <Grid item xs={1}>
-        <IconButton onClick={onDelete}>
-          <Delete />
-        </IconButton>
-      </Grid>
-    </>
-  );
-}
 
 export interface AddIndividualDataChangeProps {
   values;
