@@ -37,6 +37,7 @@ input AddIndividualDataObjectType {
   commsDisability: String
   whoAnswersPhone: String
   whoAnswersAltPhone: String
+  role: String
 }
 
 input AddIndividualIssueTypeExtras {
