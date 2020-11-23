@@ -1,10 +1,15 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  useApproveHouseholdDataChangeMutation,
+} from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -22,16 +27,33 @@ export function RequestedHouseholdDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const { showMessage } = useSnackbar();
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
+  const [mutate] = useApproveHouseholdDataChangeMutation();
   return (
     <Formik
       initialValues={{ selected: [] }}
-      onSubmit={(values) => {
-        console.log(values);
+      onSubmit={async (values) => {
+        const householdApproveData = values.selected.reduce((prev, curr) => {
+          // eslint-disable-next-line no-param-reassign
+          prev[curr] = true;
+          return prev;
+        }, {});
+        try {
+          await mutate({
+            variables: {
+              grievanceTicketId: ticket.id,
+              householdApproveData: JSON.stringify(householdApproveData),
+            },
+          });
+          showMessage('Changes Approved');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
@@ -48,7 +70,10 @@ export function RequestedHouseholdDataChange({
                     onClick={confirm(() => submitForm())}
                     variant='contained'
                     color='primary'
-                    disabled={!values.selected.length}
+                    disabled={
+                      !values.selected.length ||
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
                   >
                     Approve
                   </Button>
