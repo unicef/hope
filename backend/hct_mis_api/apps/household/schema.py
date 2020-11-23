@@ -7,6 +7,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from core.countries import Countries
 from program.models import Program
 from targeting.models import HouseholdSelection
 
@@ -31,6 +32,7 @@ from household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    IDENTIFICATION_TYPE_CHOICE,
 )
 from registration_datahub.schema import DeduplicationResultNode
 
@@ -302,6 +304,8 @@ class Query(graphene.ObjectType):
     marital_status_choices = graphene.List(ChoiceObject)
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
+    document_type_choices = graphene.List(ChoiceObject)
+    countries_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
@@ -320,3 +324,9 @@ class Query(graphene.ObjectType):
 
     def resolve_role_choices(self, info, **kwargs):
         return to_choice_object(ROLE_CHOICE)
+
+    def resolve_document_type_choices(self, info, **kwargs):
+        return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
+
+    def resolve_countries_choices(self, info, **kwargs):
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])

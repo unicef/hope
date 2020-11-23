@@ -64,6 +64,7 @@ export type AddIndividualDataObjectType = {
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
+  documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
 };
 
 export type AddIndividualIssueTypeExtras = {
@@ -1724,6 +1725,12 @@ export type IndividualDeleteIssueTypeExtras = {
   individual: Scalars['ID'],
 };
 
+export type IndividualDocumentObjectType = {
+  country?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
+  number?: Maybe<Scalars['String']>,
+};
+
 export enum IndividualHearingDisability {
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
@@ -1972,6 +1979,7 @@ export type IndividualUpdateDataObjectType = {
   commsDisability?: Maybe<Scalars['String']>,
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
+  role?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualWorkStatus {
@@ -2615,6 +2623,8 @@ export type Query = {
   maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   me?: Maybe<UserObjectType>,
   allUsers?: Maybe<UserNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
@@ -4991,6 +5001,12 @@ export type AllAddIndividualFieldsQuery = (
         & Pick<LabelNode, 'label' | 'language'>
       )>>> }
     )>>> }
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, documentTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -5564,10 +5580,10 @@ export type GrievanceTicketQuery = (
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, individual: Maybe<(
       { __typename?: 'IndividualNode' }
-      & Pick<IndividualNode, 'id' | 'unicefId'>
+      & IndividualDetailedFragment
     )>, household: Maybe<(
       { __typename?: 'HouseholdNode' }
-      & Pick<HouseholdNode, 'id' | 'unicefId'>
+      & HouseholdDetailedFragment
     )>, paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id'>
@@ -8522,6 +8538,14 @@ export const AllAddIndividualFieldsDocument = gql`
       listName
     }
   }
+  countriesChoices {
+    name
+    value
+  }
+  documentTypeChoices {
+    name
+    value
+  }
 }
     `;
 export type AllAddIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>, 'query'>;
@@ -9895,12 +9919,10 @@ export const GrievanceTicketDocument = gql`
       email
     }
     individual {
-      id
-      unicefId
+      ...individualDetailed
     }
     household {
-      id
-      unicefId
+      ...householdDetailed
     }
     paymentRecord {
       id
@@ -12395,6 +12417,7 @@ export type ResolversTypes = {
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
@@ -12676,6 +12699,7 @@ export type ResolversParentTypes = {
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
@@ -13808,6 +13832,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,

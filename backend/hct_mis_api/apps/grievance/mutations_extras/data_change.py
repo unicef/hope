@@ -114,6 +114,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
+    documents = graphene.List(IndividualDocumentObjectType)
 
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
