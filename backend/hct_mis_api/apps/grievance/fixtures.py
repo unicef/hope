@@ -6,7 +6,13 @@ from pytz import utc
 
 from account.fixtures import UserFactory
 from core.models import BusinessArea, AdminAreaType
-from grievance.models import GrievanceTicket, TicketSensitiveDetails, TicketComplaintDetails, TicketNote
+from grievance.models import (
+    GrievanceTicket,
+    TicketSensitiveDetails,
+    TicketComplaintDetails,
+    TicketNote,
+    TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketHouseholdDataUpdateDetails,
+)
 from household.fixtures import create_household
 from payment.fixtures import PaymentRecordFactory
 
@@ -125,3 +131,49 @@ class TicketNoteFactory(factory.DjangoModelFactory):
     )
     description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     created_by = factory.SubFactory(UserFactory)
+
+
+class TicketAddIndividualDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketAddIndividualDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        ),
+    )
+    household = None
+    individual_data = {}
+    approve_status = factory.fuzzy.FuzzyChoice([True, False])
+
+
+class TicketIndividualDataUpdateDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketIndividualDataUpdateDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        ),
+    )
+    individual = None
+    individual_data = {}
+
+
+class TicketHouseholdDataUpdateDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketHouseholdDataUpdateDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
+        ),
+    )
+    household = None
+    household_data = {}

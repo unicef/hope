@@ -7,6 +7,10 @@ type ActivateCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
 
+type AddIndividualApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 input AddIndividualDataObjectType {
   fullName: String!
   givenName: String!
@@ -33,6 +37,7 @@ input AddIndividualDataObjectType {
   commsDisability: String
   whoAnswersPhone: String
   whoAnswersAltPhone: String
+  role: String
 }
 
 input AddIndividualIssueTypeExtras {
@@ -607,6 +612,10 @@ enum HouseholdConsentSharing {
   HUMANITARIAN_PARTNER
   PRIVATE_PARTNER
   GOVERNMENT_PARTNER
+}
+
+type HouseholdDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
 }
 
 input HouseholdDataUpdateIssueTypeExtras {
@@ -1303,6 +1312,10 @@ enum IndividualCommsDisability {
   CANNOT_DO
 }
 
+type IndividualDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 input IndividualDataUpdateIssueTypeExtras {
   individual: ID!
   individualData: IndividualUpdateDataObjectType!
@@ -1617,6 +1630,9 @@ type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
+  approveIndividualDataChange(grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
@@ -1831,8 +1847,10 @@ type Query {
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String!, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   allAddIndividualsFieldsAttributes: [FieldAttributeNode]
+  allEditHouseholdFieldsAttributes: [FieldAttributeNode]
   grievanceTicketStatusChoices: [ChoiceObject]
   grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketManualCategoryChoices: [ChoiceObject]
   grievanceTicketIssueTypeChoices: [IssueTypesObject]
   allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
@@ -2294,6 +2312,7 @@ type TicketAddIndividualDetailsNode implements Node {
   updatedAt: DateTime!
   household: HouseholdNode
   individualData: Arg
+  approveStatus: Boolean!
 }
 
 type TicketAddIndividualDetailsNodeConnection {
