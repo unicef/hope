@@ -42,6 +42,12 @@ export const EditHouseholdDataChangeField = ({
         component: FormikTextField,
       };
       break;
+    case 'INTEGER':
+      fieldProps = {
+        component: FormikTextField,
+        type: 'number',
+      };
+      break;
     case 'SELECT_ONE':
       fieldProps = {
         choices: field.choices,
