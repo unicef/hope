@@ -26,5 +26,13 @@ export const AllAddIndividualFields = gql`
         listName
       }
     }
+    countriesChoices {
+      name
+      value
+    }
+    documentTypeChoices {
+      name
+      value
+    }
   }
 `;

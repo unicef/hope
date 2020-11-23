@@ -83,19 +83,13 @@ export function CreateGrievance(): React.ReactElement {
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string()
-      .required('Category is required')
-      .nullable(),
+    category: Yup.string().required('Category is required').nullable(),
     admin: Yup.string(),
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-    selectedRelatedTickets: Yup.array()
-      .of(Yup.string())
-      .nullable(),
+    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -347,7 +341,9 @@ export function CreateGrievance(): React.ReactElement {
                           setFieldValue('issueType', null);
                         }}
                         variant='outlined'
-                        choices={choicesData.grievanceTicketManualCategoryChoices}
+                        choices={
+                          choicesData.grievanceTicketManualCategoryChoices
+                        }
                         component={FormikSelectField}
                       />
                     </Grid>
@@ -439,7 +435,7 @@ export function CreateGrievance(): React.ReactElement {
                     {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
                       values.issueType ===
                         GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                        <AddIndividualDataChange />
+                        <AddIndividualDataChange values={values} />
                       )}
                     {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
                       values.issueType ===
