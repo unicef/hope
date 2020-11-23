@@ -49,6 +49,10 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                 'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTphY2Q1N2FhMS1lZmQ4LTRjODEtYWMxOS1iOGNhYmViZTgwODk=',
                 'individualDataUpdateTicketDetails': {
                     'individualData': {
+                        'birth_date': {
+                            'approve_status': False,
+                            'value': '1980-02-01'
+                        },
                         'family_name': {
                             'approve_status': True,
                             'value': 'Example'
@@ -60,6 +64,10 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                         'given_name': {
                             'approve_status': True,
                             'value': 'Test'
+                        },
+                        'marital_status': {
+                            'approve_status': False,
+                            'value': 'SINGLE'
                         },
                         'sex': {
                             'approve_status': False,
