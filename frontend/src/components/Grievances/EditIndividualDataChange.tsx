@@ -262,7 +262,7 @@ export const EditIndividualDataChange = ({
         </Title>
         <Grid container spacing={3}>
           <FieldArray
-            name='individualData.documents'
+            name='individualDataUpdateFields.documents'
             render={(arrayHelpers) => {
               return (
                 <>
@@ -274,6 +274,7 @@ export const EditIndividualDataChange = ({
                       documentTypeChoices={
                         addIndividualFieldsData.documentTypeChoices
                       }
+                      baseName='individualDataUpdateFields'
                     />
                   ))}
 
