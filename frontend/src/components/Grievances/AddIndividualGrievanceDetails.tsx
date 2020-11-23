@@ -35,6 +35,9 @@ export function AddIndividualGrievanceDetails({
     },
     {},
   );
+  const { documents } = ticket.addIndividualTicketDetails?.individualData;
+  // eslint-disable-next-line no-param-reassign
+  delete ticket.addIndividualTicketDetails?.individualData.documents;
   const labels = Object.entries(
     ticket.addIndividualTicketDetails?.individualData || {},
   ).map(([key, value]) => {
@@ -50,13 +53,24 @@ export function AddIndividualGrievanceDetails({
       </Grid>
     );
   });
+  const documentLabels = documents.map((item) => {
+    return (
+      <Grid key={item.country + item.type} item xs={6}>
+        <LabelizedField
+          label={item.type.replace(/_/g, ' ')}
+          value={item.number}
+        />
+      </Grid>
+    );
+  });
+  const allLabels = [...labels, ...documentLabels];
   return (
     <StyledBox>
       <Title>
         <Typography variant='h6'>Individual Data</Typography>
       </Title>
       <Grid container spacing={6}>
-        {labels}
+        {allLabels}
       </Grid>
     </StyledBox>
   );
