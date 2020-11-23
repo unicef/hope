@@ -103,7 +103,22 @@ class GrievanceTicket(TimeStampedUUIDModel):
             "household",
             "payment_record",
         ),
-        "individual_data_update_ticket_details": ("individual",),
+        "individual_data_update_ticket_details": ("individual", {"household": "individual__household"}),
+        "add_individual_ticket_details": ("household",),
+        "household_data_update_ticket_details": ("household",),
+    }
+    FIELD_TICKET_TYPES_LOOKUPS = {
+        "complaint_ticket_details": (
+            "individual",
+            "household",
+            "payment_record",
+        ),
+        "sensitive_ticket_details": (
+            "individual",
+            "household",
+            "payment_record",
+        ),
+        "individual_data_update_ticket_details": ("individual", {"household": "household"}),
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
     }
@@ -260,6 +275,10 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
     )
     individual_data = JSONField(null=True)
 
+    @property
+    def household(self):
+        return self.individual.household
+
 
 class TicketAddIndividualDetails(TimeStampedUUIDModel):
     ticket = models.OneToOneField(
@@ -285,3 +304,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+
+    @property
+    def household(self):
+        return self.individual.household
