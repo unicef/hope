@@ -1534,6 +1534,7 @@ input IndividualUpdateDataObjectType {
   commsDisability: String
   whoAnswersPhone: String
   whoAnswersAltPhone: String
+  role: String
 }
 
 enum IndividualWorkStatus {

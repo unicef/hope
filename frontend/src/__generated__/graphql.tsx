@@ -1972,6 +1972,7 @@ export type IndividualUpdateDataObjectType = {
   commsDisability?: Maybe<Scalars['String']>,
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
+  role?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualWorkStatus {
