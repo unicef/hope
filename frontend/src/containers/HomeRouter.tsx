@@ -31,6 +31,7 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
+import { EditGrievance } from '../components/Grievances/EditGrievance';
 
 const Root = styled.div`
   display: flex;
@@ -103,6 +104,9 @@ export function HomeRouter(): React.ReactElement {
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/new-ticket'>
             <CreateGrievance />
+          </Route>
+          <Route path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
+            <EditGrievance />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/:id'>
             <GrievanceDetails />
