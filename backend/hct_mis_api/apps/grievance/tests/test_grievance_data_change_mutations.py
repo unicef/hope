@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
@@ -6,6 +8,7 @@ from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
+from household.models import SINGLE
 from program.fixtures import ProgramFactory
 
 
@@ -140,6 +143,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "fullName": "Test Test",
                                 "familyName": "Romaniak",
                                 "sex": "MALE",
+                                "birthDate": date(year=1980, month=2, day=1).isoformat(),
+                                "maritalStatus": SINGLE,
                             },
                         }
                     }
@@ -170,6 +175,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "givenName": "Test",
                                 "fullName": "Test Test",
                                 "sex": "MALE",
+                                "birthDate": date(year=1980, month=2, day=1).isoformat(),
+                                "maritalStatus": SINGLE,
                             },
                         }
                     }
