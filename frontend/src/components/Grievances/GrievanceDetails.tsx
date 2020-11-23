@@ -29,7 +29,8 @@ import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { PaymentIds } from './PaymentIds';
 import { OtherRelatedTickets } from './OtherRelatedTickets';
 import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
-import { EditIndividualGrievanceDetails } from './EditIndividualGrievanceDetails';
+import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
+import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -267,7 +268,11 @@ export function GrievanceDetails(): React.ReactElement {
             )}
             {ticket?.issueType?.toString() ===
               GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
-              <EditIndividualGrievanceDetails ticket={ticket} />
+              <RequestedIndividualDataChange ticket={ticket} />
+            )}
+            {ticket?.issueType?.toString() ===
+              GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
+              <RequestedHouseholdDataChange ticket={ticket} />
             )}
           </PaddingContainer>
           <PaddingContainer>

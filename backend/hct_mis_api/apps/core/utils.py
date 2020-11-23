@@ -12,6 +12,7 @@ from django.template.defaultfilters import slugify
 from django.utils.itercompat import is_iterable
 from django_filters import OrderingFilter
 from django_filters.constants import EMPTY_VALUES
+from graphene.utils.str_converters import to_camel_case
 
 
 class CaseInsensitiveTuple(tuple):
@@ -446,3 +447,9 @@ def decode_and_get_object(encoded_id, model, required):
     if required is True or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
         return get_object_or_404(model, id=decoded_id)
+
+
+def dict_to_camel_case(dictionary):
+    if isinstance(dictionary, dict):
+        return {to_camel_case(key): value for key, value in dictionary.items()}
+    return {}
