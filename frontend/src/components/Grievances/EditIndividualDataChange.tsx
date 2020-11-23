@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { Field, FieldArray } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -18,6 +18,7 @@ import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { LabelizedField } from '../LabelizedField';
+import { DocumentField } from './DocumentField';
 
 const Title = styled.div`
   width: 100%;
@@ -192,6 +193,11 @@ export const EditIndividualDataChange = ({
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
   const {
+    data: addIndividualFieldsData,
+    loading: addIndividualFieldsLoading,
+  } = useAllAddIndividualFieldsQuery();
+
+  const {
     data: fullIndividual,
     loading: fullIndividualLoading,
   } = useIndividualQuery({ variables: { id: individual?.id } });
@@ -202,7 +208,7 @@ export const EditIndividualDataChange = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullIndividualLoading) {
+  if (loading || fullIndividualLoading || addIndividualFieldsLoading) {
     return <LoadingComponent />;
   }
   if (!individual) {
@@ -213,39 +219,90 @@ export const EditIndividualDataChange = ({
   );
   return (
     <>
-      <Title>
-        <Typography variant='h6'>Individual Data</Typography>
-      </Title>
-      <Grid container spacing={3}>
-        <FieldArray
-          name='individualDataUpdateFields'
-          render={(arrayHelpers) => (
-            <>
-              {(values.individualDataUpdateFields || []).map((item, index) => (
-                <EditIndividualDataChangeFieldRow
-                  itemValue={item}
-                  index={index}
-                  individual={fullIndividual.individual}
-                  fields={data.allAddIndividualsFieldsAttributes}
-                  notAvailableFields={notAvailableItems}
-                  onDelete={() => arrayHelpers.remove(index)}
-                />
-              ))}
-              <Grid item xs={4}>
-                <Button
-                  color='primary'
-                  onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
-                  }}
-                >
-                  <AddIcon />
-                  Add new field
-                </Button>
-              </Grid>
-            </>
-          )}
-        />
-      </Grid>
+      <>
+        <Title>
+          <Typography variant='h6'>Bio Data</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <FieldArray
+            name='individualDataUpdateFields'
+            render={(arrayHelpers) => (
+              <>
+                {(values.individualDataUpdateFields || []).map(
+                  (item, index) => (
+                    <EditIndividualDataChangeFieldRow
+                      itemValue={item}
+                      index={index}
+                      individual={fullIndividual.individual}
+                      fields={data.allAddIndividualsFieldsAttributes}
+                      notAvailableFields={notAvailableItems}
+                      onDelete={() => arrayHelpers.remove(index)}
+                    />
+                  ),
+                )}
+                <Grid item xs={4}>
+                  <Button
+                    color='primary'
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    }}
+                  >
+                    <AddIcon />
+                    Add new field
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
+        </Grid>
+      </>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>Documents</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <FieldArray
+            name='individualDataUpdateFields.documents'
+            render={(arrayHelpers) => {
+              return (
+                <>
+                  {values.individualDataUpdateFields?.documents?.map(
+                    (item, index) => (
+                      <DocumentField
+                        index={index}
+                        onDelete={() => arrayHelpers.remove(index)}
+                        countryChoices={
+                          addIndividualFieldsData.countriesChoices
+                        }
+                        documentTypeChoices={
+                          addIndividualFieldsData.documentTypeChoices
+                        }
+                      />
+                    ),
+                  )}
+
+                  <Grid item xs={8} />
+                  <Grid item xs={4}>
+                    <Button
+                      color='primary'
+                      onClick={() => {
+                        arrayHelpers.push({
+                          country: null,
+                          type: null,
+                          number: '',
+                        });
+                      }}
+                    >
+                      <AddIcon />
+                      Add Document
+                    </Button>
+                  </Grid>
+                </>
+              );
+            }}
+          />
+        </Grid>
+      </Box>
     </>
   );
 };
