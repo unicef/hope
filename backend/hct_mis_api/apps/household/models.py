@@ -30,12 +30,17 @@ SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
 )
+SINGLE = "SINGLE"
+MARRIED = "MARRIED"
+WIDOWED = "WIDOWED"
+DIVORCED = "DIVORCED"
+SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
-    ("SINGLE", _("Single")),
-    ("MARRIED", _("Married")),
-    ("WIDOWED", _("Widowed")),
-    ("DIVORCED", _("Divorced")),
-    ("SEPARATED", _("Separated")),
+    (SINGLE, _("Single")),
+    (MARRIED, _("Married")),
+    (WIDOWED, _("Widowed")),
+    (DIVORCED, _("Divorced")),
+    (SEPARATED, _("Separated")),
 )
 
 NONE = "NONE"
@@ -351,7 +356,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             and not a member of one.""",
     )
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport", related_name="individuals", on_delete=models.CASCADE,
+        "registration_data.RegistrationDataImport", related_name="individuals", on_delete=models.CASCADE, null=True,
     )
     disability = models.BooleanField(default=False)
     work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED,)
