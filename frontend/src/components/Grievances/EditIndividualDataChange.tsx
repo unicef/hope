@@ -266,17 +266,21 @@ export const EditIndividualDataChange = ({
             render={(arrayHelpers) => {
               return (
                 <>
-                  {values.individualData?.documents?.map((item, index) => (
-                    <DocumentField
-                      index={index}
-                      onDelete={() => arrayHelpers.remove(index)}
-                      countryChoices={addIndividualFieldsData.countriesChoices}
-                      documentTypeChoices={
-                        addIndividualFieldsData.documentTypeChoices
-                      }
-                      baseName='individualDataUpdateFields'
-                    />
-                  ))}
+                  {values.individualDataUpdateFields?.documents?.map(
+                    (item, index) => (
+                      <DocumentField
+                        index={index}
+                        onDelete={() => arrayHelpers.remove(index)}
+                        countryChoices={
+                          addIndividualFieldsData.countriesChoices
+                        }
+                        documentTypeChoices={
+                          addIndividualFieldsData.documentTypeChoices
+                        }
+                        baseName='individualDataUpdateFields'
+                      />
+                    ),
+                  )}
 
                   <Grid item xs={8} />
                   <Grid item xs={4}>
