@@ -11,6 +11,7 @@ import { ConfirmationDialog } from '../ConfirmationDialog';
 import { selectFields } from '../../utils/utils';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { stringify } from 'querystring';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -28,6 +29,7 @@ export function RequestedIndividualDataChange({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
+  const { showMessage } = useSnackbar();
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
@@ -37,18 +39,23 @@ export function RequestedIndividualDataChange({
   return (
     <Formik
       initialValues={{ selected: [] }}
-      onSubmit={(values) => {
+      onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
           // eslint-disable-next-line no-param-reassign
           prev[curr] = true;
           return prev;
         }, {});
-        mutate({
-          variables: {
-            grievanceTicketId: ticket.id,
-            individualApproveData: JSON.stringify(individualApproveData),
-          },
-        });
+        try {
+          await mutate({
+            variables: {
+              grievanceTicketId: ticket.id,
+              individualApproveData: JSON.stringify(individualApproveData),
+            },
+          });
+          showMessage('Changes Approved');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
