@@ -15,7 +15,7 @@ export const LookUpPaymentRecord = ({
 
   return (
     <>
-      {values.selectedPaymentRecords.length ? (
+      {values.selectedPaymentRecords?.length ? (
         <LookUpPaymentRecordDisplay
           setLookUpDialogOpen={setLookUpDialogOpen}
           values={values}

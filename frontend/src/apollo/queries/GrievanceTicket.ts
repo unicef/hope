@@ -26,12 +26,10 @@ export const GrievanceTicket = gql`
         email
       }
       individual {
-        id
-        unicefId
+        ...individualDetailed
       }
       household {
-        id
-        unicefId
+        ...householdDetailed
       }
       paymentRecord {
         id
@@ -48,24 +46,24 @@ export const GrievanceTicket = gql`
           }
         }
       }
-      addIndividualTicketDetails{
+      addIndividualTicketDetails {
         id
         individualData
-        household{
+        household {
           id
           unicefId
         }
       }
-      individualDataUpdateTicketDetails{
+      individualDataUpdateTicketDetails {
         id
-        individual{
+        individual {
           ...individualDetailed
         }
         individualData
       }
-      householdDataUpdateTicketDetails{
+      householdDataUpdateTicketDetails {
         id
-        household{
+        household {
           ...householdDetailed
         }
         householdData
