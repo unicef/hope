@@ -8,6 +8,7 @@ import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
 
 export interface DocumentFieldProps {
   index: number;
+  baseName: string;
   onDelete: () => {};
   countryChoices: AllAddIndividualFieldsQuery['countriesChoices'];
   documentTypeChoices: AllAddIndividualFieldsQuery['documentTypeChoices'];
@@ -15,6 +16,7 @@ export interface DocumentFieldProps {
 
 export function DocumentField({
   index,
+  baseName,
   onDelete,
   countryChoices,
   documentTypeChoices,
@@ -23,7 +25,7 @@ export function DocumentField({
     <>
       <Grid item xs={4}>
         <Field
-          name={`individualData.documents[${index}].country`}
+          name={`${baseName}.documents[${index}].country`}
           fullWidth
           variant='outlined'
           label='Country'
@@ -34,7 +36,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={4}>
         <Field
-          name={`individualData.documents[${index}].type`}
+          name={`${baseName}.documents[${index}].type`}
           fullWidth
           variant='outlined'
           label='Type'
@@ -45,7 +47,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`individualData.documents[${index}].number`}
+          name={`${baseName}.documents[${index}].number`}
           fullWidth
           variant='outlined'
           label='Document Number'
