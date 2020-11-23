@@ -1,8 +1,8 @@
 import { Box, Button } from '@material-ui/core';
+import { useParams, Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 import { MiśTheme } from '../../theme';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import {
@@ -74,7 +74,8 @@ export const GrievanceDetailsToolbar = ({
             <Button
               color='primary'
               variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               Edit
@@ -103,7 +104,8 @@ export const GrievanceDetailsToolbar = ({
             <Button
               color='primary'
               variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               Edit
@@ -155,7 +157,8 @@ export const GrievanceDetailsToolbar = ({
             <Button
               color='primary'
               variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               Edit
@@ -207,7 +210,8 @@ export const GrievanceDetailsToolbar = ({
             <Button
               color='primary'
               variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               Edit
