@@ -148,6 +148,10 @@ export function RequestedHouseholdDataChangeTable({
             const currentValue =
               ticket.householdDataUpdateTicketDetails.household[fieldName];
             const field = fieldsDict[row[0]];
+            const valueDetails =camelCase(row[1]) as {
+              value: string;
+              approveStatus: boolean;
+            };
             return (
               <TableRow
                 role='checkbox'
@@ -172,7 +176,7 @@ export function RequestedHouseholdDataChangeTable({
                   <CurrentValue field={field} value={currentValue} />
                 </TableCell>
                 <TableCell align='left'>
-                  <NewValue field={field} value={row[1]} />
+                  <NewValue field={field} value={valueDetails.value} />
                 </TableCell>
               </TableRow>
             );

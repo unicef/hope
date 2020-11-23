@@ -1,12 +1,16 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import {
+  GrievanceTicketQuery,
+  useApproveIndividualDataChangeMutation,
+} from '../../__generated__/graphql';
 import { Formik } from 'formik';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { selectFields } from '../../utils/utils';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { stringify } from 'querystring';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -29,11 +33,22 @@ export function RequestedIndividualDataChange({
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
+  const [mutate] = useApproveIndividualDataChangeMutation();
   return (
     <Formik
       initialValues={{ selected: [] }}
       onSubmit={(values) => {
-        console.log(values);
+        const individualApproveData = values.selected.reduce((prev, curr) => {
+          // eslint-disable-next-line no-param-reassign
+          prev[curr] = true;
+          return prev;
+        }, {});
+        mutate({
+          variables: {
+            grievanceTicketId: ticket.id,
+            individualApproveData: JSON.stringify(individualApproveData),
+          },
+        });
       }}
     >
       {({ submitForm, setFieldValue, values }) => (

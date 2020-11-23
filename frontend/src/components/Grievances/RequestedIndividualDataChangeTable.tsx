@@ -10,7 +10,9 @@ import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
+  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
+import mapKeys from 'lodash/mapKeys';
 import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -57,12 +59,26 @@ export function RequestedIndividualDataChangeTable({
     },
   }));
   const classes = useStyles();
+
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-
+  const entries = Object.entries(
+    ticket.individualDataUpdateTicketDetails.individualData,
+  );
   useEffect(() => {
-    setSelected([]);
-  }, [ticket.status]);
+    setSelected(
+      entries
+        .filter((row) => {
+          const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+            value: string;
+            approveStatus: boolean;
+          };
+          return valueDetails.approveStatus;
+        })
+        .map((row) => row[0]),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket]);
 
   if (loading) {
     return <LoadingComponent />;
@@ -75,10 +91,6 @@ export function RequestedIndividualDataChangeTable({
       return previousValue;
     },
     {},
-  );
-
-  const entries = Object.entries(
-    ticket.individualDataUpdateTicketDetails.individualData,
   );
 
   const handleClick = (event, name) => {
@@ -123,6 +135,10 @@ export function RequestedIndividualDataChangeTable({
             const currentValue =
               ticket.individualDataUpdateTicketDetails.individual[fieldName];
             const field = fieldsDict[row[0]];
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
             return (
               <TableRow
                 role='checkbox'
@@ -147,7 +163,7 @@ export function RequestedIndividualDataChangeTable({
                   <CurrentValue field={field} value={currentValue} />
                 </TableCell>
                 <TableCell align='left'>
-                  <CurrentValue field={field} value={row[1]} />
+                  <CurrentValue field={field} value={valueDetails.value} />
                 </TableCell>
               </TableRow>
             );

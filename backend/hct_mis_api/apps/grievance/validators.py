@@ -18,5 +18,5 @@ class DataChangeValidator:
 
         approve_data_names = set(approve_data.keys())
         object_data_names = set(object_data.keys())
-        if approve_data_names != object_data_names:
+        if len(approve_data_names - object_data_names) != 0:
             raise GraphQLError(error)
