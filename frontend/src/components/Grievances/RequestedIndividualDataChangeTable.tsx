@@ -32,7 +32,7 @@ export function CurrentValue({
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
-        field.choices.find((item) => item.value === value).labelEn || '-';
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
