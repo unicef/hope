@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
@@ -16,6 +16,7 @@ import {
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
+  useGrievanceTicketQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { useSnackbar } from '../../hooks/useSnackBar';
@@ -30,6 +31,7 @@ import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
+import { decodeIdString, renderUserName } from '../../utils/utils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -53,51 +55,16 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export function CreateGrievance(): React.ReactElement {
+export function EditGrievance(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
+  const { id } = useParams();
 
-  const initialValues = {
-    description: '',
-    assignedTo: '',
-    category: null,
-    language: '',
-    consent: false,
-    admin: '',
-    area: '',
-    selectedHousehold: null,
-    selectedIndividual: null,
-    selectedPaymentRecords: [],
-    selectedRelatedTickets: [],
-    identityVerified: false,
-    issueType: null,
-    givenName: '',
-    middleName: '',
-    familyName: '',
-    sex: '',
-    birthDate: '',
-    // idType: '',
-    // idNumber: ''
-  };
-
-  const validationSchema = Yup.object().shape({
-    description: Yup.string().required('Description is required'),
-    assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string().required('Category is required').nullable(),
-    admin: Yup.string(),
-    area: Yup.string(),
-    language: Yup.string().required('Language is required'),
-    consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
-  });
-
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Grievance and Feedback',
-      to: `/${businessArea}/grievance-and-feedback/`,
+  const { data: ticketData, loading: ticketLoading } = useGrievanceTicketQuery({
+    variables: {
+      id,
     },
-  ];
+  });
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea },
@@ -110,15 +77,61 @@ export function CreateGrievance(): React.ReactElement {
 
   const [mutate] = useCreateGrievanceMutation();
 
-  if (userDataLoading || choicesLoading) {
+  if (userDataLoading || choicesLoading || ticketLoading) {
     return <LoadingComponent />;
   }
-  if (!choicesData || !userData) return null;
+  if (!choicesData || !userData || !ticketData) return null;
+
+  const ticket = ticketData?.grievanceTicket;
+  const mappedLinkedTickets = ticketData?.grievanceTicket?.linkedTickets?.edges.map(
+    (edge) => edge.node.id,
+  );
+
+  const initialValues = {
+    description: ticket.description || '',
+    assignedTo: ticket.assignedTo.id || '',
+    category: ticket.category || null,
+    language: ticket.language || '',
+    consent: ticket.consent || false,
+    admin: ticket.admin || '',
+    area: ticket.area || '',
+    selectedHousehold: ticket.household || null,
+    selectedIndividual: ticket.individual || null,
+    selectedPaymentRecords: null, //add value here ?
+    selectedRelatedTickets: mappedLinkedTickets || [],
+    identityVerified: false,
+    issueType: ticket.issueType || null,
+    // idType: '',
+    // idNumber: ''
+  };
+
+  const validationSchema = Yup.object().shape({
+    description: Yup.string().required('Description is required'),
+    assignedTo: Yup.string().required('Assigned To is required'),
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
+    admin: Yup.string(),
+    area: Yup.string(),
+    language: Yup.string().required('Language is required'),
+    consent: Yup.bool().oneOf([true], 'Consent is required'),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+  });
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Grievance and Feedback',
+      to: `/${businessArea}/grievance-and-feedback/`,
+    },
+  ];
 
   const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
-    name: edge.node.firstName
-      ? `${edge.node.firstName} ${edge.node.lastName}`
-      : edge.node.email,
+    name: renderUserName(edge.node),
     value: edge.node.id,
   }));
 
@@ -310,14 +323,14 @@ export function CreateGrievance(): React.ReactElement {
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
-          await mutate(prepareVariables(values.category, values)).then(
-            (res) => {
-              return showMessage('Grievance Ticket created.', {
-                pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
-                historyMethod: 'push',
-              });
-            },
-          );
+          await mutate(
+            prepareVariables(values.category.toString(), values),
+          ).then((res) => {
+            return showMessage('Grievance Ticket created.', {
+              pathname: `/${businessArea}/grievance-and-feedback/${res.data.createGrievanceTicket.grievanceTickets[0].id}`,
+              historyMethod: 'push',
+            });
+          });
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -326,7 +339,10 @@ export function CreateGrievance(): React.ReactElement {
     >
       {({ submitForm, values, setFieldValue }) => (
         <>
-          <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
+          <PageHeader
+            title={`Edit Ticket #${decodeIdString(id)}`}
+            breadCrumbs={breadCrumbsItems}
+          />
           <Grid container spacing={3}>
             <Grid item xs={8}>
               <NewTicket>
@@ -347,15 +363,19 @@ export function CreateGrievance(): React.ReactElement {
                         component={FormikSelectField}
                       />
                     </Grid>
-                    {values.category ===
+                    {values.category.toString() ===
                       GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+                    values.category.toString() ===
+                      GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
                       <Grid item xs={6}>
                         <Field
                           name='issueType'
                           label='Issue Type*'
                           variant='outlined'
-                          choices={issueTypeDict[values.category].subCategories}
+                          choices={
+                            issueTypeDict[values.category.toString()]
+                              .subCategories
+                          }
                           component={FormikSelectField}
                         />
                       </Grid>
@@ -432,13 +452,15 @@ export function CreateGrievance(): React.ReactElement {
                     </Grid>
                   </BoxPadding>
                   <BoxPadding>
-                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType ===
+                    {values.category.toString() ===
+                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                        <AddIndividualDataChange values={values} />
+                        <AddIndividualDataChange />
                       )}
-                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType ===
+                    {values.category.toString() ===
+                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
                         <EditIndividualDataChange
                           individual={values.selectedIndividual}
@@ -446,8 +468,9 @@ export function CreateGrievance(): React.ReactElement {
                           setFieldValue={setFieldValue}
                         />
                       )}
-                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType ===
+                    {values.category.toString() ===
+                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
                         <EditHouseholdDataChange
                           household={values.selectedHousehold}
