@@ -20,7 +20,7 @@ from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject, FieldAttributeNode
-from core.utils import to_choice_object, choices_to_dict, dict_to_camel_case
+from core.utils import to_choice_object, choices_to_dict
 from grievance.models import (
     GrievanceTicket,
     TicketNote,
