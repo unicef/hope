@@ -29,6 +29,7 @@ import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange';
+import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -272,6 +273,34 @@ export function CreateGrievance(): React.ReactElement {
         },
       };
     }
+    if (
+      category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+    ) {
+      return {
+        variables: {
+          input: {
+            ...requiredVariables,
+            issueType: values.issueType,
+            linkedTickets: values.selectedRelatedTickets,
+            extras: {
+              issueType: {
+                householdDataUpdateIssueTypeExtras: {
+                  household: values.selectedHousehold?.id,
+                  householdData: values.householdDataUpdateFields
+                    .filter((item) => item.fieldName)
+                    .reduce((prev, current) => {
+                      // eslint-disable-next-line no-param-reassign
+                      prev[camelCase(current.fieldName)] = current.fieldValue;
+                      return prev;
+                    }, {}),
+                },
+              },
+            },
+          },
+        },
+      };
+    }
     return {
       variables: {
         input: {
@@ -318,7 +347,7 @@ export function CreateGrievance(): React.ReactElement {
                           setFieldValue('issueType', null);
                         }}
                         variant='outlined'
-                        choices={choicesData.grievanceTicketCategoryChoices}
+                        choices={choicesData.grievanceTicketManualCategoryChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
@@ -417,6 +446,15 @@ export function CreateGrievance(): React.ReactElement {
                         GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
                         <EditIndividualDataChange
                           individual={values.selectedIndividual}
+                          values={values}
+                          setFieldValue={setFieldValue}
+                        />
+                      )}
+                    {values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+                      values.issueType ===
+                        GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
+                        <EditHouseholdDataChange
+                          household={values.selectedHousehold}
                           values={values}
                           setFieldValue={setFieldValue}
                         />

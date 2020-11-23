@@ -1,7 +1,9 @@
-import {AllIndividualsQuery, IndividualNode} from '../../../__generated__/graphql';
+import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { HeadCell } from '../../table/EnhancedTableHead';
 
-export const headCells: HeadCell<AllIndividualsQuery["allIndividuals"]["edges"][number]["node"]>[] = [
+export const headCells: HeadCell<
+  AllIndividualsQuery['allIndividuals']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: '',

@@ -63,6 +63,13 @@ export const GrievanceTicket = gql`
         }
         individualData
       }
+      householdDataUpdateTicketDetails{
+        id
+        household{
+          ...householdDetailed
+        }
+        householdData
+      }
       issueType
       ticketNotes {
         edges {
