@@ -456,7 +456,7 @@ export function EditGrievance(): React.ReactElement {
                       GRIEVANCE_CATEGORIES.DATA_CHANGE &&
                       values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                        <AddIndividualDataChange />
+                        <AddIndividualDataChange values={values} />
                       )}
                     {values.category.toString() ===
                       GRIEVANCE_CATEGORIES.DATA_CHANGE &&

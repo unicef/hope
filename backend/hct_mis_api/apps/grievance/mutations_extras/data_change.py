@@ -21,7 +21,8 @@ from household.models import (
     Document,
     ROLE_NO_ROLE,
     ROLE_ALTERNATE,
-    ROLE_PRIMARY, IndividualRoleInHousehold,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
 )
 from household.schema import HouseholdNode, IndividualNode
 
@@ -322,3 +323,17 @@ def close_update_individual_grievance_ticket(grievance_ticket):
 
     if role_data.get("approve_status") is True:
         _handle_role(role_data.get("value"), household, individual)
+
+
+def close_update_household_grievance_ticket(grievance_ticket):
+    ticket_details = grievance_ticket.household_data_update_ticket_details
+    household = ticket_details.household
+    household_data = ticket_details.household_data
+
+    only_approved_data = {
+        field: value_and_approve_status.get("value")
+        for field, value_and_approve_status in household_data.items()
+        if value_and_approve_status.get("approve_status") is True
+    }
+
+    Household.objects.filter(id=household.id).update(**only_approved_data)
