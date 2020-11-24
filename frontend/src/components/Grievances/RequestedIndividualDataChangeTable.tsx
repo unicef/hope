@@ -17,6 +17,20 @@ import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
+const TableCellStroke = styled(TableCell)`
+  &::before {
+    content: ' ';
+    position: absolute;
+    width: 100%;
+    border-bottom: red solid 1px;
+    top: calc(50% - 1px);
+    left: 0;
+  }
+  & {
+    position: relative;
+  }
+`;
+
 const Capitalize = styled.span`
   text-transform: capitalize;
 `;
@@ -62,9 +76,16 @@ export function RequestedIndividualDataChangeTable({
 
   const [selected, setSelected] = useState([]);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  const entries = Object.entries(
-    ticket.individualDataUpdateTicketDetails.individualData,
-  );
+  const individualData = {
+    ...ticket.individualDataUpdateTicketDetails.individualData,
+  };
+  const { documents } = individualData;
+  const documentsToRemove = individualData.documents_to_remove;
+  // eslint-disable-next-line no-param-reassign
+  delete individualData.documents;
+  // eslint-disable-next-line no-param-reassign
+  delete individualData.documents_to_remove;
+  const entries = Object.entries(individualData);
   useEffect(() => {
     const localSelected = entries
       .filter((row) => {
@@ -87,6 +108,22 @@ export function RequestedIndividualDataChangeTable({
     (previousValue, currentValue) => {
       // eslint-disable-next-line no-param-reassign
       previousValue[currentValue.name] = currentValue;
+      return previousValue;
+    },
+    {},
+  );
+  const countriesDict = data.countriesChoices.reduce(
+    (previousValue, currentValue) => {
+      // eslint-disable-next-line no-param-reassign
+      previousValue[currentValue.value] = currentValue.name;
+      return previousValue;
+    },
+    {},
+  );
+  const documentTypeDict = data.documentTypeChoices.reduce(
+    (previousValue, currentValue) => {
+      // eslint-disable-next-line no-param-reassign
+      previousValue[currentValue.value] = currentValue.name;
       return previousValue;
     },
     {},
@@ -164,6 +201,69 @@ export function RequestedIndividualDataChangeTable({
                 <TableCell align='left'>
                   <CurrentValue field={field} value={valueDetails.value} />
                 </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+      <Table className={classes.table}>
+        <TableHead>
+          <TableRow>
+            <TableCell align='left' />
+            <TableCell align='left'>ID Type</TableCell>
+            <TableCell align='left'>Country</TableCell>
+            <TableCell align='left'>Number</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {documents?.map((row, index) => {
+            return (
+              <TableRow>
+                <TableCell align='left'>
+                  <Checkbox
+                    color='primary'
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
+                    checked
+                    inputProps={{ 'aria-labelledby': 'xd' }}
+                  />
+                </TableCell>
+                <TableCell align='left'>
+                  {documentTypeDict[row.value.type]}
+                </TableCell>
+                <TableCell align='left'>
+                  {countriesDict[row.value.country]}
+                </TableCell>
+                <TableCell align='left'>{row.value.number}</TableCell>
+              </TableRow>
+            );
+          })}
+          {documentsToRemove?.map((row, index) => {
+            const document = ticket.individualDataUpdateTicketDetails.individual.documents.edges.find(
+              (item) => item.node.id === row.value,
+            );
+            return (
+              <TableRow>
+                <TableCell align='left'>
+                  <Checkbox
+                    color='primary'
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
+                    checked
+                    inputProps={{ 'aria-labelledby': 'xd' }}
+                  />
+                </TableCell>
+                <TableCellStroke align='left'>
+                  {document.node.type.label}
+                </TableCellStroke>
+                <TableCellStroke align='left'>
+                  {document.node.type.country}
+                </TableCellStroke>
+                <TableCellStroke align='left'>
+                  {document.node.documentNumber}
+                </TableCellStroke>
               </TableRow>
             );
           })}

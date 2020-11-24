@@ -121,7 +121,7 @@ export const AddIndividualDataChange = ({
                     onDelete={() => arrayHelpers.remove(index)}
                     countryChoices={data.countriesChoices}
                     documentTypeChoices={data.documentTypeChoices}
-                    baseName='individualData'
+                    baseName='individualData.documents'
                   />
                 ))}
 
