@@ -11,10 +11,15 @@ from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
 from core.utils import nested_dict_get, decode_id_string
-from grievance.mutations_extras.data_change import save_data_change_extras
-from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
-from grievance.mutations_extras.main import CreateGrievanceTicketExtrasInput
 from grievance.models import GrievanceTicket, TicketNote
+from grievance.mutations_extras.data_change import (
+    save_data_change_extras,
+    close_add_individual_grievance_ticket,
+    close_update_individual_grievance_ticket,
+    close_update_household_grievance_ticket,
+)
+from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
+from grievance.mutations_extras.main import CreateGrievanceTicketExtrasInput, _not_implemented_close_method
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
 from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
 from grievance.schema import GrievanceTicketNode, TicketNoteNode
@@ -99,17 +104,11 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
-            "not_allowed": [
-                "individual_data_update_issue_type_extras",
-                "individual_delete_issue_type_extras",
-            ],
+            "not_allowed": ["individual_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "individual_delete_issue_type_extras",
-            ],
+            "not_allowed": ["household_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
             "required": ["extras.issue_type.add_individual_issue_type_extras"],
@@ -121,10 +120,7 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
             "required": ["extras.issue_type.individual_delete_issue_type_extras"],
-            "not_allowed": [
-                "household_data_update_issue_type_extras",
-                "individual_data_update_issue_type_extras",
-            ],
+            "not_allowed": ["household_data_update_issue_type_extras", "individual_data_update_issue_type_extras",],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
@@ -235,9 +231,45 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
 class GrievanceStatusChangeMutation(graphene.Mutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
+    CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING = {
+        GrievanceTicket.CATEGORY_DATA_CHANGE: {
+            GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: close_update_household_grievance_ticket,
+            GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
+            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: close_add_individual_grievance_ticket,
+            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _not_implemented_close_method,
+        },
+        GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: {
+            GrievanceTicket.ISSUE_TYPE_DATA_BREACH: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_FRAUD_FORGERY: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_FRAUD_MISUSE: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_HARASSMENT: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_UNAUTHORIZED_USE: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_CONFLICT_OF_INTEREST: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_GROSS_MISMANAGEMENT: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_PERSONAL_DISPUTES: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: _not_implemented_close_method,
+        },
+        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_REFERRAL: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_DEDUPLICATION: _not_implemented_close_method,
+    }
+
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID)
         status = graphene.Int()
+
+    @classmethod
+    def get_close_function(cls, category, issue_type):
+        function_or_nested_issue_types = cls.CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING.get(category)
+        if isinstance(function_or_nested_issue_types, dict) and issue_type:
+            return function_or_nested_issue_types.get(issue_type)
+        return function_or_nested_issue_types
 
     @classmethod
     @is_authenticated
@@ -255,6 +287,9 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
             raise GraphQLError("New status is incorrect")
+        if status == GrievanceTicket.STATUS_CLOSED:
+            close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
+            close_function(grievance_ticket)
         grievance_ticket.status = status
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
