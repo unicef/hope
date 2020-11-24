@@ -101,6 +101,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'approve_status': False,
                                 'value': '1980-02-01'
                             },
+                            'documents': [
+                            ],
+                            'documents_to_remove': [
+                            ],
                             'full_name': {
                                 'approve_status': False,
                                 'value': 'Test Test'

@@ -97,6 +97,8 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
+    documents = graphene.List(IndividualDocumentObjectType)
+    documents_to_remove = graphene.List(graphene.ID)
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -180,7 +182,9 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
     }
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
+        household_data=household_data_with_approve_status,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -195,12 +199,22 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
+    documents = individual_data.pop("documents", [])
+    documents_to_remove = individual_data.pop("documents_to_remove", [])
     to_date_string(individual_data, "birth_date")
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
+    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_to_remove_with_approve_status = [
+        {"value": document_id, "approve_status": False} for document_id in documents_to_remove
+    ]
+    individual_data_with_approve_status["documents"] = documents_with_approve_status
+    individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -215,7 +229,8 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     ticket_individual_data_update_details = TicketDeleteIndividualDetails(
-        individual=individual, ticket=grievance_ticket,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -233,7 +248,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data, household=household, ticket=grievance_ticket,
+        individual_data=individual_data,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
