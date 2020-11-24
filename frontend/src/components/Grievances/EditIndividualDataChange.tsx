@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { Field, FieldArray } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
@@ -18,11 +18,19 @@ import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { LabelizedField } from '../LabelizedField';
+import { NewDocumentFieldArray } from './NewDocumentFieldArray';
+import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
+const BoxWithBorders = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  padding: 15px 0;
+`;
+
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
 `;
@@ -181,16 +189,23 @@ export const EditIndividualDataChangeFieldRow = ({
     </>
   );
 };
+
 export interface EditIndividualDataChangeProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
   values;
   setFieldValue;
 }
+
 export const EditIndividualDataChange = ({
   individual,
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
+  const {
+    data: addIndividualFieldsData,
+    loading: addIndividualFieldsLoading,
+  } = useAllAddIndividualFieldsQuery();
+
   const {
     data: fullIndividual,
     loading: fullIndividualLoading,
@@ -199,10 +214,13 @@ export const EditIndividualDataChange = ({
     setFieldValue('individualDataUpdateFields', [
       { fieldName: null, fieldValue: null },
     ]);
+    // setFieldValue('individualDataUpdateFields.documents', [
+    //   { fieldName: null, fieldValue: null },
+    // ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullIndividualLoading) {
+  if (loading || fullIndividualLoading || addIndividualFieldsLoading) {
     return <LoadingComponent />;
   }
   if (!individual) {
@@ -213,39 +231,57 @@ export const EditIndividualDataChange = ({
   );
   return (
     <>
-      <Title>
-        <Typography variant='h6'>Individual Data</Typography>
-      </Title>
-      <Grid container spacing={3}>
-        <FieldArray
-          name='individualDataUpdateFields'
-          render={(arrayHelpers) => (
-            <>
-              {(values.individualDataUpdateFields || []).map((item, index) => (
-                <EditIndividualDataChangeFieldRow
-                  itemValue={item}
-                  index={index}
-                  individual={fullIndividual.individual}
-                  fields={data.allAddIndividualsFieldsAttributes}
-                  notAvailableFields={notAvailableItems}
-                  onDelete={() => arrayHelpers.remove(index)}
-                />
-              ))}
-              <Grid item xs={4}>
-                <Button
-                  color='primary'
-                  onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
-                  }}
-                >
-                  <AddIcon />
-                  Add new field
-                </Button>
-              </Grid>
-            </>
-          )}
+      <BoxWithBorders>
+        <Title>
+          <Typography variant='h6'>Bio Data</Typography>
+        </Title>
+        <Grid container spacing={3} >
+          <FieldArray
+            name='individualDataUpdateFields'
+            render={(arrayHelpers) => (
+              <>
+                {(values.individualDataUpdateFields || []).map(
+                  (item, index) => (
+                    <EditIndividualDataChangeFieldRow
+                      itemValue={item}
+                      index={index}
+                      individual={fullIndividual.individual}
+                      fields={data.allAddIndividualsFieldsAttributes}
+                      notAvailableFields={notAvailableItems}
+                      onDelete={() => arrayHelpers.remove(index)}
+                    />
+                  ),
+                )}
+                <Grid item xs={4}>
+                  <Button
+                    color='primary'
+                    onClick={() => {
+                      arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    }}
+                  >
+                    <AddIcon />
+                    Add new field
+                  </Button>
+                </Grid>
+              </>
+            )}
+          />
+        </Grid>
+      </BoxWithBorders>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>Documents</Typography>
+        </Title>
+        <ExistingDocumentFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
         />
-      </Grid>
+        <NewDocumentFieldArray
+          values={values}
+          addIndividualFieldsData={addIndividualFieldsData}
+        />
+      </Box>
     </>
   );
 };
