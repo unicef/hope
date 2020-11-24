@@ -13,9 +13,17 @@ const Link = styled.a`
 export const ContentLink = ({
   href,
   children,
+  target,
+  rel,
 }: {
   href: string;
   children: string;
+  target?: string;
+  rel?: string;
 }): React.ReactElement => {
-  return <Link href={href}>{children}</Link>;
+  return (
+    <Link target={target} rel={rel} href={href}>
+      {children}
+    </Link>
+  );
 };
