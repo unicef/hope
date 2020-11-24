@@ -243,6 +243,7 @@ export function CreateGrievance(): React.ReactElement {
       category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
+      console.log('values', values);
       return {
         variables: {
           input: {
@@ -253,13 +254,18 @@ export function CreateGrievance(): React.ReactElement {
               issueType: {
                 individualDataUpdateIssueTypeExtras: {
                   individual: values.selectedIndividual?.id,
-                  individualData: values.individualDataUpdateFields
-                    .filter((item) => item.fieldName)
-                    .reduce((prev, current) => {
-                      // eslint-disable-next-line no-param-reassign
-                      prev[camelCase(current.fieldName)] = current.fieldValue;
-                      return prev;
-                    }, {}),
+                  individualData: {
+                    ...values.individualDataUpdateFields
+                      .filter((item) => item.fieldName)
+                      .reduce((prev, current) => {
+                        // eslint-disable-next-line no-param-reassign
+                        prev[camelCase(current.fieldName)] = current.fieldValue;
+                        return prev;
+                      }, {}),
+                    documents: values.individualDataUpdateFieldsDocuments,
+                    documentsToRemove:
+                      values.individualDataUpdateDocumentsToRemove,
+                  },
                 },
               },
             },
