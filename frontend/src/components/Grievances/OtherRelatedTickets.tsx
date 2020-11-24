@@ -63,6 +63,8 @@ export const OtherRelatedTickets = ({
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
             <ContentLink
+              target='_blank'
+              rel='noopener noreferrer'
               href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
             >
               {decodeIdString(edge.node.id)}
