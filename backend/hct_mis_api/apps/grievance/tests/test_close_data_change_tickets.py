@@ -16,13 +16,19 @@ from grievance.fixtures import (
 )
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE, Individual, ROLE_PRIMARY, IDENTIFICATION_TYPE_NATIONAL_ID, Document, \
-    IDENTIFICATION_TYPE_CHOICE, DocumentType
+from household.models import (
+    SINGLE,
+    Individual,
+    ROLE_PRIMARY,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    Document,
+    IDENTIFICATION_TYPE_CHOICE,
+    DocumentType,
+)
 from program.fixtures import ProgramFactory
 
 
 class TestCloseDataChangeTickets(APITestCase):
-
     STATUS_CHANGE_MUTATION = """
     mutation GrievanceStatusChange($grievanceTicketId: ID!, $status: Int) {
       grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
@@ -37,9 +43,7 @@ class TestCloseDataChangeTickets(APITestCase):
     """
 
     def generate_document_types_for_all_countries(self):
-        identification_type_choice = tuple(
-            (doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE
-        )
+        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
         document_types = []
         for alpha2 in COUNTRIES:
             for doc_type, label in identification_type_choice:
@@ -144,7 +148,10 @@ class TestCloseDataChangeTickets(APITestCase):
         TicketHouseholdDataUpdateDetailsFactory(
             ticket=self.household_data_change_grievance_ticket,
             household=self.household_one,
-            household_data={"village": "Test Village", "size": 19},
+            household_data={
+                "village": {"value": "Test Village", "approve_status": True},
+                "size": {"value": 19, "approve_status": True},
+            },
         )
 
     def test_close_add_individual(self):
@@ -191,3 +198,18 @@ class TestCloseDataChangeTickets(APITestCase):
 
         role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
         self.assertEqual(str(role.household.id), str(self.household_one.id))
+
+    def test_close_update_household(self):
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+        self.household_one.refresh_from_db()
+        self.assertEqual(self.household_one.size, 19)
+        self.assertEqual(self.household_one.village, "Test Village")
