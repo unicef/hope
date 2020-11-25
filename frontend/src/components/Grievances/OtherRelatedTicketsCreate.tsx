@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@material-ui/core';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -12,10 +12,7 @@ import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 
-const StyledBox = styled.div`
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
+const StyledBox = styled(Paper)`
   border-radius: 3px;
   background-color: #fff;
   display: flex;
@@ -40,7 +37,6 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
   const { data, loading } = useExistingGrievanceTicketsQuery({
     variables: {
       businessArea,
-      category: values.category?.toString(),
       household:
         //TODO Janek to jeszcze kiedyś wymyśli
         decodeIdString(values?.selectedHousehold?.id) ||

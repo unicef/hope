@@ -21,7 +21,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Assigned to',
-    id: 'assignedTo',
+    id: 'assigned_to__first_name',
     numeric: false,
     dataCy: 'assignedTo',
   },
@@ -35,21 +35,21 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'householdId',
+    id: 'household__unicef_id',
     numeric: false,
     dataCy: 'householdId',
   },
   {
     disablePadding: false,
     label: 'Creation date',
-    id: 'createdAt',
+    id: 'created_at',
     numeric: false,
     dataCy: 'createdAt',
   },
   {
     disablePadding: false,
     label: 'Last modified date',
-    id: 'userModified',
+    id: 'user_modified',
     numeric: false,
     dataCy: 'userModified',
   },

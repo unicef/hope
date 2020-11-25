@@ -1,6 +1,7 @@
 import React from 'react';
 import { InputAdornment, TextField } from '@material-ui/core';
 import styled from 'styled-components';
+import get from 'lodash/get';
 
 const StyledTextField = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -21,7 +22,9 @@ export const FormikTextField = ({
   precision,
   ...otherProps
 }): React.ReactElement => {
-  const isInvalid = form.errors[field.name] && form.touched[field.name];
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount>0);
   const handleKeyPress = (evt): void => {
     if (
       otherProps.type === 'number' &&
@@ -53,7 +56,7 @@ export const FormikTextField = ({
         error={isInvalid}
         autoComplete='off'
         type={type}
-        helperText={isInvalid && form.errors[field.name]}
+        helperText={isInvalid && get(form.errors, field.name)}
         InputProps={{
           onKeyPress: handleKeyPress,
           startAdornment: decoratorStart && (
