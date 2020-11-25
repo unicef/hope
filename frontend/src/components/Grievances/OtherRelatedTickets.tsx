@@ -1,4 +1,5 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -12,10 +13,7 @@ import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 
-const StyledBox = styled.div`
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
+const StyledBox = styled(Paper)`
   border-radius: 3px;
   background-color: #fff;
   display: flex;
@@ -23,6 +21,7 @@ const StyledBox = styled.div`
   width: 100%;
   padding: 26px 22px;
 `;
+
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
@@ -41,6 +40,8 @@ export const OtherRelatedTickets = ({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }) => {
   const businessArea = useBusinessArea();
+  const { id } = useParams();
+
   const [show, setShow] = useState(false);
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -75,23 +76,31 @@ export const OtherRelatedTickets = ({
 
   const openHouseholdTickets = householdTickets.length
     ? householdTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+        (edge) =>
+          edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED &&
+          edge.node.id !== id,
       )
     : [];
   const closedHouseholdTickets = householdTickets.length
     ? householdTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+        (edge) =>
+          edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED &&
+          edge.node.id !== id,
       )
     : [];
 
   const openTickets = linkedTickets.length
     ? linkedTickets.filter(
-        (edge) => edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED,
+        (edge) =>
+          edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED &&
+          edge.node.id !== id,
       )
     : [];
   const closedTickets = linkedTickets.length
     ? linkedTickets.filter(
-        (edge) => edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED,
+        (edge) =>
+          edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED &&
+          edge.node.id !== id,
       )
     : [];
 
