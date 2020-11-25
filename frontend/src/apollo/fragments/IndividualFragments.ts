@@ -65,7 +65,9 @@ export const individualDetailed = gql`
     documents {
       edges {
         node {
+          id
           type {
+            country
             label
           }
           documentNumber

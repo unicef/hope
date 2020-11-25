@@ -25,3 +25,8 @@ class CategoryExtrasInput(graphene.InputObjectType):
 class CreateGrievanceTicketExtrasInput(graphene.InputObjectType):
     category = CategoryExtrasInput()
     issue_type = IssueTypeExtrasInput()
+
+
+# TODO: Remove it when all methods for closing tickets are implemented
+def _not_implemented_close_method(*args, **kwargs):
+    raise NotImplementedError
