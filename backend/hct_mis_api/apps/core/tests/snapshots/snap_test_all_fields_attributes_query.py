@@ -18342,7 +18342,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'given_name',
-                'required': True,
+                'required': False,
                 'type': 'STRING'
             },
             {
@@ -18376,7 +18376,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'family_name',
-                'required': True,
+                'required': False,
                 'type': 'STRING'
             },
             {
