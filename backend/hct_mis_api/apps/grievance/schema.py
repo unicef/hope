@@ -151,7 +151,8 @@ class ExistingGrievanceTicketFilter(FilterSet):
         payment_record_objects = cleaned_data.pop("payment_record", None)
         household_object = cleaned_data.pop("household", None)
         individual_object = cleaned_data.pop("individual", None)
-
+        if household_object is None:
+            queryset.model.objects.none()
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
             assert isinstance(
