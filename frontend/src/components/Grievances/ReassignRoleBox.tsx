@@ -39,9 +39,8 @@ const WarnIcon = styled(WarningIcon)`
 `;
 
 export const ReassignRoleBox = ({
-  ticket,
-}: {
-  linkedTickets: GrievanceTicketQuery['grievanceTicket']['linkedTickets']['edges'];
+                                  ticket,
+                                }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }) => {
   const businessArea = useBusinessArea();
@@ -50,7 +49,6 @@ export const ReassignRoleBox = ({
   const { data, loading } = useExistingGrievanceTicketsQuery({
     variables: {
       businessArea,
-      category: ticket.category.toString(),
       household:
         decodeIdString(ticket.household?.id) ||
         '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
