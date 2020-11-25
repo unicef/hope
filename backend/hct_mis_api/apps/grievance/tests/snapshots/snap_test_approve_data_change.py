@@ -66,11 +66,11 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                         'documents_to_remove': [
                             {
                                 'approve_status': True,
-                                'value': 'RG9jdW1lbnROb2RlOmYzMzlkMGRhLTNhNDctNGFkYy05MjgxLWUwYWJmZTYyOGYzMA=='
+                                'value': 'RG9jdW1lbnROb2RlOmRmMWNlNmU4LTI4NjQtNGMzZi04MDNkLTE5ZWM2ZjRjNDdmMw=='
                             },
                             {
                                 'approve_status': False,
-                                'value': 'RG9jdW1lbnROb2RlOjA2YzZkMjc1LWYxODgtNGY1YS04MzlhLTRiOWFhYzk3YjBjMA=='
+                                'value': 'RG9jdW1lbnROb2RlOjhhZDVlM2I4LTRjNGQtNGMxMC04NzU2LTExOGQ4NjA5NWRkMA=='
                             }
                         ],
                         'family_name': {
