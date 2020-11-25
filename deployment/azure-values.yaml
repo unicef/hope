@@ -183,6 +183,8 @@ airflow:
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  nodeSelector:
+    agentpool: hope
   worker:
     resources:
       limits:
@@ -212,6 +214,8 @@ airflow:
         cpu: "250m"
         memory: "256Mi"
   airflow:
+    nodeSelector:
+      agentpool: hope
     redis:
       resources:
         limits:

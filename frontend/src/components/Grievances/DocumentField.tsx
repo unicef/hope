@@ -25,7 +25,7 @@ export function DocumentField({
     <>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}.documents[${index}].country`}
+          name={`${baseName}[${index}].country`}
           fullWidth
           variant='outlined'
           label='Country'
@@ -36,7 +36,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={4}>
         <Field
-          name={`${baseName}.documents[${index}].type`}
+          name={`${baseName}[${index}].type`}
           fullWidth
           variant='outlined'
           label='Type'
@@ -47,7 +47,7 @@ export function DocumentField({
       </Grid>
       <Grid item xs={3}>
         <Field
-          name={`${baseName}.documents[${index}].number`}
+          name={`${baseName}[${index}].number`}
           fullWidth
           variant='outlined'
           label='Document Number'

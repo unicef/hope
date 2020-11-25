@@ -1,6 +1,9 @@
 import graphene
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django_countries.fields import Country
 from graphene.utils.str_converters import to_snake_case
+from graphql import GraphQLError
 
 from core.utils import decode_id_string
 from grievance.models import (
@@ -10,7 +13,17 @@ from grievance.models import (
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
 )
-from household.models import Individual, Household, ROLE_CHOICE
+from household.models import (
+    Individual,
+    Household,
+    HEAD,
+    DocumentType,
+    Document,
+    ROLE_NO_ROLE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold,
+)
 from household.schema import HouseholdNode, IndividualNode
 
 
@@ -51,9 +64,9 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
 
 
 class IndividualDocumentObjectType(graphene.InputObjectType):
-    country = graphene.String()
-    type = graphene.String()
-    number = graphene.String()
+    country = graphene.String(required=True)
+    type = graphene.String(required=True)
+    number = graphene.String(required=True)
 
 
 class IndividualUpdateDataObjectType(graphene.InputObjectType):
@@ -84,6 +97,8 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
+    documents = graphene.List(IndividualDocumentObjectType)
+    documents_to_remove = graphene.List(graphene.ID)
 
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
@@ -92,9 +107,9 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     middle_name = graphene.String()
     family_name = graphene.String(required=True)
     sex = graphene.String(required=True)
-    birth_date = graphene.Date()
+    birth_date = graphene.Date(required=True)
     estimated_birth_date = graphene.Boolean()
-    marital_status = graphene.String()
+    marital_status = graphene.String(required=True)
     phone_no = graphene.String()
     phone_no_alternative = graphene.String()
     relationship = graphene.String()
@@ -184,10 +199,18 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
+    documents = individual_data.pop("documents", [])
+    documents_to_remove = individual_data.pop("documents_to_remove", [])
     to_date_string(individual_data, "birth_date")
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
+    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_to_remove_with_approve_status = [
+        {"value": document_id, "approve_status": False} for document_id in documents_to_remove
+    ]
+    individual_data_with_approve_status["documents"] = documents_with_approve_status
+    individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
         individual_data=individual_data_with_approve_status,
         individual=individual,
@@ -232,3 +255,102 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
+
+
+def _handle_role(role, household, individual):
+    if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
+        already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
+        if already_existing_role:
+            already_existing_role.individual = individual
+            already_existing_role.save()
+        else:
+            IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
+
+
+def close_add_individual_grievance_ticket(grievance_ticket):
+    ticket_details = grievance_ticket.add_individual_ticket_details
+    if ticket_details.approve_status is False:
+        return
+
+    household = ticket_details.household
+    individual_data = ticket_details.individual_data
+    documents = individual_data.pop("documents", [])
+    role = individual_data.pop("role", ROLE_NO_ROLE)
+    first_registration_date = timezone.now()
+    individual = Individual(
+        household=household,
+        first_registration_date=first_registration_date,
+        last_registration_date=first_registration_date,
+        **individual_data,
+    )
+
+    documents_to_create = []
+    for document in documents:
+        type_name = document.get("type")
+        country_code = document.get("country")
+        country = Country(country_code)
+        number = document.get("number")
+        document_type = DocumentType.objects.get(country=country, type=type_name)
+
+        document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
+        if document_already_exists:
+            raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
+
+        document_obj = Document(document_number=number, individual=individual, type=document_type)
+        documents_to_create.append(document_obj)
+
+    relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
+    if household:
+        individual.save()
+        if relationship_to_head_of_household == HEAD:
+            household.head_of_household = individual
+            household.individuals.exclude(id=individual.id).update(relationship_to_head_of_household="")
+            household.save(update_fields=["head_of_household"])
+        household.size += 1
+        household.save()
+    else:
+        individual.relationship_to_head_of_household = ""
+        individual.save()
+
+    _handle_role(role, household, individual)
+
+    Document.objects.bulk_create(documents_to_create)
+
+
+def close_update_individual_grievance_ticket(grievance_ticket):
+    ticket_details = grievance_ticket.individual_data_update_ticket_details
+    individual = ticket_details.individual
+    household = individual.household
+    individual_data = ticket_details.individual_data
+    role_data = individual_data.pop("role", ROLE_NO_ROLE)
+
+    only_approved_data = {
+        field: value_and_approve_status.get("value")
+        for field, value_and_approve_status in individual_data.items()
+        if value_and_approve_status.get("approve_status") is True
+    }
+
+    Individual.objects.filter(id=individual.id).update(**only_approved_data)
+
+    relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
+    if household and relationship_to_head_of_household == HEAD:
+        household.head_of_household = individual
+        household.individuals.exclude(id=individual.id).update(relationship_to_head_of_household="")
+        household.save()
+
+    if role_data.get("approve_status") is True:
+        _handle_role(role_data.get("value"), household, individual)
+
+
+def close_update_household_grievance_ticket(grievance_ticket):
+    ticket_details = grievance_ticket.household_data_update_ticket_details
+    household = ticket_details.household
+    household_data = ticket_details.household_data
+
+    only_approved_data = {
+        field: value_and_approve_status.get("value")
+        for field, value_and_approve_status in household_data.items()
+        if value_and_approve_status.get("approve_status") is True
+    }
+
+    Household.objects.filter(id=household.id).update(**only_approved_data)

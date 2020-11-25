@@ -1542,6 +1542,8 @@ input IndividualUpdateDataObjectType {
   whoAnswersPhone: String
   whoAnswersAltPhone: String
   role: String
+  documents: [IndividualDocumentObjectType]
+  documentsToRemove: [ID]
 }
 
 enum IndividualWorkStatus {
