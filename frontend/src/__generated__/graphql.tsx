@@ -2147,6 +2147,8 @@ export type MutationsCreateTicketNoteArgs = {
 
 
 export type MutationsApproveIndividualDataChangeArgs = {
+  approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>
 };
@@ -4583,7 +4585,9 @@ export type ApproveHouseholdDataChangeMutation = (
 
 export type ApproveIndividualDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  individualApproveData?: Maybe<Scalars['JSONString']>
+  individualApproveData?: Maybe<Scalars['JSONString']>,
+  approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
 
@@ -7142,8 +7146,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove) {
     grievanceTicket {
       id
       status
@@ -7185,6 +7189,8 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      individualApproveData: // value for 'individualApproveData'
+ *      approvedDocumentsToCreate: // value for 'approvedDocumentsToCreate'
+ *      approvedDocumentsToRemove: // value for 'approvedDocumentsToRemove'
  *   },
  * });
  */
