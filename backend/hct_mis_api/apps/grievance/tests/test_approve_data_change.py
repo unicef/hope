@@ -118,11 +118,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         birth_certificate_type = DocumentType.objects.get(
             country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
         )
+
         self.national_id = DocumentFactory(
-            type=national_id_type, document_number="789-789-645", individual=first_individual
+            id="df1ce6e8-2864-4c3f-803d-19ec6f4c47f3",
+            type=national_id_type,
+            document_number="789-789-645",
+            individual=first_individual,
         )
         self.birth_certificate = DocumentFactory(
-            type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+            id="8ad5e3b8-4c4d-4c10-8756-118d86095dd0",
+            type=birth_certificate_type,
+            document_number="ITY8456",
+            individual=first_individual,
         )
         household_one.head_of_household = first_individual
         household_one.save()
