@@ -87,7 +87,11 @@ export function RequestedIndividualDataChangeTable({
   }));
   const classes = useStyles();
 
-  const [selected, setSelected] = useState([]);
+  const [selectedBioData, setSelectedBioData] = useState([]);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [selectedDocumentsToRemove, setSelectedDocumentsToRemove] = useState(
+    [],
+  );
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -109,7 +113,7 @@ export function RequestedIndividualDataChangeTable({
         return valueDetails.approveStatus;
       })
       .map((row) => camelCase(row[0]));
-    setSelected(localSelected);
+    setSelectedBioData(localSelected);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket]);
 
@@ -130,27 +134,61 @@ export function RequestedIndividualDataChangeTable({
   }
 
   const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+    const selectedIndex = selectedBioData.indexOf(name);
     let newSelected = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selectedBioData, name);
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
+      newSelected = newSelected.concat(selectedBioData.slice(1));
+    } else if (selectedIndex === selectedBioData.length - 1) {
+      newSelected = newSelected.concat(selectedBioData.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
+        selectedBioData.slice(0, selectedIndex),
+        selectedBioData.slice(selectedIndex + 1),
       );
     }
 
-    setSelected(newSelected);
+    setSelectedBioData(newSelected);
     setFieldValue('selected', newSelected);
   };
+  const handleSelectBioData = (name, selected) => {
+    const newSelected = [...selectedBioData];
+    const selectedIndex = newSelected.indexOf(name);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(name);
+    }
+    setSelectedBioData(newSelected);
+    setFieldValue('selected', newSelected);
+  };
+  const handleSelectDocument = (documentIndex, selected) => {
+    const newSelected = [...selectedDocuments];
+    const selectedIndex = newSelected.indexOf(documentIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(documentIndex);
+    }
+    setSelectedDocuments(newSelected);
+    setFieldValue('selectedDocuments', newSelected);
+  };
 
-  const isSelected = (name: string): boolean => selected.includes(name);
+  const handleSelectDocumentToRemove = (documentIndex, selected) => {
+    const newSelected = [...selectedDocumentsToRemove];
+    const selectedIndex = newSelected.indexOf(documentIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(documentIndex);
+    }
+    setSelectedDocumentsToRemove(newSelected);
+    setFieldValue('selectedDocumentsToRemove', newSelected);
+  };
+
+  const isSelected = (name: string): boolean => selectedBioData.includes(name);
 
   return (
     <div>
@@ -183,7 +221,9 @@ export function RequestedIndividualDataChangeTable({
               >
                 <TableCell>
                   <Checkbox
-                    onClick={(event) => handleClick(event, fieldName)}
+                    onChange={(event) =>
+                      handleSelectBioData(fieldName, event.target.checked)
+                    }
                     color='primary'
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
@@ -227,11 +267,14 @@ export function RequestedIndividualDataChangeTable({
                 <TableCell align='left'>
                   <Checkbox
                     color='primary'
+                    onChange={(event) => {
+                      handleSelectDocument(index, event.target.checked);
+                    }}
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
-                    checked
-                    inputProps={{ 'aria-labelledby': 'xd' }}
+                    checked={selectedDocuments.includes(index)}
+                    inputProps={{ 'aria-labelledby': 'selected' }}
                   />
                 </TableCell>
                 <TableCell align='left'>
@@ -252,11 +295,14 @@ export function RequestedIndividualDataChangeTable({
               <TableRow>
                 <TableCell align='left'>
                   <Checkbox
+                    onChange={(event) => {
+                      handleSelectDocumentToRemove(index, event.target.checked);
+                    }}
                     color='primary'
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
-                    checked
+                    checked={selectedDocumentsToRemove.includes(index)}
                     inputProps={{ 'aria-labelledby': 'xd' }}
                   />
                 </TableCell>

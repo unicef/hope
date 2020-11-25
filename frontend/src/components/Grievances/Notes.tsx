@@ -8,8 +8,9 @@ import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
 import {
+  GrievanceTicketDocument,
   GrievanceTicketQuery,
-  useCreateGrievanceTicketNoteMutation,
+  useCreateGrievanceTicketNoteMutation, useGrievanceTicketQuery,
   useMeQuery,
 } from '../../__generated__/graphql';
 import { renderUserName } from '../../utils/utils';
@@ -102,7 +103,7 @@ export function Notes({
           variables: {
             noteInput: { ticket: id, description: values.newNote },
           },
-          refetchQueries: () => [{ query: GrievanceTicket, variables: { id } }],
+          refetchQueries: () => [{ query: GrievanceTicketDocument, variables: { id } }],
         });
         resetForm({});
       }}
