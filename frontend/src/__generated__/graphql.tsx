@@ -802,6 +802,7 @@ export type GrievanceTicketNode = Node & {
   consent: Scalars['Boolean'],
   businessArea: UserBusinessAreaNode,
   linkedTickets: GrievanceTicketNodeConnection,
+  linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
   sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
@@ -812,10 +813,19 @@ export type GrievanceTicketNode = Node & {
   household?: Maybe<HouseholdNode>,
   individual?: Maybe<IndividualNode>,
   paymentRecord?: Maybe<PaymentRecordNode>,
+  relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
 };
 
 
 export type GrievanceTicketNodeLinkedTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -2683,7 +2693,7 @@ export type QueryExistingGrievanceTicketsArgs = {
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
   businessArea: Scalars['String'],
-  category: Scalars['String'],
+  category?: Maybe<Scalars['String']>,
   issueType?: Maybe<Scalars['String']>,
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
@@ -5546,8 +5556,6 @@ export type ExistingGrievanceTicketsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
   businessArea: Scalars['String'],
-  category: Scalars['String'],
-  issueType?: Maybe<Scalars['String']>,
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
   paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
@@ -5606,20 +5614,14 @@ export type GrievanceTicketQuery = (
     )>, paymentRecord: Maybe<(
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id'>
-    )>, linkedTickets: (
-      { __typename?: 'GrievanceTicketNodeConnection' }
-      & { edges: Array<Maybe<(
-        { __typename?: 'GrievanceTicketNodeEdge' }
-        & { node: Maybe<(
-          { __typename?: 'GrievanceTicketNode' }
-          & Pick<GrievanceTicketNode, 'id' | 'status'>
-          & { household: Maybe<(
-            { __typename?: 'HouseholdNode' }
-            & Pick<HouseholdNode, 'id' | 'unicefId'>
-          )> }
-        )> }
-      )>> }
-    ), addIndividualTicketDetails: Maybe<(
+    )>, relatedTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
+    )>>>, addIndividualTicketDetails: Maybe<(
       { __typename?: 'TicketAddIndividualDetailsNode' }
       & Pick<TicketAddIndividualDetailsNode, 'id' | 'individualData' | 'approveStatus'>
       & { household: Maybe<(
@@ -9882,8 +9884,8 @@ export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
 export const ExistingGrievanceTicketsDocument = gql`
-    query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $category: String!, $issueType: String, $household: ID, $individual: ID, $paymentRecord: [ID], $orderBy: String) {
-  existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, category: $category, issueType: $issueType, household: $household, individual: $individual, paymentRecord: $paymentRecord, orderBy: $orderBy) {
+    query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $orderBy: String) {
+  existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -9949,8 +9951,6 @@ export function withExistingGrievanceTickets<TProps, TChildProps = {}>(operation
  *      last: // value for 'last'
  *      id: // value for 'id'
  *      businessArea: // value for 'businessArea'
- *      category: // value for 'category'
- *      issueType: // value for 'issueType'
  *      household: // value for 'household'
  *      individual: // value for 'individual'
  *      paymentRecord: // value for 'paymentRecord'
@@ -10001,16 +10001,12 @@ export const GrievanceTicketDocument = gql`
     paymentRecord {
       id
     }
-    linkedTickets {
-      edges {
-        node {
-          id
-          status
-          household {
-            id
-            unicefId
-          }
-        }
+    relatedTickets {
+      id
+      status
+      household {
+        id
+        unicefId
       }
     }
     addIndividualTicketDetails {
@@ -13224,6 +13220,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
+  linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
   sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
@@ -13234,6 +13231,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
 };
 
 export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
@@ -13852,7 +13850,7 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
   allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
-  existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea' | 'category'>>,
+  existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
   allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
   allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
