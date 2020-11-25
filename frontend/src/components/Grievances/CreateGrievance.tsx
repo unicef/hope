@@ -13,6 +13,7 @@ import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
+  useAllAddIndividualFieldsQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -90,6 +91,14 @@ export function CreateGrievance(): React.ReactElement {
     consent: Yup.bool().oneOf([true], 'Consent is required'),
     selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
     selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+    // individualData: Yup.object().shape({
+    //   relationship:Yup.string().required('You need specify this field')
+    //   fullName:Yup.string().required('You need specify this field')
+    //   :Yup.string().required('You need specify this field')
+    //   relationship:Yup.string().required('You need specify this field')
+    //   relationship:Yup.string().required('You need specify this field')
+    //   relationship:Yup.string().required('You need specify this field')
+    // })
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -109,12 +118,40 @@ export function CreateGrievance(): React.ReactElement {
   } = useGrievancesChoiceDataQuery();
 
   const [mutate] = useCreateGrievanceMutation();
-
+  const {
+    data: allAddIndividualFieldsData,
+    loading,
+  } = useAllAddIndividualFieldsQuery();
   if (userDataLoading || choicesLoading) {
     return <LoadingComponent />;
   }
   if (!choicesData || !userData) return null;
-
+  const validate = (values) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errors: { [id: string]: any } = {};
+    console.log(values, values);
+    if (
+      values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+    ) {
+      const individualDataErrors = {};
+      const individualData = values.individualData || {};
+      for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
+        const fieldName = camelCase(field.name);
+        if (
+          field.required &&
+          (individualData[fieldName] === null ||
+            individualData[fieldName] === undefined)
+        ) {
+          individualDataErrors[fieldName] = 'Field Required';
+        }
+        if (Object.keys(individualDataErrors).length > 0) {
+          errors.individualData = individualDataErrors;
+        }
+      }
+    }
+    return errors;
+  };
   const mappedIndividuals = userData.allUsers.edges.map((edge) => ({
     name: edge.node.firstName
       ? `${edge.node.firstName} ${edge.node.lastName}`
@@ -328,10 +365,12 @@ export function CreateGrievance(): React.ReactElement {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
       }}
+      validate={validate}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue }) => (
+      {({ submitForm, values, setFieldValue, errors }) => (
         <>
+          {console.log('errors', errors)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>

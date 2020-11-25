@@ -6,6 +6,7 @@ import {
   ProgramStatus,
 } from '../__generated__/graphql';
 import { TARGETING_STATES } from './constants';
+import get from 'lodash/get';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -341,4 +342,23 @@ export function renderUserName(user) {
   return user?.firstName
     ? `${user.firstName} ${user.lastName}`
     : `${user.email}`;
+}
+
+
+/**
+ *
+ * @param array
+ * @param keyName
+ * @param valueName - if valueName = "*" whole object is used
+ */
+export function arrayToDict(array, keyExtractor, valueExtractor) {
+  const reduceCallback = (previousValue, currentValue) => {
+    const key = get(currentValue, keyExtractor);
+    const value =
+      valueExtractor === '*' ? currentValue : get(currentValue, valueExtractor);
+    // eslint-disable-next-line no-param-reassign
+    previousValue[key] = value;
+    return previousValue;
+  };
+  return array?.reduce(reduceCallback, {})
 }
