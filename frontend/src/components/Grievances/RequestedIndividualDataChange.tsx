@@ -10,6 +10,8 @@ import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataCha
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import mapKeys from 'lodash/mapKeys';
+import camelCase from 'lodash/camelCase';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -34,12 +36,39 @@ export function RequestedIndividualDataChange({
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
+  const individualData = {
+    ...ticket.individualDataUpdateTicketDetails.individualData,
+  };
+  const entries = Object.entries(individualData);
+  const selectedDocuments = [];
+  const selectedDocumentsToRemove = [];
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < individualData.documents.length; i++) {
+    if (individualData.documents[i].approve_status) {
+      selectedDocuments.push(i);
+    }
+  }
+  console.log('individualData', individualData);
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < individualData.documents_to_remove.length; i++) {
+    if (individualData.documents_to_remove[i].approve_status) {
+      selectedDocumentsToRemove.push(i);
+    }
+  }
   return (
     <Formik
       initialValues={{
-        selected: [],
-        selectedDocuments: [],
-        selectedDocumentsToRemove: [],
+        selected: entries
+          .filter((row) => {
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
+            return valueDetails.approveStatus;
+          })
+          .map((row) => camelCase(row[0])),
+        selectedDocuments,
+        selectedDocumentsToRemove,
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -54,12 +83,8 @@ export function RequestedIndividualDataChange({
             variables: {
               grievanceTicketId: ticket.id,
               individualApproveData: JSON.stringify(individualApproveData),
-              // approvedDocumentsToCreate: JSON.stringify(
-              //   approvedDocumentsToCreate,
-              // ),
-              // approvedDocumentsToRemove: JSON.stringify(
-              //   approvedDocumentsToRemove,
-              // ),
+              approvedDocumentsToCreate,
+              approvedDocumentsToRemove,
             },
           });
           showMessage('Changes Approved');
@@ -93,6 +118,7 @@ export function RequestedIndividualDataChange({
             </Box>
           </Title>
           <RequestedIndividualDataChangeTable
+            values={values}
             ticket={ticket}
             setFieldValue={setFieldValue}
           />

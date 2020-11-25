@@ -1,7 +1,6 @@
 from datetime import date
 
 from django.core.management import call_command
-from django_countries.data import COUNTRIES
 from django_countries.fields import Country
 
 from account.fixtures import UserFactory
@@ -15,15 +14,13 @@ from grievance.fixtures import (
     TicketHouseholdDataUpdateDetailsFactory,
 )
 from grievance.models import GrievanceTicket
-from household.fixtures import HouseholdFactory, IndividualFactory
+from household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
 from household.models import (
     SINGLE,
     Individual,
     ROLE_PRIMARY,
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    Document,
-    IDENTIFICATION_TYPE_CHOICE,
-    DocumentType,
+    Document, DocumentType, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
 )
 from program.fixtures import ProgramFactory
 
@@ -42,25 +39,16 @@ class TestCloseDataChangeTickets(APITestCase):
     }
     """
 
-    def generate_document_types_for_all_countries(self):
-        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
-        document_types = []
-        for alpha2 in COUNTRIES:
-            for doc_type, label in identification_type_choice:
-                document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
-
-        DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
-
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
         self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area, )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(), )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
@@ -87,6 +75,17 @@ class TestCloseDataChangeTickets(APITestCase):
         self.individuals = [
             IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
         ]
+        first_individual = self.individuals[0]
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(
+            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+        )
+        self.national_id = DocumentFactory(
+            type=national_id_type, document_number="789-789-645", individual=first_individual
+        )
+        self.birth_certificate = DocumentFactory(
+            type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+        )
         household_one.head_of_household = self.individuals[0]
         household_one.save()
         self.household_one = household_one
@@ -110,7 +109,8 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321",}],
+                "documents": [
+                    {"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
             },
             approve_status=True,
         )
@@ -134,6 +134,16 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
                 "role": {"value": ROLE_PRIMARY, "approve_status": True},
+                "documents": [
+                    {
+                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "approve_status": True,
+                    },
+                ],
+                "documents_to_remove": [
+                    {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
+                    {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                ],
             },
         )
 
@@ -198,6 +208,13 @@ class TestCloseDataChangeTickets(APITestCase):
 
         role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
         self.assertEqual(str(role.household.id), str(self.household_one.id))
+
+        document = Document.objects.get(document_number="999-888-777")
+        self.assertEqual(document.type.country, Country("POL"))
+        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+
+        self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
+        self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
 
     def test_close_update_household(self):
         self.graphql_request(

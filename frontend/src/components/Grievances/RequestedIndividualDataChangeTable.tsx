@@ -75,10 +75,12 @@ export function CurrentValue({
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
+  values;
 }
 export function RequestedIndividualDataChangeTable({
   setFieldValue,
   ticket,
+  values,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -87,11 +89,9 @@ export function RequestedIndividualDataChangeTable({
   }));
   const classes = useStyles();
 
-  const [selectedBioData, setSelectedBioData] = useState([]);
-  const [selectedDocuments, setSelectedDocuments] = useState([]);
-  const [selectedDocumentsToRemove, setSelectedDocumentsToRemove] = useState(
-    [],
-  );
+  const selectedBioData = values.selected;
+  const { selectedDocuments } = values;
+  const { selectedDocumentsToRemove } = values;
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -103,19 +103,6 @@ export function RequestedIndividualDataChangeTable({
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents_to_remove;
   const entries = Object.entries(individualData);
-  useEffect(() => {
-    const localSelected = entries
-      .filter((row) => {
-        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-          value: string;
-          approveStatus: boolean;
-        };
-        return valueDetails.approveStatus;
-      })
-      .map((row) => camelCase(row[0]));
-    setSelectedBioData(localSelected);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticket]);
 
   const fieldsDict = useArrayToDict(
     data?.allAddIndividualsFieldsAttributes,
@@ -133,26 +120,6 @@ export function RequestedIndividualDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selectedBioData.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selectedBioData, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selectedBioData.slice(1));
-    } else if (selectedIndex === selectedBioData.length - 1) {
-      newSelected = newSelected.concat(selectedBioData.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selectedBioData.slice(0, selectedIndex),
-        selectedBioData.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelectedBioData(newSelected);
-    setFieldValue('selected', newSelected);
-  };
   const handleSelectBioData = (name, selected) => {
     const newSelected = [...selectedBioData];
     const selectedIndex = newSelected.indexOf(name);
@@ -161,7 +128,6 @@ export function RequestedIndividualDataChangeTable({
     } else {
       newSelected.push(name);
     }
-    setSelectedBioData(newSelected);
     setFieldValue('selected', newSelected);
   };
   const handleSelectDocument = (documentIndex, selected) => {
@@ -172,7 +138,6 @@ export function RequestedIndividualDataChangeTable({
     } else {
       newSelected.push(documentIndex);
     }
-    setSelectedDocuments(newSelected);
     setFieldValue('selectedDocuments', newSelected);
   };
 
@@ -184,7 +149,6 @@ export function RequestedIndividualDataChangeTable({
     } else {
       newSelected.push(documentIndex);
     }
-    setSelectedDocumentsToRemove(newSelected);
     setFieldValue('selectedDocumentsToRemove', newSelected);
   };
 
@@ -307,13 +271,13 @@ export function RequestedIndividualDataChangeTable({
                   />
                 </TableCell>
                 <TableCellStroke align='left'>
-                  {document.node.type.label}
+                  {document?.node?.type?.label || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document.node.type.country}
+                  {document?.node?.type?.country || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document.node.documentNumber}
+                  {document?.node?.documentNumber || '-'}
                 </TableCellStroke>
               </TableRow>
             );
