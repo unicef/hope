@@ -13,9 +13,22 @@ import {
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import mapKeys from 'lodash/mapKeys';
-import { Checkbox, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
+
+const Title = styled.div`
+  padding-top: ${({ theme }) => theme.spacing(4)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+`;
 
 const TableCellStroke = styled(TableCell)`
   &::before {
@@ -100,34 +113,21 @@ export function RequestedIndividualDataChangeTable({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket]);
 
-  if (loading) {
+  const fieldsDict = useArrayToDict(
+    data?.allAddIndividualsFieldsAttributes,
+    'name',
+    '*',
+  );
+  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
+  const documentTypeDict = useArrayToDict(
+    data?.documentTypeChoices,
+    'value',
+    'name',
+  );
+
+  if (loading || !fieldsDict || !countriesDict || !documentTypeDict) {
     return <LoadingComponent />;
   }
-
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
-  );
-  const countriesDict = data.countriesChoices.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.value] = currentValue.name;
-      return previousValue;
-    },
-    {},
-  );
-  const documentTypeDict = data.documentTypeChoices.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.value] = currentValue.name;
-      return previousValue;
-    },
-    {},
-  );
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
@@ -206,6 +206,11 @@ export function RequestedIndividualDataChangeTable({
           })}
         </TableBody>
       </Table>
+      <Title>
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h6'>Document Changes</Typography>
+        </Box>
+      </Title>
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
