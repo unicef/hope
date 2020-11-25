@@ -2,6 +2,7 @@ import json
 from datetime import date
 
 from django.core.management import call_command
+from django_countries.fields import Country
 
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
@@ -14,8 +15,13 @@ from grievance.fixtures import (
     TicketHouseholdDataUpdateDetailsFactory,
 )
 from grievance.models import GrievanceTicket
-from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE
+from household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from household.models import (
+    SINGLE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    DocumentType,
+)
 from program.fixtures import ProgramFactory
 
 
@@ -34,9 +40,17 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     """
 
     APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION = """
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString) {
+    mutation ApproveIndividualDataChange(
+      $grievanceTicketId: ID!, 
+      $individualApproveData: JSONString, 
+      $approvedDocumentsToCreate: [Int], 
+      $approvedDocumentsToRemove: [Int]
+    ) {
       approveIndividualDataChange(
-        grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData
+        grievanceTicketId: $grievanceTicketId, 
+        individualApproveData: $individualApproveData,
+        approvedDocumentsToCreate: $approvedDocumentsToCreate, 
+        approvedDocumentsToRemove: $approvedDocumentsToRemove
       ) {
         grievanceTicket {
           id
@@ -66,19 +80,13 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
+        self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(
-            name="Admin type one",
-            admin_level=2,
-            business_area=self.business_area,
-        )
+        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(
-            name="Test program ONE",
-            business_area=BusinessArea.objects.first(),
-        )
+        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
@@ -105,7 +113,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         self.individuals = [
             IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
         ]
-        household_one.head_of_household = self.individuals[0]
+        first_individual = self.individuals[0]
+        national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
+        birth_certificate_type = DocumentType.objects.get(
+            country=Country("POL"), type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+        )
+        self.national_id = DocumentFactory(
+            type=national_id_type, document_number="789-789-645", individual=first_individual
+        )
+        self.birth_certificate = DocumentFactory(
+            type=birth_certificate_type, document_number="ITY8456", individual=first_individual
+        )
+        household_one.head_of_household = first_individual
         household_one.save()
         self.household_one = household_one
 
@@ -126,6 +145,10 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "sex": "MALE",
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
+                "documents": [
+                    {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "123-XYZ-321",},
+                    {"country": "POL", "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, "number": "QWE4567",},
+                ],
             },
             approve_status=False,
         )
@@ -141,12 +164,22 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             ticket=self.individual_data_change_grievance_ticket,
             individual=self.individuals[0],
             individual_data={
-                "given_name": {"value": "Test"},
-                "full_name": {"value": "Test Example"},
-                "family_name": {"value": "Example"},
-                "sex": {"value": "MALE"},
-                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat()},
-                "marital_status": {"value": SINGLE},
+                "given_name": {"value": "Test", "approve_status": False},
+                "full_name": {"value": "Test Example", "approve_status": False},
+                "family_name": {"value": "Example", "approve_status": False},
+                "sex": {"value": "MALE", "approve_status": False},
+                "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
+                "marital_status": {"value": SINGLE, "approve_status": False},
+                "documents": [
+                    {
+                        "value": {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "999-888-777"},
+                        "approve_status": False,
+                    },
+                ],
+                "documents_to_remove": [
+                    {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": False},
+                    {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                ],
             },
         )
 
@@ -182,6 +215,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
+                "approvedDocumentsToCreate": [0],
+                "approvedDocumentsToRemove": [0],
             },
         )
 

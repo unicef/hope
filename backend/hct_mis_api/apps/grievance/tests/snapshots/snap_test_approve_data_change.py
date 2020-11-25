@@ -53,6 +53,26 @@ snapshots['TestGrievanceApproveDataChangeMutation::test_approve_update_individua
                             'approve_status': False,
                             'value': '1980-02-01'
                         },
+                        'documents': [
+                            {
+                                'approve_status': True,
+                                'value': {
+                                    'country': 'POL',
+                                    'number': '999-888-777',
+                                    'type': 'NATIONAL_ID'
+                                }
+                            }
+                        ],
+                        'documents_to_remove': [
+                            {
+                                'approve_status': True,
+                                'value': 'RG9jdW1lbnROb2RlOmYzMzlkMGRhLTNhNDctNGFkYy05MjgxLWUwYWJmZTYyOGYzMA=='
+                            },
+                            {
+                                'approve_status': False,
+                                'value': 'RG9jdW1lbnROb2RlOjA2YzZkMjc1LWYxODgtNGY1YS04MzlhLTRiOWFhYzk3YjBjMA=='
+                            }
+                        ],
                         'family_name': {
                             'approve_status': True,
                             'value': 'Example'

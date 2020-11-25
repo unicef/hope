@@ -326,11 +326,22 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         indicating whether field change is approved or not.
         """
         individual_approve_data = graphene.JSONString()
+        approved_documents_to_create = graphene.List(graphene.Int)
+        approved_documents_to_remove = graphene.List(graphene.Int)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, individual_approve_data, **kwargs):
+    def mutate(
+        cls,
+        root,
+        info,
+        grievance_ticket_id,
+        individual_approve_data,
+        approved_documents_to_create,
+        approved_documents_to_remove,
+        **kwargs,
+    ):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         cls.verify_approve_data(individual_approve_data)
@@ -339,7 +350,17 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         individual_data = individual_data_details.individual_data
         cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
         for field_name, item in individual_data.items():
-            if individual_approve_data.get(field_name):
+            field_to_approve = individual_approve_data.get(field_name)
+            if field_name in ("documents", "documents_to_remove"):
+                for index, document_data in enumerate(individual_data[field_name]):
+                    approved_documents_indexes = (
+                        approved_documents_to_create if field_name == "documents" else approved_documents_to_remove
+                    )
+                    if index in approved_documents_indexes:
+                        document_data["approve_status"] = True
+                    else:
+                        document_data["approve_status"] = False
+            elif field_to_approve:
                 individual_data[field_name]["approve_status"] = True
             else:
                 individual_data[field_name]["approve_status"] = False

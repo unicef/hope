@@ -1,9 +1,7 @@
 import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django_countries.fields import Country
 from graphene.utils.str_converters import to_snake_case
-from graphql import GraphQLError
 
 from core.utils import decode_id_string
 from grievance.models import (
@@ -13,16 +11,13 @@ from grievance.models import (
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
 )
+from grievance.mutations_extras.utils import _handle_add_document, _handle_role
 from household.models import (
     Individual,
     Household,
     HEAD,
-    DocumentType,
     Document,
     ROLE_NO_ROLE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold,
 )
 from household.schema import HouseholdNode, IndividualNode
 
@@ -182,9 +177,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
     }
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data_with_approve_status,
-        household=household,
-        ticket=grievance_ticket,
+        household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -212,9 +205,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data_with_approve_status["documents"] = documents_with_approve_status
     individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data_with_approve_status,
-        individual=individual,
-        ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -229,8 +220,7 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     ticket_individual_data_update_details = TicketDeleteIndividualDetails(
-        individual=individual,
-        ticket=grievance_ticket,
+        individual=individual, ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -248,23 +238,11 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data,
-        household=household,
-        ticket=grievance_ticket,
+        individual_data=individual_data, household=household, ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
-
-
-def _handle_role(role, household, individual):
-    if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
-        already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
-        if already_existing_role:
-            already_existing_role.individual = individual
-            already_existing_role.save()
-        else:
-            IndividualRoleInHousehold.objects.create(individual=individual, household=household, role=role)
 
 
 def close_add_individual_grievance_ticket(grievance_ticket):
@@ -284,20 +262,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         **individual_data,
     )
 
-    documents_to_create = []
-    for document in documents:
-        type_name = document.get("type")
-        country_code = document.get("country")
-        country = Country(country_code)
-        number = document.get("number")
-        document_type = DocumentType.objects.get(country=country, type=type_name)
-
-        document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
-        if document_already_exists:
-            raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
-
-        document_obj = Document(document_number=number, individual=individual, type=document_type)
-        documents_to_create.append(document_obj)
+    documents_to_create = [_handle_add_document(document, individual) for document in documents]
 
     relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
     if household:
@@ -323,6 +288,13 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     household = individual.household
     individual_data = ticket_details.individual_data
     role_data = individual_data.pop("role", ROLE_NO_ROLE)
+    documents = individual_data.pop("documents", [])
+    documents_to_remove_encoded = individual_data.pop("documents_to_remove", [])
+    documents_to_remove = [
+        decode_id_string(document_data["value"])
+        for document_data in documents_to_remove_encoded
+        if document_data["approve_status"] is True
+    ]
 
     only_approved_data = {
         field: value_and_approve_status.get("value")
@@ -340,6 +312,14 @@ def close_update_individual_grievance_ticket(grievance_ticket):
 
     if role_data.get("approve_status") is True:
         _handle_role(role_data.get("value"), household, individual)
+
+    documents_to_create = [
+        _handle_add_document(document_data["value"], individual)
+        for document_data in documents
+        if document_data["approve_status"] is True
+    ]
+    Document.objects.bulk_create(documents_to_create)
+    Document.objects.filter(id__in=documents_to_remove).delete()
 
 
 def close_update_household_grievance_ticket(grievance_ticket):
