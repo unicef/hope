@@ -2,11 +2,13 @@ import base64
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
+from django_countries.data import COUNTRIES
 from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
 from household.elasticsearch_utils import rebuild_search_index
+from household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 
 
 class APITestCase(SnapshotTestTestCase):
@@ -40,6 +42,15 @@ class APITestCase(SnapshotTestTestCase):
         context_value.user = user or AnonymousUser()
         self.__set_context_files(context_value, files)
         return context_value
+
+    def generate_document_types_for_all_countries(self):
+        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
+        document_types = []
+        for alpha2 in COUNTRIES:
+            for doc_type, label in identification_type_choice:
+                document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
+
+        DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
     @staticmethod
     def id_to_base64(id, name):
