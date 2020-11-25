@@ -30,3 +30,6 @@ class CreateGrievanceTicketExtrasInput(graphene.InputObjectType):
 # TODO: Remove it when all methods for closing tickets are implemented
 def _not_implemented_close_method(*args, **kwargs):
     raise NotImplementedError
+
+def _no_operation_close_method(*args, **kwargs):
+    pass

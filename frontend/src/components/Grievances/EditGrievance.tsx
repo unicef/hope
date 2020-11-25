@@ -83,8 +83,8 @@ export function EditGrievance(): React.ReactElement {
   if (!choicesData || !userData || !ticketData) return null;
 
   const ticket = ticketData?.grievanceTicket;
-  const mappedLinkedTickets = ticketData?.grievanceTicket?.linkedTickets?.edges.map(
-    (edge) => edge.node.id,
+  const mappedLinkedTickets = ticketData?.grievanceTicket?.relatedTickets?.map(
+    (edge) => edge.id,
   );
 
   const initialValues = {
