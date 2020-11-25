@@ -74,7 +74,7 @@ class GrievanceTicketFilter(FilterSet):
         model = GrievanceTicket
 
     order_by = OrderingFilter(
-        fields=("id", "status", "assigned_to__full_name", "category", "created_at", "households_count", "user_modified")
+        fields=("id", "status", "assigned_to__first_name", "category", "created_at", "households_count", "user_modified", "unicef_id")
     )
 
     def search_filter(self, qs, name, value):
