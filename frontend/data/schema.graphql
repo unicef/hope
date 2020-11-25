@@ -17,9 +17,9 @@ input AddIndividualDataObjectType {
   middleName: String
   familyName: String!
   sex: String!
-  birthDate: Date
+  birthDate: Date!
   estimatedBirthDate: Boolean
-  maritalStatus: String
+  maritalStatus: String!
   phoneNo: String
   phoneNoAlternative: String
   relationship: String
@@ -576,6 +576,7 @@ type GrievanceTicketNode implements Node {
   consent: Boolean!
   businessArea: UserBusinessAreaNode!
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
   sensitiveTicketDetails: TicketSensitiveDetailsNode
@@ -586,6 +587,7 @@ type GrievanceTicketNode implements Node {
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
+  relatedTickets: [GrievanceTicketNode]
 }
 
 type GrievanceTicketNodeConnection {
@@ -1341,9 +1343,9 @@ input IndividualDeleteIssueTypeExtras {
 }
 
 input IndividualDocumentObjectType {
-  country: String
-  type: String
-  number: String
+  country: String!
+  type: String!
+  number: String!
 }
 
 enum IndividualHearingDisability {
@@ -1393,7 +1395,7 @@ type IndividualNode implements Node {
   phoneNoAlternative: String!
   relationship: IndividualRelationship
   household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode!
+  registrationDataImport: RegistrationDataImportNode
   disability: Boolean!
   workStatus: IndividualWorkStatus
   firstRegistrationDate: Date!
@@ -1640,7 +1642,7 @@ type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
-  approveIndividualDataChange(grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
@@ -1854,7 +1856,7 @@ enum ProgramStatus {
 type Query {
   grievanceTicket(id: ID!): GrievanceTicketNode
   allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
-  existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String!, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
+  existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   allAddIndividualsFieldsAttributes: [FieldAttributeNode]
   allEditHouseholdFieldsAttributes: [FieldAttributeNode]

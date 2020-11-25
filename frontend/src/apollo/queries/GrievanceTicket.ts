@@ -1,4 +1,12 @@
 import { gql } from 'apollo-boost';
+import {
+  individualDetailed,
+  individualMinimal,
+} from '../fragments/IndividualFragments';
+import {
+  householdDetailed,
+  householdMinimal,
+} from '../fragments/HouseholdFragments';
 
 export const GrievanceTicket = gql`
   query GrievanceTicket($id: ID!) {
@@ -34,21 +42,18 @@ export const GrievanceTicket = gql`
       paymentRecord {
         id
       }
-      linkedTickets {
-        edges {
-          node {
-            id
-            status
-            household {
-              id
-              unicefId
-            }
-          }
+      relatedTickets {
+        id
+        status
+        household {
+          id
+          unicefId
         }
       }
       addIndividualTicketDetails {
         id
         individualData
+        approveStatus
         household {
           id
           unicefId

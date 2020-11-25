@@ -13,9 +13,22 @@ import {
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import mapKeys from 'lodash/mapKeys';
-import { Checkbox, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Checkbox,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
+
+const Title = styled.div`
+  padding-top: ${({ theme }) => theme.spacing(4)}px;
+  padding-bottom: ${({ theme }) => theme.spacing(2)}px;
+`;
 
 const TableCellStroke = styled(TableCell)`
   &::before {
@@ -62,10 +75,12 @@ export function CurrentValue({
 interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
+  values;
 }
 export function RequestedIndividualDataChangeTable({
   setFieldValue,
   ticket,
+  values,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -74,7 +89,9 @@ export function RequestedIndividualDataChangeTable({
   }));
   const classes = useStyles();
 
-  const [selected, setSelected] = useState([]);
+  const selectedBioData = values.selected;
+  const { selectedDocuments } = values;
+  const { selectedDocumentsToRemove } = values;
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -86,71 +103,56 @@ export function RequestedIndividualDataChangeTable({
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents_to_remove;
   const entries = Object.entries(individualData);
-  useEffect(() => {
-    const localSelected = entries
-      .filter((row) => {
-        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-          value: string;
-          approveStatus: boolean;
-        };
-        return valueDetails.approveStatus;
-      })
-      .map((row) => camelCase(row[0]));
-    setSelected(localSelected);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticket]);
 
-  if (loading) {
+  const fieldsDict = useArrayToDict(
+    data?.allAddIndividualsFieldsAttributes,
+    'name',
+    '*',
+  );
+  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
+  const documentTypeDict = useArrayToDict(
+    data?.documentTypeChoices,
+    'value',
+    'name',
+  );
+
+  if (loading || !fieldsDict || !countriesDict || !documentTypeDict) {
     return <LoadingComponent />;
   }
 
-  const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
-  );
-  const countriesDict = data.countriesChoices.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.value] = currentValue.name;
-      return previousValue;
-    },
-    {},
-  );
-  const documentTypeDict = data.documentTypeChoices.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.value] = currentValue.name;
-      return previousValue;
-    },
-    {},
-  );
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+  const handleSelectBioData = (name, selected) => {
+    const newSelected = [...selectedBioData];
+    const selectedIndex = newSelected.indexOf(name);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(name);
     }
-
-    setSelected(newSelected);
     setFieldValue('selected', newSelected);
   };
+  const handleSelectDocument = (documentIndex, selected) => {
+    const newSelected = [...selectedDocuments];
+    const selectedIndex = newSelected.indexOf(documentIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(documentIndex);
+    }
+    setFieldValue('selectedDocuments', newSelected);
+  };
 
-  const isSelected = (name: string): boolean => selected.includes(name);
+  const handleSelectDocumentToRemove = (documentIndex, selected) => {
+    const newSelected = [...selectedDocumentsToRemove];
+    const selectedIndex = newSelected.indexOf(documentIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(documentIndex);
+    }
+    setFieldValue('selectedDocumentsToRemove', newSelected);
+  };
+
+  const isSelected = (name: string): boolean => selectedBioData.includes(name);
 
   return (
     <div>
@@ -183,7 +185,9 @@ export function RequestedIndividualDataChangeTable({
               >
                 <TableCell>
                   <Checkbox
-                    onClick={(event) => handleClick(event, fieldName)}
+                    onChange={(event) =>
+                      handleSelectBioData(fieldName, event.target.checked)
+                    }
                     color='primary'
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
@@ -206,6 +210,11 @@ export function RequestedIndividualDataChangeTable({
           })}
         </TableBody>
       </Table>
+      <Title>
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h6'>Document Changes</Typography>
+        </Box>
+      </Title>
       <Table className={classes.table}>
         <TableHead>
           <TableRow>
@@ -222,11 +231,14 @@ export function RequestedIndividualDataChangeTable({
                 <TableCell align='left'>
                   <Checkbox
                     color='primary'
+                    onChange={(event) => {
+                      handleSelectDocument(index, event.target.checked);
+                    }}
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
-                    checked
-                    inputProps={{ 'aria-labelledby': 'xd' }}
+                    checked={selectedDocuments.includes(index)}
+                    inputProps={{ 'aria-labelledby': 'selected' }}
                   />
                 </TableCell>
                 <TableCell align='left'>
@@ -247,22 +259,25 @@ export function RequestedIndividualDataChangeTable({
               <TableRow>
                 <TableCell align='left'>
                   <Checkbox
+                    onChange={(event) => {
+                      handleSelectDocumentToRemove(index, event.target.checked);
+                    }}
                     color='primary'
                     disabled={
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
-                    checked
+                    checked={selectedDocumentsToRemove.includes(index)}
                     inputProps={{ 'aria-labelledby': 'xd' }}
                   />
                 </TableCell>
                 <TableCellStroke align='left'>
-                  {document.node.type.label}
+                  {document?.node?.type?.label || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document.node.type.country}
+                  {document?.node?.type?.country || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document.node.documentNumber}
+                  {document?.node?.documentNumber || '-'}
                 </TableCellStroke>
               </TableRow>
             );

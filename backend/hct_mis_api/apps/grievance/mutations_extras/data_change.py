@@ -287,7 +287,7 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     individual = ticket_details.individual
     household = individual.household
     individual_data = ticket_details.individual_data
-    role_data = individual_data.pop("role", ROLE_NO_ROLE)
+    role_data = individual_data.pop("role", {})
     documents = individual_data.pop("documents", [])
     documents_to_remove_encoded = individual_data.pop("documents_to_remove", [])
     documents_to_remove = [
