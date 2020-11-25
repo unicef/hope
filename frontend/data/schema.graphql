@@ -17,9 +17,9 @@ input AddIndividualDataObjectType {
   middleName: String
   familyName: String!
   sex: String!
-  birthDate: Date
+  birthDate: Date!
   estimatedBirthDate: Boolean
-  maritalStatus: String
+  maritalStatus: String!
   phoneNo: String
   phoneNoAlternative: String
   relationship: String
@@ -1341,9 +1341,9 @@ input IndividualDeleteIssueTypeExtras {
 }
 
 input IndividualDocumentObjectType {
-  country: String
-  type: String
-  number: String
+  country: String!
+  type: String!
+  number: String!
 }
 
 enum IndividualHearingDisability {
@@ -1393,7 +1393,7 @@ type IndividualNode implements Node {
   phoneNoAlternative: String!
   relationship: IndividualRelationship
   household: HouseholdNode
-  registrationDataImport: RegistrationDataImportNode!
+  registrationDataImport: RegistrationDataImportNode
   disability: Boolean!
   workStatus: IndividualWorkStatus
   firstRegistrationDate: Date!
