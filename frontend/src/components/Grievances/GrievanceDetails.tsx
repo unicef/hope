@@ -31,6 +31,7 @@ import { OtherRelatedTickets } from './OtherRelatedTickets';
 import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
 import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
+import { ReassignRoleBox } from './ReassignRoleBox';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -228,6 +229,20 @@ export function GrievanceDetails(): React.ReactElement {
           </Box>
         </Box>
       );
+    // if (
+    //   ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    //   ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+    // )
+    //   return (
+    //     <PaddingContainer>
+    //       <Box display='flex' flexDirection='column'>
+    //         <ReassignRoleBox
+    //           ticket={ticket}
+    //           linkedTickets={ticket.linkedTickets.edges}
+    //         />
+    //       </Box>
+    //     </PaddingContainer>
+    //   );
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>
@@ -261,20 +276,24 @@ export function GrievanceDetails(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
-          <PaddingContainer>
-            {ticket?.issueType?.toString() ===
-              GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
+            <PaddingContainer>
               <AddIndividualGrievanceDetails ticket={ticket} />
-            )}
-            {ticket?.issueType?.toString() ===
-              GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
+            <PaddingContainer>
               <RequestedIndividualDataChange ticket={ticket} />
-            )}
-            {ticket?.issueType?.toString() ===
-              GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
+            <PaddingContainer>
               <RequestedHouseholdDataChange ticket={ticket} />
-            )}
-          </PaddingContainer>
+            </PaddingContainer>
+          )}
           <PaddingContainer>
             <Notes notes={ticket.ticketNotes} />
           </PaddingContainer>
