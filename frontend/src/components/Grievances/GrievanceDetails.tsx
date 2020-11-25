@@ -224,7 +224,7 @@ export function GrievanceDetails(): React.ReactElement {
           <Box mt={6}>
             <OtherRelatedTickets
               ticket={ticket}
-              linkedTickets={ticket.linkedTickets.edges}
+              linkedTickets={ticket.relatedTickets}
             />
           </Box>
         </Box>
@@ -248,7 +248,7 @@ export function GrievanceDetails(): React.ReactElement {
         <Box display='flex' flexDirection='column'>
           <OtherRelatedTickets
             ticket={ticket}
-            linkedTickets={ticket.linkedTickets.edges}
+            linkedTickets={ticket.relatedTickets}
           />
         </Box>
       </PaddingContainer>

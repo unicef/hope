@@ -74,7 +74,16 @@ class GrievanceTicketFilter(FilterSet):
         model = GrievanceTicket
 
     order_by = OrderingFilter(
-        fields=("id", "status", "assigned_to__first_name", "category", "created_at", "households_count", "user_modified", "unicef_id")
+        fields=(
+            "id",
+            "status",
+            "assigned_to__first_name",
+            "category",
+            "created_at",
+            "households_count",
+            "user_modified",
+            "unicef_id",
+        )
     )
 
     def search_filter(self, qs, name, value):
@@ -106,7 +115,7 @@ class GrievanceTicketFilter(FilterSet):
 
 class ExistingGrievanceTicketFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
-    category = ChoiceFilter(field_name="category", required=True, choices=GrievanceTicket.CATEGORY_CHOICES)
+    category = ChoiceFilter(field_name="category", choices=GrievanceTicket.CATEGORY_CHOICES)
     issue_type = ChoiceFilter(field_name="issue_type", choices=GrievanceTicket.ALL_ISSUE_TYPES)
     household = ModelChoiceFilter(queryset=Household.objects.all())
     individual = ModelChoiceFilter(queryset=Individual.objects.all())
@@ -180,6 +189,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
     payment_record = graphene.Field(PaymentRecordNode)
+    related_tickets = graphene.List(lambda: GrievanceTicketNode)
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
@@ -194,6 +204,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         convert_choices_to_enum = False
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_household(grievance_ticket, info):
+        return grievance_ticket.related_tickets
 
     def resolve_household(grievance_ticket, info):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "household")

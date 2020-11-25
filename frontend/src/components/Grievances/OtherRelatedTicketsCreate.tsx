@@ -37,7 +37,6 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
   const { data, loading } = useExistingGrievanceTicketsQuery({
     variables: {
       businessArea,
-      category: values.category?.toString(),
       household:
         //TODO Janek to jeszcze kiedyś wymyśli
         decodeIdString(values?.selectedHousehold?.id) ||
