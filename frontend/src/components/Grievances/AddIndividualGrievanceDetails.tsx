@@ -1,11 +1,17 @@
-import { Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
 import {
+  GrievanceTicketDocument,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
+  useApproveAddIndividualDataChangeMutation,
+  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
+import { Formik } from 'formik';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -24,6 +30,7 @@ export function AddIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
+  const [mutate] = useApproveAddIndividualDataChangeMutation();
   if (loading) {
     return null;
   }
@@ -38,36 +45,70 @@ export function AddIndividualGrievanceDetails({
   const { documents } = ticket.addIndividualTicketDetails?.individualData;
   // eslint-disable-next-line no-param-reassign
   delete ticket.addIndividualTicketDetails?.individualData.documents;
-  const labels = Object.entries(
-    ticket.addIndividualTicketDetails?.individualData || {},
-  ).map(([key, value]) => {
-    let textValue = value;
-    const fieldAttribute = fieldsDict[key];
-    if (fieldAttribute.type === 'SELECT_ONE') {
-      textValue = fieldAttribute.choices.find((item) => item.value === value)
-        .labelEn;
-    }
-    return (
-      <Grid key={key} item xs={6}>
-        <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
-      </Grid>
-    );
-  });
-  const documentLabels = documents?.map((item) => {
-    return (
-      <Grid key={item.country + item.type} item xs={6}>
-        <LabelizedField
-          label={item.type.replace(/_/g, ' ')}
-          value={item.number}
-        />
-      </Grid>
-    );
-  });
+  const labels =
+    Object.entries(ticket.addIndividualTicketDetails?.individualData || {}).map(
+      ([key, value]) => {
+        let textValue = value;
+        const fieldAttribute = fieldsDict[key];
+        if (fieldAttribute.type === 'SELECT_ONE') {
+          textValue = fieldAttribute.choices.find(
+            (item) => item.value === value,
+          ).labelEn;
+        }
+        return (
+          <Grid key={key} item xs={6}>
+            <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
+          </Grid>
+        );
+      },
+    ) || [];
+  const documentLabels =
+    documents?.map((item) => {
+      return (
+        <Grid key={item.country + item.type} item xs={6}>
+          <LabelizedField
+            label={item.type.replace(/_/g, ' ')}
+            value={item.number}
+          />
+        </Grid>
+      );
+    }) || [];
   const allLabels = [...labels, ...documentLabels];
   return (
     <StyledBox>
       <Title>
-        <Typography variant='h6'>Individual Data</Typography>
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h6'>Individual Data</Typography>
+          <ConfirmationDialog title='Warning' content='Are you sure?'>
+            {(confirm) => (
+              <Button
+                onClick={confirm(() =>
+                  mutate({
+                    variables: {
+                      grievanceTicketId: ticket.id,
+                      approveStatus: true,
+                    },
+                    refetchQueries: () => [
+                      {
+                        query: GrievanceTicketDocument,
+                        variables: { id: ticket.id },
+                      },
+                    ],
+                  }),
+                )}
+                variant='contained'
+                color='primary'
+                disabled={
+                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                }
+              >
+                {ticket.addIndividualTicketDetails.approveStatus
+                  ? 'Unapprove'
+                  : 'Approve'}
+              </Button>
+            )}
+          </ConfirmationDialog>
+        </Box>
       </Title>
       <Grid container spacing={6}>
         {allLabels}

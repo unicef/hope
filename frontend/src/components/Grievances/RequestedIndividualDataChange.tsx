@@ -38,18 +38,30 @@ export function RequestedIndividualDataChange({
   const [mutate] = useApproveIndividualDataChangeMutation();
   return (
     <Formik
-      initialValues={{ selected: [] }}
+      initialValues={{
+        selected: [],
+        selectedDocuments: [],
+        selectedDocumentsToRemove: [],
+      }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
           // eslint-disable-next-line no-param-reassign
           prev[curr] = true;
           return prev;
         }, {});
+        const approvedDocumentsToCreate = values.selectedDocuments;
+        const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
         try {
           await mutate({
             variables: {
               grievanceTicketId: ticket.id,
               individualApproveData: JSON.stringify(individualApproveData),
+              // approvedDocumentsToCreate: JSON.stringify(
+              //   approvedDocumentsToCreate,
+              // ),
+              // approvedDocumentsToRemove: JSON.stringify(
+              //   approvedDocumentsToRemove,
+              // ),
             },
           });
           showMessage('Changes Approved');
@@ -73,7 +85,6 @@ export function RequestedIndividualDataChange({
                     variant='contained'
                     color='primary'
                     disabled={
-                      !values.selected.length ||
                       ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                     }
                   >
