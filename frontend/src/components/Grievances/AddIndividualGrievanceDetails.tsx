@@ -89,7 +89,8 @@ export function AddIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: true,
+                        approveStatus: !ticket.addIndividualTicketDetails
+                          .approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -98,7 +99,12 @@ export function AddIndividualGrievanceDetails({
                         },
                       ],
                     });
-                    showMessage('Changes Approved');
+                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage('Changes Disapproved');
+                    }
+                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage('Changes Approved');
+                    }
                   } catch (e) {
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
@@ -110,7 +116,7 @@ export function AddIndividualGrievanceDetails({
                 }
               >
                 {ticket.addIndividualTicketDetails.approveStatus
-                  ? 'Unapprove'
+                  ? 'Disapprove'
                   : 'Approve'}
               </Button>
             )}
