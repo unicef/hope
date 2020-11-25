@@ -75,32 +75,34 @@ export const OtherRelatedTickets = ({
   const renderRelatedIds = (tickets) =>
     tickets.length
       ? tickets.map((edge) => (
-        <Box key={edge.id} mb={1}>
-          <ContentLink
-            target='_blank'
-            rel='noopener noreferrer'
-            href={`/${businessArea}/grievance-and-feedback/${edge.id}`}
-          >
-            {decodeIdString(edge.id)}
-          </ContentLink>
-        </Box>
-      ))
+          <Box key={edge.id} mb={1}>
+            <ContentLink
+              target='_blank'
+              rel='noopener noreferrer'
+              href={`/${businessArea}/grievance-and-feedback/${edge.id}`}
+            >
+              {decodeIdString(edge.id)}
+            </ContentLink>
+          </Box>
+        ))
       : '-';
 
-  const openHouseholdTickets = householdTickets.length
-    ? householdTickets.filter(
-        (edge) =>
-          edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED &&
-          edge.node.id !== id,
-      )
-    : [];
-  const closedHouseholdTickets = householdTickets.length
-    ? householdTickets.filter(
-        (edge) =>
-          edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED &&
-          edge.node.id !== id,
-      )
-    : [];
+  const openHouseholdTickets =
+    ticket.household?.id && householdTickets.length
+      ? householdTickets.filter(
+          (edge) =>
+            edge.node.status !== GRIEVANCE_TICKET_STATES.CLOSED &&
+            edge.node.id !== id,
+        )
+      : [];
+  const closedHouseholdTickets =
+    ticket.household?.id && householdTickets.length
+      ? householdTickets.filter(
+          (edge) =>
+            edge.node.status === GRIEVANCE_TICKET_STATES.CLOSED &&
+            edge.node.id !== id,
+        )
+      : [];
 
   const openTickets = linkedTickets.length
     ? linkedTickets.filter(
