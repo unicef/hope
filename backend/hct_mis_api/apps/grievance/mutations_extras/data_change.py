@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -11,7 +13,7 @@ from grievance.models import (
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
 )
-from grievance.mutations_extras.utils import _handle_add_document, _handle_role
+from grievance.mutations_extras.utils import handle_add_document, handle_role, prepare_previous_documents
 from household.models import (
     Individual,
     Household,
@@ -176,6 +178,13 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     household_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
     }
+
+    for field, field_data in household_data_with_approve_status.items():
+        current_value = getattr(household, field, None)
+        if isinstance(current_value, (datetime, date)):
+            current_value = current_value.isoformat()
+        household_data_with_approve_status[field]["previous_value"] = current_value
+
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
         household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
     )
@@ -198,12 +207,23 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
     }
+
+    for field, field_data in individual_data_with_approve_status.items():
+        current_value = getattr(individual, field, None)
+        if isinstance(current_value, (datetime, date)):
+            current_value = current_value.isoformat()
+        individual_data_with_approve_status[field]["previous_value"] = current_value
+
     documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
     documents_to_remove_with_approve_status = [
         {"value": document_id, "approve_status": False} for document_id in documents_to_remove
     ]
     individual_data_with_approve_status["documents"] = documents_with_approve_status
     individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
+
+    individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
+        documents_to_remove_with_approve_status
+    )
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
         individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
     )
@@ -262,7 +282,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         **individual_data,
     )
 
-    documents_to_create = [_handle_add_document(document, individual) for document in documents]
+    documents_to_create = [handle_add_document(document, individual) for document in documents]
 
     relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
     if household:
@@ -277,7 +297,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         individual.relationship_to_head_of_household = ""
         individual.save()
 
-    _handle_role(role, household, individual)
+    handle_role(role, household, individual)
 
     Document.objects.bulk_create(documents_to_create)
 
@@ -299,7 +319,7 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     only_approved_data = {
         field: value_and_approve_status.get("value")
         for field, value_and_approve_status in individual_data.items()
-        if value_and_approve_status.get("approve_status") is True
+        if value_and_approve_status.get("approve_status") is True and field != "previous_documents"
     }
 
     Individual.objects.filter(id=individual.id).update(**only_approved_data)
@@ -311,10 +331,10 @@ def close_update_individual_grievance_ticket(grievance_ticket):
         household.save()
 
     if role_data.get("approve_status") is True:
-        _handle_role(role_data.get("value"), household, individual)
+        handle_role(role_data.get("value"), household, individual)
 
     documents_to_create = [
-        _handle_add_document(document_data["value"], individual)
+        handle_add_document(document_data["value"], individual)
         for document_data in documents
         if document_data["approve_status"] is True
     ]
