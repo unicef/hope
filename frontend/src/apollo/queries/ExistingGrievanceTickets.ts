@@ -8,8 +8,6 @@ export const ExistingGrievanceTickets = gql`
     $last: Int
     $id: UUID
     $businessArea: String!
-    $category: String!
-    $issueType: String
     $household: ID
     $individual: ID
     $paymentRecord: [ID]
@@ -22,8 +20,6 @@ export const ExistingGrievanceTickets = gql`
       last: $last
       id: $id
       businessArea: $businessArea
-      category: $category
-      issueType: $issueType
       household: $household
       individual: $individual
       paymentRecord: $paymentRecord
