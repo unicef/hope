@@ -35,7 +35,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Household Id',
-    id: 'household__unicef_id',
+    id: 'household_unicef_id',
     numeric: false,
     dataCy: 'householdId',
   },
