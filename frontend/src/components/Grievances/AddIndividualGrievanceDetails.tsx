@@ -53,7 +53,7 @@ export function AddIndividualGrievanceDetails({
       </Grid>
     );
   });
-  const documentLabels = documents.map((item) => {
+  const documentLabels = documents?.map((item) => {
     return (
       <Grid key={item.country + item.type} item xs={6}>
         <LabelizedField

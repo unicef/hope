@@ -18,19 +18,21 @@ import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { LabelizedField } from '../LabelizedField';
-import { DocumentField } from './DocumentField';
+import { NewDocumentFieldArray } from './NewDocumentFieldArray';
+import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
-const AddIcon = styled(AddCircleOutline)`
-  margin-right: 10px;
-`;
 const BoxWithBorders = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   padding: 15px 0;
+`;
+
+const AddIcon = styled(AddCircleOutline)`
+  margin-right: 10px;
 `;
 
 export interface EditIndividualDataChangeField {
@@ -187,11 +189,13 @@ export const EditIndividualDataChangeFieldRow = ({
     </>
   );
 };
+
 export interface EditIndividualDataChangeProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
   values;
   setFieldValue;
 }
+
 export const EditIndividualDataChange = ({
   individual,
   values,
@@ -210,9 +214,9 @@ export const EditIndividualDataChange = ({
     setFieldValue('individualDataUpdateFields', [
       { fieldName: null, fieldValue: null },
     ]);
-    setFieldValue('individualDataUpdateFields.documents', [
-      { fieldName: null, fieldValue: null },
-    ]);
+    // setFieldValue('individualDataUpdateFields.documents', [
+    //   { fieldName: null, fieldValue: null },
+    // ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
@@ -231,7 +235,7 @@ export const EditIndividualDataChange = ({
         <Title>
           <Typography variant='h6'>Bio Data</Typography>
         </Title>
-        <Grid container spacing={3}>
+        <Grid container spacing={3} >
           <FieldArray
             name='individualDataUpdateFields'
             render={(arrayHelpers) => (
@@ -268,49 +272,15 @@ export const EditIndividualDataChange = ({
         <Title>
           <Typography variant='h6'>Documents</Typography>
         </Title>
-        <Grid container spacing={3}>
-          <FieldArray
-            name='individualDataUpdateFields.documents'
-            render={(arrayHelpers) => {
-              return (
-                <>
-                  {values.individualDataUpdateFields?.documents?.map(
-                    (item, index) => (
-                      <DocumentField
-                        index={index}
-                        onDelete={() => arrayHelpers.remove(index)}
-                        countryChoices={
-                          addIndividualFieldsData.countriesChoices
-                        }
-                        documentTypeChoices={
-                          addIndividualFieldsData.documentTypeChoices
-                        }
-                        baseName='individualDataUpdateFields'
-                      />
-                    ),
-                  )}
-
-                  <Grid item xs={8} />
-                  <Grid item xs={12}>
-                    <Button
-                      color='primary'
-                      onClick={() => {
-                        arrayHelpers.push({
-                          country: null,
-                          type: null,
-                          number: '',
-                        });
-                      }}
-                    >
-                      <AddIcon />
-                      Add Document
-                    </Button>
-                  </Grid>
-                </>
-              );
-            }}
-          />
-        </Grid>
+        <ExistingDocumentFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewDocumentFieldArray
+          values={values}
+          addIndividualFieldsData={addIndividualFieldsData}
+        />
       </Box>
     </>
   );

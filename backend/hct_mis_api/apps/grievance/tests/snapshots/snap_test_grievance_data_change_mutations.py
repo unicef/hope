@@ -17,9 +17,11 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'individualData': {
+                            'birth_date': '1980-02-01',
                             'family_name': 'Romaniak',
                             'full_name': 'Test Test',
                             'given_name': 'Test',
+                            'marital_status': 'SINGLE',
                             'sex': 'MALE'
                         }
                     },
@@ -95,6 +97,14 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'fullName': 'Benjamin Butler'
                         },
                         'individualData': {
+                            'birth_date': {
+                                'approve_status': False,
+                                'value': '1980-02-01'
+                            },
+                            'documents': [
+                            ],
+                            'documents_to_remove': [
+                            ],
                             'full_name': {
                                 'approve_status': False,
                                 'value': 'Test Test'
@@ -102,6 +112,10 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             'given_name': {
                                 'approve_status': False,
                                 'value': 'Test'
+                            },
+                            'marital_status': {
+                                'approve_status': False,
+                                'value': 'SINGLE'
                             },
                             'sex': {
                                 'approve_status': False,

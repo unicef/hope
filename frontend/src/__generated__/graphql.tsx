@@ -1980,6 +1980,8 @@ export type IndividualUpdateDataObjectType = {
   whoAnswersPhone?: Maybe<Scalars['String']>,
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
+  documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
+  documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
 };
 
 export enum IndividualWorkStatus {
@@ -4393,10 +4395,10 @@ export type IndividualDetailedFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
-          & Pick<DocumentTypeNode, 'label'>
+          & Pick<DocumentTypeNode, 'country' | 'label'>
         ) }
       )> }
     )>> }
@@ -6627,7 +6629,9 @@ export const IndividualDetailedFragmentDoc = gql`
   documents {
     edges {
       node {
+        id
         type {
+          country
           label
         }
         documentNumber
@@ -12414,10 +12418,10 @@ export type ResolversTypes = {
   HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
-  IndividualDocumentObjectType: IndividualDocumentObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
@@ -12696,10 +12700,10 @@ export type ResolversParentTypes = {
   HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
-  IndividualDocumentObjectType: IndividualDocumentObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
