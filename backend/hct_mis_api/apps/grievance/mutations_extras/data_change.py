@@ -1,6 +1,7 @@
 import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django_countries.fields import Country
 from graphene.utils.str_converters import to_snake_case
 
 from core.utils import decode_id_string
@@ -326,7 +327,12 @@ def close_update_household_grievance_ticket(grievance_ticket):
     ticket_details = grievance_ticket.household_data_update_ticket_details
     household = ticket_details.household
     household_data = ticket_details.household_data
-
+    country_origin = household_data.get("country_origin",{})
+    if country_origin.get("value") is not None:
+        household_data["country_origin"]["value"] = Country(country_origin.get("value"))
+    country = household_data.get("country",{})
+    if country.get("value") is not None:
+        household_data["country"]["value"] = Country(country.get("value"))
     only_approved_data = {
         field: value_and_approve_status.get("value")
         for field, value_and_approve_status in household_data.items()
