@@ -8,9 +8,7 @@ import {
 import { Formik } from 'formik';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { selectFields } from '../../utils/utils';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { stringify } from 'querystring';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import mapKeys from 'lodash/mapKeys';
 import camelCase from 'lodash/camelCase';
