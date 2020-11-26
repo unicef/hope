@@ -25,13 +25,13 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
+import { decodeIdString, renderUserName } from '../../utils/utils';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
-import { decodeIdString, renderUserName } from '../../utils/utils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;

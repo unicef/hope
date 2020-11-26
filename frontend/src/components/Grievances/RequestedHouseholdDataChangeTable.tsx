@@ -6,17 +6,15 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import mapKeys from 'lodash/mapKeys';
+import { Checkbox, makeStyles } from '@material-ui/core';
 import {
-  AllAddIndividualFieldsQuery,
   AllEditHouseholdFieldsQuery,
   GrievanceTicketQuery,
-  useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
 } from '../../__generated__/graphql';
-import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import mapKeys from 'lodash/mapKeys';
 import { useArrayToDict } from '../../hooks/useArrayToDict';
 
 const Capitalize = styled.span`

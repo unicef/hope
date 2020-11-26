@@ -11,6 +11,7 @@ import { useSnackbar } from '../hooks/useSnackBar';
 import { GrievanceDetails } from '../components/Grievances/GrievanceDetails';
 import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
 import { CreateGrievance } from '../components/Grievances/CreateGrievance';
+import { EditGrievance } from '../components/Grievances/EditGrievance';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
@@ -31,7 +32,6 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
-import { EditGrievance } from '../components/Grievances/EditGrievance';
 
 const Root = styled.div`
   display: flex;

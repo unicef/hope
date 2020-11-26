@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -36,12 +36,6 @@ import { ReassignRoleBox } from './ReassignRoleBox';
 
 const PaddingContainer = styled.div`
   padding: 22px;
-`;
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
 `;
 
 const Title = styled.div`
