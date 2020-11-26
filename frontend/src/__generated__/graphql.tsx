@@ -5611,6 +5611,17 @@ export type GrievanceTicketQuery = (
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, individual: Maybe<(
       { __typename?: 'IndividualNode' }
+      & { householdsAndRoles: Array<(
+        { __typename?: 'IndividualRoleInHouseholdNode' }
+        & Pick<IndividualRoleInHouseholdNode, 'role'>
+        & { individual: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'unicefId'>
+        ), household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        ) }
+      )> }
       & IndividualDetailedFragment
     )>, household: Maybe<(
       { __typename?: 'HouseholdNode' }
@@ -10000,6 +10011,17 @@ export const GrievanceTicketDocument = gql`
     }
     individual {
       ...individualDetailed
+      householdsAndRoles {
+        individual {
+          id
+          unicefId
+        }
+        household {
+          id
+          unicefId
+        }
+        role
+      }
     }
     household {
       ...householdDetailed
