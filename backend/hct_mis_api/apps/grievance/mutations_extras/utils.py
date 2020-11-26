@@ -46,3 +46,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
         }
 
     return previous_documents
+
+
+def get_role_data_key(household_id, individual_id, role):
+    return f"hh_{household_id}__ind_{individual_id}__r_{role}"
