@@ -229,20 +229,17 @@ export function GrievanceDetails(): React.ReactElement {
           </Box>
         </Box>
       );
-    // if (
-    //   ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    //   ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
-    // )
-    //   return (
-    //     <PaddingContainer>
-    //       <Box display='flex' flexDirection='column'>
-    //         <ReassignRoleBox
-    //           ticket={ticket}
-    //           linkedTickets={ticket.linkedTickets.edges}
-    //         />
-    //       </Box>
-    //     </PaddingContainer>
-    //   );
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+    )
+      return (
+        <PaddingContainer>
+          <Box display='flex' flexDirection='column'>
+            <ReassignRoleBox ticket={ticket} />
+          </Box>
+        </PaddingContainer>
+      );
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>

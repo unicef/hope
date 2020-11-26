@@ -43,15 +43,14 @@ export function RequestedIndividualDataChange({
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < individualData.documents.length; i++) {
-    if (individualData.documents[i].approve_status) {
+  for (let i = 0; i < individualData?.documents?.length; i++) {
+    if (individualData?.documents[i]?.approve_status) {
       selectedDocuments.push(i);
     }
   }
-  console.log('individualData', individualData);
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < individualData.documents_to_remove.length; i++) {
-    if (individualData.documents_to_remove[i].approve_status) {
+  for (let i = 0; i < individualData?.documents_to_remove?.length; i++) {
+    if (individualData?.documents_to_remove[i]?.approve_status) {
       selectedDocumentsToRemove.push(i);
     }
   }
