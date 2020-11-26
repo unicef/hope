@@ -126,9 +126,9 @@ export function CreateGrievance(): React.ReactElement {
   const [mutate] = useCreateGrievanceMutation();
   const {
     data: allAddIndividualFieldsData,
-    loading,
+    loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  if (userDataLoading || choicesLoading) {
+  if (userDataLoading || choicesLoading || allAddIndividualFieldsDataLoading) {
     return <LoadingComponent />;
   }
   if (!choicesData || !userData) return null;

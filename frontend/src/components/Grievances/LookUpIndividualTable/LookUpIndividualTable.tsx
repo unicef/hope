@@ -5,7 +5,6 @@ import { decodeIdString } from '../../../utils/utils';
 import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
-  IndividualNode,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
 import { headCells } from './LookUpIndividualTableHeadCells';

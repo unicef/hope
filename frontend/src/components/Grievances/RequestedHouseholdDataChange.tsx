@@ -1,15 +1,15 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
+import { Formik } from 'formik';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
 } from '../../__generated__/graphql';
-import { Formik } from 'formik';
-import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { RequestedHouseholdDataChangeTable } from './RequestedHouseholdDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;
