@@ -17,6 +17,7 @@ import { Checkbox, makeStyles } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import mapKeys from 'lodash/mapKeys';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
@@ -102,19 +103,15 @@ export function RequestedHouseholdDataChangeTable({
     setSelected(localSelected);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticket]);
-
-  if (loading) {
+  const fieldsDict = useArrayToDict(
+    data?.allEditHouseholdFieldsAttributes,
+    'name',
+    '*',
+  );
+  const countriesDict = useArrayToDict(data?.countriesChoices, 'value', 'name');
+  if (loading || !fieldsDict || !countriesDict) {
     return <LoadingComponent />;
   }
-
-  const fieldsDict = data.allEditHouseholdFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
-  );
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
@@ -146,22 +143,34 @@ export function RequestedHouseholdDataChangeTable({
           <TableRow>
             <TableCell align='left' />
             <TableCell align='left'>Type of Data</TableCell>
-            <TableCell align='left'>Current Value</TableCell>
+            <TableCell align='left'>
+              {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? 'Previous'
+                : 'Current'}{' '}
+              Value
+            </TableCell>
             <TableCell align='left'>New Value</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {entries.map((row, index) => {
             const fieldName = camelCase(row[0]);
+            const field = fieldsDict[row[0]];
             const isItemSelected = isSelected(fieldName);
             const labelId = `enhanced-table-checkbox-${index}`;
-            const currentValue =
-              ticket.householdDataUpdateTicketDetails.household[fieldName];
-            const field = fieldsDict[row[0]];
             const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
               value: string;
+              previousValue: string;
               approveStatus: boolean;
             };
+            const previousValue =
+              fieldName === 'country' || fieldName === 'countryOrigin'
+                ? countriesDict[valueDetails.previousValue]
+                : valueDetails.previousValue;
+            const currentValue =
+              ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? previousValue
+                : ticket.householdDataUpdateTicketDetails.household[fieldName];
             return (
               <TableRow
                 role='checkbox'

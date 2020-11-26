@@ -1,3 +1,6 @@
+from core.utils import decode_id_string
+
+
 def handle_role(role, household, individual):
     from household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
 
@@ -35,10 +38,10 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
 
     previous_documents = {}
     for document_data in documents_to_remove_with_approve_status:
-        document_id = document_data.get("value")
+        document_id = decode_id_string(document_data.get("value"))
         document = get_object_or_404(Document, id=document_id)
-        previous_documents[encode_id_base64(document.id, "GrievanceTicket")] = {
-            "id": encode_id_base64(document.id, "GrievanceTicketNode"),
+        previous_documents[encode_id_base64(document.id, "Document")] = {
+            "id": encode_id_base64(document.id, "Document"),
             "document_number": document.document_number,
             "individual": encode_id_base64(document.individual.id, "Individual"),
             "label": document.type.label,

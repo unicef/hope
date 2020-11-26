@@ -97,11 +97,14 @@ export function RequestedIndividualDataChangeTable({
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
   const { documents } = individualData;
+  const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents;
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents_to_remove;
+  // eslint-disable-next-line no-param-reassign
+  delete individualData.previous_documents;
   const entries = Object.entries(individualData);
 
   const fieldsDict = useArrayToDict(
@@ -161,7 +164,12 @@ export function RequestedIndividualDataChangeTable({
           <TableRow>
             <TableCell align='left' />
             <TableCell align='left'>Type of Data</TableCell>
-            <TableCell align='left'>Current Value</TableCell>
+            <TableCell align='left'>
+              {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? 'Previous'
+                : 'Current'}{' '}
+              Value
+            </TableCell>
             <TableCell align='left'>New Value</TableCell>
           </TableRow>
         </TableHead>
@@ -170,13 +178,18 @@ export function RequestedIndividualDataChangeTable({
             const fieldName = camelCase(row[0]);
             const isItemSelected = isSelected(fieldName);
             const labelId = `enhanced-table-checkbox-${index}`;
-            const currentValue =
-              ticket.individualDataUpdateTicketDetails.individual[fieldName];
-            const field = fieldsDict[row[0]];
             const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
               value: string;
+              previousValue: string;
               approveStatus: boolean;
             };
+            const currentValue =
+              ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? valueDetails.previousValue
+                : ticket.individualDataUpdateTicketDetails.individual[
+                    fieldName
+                  ];
+            const field = fieldsDict[row[0]];
             return (
               <TableRow
                 role='checkbox'
@@ -252,9 +265,8 @@ export function RequestedIndividualDataChangeTable({
             );
           })}
           {documentsToRemove?.map((row, index) => {
-            const document = ticket.individualDataUpdateTicketDetails.individual.documents.edges.find(
-              (item) => item.node.id === row.value,
-            );
+            const document = previousDocuments[row.value];
+            console.log('document', document);
             return (
               <TableRow>
                 <TableCell align='left'>
@@ -271,13 +283,13 @@ export function RequestedIndividualDataChangeTable({
                   />
                 </TableCell>
                 <TableCellStroke align='left'>
-                  {document?.node?.type?.label || '-'}
+                  {document?.label || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document?.node?.type?.country || '-'}
+                  {countriesDict[document?.country] || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document?.node?.documentNumber || '-'}
+                  {document?.document_number || '-'}
                 </TableCellStroke>
               </TableRow>
             );

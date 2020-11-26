@@ -26,5 +26,9 @@ export const AllEditHouseholdFields = gql`
         listName
       }
     }
+    countriesChoices {
+      name
+      value
+    }
   }
 `;

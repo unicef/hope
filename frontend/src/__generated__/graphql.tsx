@@ -5146,6 +5146,9 @@ export type AllEditHouseholdFieldsQuery = (
         & Pick<LabelNode, 'label' | 'language'>
       )>>> }
     )>>> }
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -8914,6 +8917,10 @@ export const AllEditHouseholdFieldsDocument = gql`
       admin
       listName
     }
+  }
+  countriesChoices {
+    name
+    value
   }
 }
     `;
