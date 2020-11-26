@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   Box,
@@ -7,24 +8,17 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Tab,
-  Tabs,
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
-import { TabPanel } from '../../TabPanel';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   ProgramNode,
   useAllProgramsQuery,
-  useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
-import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -36,27 +30,13 @@ const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const StyledTabs = styled(Tabs)`
-  && {
-    max-width: 500px;
-  }
-`;
-
 export const LookUpReassignRoleModal = ({
   onValueChange,
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
 }): React.ReactElement => {
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [filterHousehold, setFilterHousehold] = useState({
-    search: '',
-    programs: [],
-    lastRegistrationDate: { min: undefined, max: undefined },
-    residenceStatus: '',
-    size: { min: undefined, max: undefined },
-    admin2: '',
-  });
+  const { id } = useParams();
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
     program: '',
@@ -65,26 +45,19 @@ export const LookUpReassignRoleModal = ({
     admin2: '',
     sex: '',
   });
-  const debouncedFilterHousehold = useDebounce(filterHousehold, 500);
   const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
   });
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery({
-    variables: { businessArea },
-  });
-  if (loading || choicesLoading) return null;
+
+  if (loading) return null;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
 
   const handleCancel = (): void => {
     setLookUpDialogOpen(false);
-    setSelectedTab(0);
   };
   return (
     <Formik
@@ -93,6 +66,13 @@ export const LookUpReassignRoleModal = ({
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
+        const variables = {
+          grievanceTicketId: id,
+          householdId: values.selectedHousehold.id,
+          individuald: values.selectedIndividual.id,
+          role: values.selectedIndividual.role,
+        };
+        console.log('submit variables in nonexisting mutation', variables);
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
@@ -105,58 +85,21 @@ export const LookUpReassignRoleModal = ({
           aria-labelledby='form-dialog-title'
         >
           <DialogTitleWrapper>
-            <DialogTitle id='scroll-dialog-title'>
-              <StyledTabs
-                value={selectedTab}
-                onChange={(event: React.ChangeEvent<{}>, newValue: number) => {
-                  setSelectedTab(newValue);
-                }}
-                indicatorColor='primary'
-                textColor='primary'
-                variant='fullWidth'
-                aria-label='look up tabs'
-              >
-                <Tab label='LOOK UP HOUSEHOLD' />
-                <Tab
-                  disabled={
-                    initialValues.issueType ===
-                    GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-                  }
-                  label='LOOK UP INDIVIDUAL'
-                />
-              </StyledTabs>
-            </DialogTitle>
+            <DialogTitle id='scroll-dialog-title'>Reassign Role</DialogTitle>
           </DialogTitleWrapper>
           <DialogContent>
-            <TabPanel value={selectedTab} index={0}>
-              <LookUpHouseholdFilters
-                programs={programs as ProgramNode[]}
-                filter={debouncedFilterHousehold}
-                onFilterChange={setFilterHousehold}
-                choicesData={choicesData}
-              />
-              <LookUpHouseholdTable
-                filter={debouncedFilterHousehold}
-                businessArea={businessArea}
-                choicesData={choicesData}
-                setFieldValue={setFieldValue}
-                initialValues={initialValues}
-              />
-            </TabPanel>
-            <TabPanel value={selectedTab} index={1}>
-              <LookUpIndividualFilters
-                programs={programs as ProgramNode[]}
-                filter={debouncedFilterIndividual}
-                onFilterChange={setFilterIndividual}
-              />
-              <LookUpIndividualTable
-                filter={debouncedFilterIndividual}
-                businessArea={businessArea}
-                setFieldValue={setFieldValue}
-                initialValues={initialValues}
-                valuesInner={values}
-              />
-            </TabPanel>
+            <LookUpIndividualFilters
+              programs={programs as ProgramNode[]}
+              filter={debouncedFilterIndividual}
+              onFilterChange={setFilterIndividual}
+            />
+            <LookUpIndividualTable
+              filter={debouncedFilterIndividual}
+              businessArea={businessArea}
+              setFieldValue={setFieldValue}
+              initialValues={initialValues}
+              valuesInner={values}
+            />
           </DialogContent>
           <DialogFooter>
             <DialogActions>

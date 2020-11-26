@@ -20,6 +20,7 @@ import {
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
@@ -231,7 +232,8 @@ export function GrievanceDetails(): React.ReactElement {
       );
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
     )
       return (
         <PaddingContainer>

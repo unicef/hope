@@ -140,11 +140,15 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink
-              href={`/${businessArea}/population/household/${individual.household.id}`}
-            >
-              {individual.household.unicefId}
-            </ContentLink>
+            {individual.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/population/household/${individual.household?.id}`}
+              >
+                {individual.household?.unicefId}
+              </ContentLink>
+            ) : (
+              <span>-</span>
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

@@ -53,10 +53,7 @@ export const LookUpReassignRoleDisplay = ({
             </span>
             <span>
               Individual ID:
-              <BlueText>
-                {' '}
-                {values?.selectedIndividual?.unicefId || '-'}
-              </BlueText>
+              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
