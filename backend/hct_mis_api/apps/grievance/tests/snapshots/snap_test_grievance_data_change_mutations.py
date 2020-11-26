@@ -119,14 +119,14 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             },
                             'marital_status': {
                                 'approve_status': False,
-                                'previous_value': 'SEPARATED',
+                                'previous_value': 'WIDOWED',
                                 'value': 'SINGLE'
                             },
                             'previous_documents': {
                             },
                             'sex': {
                                 'approve_status': False,
-                                'previous_value': 'MALE',
+                                'previous_value': 'FEMALE',
                                 'value': 'MALE'
                             }
                         }
