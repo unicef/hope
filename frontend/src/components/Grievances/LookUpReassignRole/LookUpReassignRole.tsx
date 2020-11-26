@@ -8,18 +8,24 @@ import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
 export const LookUpReassignRole = ({
   household,
 }: {
-  household: GrievanceTicketQuery['grievanceTicket']['household'];
+  household:
+    | GrievanceTicketQuery['grievanceTicket']['household']
+    | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
   return (
     <Formik
-      initialValues={{ selectedIndividual: null, selectedHousehold: null }}
-      onSubmit={(values) => console.log(values)}
+      initialValues={{
+        selectedIndividual: null,
+        selectedHousehold: household || null,
+        role: '',
+      }}
+      onSubmit={null}
     >
-      {({ submitForm, setFieldValue, values }) => (
+      {({ setFieldValue, values }) => (
         <>
-          {values.selectedHousehold || values.selectedIndividual ? (
+          {values.selectedIndividual ? (
             <LookUpReassignRoleDisplay
               setLookUpDialogOpen={setLookUpDialogOpen}
               values={values}
@@ -36,7 +42,6 @@ export const LookUpReassignRole = ({
             setLookUpDialogOpen={setLookUpDialogOpen}
             initialValues={values}
             onValueChange={setFieldValue}
-            // submitForm={submitForm}
           />
         </>
       )}
