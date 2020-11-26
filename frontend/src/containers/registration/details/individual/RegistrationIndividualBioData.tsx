@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import {
   decodeIdString,
   getAgeFromDob,
@@ -38,7 +37,6 @@ interface RegistrationIndividualBioDataProps {
 export function RegistrationIndividualsBioData({
   individual,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   let age: number | null;

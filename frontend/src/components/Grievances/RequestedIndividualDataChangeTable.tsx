@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import camelCase from 'lodash/camelCase';
@@ -6,24 +6,16 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import mapKeys from 'lodash/mapKeys';
+import { Box, Checkbox, makeStyles, Typography } from '@material-ui/core';
+import { LoadingComponent } from '../LoadingComponent';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
-  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import mapKeys from 'lodash/mapKeys';
-import {
-  Box,
-  Button,
-  Checkbox,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
-import { LoadingComponent } from '../LoadingComponent';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
