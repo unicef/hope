@@ -35,6 +35,17 @@ export const GrievanceTicket = gql`
       }
       individual {
         ...individualDetailed
+        householdsAndRoles {
+          individual {
+            id
+            unicefId
+          }
+          household {
+            id
+            unicefId
+          }
+          role
+        }
       }
       household {
         ...householdDetailed
