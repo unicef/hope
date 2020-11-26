@@ -12,6 +12,7 @@ import { LabelizedField } from '../LabelizedField';
 import { Formik } from 'formik';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -30,6 +31,7 @@ export function AddIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
+  const { showMessage } = useSnackbar();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
   if (loading) {
     return null;
@@ -82,20 +84,31 @@ export function AddIndividualGrievanceDetails({
           <ConfirmationDialog title='Warning' content='Are you sure?'>
             {(confirm) => (
               <Button
-                onClick={confirm(() =>
-                  mutate({
-                    variables: {
-                      grievanceTicketId: ticket.id,
-                      approveStatus: true,
-                    },
-                    refetchQueries: () => [
-                      {
-                        query: GrievanceTicketDocument,
-                        variables: { id: ticket.id },
+                onClick={confirm(async () => {
+                  try {
+                    await mutate({
+                      variables: {
+                        grievanceTicketId: ticket.id,
+                        approveStatus: !ticket.addIndividualTicketDetails
+                          .approveStatus,
                       },
-                    ],
-                  }),
-                )}
+                      refetchQueries: () => [
+                        {
+                          query: GrievanceTicketDocument,
+                          variables: { id: ticket.id },
+                        },
+                      ],
+                    });
+                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage('Changes Disapproved');
+                    }
+                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                      showMessage('Changes Approved');
+                    }
+                  } catch (e) {
+                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  }
+                })}
                 variant='contained'
                 color='primary'
                 disabled={
@@ -103,7 +116,7 @@ export function AddIndividualGrievanceDetails({
                 }
               >
                 {ticket.addIndividualTicketDetails.approveStatus
-                  ? 'Unapprove'
+                  ? 'Disapprove'
                   : 'Approve'}
               </Button>
             )}
