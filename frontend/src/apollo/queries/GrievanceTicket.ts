@@ -76,6 +76,7 @@ export const GrievanceTicket = gql`
           ...individualDetailed
         }
         individualData
+        
       }
       householdDataUpdateTicketDetails {
         id
