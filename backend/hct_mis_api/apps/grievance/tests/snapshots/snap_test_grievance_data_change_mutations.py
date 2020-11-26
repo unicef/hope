@@ -70,6 +70,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                         'householdData': {
                             'female_age_group_6_11_count': {
                                 'approve_status': False,
+                                'previous_value': 0,
                                 'value': 14
                             }
                         }
@@ -99,6 +100,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                         'individualData': {
                             'birth_date': {
                                 'approve_status': False,
+                                'previous_value': '1943-07-30',
                                 'value': '1980-02-01'
                             },
                             'documents': [
@@ -107,18 +109,24 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             ],
                             'full_name': {
                                 'approve_status': False,
+                                'previous_value': 'Benjamin Butler',
                                 'value': 'Test Test'
                             },
                             'given_name': {
                                 'approve_status': False,
+                                'previous_value': 'Benjamin',
                                 'value': 'Test'
                             },
                             'marital_status': {
                                 'approve_status': False,
+                                'previous_value': 'WIDOWED',
                                 'value': 'SINGLE'
+                            },
+                            'previous_documents': {
                             },
                             'sex': {
                                 'approve_status': False,
+                                'previous_value': 'FEMALE',
                                 'value': 'MALE'
                             }
                         }
