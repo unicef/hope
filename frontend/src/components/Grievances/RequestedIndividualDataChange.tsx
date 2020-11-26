@@ -1,17 +1,17 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
+import { Formik } from 'formik';
+import mapKeys from 'lodash/mapKeys';
+import camelCase from 'lodash/camelCase';
+import { ConfirmationDialog } from '../ConfirmationDialog';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   GrievanceTicketQuery,
   useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { Formik } from 'formik';
-import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
-import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import mapKeys from 'lodash/mapKeys';
-import camelCase from 'lodash/camelCase';
+import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
 
 const StyledBox = styled(Paper)`
   display: flex;
