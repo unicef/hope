@@ -8,7 +8,7 @@ from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE
+from household.models import SINGLE, FEMALE, WIDOWED
 from program.fixtures import ProgramFactory
 
 
@@ -83,6 +83,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
+                "sex": FEMALE,
+                "marital_status": WIDOWED,
             },
             {
                 "full_name": "Robin Ford",
@@ -90,6 +92,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+                "sex": FEMALE,
+                "marital_status": WIDOWED,
             },
             {
                 "full_name": "Timothy Perry",
@@ -97,6 +101,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "family_name": "Perry",
                 "phone_no": "(548)313-1700-902",
                 "birth_date": "1983-12-21",
+                "sex": FEMALE,
+                "marital_status": WIDOWED,
             },
             {
                 "full_name": "Eric Torres",
@@ -104,6 +110,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "family_name": "Torres",
                 "phone_no": "(228)231-5473",
                 "birth_date": "1973-03-23",
+                "sex": FEMALE,
+                "marital_status": WIDOWED,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -111,6 +119,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "family_name": "Franklin",
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
+                "sex": FEMALE,
+                "marital_status": WIDOWED,
             },
         ]
 
