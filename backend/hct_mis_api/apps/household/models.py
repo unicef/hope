@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from django.contrib.gis.db.models import PointField
+from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
+from model_utils.managers import SoftDeletableManager
+from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -267,11 +269,14 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label} in {self.country}"
 
 
-class Document(TimeStampedUUIDModel):
+class Document(SoftDeletableModel, TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+
+    objects = models.Manager()
+    existing_objects = SoftDeletableManager()
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -279,6 +284,13 @@ class Document(TimeStampedUUIDModel):
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["document_number", "type"], condition=Q(is_removed=False), name="unique_if_not_removed"
+            )
+        ]
 
 
 class Agency(models.Model):
