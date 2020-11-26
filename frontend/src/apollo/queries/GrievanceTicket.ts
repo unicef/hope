@@ -1,12 +1,4 @@
 import { gql } from 'apollo-boost';
-import {
-  individualDetailed,
-  individualMinimal,
-} from '../fragments/IndividualFragments';
-import {
-  householdDetailed,
-  householdMinimal,
-} from '../fragments/HouseholdFragments';
 
 export const GrievanceTicket = gql`
   query GrievanceTicket($id: ID!) {
@@ -76,7 +68,6 @@ export const GrievanceTicket = gql`
           ...individualDetailed
         }
         individualData
-        
       }
       householdDataUpdateTicketDetails {
         id
