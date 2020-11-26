@@ -1,6 +1,7 @@
 import graphene
 from django.db import models
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from django_filters import (
     FilterSet,
     CharFilter,
@@ -82,9 +83,23 @@ class GrievanceTicketFilter(FilterSet):
             "created_at",
             "households_count",
             "user_modified",
-            "unicef_id",
+            "household_unicef_id",
         )
     )
+
+    @property
+    def qs(self):
+        return super().qs.annotate(
+            household_unicef_id=Coalesce(
+                "complaint_ticket_details__household__unicef_id",
+                "sensitive_ticket_details__household__unicef_id",
+                "sensitive_ticket_details__household__unicef_id",
+                "individual_data_update_ticket_details__individual__household__unicef_id",
+                "add_individual_ticket_details__household__unicef_id",
+                "household_data_update_ticket_details__household__unicef_id",
+                "delete_individual_ticket_details__individual__household__unicef_id",
+            )
+        )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -155,12 +170,9 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset.model.objects.none()
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(
-                queryset, models.QuerySet
-            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
-                type(self).__name__,
-                name,
-                type(queryset).__name__,
+            assert isinstance(queryset, models.QuerySet), (
+                "Expected '%s.%s' to return a QuerySet, but got a %s instead."
+                % (type(self).__name__, name, type(queryset).__name__,)
             )
 
         if payment_record_objects:
@@ -314,18 +326,9 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(
-        TicketNoteNode,
-        filterset_class=TicketNoteFilter,
-    )
-    all_add_individuals_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        description="All field datatype meta.",
-    )
-    all_edit_household_fields_attributes = graphene.List(
-        FieldAttributeNode,
-        description="All field datatype meta.",
-    )
+    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
+    all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
+    all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
     grievance_ticket_category_choices = graphene.List(ChoiceObject)
     grievance_ticket_manual_category_choices = graphene.List(ChoiceObject)
