@@ -17,15 +17,13 @@ class TestRoleReassignMutation(APITestCase):
       $grievanceTicketId: ID!, 
       $householdId: ID!, 
       $individualId: ID!, 
-      $role: String!,
-      $previouslyAssignedIndividualId: ID
+      $role: String!
     ) {
       reassignRole(
         grievanceTicketId: $grievanceTicketId, 
         householdId: $householdId, 
         individualId: $individualId, 
-        role: $role,
-        previouslyAssignedIndividualId: $previouslyAssignedIndividualId
+        role: $role
       ) {
         household {
           id
@@ -104,7 +102,7 @@ class TestRoleReassignMutation(APITestCase):
         role_reassign_data = ticket_details.role_reassign_data
 
         expected_data = {
-            "hh_b5cb9bb2-a4f3-49f0-a9c8-a2f260026054__ind_d4848d8e-4a1c-49e9-b1c0-1e994047164a__r_PRIMARY": {
+            str(self.role.id): {
                 "role": "PRIMARY",
                 "household": "b5cb9bb2-a4f3-49f0-a9c8-a2f260026054",
                 "individual": "d4848d8e-4a1c-49e9-b1c0-1e994047164a",
