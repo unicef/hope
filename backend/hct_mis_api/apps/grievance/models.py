@@ -121,6 +121,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         "individual_data_update_ticket_details": ("individual", {"household": "household"}),
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
+        "delete_individual_ticket_details": ("individual",),
     }
 
     user_modified = models.DateTimeField(

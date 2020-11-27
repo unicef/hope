@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import camelCase from 'lodash/camelCase';
@@ -6,24 +6,16 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import mapKeys from 'lodash/mapKeys';
+import { Box, Checkbox, makeStyles, Typography } from '@material-ui/core';
+import { LoadingComponent } from '../LoadingComponent';
+import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
-  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import mapKeys from 'lodash/mapKeys';
-import {
-  Box,
-  Button,
-  Checkbox,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
-import { LoadingComponent } from '../LoadingComponent';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
@@ -97,11 +89,14 @@ export function RequestedIndividualDataChangeTable({
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
   const { documents } = individualData;
+  const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents;
   // eslint-disable-next-line no-param-reassign
   delete individualData.documents_to_remove;
+  // eslint-disable-next-line no-param-reassign
+  delete individualData.previous_documents;
   const entries = Object.entries(individualData);
 
   const fieldsDict = useArrayToDict(
@@ -161,7 +156,12 @@ export function RequestedIndividualDataChangeTable({
           <TableRow>
             <TableCell align='left' />
             <TableCell align='left'>Type of Data</TableCell>
-            <TableCell align='left'>Current Value</TableCell>
+            <TableCell align='left'>
+              {ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? 'Previous'
+                : 'Current'}{' '}
+              Value
+            </TableCell>
             <TableCell align='left'>New Value</TableCell>
           </TableRow>
         </TableHead>
@@ -170,13 +170,18 @@ export function RequestedIndividualDataChangeTable({
             const fieldName = camelCase(row[0]);
             const isItemSelected = isSelected(fieldName);
             const labelId = `enhanced-table-checkbox-${index}`;
-            const currentValue =
-              ticket.individualDataUpdateTicketDetails.individual[fieldName];
-            const field = fieldsDict[row[0]];
             const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
               value: string;
+              previousValue: string;
               approveStatus: boolean;
             };
+            const currentValue =
+              ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+                ? valueDetails.previousValue
+                : ticket.individualDataUpdateTicketDetails.individual[
+                    fieldName
+                  ];
+            const field = fieldsDict[row[0]];
             return (
               <TableRow
                 role='checkbox'
@@ -252,9 +257,8 @@ export function RequestedIndividualDataChangeTable({
             );
           })}
           {documentsToRemove?.map((row, index) => {
-            const document = ticket.individualDataUpdateTicketDetails.individual.documents.edges.find(
-              (item) => item.node.id === row.value,
-            );
+            const document = previousDocuments[row.value];
+            console.log('document', document);
             return (
               <TableRow>
                 <TableCell align='left'>
@@ -271,13 +275,13 @@ export function RequestedIndividualDataChangeTable({
                   />
                 </TableCell>
                 <TableCellStroke align='left'>
-                  {document?.node?.type?.label || '-'}
+                  {document?.label || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document?.node?.type?.country || '-'}
+                  {countriesDict[document?.country] || '-'}
                 </TableCellStroke>
                 <TableCellStroke align='left'>
-                  {document?.node?.documentNumber || '-'}
+                  {document?.document_number || '-'}
                 </TableCellStroke>
               </TableRow>
             );

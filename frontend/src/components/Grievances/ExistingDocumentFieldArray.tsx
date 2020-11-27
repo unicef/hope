@@ -1,13 +1,8 @@
 import React from 'react';
-import { Box, Button, Grid, IconButton } from '@material-ui/core';
-import { FieldArray } from 'formik';
-import { DocumentField } from './DocumentField';
-import { AddCircleOutline, Delete } from '@material-ui/icons';
+import { Box, Grid, IconButton } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import styled from 'styled-components';
-import {
-  AllAddIndividualFieldsQuery,
-  AllIndividualsQuery,
-} from '../../__generated__/graphql';
+import { AllIndividualsQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 
 const DisabledDiv = styled.div`
@@ -24,8 +19,7 @@ export function ExistingDocumentFieldArray({
   values,
   individual,
 }: NewDocumentFieldArrayProps): React.ReactElement {
-  const documentsToRemove =
-    values?.individualDataUpdateDocumentsToRemove || [];
+  const documentsToRemove = values?.individualDataUpdateDocumentsToRemove || [];
 
   const documentsLabels = individual?.documents?.edges?.map((item) => {
     const removed = documentsToRemove.includes(item.node.id);

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button, Grid } from '@material-ui/core';
 import { FieldArray } from 'formik';
-import { DocumentField } from './DocumentField';
 import { AddCircleOutline } from '@material-ui/icons';
 import styled from 'styled-components';
 import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import { DocumentField } from './DocumentField';
 
 const AddIcon = styled(AddCircleOutline)`
   margin-right: 10px;
