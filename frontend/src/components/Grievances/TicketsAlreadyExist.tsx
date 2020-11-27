@@ -44,7 +44,7 @@ export const TicketsAlreadyExist = ({ values }) => {
   if (!data) return null;
   const { edges } = data.existingGrievanceTickets;
   const mappedTickets = edges?.map((edge) => (
-    <Box mb={2}>
+    <Box mb={1}>
       <ContentLink
         target='_blank'
         rel='noopener noreferrer'
