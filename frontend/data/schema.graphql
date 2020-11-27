@@ -1646,6 +1646,7 @@ type Mutations {
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
+  reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
@@ -1973,6 +1974,11 @@ type RapidProFlowRun {
   completed: Int
   interrupted: Int
   expired: Int
+}
+
+type ReassignRoleMutation {
+  household: HouseholdNode
+  individual: IndividualNode
 }
 
 enum RegistrationDataImportDataSource {
@@ -2368,6 +2374,8 @@ type TicketDeleteIndividualDetailsNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   individual: IndividualNode
+  roleReassignData: JSONString!
+  approveStatus: Boolean!
   individualData: Arg
 }
 

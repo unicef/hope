@@ -88,7 +88,7 @@ function prepareInitialValueEditIndividual(
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
-  const { documents } = individualData;
+  const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
   delete individualData.documents;
   delete individualData.documents_to_remove;
@@ -195,13 +195,19 @@ export function EditGrievancePage(): React.ReactElement {
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string().required('Category is required').nullable(),
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
     admin: Yup.string(),
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [

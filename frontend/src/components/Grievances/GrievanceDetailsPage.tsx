@@ -33,6 +33,7 @@ import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
 import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
+import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -273,6 +274,12 @@ export function GrievanceDetailsPage(): React.ReactElement {
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>
               <AddIndividualGrievanceDetails ticket={ticket} />
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
+            <PaddingContainer>
+              <DeleteIndividualGrievanceDetails ticket={ticket} />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 export const REASSIGN_ROLE = gql`
-  mutation ReassignRole(
+  mutation ReassignRoleGrievance(
     $grievanceTicketId: ID!
     $householdId: ID!
     $individualId: ID!
