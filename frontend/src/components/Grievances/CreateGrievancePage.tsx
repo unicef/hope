@@ -31,6 +31,7 @@ import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
+import { TicketsAlreadyExist } from './TicketsAlreadyExist';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -526,6 +527,14 @@ export function CreateGrievancePage(): React.ReactElement {
               </NewTicket>
             </Grid>
             <Grid item xs={4}>
+              <NewTicket>
+                {values.category &&
+                values.issueType &&
+                values.selectedHousehold?.id &&
+                values.selectedIndividual?.id ? (
+                  <TicketsAlreadyExist values={values} />
+                ) : null}
+              </NewTicket>
               <NewTicket>
                 {values.category && values.selectedHousehold?.id ? (
                   <OtherRelatedTicketsCreate values={values} />
