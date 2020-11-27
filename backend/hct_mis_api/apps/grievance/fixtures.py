@@ -12,6 +12,7 @@ from grievance.models import (
     TicketComplaintDetails,
     TicketNote,
     TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketHouseholdDataUpdateDetails,
+    TicketDeleteIndividualDetails,
 )
 from household.fixtures import create_household
 from payment.fixtures import PaymentRecordFactory
@@ -146,6 +147,21 @@ class TicketAddIndividualDetailsFactory(factory.DjangoModelFactory):
     )
     household = None
     individual_data = {}
+    approve_status = factory.fuzzy.FuzzyChoice([True, False])
+
+
+class TicketDeleteIndividualDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketDeleteIndividualDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+        ),
+    )
+    individual = None
     approve_status = factory.fuzzy.FuzzyChoice([True, False])
 
 
