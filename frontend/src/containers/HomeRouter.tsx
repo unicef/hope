@@ -8,10 +8,10 @@ import { Drawer } from '../components/Drawer/Drawer';
 import { AppBar } from '../components/AppBar';
 import { isAuthenticated } from '../utils/utils';
 import { useSnackbar } from '../hooks/useSnackBar';
-import { GrievanceDetails } from '../components/Grievances/GrievanceDetails';
+import { GrievanceDetailsPage } from '../components/Grievances/GrievanceDetailsPage';
 import { GrievancesTablePage } from '../components/Grievances/GrievancesTablePage';
-import { CreateGrievance } from '../components/Grievances/CreateGrievance';
-import { EditGrievance } from '../components/Grievances/EditGrievance';
+import { CreateGrievancePage } from '../components/Grievances/CreateGrievancePage';
+import { EditGrievancePage } from '../components/Grievances/EditGrievancePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProgramsPage } from './pages/ProgramsPage';
 import { ProgramDetailsPage } from './pages/ProgramDetailsPage';
@@ -103,13 +103,13 @@ export function HomeRouter(): React.ReactElement {
             <PaymentVerificationDetailsPage />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/new-ticket'>
-            <CreateGrievance />
+            <CreateGrievancePage />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
-            <EditGrievance />
+            <EditGrievancePage />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/:id'>
-            <GrievanceDetails />
+            <GrievanceDetailsPage />
           </Route>
           <Route path='/:businessArea/grievance-and-feedback'>
             <GrievancesTablePage />

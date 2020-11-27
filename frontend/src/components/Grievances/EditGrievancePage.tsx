@@ -13,6 +13,7 @@ import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
+  GrievanceTicketQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -55,7 +56,119 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export function EditGrievance(): React.ReactElement {
+function prepareInitialValues(ticket: GrievanceTicketQuery['grievanceTicket']) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const initialValues: { [id: string]: any } = {
+    description: ticket.description || '',
+    assignedTo: ticket.assignedTo.id || '',
+    category: ticket.category || null,
+    language: ticket.language || '',
+    consent: ticket.consent || false,
+    admin: ticket.admin || '',
+    area: ticket.area || '',
+    selectedHousehold: ticket.household || null,
+    selectedIndividual: ticket.individual || null,
+    selectedPaymentRecords: null, //add value here ?
+    // selectedRelatedTickets: mappedLinkedTickets || [],
+    identityVerified: false,
+    issueType: ticket.issueType || null,
+    // idType: '',
+    // idNumber: ''
+  };
+  const category = ticket.category.toString();
+  const issueType = ticket.issueType.toString();
+  // if (
+  //   category ===
+  //   (GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
+  //     GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
+  //     GRIEVANCE_CATEGORIES.REFERRAL)
+  // ) {
+  //   console.log('not needed');
+  // }
+  // if (category === GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT) {
+  //   console.log('not needed');
+  // }
+  // if (category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE) {
+  //   console.log('not needed');
+  // }
+  // if (
+  //   category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+  //   issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+  // ) {
+  //   console.log('not needed');
+  // }
+  // if (
+  //   category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+  //   issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
+  // ) {
+  //   console.log('not needed');
+  // }
+  if (
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+  ) {
+    initialValues.selectedHousehold = ticket.household;
+    const individualData = {
+      ...ticket.addIndividualTicketDetails.individualData,
+    };
+    initialValues.individualData = Object.entries(individualData).reduce(
+      (previousValue, currentValue: [string, { value: string }]) => {
+        // eslint-disable-next-line no-param-reassign,prefer-destructuring
+        previousValue[camelCase(currentValue[0])] = currentValue[1];
+        return previousValue;
+      },
+      {},
+    );
+  }
+  if (
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+  ) {
+    initialValues.selectedIndividual = ticket.individual;
+    const individualData = {
+      ...ticket.individualDataUpdateTicketDetails.individualData,
+    };
+    const { documents } = individualData;
+    const documentsToRemove = individualData.documents_to_remove;
+    delete individualData.documents;
+    delete individualData.documents_to_remove;
+    delete individualData.previous_documents;
+    initialValues.individualDataUpdateFields = Object.entries(
+      individualData,
+    ).map((entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }));
+    initialValues.individualDataUpdateFieldsDocuments = documents.map(
+      (item) => item.value,
+    );
+    initialValues.individualDataUpdateDocumentsToRemove = documentsToRemove.map(
+      (item) => item.value,
+    );
+  }
+  if (
+    category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+  ) {
+    initialValues.selectedHousehold = ticket.household;
+    const householdData = {
+      ...ticket.householdDataUpdateTicketDetails.householdData,
+    };
+    initialValues.householdDataUpdateFields = Object.entries(householdData).map(
+      (entry: [string, { value: string }]) => ({
+        fieldName: entry[0],
+        fieldValue: entry[1].value,
+      }),
+    );
+    console.log(
+      'initialValues.householdDataUpdateFields',
+      initialValues.householdDataUpdateFields,
+    );
+  }
+  return initialValues;
+}
+
+export function EditGrievancePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
@@ -87,40 +200,18 @@ export function EditGrievance(): React.ReactElement {
     (edge) => edge.id,
   );
 
-  const initialValues = {
-    description: ticket.description || '',
-    assignedTo: ticket.assignedTo.id || '',
-    category: ticket.category || null,
-    language: ticket.language || '',
-    consent: ticket.consent || false,
-    admin: ticket.admin || '',
-    area: ticket.area || '',
-    selectedHousehold: ticket.household || null,
-    selectedIndividual: ticket.individual || null,
-    selectedPaymentRecords: null, //add value here ?
-    selectedRelatedTickets: mappedLinkedTickets || [],
-    identityVerified: false,
-    issueType: ticket.issueType || null,
-    // idType: '',
-    // idNumber: ''
-  };
+  const initialValues = prepareInitialValues(ticket);
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string()
-      .required('Category is required')
-      .nullable(),
+    category: Yup.string().required('Category is required').nullable(),
     admin: Yup.string(),
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-    selectedRelatedTickets: Yup.array()
-      .of(Yup.string())
-      .nullable(),
+    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
