@@ -468,7 +468,7 @@ class ReassignRoleMutation(graphene.Mutation):
         individual_id = graphene.Argument(graphene.ID, required=True)
         role = graphene.String(required=True)
         # provide only for edit role
-        previously_assigned_individual_id = graphene.Argument(graphene.ID)
+        previously_assigned_individual_id = graphene.Argument(graphene.ID, required=False)
 
     @classmethod
     def verify_role_choices(cls, role):
@@ -494,7 +494,6 @@ class ReassignRoleMutation(graphene.Mutation):
         individual_id,
         grievance_ticket_id,
         role,
-        previously_assigned_individual_id,
         **kwargs,
     ):
         cls.verify_role_choices(role)
@@ -508,6 +507,7 @@ class ReassignRoleMutation(graphene.Mutation):
         ticket_details = grievance_ticket.delete_individual_ticket_details
         cls.verify_if_role_exists(household, ticket_details.individual, role)
 
+        previously_assigned_individual_id = kwargs.get("previously_assigned_individual_id")
         if previously_assigned_individual_id:
             role_data_key = get_role_data_key(household.id, previously_assigned_individual_id, role)
             previous_role_data = ticket_details.role_reassign_data.pop(role_data_key, None)
