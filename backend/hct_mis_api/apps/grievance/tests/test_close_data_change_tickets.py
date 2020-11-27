@@ -217,12 +217,12 @@ class TestCloseDataChangeTickets(APITestCase):
             ticket=self.individual_delete_grievance_ticket,
             individual=self.individuals_household_two[0],
             role_reassign_data={
-                f"hh_{self.household_two.id}__ind_{self.individuals_household_two[1].id}__r_PRIMARY": {
+                str(self.role_primary.id): {
                     "role": ROLE_PRIMARY,
                     "household": str(self.household_two.id),
                     "individual": str(self.individuals_household_two[1].id),
                 },
-                f"hh_{self.household_two.id}__ind_{self.individuals_household_two[1].id}__r_HEAD": {
+                f"HEAD": {
                     "role": HEAD,
                     "household": str(self.household_two.id),
                     "individual": str(self.individuals_household_two[1].id),
