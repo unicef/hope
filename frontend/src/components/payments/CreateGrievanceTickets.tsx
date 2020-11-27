@@ -31,7 +31,6 @@ export function CreateGrievanceTickets({
   const [DialogOpen, setDialogOpen] = useState(false);
 
   const createGrievanceTickets = (): void => {
-    console.log('create');
     setDialogOpen(false);
   };
   return (

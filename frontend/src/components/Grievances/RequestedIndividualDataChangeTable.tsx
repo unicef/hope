@@ -88,7 +88,7 @@ export function RequestedIndividualDataChangeTable({
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
-  const { documents } = individualData;
+  const documents = individualData?.documents;
   const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
   // eslint-disable-next-line no-param-reassign
@@ -258,7 +258,6 @@ export function RequestedIndividualDataChangeTable({
           })}
           {documentsToRemove?.map((row, index) => {
             const document = previousDocuments[row.value];
-            console.log('document', document);
             return (
               <TableRow>
                 <TableCell align='left'>

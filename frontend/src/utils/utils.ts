@@ -361,3 +361,23 @@ export function arrayToDict(array, keyExtractor, valueExtractor) {
   };
   return array?.reduce(reduceCallback, {});
 }
+
+export function thingForSpecificGrievanceType(
+  ticket: { category: number | string; issueType?: number | string },
+  thingDict,
+  defaultThing = null,
+) {
+  const category = ticket.category?.toString();
+  const issueType = ticket.issueType?.toString();
+  if (!(category in thingDict)) {
+    return defaultThing;
+  }
+  const categoryThing = thingDict[category];
+  if (issueType === null || issueType === undefined) {
+    return categoryThing;
+  }
+  if (!(issueType in categoryThing)) {
+    return defaultThing;
+  }
+  return categoryThing[issueType];
+}

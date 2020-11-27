@@ -46,6 +46,7 @@ export const GrievanceDetailsToolbar = ({
   const isInProgress = ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isOnHold = ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD;
+  const isEditable = isNew || isAssigned || isInProgress;
 
   const isFeedbackType =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
@@ -68,9 +69,9 @@ export const GrievanceDetailsToolbar = ({
       title={`Ticket #${decodeIdString(id)}`}
       breadCrumbs={breadCrumbsItems}
     >
-      <>
-        {isNew && (
-          <Box display='flex' alignItems='center'>
+      <Box display='flex' alignItems='center'>
+        {isEditable && (
+          <>
             <Button
               color='primary'
               variant='outlined'
@@ -81,6 +82,10 @@ export const GrievanceDetailsToolbar = ({
               Edit
             </Button>
             <Separator />
+          </>
+        )}
+        {isNew && (
+          <>
             <Button
               color='primary'
               variant='contained'
@@ -88,7 +93,7 @@ export const GrievanceDetailsToolbar = ({
             >
               ASSIGN TO ME
             </Button>
-          </Box>
+          </>
         )}
         {isAssigned && (
           <Button
@@ -100,17 +105,7 @@ export const GrievanceDetailsToolbar = ({
           </Button>
         )}
         {isInProgress && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -150,20 +145,10 @@ export const GrievanceDetailsToolbar = ({
                 )}
               </ConfirmationDialog>
             )}
-          </Box>
+          </>
         )}
         {isOnHold && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -203,20 +188,10 @@ export const GrievanceDetailsToolbar = ({
                 )}
               </ConfirmationDialog>
             )}
-          </Box>
+          </>
         )}
         {isForApproval && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -243,9 +218,9 @@ export const GrievanceDetailsToolbar = ({
                 </Button>
               )}
             </ConfirmationDialog>
-          </Box>
+          </>
         )}
-      </>
+      </Box>
     </PageHeader>
   );
 };

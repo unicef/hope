@@ -1,16 +1,19 @@
+import React, { useEffect } from 'react';
+import snakeCase from 'lodash/snakeCase';
 import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React from 'react';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
-  useApproveAddIndividualDataChangeMutation,
+  useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { LoadingComponent } from '../LoadingComponent';
+import { UniversalMoment } from '../UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -23,17 +26,40 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export function AddIndividualGrievanceDetails({
+export function DeleteIndividualGrievanceDetails({
   ticket,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
-  const { data, loading } = useAllAddIndividualFieldsQuery();
   const { showMessage } = useSnackbar();
-  const [mutate] = useApproveAddIndividualDataChangeMutation();
-  if (loading) {
-    return null;
-  }
+  const shouldBeDisabled = (): boolean => {
+    if (ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL) {
+      return true;
+    }
+    const isHeadOfHousehold =
+      ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+
+    const rolesCount =
+      ticket.individual?.householdsAndRoles.length +
+      (isHeadOfHousehold ? 1 : 0);
+    if (
+      rolesCount !==
+      Object.keys(
+        JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+      ).length
+    ) {
+      return true;
+    }
+    return false;
+  };
+  useEffect(() => {
+    shouldBeDisabled();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticket.status]);
+  const { data, loading } = useAllAddIndividualFieldsQuery();
+  const [mutate] = useApproveDeleteIndividualDataChangeMutation();
+  if (loading) return <LoadingComponent />;
+  const documents = ticket.individual?.documents;
   const fieldsDict = data.allAddIndividualsFieldsAttributes.reduce(
     (previousValue, currentValue) => {
       // eslint-disable-next-line no-param-reassign
@@ -42,44 +68,64 @@ export function AddIndividualGrievanceDetails({
     },
     {},
   );
-  const documents =
-    ticket.addIndividualTicketDetails?.individualData?.documents;
-  // eslint-disable-next-line no-param-reassign
-  delete ticket.addIndividualTicketDetails?.individualData.documents;
+
+  const excludedFields = [
+    'household',
+    'documents',
+    'householdsAndRoles',
+    'identities',
+    'headingHousehold',
+    'flexFields',
+    'id',
+    'sanctionListLastCheck',
+    'createdAt',
+    'updatedAt',
+    'typeName',
+  ];
   const labels =
-    Object.entries(ticket.addIndividualTicketDetails?.individualData || {}).map(
-      ([key, value]) => {
+    Object.entries(ticket.individual || {})
+      .filter(([key, value]) => !excludedFields.includes(key))
+      .map(([key, value]) => {
         let textValue = value;
-        const fieldAttribute = fieldsDict[key];
-        if (fieldAttribute.type === 'SELECT_ONE') {
+        const snakeKey = snakeCase(key);
+        const fieldAttribute = fieldsDict[snakeKey];
+        if (fieldAttribute?.type === 'SELECT_ONE') {
           textValue = fieldAttribute.choices.find(
             (item) => item.value === value,
           ).labelEn;
         }
+        if (fieldAttribute?.type === 'DATE') {
+          textValue = <UniversalMoment>{textValue}</UniversalMoment>;
+        }
         return (
           <Grid key={key} item xs={6}>
-            <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
+            <LabelizedField
+              label={snakeKey.replace(/_/g, ' ')}
+              value={textValue || '-'}
+            />
           </Grid>
         );
-      },
-    ) || [];
+      }) || [];
+
   const documentLabels =
-    documents?.map((item) => {
+    documents?.edges?.map((edge) => {
+      const item = edge.node;
       return (
-        <Grid key={item.country + item.type} item xs={6}>
+        <Grid key={item.type.country + item.type.label} item xs={6}>
           <LabelizedField
-            label={item.type.replace(/_/g, ' ')}
-            value={item.number}
+            label={item.type.label.replace(/_/g, ' ')}
+            value={item.documentNumber}
           />
         </Grid>
       );
     }) || [];
   const allLabels = [...labels, ...documentLabels];
+
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Individual Data</Typography>
+          <Typography variant='h6'>Individual to be deleted</Typography>
           <ConfirmationDialog title='Warning' content='Are you sure?'>
             {(confirm) => (
               <Button
@@ -88,8 +134,8 @@ export function AddIndividualGrievanceDetails({
                     await mutate({
                       variables: {
                         grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.addIndividualTicketDetails
-                          .approveStatus,
+                        approveStatus: !ticket.deleteIndividualTicketDetails
+                          ?.approveStatus,
                       },
                       refetchQueries: () => [
                         {
@@ -98,10 +144,10 @@ export function AddIndividualGrievanceDetails({
                         },
                       ],
                     });
-                    if (ticket.addIndividualTicketDetails.approveStatus) {
+                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
                       showMessage('Changes Disapproved');
                     }
-                    if (!ticket.addIndividualTicketDetails.approveStatus) {
+                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
                       showMessage('Changes Approved');
                     }
                   } catch (e) {
@@ -110,11 +156,9 @@ export function AddIndividualGrievanceDetails({
                 })}
                 variant='contained'
                 color='primary'
-                disabled={
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                }
+                disabled={shouldBeDisabled()}
               >
-                {ticket.addIndividualTicketDetails.approveStatus
+                {ticket.deleteIndividualTicketDetails?.approveStatus
                   ? 'Disapprove'
                   : 'Approve'}
               </Button>
