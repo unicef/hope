@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
@@ -37,7 +36,6 @@ interface IndividualBioDataProps {
 export function IndividualsBioData({
   individual,
 }: IndividualBioDataProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   let age: number | null;
@@ -140,11 +138,15 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink
-              href={`/${businessArea}/population/household/${individual.household.id}`}
-            >
-              {individual.household.unicefId}
-            </ContentLink>
+            {individual.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/population/household/${individual.household?.id}`}
+              >
+                {individual.household?.unicefId}
+              </ContentLink>
+            ) : (
+              <span>-</span>
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

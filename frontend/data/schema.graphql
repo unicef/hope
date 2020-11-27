@@ -456,6 +456,7 @@ type DocumentNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
   documentNumber: String!
   photo: String!
   individual: IndividualNode!

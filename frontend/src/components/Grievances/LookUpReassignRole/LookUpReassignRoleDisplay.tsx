@@ -28,7 +28,7 @@ const DarkGrey = styled.span`
   cursor: pointer;
 `;
 
-export const LookUpHouseholdIndividualDisplay = ({
+export const LookUpReassignRoleDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
@@ -49,10 +49,7 @@ export const LookUpHouseholdIndividualDisplay = ({
             </span>
             <span>
               Individual ID:
-              <BlueText>
-                {' '}
-                {values?.selectedIndividual?.unicefId || '-'}
-              </BlueText>
+              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
