@@ -612,6 +612,11 @@ export type DeduplicationResultNode = {
   age?: Maybe<Scalars['Int']>,
 };
 
+export type DeleteIndividualApproveMutation = {
+   __typename?: 'DeleteIndividualApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
 export type DeleteProgram = {
    __typename?: 'DeleteProgram',
   ok?: Maybe<Scalars['Boolean']>,
@@ -2101,6 +2106,7 @@ export type Mutations = {
   approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
   approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
   approveAddIndividual?: Maybe<AddIndividualApproveMutation>,
+  approveDeleteIndividual?: Maybe<DeleteIndividualApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
@@ -2163,6 +2169,12 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 
 
 export type MutationsApproveAddIndividualArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID']
+};
+
+
+export type MutationsApproveDeleteIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID']
 };
@@ -4577,6 +4589,23 @@ export type ApproveAddIndividualDataChangeMutation = (
   { __typename?: 'Mutations' }
   & { approveAddIndividual: Maybe<(
     { __typename?: 'AddIndividualApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveDeleteIndividualDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveDeleteIndividualDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveDeleteIndividual: Maybe<(
+    { __typename?: 'DeleteIndividualApproveMutation' }
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
@@ -7151,6 +7180,59 @@ export function useApproveAddIndividualDataChangeMutation(baseOptions?: ApolloRe
 export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
 export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
+export const ApproveDeleteIndividualDataChangeDocument = gql`
+    mutation ApproveDeleteIndividualDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveDeleteIndividual(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveDeleteIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
+export type ApproveDeleteIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveDeleteIndividualDataChangeComponent = (props: ApproveDeleteIndividualDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables> mutation={ApproveDeleteIndividualDataChangeDocument} {...props} />
+    );
+    
+export type ApproveDeleteIndividualDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables> & TChildProps;
+export function withApproveDeleteIndividualDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveDeleteIndividualDataChangeMutation,
+  ApproveDeleteIndividualDataChangeMutationVariables,
+  ApproveDeleteIndividualDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables, ApproveDeleteIndividualDataChangeProps<TChildProps>>(ApproveDeleteIndividualDataChangeDocument, {
+      alias: 'approveDeleteIndividualDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveDeleteIndividualDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveDeleteIndividualDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveDeleteIndividualDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveDeleteIndividualDataChangeMutation, { data, loading, error }] = useApproveDeleteIndividualDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveDeleteIndividualDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>(ApproveDeleteIndividualDataChangeDocument, baseOptions);
+      }
+export type ApproveDeleteIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveDeleteIndividualDataChangeMutation>;
+export type ApproveDeleteIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveDeleteIndividualDataChangeMutation>;
+export type ApproveDeleteIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
 export const ApproveHouseholdDataChangeDocument = gql`
     mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString) {
   approveHouseholdDataChange(grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData) {
@@ -12643,6 +12725,7 @@ export type ResolversTypes = {
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
   AddIndividualApproveMutation: ResolverTypeWrapper<AddIndividualApproveMutation>,
+  DeleteIndividualApproveMutation: ResolverTypeWrapper<DeleteIndividualApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
@@ -12926,6 +13009,7 @@ export type ResolversParentTypes = {
   IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
   HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
   AddIndividualApproveMutation: AddIndividualApproveMutation,
+  DeleteIndividualApproveMutation: DeleteIndividualApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
@@ -13238,6 +13322,10 @@ export type DeduplicationResultNodeResolvers<ContextType = any, ParentType exten
   proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type DeleteIndividualApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteIndividualApproveMutation'] = ResolversParentTypes['DeleteIndividualApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
 };
 
 export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
@@ -13845,6 +13933,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
   approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['AddIndividualApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['DeleteIndividualApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
@@ -14692,6 +14781,7 @@ export type Resolvers<ContextType = any> = {
   DateTime?: GraphQLScalarType,
   Decimal?: GraphQLScalarType,
   DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
+  DeleteIndividualApproveMutation?: DeleteIndividualApproveMutationResolvers<ContextType>,
   DeleteProgram?: DeleteProgramResolvers<ContextType>,
   DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
   DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,

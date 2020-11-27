@@ -209,6 +209,18 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 3,
     },
   ];
+  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
+  const isHeadOfHousehold =
+    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+  const hasRolesToReassign =
+    householdsAndRoles.filter((el) => el.role !== 'NO_ROLE').length > 0;
+  const shouldShowReassignBox = (): boolean => {
+    const isRightCategory =
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+    return isRightCategory && (isHeadOfHousehold || hasRolesToReassign);
+  };
 
   const renderRightSection = (): React.ReactElement => {
     if (
@@ -225,11 +237,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
           </Box>
         </Box>
       );
-    if (
-      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-    )
+    if (shouldShowReassignBox()) {
       return (
         <PaddingContainer>
           <Box display='flex' flexDirection='column'>
@@ -237,6 +245,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
           </Box>
         </PaddingContainer>
       );
+    }
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>

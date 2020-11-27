@@ -501,7 +501,7 @@ class ReassignRoleMutation(graphene.Mutation):
             role_data_key = "HEAD"
         else:
             role_object = get_object_or_404(
-                IndividualRoleInHousehold, individual=individual, household=household, role=role
+                IndividualRoleInHousehold, individual=ticket_details.individual, household=household, role=role
             )
             role_data_key = str(role_object.id)
 
@@ -522,4 +522,5 @@ class Mutations(graphene.ObjectType):
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
     approve_add_individual = AddIndividualApproveMutation.Field()
+    approve_delete_individual = DeleteIndividualApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()
