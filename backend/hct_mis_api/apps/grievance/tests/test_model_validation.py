@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
+from account.fixtures import UserFactory
 from core.models import BusinessArea
 from grievance.models import GrievanceTicket
 
@@ -10,7 +11,7 @@ class TestGrievanceModelValidation(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-
+        cls.user = UserFactory.create()
         cls.base_model_data = {
             "status": GrievanceTicket.STATUS_NEW,
             "description": "test description",
@@ -19,11 +20,13 @@ class TestGrievanceModelValidation(TestCase):
             "language": "english",
             "consent": True,
             "business_area": BusinessArea.objects.first(),
+            "assigned_to": cls.user,
+            "created_by": cls.user,
         }
 
         cls.valid_model_data = {
             "category": GrievanceTicket.CATEGORY_DATA_CHANGE,
-            "issue_type": GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DATA_UPDATE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
         }
 
         cls.valid_model_2_data = {
@@ -38,7 +41,7 @@ class TestGrievanceModelValidation(TestCase):
 
         cls.invalid_model_2_data = {
             "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            "issue_type": GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DATA_UPDATE,
+            "issue_type": GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
         }
 
     def test_valid_issue_types(self):
@@ -56,8 +59,8 @@ class TestGrievanceModelValidation(TestCase):
         grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.invalid_model_2_data)
 
         self.assertRaisesMessage(
-            ValidationError, "{'issue_type': ['Invalid subcategory for selected category']}", grievance_ticket_1.save,
+            ValidationError, "{'issue_type': ['Invalid issue type for selected category']}", grievance_ticket_1.save,
         )
         self.assertRaisesMessage(
-            ValidationError, "{'issue_type': ['Invalid subcategory for selected category']}", grievance_ticket_2.save,
+            ValidationError, "{'issue_type': ['Invalid issue type for selected category']}", grievance_ticket_2.save,
         )
