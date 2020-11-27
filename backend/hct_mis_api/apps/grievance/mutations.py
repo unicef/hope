@@ -27,7 +27,6 @@ from grievance.mutations_extras.main import (
 )
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
 from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
-from grievance.mutations_extras.utils import get_role_data_key
 from grievance.schema import GrievanceTicketNode, TicketNoteNode
 from grievance.validators import DataChangeValidator
 from household.models import Household, Individual, HEAD, ROLE_ALTERNATE, ROLE_PRIMARY, IndividualRoleInHousehold
@@ -467,8 +466,6 @@ class ReassignRoleMutation(graphene.Mutation):
         household_id = graphene.Argument(graphene.ID, required=True)
         individual_id = graphene.Argument(graphene.ID, required=True)
         role = graphene.String(required=True)
-        # provide only for edit role
-        previously_assigned_individual_id = graphene.Argument(graphene.ID, required=False)
 
     @classmethod
     def verify_role_choices(cls, role):
@@ -487,14 +484,7 @@ class ReassignRoleMutation(graphene.Mutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls,
-        root,
-        info,
-        household_id,
-        individual_id,
-        grievance_ticket_id,
-        role,
-        **kwargs,
+        cls, root, info, household_id, individual_id, grievance_ticket_id, role, **kwargs,
     ):
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)
@@ -507,21 +497,19 @@ class ReassignRoleMutation(graphene.Mutation):
         ticket_details = grievance_ticket.delete_individual_ticket_details
         cls.verify_if_role_exists(household, ticket_details.individual, role)
 
-        previously_assigned_individual_id = kwargs.get("previously_assigned_individual_id")
-        if previously_assigned_individual_id:
-            role_data_key = get_role_data_key(household.id, previously_assigned_individual_id, role)
-            previous_role_data = ticket_details.role_reassign_data.pop(role_data_key, None)
-            if previous_role_data is None:
-                raise GraphQLError("No such individual in already reassigned roles")
-            new_role_data_key = get_role_data_key(household.id, individual.id, role)
-            ticket_details.role_reassign_data[new_role_data_key] = previous_role_data
+        if role == HEAD:
+            role_data_key = "HEAD"
         else:
-            role_data_key = get_role_data_key(household.id, individual.id, role)
-            ticket_details.role_reassign_data[role_data_key] = {
-                "role": role,
-                "household": str(household.id),
-                "individual": str(individual.id),
-            }
+            role_object = get_object_or_404(
+                IndividualRoleInHousehold, individual=individual, household=household, role=role
+            )
+            role_data_key = str(role_object.id)
+
+        ticket_details.role_reassign_data[role_data_key] = {
+            "role": role,
+            "household": str(household.id),
+            "individual": str(individual.id),
+        }
         ticket_details.save()
 
         return cls(household=household, individual=individual)
