@@ -12,6 +12,7 @@ from grievance.fixtures import (
     TicketAddIndividualDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
+    TicketDeleteIndividualDetailsFactory,
 )
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
@@ -20,7 +21,12 @@ from household.models import (
     Individual,
     ROLE_PRIMARY,
     IDENTIFICATION_TYPE_NATIONAL_ID,
-    Document, DocumentType, IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    Document,
+    DocumentType,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IndividualRoleInHousehold,
+    ROLE_ALTERNATE,
+    HEAD,
 )
 from program.fixtures import ProgramFactory
 
@@ -45,15 +51,20 @@ class TestCloseDataChangeTickets(APITestCase):
         self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area, )
+        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(), )
+        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
         household_one.programs.add(program_one)
+
+        household_two = HouseholdFactory.build(id="603dfd3f-baca-42d1-aac6-3e1c537ddbef")
+        household_two.registration_data_import.imported_by.save()
+        household_two.registration_data_import.save()
+        household_two.programs.add(program_one)
 
         self.individuals_to_create = [
             {
@@ -72,9 +83,33 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         ]
 
+        self.individuals_to_create_for_second_household = [
+            {
+                "id": "257f6f84-313c-43bd-8f0e-89b96c41a7d5",
+                "full_name": "Test Example",
+                "given_name": "Test",
+                "family_name": "Example",
+                "phone_no": "+18773523904",
+                "birth_date": "1965-03-15",
+            },
+            {
+                "id": "cd5ced0f-3777-47d8-92ca-5b3aa22f186d",
+                "full_name": "John Doe",
+                "given_name": "John",
+                "family_name": "Doe",
+                "phone_no": "+12315124125",
+                "birth_date": "1975-07-25",
+            },
+        ]
+
         self.individuals = [
             IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
         ]
+        self.individuals_household_two = [
+            IndividualFactory(household=household_two, **individual)
+            for individual in self.individuals_to_create_for_second_household
+        ]
+
         first_individual = self.individuals[0]
         national_id_type = DocumentType.objects.get(country=Country("POL"), type=IDENTIFICATION_TYPE_NATIONAL_ID)
         birth_certificate_type = DocumentType.objects.get(
@@ -89,6 +124,13 @@ class TestCloseDataChangeTickets(APITestCase):
         household_one.head_of_household = self.individuals[0]
         household_one.save()
         self.household_one = household_one
+
+        household_two.head_of_household = self.individuals_household_two[0]
+        household_two.save()
+        self.household_two = household_two
+        self.role_primary = IndividualRoleInHousehold.objects.create(
+            role=ROLE_PRIMARY, individual=self.individuals_household_two[0], household=household_two,
+        )
 
         self.add_individual_grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
@@ -109,8 +151,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
-                "documents": [
-                    {"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
+                "documents": [{"type": IDENTIFICATION_TYPE_NATIONAL_ID, "country": "POL", "number": "123-123-UX-321"}],
             },
             approve_status=True,
         )
@@ -164,6 +205,32 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
 
+        self.individual_delete_grievance_ticket = GrievanceTicketFactory(
+            id="a2a15944-f836-4764-8163-30e0c47ce3bb",
+            category=GrievanceTicket.CATEGORY_DATA_CHANGE,
+            issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
+            admin=self.admin_area_1.title,
+            business_area=self.business_area,
+            status=GrievanceTicket.STATUS_FOR_APPROVAL,
+        )
+        TicketDeleteIndividualDetailsFactory(
+            ticket=self.individual_delete_grievance_ticket,
+            individual=self.individuals_household_two[0],
+            role_reassign_data={
+                f"hh_{self.household_two.id}__ind_{self.individuals_household_two[1].id}__r_PRIMARY": {
+                    "role": ROLE_PRIMARY,
+                    "household": str(self.household_two.id),
+                    "individual": str(self.individuals_household_two[1].id),
+                },
+                f"hh_{self.household_two.id}__ind_{self.individuals_household_two[1].id}__r_HEAD": {
+                    "role": HEAD,
+                    "household": str(self.household_two.id),
+                    "individual": str(self.individuals_household_two[1].id),
+                },
+            },
+            approve_status=True,
+        )
+
     def test_close_add_individual(self):
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
@@ -183,7 +250,9 @@ class TestCloseDataChangeTickets(APITestCase):
         document = Document.objects.get(document_number="123-123-UX-321")
         self.assertEqual(document.type.country, Country("POL"))
 
-        role = created_individual.households_and_roles.get(role=ROLE_PRIMARY, individual=created_individual)
+        role = created_individual.households_and_roles.get(
+            role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
+        )
         self.assertEqual(str(role.household.id), str(self.household_one.id))
 
     def test_close_update_individual(self):
@@ -230,3 +299,20 @@ class TestCloseDataChangeTickets(APITestCase):
         self.household_one.refresh_from_db()
         self.assertEqual(self.household_one.size, 19)
         self.assertEqual(self.household_one.village, "Test Village")
+
+    def test_close_individual_delete(self):
+        self.graphql_request(
+            request_string=self.STATUS_CHANGE_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.individual_delete_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "status": GrievanceTicket.STATUS_CLOSED,
+            },
+        )
+        self.assertFalse(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
+        changed_role_exists = IndividualRoleInHousehold.objects.filter(
+            role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
+        ).exists()
+        self.assertTrue(changed_role_exists)
