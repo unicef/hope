@@ -6,7 +6,6 @@ import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
-  HouseholdNode,
   useAllHouseholdsQuery,
 } from '../../../__generated__/graphql';
 import { headCells } from './LookUpHouseholdTableHeadCells';
@@ -46,7 +45,9 @@ export const LookUpHouseholdTable = ({
   const [selectedHousehold, setSelectedHousehold] = useState(
     initialValues.selectedHousehold,
   );
-  const handleRadioChange = (household:AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"]): void => {
+  const handleRadioChange = (
+    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+  ): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
@@ -54,7 +55,10 @@ export const LookUpHouseholdTable = ({
   };
   return (
     <TableWrapper>
-      <UniversalTable<AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"], AllHouseholdsQueryVariables>
+      <UniversalTable<
+        AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+        AllHouseholdsQueryVariables
+      >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllHouseholdsQuery}

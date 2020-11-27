@@ -666,6 +666,7 @@ export type DocumentNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   documentNumber: Scalars['String'],
   photo: Scalars['String'],
   individual: IndividualNode,
@@ -5145,6 +5146,9 @@ export type AllEditHouseholdFieldsQuery = (
         & Pick<LabelNode, 'label' | 'language'>
       )>>> }
     )>>> }
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -5611,6 +5615,17 @@ export type GrievanceTicketQuery = (
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
     )>, individual: Maybe<(
       { __typename?: 'IndividualNode' }
+      & { householdsAndRoles: Array<(
+        { __typename?: 'IndividualRoleInHouseholdNode' }
+        & Pick<IndividualRoleInHouseholdNode, 'role'>
+        & { individual: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'unicefId'>
+        ), household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        ) }
+      )> }
       & IndividualDetailedFragment
     )>, household: Maybe<(
       { __typename?: 'HouseholdNode' }
@@ -8914,6 +8929,10 @@ export const AllEditHouseholdFieldsDocument = gql`
       listName
     }
   }
+  countriesChoices {
+    name
+    value
+  }
 }
     `;
 export type AllEditHouseholdFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>, 'query'>;
@@ -10000,6 +10019,17 @@ export const GrievanceTicketDocument = gql`
     }
     individual {
       ...individualDetailed
+      householdsAndRoles {
+        individual {
+          id
+          unicefId
+        }
+        household {
+          id
+          unicefId
+        }
+        role
+      }
     }
     household {
       ...householdDetailed
@@ -13139,6 +13169,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
