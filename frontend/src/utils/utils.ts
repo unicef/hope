@@ -1,4 +1,5 @@
 import moment from 'moment';
+import get from 'lodash/get';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
@@ -6,7 +7,6 @@ import {
   ProgramStatus,
 } from '../__generated__/graphql';
 import { TARGETING_STATES } from './constants';
-import get from 'lodash/get';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -344,7 +344,6 @@ export function renderUserName(user) {
     : `${user.email}`;
 }
 
-
 /**
  *
  * @param array
@@ -360,5 +359,5 @@ export function arrayToDict(array, keyExtractor, valueExtractor) {
     previousValue[key] = value;
     return previousValue;
   };
-  return array?.reduce(reduceCallback, {})
+  return array?.reduce(reduceCallback, {});
 }

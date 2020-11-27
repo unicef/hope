@@ -163,7 +163,7 @@ export function EditTargetPopulation({
             loading={loadingPrograms}
             program={values.program}
           />
-          <CandidateListTab allPrograms={allProgramsData} values={values} />
+          <CandidateListTab values={values} />
         </Form>
       )}
     </Formik>
