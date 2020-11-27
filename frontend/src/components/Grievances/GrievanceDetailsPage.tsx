@@ -33,6 +33,7 @@ import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
 import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
+import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -47,7 +48,7 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-export function GrievanceDetails(): React.ReactElement {
+export function GrievanceDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data, loading } = useGrievanceTicketQuery({
     variables: { id },
@@ -208,6 +209,18 @@ export function GrievanceDetails(): React.ReactElement {
       size: 3,
     },
   ];
+  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
+  const isHeadOfHousehold =
+    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+  const hasRolesToReassign =
+    householdsAndRoles.filter((el) => el.role !== 'NO_ROLE').length > 0;
+  const shouldShowReassignBox = (): boolean => {
+    const isRightCategory =
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+    return isRightCategory && (isHeadOfHousehold || hasRolesToReassign);
+  };
 
   const renderRightSection = (): React.ReactElement => {
     if (
@@ -224,11 +237,7 @@ export function GrievanceDetails(): React.ReactElement {
           </Box>
         </Box>
       );
-    if (
-      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
-      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-    )
+    if (shouldShowReassignBox()) {
       return (
         <PaddingContainer>
           <Box display='flex' flexDirection='column'>
@@ -236,6 +245,7 @@ export function GrievanceDetails(): React.ReactElement {
           </Box>
         </PaddingContainer>
       );
+    }
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>
@@ -273,6 +283,12 @@ export function GrievanceDetails(): React.ReactElement {
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>
               <AddIndividualGrievanceDetails ticket={ticket} />
+            </PaddingContainer>
+          )}
+          {ticket?.issueType?.toString() ===
+            GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
+            <PaddingContainer>
+              <DeleteIndividualGrievanceDetails ticket={ticket} />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===

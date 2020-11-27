@@ -15,10 +15,12 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   ProgramNode,
   useAllProgramsQuery,
+  useReassignRoleGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -35,8 +37,11 @@ export const LookUpReassignRoleModal = ({
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
+  ticket,
 }): React.ReactElement => {
   const { id } = useParams();
+  const { showMessage } = useSnackbar();
+  const [mutate] = useReassignRoleGrievanceMutation();
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
     program: '',
@@ -62,17 +67,23 @@ export const LookUpReassignRoleModal = ({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
+      onSubmit={async (values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
-        const variables = {
-          grievanceTicketId: id,
-          householdId: values.selectedHousehold.id,
-          individuald: values.selectedIndividual.id,
-          role: values.selectedIndividual.role,
-        };
-        console.log('submit variables in nonexisting mutation', variables);
+        try {
+          await mutate({
+            variables: {
+              grievanceTicketId: id,
+              householdId: values.selectedHousehold.id,
+              individualId: values.selectedIndividual.id,
+              role: values.role,
+            },
+          });
+          showMessage('Role Reassigned');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
