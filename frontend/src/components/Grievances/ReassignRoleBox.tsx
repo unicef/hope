@@ -1,4 +1,5 @@
 import { Box, Paper, Typography } from '@material-ui/core';
+import capitalize from 'lodash/capitalize';
 import React from 'react';
 import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
@@ -36,22 +37,31 @@ export const ReassignRoleBox = ({
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
   const isHeadOfHousehold =
     ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
-  const mappedLookUpsForExternalHouseholds = householdsAndRoles.map((el) => (
-    <Box mb={2} mt={2}>
-      <Box mb={2}>
-        <LabelizedField label='HOUSEHOLD ID'>
-          <ContentLink
-            target='_blank'
-            rel='noopener noreferrer'
-            href={`/${businessArea}/population/household/${el.household.id}`}
-          >
-            {el.household.unicefId}
-          </ContentLink>
-        </LabelizedField>
+  const mappedLookUpsForExternalHouseholds = householdsAndRoles
+    .filter((el) => el.role !== 'NO_ROLE')
+    .map((el) => (
+      <Box mb={2} mt={2}>
+        <Box mb={2}>
+          <LabelizedField label='ROLE'>
+            <>{capitalize(el.role)} Collector</>
+          </LabelizedField>
+          <LabelizedField label='HOUSEHOLD ID'>
+            <ContentLink
+              target='_blank'
+              rel='noopener noreferrer'
+              href={`/${businessArea}/population/household/${el.household.id}`}
+            >
+              {el.household.unicefId}
+            </ContentLink>
+          </LabelizedField>
+        </Box>
+        <LookUpReassignRole
+          individualRole={{ role: el.role, id: el.id }}
+          ticket={ticket}
+          household={el.household}
+        />
       </Box>
-      <LookUpReassignRole household={el.household} />
-    </Box>
-  ));
+    ));
 
   return (
     <StyledBox>
@@ -68,6 +78,9 @@ export const ReassignRoleBox = ({
         {isHeadOfHousehold && (
           <Box mb={2} mt={2}>
             <Box mb={2}>
+              <LabelizedField label='ROLE'>
+                <>Head of Household</>
+              </LabelizedField>
               <LabelizedField label='HOUSEHOLD ID'>
                 <ContentLink
                   target='_blank'
@@ -78,7 +91,11 @@ export const ReassignRoleBox = ({
                 </ContentLink>
               </LabelizedField>
             </Box>
-            <LookUpReassignRole household={ticket?.household} />
+            <LookUpReassignRole
+              individualRole={{ role: 'HEAD', id: 'HEAD' }}
+              ticket={ticket}
+              household={ticket?.household}
+            />
           </Box>
         )}
         {mappedLookUpsForExternalHouseholds}

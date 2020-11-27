@@ -22,8 +22,8 @@ export type Scalars = {
   Decimal: any,
   Arg: any,
   JSONLazyString: any,
-  GeoJSON: any,
   JSONString: any,
+  GeoJSON: any,
   Upload: any,
 };
 
@@ -2101,6 +2101,7 @@ export type Mutations = {
   approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
   approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
   approveAddIndividual?: Maybe<AddIndividualApproveMutation>,
+  reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
   importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
@@ -2164,6 +2165,14 @@ export type MutationsApproveHouseholdDataChangeArgs = {
 export type MutationsApproveAddIndividualArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID']
+};
+
+
+export type MutationsReassignRoleArgs = {
+  grievanceTicketId: Scalars['ID'],
+  householdId: Scalars['ID'],
+  individualId: Scalars['ID'],
+  role: Scalars['String']
 };
 
 
@@ -3125,6 +3134,12 @@ export type RapidProFlowRun = {
   expired?: Maybe<Scalars['Int']>,
 };
 
+export type ReassignRoleMutation = {
+   __typename?: 'ReassignRoleMutation',
+  household?: Maybe<HouseholdNode>,
+  individual?: Maybe<IndividualNode>,
+};
+
 export enum RegistrationDataImportDatahubImportDone {
   NotStarted = 'NOT_STARTED',
   Started = 'STARTED',
@@ -3645,6 +3660,8 @@ export type TicketDeleteIndividualDetailsNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   individual?: Maybe<IndividualNode>,
+  roleReassignData: Scalars['JSONString'],
+  approveStatus: Scalars['Boolean'],
   individualData?: Maybe<Scalars['Arg']>,
 };
 
@@ -4867,6 +4884,28 @@ export type ImportXlsxCashPlanVerificationMutation = (
   )> }
 );
 
+export type ReassignRoleGrievanceMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  householdId: Scalars['ID'],
+  individualId: Scalars['ID'],
+  role: Scalars['String']
+};
+
+
+export type ReassignRoleGrievanceMutation = (
+  { __typename?: 'Mutations' }
+  & { reassignRole: Maybe<(
+    { __typename?: 'ReassignRoleMutation' }
+    & { household: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>, individual: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'unicefId'>
+    )> }
+  )> }
+);
+
 export type RerunDedupeMutationVariables = {
   registrationDataImportDatahubId: Scalars['ID']
 };
@@ -5619,7 +5658,7 @@ export type GrievanceTicketQuery = (
       { __typename?: 'IndividualNode' }
       & { householdsAndRoles: Array<(
         { __typename?: 'IndividualRoleInHouseholdNode' }
-        & Pick<IndividualRoleInHouseholdNode, 'role'>
+        & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
         & { individual: (
           { __typename?: 'IndividualNode' }
           & Pick<IndividualNode, 'id' | 'unicefId'>
@@ -5663,6 +5702,9 @@ export type GrievanceTicketQuery = (
         { __typename?: 'HouseholdNode' }
         & HouseholdDetailedFragment
       )> }
+    )>, deleteIndividualTicketDetails: Maybe<(
+      { __typename?: 'TicketDeleteIndividualDetailsNode' }
+      & Pick<TicketDeleteIndividualDetailsNode, 'id' | 'roleReassignData' | 'approveStatus'>
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -8079,6 +8121,65 @@ export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloRe
 export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
 export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export const ReassignRoleGrievanceDocument = gql`
+    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $role: String!) {
+  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, role: $role) {
+    household {
+      id
+      unicefId
+    }
+    individual {
+      id
+      unicefId
+    }
+  }
+}
+    `;
+export type ReassignRoleGrievanceMutationFn = ApolloReactCommon.MutationFunction<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>;
+export type ReassignRoleGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>, 'mutation'>;
+
+    export const ReassignRoleGrievanceComponent = (props: ReassignRoleGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables> mutation={ReassignRoleGrievanceDocument} {...props} />
+    );
+    
+export type ReassignRoleGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables> & TChildProps;
+export function withReassignRoleGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReassignRoleGrievanceMutation,
+  ReassignRoleGrievanceMutationVariables,
+  ReassignRoleGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables, ReassignRoleGrievanceProps<TChildProps>>(ReassignRoleGrievanceDocument, {
+      alias: 'reassignRoleGrievance',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReassignRoleGrievanceMutation__
+ *
+ * To run a mutation, you first call `useReassignRoleGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReassignRoleGrievanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reassignRoleGrievanceMutation, { data, loading, error }] = useReassignRoleGrievanceMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      householdId: // value for 'householdId'
+ *      individualId: // value for 'individualId'
+ *      role: // value for 'role'
+ *   },
+ * });
+ */
+export function useReassignRoleGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>(ReassignRoleGrievanceDocument, baseOptions);
+      }
+export type ReassignRoleGrievanceMutationHookResult = ReturnType<typeof useReassignRoleGrievanceMutation>;
+export type ReassignRoleGrievanceMutationResult = ApolloReactCommon.MutationResult<ReassignRoleGrievanceMutation>;
+export type ReassignRoleGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>;
 export const RerunDedupeDocument = gql`
     mutation RerunDedupe($registrationDataImportDatahubId: ID!) {
   rerunDedupe(registrationDataImportDatahubId: $registrationDataImportDatahubId) {
@@ -10032,6 +10133,7 @@ export const GrievanceTicketDocument = gql`
           id
           unicefId
         }
+        id
         role
       }
     }
@@ -10071,6 +10173,11 @@ export const GrievanceTicketDocument = gql`
         ...householdDetailed
       }
       householdData
+    }
+    deleteIndividualTicketDetails {
+      id
+      roleReassignData
+      approveStatus
     }
     issueType
     ticketNotes {
@@ -12421,6 +12528,7 @@ export type ResolversTypes = {
   TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
   TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
   TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -12467,7 +12575,6 @@ export type ResolversTypes = {
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
   BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
   GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
@@ -12536,6 +12643,7 @@ export type ResolversTypes = {
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
   AddIndividualApproveMutation: ResolverTypeWrapper<AddIndividualApproveMutation>,
+  ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
@@ -12703,6 +12811,7 @@ export type ResolversParentTypes = {
   TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
   TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
   TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
+  JSONString: Scalars['JSONString'],
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -12749,7 +12858,6 @@ export type ResolversParentTypes = {
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
   BusinessAreaNode: BusinessAreaNode,
   GroupAttributeNode: GroupAttributeNode,
-  JSONString: Scalars['JSONString'],
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
@@ -12818,6 +12926,7 @@ export type ResolversParentTypes = {
   IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
   HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
   AddIndividualApproveMutation: AddIndividualApproveMutation,
+  ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
@@ -13736,6 +13845,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
   approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['AddIndividualApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
   importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
@@ -13995,6 +14105,11 @@ export type RapidProFlowRunResolvers<ContextType = any, ParentType extends Resol
   completed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   interrupted?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   expired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']> = {
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
 };
 
 export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNode'] = ResolversParentTypes['RegistrationDataImportDatahubNode']> = {
@@ -14291,6 +14406,8 @@ export type TicketDeleteIndividualDetailsNodeResolvers<ContextType = any, Parent
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
 };
 
@@ -14649,6 +14766,7 @@ export type Resolvers<ContextType = any> = {
   RapidProFlow?: RapidProFlowResolvers<ContextType>,
   RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
   RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
+  ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
   RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
   RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,
   RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<ContextType>,
