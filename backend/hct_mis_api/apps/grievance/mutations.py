@@ -10,7 +10,7 @@ from account.schema import UserNode
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
-from core.utils import nested_dict_get, decode_id_string
+from core.utils import nested_dict_get, decode_id_string, encode_id_base64
 from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.data_change import (
     save_data_change_extras,
@@ -507,8 +507,8 @@ class ReassignRoleMutation(graphene.Mutation):
 
         ticket_details.role_reassign_data[role_data_key] = {
             "role": role,
-            "household": str(household.id),
-            "individual": str(individual.id),
+            "household": household_id,
+            "individual": individual_id,
         }
         ticket_details.save()
 
