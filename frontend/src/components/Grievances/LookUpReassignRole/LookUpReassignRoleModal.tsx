@@ -39,7 +39,9 @@ export const LookUpReassignRoleModal = ({
 }): React.ReactElement => {
   const { id } = useParams();
   const { showMessage } = useSnackbar();
-  const [mutate] = useReassignRoleMutation();
+  // const [mutate] = useReassignRoleMutation();
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const mutate = async (vars) => {};
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
     program: '',

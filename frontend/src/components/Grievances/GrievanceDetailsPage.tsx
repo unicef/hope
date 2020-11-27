@@ -47,7 +47,7 @@ const StatusContainer = styled.div`
   max-width: 200px;
 `;
 
-export function GrievanceDetails(): React.ReactElement {
+export function GrievanceDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const { data, loading } = useGrievanceTicketQuery({
     variables: { id },
