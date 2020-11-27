@@ -42,7 +42,8 @@ export function AddIndividualGrievanceDetails({
     },
     {},
   );
-  const { documents } = ticket.addIndividualTicketDetails?.individualData;
+  const documents =
+    ticket.addIndividualTicketDetails?.individualData?.documents;
   // eslint-disable-next-line no-param-reassign
   delete ticket.addIndividualTicketDetails?.individualData.documents;
   const labels =
