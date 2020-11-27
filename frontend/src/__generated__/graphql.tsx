@@ -5567,6 +5567,8 @@ export type ExistingGrievanceTicketsQueryVariables = {
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['ID']>,
   paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  category?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -9909,8 +9911,8 @@ export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
 export const ExistingGrievanceTicketsDocument = gql`
-    query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $orderBy: String) {
-  existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, orderBy: $orderBy) {
+    query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $category: String, $issueType: String, $orderBy: String) {
+  existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, category: $category, issueType: $issueType, orderBy: $orderBy) {
     totalCount
     pageInfo {
       startCursor
@@ -9979,6 +9981,8 @@ export function withExistingGrievanceTickets<TProps, TChildProps = {}>(operation
  *      household: // value for 'household'
  *      individual: // value for 'individual'
  *      paymentRecord: // value for 'paymentRecord'
+ *      category: // value for 'category'
+ *      issueType: // value for 'issueType'
  *      orderBy: // value for 'orderBy'
  *   },
  * });

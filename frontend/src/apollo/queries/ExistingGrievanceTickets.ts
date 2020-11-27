@@ -11,6 +11,8 @@ export const ExistingGrievanceTickets = gql`
     $household: ID
     $individual: ID
     $paymentRecord: [ID]
+    $category: String
+    $issueType: String
     $orderBy: String
   ) {
     existingGrievanceTickets(
@@ -23,6 +25,8 @@ export const ExistingGrievanceTickets = gql`
       household: $household
       individual: $individual
       paymentRecord: $paymentRecord
+      category: $category
+      issueType: $issueType
       orderBy: $orderBy
     ) {
       totalCount

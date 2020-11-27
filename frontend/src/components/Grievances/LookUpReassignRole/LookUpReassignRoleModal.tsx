@@ -19,6 +19,7 @@ import {
 import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
 import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -37,6 +38,8 @@ export const LookUpReassignRoleModal = ({
   setLookUpDialogOpen,
 }): React.ReactElement => {
   const { id } = useParams();
+  const { showMessage } = useSnackbar();
+  const [mutate] = useReassignRoleMutation();
   const [filterIndividual, setFilterIndividual] = useState({
     search: '',
     program: '',
@@ -62,7 +65,7 @@ export const LookUpReassignRoleModal = ({
   return (
     <Formik
       initialValues={initialValues}
-      onSubmit={(values) => {
+      onSubmit={async (values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
@@ -72,7 +75,16 @@ export const LookUpReassignRoleModal = ({
           individuald: values.selectedIndividual.id,
           role: values.selectedIndividual.role,
         };
-        console.log('submit variables in nonexisting mutation', variables);
+        try {
+          await mutate({
+            variables: {
+              variables,
+            },
+          });
+          showMessage('Roles Reassigned');
+        } catch (e) {
+          e.graphQLErrors.map((x) => showMessage(x.message));
+        }
       }}
     >
       {({ submitForm, setFieldValue, values }) => (
