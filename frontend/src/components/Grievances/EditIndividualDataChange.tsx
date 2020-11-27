@@ -146,6 +146,7 @@ export const EditIndividualDataChangeFieldRow = ({
   onDelete,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  console.log('itemValue', itemValue, field);
   return (
     <>
       <Grid item xs={4}>
@@ -211,9 +212,14 @@ export const EditIndividualDataChange = ({
     loading: fullIndividualLoading,
   } = useIndividualQuery({ variables: { id: individual?.id } });
   useEffect(() => {
-    setFieldValue('individualDataUpdateFields', [
-      { fieldName: null, fieldValue: null },
-    ]);
+    if (
+      !values.individualDataUpdateFields ||
+      values.individualDataUpdateFields.length === 0
+    ) {
+      setFieldValue('individualDataUpdateFields', [
+        { fieldName: null, fieldValue: null },
+      ]);
+    }
     // setFieldValue('individualDataUpdateFields.documents', [
     //   { fieldName: null, fieldValue: null },
     // ]);

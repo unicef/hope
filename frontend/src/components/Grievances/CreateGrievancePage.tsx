@@ -54,7 +54,7 @@ const BoxWithBorders = styled.div`
   padding: 15px 0;
 `;
 
-export function CreateGrievance(): React.ReactElement {
+export function CreateGrievancePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
 

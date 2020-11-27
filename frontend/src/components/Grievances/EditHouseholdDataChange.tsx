@@ -206,9 +206,14 @@ export const EditHouseholdDataChange = ({
     loading: fullHouseholdLoading,
   } = useHouseholdQuery({ variables: { id: household?.id } });
   useEffect(() => {
-    setFieldValue('householdDataUpdateFields', [
-      { fieldName: null, fieldValue: null },
-    ]);
+    if (
+      !values.householdDataUpdateFields ||
+      values.householdDataUpdateFields.length === 0
+    ) {
+      setFieldValue('householdDataUpdateFields', [
+        { fieldName: null, fieldValue: null },
+      ]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const {
