@@ -310,6 +310,8 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
+    role_reassign_data = JSONField(default=dict)
+    approve_status = models.BooleanField(default=False)
 
     @property
     def household(self):
