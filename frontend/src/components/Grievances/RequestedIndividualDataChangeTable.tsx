@@ -258,7 +258,6 @@ export function RequestedIndividualDataChangeTable({
           })}
           {documentsToRemove?.map((row, index) => {
             const document = previousDocuments[row.value];
-            console.log('document', document);
             return (
               <TableRow>
                 <TableCell align='left'>
