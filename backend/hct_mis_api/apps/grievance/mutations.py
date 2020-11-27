@@ -17,6 +17,7 @@ from grievance.mutations_extras.data_change import (
     close_add_individual_grievance_ticket,
     close_update_individual_grievance_ticket,
     close_update_household_grievance_ticket,
+    close_delete_individual_ticket,
 )
 from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
 from grievance.mutations_extras.main import (
@@ -243,7 +244,7 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
             GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: close_update_household_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: close_update_individual_grievance_ticket,
             GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: close_add_individual_grievance_ticket,
-            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _not_implemented_close_method,
+            GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: close_delete_individual_ticket,
         },
         GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: {
             GrievanceTicket.ISSUE_TYPE_DATA_BREACH: _no_operation_close_method,
@@ -466,6 +467,8 @@ class ReassignRoleMutation(graphene.Mutation):
         household_id = graphene.Argument(graphene.ID, required=True)
         individual_id = graphene.Argument(graphene.ID, required=True)
         role = graphene.String(required=True)
+        # provide only for edit role
+        previously_assigned_individual_id = graphene.Argument(graphene.ID)
 
     @classmethod
     def verify_role_choices(cls, role):
@@ -483,7 +486,17 @@ class ReassignRoleMutation(graphene.Mutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, household_id, individual_id, grievance_ticket_id, role, **kwargs):
+    def mutate(
+        cls,
+        root,
+        info,
+        household_id,
+        individual_id,
+        grievance_ticket_id,
+        role,
+        previously_assigned_individual_id,
+        **kwargs,
+    ):
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)
         decoded_individual_id = decode_id_string(individual_id)
@@ -495,12 +508,20 @@ class ReassignRoleMutation(graphene.Mutation):
         ticket_details = grievance_ticket.delete_individual_ticket_details
         cls.verify_if_role_exists(household, ticket_details.individual, role)
 
-        role_data_key = get_role_data_key(household.id, individual.id, role)
-        ticket_details.role_reassign_data[role_data_key] = {
-            "role": role,
-            "household": str(household.id),
-            "individual": str(individual.id),
-        }
+        if previously_assigned_individual_id:
+            role_data_key = get_role_data_key(household.id, previously_assigned_individual_id, role)
+            previous_role_data = ticket_details.role_reassign_data.pop(role_data_key, None)
+            if previous_role_data is None:
+                raise GraphQLError("No such individual in already reassigned roles")
+            new_role_data_key = get_role_data_key(household.id, individual.id, role)
+            ticket_details.role_reassign_data[new_role_data_key] = previous_role_data
+        else:
+            role_data_key = get_role_data_key(household.id, individual.id, role)
+            ticket_details.role_reassign_data[role_data_key] = {
+                "role": role,
+                "household": str(household.id),
+                "individual": str(individual.id),
+            }
         ticket_details.save()
 
         return cls(household=household, individual=individual)
