@@ -146,7 +146,6 @@ export const EditIndividualDataChangeFieldRow = ({
   onDelete,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  console.log('itemValue', itemValue, field);
   return (
     <>
       <Grid item xs={4}>

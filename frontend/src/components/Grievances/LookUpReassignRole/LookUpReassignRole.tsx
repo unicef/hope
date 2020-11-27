@@ -1,7 +1,8 @@
 import { Formik } from 'formik';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   GrievanceTicketQuery,
+  useIndividualLazyQuery,
   useIndividualQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../LoadingComponent';
@@ -24,20 +25,17 @@ export const LookUpReassignRole = ({
   const reAssigneeRole = JSON.parse(
     ticket?.deleteIndividualTicketDetails?.roleReassignData,
   )[individualRole.id];
-  console.log('😎: reAssigneeRole', reAssigneeRole);
 
   const { data: individualData, loading } = useIndividualQuery({
     variables: { id: reAssigneeRole?.individual },
   });
-  console.log('😎: individualData', individualData);
 
-  if (!individualData) return null;
   if (loading) return <LoadingComponent />;
 
   return (
     <Formik
       initialValues={{
-        selectedIndividual: individualData.individual || null,
+        selectedIndividual: individualData?.individual || null,
         selectedHousehold: household || null,
         role: individualRole.role,
       }}
