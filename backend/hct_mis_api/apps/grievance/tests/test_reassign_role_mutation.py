@@ -104,8 +104,8 @@ class TestRoleReassignMutation(APITestCase):
         expected_data = {
             str(self.role.id): {
                 "role": "PRIMARY",
-                "household": "b5cb9bb2-a4f3-49f0-a9c8-a2f260026054",
-                "individual": "d4848d8e-4a1c-49e9-b1c0-1e994047164a",
+                "household": self.id_to_base64("b5cb9bb2-a4f3-49f0-a9c8-a2f260026054", "HouseholdNode"),
+                "individual": self.id_to_base64("d4848d8e-4a1c-49e9-b1c0-1e994047164a", "IndividualNode"),
             }
         }
         self.assertEqual(role_reassign_data, expected_data)

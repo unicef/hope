@@ -219,13 +219,13 @@ class TestCloseDataChangeTickets(APITestCase):
             role_reassign_data={
                 str(self.role_primary.id): {
                     "role": ROLE_PRIMARY,
-                    "household": str(self.household_two.id),
-                    "individual": str(self.individuals_household_two[1].id),
+                    "household": self.id_to_base64(self.household_two.id, "HouseholdNode"),
+                    "individual": self.id_to_base64(self.individuals_household_two[1].id, "IndividualNode"),
                 },
                 f"HEAD": {
                     "role": HEAD,
-                    "household": str(self.household_two.id),
-                    "individual": str(self.individuals_household_two[1].id),
+                    "household": self.id_to_base64(self.household_two.id, "HouseholdNode"),
+                    "individual": self.id_to_base64(self.individuals_household_two[1].id, "IndividualNode"),
                 },
             },
             approve_status=True,
