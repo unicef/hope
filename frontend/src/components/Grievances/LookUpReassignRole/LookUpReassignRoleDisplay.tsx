@@ -2,7 +2,6 @@ import { Box, Grid } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 const StyledBox = styled.div`
   border: 1.5px solid #043e91;
@@ -21,10 +20,6 @@ const BlueText = styled.span`
 const LightGrey = styled.span`
   color: #949494;
   margin-right: 10px;
-  cursor: pointer;
-`;
-const DarkGrey = styled.span`
-  color: #757575;
   cursor: pointer;
 `;
 
@@ -64,15 +59,6 @@ export const LookUpReassignRoleDisplay = ({
                     onClick={() => setLookUpDialogOpen(true)}
                   />
                 </LightGrey>
-              </Grid>
-              <Grid item>
-                <DarkGrey>
-                  <DeleteIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => handleRemove()}
-                  />
-                </DarkGrey>
               </Grid>
             </Grid>
           </Box>

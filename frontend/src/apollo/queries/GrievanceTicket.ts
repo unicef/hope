@@ -36,6 +36,7 @@ export const GrievanceTicket = gql`
             id
             unicefId
           }
+          id
           role
         }
       }
@@ -75,6 +76,11 @@ export const GrievanceTicket = gql`
           ...householdDetailed
         }
         householdData
+      }
+      deleteIndividualTicketDetails {
+        id
+        roleReassignData
+        approveStatus
       }
       issueType
       ticketNotes {

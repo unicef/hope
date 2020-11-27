@@ -211,9 +211,14 @@ export const EditIndividualDataChange = ({
     loading: fullIndividualLoading,
   } = useIndividualQuery({ variables: { id: individual?.id } });
   useEffect(() => {
-    setFieldValue('individualDataUpdateFields', [
-      { fieldName: null, fieldValue: null },
-    ]);
+    if (
+      !values.individualDataUpdateFields ||
+      values.individualDataUpdateFields.length === 0
+    ) {
+      setFieldValue('individualDataUpdateFields', [
+        { fieldName: null, fieldValue: null },
+      ]);
+    }
     // setFieldValue('individualDataUpdateFields.documents', [
     //   { fieldName: null, fieldValue: null },
     // ]);
