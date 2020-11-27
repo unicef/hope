@@ -188,10 +188,14 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
         current_value = getattr(household, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
+        if isinstance(current_value, Country):
+            current_value = current_value.alpha3
         household_data_with_approve_status[field]["previous_value"] = current_value
 
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
+        household_data=household_data_with_approve_status,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -230,7 +234,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         documents_to_remove_with_approve_status
     )
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -245,7 +251,8 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     ticket_individual_data_update_details = TicketDeleteIndividualDetails(
-        individual=individual, ticket=grievance_ticket,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -263,7 +270,9 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data, household=household, ticket=grievance_ticket,
+        individual_data=individual_data,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()

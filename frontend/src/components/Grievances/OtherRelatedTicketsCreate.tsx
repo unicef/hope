@@ -4,10 +4,7 @@ import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
-import {
-  GrievanceTicketQuery,
-  useExistingGrievanceTicketsQuery,
-} from '../../__generated__/graphql';
+import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
 import { ContentLink } from '../ContentLink';
 import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';

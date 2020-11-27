@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 
 /**

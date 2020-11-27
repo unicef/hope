@@ -1,5 +1,12 @@
 import React from 'react';
-import {Avatar, Box, Button, Grid, Paper, Typography} from '@material-ui/core';
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Typography,
+} from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
@@ -10,11 +17,10 @@ import { OverviewContainerColumn } from '../OverviewContainerColumn';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
-  useCreateGrievanceTicketNoteMutation, useGrievanceTicketQuery,
+  useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../__generated__/graphql';
 import { renderUserName } from '../../utils/utils';
-import { GrievanceTicket } from '../../apollo/queries/GrievanceTicket';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -103,7 +109,9 @@ export function Notes({
           variables: {
             noteInput: { ticket: id, description: values.newNote },
           },
-          refetchQueries: () => [{ query: GrievanceTicketDocument, variables: { id } }],
+          refetchQueries: () => [
+            { query: GrievanceTicketDocument, variables: { id } },
+          ],
         });
         resetForm({});
       }}

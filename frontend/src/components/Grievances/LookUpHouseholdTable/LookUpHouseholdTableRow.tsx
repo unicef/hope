@@ -5,16 +5,17 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
-  HouseholdNode,
 } from '../../../__generated__/graphql';
 import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
-  household: AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"];
-  radioChangeHandler: (household:AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"]) => void;
-  selectedHousehold: AllHouseholdsQuery["allHouseholds"]["edges"][number]["node"];
+  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
+  radioChangeHandler: (
+    household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
+  ) => void;
+  selectedHousehold: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
   choicesData: HouseholdChoiceDataQuery;
 }
 
@@ -51,7 +52,9 @@ export function LookUpHouseholdTableRow({
         <Radio
           color='primary'
           checked={selectedHousehold?.id === household.id}
-          onChange={()=>{radioChangeHandler(household)}}
+          onChange={() => {
+            radioChangeHandler(household);
+          }}
           value={household.id}
           name='radio-button-household'
           inputProps={{ 'aria-label': household.id }}

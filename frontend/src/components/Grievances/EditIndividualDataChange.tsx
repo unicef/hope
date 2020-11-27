@@ -3,6 +3,7 @@ import { Box, Button, Grid, IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import { Field, FieldArray } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
+import { AddCircleOutline, Delete } from '@material-ui/icons';
 import camelCase from 'lodash/camelCase';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
@@ -16,7 +17,6 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { AddCircleOutline, Delete } from '@material-ui/icons';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
@@ -235,7 +235,7 @@ export const EditIndividualDataChange = ({
         <Title>
           <Typography variant='h6'>Bio Data</Typography>
         </Title>
-        <Grid container spacing={3} >
+        <Grid container spacing={3}>
           <FieldArray
             name='individualDataUpdateFields'
             render={(arrayHelpers) => (

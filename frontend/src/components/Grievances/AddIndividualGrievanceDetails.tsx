@@ -6,10 +6,8 @@ import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
-  useApproveIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
-import { Formik } from 'formik';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
