@@ -1,7 +1,7 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
-import {AllIndividualsQuery, IndividualNode} from '../../../__generated__/graphql';
+import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
@@ -9,9 +9,11 @@ import { Pointer } from '../../Pointer';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
-  individual: AllIndividualsQuery["allIndividuals"]["edges"][number]["node"];
-  radioChangeHandler: (individual: AllIndividualsQuery["allIndividuals"]["edges"][number]["node"]) => void;
-  selectedIndividual: AllIndividualsQuery["allIndividuals"]["edges"][number]["node"];
+  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
+  radioChangeHandler: (
+    individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
+  ) => void;
+  selectedIndividual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
 }
 
 export function LookUpIndividualTableRow({
@@ -49,7 +51,9 @@ export function LookUpIndividualTableRow({
         <Radio
           color='primary'
           checked={selectedIndividual?.id === individual.id}
-          onChange={()=>{radioChangeHandler(individual)}}
+          onChange={() => {
+            radioChangeHandler(individual);
+          }}
           value={individual.id}
           name='radio-button-household'
           inputProps={{ 'aria-label': individual.id }}

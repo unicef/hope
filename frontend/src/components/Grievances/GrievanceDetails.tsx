@@ -1,4 +1,4 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -20,6 +20,7 @@ import {
 import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
@@ -35,12 +36,6 @@ import { ReassignRoleBox } from './ReassignRoleBox';
 
 const PaddingContainer = styled.div`
   padding: 22px;
-`;
-const StyledBox = styled(Paper)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 26px 22px;
 `;
 
 const Title = styled.div`
@@ -229,20 +224,18 @@ export function GrievanceDetails(): React.ReactElement {
           </Box>
         </Box>
       );
-    // if (
-    //   ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    //   ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL
-    // )
-    //   return (
-    //     <PaddingContainer>
-    //       <Box display='flex' flexDirection='column'>
-    //         <ReassignRoleBox
-    //           ticket={ticket}
-    //           linkedTickets={ticket.linkedTickets.edges}
-    //         />
-    //       </Box>
-    //     </PaddingContainer>
-    //   );
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+    )
+      return (
+        <PaddingContainer>
+          <Box display='flex' flexDirection='column'>
+            <ReassignRoleBox ticket={ticket} />
+          </Box>
+        </PaddingContainer>
+      );
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>

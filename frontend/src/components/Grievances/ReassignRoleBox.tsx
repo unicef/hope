@@ -1,18 +1,12 @@
-import { Box, Grid, Paper, Typography } from '@material-ui/core';
-import React, { useState } from 'react';
+import { Box, Paper, Typography } from '@material-ui/core';
+import React from 'react';
 import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
-import {
-  GrievanceTicketQuery,
-  useExistingGrievanceTicketsQuery,
-} from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
-import { Missing } from '../Missing';
+import { ContentLink } from '../ContentLink';
+import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
@@ -27,11 +21,6 @@ const Title = styled.div`
   color: ${({ theme }) => theme.hctPalette.oragne};
 `;
 
-const BlueBold = styled.div`
-  color: ${({ theme }) => theme.hctPalette.navyBlue};
-  font-weight: 500;
-  cursor: pointer;
-`;
 const WarnIcon = styled(WarningIcon)`
   position: relative;
   top: 5px;
@@ -39,28 +28,30 @@ const WarnIcon = styled(WarningIcon)`
 `;
 
 export const ReassignRoleBox = ({
-                                  ticket,
-                                }: {
+  ticket,
+}: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }) => {
   const businessArea = useBusinessArea();
-  const [show, setShow] = useState(false);
-
-  const { data, loading } = useExistingGrievanceTicketsQuery({
-    variables: {
-      businessArea,
-      household:
-        decodeIdString(ticket.household?.id) ||
-        '294cfa7e-b16f-4331-8014-a22ffb2b8b3c',
-      //adding some random ID to get 0 results if there is no household id.
-    },
-  });
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
-
-  const householdTickets = data.existingGrievanceTickets.edges;
-
-  const households = ['HH-1', 'HH-2', 'HH-3'];
+  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
+  const isHeadOfHousehold =
+    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+  const mappedLookUpsForExternalHouseholds = householdsAndRoles.map((el) => (
+    <Box mb={2} mt={2}>
+      <Box mb={2}>
+        <LabelizedField label='HOUSEHOLD ID'>
+          <ContentLink
+            target='_blank'
+            rel='noopener noreferrer'
+            href={`/${businessArea}/population/household/${el.household.id}`}
+          >
+            {el.household.unicefId}
+          </ContentLink>
+        </LabelizedField>
+      </Box>
+      <LookUpReassignRole household={el.household} />
+    </Box>
+  ));
 
   return (
     <StyledBox>
@@ -74,7 +65,23 @@ export const ReassignRoleBox = ({
         Upon removing you will need to select new individual(s) for this role.
       </Typography>
       <Box mt={3} display='flex' flexDirection='column'>
-        <Missing />
+        {isHeadOfHousehold && (
+          <Box mb={2} mt={2}>
+            <Box mb={2}>
+              <LabelizedField label='HOUSEHOLD ID'>
+                <ContentLink
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  href={`/${businessArea}/population/household/${ticket?.household.id}`}
+                >
+                  {ticket?.household.unicefId}
+                </ContentLink>
+              </LabelizedField>
+            </Box>
+            <LookUpReassignRole household={ticket?.household} />
+          </Box>
+        )}
+        {mappedLookUpsForExternalHouseholds}
       </Box>
     </StyledBox>
   );

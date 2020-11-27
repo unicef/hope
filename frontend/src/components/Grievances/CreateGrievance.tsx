@@ -84,13 +84,19 @@ export function CreateGrievance(): React.ReactElement {
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string().required('Category is required').nullable(),
+    category: Yup.string()
+      .required('Category is required')
+      .nullable(),
     admin: Yup.string(),
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+    selectedPaymentRecords: Yup.array()
+      .of(Yup.string())
+      .nullable(),
+    selectedRelatedTickets: Yup.array()
+      .of(Yup.string())
+      .nullable(),
     // individualData: Yup.object().shape({
     //   relationship:Yup.string().required('You need specify this field')
     //   fullName:Yup.string().required('You need specify this field')
@@ -120,16 +126,15 @@ export function CreateGrievance(): React.ReactElement {
   const [mutate] = useCreateGrievanceMutation();
   const {
     data: allAddIndividualFieldsData,
-    loading,
+    loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-  if (userDataLoading || choicesLoading) {
+  if (userDataLoading || choicesLoading || allAddIndividualFieldsDataLoading) {
     return <LoadingComponent />;
   }
   if (!choicesData || !userData) return null;
   const validate = (values) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors: { [id: string]: any } = {};
-    console.log(values, values);
     if (
       values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
@@ -280,7 +285,6 @@ export function CreateGrievance(): React.ReactElement {
       category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
     ) {
-      console.log('values', values);
       return {
         variables: {
           input: {
@@ -370,7 +374,6 @@ export function CreateGrievance(): React.ReactElement {
     >
       {({ submitForm, values, setFieldValue, errors }) => (
         <>
-          {console.log('errors', errors)}
           <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
           <Grid container spacing={3}>
             <Grid item xs={8}>
