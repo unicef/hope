@@ -23,6 +23,11 @@ const StyledAutocomplete = styled(Autocomplete)`
 export function AdminAreasAutocomplete({
   value,
   onChange,
+  disabled,
+}: {
+  value;
+  onChange;
+  disabled?;
 }): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
@@ -59,6 +64,7 @@ export function AdminAreasAutocomplete({
         }
         return `${option.node.title}`;
       }}
+      disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}
       loading={loading}
       renderInput={(params) => (
