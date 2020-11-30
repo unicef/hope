@@ -135,7 +135,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=True)
-    household_data = HouseholdUpdateDataObjectType()
+    household_data = HouseholdUpdateDataObjectType(required=True)
 
 
 class IndividualDataUpdateIssueTypeExtras(graphene.InputObjectType):
@@ -145,6 +145,18 @@ class IndividualDataUpdateIssueTypeExtras(graphene.InputObjectType):
 
 class AddIndividualIssueTypeExtras(graphene.InputObjectType):
     household = graphene.GlobalID(node=HouseholdNode, required=True)
+    individual_data = AddIndividualDataObjectType(required=True)
+
+
+class UpdateHouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
+    household_data = HouseholdUpdateDataObjectType(required=True)
+
+
+class UpdateIndividualDataUpdateIssueTypeExtras(graphene.InputObjectType):
+    individual_data = IndividualUpdateDataObjectType(required=True)
+
+
+class UpdateAddIndividualIssueTypeExtras(graphene.InputObjectType):
     individual_data = AddIndividualDataObjectType(required=True)
 
 
@@ -168,6 +180,16 @@ def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwarg
         return save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs)
     if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
         return save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+
+
+def update_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    issue_type = grievance_ticket.issue_type
+    if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
+        return update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    if issue_type == GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL:
+        return update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs)
+    if issue_type == GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE:
+        return update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs)
 
 
 def save_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
@@ -198,6 +220,31 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
+
+
+def update_household_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    ticket_details = grievance_ticket.household_data_update_ticket_details
+    household_data_update_new_extras = extras.get("household_data_update_issue_type_extras")
+    household = ticket_details.household
+    new_household_data = household_data_update_new_extras.get("household_data", {})
+    to_date_string(new_household_data, "start")
+    to_date_string(new_household_data, "end")
+    household_data_with_approve_status = {
+        to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_household_data.items()
+    }
+
+    for field, field_data in household_data_with_approve_status.items():
+        current_value = getattr(household, field, None)
+        if isinstance(current_value, (datetime, date)):
+            current_value = current_value.isoformat()
+        if isinstance(current_value, Country):
+            current_value = current_value.alpha3
+        household_data_with_approve_status[field]["previous_value"] = current_value
+
+    ticket_details.household_data = household_data_with_approve_status
+    ticket_details.save()
+    grievance_ticket.refresh_from_db()
+    return grievance_ticket
 
 
 def save_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
@@ -239,6 +286,43 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     return [grievance_ticket]
 
 
+def update_individual_data_update_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    ticket_details = grievance_ticket.individual_data_update_ticket_details
+
+    individual_data_update_extras = extras.get("individual_data_update_issue_type_extras")
+
+    individual = ticket_details.individual
+    new_individual_data = individual_data_update_extras.get("individual_data", {})
+    documents = new_individual_data.pop("documents", [])
+    documents_to_remove = new_individual_data.pop("documents_to_remove", [])
+    to_date_string(new_individual_data, "birth_date")
+    individual_data_with_approve_status = {
+        to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_individual_data.items()
+    }
+
+    for field, field_data in individual_data_with_approve_status.items():
+        current_value = getattr(individual, field, None)
+        if isinstance(current_value, (datetime, date)):
+            current_value = current_value.isoformat()
+        individual_data_with_approve_status[field]["previous_value"] = current_value
+
+    documents_with_approve_status = [{"value": document, "approve_status": False} for document in documents]
+    documents_to_remove_with_approve_status = [
+        {"value": document_id, "approve_status": False} for document_id in documents_to_remove
+    ]
+    individual_data_with_approve_status["documents"] = documents_with_approve_status
+    individual_data_with_approve_status["documents_to_remove"] = documents_to_remove_with_approve_status
+
+    individual_data_with_approve_status["previous_documents"] = prepare_previous_documents(
+        documents_to_remove_with_approve_status
+    )
+
+    ticket_details.individual_data = individual_data_with_approve_status
+    ticket_details.save()
+    grievance_ticket.refresh_from_db()
+    return grievance_ticket
+
+
 def save_individual_delete_extras(root, info, input, grievance_ticket, extras, **kwargs):
     data_change_extras = extras.get("issue_type")
     individual_data_update_issue_type_extras = data_change_extras.get("individual_delete_issue_type_extras")
@@ -270,6 +354,22 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
     return [grievance_ticket]
+
+
+def update_add_individual_extras(root, info, input, grievance_ticket, extras, **kwargs):
+    ticket_details = grievance_ticket.add_individual_ticket_details
+    new_add_individual_extras = extras.get("add_individual_issue_type_extras")
+
+    new_individual_data = new_add_individual_extras.get("individual_data", {})
+    to_date_string(new_individual_data, "birth_date")
+    new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
+
+    ticket_details.individual_data = new_individual_data
+    ticket_details.approve_status = False
+    ticket_details.save()
+
+    grievance_ticket.refresh_from_db()
+    return grievance_ticket
 
 
 def close_add_individual_grievance_ticket(grievance_ticket):
@@ -407,7 +507,11 @@ def close_delete_individual_ticket(grievance_ticket):
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
     removed_individual_household = individual_to_remove.household
-    removed_individual_is_head = removed_individual_household.head_of_household.id == individual_to_remove.id
+
+    if removed_individual_household:
+        removed_individual_is_head = removed_individual_household.head_of_household.id == individual_to_remove.id
+    else:
+        removed_individual_is_head = False
 
     if (
         not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
