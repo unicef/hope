@@ -1,8 +1,12 @@
 import camelCase from 'lodash/camelCase';
-import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES,} from '../../../utils/constants';
-import {thingForSpecificGrievanceType} from '../../../utils/utils';
-import {AllAddIndividualFieldsQuery} from "../../../__generated__/graphql";
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../../utils/constants';
+import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
@@ -14,6 +18,7 @@ function prepareFeedbackVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareGrievanceComplaintVariables(requiredVariables, values) {
   return {
     variables: {
@@ -34,6 +39,7 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareSesitiveVariables(requiredVariables, values) {
   return {
     variables: {
@@ -55,6 +61,7 @@ function prepareSesitiveVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
   return {
     variables: {
@@ -75,6 +82,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareDeleteIndividualVariables(requiredVariables, values) {
   return {
     variables: {
@@ -94,6 +102,7 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
   return {
     variables: {
@@ -124,6 +133,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
   return {
     variables: {
@@ -150,6 +160,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareDefaultVariables(requiredVariables, values) {
   return {
     variables: {
@@ -175,6 +186,7 @@ export const prepareVariablesDict = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values) {
   const requiredVariables = {
     businessArea,
@@ -194,6 +206,7 @@ export function prepareVariables(businessArea, values) {
   return prepareFunction(requiredVariables, values);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validate(
   values,
   allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
