@@ -24,6 +24,8 @@ import {
   GRIEVANCE_CATEGORIES,
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
+import {renderUserName, thingForSpecificGrievanceType} from '../../utils/utils';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
@@ -32,8 +34,6 @@ import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';
 import { prepareVariables, validate } from './utils/createGrievanceUtils';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
-import {renderUserName, thingForSpecificGrievanceType} from '../../utils/utils';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
