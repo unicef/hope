@@ -185,7 +185,14 @@ export const prepareVariablesDict = {
     [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: prepareEditHouseholdVariables,
   },
 };
-
+const grievanceTypeIssueTypeDict = {
+  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.REFERRAL]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: 'IGNORE',
+  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
+};
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values) {
   const requiredVariables = {
@@ -202,6 +209,7 @@ export function prepareVariables(businessArea, values) {
     values,
     prepareVariablesDict,
     prepareDefaultVariables,
+    grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
 }

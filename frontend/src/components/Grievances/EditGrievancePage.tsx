@@ -145,9 +145,12 @@ function prepareInitialValues(ticket: GrievanceTicketQuery['grievanceTicket']) {
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
-    selectedPaymentRecords: null, //add value here ?
     identityVerified: false,
     issueType: ticket.issueType || null,
+    selectedPaymentRecords: [ticket.paymentRecord.id],
+    selectedRelatedTickets: ticket.relatedTickets.map(
+      (relatedTicket) => relatedTicket.id,
+    ),
   };
   const prepareInitialValueFunction = thingForSpecificGrievanceType(
     ticket,
@@ -157,7 +160,14 @@ function prepareInitialValues(ticket: GrievanceTicketQuery['grievanceTicket']) {
   initialValues = prepareInitialValueFunction(initialValues, ticket);
   return initialValues;
 }
-
+const EmptyComponent = (): React.ReactElement => null;
+const dataChangeComponentDict = {
+  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
+    [GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL]: AddIndividualDataChange,
+    [GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL]: EditIndividualDataChange,
+    [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD]: EditHouseholdDataChange,
+  },
+};
 export function EditGrievancePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
@@ -190,24 +200,19 @@ export function EditGrievancePage(): React.ReactElement {
     (edge) => edge.id,
   );
 
-  const initialValues = prepareInitialValues(ticket);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const initialValues: any = prepareInitialValues(ticket);
 
   const validationSchema = Yup.object().shape({
     description: Yup.string().required('Description is required'),
     assignedTo: Yup.string().required('Assigned To is required'),
-    category: Yup.string()
-      .required('Category is required')
-      .nullable(),
+    category: Yup.string().required('Category is required').nullable(),
     admin: Yup.string(),
     area: Yup.string(),
     language: Yup.string().required('Language is required'),
     consent: Yup.bool().oneOf([true], 'Consent is required'),
-    selectedPaymentRecords: Yup.array()
-      .of(Yup.string())
-      .nullable(),
-    selectedRelatedTickets: Yup.array()
-      .of(Yup.string())
-      .nullable(),
+    selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+    selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
   });
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -424,177 +429,172 @@ export function EditGrievancePage(): React.ReactElement {
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue }) => (
-        <>
-          <PageHeader
-            title={`Edit Ticket #${decodeIdString(id)}`}
-            breadCrumbs={breadCrumbsItems}
-          />
-          <Grid container spacing={3}>
-            <Grid item xs={8}>
-              <NewTicket>
-                <ContainerColumnWithBorder>
-                  <Grid container spacing={3}>
-                    <Grid item xs={6}>
-                      <Field
-                        name='category'
-                        label='Category*'
-                        onChange={(e) => {
-                          setFieldValue('category', e.target.value);
-                          setFieldValue('issueType', null);
-                        }}
-                        variant='outlined'
-                        choices={
-                          choicesData.grievanceTicketManualCategoryChoices
-                        }
-                        component={FormikSelectField}
-                      />
-                    </Grid>
-                    {values.category.toString() ===
-                      GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-                    values.category.toString() ===
-                      GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+      {({ submitForm, values, setFieldValue }) => {
+        const DatachangeComponent = thingForSpecificGrievanceType(
+          values,
+          dataChangeComponentDict,
+          EmptyComponent,
+        );
+        return (
+          <>
+            <PageHeader
+              title={`Edit Ticket #${decodeIdString(id)}`}
+              breadCrumbs={breadCrumbsItems}
+            />
+            <Grid container spacing={3}>
+              <Grid item xs={8}>
+                <NewTicket>
+                  <ContainerColumnWithBorder>
+                    <Grid container spacing={3}>
                       <Grid item xs={6}>
                         <Field
-                          name='issueType'
-                          label='Issue Type*'
+                          name='category'
+                          label='Category*'
+                          disabled
+                          onChange={(e) => {
+                            setFieldValue('category', e.target.value);
+                            setFieldValue('issueType', null);
+                          }}
                           variant='outlined'
                           choices={
-                            issueTypeDict[values.category.toString()]
-                              .subCategories
+                            choicesData.grievanceTicketManualCategoryChoices
                           }
                           component={FormikSelectField}
                         />
                       </Grid>
-                    ) : null}
-                  </Grid>
-                  <BoxWithBorders>
-                    <Box display='flex' flexDirection='column'>
-                      <Consent />
-                      <Field
-                        name='consent'
-                        label='Received Consent*'
-                        color='primary'
-                        component={FormikCheckboxField}
-                      />
-                      <LookUpSection
-                        category={values.category}
+                      {values.category.toString() ===
+                        GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+                      values.category.toString() ===
+                        GRIEVANCE_CATEGORIES.DATA_CHANGE ? (
+                        <Grid item xs={6}>
+                          <Field
+                            name='issueType'
+                            disabled
+                            label='Issue Type*'
+                            variant='outlined'
+                            choices={
+                              issueTypeDict[values.category.toString()]
+                                .subCategories
+                            }
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      ) : null}
+                    </Grid>
+                    <BoxWithBorders>
+                      <Box display='flex' flexDirection='column'>
+                        <Consent />
+                        <Field
+                          name='consent'
+                          label='Received Consent*'
+                          color='primary'
+                          disabled
+                          component={FormikCheckboxField}
+                        />
+                        <LookUpSection
+                          values={values}
+                          disabledHouseholdIndividual
+                          disabledPaymentRecords
+                          onValueChange={setFieldValue}
+                        />
+                      </Box>
+                    </BoxWithBorders>
+                    <BoxWithBorderBottom>
+                      <Grid container spacing={3}>
+                        <Grid item xs={6}>
+                          <Field
+                            name='assignedTo'
+                            label='Assigned to*'
+                            variant='outlined'
+                            choices={mappedIndividuals}
+                            component={FormikSelectField}
+                          />
+                        </Grid>
+                      </Grid>
+                    </BoxWithBorderBottom>
+                    <BoxPadding>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12}>
+                          <Field
+                            name='description'
+                            multiline
+                            fullWidth
+                            disabled={ticket.description}
+                            variant='outlined'
+                            label='Description*'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='admin'
+                            label='Administrative Level 2'
+                            disabled={ticket.admin}
+                            variant='outlined'
+                            component={FormikAdminAreaAutocomplete}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='area'
+                            fullWidth
+                            disabled={ticket.area}
+                            variant='outlined'
+                            label='Area / Village / Pay point'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Field
+                            name='language'
+                            multiline
+                            fullWidth
+                            disabled={ticket.language}
+                            variant='outlined'
+                            label='Languages Spoken*'
+                            component={FormikTextField}
+                          />
+                        </Grid>
+                      </Grid>
+                    </BoxPadding>
+                    <BoxPadding>
+                      <DatachangeComponent
                         values={values}
-                        onValueChange={setFieldValue}
+                        setFieldValue={setFieldValue}
                       />
-                    </Box>
-                  </BoxWithBorders>
-                  <BoxWithBorderBottom>
-                    <Grid container spacing={3}>
-                      <Grid item xs={6}>
-                        <Field
-                          name='assignedTo'
-                          label='Assigned to*'
-                          variant='outlined'
-                          choices={mappedIndividuals}
-                          component={FormikSelectField}
-                        />
-                      </Grid>
-                    </Grid>
-                  </BoxWithBorderBottom>
-                  <BoxPadding>
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <Field
-                          name='description'
-                          multiline
-                          fullWidth
-                          variant='outlined'
-                          label='Description*'
-                          component={FormikTextField}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Field
-                          name='admin'
-                          label='Administrative Level 2'
-                          variant='outlined'
-                          component={FormikAdminAreaAutocomplete}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Field
-                          name='area'
-                          fullWidth
-                          variant='outlined'
-                          label='Area / Village / Pay point'
-                          component={FormikTextField}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Field
-                          name='language'
-                          multiline
-                          fullWidth
-                          variant='outlined'
-                          label='Languages Spoken*'
-                          component={FormikTextField}
-                        />
-                      </Grid>
-                    </Grid>
-                  </BoxPadding>
-                  <BoxPadding>
-                    {values.category.toString() ===
-                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType.toString() ===
-                        GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
-                        <AddIndividualDataChange values={values} />
-                      )}
-                    {values.category.toString() ===
-                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType.toString() ===
-                        GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
-                        <EditIndividualDataChange
-                          values={values}
-                          setFieldValue={setFieldValue}
-                        />
-                      )}
-                    {values.category.toString() ===
-                      GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-                      values.issueType.toString() ===
-                        GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
-                        <EditHouseholdDataChange
-                          values={values}
-                          setFieldValue={setFieldValue}
-                        />
-                      )}
-                  </BoxPadding>
+                    </BoxPadding>
 
-                  <DialogFooter>
-                    <DialogActions>
-                      <Button
-                        component={Link}
-                        to={`/${businessArea}/grievance-and-feedback`}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        color='primary'
-                        variant='contained'
-                        onClick={submitForm}
-                      >
-                        Save
-                      </Button>
-                    </DialogActions>
-                  </DialogFooter>
-                </ContainerColumnWithBorder>
-              </NewTicket>
+                    <DialogFooter>
+                      <DialogActions>
+                        <Button
+                          component={Link}
+                          to={`/${businessArea}/grievance-and-feedback`}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          color='primary'
+                          variant='contained'
+                          onClick={submitForm}
+                        >
+                          Save
+                        </Button>
+                      </DialogActions>
+                    </DialogFooter>
+                  </ContainerColumnWithBorder>
+                </NewTicket>
+              </Grid>
+              <Grid item xs={4}>
+                <NewTicket>
+                  {values.category && values.selectedHousehold?.id ? (
+                    <OtherRelatedTicketsCreate values={values} />
+                  ) : null}
+                </NewTicket>
+              </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <NewTicket>
-                {values.category && values.selectedHousehold?.id ? (
-                  <OtherRelatedTicketsCreate values={values} />
-                ) : null}
-              </NewTicket>
-            </Grid>
-          </Grid>
-        </>
-      )}
+          </>
+        );
+      }}
     </Formik>
   );
 }

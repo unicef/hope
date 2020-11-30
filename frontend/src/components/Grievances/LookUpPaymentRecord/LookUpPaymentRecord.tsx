@@ -6,6 +6,11 @@ import { LookUpPaymentRecordModal } from './LookUpPaymentRecordModal';
 export const LookUpPaymentRecord = ({
   onValueChange,
   values,
+  disabled,
+}: {
+  onValueChange;
+  values;
+  disabled?;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
@@ -19,6 +24,7 @@ export const LookUpPaymentRecord = ({
         <LookUpPaymentRecordDisplay
           setLookUpDialogOpen={setLookUpDialogOpen}
           values={values}
+          disabled={disabled}
           onValueChange={onValueChange}
         />
       ) : (
