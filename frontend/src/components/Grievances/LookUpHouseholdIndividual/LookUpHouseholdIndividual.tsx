@@ -6,15 +6,21 @@ import { LookUpHouseholdIndividualModal } from './LookUpHouseholdIndividualModal
 export const LookUpHouseholdIndividual = ({
   onValueChange,
   values,
+  disabled
+}:{
+  onValueChange,
+  values,
+  disabled?:boolean
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
 
   return (
     <>
-      {values.selectedHousehold || values.selectedIndividual ? (
+      {values.selectedHousehold || values.selectedIndividual||disabled ? (
         <LookUpHouseholdIndividualDisplay
           setLookUpDialogOpen={setLookUpDialogOpen}
           values={values}
+          disabled={disabled}
           onValueChange={onValueChange}
         />
       ) : (

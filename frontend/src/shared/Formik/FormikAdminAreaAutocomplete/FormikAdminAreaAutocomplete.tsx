@@ -4,6 +4,7 @@ import { AdminAreasAutocomplete } from '../../../components/population/AdminArea
 export const FormikAdminAreaAutocomplete = ({
   field,
   form,
+  disabled
 }): React.ReactElement => {
   const handleChange = (e, option): void => {
     if (!option) {
@@ -14,7 +15,7 @@ export const FormikAdminAreaAutocomplete = ({
   };
   return (
     <>
-      <AdminAreasAutocomplete value={field.value} onChange={handleChange} />
+      <AdminAreasAutocomplete disabled={disabled} value={field.value} onChange={handleChange} />
     </>
   );
 };
