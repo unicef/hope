@@ -90,6 +90,7 @@ export const AddIndividualDataChangeField = ({
 
 export interface AddIndividualDataChangeProps {
   values;
+  setFieldValue?;
 }
 
 export const AddIndividualDataChange = ({
