@@ -1,6 +1,3 @@
-from core.utils import decode_id_string
-
-
 def handle_role(role, household, individual):
     from household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
 
@@ -33,11 +30,12 @@ def handle_add_document(document, individual):
 
 def prepare_previous_documents(documents_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
-    from core.utils import encode_id_base64
+    from core.utils import decode_id_string, encode_id_base64
     from household.models import Document
 
     previous_documents = {}
     for document_data in documents_to_remove_with_approve_status:
+
         document_id = decode_id_string(document_data.get("value"))
         document = get_object_or_404(Document, id=document_id)
         previous_documents[encode_id_base64(document.id, "Document")] = {
@@ -49,3 +47,23 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
         }
 
     return previous_documents
+
+
+def verify_required_arguments(input_data, field_name, options):
+    from graphql import GraphQLError
+    from core.utils import nested_dict_get
+
+    for key, value in options.items():
+        if key != input_data.get(field_name):
+            continue
+        for required in value.get("required"):
+            if nested_dict_get(input_data, required) is None:
+                raise GraphQLError(f"You have to provide {required} in {key}")
+        for not_allowed in value.get("not_allowed"):
+            if nested_dict_get(input_data, not_allowed) is not None:
+                raise GraphQLError(f"You can't provide {not_allowed} in {key}")
+
+
+def remove_parsed_data_fields(data_dict, fields_list):
+    for field in fields_list:
+        data_dict.pop(field, None)
