@@ -192,15 +192,15 @@ export const EditHouseholdDataChangeFieldRow = ({
   );
 };
 export interface EditHouseholdDataChangeProps {
-  household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];
   values;
   setFieldValue;
 }
 export const EditHouseholdDataChange = ({
-  household,
   values,
   setFieldValue,
 }: EditHouseholdDataChangeProps): React.ReactElement => {
+  const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
+    values.selectedHousehold;
   const {
     data: fullHousehold,
     loading: fullHouseholdLoading,
