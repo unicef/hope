@@ -211,9 +211,9 @@ export function GrievanceDetailsPage(): React.ReactElement {
   ];
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
   const isHeadOfHousehold =
-    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+    ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const hasRolesToReassign =
-    householdsAndRoles.filter((el) => el.role !== 'NO_ROLE').length > 0;
+    householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
   const shouldShowReassignBox = (): boolean => {
     const isRightCategory =
       ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
