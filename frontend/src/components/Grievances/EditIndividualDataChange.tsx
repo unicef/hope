@@ -191,16 +191,16 @@ export const EditIndividualDataChangeFieldRow = ({
 };
 
 export interface EditIndividualDataChangeProps {
-  individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
   values;
   setFieldValue;
 }
 
 export const EditIndividualDataChange = ({
-  individual,
   values,
   setFieldValue,
 }: EditIndividualDataChangeProps): React.ReactElement => {
+  const individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'] =
+    values.selectedIndividual;
   const {
     data: addIndividualFieldsData,
     loading: addIndividualFieldsLoading,
@@ -219,9 +219,6 @@ export const EditIndividualDataChange = ({
         { fieldName: null, fieldValue: null },
       ]);
     }
-    // setFieldValue('individualDataUpdateFields.documents', [
-    //   { fieldName: null, fieldValue: null },
-    // ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();

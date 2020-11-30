@@ -6,7 +6,11 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { TARGETING_STATES } from './constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+  TARGETING_STATES,
+} from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -324,7 +328,7 @@ export function descendingComparator(a, b, orderBy): number {
   return 0;
 }
 
-export function getComparator(order, orderBy) {
+export function getComparator(order, orderBy)  {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -338,34 +342,27 @@ export function reduceChoices(choices): { [id: number]: string } {
   }, {});
 }
 
-export function renderUserName(user) {
+export function renderUserName(user):string {
   return user?.firstName
     ? `${user.firstName} ${user.lastName}`
     : `${user.email}`;
 }
 
-/**
- *
- * @param array
- * @param keyName
- * @param valueName - if valueName = "*" whole object is used
- */
-export function arrayToDict(array, keyExtractor, valueExtractor) {
-  const reduceCallback = (previousValue, currentValue) => {
-    const key = get(currentValue, keyExtractor);
-    const value =
-      valueExtractor === '*' ? currentValue : get(currentValue, valueExtractor);
-    // eslint-disable-next-line no-param-reassign
-    previousValue[key] = value;
-    return previousValue;
-  };
-  return array?.reduce(reduceCallback, {});
-}
+const grievanceTypeIssueTypeDict = {
+  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.REFERRAL]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: true,
+  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
+};
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function thingForSpecificGrievanceType(
   ticket: { category: number | string; issueType?: number | string },
   thingDict,
   defaultThing = null,
+  categoryWithIssueTypeDict = grievanceTypeIssueTypeDict,
 ) {
   const category = ticket.category?.toString();
   const issueType = ticket.issueType?.toString();
@@ -373,7 +370,10 @@ export function thingForSpecificGrievanceType(
     return defaultThing;
   }
   const categoryThing = thingDict[category];
-  if (issueType === null || issueType === undefined) {
+  if (
+    !categoryWithIssueTypeDict[category] &&
+    (issueType === null || issueType === undefined)
+  ) {
     return categoryThing;
   }
   if (!(issueType in categoryThing)) {
