@@ -328,7 +328,7 @@ export function descendingComparator(a, b, orderBy): number {
   return 0;
 }
 
-export function getComparator(order, orderBy)  {
+export function getComparator(order, orderBy) {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -342,13 +342,13 @@ export function reduceChoices(choices): { [id: number]: string } {
   }, {});
 }
 
-export function renderUserName(user):string {
+export function renderUserName(user): string {
   return user?.firstName
     ? `${user.firstName} ${user.lastName}`
     : `${user.email}`;
 }
 
-const grievanceTypeIssueTypeDict = {
+const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
   [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
   [GRIEVANCE_CATEGORIES.REFERRAL]: false,
@@ -371,8 +371,9 @@ export function thingForSpecificGrievanceType(
   }
   const categoryThing = thingDict[category];
   if (
-    !categoryWithIssueTypeDict[category] &&
-    (issueType === null || issueType === undefined)
+    categoryWithIssueTypeDict[category] === 'IGNORE' ||
+    (!categoryWithIssueTypeDict[category] &&
+      (issueType === null || issueType === undefined))
   ) {
     return categoryThing;
   }

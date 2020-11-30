@@ -214,7 +214,6 @@ export function CreateGrievancePage(): React.ReactElement {
                           component={FormikCheckboxField}
                         />
                         <LookUpSection
-                          category={values.category}
                           values={values}
                           onValueChange={setFieldValue}
                         />
