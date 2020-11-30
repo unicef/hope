@@ -32,30 +32,17 @@ export function DeleteIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const shouldBeDisabled = (): boolean => {
-    if (ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL) {
-      return true;
-    }
-    const isHeadOfHousehold =
-      ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
 
-    const rolesCount =
-      ticket.individual?.householdsAndRoles.length +
-      (isHeadOfHousehold ? 1 : 0);
-    if (
-      rolesCount !==
-      Object.keys(
-        JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
-      ).length
-    ) {
-      return true;
-    }
-    return false;
-  };
-  useEffect(() => {
-    shouldBeDisabled();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticket.status]);
+  const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+  const isHeadOfHousehold =
+    ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
+  const rolesCount =
+    ticket.individual?.householdsAndRoles.length + (isHeadOfHousehold ? 1 : 0);
+  const rolesReassignedCount = Object.keys(
+    JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
+  ).length;
+  const approveEnabled = isForApproval && rolesCount === rolesReassignedCount;
+
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveDeleteIndividualDataChangeMutation();
   if (loading) return <LoadingComponent />;
@@ -156,7 +143,7 @@ export function DeleteIndividualGrievanceDetails({
                 })}
                 variant='contained'
                 color='primary'
-                disabled={shouldBeDisabled()}
+                disabled={!approveEnabled}
               >
                 {ticket.deleteIndividualTicketDetails?.approveStatus
                   ? 'Disapprove'

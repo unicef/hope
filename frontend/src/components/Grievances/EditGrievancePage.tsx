@@ -550,7 +550,6 @@ export function EditGrievancePage(): React.ReactElement {
                       values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
                         <EditIndividualDataChange
-                          individual={values.selectedIndividual}
                           values={values}
                           setFieldValue={setFieldValue}
                         />
@@ -560,7 +559,6 @@ export function EditGrievancePage(): React.ReactElement {
                       values.issueType.toString() ===
                         GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
                         <EditHouseholdDataChange
-                          household={values.selectedHousehold}
                           values={values}
                           setFieldValue={setFieldValue}
                         />
