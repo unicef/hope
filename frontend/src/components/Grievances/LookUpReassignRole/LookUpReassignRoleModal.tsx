@@ -13,6 +13,7 @@ import { Field, Formik } from 'formik';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
+  GrievanceTicketDocument,
   ProgramNode,
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
@@ -79,6 +80,12 @@ export const LookUpReassignRoleModal = ({
               individualId: values.selectedIndividual.id,
               role: values.role,
             },
+            refetchQueries: () => [
+              {
+                query: GrievanceTicketDocument,
+                variables: { id: ticket.id },
+              },
+            ],
           });
           showMessage('Role Reassigned');
         } catch (e) {
