@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik } from 'formik';
 import mapKeys from 'lodash/mapKeys';
 import camelCase from 'lodash/camelCase';
@@ -30,9 +30,10 @@ export function RequestedIndividualDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const getConfirmationText = (values) => {
-    return `You approved ${values.selected.length || 0} change${
-      values.selected.length === 1 ? '' : 's'
+  const [isEdit, setEdit] = useState(false);
+  const getConfirmationText = (allChangesLength) => {
+    return `You approved ${allChangesLength || 0} change${
+      allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
@@ -87,42 +88,61 @@ export function RequestedIndividualDataChange({
             },
           });
           showMessage('Changes Approved');
+          setEdit(false);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
       }}
     >
-      {({ submitForm, setFieldValue, values }) => (
-        <StyledBox>
-          <Title>
-            <Box display='flex' justifyContent='space-between'>
-              <Typography variant='h6'>Requested Data Change</Typography>
-              <ConfirmationDialog
-                title='Warning'
-                content={getConfirmationText(values)}
-              >
-                {(confirm) => (
+      {({ submitForm, setFieldValue, values }) => {
+        const allChangesLength =
+          values.selected.length +
+          values.selectedDocuments.length +
+          values.selectedDocumentsToRemove.length;
+
+        return (
+          <StyledBox>
+            <Title>
+              <Box display='flex' justifyContent='space-between'>
+                <Typography variant='h6'>Requested Data Change</Typography>
+                {allChangesLength && !isEdit ? (
                   <Button
-                    onClick={confirm(() => submitForm())}
-                    variant='contained'
+                    onClick={() => setEdit(true)}
+                    variant='outlined'
                     color='primary'
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
                   >
-                    Approve
+                    EDIT
                   </Button>
+                ) : (
+                  <ConfirmationDialog
+                    title='Warning'
+                    content={getConfirmationText(allChangesLength)}
+                  >
+                    {(confirm) => (
+                      <Button
+                        onClick={confirm(() => submitForm())}
+                        variant='contained'
+                        color='primary'
+                        disabled={
+                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                        }
+                      >
+                        Approve
+                      </Button>
+                    )}
+                  </ConfirmationDialog>
                 )}
-              </ConfirmationDialog>
-            </Box>
-          </Title>
-          <RequestedIndividualDataChangeTable
-            values={values}
-            ticket={ticket}
-            setFieldValue={setFieldValue}
-          />
-        </StyledBox>
-      )}
+              </Box>
+            </Title>
+            <RequestedIndividualDataChangeTable
+              values={values}
+              ticket={ticket}
+              setFieldValue={setFieldValue}
+              isEdit={isEdit}
+            />
+          </StyledBox>
+        );
+      }}
     </Formik>
   );
 }

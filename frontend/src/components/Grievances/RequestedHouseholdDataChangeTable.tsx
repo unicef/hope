@@ -1,6 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -19,6 +20,9 @@ import { useArrayToDict } from '../../hooks/useArrayToDict';
 
 const Capitalize = styled.span`
   text-transform: capitalize;
+`;
+const GreenIcon = styled.div`
+  color: #28cb15;
 `;
 
 export interface CurrentValueProps {
@@ -71,10 +75,12 @@ export function NewValue({
 interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
+  isEdit;
 }
 export function RequestedHouseholdDataChangeTable({
   setFieldValue,
   ticket,
+  isEdit,
 }: RequestedHouseholdDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -176,15 +182,23 @@ export function RequestedHouseholdDataChangeTable({
                 key={fieldName}
               >
                 <TableCell>
-                  <Checkbox
-                    onClick={(event) => handleClick(event, fieldName)}
-                    color='primary'
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                    checked={isItemSelected}
-                    inputProps={{ 'aria-labelledby': labelId }}
-                  />
+                  {isEdit ? (
+                    <Checkbox
+                      onClick={(event) => handleClick(event, fieldName)}
+                      color='primary'
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={isItemSelected}
+                      inputProps={{ 'aria-labelledby': labelId }}
+                    />
+                  ) : (
+                    isItemSelected && (
+                      <GreenIcon>
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
                 </TableCell>
                 <TableCell id={labelId} scope='row' align='left'>
                   <Capitalize>{row[0].replaceAll('_', ' ')}</Capitalize>
