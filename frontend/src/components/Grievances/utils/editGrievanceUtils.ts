@@ -242,20 +242,17 @@ function prepareEditIndividualVariables(requiredVariables, values) {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
         extras: {
-          issueType: {
-            individualDataUpdateIssueTypeExtras: {
-              individual: values.selectedIndividual?.id,
-              individualData: {
-                ...values.individualDataUpdateFields
-                  .filter((item) => item.fieldName)
-                  .reduce((prev, current) => {
-                    // eslint-disable-next-line no-param-reassign
-                    prev[camelCase(current.fieldName)] = current.fieldValue;
-                    return prev;
-                  }, {}),
-                documents: values.individualDataUpdateFieldsDocuments,
-                documentsToRemove: values.individualDataUpdateDocumentsToRemove,
-              },
+          individualDataUpdateIssueTypeExtras: {
+            individualData: {
+              ...values.individualDataUpdateFields
+                .filter((item) => item.fieldName)
+                .reduce((prev, current) => {
+                  // eslint-disable-next-line no-param-reassign
+                  prev[camelCase(current.fieldName)] = current.fieldValue;
+                  return prev;
+                }, {}),
+              documents: values.individualDataUpdateFieldsDocuments,
+              documentsToRemove: values.individualDataUpdateDocumentsToRemove,
             },
           },
         },
@@ -272,17 +269,14 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
         extras: {
-          issueType: {
-            householdDataUpdateIssueTypeExtras: {
-              household: values.selectedHousehold?.id,
-              householdData: values.householdDataUpdateFields
-                .filter((item) => item.fieldName)
-                .reduce((prev, current) => {
-                  // eslint-disable-next-line no-param-reassign
-                  prev[camelCase(current.fieldName)] = current.fieldValue;
-                  return prev;
-                }, {}),
-            },
+          householdDataUpdateIssueTypeExtras: {
+            householdData: values.householdDataUpdateFields
+              .filter((item) => item.fieldName)
+              .reduce((prev, current) => {
+                // eslint-disable-next-line no-param-reassign
+                prev[camelCase(current.fieldName)] = current.fieldValue;
+                return prev;
+              }, {}),
           },
         },
       },
