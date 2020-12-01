@@ -28,11 +28,6 @@ export const LookUpReassignRoleDisplay = ({
   setLookUpDialogOpen,
   onValueChange,
 }): React.ReactElement => {
-  const handleRemove = (): void => {
-    onValueChange('selectedHousehold', '');
-    onValueChange('selectedIndividual', '');
-  };
-
   return (
     <StyledBox>
       <Grid container>

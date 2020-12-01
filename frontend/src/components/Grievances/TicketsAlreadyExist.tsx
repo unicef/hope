@@ -46,8 +46,6 @@ export const TicketsAlreadyExist = ({ values }) => {
   const mappedTickets = edges?.map((edge) => (
     <Box mb={1}>
       <ContentLink
-        target='_blank'
-        rel='noopener noreferrer'
         href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
       >
         {decodeIdString(edge.node.id)}
