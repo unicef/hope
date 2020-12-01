@@ -223,98 +223,108 @@ export function RequestedIndividualDataChangeTable({
           })}
         </TableBody>
       </Table>
-      <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Documents to be added</Typography>
-        </Box>
-      </Title>
-      <Table className={classes.table}>
-        {documentsTableHead}
-        <TableBody>
-          {documents?.map((row, index) => {
-            return (
-              <TableRow>
-                <TableCell align='left'>
-                  {isEdit ? (
-                    <Checkbox
-                      color='primary'
-                      onChange={(event) => {
-                        handleSelectDocument(index, event.target.checked);
-                      }}
-                      disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
-                      checked={selectedDocuments.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'selected' }}
-                    />
-                  ) : (
-                    selectedDocuments.includes(index) && (
-                      <GreenIcon>
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell align='left'>
-                  {documentTypeDict[row.value.type]}
-                </TableCell>
-                <TableCell align='left'>
-                  {countriesDict[row.value.country]}
-                </TableCell>
-                <TableCell align='left'>{row.value.number}</TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-      <Title>
-        <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Documents to be removed</Typography>
-        </Box>
-      </Title>
-      <Table className={classes.table}>
-        {documentsTableHead}
-        <TableBody>
-          {documentsToRemove?.map((row, index) => {
-            const document = previousDocuments[row.value];
-            return (
-              <TableRow>
-                <TableCell align='left'>
-                  {isEdit ? (
-                    <Checkbox
-                      onChange={(event) => {
-                        handleSelectDocumentToRemove(
-                          index,
-                          event.target.checked,
-                        );
-                      }}
-                      color='primary'
-                      disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
-                      checked={selectedDocumentsToRemove.includes(index)}
-                      inputProps={{ 'aria-labelledby': 'xd' }}
-                    />
-                  ) : (
-                    selectedDocumentsToRemove.includes(index) && (
-                      <GreenIcon>
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell align='left'>{document?.label || '-'}</TableCell>
-                <TableCell align='left'>
-                  {countriesDict[document?.country] || '-'}
-                </TableCell>
-                <TableCell align='left'>
-                  {document?.document_number || '-'}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      {documents.length ? (
+        <>
+          <Title>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>Documents to be added</Typography>
+            </Box>
+          </Title>
+          <Table className={classes.table}>
+            {documentsTableHead}
+            <TableBody>
+              {documents?.map((row, index) => {
+                return (
+                  <TableRow>
+                    <TableCell align='left'>
+                      {isEdit ? (
+                        <Checkbox
+                          color='primary'
+                          onChange={(event) => {
+                            handleSelectDocument(index, event.target.checked);
+                          }}
+                          disabled={
+                            ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          }
+                          checked={selectedDocuments.includes(index)}
+                          inputProps={{ 'aria-labelledby': 'selected' }}
+                        />
+                      ) : (
+                        selectedDocuments.includes(index) && (
+                          <GreenIcon>
+                            <CheckCircleIcon />
+                          </GreenIcon>
+                        )
+                      )}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {documentTypeDict[row.value.type]}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {countriesDict[row.value.country]}
+                    </TableCell>
+                    <TableCell align='left'>{row.value.number}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      ) : null}
+      {documentsToRemove.length ? (
+        <>
+          <Title>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>Documents to be removed</Typography>
+            </Box>
+          </Title>
+          <Table className={classes.table}>
+            {documentsTableHead}
+            <TableBody>
+              {documentsToRemove?.map((row, index) => {
+                const document = previousDocuments[row.value];
+                return (
+                  <TableRow>
+                    <TableCell align='left'>
+                      {isEdit ? (
+                        <Checkbox
+                          onChange={(event) => {
+                            handleSelectDocumentToRemove(
+                              index,
+                              event.target.checked,
+                            );
+                          }}
+                          color='primary'
+                          disabled={
+                            ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          }
+                          checked={selectedDocumentsToRemove.includes(index)}
+                          inputProps={{ 'aria-labelledby': 'xd' }}
+                        />
+                      ) : (
+                        selectedDocumentsToRemove.includes(index) && (
+                          <GreenIcon>
+                            <CheckCircleIcon />
+                          </GreenIcon>
+                        )
+                      )}
+                    </TableCell>
+                    <TableCell align='left'>{document?.label || '-'}</TableCell>
+                    <TableCell align='left'>
+                      {countriesDict[document?.country] || '-'}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {document?.document_number || '-'}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      ) : null}
     </div>
   );
 }
