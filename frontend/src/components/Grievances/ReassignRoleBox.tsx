@@ -47,8 +47,6 @@ export const ReassignRoleBox = ({
           </LabelizedField>
           <LabelizedField label='HOUSEHOLD ID'>
             <ContentLink
-              target='_blank'
-              rel='noopener noreferrer'
               href={`/${businessArea}/population/household/${el.household.id}`}
             >
               {el.household.unicefId}
@@ -83,8 +81,6 @@ export const ReassignRoleBox = ({
               </LabelizedField>
               <LabelizedField label='HOUSEHOLD ID'>
                 <ContentLink
-                  target='_blank'
-                  rel='noopener noreferrer'
                   href={`/${businessArea}/population/household/${ticket?.household.id}`}
                 >
                   {ticket?.household.unicefId}
