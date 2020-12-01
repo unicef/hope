@@ -105,9 +105,9 @@ class IndividualUpdateDataObjectType(graphene.InputObjectType):
 
 class AddIndividualDataObjectType(graphene.InputObjectType):
     full_name = graphene.String(required=True)
-    given_name = graphene.String(required=True)
+    given_name = graphene.String()
     middle_name = graphene.String()
-    family_name = graphene.String(required=True)
+    family_name = graphene.String()
     sex = graphene.String(required=True)
     birth_date = graphene.Date(required=True)
     estimated_birth_date = graphene.Boolean()
