@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -22,24 +23,12 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(2)}px;
 `;
 
-const TableCellStroke = styled(TableCell)`
-  &::before {
-    content: ' ';
-    position: absolute;
-    width: 100%;
-    border-bottom: red solid 1px;
-    top: calc(50% - 1px);
-    left: 0;
-  }
-  & {
-    position: relative;
-  }
-`;
-
 const Capitalize = styled.span`
   text-transform: capitalize;
 `;
-
+const GreenIcon = styled.div`
+  color: #28cb15;
+`;
 export interface CurrentValueProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
   value;
@@ -68,11 +57,13 @@ interface RequestedIndividualDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
   values;
+  isEdit;
 }
 export function RequestedIndividualDataChangeTable({
   setFieldValue,
   ticket,
   values,
+  isEdit,
 }: RequestedIndividualDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -148,7 +139,16 @@ export function RequestedIndividualDataChangeTable({
   };
 
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
-
+  const documentsTableHead = (
+    <TableHead>
+      <TableRow>
+        <TableCell align='left' />
+        <TableCell align='left'>ID Type</TableCell>
+        <TableCell align='left'>Country</TableCell>
+        <TableCell align='left'>Number</TableCell>
+      </TableRow>
+    </TableHead>
+  );
   return (
     <div>
       <Table className={classes.table}>
@@ -189,17 +189,25 @@ export function RequestedIndividualDataChangeTable({
                 key={fieldName}
               >
                 <TableCell>
-                  <Checkbox
-                    onChange={(event) =>
-                      handleSelectBioData(fieldName, event.target.checked)
-                    }
-                    color='primary'
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                    checked={isItemSelected}
-                    inputProps={{ 'aria-labelledby': labelId }}
-                  />
+                  {isEdit ? (
+                    <Checkbox
+                      onChange={(event) =>
+                        handleSelectBioData(fieldName, event.target.checked)
+                      }
+                      color='primary'
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={isItemSelected}
+                      inputProps={{ 'aria-labelledby': labelId }}
+                    />
+                  ) : (
+                    isItemSelected && (
+                      <GreenIcon>
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
                 </TableCell>
                 <TableCell id={labelId} scope='row' align='left'>
                   <Capitalize>{row[0].replaceAll('_', ' ')}</Capitalize>
@@ -217,34 +225,35 @@ export function RequestedIndividualDataChangeTable({
       </Table>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Document Changes</Typography>
+          <Typography variant='h6'>Documents to be added</Typography>
         </Box>
       </Title>
       <Table className={classes.table}>
-        <TableHead>
-          <TableRow>
-            <TableCell align='left' />
-            <TableCell align='left'>ID Type</TableCell>
-            <TableCell align='left'>Country</TableCell>
-            <TableCell align='left'>Number</TableCell>
-          </TableRow>
-        </TableHead>
+        {documentsTableHead}
         <TableBody>
           {documents?.map((row, index) => {
             return (
               <TableRow>
                 <TableCell align='left'>
-                  <Checkbox
-                    color='primary'
-                    onChange={(event) => {
-                      handleSelectDocument(index, event.target.checked);
-                    }}
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                    checked={selectedDocuments.includes(index)}
-                    inputProps={{ 'aria-labelledby': 'selected' }}
-                  />
+                  {isEdit ? (
+                    <Checkbox
+                      color='primary'
+                      onChange={(event) => {
+                        handleSelectDocument(index, event.target.checked);
+                      }}
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={selectedDocuments.includes(index)}
+                      inputProps={{ 'aria-labelledby': 'selected' }}
+                    />
+                  ) : (
+                    selectedDocuments.includes(index) && (
+                      <GreenIcon>
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
                 </TableCell>
                 <TableCell align='left'>
                   {documentTypeDict[row.value.type]}
@@ -256,32 +265,51 @@ export function RequestedIndividualDataChangeTable({
               </TableRow>
             );
           })}
+        </TableBody>
+      </Table>
+      <Title>
+        <Box display='flex' justifyContent='space-between'>
+          <Typography variant='h6'>Documents to be removed</Typography>
+        </Box>
+      </Title>
+      <Table className={classes.table}>
+        {documentsTableHead}
+        <TableBody>
           {documentsToRemove?.map((row, index) => {
             const document = previousDocuments[row.value];
             return (
               <TableRow>
                 <TableCell align='left'>
-                  <Checkbox
-                    onChange={(event) => {
-                      handleSelectDocumentToRemove(index, event.target.checked);
-                    }}
-                    color='primary'
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                    checked={selectedDocumentsToRemove.includes(index)}
-                    inputProps={{ 'aria-labelledby': 'xd' }}
-                  />
+                  {isEdit ? (
+                    <Checkbox
+                      onChange={(event) => {
+                        handleSelectDocumentToRemove(
+                          index,
+                          event.target.checked,
+                        );
+                      }}
+                      color='primary'
+                      disabled={
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                      checked={selectedDocumentsToRemove.includes(index)}
+                      inputProps={{ 'aria-labelledby': 'xd' }}
+                    />
+                  ) : (
+                    selectedDocumentsToRemove.includes(index) && (
+                      <GreenIcon>
+                        <CheckCircleIcon />
+                      </GreenIcon>
+                    )
+                  )}
                 </TableCell>
-                <TableCellStroke align='left'>
-                  {document?.label || '-'}
-                </TableCellStroke>
-                <TableCellStroke align='left'>
+                <TableCell align='left'>{document?.label || '-'}</TableCell>
+                <TableCell align='left'>
                   {countriesDict[document?.country] || '-'}
-                </TableCellStroke>
-                <TableCellStroke align='left'>
+                </TableCell>
+                <TableCell align='left'>
                   {document?.document_number || '-'}
-                </TableCellStroke>
+                </TableCell>
               </TableRow>
             );
           })}
