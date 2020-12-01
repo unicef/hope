@@ -888,7 +888,7 @@ export type HouseholdDataChangeApproveMutation = {
 
 export type HouseholdDataUpdateIssueTypeExtras = {
   household: Scalars['ID'],
-  householdData?: Maybe<HouseholdUpdateDataObjectType>,
+  householdData: HouseholdUpdateDataObjectType,
 };
 
 export type HouseholdNode = Node & {
@@ -2101,6 +2101,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
+  updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
   createTicketNote?: Maybe<CreateTicketNoteMutation>,
   approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
@@ -2140,6 +2141,11 @@ export type Mutations = {
 
 export type MutationsCreateGrievanceTicketArgs = {
   input: CreateGrievanceTicketInput
+};
+
+
+export type MutationsUpdateGrievanceTicketArgs = {
+  input: UpdateGrievanceTicketInput
 };
 
 
@@ -3789,6 +3795,40 @@ export type UnapproveTargetPopulationMutation = {
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
+export type UpdateAddIndividualIssueTypeExtras = {
+  individualData: AddIndividualDataObjectType,
+};
+
+export type UpdateGrievanceTicketExtrasInput = {
+  householdDataUpdateIssueTypeExtras?: Maybe<UpdateHouseholdDataUpdateIssueTypeExtras>,
+  individualDataUpdateIssueTypeExtras?: Maybe<UpdateIndividualDataUpdateIssueTypeExtras>,
+  addIndividualIssueTypeExtras?: Maybe<UpdateAddIndividualIssueTypeExtras>,
+};
+
+export type UpdateGrievanceTicketInput = {
+  ticketId: Scalars['ID'],
+  description?: Maybe<Scalars['String']>,
+  assignedTo?: Maybe<Scalars['ID']>,
+  admin?: Maybe<Scalars['String']>,
+  area?: Maybe<Scalars['String']>,
+  language?: Maybe<Scalars['String']>,
+  linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
+};
+
+export type UpdateGrievanceTicketMutation = {
+   __typename?: 'UpdateGrievanceTicketMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type UpdateHouseholdDataUpdateIssueTypeExtras = {
+  householdData: HouseholdUpdateDataObjectType,
+};
+
+export type UpdateIndividualDataUpdateIssueTypeExtras = {
+  individualData: IndividualUpdateDataObjectType,
+};
+
 export type UpdatePaymentVerificationReceivedAndReceivedAmount = {
    __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount',
   paymentVerification?: Maybe<PaymentVerificationNode>,
@@ -4976,6 +5016,22 @@ export type UnapproveTpMutation = (
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type UpdateGrievanceMutationVariables = {
+  input: UpdateGrievanceTicketInput
+};
+
+
+export type UpdateGrievanceMutation = (
+  { __typename?: 'Mutations' }
+  & { updateGrievanceTicket: Maybe<(
+    { __typename?: 'UpdateGrievanceTicketMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
     )> }
   )> }
 );
@@ -8413,6 +8469,57 @@ export function useUnapproveTpMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type UnapproveTpMutationHookResult = ReturnType<typeof useUnapproveTpMutation>;
 export type UnapproveTpMutationResult = ApolloReactCommon.MutationResult<UnapproveTpMutation>;
 export type UnapproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UnapproveTpMutation, UnapproveTpMutationVariables>;
+export const UpdateGrievanceDocument = gql`
+    mutation UpdateGrievance($input: UpdateGrievanceTicketInput!) {
+  updateGrievanceTicket(input: $input) {
+    grievanceTicket {
+      id
+    }
+  }
+}
+    `;
+export type UpdateGrievanceMutationFn = ApolloReactCommon.MutationFunction<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
+export type UpdateGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>, 'mutation'>;
+
+    export const UpdateGrievanceComponent = (props: UpdateGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables> mutation={UpdateGrievanceDocument} {...props} />
+    );
+    
+export type UpdateGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateGrievanceMutation, UpdateGrievanceMutationVariables> & TChildProps;
+export function withUpdateGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateGrievanceMutation,
+  UpdateGrievanceMutationVariables,
+  UpdateGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateGrievanceMutation, UpdateGrievanceMutationVariables, UpdateGrievanceProps<TChildProps>>(UpdateGrievanceDocument, {
+      alias: 'updateGrievance',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateGrievanceMutation__
+ *
+ * To run a mutation, you first call `useUpdateGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGrievanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGrievanceMutation, { data, loading, error }] = useUpdateGrievanceMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>(UpdateGrievanceDocument, baseOptions);
+      }
+export type UpdateGrievanceMutationHookResult = ReturnType<typeof useUpdateGrievanceMutation>;
+export type UpdateGrievanceMutationResult = ApolloReactCommon.MutationResult<UpdateGrievanceMutation>;
+export type UpdateGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
 export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
     mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
   updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
@@ -12719,6 +12826,12 @@ export type ResolversTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
   GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
@@ -13003,6 +13116,12 @@ export type ResolversParentTypes = {
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
   CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
   GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
   CreateTicketNoteInput: CreateTicketNoteInput,
   CreateTicketNoteMutation: CreateTicketNoteMutation,
@@ -13928,6 +14047,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
+  updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
   createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
   approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
@@ -14597,6 +14717,10 @@ export type UnapproveTargetPopulationMutationResolvers<ContextType = any, Parent
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
+export type UpdateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateGrievanceTicketMutation'] = ResolversParentTypes['UpdateGrievanceTicketMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
 export type UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']> = {
   paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
 };
@@ -14906,6 +15030,7 @@ export type Resolvers<ContextType = any> = {
   TicketSensitiveDetailsNodeConnection?: TicketSensitiveDetailsNodeConnectionResolvers<ContextType>,
   TicketSensitiveDetailsNodeEdge?: TicketSensitiveDetailsNodeEdgeResolvers<ContextType>,
   UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
+  UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>,
   UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>,
   UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,
   UpdateProgram?: UpdateProgramResolvers<ContextType>,
