@@ -29,8 +29,8 @@ export function AddIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  const { showMessage } = useSnackbar();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const { showMessage } = useSnackbar();
   if (loading) {
     return null;
   }
