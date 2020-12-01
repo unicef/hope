@@ -13,8 +13,6 @@ const Link = styled.a`
 export const ContentLink = ({
   href,
   children,
-  target,
-  rel,
 }: {
   href: string;
   children: string;
@@ -22,7 +20,7 @@ export const ContentLink = ({
   rel?: string;
 }): React.ReactElement => {
   return (
-    <Link target={target} rel={rel} href={href}>
+    <Link target='_blank' rel='noopener noreferrer' href={href}>
       {children}
     </Link>
   );
