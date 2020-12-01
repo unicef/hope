@@ -29,8 +29,8 @@ export function AddIndividualGrievanceDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  const { showMessage } = useSnackbar();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
+  const { showMessage } = useSnackbar();
   if (loading) {
     return null;
   }
@@ -42,12 +42,13 @@ export function AddIndividualGrievanceDetails({
     },
     {},
   );
-  const documents =
-    ticket.addIndividualTicketDetails?.individualData?.documents;
-  // eslint-disable-next-line no-param-reassign
-  delete ticket.addIndividualTicketDetails?.individualData.documents;
+  const individualData = {
+    ...ticket.addIndividualTicketDetails?.individualData,
+  };
+  const documents = individualData?.documents;
+  delete individualData.documents;
   const labels =
-    Object.entries(ticket.addIndividualTicketDetails?.individualData || {}).map(
+    Object.entries(individualData || {}).map(
       ([key, value]) => {
         let textValue = value;
         const fieldAttribute = fieldsDict[key];

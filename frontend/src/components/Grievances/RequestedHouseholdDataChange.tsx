@@ -1,7 +1,9 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik } from 'formik';
+import mapKeys from 'lodash/mapKeys';
+import camelCase from 'lodash/camelCase';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
@@ -28,15 +30,31 @@ export function RequestedHouseholdDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
+  const [isEdit, setEdit] = useState(false);
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
+  const householdData = {
+    ...ticket.householdDataUpdateTicketDetails.householdData,
+  };
+  const entries = Object.entries(householdData);
+
   return (
     <Formik
-      initialValues={{ selected: [] }}
+      initialValues={{
+        selected: entries
+          .filter((row) => {
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
+            return valueDetails.approveStatus;
+          })
+          .map((row) => camelCase(row[0])),
+      }}
       onSubmit={async (values) => {
         const householdApproveData = values.selected.reduce((prev, curr) => {
           // eslint-disable-next-line no-param-reassign
@@ -51,6 +69,7 @@ export function RequestedHouseholdDataChange({
             },
           });
           showMessage('Changes Approved');
+          setEdit(false);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -61,29 +80,40 @@ export function RequestedHouseholdDataChange({
           <Title>
             <Box display='flex' justifyContent='space-between'>
               <Typography variant='h6'>Requested Data Change</Typography>
-              <ConfirmationDialog
-                title='Warning'
-                content={getConfirmationText(values)}
-              >
-                {(confirm) => (
-                  <Button
-                    onClick={confirm(() => submitForm())}
-                    variant='contained'
-                    color='primary'
-                    disabled={
-                      !values.selected.length ||
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
-                  >
-                    Approve
-                  </Button>
-                )}
-              </ConfirmationDialog>
+              {values.selected.length && !isEdit ? (
+                <Button
+                  onClick={() => setEdit(true)}
+                  variant='outlined'
+                  color='primary'
+                >
+                  EDIT
+                </Button>
+              ) : (
+                <ConfirmationDialog
+                  title='Warning'
+                  content={getConfirmationText(values)}
+                >
+                  {(confirm) => (
+                    <Button
+                      onClick={confirm(() => submitForm())}
+                      variant='contained'
+                      color='primary'
+                      disabled={
+                        !values.selected.length ||
+                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                      }
+                    >
+                      Approve
+                    </Button>
+                  )}
+                </ConfirmationDialog>
+              )}
             </Box>
           </Title>
           <RequestedHouseholdDataChangeTable
             ticket={ticket}
             setFieldValue={setFieldValue}
+            isEdit={isEdit}
           />
         </StyledBox>
       )}

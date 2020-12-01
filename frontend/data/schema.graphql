@@ -628,7 +628,7 @@ type HouseholdDataChangeApproveMutation {
 
 input HouseholdDataUpdateIssueTypeExtras {
   household: ID!
-  householdData: HouseholdUpdateDataObjectType
+  householdData: HouseholdUpdateDataObjectType!
 }
 
 type HouseholdNode implements Node {
@@ -1645,6 +1645,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
+  updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
@@ -2481,6 +2482,39 @@ scalar UUID
 
 type UnapproveTargetPopulationMutation {
   targetPopulation: TargetPopulationNode
+}
+
+input UpdateAddIndividualIssueTypeExtras {
+  individualData: AddIndividualDataObjectType!
+}
+
+input UpdateGrievanceTicketExtrasInput {
+  householdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras
+  individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
+  addIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras
+}
+
+input UpdateGrievanceTicketInput {
+  ticketId: ID!
+  description: String
+  assignedTo: ID
+  admin: String
+  area: String
+  language: String
+  linkedTickets: [ID]
+  extras: UpdateGrievanceTicketExtrasInput
+}
+
+type UpdateGrievanceTicketMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+input UpdateHouseholdDataUpdateIssueTypeExtras {
+  householdData: HouseholdUpdateDataObjectType!
+}
+
+input UpdateIndividualDataUpdateIssueTypeExtras {
+  individualData: IndividualUpdateDataObjectType!
 }
 
 type UpdatePaymentVerificationReceivedAndReceivedAmount {
