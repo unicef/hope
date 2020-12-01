@@ -51,8 +51,6 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
           <Box key={edge.node.id} mb={1}>
             <ContentLink
               href={`/${businessArea}/grievance-and-feedback/${edge.node.id}`}
-              target='_blank'
-              rel='noopener noreferrer'
             >
               {decodeIdString(edge.node.id)}
             </ContentLink>
