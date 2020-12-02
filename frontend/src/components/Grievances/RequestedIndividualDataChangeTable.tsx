@@ -82,11 +82,8 @@ export function RequestedIndividualDataChangeTable({
   const documents = individualData?.documents;
   const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
-  // eslint-disable-next-line no-param-reassign
   delete individualData.documents;
-  // eslint-disable-next-line no-param-reassign
   delete individualData.documents_to_remove;
-  // eslint-disable-next-line no-param-reassign
   delete individualData.previous_documents;
   const entries = Object.entries(individualData);
 

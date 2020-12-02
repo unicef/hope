@@ -30,28 +30,44 @@ export function RequestedIndividualDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const [isEdit, setEdit] = useState(true);
+  const individualData = {
+    ...ticket.individualDataUpdateTicketDetails.individualData,
+  };
+  let allApprovedCount = 0;
+  const documents = individualData?.documents;
+  const documentsToRemove = individualData.documents_to_remove;
+  delete individualData.documents;
+  delete individualData.documents_to_remove;
+  delete individualData.previous_documents;
+
+  const entries = Object.entries(individualData);
+  allApprovedCount += documents.filter((el) => el.approve_status).length;
+  allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
+    .length;
+  allApprovedCount += entries.filter(
+    ([key, value]: [string, { approve_status: boolean }]) =>
+      value.approve_status,
+  ).length;
+
+  const [isEdit, setEdit] = useState(allApprovedCount === 0);
   const getConfirmationText = (allChangesLength) => {
     return `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
-  const individualData = {
-    ...ticket.individualDataUpdateTicketDetails.individualData,
-  };
-  const entries = Object.entries(individualData);
+
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < individualData?.documents?.length; i++) {
-    if (individualData?.documents[i]?.approve_status) {
+  for (let i = 0; i < documents?.length; i++) {
+    if (documents[i]?.approve_status) {
       selectedDocuments.push(i);
     }
   }
   // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < individualData?.documents_to_remove?.length; i++) {
-    if (individualData?.documents_to_remove[i]?.approve_status) {
+  for (let i = 0; i < documentsToRemove?.length; i++) {
+    if (documentsToRemove[i]?.approve_status) {
       selectedDocumentsToRemove.push(i);
     }
   }
