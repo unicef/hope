@@ -67,3 +67,32 @@ def verify_required_arguments(input_data, field_name, options):
 def remove_parsed_data_fields(data_dict, fields_list):
     for field in fields_list:
         data_dict.pop(field, None)
+
+
+def verify_flex_fields(flex_fields_to_verify, associated_with):
+    import re
+    from core.core_fields_attributes import FIELD_TYPES_TO_INTERNAL_TYPE, TYPE_SELECT_ONE, TYPE_SELECT_MANY
+    from core.utils import serialize_flex_attributes
+
+    if associated_with not in ("households", "individuals"):
+        raise ValueError("associated_with argument must be one of ['household', 'individual']")
+
+    all_flex_fields = serialize_flex_attributes().get(associated_with, {})
+
+    for name, value in flex_fields_to_verify.items():
+        flex_field = all_flex_fields.get(name)
+        if flex_field is None:
+            raise ValueError(f"{name} is not a correct `flex field")
+        field_type = flex_field["type"]
+        field_choices = set(f.get("value") for f in flex_field["choices"])
+
+        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is not None:
+            raise ValueError(f"invalid value type for a field {name}")
+
+        if field_type == TYPE_SELECT_ONE and value not in field_choices:
+            raise ValueError(f"invalid value: {value} for a field {name}")
+
+        if field_type == TYPE_SELECT_MANY:
+            values = set(re.split("[, ;]+", value))
+            if values.issubset(field_choices) is False:
+                raise ValueError(f"invalid value: {value} for a field {name}")
