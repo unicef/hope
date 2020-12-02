@@ -26,12 +26,25 @@ const AddIcon = styled(AddCircleOutline)`
 
 export interface AddIndividualDataChangeFieldProps {
   field: AllAddIndividualFieldsQuery['allAddIndividualsFieldsAttributes'][number];
+  flexField?: boolean;
 }
 export const AddIndividualDataChangeField = ({
   field,
+  flexField,
 }: AddIndividualDataChangeFieldProps): React.ReactElement => {
   let fieldProps;
   switch (field.type) {
+    case 'DECIMAL':
+      fieldProps = {
+        component: FormikTextField,
+      };
+      break;
+    case 'INTEGER':
+      fieldProps = {
+        component: FormikTextField,
+        type: 'number',
+      };
+      break;
     case 'STRING':
       fieldProps = {
         component: FormikTextField,
@@ -75,7 +88,9 @@ export const AddIndividualDataChangeField = ({
     <>
       <Grid item xs={6}>
         <Field
-          name={`individualData.${camelCase(field.name)}`}
+          name={`individualData${flexField ? '.flexFields' : ''}.${camelCase(
+            field.name,
+          )}`}
           fullWidth
           variant='outlined'
           label={field.labelEn}
@@ -100,14 +115,30 @@ export const AddIndividualDataChange = ({
   if (loading) {
     return <LoadingComponent />;
   }
+  const flexFields = data.allAddIndividualsFieldsAttributes.filter(
+    (item) => item.isFlexField,
+  );
+  const coreFields = data.allAddIndividualsFieldsAttributes.filter(
+    (item) => !item.isFlexField,
+  );
   return (
     <>
       <Title>
         <Typography variant='h6'>Individual Data</Typography>
       </Title>
       <Grid container spacing={3}>
-        {data.allAddIndividualsFieldsAttributes.map((item) => (
+        <Grid item xs={12}>
+          Core Fields
+        </Grid>
+
+        {coreFields.map((item) => (
           <AddIndividualDataChangeField field={item} />
+        ))}
+        <Grid item xs={12}>
+          Flex Fields
+        </Grid>
+        {flexFields.map((item) => (
+          <AddIndividualDataChangeField field={item} flexField />
         ))}
       </Grid>
       <Grid container spacing={3}>

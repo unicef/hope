@@ -19,7 +19,7 @@ from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterC
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD, KOBO_COLLECTOR_FIELD
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
-from core.models import AdminArea
+from core.models import AdminArea, FlexibleAttribute
 from core.schema import ChoiceObject, FieldAttributeNode
 from core.utils import to_choice_object, choices_to_dict
 from grievance.models import (
@@ -170,9 +170,12 @@ class ExistingGrievanceTicketFilter(FilterSet):
             queryset.model.objects.none()
         for name, value in cleaned_data.items():
             queryset = self.filters[name].filter(queryset, value)
-            assert isinstance(queryset, models.QuerySet), (
-                "Expected '%s.%s' to return a QuerySet, but got a %s instead."
-                % (type(self).__name__, name, type(queryset).__name__,)
+            assert isinstance(
+                queryset, models.QuerySet
+            ), "Expected '%s.%s' to return a QuerySet, but got a %s instead." % (
+                type(self).__name__,
+                name,
+                type(queryset).__name__,
             )
 
         if payment_record_objects:
@@ -326,7 +329,10 @@ class Query(graphene.ObjectType):
         # TODO Enable permissions below
         # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
     )
-    all_ticket_notes = DjangoPermissionFilterConnectionField(TicketNoteNode, filterset_class=TicketNoteFilter,)
+    all_ticket_notes = DjangoPermissionFilterConnectionField(
+        TicketNoteNode,
+        filterset_class=TicketNoteFilter,
+    )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     grievance_ticket_status_choices = graphene.List(ChoiceObject)
@@ -383,13 +389,15 @@ class Query(graphene.ObjectType):
             "who_answers_alt_phone",
         ]
 
-        # yield from FlexibleAttribute.objects.order_by("name").all()
         yield from [
             x
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
-        yield from [KOBO_COLLECTOR_FIELD.get("role_i_c")]
+        yield KOBO_COLLECTOR_FIELD.get("role_i_c")
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+        ).order_by("name")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
