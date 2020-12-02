@@ -382,6 +382,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     flex_fields = individual_data.get("flex_fields", {})
+    
     verify_flex_fields(flex_fields, "individuals")
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data, household=household, ticket=grievance_ticket,
