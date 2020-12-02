@@ -30,7 +30,6 @@ export function RequestedHouseholdDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const [isEdit, setEdit] = useState(true);
   const getConfirmationText = (values) => {
     return `You approved ${values.selected.length || 0} change${
       values.selected.length === 1 ? '' : 's'
@@ -40,7 +39,14 @@ export function RequestedHouseholdDataChange({
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
+  let allApprovedCount = 0;
   const entries = Object.entries(householdData);
+  allApprovedCount += entries.filter(
+    ([key, value]: [string, { approve_status: boolean }]) =>
+      value.approve_status,
+  ).length;
+
+  const [isEdit, setEdit] = useState(allApprovedCount === 0);
 
   return (
     <Formik
