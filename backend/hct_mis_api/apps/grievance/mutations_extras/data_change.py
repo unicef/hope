@@ -4,7 +4,7 @@ import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
-from graphene.utils.str_converters import to_snake_case
+from core.utils import to_snake_case
 from graphql import GraphQLError
 
 from core.utils import decode_id_string
