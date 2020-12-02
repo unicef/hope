@@ -207,7 +207,7 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     household_data = household_data_update_issue_type_extras.get("household_data", {})
     to_date_string(household_data, "start")
     to_date_string(household_data, "end")
-    flex_fields = household_data.pop("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in household_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "households")
     household_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in household_data.items()
@@ -227,7 +227,9 @@ def save_household_data_update_extras(root, info, input, grievance_ticket, extra
     }
     household_data_with_approve_status["flex_fields"] = flex_fields_with_approve_status
     ticket_individual_data_update_details = TicketHouseholdDataUpdateDetails(
-        household_data=household_data_with_approve_status, household=household, ticket=grievance_ticket,
+        household_data=household_data_with_approve_status,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -241,7 +243,7 @@ def update_household_data_update_extras(root, info, input, grievance_ticket, ext
     new_household_data = household_data_update_new_extras.get("household_data", {})
     to_date_string(new_household_data, "start")
     to_date_string(new_household_data, "end")
-    flex_fields = new_household_data.pop("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in new_household_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "households")
     household_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in new_household_data.items()
@@ -276,7 +278,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     documents = individual_data.pop("documents", [])
     documents_to_remove = individual_data.pop("documents_to_remove", [])
     to_date_string(individual_data, "birth_date")
-    flex_fields = individual_data.pop("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
     individual_data_with_approve_status = {
         to_snake_case(field): {"value": value, "approve_status": False} for field, value in individual_data.items()
@@ -304,7 +306,9 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         documents_to_remove_with_approve_status
     )
     ticket_individual_data_update_details = TicketIndividualDataUpdateDetails(
-        individual_data=individual_data_with_approve_status, individual=individual, ticket=grievance_ticket,
+        individual_data=individual_data_with_approve_status,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -320,7 +324,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     new_individual_data = individual_data_update_extras.get("individual_data", {})
     documents = new_individual_data.pop("documents", [])
     documents_to_remove = new_individual_data.pop("documents_to_remove", [])
-    flex_fields = new_individual_data.pop("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
     to_date_string(new_individual_data, "birth_date")
     verify_flex_fields(flex_fields, "individuals")
 
@@ -364,7 +368,8 @@ def save_individual_delete_extras(root, info, input, grievance_ticket, extras, *
     individual_id = decode_id_string(individual_encoded_id)
     individual = get_object_or_404(Individual, id=individual_id)
     ticket_individual_data_update_details = TicketDeleteIndividualDetails(
-        individual=individual, ticket=grievance_ticket,
+        individual=individual,
+        ticket=grievance_ticket,
     )
     ticket_individual_data_update_details.save()
     grievance_ticket.refresh_from_db()
@@ -381,10 +386,12 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     individual_data = add_individual_issue_type_extras.get("individual_data", {})
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
-    flex_fields = individual_data.get("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
     ticket_add_individual_details = TicketAddIndividualDetails(
-        individual_data=individual_data, household=household, ticket=grievance_ticket,
+        individual_data=individual_data,
+        household=household,
+        ticket=grievance_ticket,
     )
     ticket_add_individual_details.save()
     grievance_ticket.refresh_from_db()
@@ -398,7 +405,7 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     new_individual_data = new_add_individual_extras.get("individual_data", {})
     to_date_string(new_individual_data, "birth_date")
     new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
-    flex_fields = new_individual_data.get("flex_fields", {})
+    flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
 
     ticket_details.individual_data = new_individual_data
