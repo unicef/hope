@@ -221,24 +221,38 @@ export function validate(
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors: { [id: string]: any } = {};
-  if (
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-  ) {
-    const individualDataErrors = {};
-    const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
+  if (values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
+    if (
+      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+    ) {
+      if (!values.selectedHousehold) {
+        errors.selectedHousehold = 'Household is Required';
       }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
+    }
+    if (
+      values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL ||
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+    ) {
+      if (!values.selectedIndividual) {
+        errors.selectedIndividual = 'Individual is Required';
       }
+    }
+  }
+
+  const individualDataErrors = {};
+  const individualData = values.individualData || {};
+  for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
+    const fieldName = camelCase(field.name);
+    if (
+      field.required &&
+      (individualData[fieldName] === null ||
+        individualData[fieldName] === undefined)
+    ) {
+      individualDataErrors[fieldName] = 'Field Required';
+    }
+    if (Object.keys(individualDataErrors).length > 0) {
+      errors.individualData = individualDataErrors;
     }
   }
   return errors;
