@@ -453,3 +453,9 @@ def dict_to_camel_case(dictionary):
     if isinstance(dictionary, dict):
         return {to_camel_case(key): value for key, value in dictionary.items()}
     return {}
+
+
+def to_snake_case(camel_case_string):
+    import re
+
+    return re.sub("([A-Z])", r"_\1", camel_case_string).lower()

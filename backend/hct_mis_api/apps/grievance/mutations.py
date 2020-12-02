@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from graphene.utils.str_converters import to_snake_case
+from core.utils import to_snake_case
 from graphql import GraphQLError
 
 from account.schema import UserNode
