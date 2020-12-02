@@ -39,9 +39,9 @@ export type AddIndividualApproveMutation = {
 
 export type AddIndividualDataObjectType = {
   fullName: Scalars['String'],
-  givenName: Scalars['String'],
+  givenName?: Maybe<Scalars['String']>,
   middleName?: Maybe<Scalars['String']>,
-  familyName: Scalars['String'],
+  familyName?: Maybe<Scalars['String']>,
   sex: Scalars['String'],
   birthDate: Scalars['Date'],
   estimatedBirthDate?: Maybe<Scalars['Boolean']>,
@@ -5717,6 +5717,9 @@ export type ExistingGrievanceTicketsQuery = (
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
+        )>, individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'unicefId' | 'id'>
         )> }
       )> }
     )>> }
@@ -10224,6 +10227,10 @@ export const ExistingGrievanceTicketsDocument = gql`
         userModified
         admin
         household {
+          unicefId
+          id
+        }
+        individual {
           unicefId
           id
         }
