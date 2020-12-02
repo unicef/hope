@@ -303,7 +303,6 @@ export function CreateGrievancePage(): React.ReactElement {
               <Grid item xs={4}>
                 <NewTicket>
                   {values.category &&
-                  values.issueType &&
                   values.selectedHousehold?.id &&
                   values.selectedIndividual?.id ? (
                     <TicketsAlreadyExist values={values} />
