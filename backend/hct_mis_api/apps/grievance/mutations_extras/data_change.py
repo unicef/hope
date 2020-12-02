@@ -32,6 +32,7 @@ from household.models import (
     IndividualRoleInHousehold,
 )
 from household.schema import HouseholdNode, IndividualNode
+from utils.schema import Arg
 
 
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
@@ -136,6 +137,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
+    flex_fields = Arg()
 
 
 class HouseholdDataUpdateIssueTypeExtras(graphene.InputObjectType):
@@ -386,7 +388,7 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     individual_data = add_individual_issue_type_extras.get("individual_data", {})
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
-    flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
+    flex_fields =  {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
     ticket_add_individual_details = TicketAddIndividualDetails(
         individual_data=individual_data,
