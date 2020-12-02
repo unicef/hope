@@ -437,17 +437,17 @@ def close_add_individual_grievance_ticket(grievance_ticket):
 
     documents_to_create = [handle_add_document(document, individual) for document in documents]
 
-    relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
+    relationship_to_head_of_household = individual_data.get("relationship")
     if household:
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            household.individuals.exclude(id=individual.id).update(relationship_to_head_of_household="")
+            household.individuals.exclude(id=individual.id).update(relationship="")
             household.save(update_fields=["head_of_household"])
         household.size += 1
         household.save()
     else:
-        individual.relationship_to_head_of_household = ""
+        individual.relationship = ""
         individual.save()
 
     handle_role(role, household, individual)
@@ -486,10 +486,10 @@ def close_update_individual_grievance_ticket(grievance_ticket):
 
     Individual.objects.filter(id=individual.id).update(flex_fields=flex_fields, **only_approved_data)
 
-    relationship_to_head_of_household = individual_data.get("relationship_to_head_of_household")
+    relationship_to_head_of_household = individual_data.get("relationship")
     if household and relationship_to_head_of_household == HEAD:
         household.head_of_household = individual
-        household.individuals.exclude(id=individual.id).update(relationship_to_head_of_household="")
+        household.individuals.exclude(id=individual.id).update(relationship="")
         household.save()
 
     if role_data.get("approve_status") is True:
@@ -551,6 +551,9 @@ def close_delete_individual_ticket(grievance_ticket):
             household.head_of_household = new_individual
             # can be directly saved, because there is always only one head of household to update
             household.save()
+            household.individuals.exclude(id=new_individual.id).update(relationship="")
+            new_individual.relationship = HEAD
+            new_individual.save()
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
                 IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
