@@ -11,11 +11,15 @@ export const LookUpSection = ({
   values,
   disabledHouseholdIndividual,
   disabledPaymentRecords,
+  errors,
+  touched,
 }: {
   onValueChange;
   values;
   disabledHouseholdIndividual?;
   disabledPaymentRecords?;
+  errors?;
+  touched?;
 }): React.ReactElement => {
   const renderedLookupHouseholdIndividual = (
     <Grid item xs={6}>
@@ -24,6 +28,8 @@ export const LookUpSection = ({
           values={values}
           onValueChange={onValueChange}
           disabled={disabledHouseholdIndividual}
+          errors={errors}
+          touched={touched}
         />
       </Box>
     </Grid>
