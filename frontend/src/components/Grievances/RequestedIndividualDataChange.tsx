@@ -30,7 +30,7 @@ export function RequestedIndividualDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const [isEdit, setEdit] = useState(false);
+  const [isEdit, setEdit] = useState(true);
   const getConfirmationText = (allChangesLength) => {
     return `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
@@ -124,7 +124,9 @@ export function RequestedIndividualDataChange({
                         variant='contained'
                         color='primary'
                         disabled={
-                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+                          !allChangesLength
                         }
                       >
                         Approve
