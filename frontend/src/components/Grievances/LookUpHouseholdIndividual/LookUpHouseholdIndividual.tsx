@@ -37,10 +37,10 @@ export const LookUpHouseholdIndividual = ({
           />
         )}
         {isInvalid('selectedIndividual', errors, touched) && (
-          <FormHelperText error>{errors.selectedIndividual}</FormHelperText>
+          <FormHelperText error>{errors?.selectedIndividual}</FormHelperText>
         )}
         {isInvalid('selectedHousehold', errors, touched) && (
-          <FormHelperText error>{errors.selectedHousehold}</FormHelperText>
+          <FormHelperText error>{errors?.selectedHousehold}</FormHelperText>
         )}
       </Box>
 
