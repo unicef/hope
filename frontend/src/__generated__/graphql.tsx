@@ -1130,6 +1130,7 @@ export type HouseholdUpdateDataObjectType = {
   orgEnumerator?: Maybe<Scalars['String']>,
   orgNameEnumerator?: Maybe<Scalars['String']>,
   village?: Maybe<Scalars['String']>,
+  flexFields?: Maybe<Scalars['Arg']>,
 };
 
 export enum ImportDataDataType {
@@ -2165,12 +2166,14 @@ export type MutationsCreateTicketNoteArgs = {
 export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>
 };
 
 
 export type MutationsApproveHouseholdDataChangeArgs = {
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
   householdApproveData?: Maybe<Scalars['JSONString']>
 };
@@ -4657,7 +4660,8 @@ export type ApproveDeleteIndividualDataChangeMutation = (
 
 export type ApproveHouseholdDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  householdApproveData?: Maybe<Scalars['JSONString']>
+  householdApproveData?: Maybe<Scalars['JSONString']>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>
 };
 
 
@@ -4675,6 +4679,7 @@ export type ApproveHouseholdDataChangeMutation = (
 export type ApproveIndividualDataChangeMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
@@ -7295,8 +7300,8 @@ export type ApproveDeleteIndividualDataChangeMutationHookResult = ReturnType<typ
 export type ApproveDeleteIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveDeleteIndividualDataChangeMutation>;
 export type ApproveDeleteIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
 export const ApproveHouseholdDataChangeDocument = gql`
-    mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString) {
-  approveHouseholdDataChange(grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData) {
+    mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString, $flexFieldsApproveData: JSONString) {
+  approveHouseholdDataChange(grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData, flexFieldsApproveData: $flexFieldsApproveData) {
     grievanceTicket {
       id
       status
@@ -7338,6 +7343,7 @@ export function withApproveHouseholdDataChange<TProps, TChildProps = {}>(operati
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      householdApproveData: // value for 'householdApproveData'
+ *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
  *   },
  * });
  */
@@ -7348,8 +7354,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int]) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove) {
     grievanceTicket {
       id
       status
@@ -7391,6 +7397,7 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *   variables: {
  *      grievanceTicketId: // value for 'grievanceTicketId'
  *      individualApproveData: // value for 'individualApproveData'
+ *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
  *      approvedDocumentsToCreate: // value for 'approvedDocumentsToCreate'
  *      approvedDocumentsToRemove: // value for 'approvedDocumentsToRemove'
  *   },

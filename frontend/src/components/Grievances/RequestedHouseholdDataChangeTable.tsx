@@ -78,6 +78,68 @@ interface RequestedHouseholdDataChangeTableProps {
   isEdit;
   values;
 }
+
+function renderRow(
+  row,
+  fieldsDict,
+  isSelected,
+  index,
+  countriesDict,
+  ticket,
+  isEdit,
+  handleSelectBioData
+)  {
+  const fieldName = row[0];
+  const field = fieldsDict[row[0]];
+  const isItemSelected = isSelected(fieldName);
+  const labelId = `enhanced-table-checkbox-${index}`;
+  const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+    value: string;
+    previousValue: string;
+    approveStatus: boolean;
+  };
+  const previousValue =
+    fieldName === 'country' || fieldName === 'countryOrigin'
+      ? countriesDict[valueDetails.previousValue]
+      : valueDetails.previousValue;
+  const currentValue =
+    ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+      ? previousValue
+      : ticket.householdDataUpdateTicketDetails.household[fieldName];
+  return (
+    <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
+      <TableCell>
+        {isEdit ? (
+          <Checkbox
+            onChange={(event) =>
+              handleSelectBioData(fieldName, event.target.checked)
+            }
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': labelId }}
+          />
+        ) : (
+          isItemSelected && (
+            <GreenIcon>
+              <CheckCircleIcon />
+            </GreenIcon>
+          )
+        )}
+      </TableCell>
+      <TableCell id={labelId} scope='row' align='left'>
+        <Capitalize>{row[0].replaceAll('_h_f','').replaceAll('_', ' ')}</Capitalize>
+      </TableCell>
+      <TableCell align='left'>
+        <CurrentValue field={field} value={currentValue} />
+      </TableCell>
+      <TableCell align='left'>
+        <NewValue field={field} value={valueDetails.value} />
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function RequestedHouseholdDataChangeTable({
   setFieldValue,
   ticket,
@@ -93,10 +155,13 @@ export function RequestedHouseholdDataChangeTable({
   const { data, loading } = useAllEditHouseholdFieldsQuery();
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
-
+  const householdData = {...ticket.householdDataUpdateTicketDetails.householdData}
+  const flexFields = householdData.flex_fields;
+  delete householdData.flex_fields;
   const entries = Object.entries(
-    ticket.householdDataUpdateTicketDetails.householdData,
+    householdData,
   );
+  const entriesFlexFields = Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
     data?.allEditHouseholdFieldsAttributes,
     'name',
@@ -128,7 +193,6 @@ export function RequestedHouseholdDataChangeTable({
     setFieldValue('selected', newSelected);
   };
 
-
   const isSelected = (name: string): boolean => selectedBioData.includes(name);
   const isSelectedFlexfields = (name: string): boolean =>
     selectedFlexFields.includes(name);
@@ -150,60 +214,27 @@ export function RequestedHouseholdDataChangeTable({
         </TableHead>
         <TableBody>
           {entries.map((row, index) => {
-            const fieldName = camelCase(row[0]);
-            const field = fieldsDict[row[0]];
-            const isItemSelected = isSelected(fieldName);
-            const labelId = `enhanced-table-checkbox-${index}`;
-            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-              value: string;
-              previousValue: string;
-              approveStatus: boolean;
-            };
-            const previousValue =
-              fieldName === 'country' || fieldName === 'countryOrigin'
-                ? countriesDict[valueDetails.previousValue]
-                : valueDetails.previousValue;
-            const currentValue =
-              ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-                ? previousValue
-                : ticket.householdDataUpdateTicketDetails.household[fieldName];
-            return (
-              <TableRow
-                role='checkbox'
-                aria-checked={isItemSelected}
-                key={fieldName}
-              >
-                <TableCell>
-                  {isEdit ? (
-                    <Checkbox
-                      onChange={(event) =>
-                        handleSelectBioData(fieldName, event.target.checked)
-                      }
-                      color='primary'
-                      disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
-                      checked={isItemSelected}
-                      inputProps={{ 'aria-labelledby': labelId }}
-                    />
-                  ) : (
-                    isItemSelected && (
-                      <GreenIcon>
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell id={labelId} scope='row' align='left'>
-                  <Capitalize>{row[0].replaceAll('_', ' ')}</Capitalize>
-                </TableCell>
-                <TableCell align='left'>
-                  <CurrentValue field={field} value={currentValue} />
-                </TableCell>
-                <TableCell align='left'>
-                  <NewValue field={field} value={valueDetails.value} />
-                </TableCell>
-              </TableRow>
+            return renderRow(
+              row,
+              fieldsDict,
+              isSelected,
+              index,
+              countriesDict,
+              ticket,
+              isEdit,
+              handleSelectBioData,
+            );
+          })}
+          {entriesFlexFields.map((row, index) => {
+            return renderRow(
+              row,
+              fieldsDict,
+              isSelectedFlexfields,
+              index,
+              countriesDict,
+              ticket,
+              isEdit,
+              handleFlexFields,
             );
           })}
         </TableBody>
