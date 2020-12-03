@@ -382,3 +382,6 @@ export function thingForSpecificGrievanceType(
   }
   return categoryThing[issueType];
 }
+
+export const isInvalid = (fieldname: string, errors, touched): boolean =>
+  errors[fieldname] && touched[fieldname];
