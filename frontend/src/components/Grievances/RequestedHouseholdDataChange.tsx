@@ -31,7 +31,8 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values) => {
-    return `You approved ${values.selected.length+ values.selectedFlexFields.length || 0} change${
+    return `You approved ${values.selected.length +
+      values.selectedFlexFields.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
@@ -58,14 +59,10 @@ export function RequestedHouseholdDataChange({
     <Formik
       initialValues={{
         selected: entries
-          .filter((row) => {
-            const valueDetails = mapKeys(row[1], (v, k) => k) as {
-              value: string;
-              approveStatus: boolean;
-            };
-            return valueDetails.approveStatus;
+          .filter((row: [string, { approve_status: boolean }]) => {
+            return row[1].approve_status;
           })
-          .map((row) => camelCase(row[0])),
+          .map((row) => row[0]),
         selectedFlexFields: flexFieldsEntries
           .filter((row) => {
             const valueDetails = mapKeys(row[1], (v, k) => k) as {
@@ -74,7 +71,7 @@ export function RequestedHouseholdDataChange({
             };
             return valueDetails.approveStatus;
           })
-          .map((row) => camelCase(row[0])),
+          .map((row) => row[0]),
       }}
       onSubmit={async (values) => {
         const householdApproveData = values.selected.reduce((prev, curr) => {
@@ -82,11 +79,14 @@ export function RequestedHouseholdDataChange({
           prev[curr] = true;
           return prev;
         }, {});
-        const flexFieldsApproveData = values.selectedFlexFields.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
-          return prev;
-        }, {});
+        const flexFieldsApproveData = values.selectedFlexFields.reduce(
+          (prev, curr) => {
+            // eslint-disable-next-line no-param-reassign
+            prev[curr] = true;
+            return prev;
+          },
+          {},
+        );
         try {
           await mutate({
             variables: {
