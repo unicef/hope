@@ -40,6 +40,8 @@ export function RequestedHouseholdDataChange({
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
   let allApprovedCount = 0;
+  const flexFields = householdData?.flexFields;
+  delete householdData.flexFields;
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
     ([key, value]: [string, { approve_status: boolean }]) =>
@@ -47,7 +49,6 @@ export function RequestedHouseholdDataChange({
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-
   return (
     <Formik
       initialValues={{
@@ -120,6 +121,7 @@ export function RequestedHouseholdDataChange({
             ticket={ticket}
             setFieldValue={setFieldValue}
             isEdit={isEdit}
+            values={values}
           />
         </StyledBox>
       )}
