@@ -65,6 +65,7 @@ export type AddIndividualDataObjectType = {
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
+  flexFields?: Maybe<Scalars['Arg']>,
 };
 
 export type AddIndividualIssueTypeExtras = {
@@ -1998,6 +1999,7 @@ export type IndividualUpdateDataObjectType = {
   role?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  flexFields?: Maybe<Scalars['Arg']>,
 };
 
 export enum IndividualWorkStatus {

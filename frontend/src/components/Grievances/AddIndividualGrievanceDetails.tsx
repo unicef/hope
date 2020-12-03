@@ -47,23 +47,37 @@ export function AddIndividualGrievanceDetails({
   };
   const documents = individualData?.documents;
   delete individualData.documents;
+  const flexFields = individualData?.flex_fields;
+  delete individualData?.flex_fields;
+  delete individualData.documents;
   const labels =
-    Object.entries(individualData || {}).map(
-      ([key, value]) => {
-        let textValue = value;
-        const fieldAttribute = fieldsDict[key];
-        if (fieldAttribute.type === 'SELECT_ONE') {
-          textValue = fieldAttribute.choices.find(
-            (item) => item.value === value,
-          ).labelEn;
-        }
-        return (
-          <Grid key={key} item xs={6}>
-            <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
-          </Grid>
-        );
-      },
-    ) || [];
+    Object.entries(individualData || {}).map(([key, value]) => {
+      let textValue = value;
+      const fieldAttribute = fieldsDict[key];
+      if (fieldAttribute.type === 'SELECT_ONE') {
+        textValue = fieldAttribute.choices.find((item) => item.value === value)
+          .labelEn;
+      }
+      return (
+        <Grid key={key} item xs={6}>
+          <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
+        </Grid>
+      );
+    }) || [];
+  const flexFieldLabes =
+    Object.entries(flexFields || {}).map(([key, value]) => {
+      let textValue = value;
+      const fieldAttribute = fieldsDict[key];
+      if (fieldAttribute.type === 'SELECT_ONE') {
+        textValue = fieldAttribute.choices.find((item) => item.value === value)
+          .labelEn;
+      }
+      return (
+        <Grid key={key} item xs={6}>
+          <LabelizedField label={key.replaceAll("_i_f","").replace(/_/g, ' ')} value={textValue} />
+        </Grid>
+      );
+    }) || [];
   const documentLabels =
     documents?.map((item) => {
       return (
@@ -75,7 +89,7 @@ export function AddIndividualGrievanceDetails({
         </Grid>
       );
     }) || [];
-  const allLabels = [...labels, ...documentLabels];
+  const allLabels = [...labels, ...flexFieldLabes, ...documentLabels];
   return (
     <StyledBox>
       <Title>
