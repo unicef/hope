@@ -104,7 +104,11 @@ export function RequestedIndividualDataChange({
             },
           });
           showMessage('Changes Approved');
-          setEdit(false);
+          const sum =
+            values.selected.length +
+            values.selectedDocuments.length +
+            values.selectedDocumentsToRemove.length;
+          setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
