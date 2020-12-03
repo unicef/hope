@@ -458,5 +458,5 @@ def dict_to_camel_case(dictionary):
 def to_snake_case(camel_case_string):
     import re
 
-    snake_case = re.sub("(?<!^)([A-Z])", r"_\1", camel_case_string)
+    snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
     return snake_case[0] + snake_case[1:].lower()
