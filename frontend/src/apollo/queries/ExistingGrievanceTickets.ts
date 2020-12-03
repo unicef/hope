@@ -53,6 +53,10 @@ export const ExistingGrievanceTickets = gql`
             unicefId
             id
           }
+          individual {
+            unicefId
+            id
+          }
         }
       }
     }
