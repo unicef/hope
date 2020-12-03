@@ -69,6 +69,7 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String()
     org_name_enumerator = graphene.String()
     village = graphene.String()
+    flex_fields = Arg()
 
 
 class IndividualDocumentObjectType(graphene.InputObjectType):

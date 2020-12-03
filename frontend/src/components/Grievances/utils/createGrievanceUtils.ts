@@ -155,7 +155,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
     .filter((item) => item.fieldName && item.isFlexField)
     .reduce((prev, current) => {
       // eslint-disable-next-line no-param-reassign
-      prev[camelCase(current.fieldName)] = current.fieldValue;
+      prev[current.fieldName] = current.fieldValue;
       return prev;
     }, {});
   return {
