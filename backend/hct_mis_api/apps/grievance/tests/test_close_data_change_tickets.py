@@ -240,7 +240,7 @@ class TestCloseDataChangeTickets(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        created_individual = Individual.objects.filter(
+        created_individual = Individual.objects.exclude(id="257f6f84-313c-43bd-8f0e-89b96c41a7d5").filter(
             given_name="Test", full_name="Test Example", family_name="Example", sex="MALE",
         )
         self.assertTrue(created_individual.exists())

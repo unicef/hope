@@ -294,6 +294,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
             "previous_documents": {},
             "documents_to_remove": [],
+            "flex_fields": {},
         }
         self.assertEqual(result, expected_result)
         self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
@@ -320,6 +321,7 @@ class TestUpdateGrievanceTickets(APITestCase):
         expected_result = {
             "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
             "size": {"value": 3, "approve_status": False, "previous_value": 2},
+            "flex_fields": {},
         }
         self.assertEqual(result, expected_result)
         self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
