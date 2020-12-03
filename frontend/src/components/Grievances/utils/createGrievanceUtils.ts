@@ -240,19 +240,24 @@ export function validate(
     }
   }
 
-  const individualDataErrors = {};
-  const individualData = values.individualData || {};
-  for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-    const fieldName = camelCase(field.name);
-    if (
-      field.required &&
-      (individualData[fieldName] === null ||
-        individualData[fieldName] === undefined)
-    ) {
-      individualDataErrors[fieldName] = 'Field Required';
-    }
-    if (Object.keys(individualDataErrors).length > 0) {
-      errors.individualData = individualDataErrors;
+  if (
+    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
+  ) {
+    const individualDataErrors = {};
+    const individualData = values.individualData || {};
+    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
+      const fieldName = camelCase(field.name);
+      if (
+        field.required &&
+        (individualData[fieldName] === null ||
+          individualData[fieldName] === undefined)
+      ) {
+        individualDataErrors[fieldName] = 'Field Required';
+      }
+      if (Object.keys(individualDataErrors).length > 0) {
+        errors.individualData = individualDataErrors;
+      }
     }
   }
   return errors;
