@@ -464,7 +464,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
             if field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
-                        field_name
+                        flex_field_name
                     )
             elif field_to_approve:
                 individual_data[field_name]["approve_status"] = True
@@ -508,7 +508,7 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
             if field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
-                        field_name
+                        flex_field_name
                     )
             elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
