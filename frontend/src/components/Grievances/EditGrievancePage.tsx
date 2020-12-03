@@ -150,7 +150,7 @@ export function EditGrievancePage(): React.ReactElement {
       }}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue }) => {
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
         const DatachangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -217,6 +217,8 @@ export function EditGrievancePage(): React.ReactElement {
                           disabledHouseholdIndividual
                           disabledPaymentRecords
                           onValueChange={setFieldValue}
+                          errors={errors}
+                          touched={touched}
                         />
                       </Box>
                     </BoxWithBorders>
