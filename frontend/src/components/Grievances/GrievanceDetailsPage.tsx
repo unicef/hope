@@ -228,7 +228,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     )
       return (
         <Box display='flex' flexDirection='column'>
-          <PaymentIds ids={['34543xx', '44322xx', '12345xx']} />
+          <PaymentIds ids={['34543xx', 'Missing', '12345xx']} />
           <Box mt={6}>
             <OtherRelatedTickets
               ticket={ticket}

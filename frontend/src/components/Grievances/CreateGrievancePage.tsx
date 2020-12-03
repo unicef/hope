@@ -25,7 +25,10 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../utils/constants';
 import { useArrayToDict } from '../../hooks/useArrayToDict';
-import {renderUserName, thingForSpecificGrievanceType} from '../../utils/utils';
+import {
+  renderUserName,
+  thingForSpecificGrievanceType,
+} from '../../utils/utils';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
@@ -68,13 +71,19 @@ export const dataChangeComponentDict = {
 const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string().required('Category is required').nullable(),
+  category: Yup.string()
+    .required('Category is required')
+    .nullable(),
   admin: Yup.string(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+  selectedPaymentRecords: Yup.array()
+    .of(Yup.string())
+    .nullable(),
+  selectedRelatedTickets: Yup.array()
+    .of(Yup.string())
+    .nullable(),
 });
 
 export function CreateGrievancePage(): React.ReactElement {
@@ -159,7 +168,7 @@ export function CreateGrievancePage(): React.ReactElement {
       validate={(values) => validate(values, allAddIndividualFieldsData)}
       validationSchema={validationSchema}
     >
-      {({ submitForm, values, setFieldValue }) => {
+      {({ submitForm, values, setFieldValue, errors, touched }) => {
         const DatachangeComponent = thingForSpecificGrievanceType(
           values,
           dataChangeComponentDict,
@@ -216,6 +225,8 @@ export function CreateGrievancePage(): React.ReactElement {
                         <LookUpSection
                           values={values}
                           onValueChange={setFieldValue}
+                          errors={errors}
+                          touched={touched}
                         />
                       </Box>
                     </BoxWithBorders>
@@ -303,7 +314,6 @@ export function CreateGrievancePage(): React.ReactElement {
               <Grid item xs={4}>
                 <NewTicket>
                   {values.category &&
-                  values.issueType &&
                   values.selectedHousehold?.id &&
                   values.selectedIndividual?.id ? (
                     <TicketsAlreadyExist values={values} />
