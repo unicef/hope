@@ -140,9 +140,7 @@ export function RequestedIndividualDataChange({
                         variant='contained'
                         color='primary'
                         disabled={
-                          ticket.status !==
-                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-                          !allChangesLength
+                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                         }
                       >
                         Approve
