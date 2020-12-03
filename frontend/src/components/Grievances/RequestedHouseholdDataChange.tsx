@@ -75,7 +75,7 @@ export function RequestedHouseholdDataChange({
             },
           });
           showMessage('Changes Approved');
-          setEdit(false);
+          setEdit(values.selected.length === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -105,7 +105,6 @@ export function RequestedHouseholdDataChange({
                       variant='contained'
                       color='primary'
                       disabled={
-                        !values.selected.length ||
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                     >
