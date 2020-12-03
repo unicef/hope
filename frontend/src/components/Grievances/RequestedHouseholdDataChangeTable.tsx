@@ -76,11 +76,13 @@ interface RequestedHouseholdDataChangeTableProps {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   setFieldValue;
   isEdit;
+  values;
 }
 export function RequestedHouseholdDataChangeTable({
   setFieldValue,
   ticket,
   isEdit,
+  values,
 }: RequestedHouseholdDataChangeTableProps): ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -88,25 +90,13 @@ export function RequestedHouseholdDataChangeTable({
     },
   }));
   const classes = useStyles();
-  const [selected, setSelected] = useState([]);
   const { data, loading } = useAllEditHouseholdFieldsQuery();
+  const selectedBioData = values.selected;
+  const { selectedFlexFields } = values;
 
   const entries = Object.entries(
     ticket.householdDataUpdateTicketDetails.householdData,
   );
-  useEffect(() => {
-    const localSelected = entries
-      .filter((row) => {
-        const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-          value: string;
-          approveStatus: boolean;
-        };
-        return valueDetails.approveStatus;
-      })
-      .map((row) => camelCase(row[0]));
-    setSelected(localSelected);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticket]);
   const fieldsDict = useArrayToDict(
     data?.allEditHouseholdFieldsAttributes,
     'name',
@@ -117,29 +107,31 @@ export function RequestedHouseholdDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+  const handleFlexFields = (name, selected) => {
+    const newSelected = [...selectedFlexFields];
+    const selectedIndex = newSelected.indexOf(name);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(name);
     }
-    // {"givenName": True, "fullName": True, "familyName": True, "sex": False}
-    setSelected(newSelected);
+    setFieldValue('selectedFlexFields', newSelected);
+  };
+  const handleSelectBioData = (name, selected) => {
+    const newSelected = [...selectedBioData];
+    const selectedIndex = newSelected.indexOf(name);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(name);
+    }
     setFieldValue('selected', newSelected);
   };
 
-  const isSelected = (name: string): boolean => selected.includes(name);
 
+  const isSelected = (name: string): boolean => selectedBioData.includes(name);
+  const isSelectedFlexfields = (name: string): boolean =>
+    selectedFlexFields.includes(name);
   return (
     <div>
       <Table className={classes.table}>
@@ -184,7 +176,9 @@ export function RequestedHouseholdDataChangeTable({
                 <TableCell>
                   {isEdit ? (
                     <Checkbox
-                      onClick={(event) => handleClick(event, fieldName)}
+                      onChange={(event) =>
+                        handleSelectBioData(fieldName, event.target.checked)
+                      }
                       color='primary'
                       disabled={
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
