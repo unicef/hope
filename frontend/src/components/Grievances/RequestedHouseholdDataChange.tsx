@@ -75,7 +75,7 @@ export function RequestedHouseholdDataChange({
             },
           });
           showMessage('Changes Approved');
-          setEdit(false);
+          setEdit(values.selected.length === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
