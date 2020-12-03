@@ -31981,6 +31981,16 @@
               }
             },
             "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -32401,6 +32411,16 @@
                 "name": "IndividualDocumentObjectType",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "defaultValue": null
           }

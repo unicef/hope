@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Grid, IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import { Field, FieldArray } from 'formik';
+import {Field, FieldArray, useField} from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import camelCase from 'lodash/camelCase';
@@ -37,6 +37,11 @@ export const EditHouseholdDataChangeField = ({
 }: EditHouseholdDataChangeField): React.ReactElement => {
   let fieldProps;
   switch (field.type) {
+    case 'DECIMAL':
+      fieldProps = {
+        component: FormikTextField,
+      };
+      break;
     case 'STRING':
       fieldProps = {
         component: FormikTextField,
@@ -148,6 +153,13 @@ export const EditHouseholdDataChangeFieldRow = ({
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  const [fieldNotUsed, metaNotUsed, helpers] = useField(
+    `householdDataUpdateFields[${index}].isFlexField`,
+  );
+  useEffect(() => {
+    helpers.setValue(field?.isFlexField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemValue.fieldName]);
   return (
     <>
       <Grid item xs={4}>

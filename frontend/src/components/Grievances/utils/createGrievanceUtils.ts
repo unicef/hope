@@ -104,6 +104,21 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
+  const individualData = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  individualData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -115,13 +130,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
             individualDataUpdateIssueTypeExtras: {
               individual: values.selectedIndividual?.id,
               individualData: {
-                ...values.individualDataUpdateFields
-                  .filter((item) => item.fieldName)
-                  .reduce((prev, current) => {
-                    // eslint-disable-next-line no-param-reassign
-                    prev[camelCase(current.fieldName)] = current.fieldValue;
-                    return prev;
-                  }, {}),
+                ...individualData,
                 documents: values.individualDataUpdateFieldsDocuments,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
               },
@@ -135,6 +144,20 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
+  const householdData = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
   return {
     variables: {
       input: {
@@ -145,13 +168,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
           issueType: {
             householdDataUpdateIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              householdData: values.householdDataUpdateFields
-                .filter((item) => item.fieldName)
-                .reduce((prev, current) => {
-                  // eslint-disable-next-line no-param-reassign
-                  prev[camelCase(current.fieldName)] = current.fieldValue;
-                  return prev;
-                }, {}),
+              householdData: { ...householdData, flexFields },
             },
           },
         },

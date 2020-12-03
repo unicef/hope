@@ -86,7 +86,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
         field_type = flex_field["type"]
         field_choices = set(f.get("value") for f in flex_field["choices"])
 
-        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is not None:
+        if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
             raise ValueError(f"invalid value type for a field {name}")
 
         if field_type == TYPE_SELECT_ONE and value not in field_choices:
