@@ -83,6 +83,7 @@ export function RequestedIndividualDataChange({
             return valueDetails.approveStatus;
           })
           .map((row) => camelCase(row[0])),
+        selectedFlexFields: [],
         selectedDocuments,
         selectedDocumentsToRemove,
       }}
@@ -94,6 +95,7 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
+        const flexFieldsApproveData = values.selectedFlexFields;
         try {
           await mutate({
             variables: {
@@ -101,6 +103,7 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
+              // approvedFlexFields
             },
           });
           showMessage('Changes Approved');

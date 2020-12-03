@@ -39,6 +39,7 @@ input AddIndividualDataObjectType {
   whoAnswersAltPhone: String
   role: String
   documents: [IndividualDocumentObjectType]
+  flexFields: Arg
 }
 
 input AddIndividualIssueTypeExtras {
@@ -1551,6 +1552,7 @@ input IndividualUpdateDataObjectType {
   role: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
+  flexFields: Arg
 }
 
 enum IndividualWorkStatus {

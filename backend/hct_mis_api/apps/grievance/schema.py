@@ -442,3 +442,6 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _HOUSEHOLD and x.get("name") in ACCEPTABLE_FIELDS
         ]
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+        ).order_by("name")
