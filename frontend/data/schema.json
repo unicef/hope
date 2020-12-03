@@ -29858,6 +29858,16 @@
                 "defaultValue": null
               },
               {
+                "name": "flexFieldsApproveData",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "JSONString",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "grievanceTicketId",
                 "description": null,
                 "type": {
@@ -29894,6 +29904,16 @@
             "name": "approveHouseholdDataChange",
             "description": null,
             "args": [
+              {
+                "name": "flexFieldsApproveData",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "JSONString",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
               {
                 "name": "grievanceTicketId",
                 "description": null,
@@ -31626,6 +31646,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
               "ofType": null
             },
             "defaultValue": null

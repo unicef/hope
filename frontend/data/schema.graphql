@@ -774,6 +774,7 @@ input HouseholdUpdateDataObjectType {
   orgEnumerator: String
   orgNameEnumerator: String
   village: String
+  flexFields: Arg
 }
 
 enum ImportDataDataType {
@@ -1650,8 +1651,8 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
-  approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): DeleteIndividualApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation

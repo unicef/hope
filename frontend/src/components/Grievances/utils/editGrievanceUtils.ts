@@ -92,12 +92,24 @@ function prepareInitialValueEditHousehold(
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
-  initialValues.householdDataUpdateFields = Object.entries(householdData).map(
+  const flexFields = householdData.flex_fields;
+  delete householdData.flex_fields;
+  const householdDataArray = Object.entries(householdData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
       fieldValue: entry[1].value,
     }),
   );
+  const flexFieldsArray = Object.entries(flexFields).map(
+    (entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }),
+  );
+  initialValues.householdDataUpdateFields = [
+    ...householdDataArray,
+    ...flexFieldsArray,
+  ];
   return initialValues;
 }
 
@@ -294,6 +306,21 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
+  const householdData = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[current.fieldName] = current.fieldValue;
+      return prev;
+    }, {});
+  householdData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -301,13 +328,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           householdDataUpdateIssueTypeExtras: {
-            householdData: values.householdDataUpdateFields
-              .filter((item) => item.fieldName)
-              .reduce((prev, current) => {
-                // eslint-disable-next-line no-param-reassign
-                prev[camelCase(current.fieldName)] = current.fieldValue;
-                return prev;
-              }, {}),
+            householdData,
           },
         },
       },
