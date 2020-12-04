@@ -46,7 +46,8 @@ export const GrievanceDetailsToolbar = ({
   const isInProgress = ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isOnHold = ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD;
-  const isEditable = isNew || isAssigned || isInProgress;
+  const isClosed = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED;
+  const isEditable = !isClosed;
 
   const isFeedbackType =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
