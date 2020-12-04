@@ -160,7 +160,7 @@ export function GrievancesFilters({
                 onFilterChange({ ...filter, admin: undefined });
                 return;
               }
-              onFilterChange({ ...filter, admin: option.node.id });
+              onFilterChange({ ...filter, admin: option });
             }}
           />
         </Grid>

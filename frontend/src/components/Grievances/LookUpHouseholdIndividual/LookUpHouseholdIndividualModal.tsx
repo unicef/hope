@@ -12,7 +12,6 @@ import {
 } from '@material-ui/core';
 import { Field, Formik } from 'formik';
 import { TabPanel } from '../../TabPanel';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   ProgramNode,
@@ -49,24 +48,36 @@ export const LookUpHouseholdIndividualModal = ({
   setLookUpDialogOpen,
 }): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filterHousehold, setFilterHousehold] = useState({
+  const householdFilterInitial = {
     search: '',
     programs: [],
     lastRegistrationDate: { min: undefined, max: undefined },
     residenceStatus: '',
     size: { min: undefined, max: undefined },
-    admin2: '',
-  });
-  const [filterIndividual, setFilterIndividual] = useState({
+    admin2: null,
+  };
+  const [filterHouseholdApplied, setFilterHouseholdApplied] = useState(
+    householdFilterInitial,
+  );
+  const [filterHousehold, setFilterHousehold] = useState(
+    householdFilterInitial,
+  );
+
+  const individualFilterInitial = {
     search: '',
-    program: '',
+    programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
-    residenceStatus: '',
+    status: '',
     admin2: '',
     sex: '',
-  });
-  const debouncedFilterHousehold = useDebounce(filterHousehold, 500);
-  const debouncedFilterIndividual = useDebounce(filterIndividual, 500);
+  };
+  const [filterIndividualApplied, setFilterIndividualApplied] = useState(
+    individualFilterInitial,
+  );
+  const [filterIndividual, setFilterIndividual] = useState(
+    individualFilterInitial,
+  );
+
   const businessArea = useBusinessArea();
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
@@ -131,12 +142,14 @@ export const LookUpHouseholdIndividualModal = ({
             <TabPanel value={selectedTab} index={0}>
               <LookUpHouseholdFilters
                 programs={programs as ProgramNode[]}
-                filter={debouncedFilterHousehold}
+                filter={filterHousehold}
                 onFilterChange={setFilterHousehold}
+                setFilterHouseholdApplied={setFilterHouseholdApplied}
+                householdFilterInitial={householdFilterInitial}
                 choicesData={choicesData}
               />
               <LookUpHouseholdTable
-                filter={debouncedFilterHousehold}
+                filter={filterHouseholdApplied}
                 businessArea={businessArea}
                 choicesData={choicesData}
                 setFieldValue={setFieldValue}
@@ -146,11 +159,13 @@ export const LookUpHouseholdIndividualModal = ({
             <TabPanel value={selectedTab} index={1}>
               <LookUpIndividualFilters
                 programs={programs as ProgramNode[]}
-                filter={debouncedFilterIndividual}
+                filter={filterIndividual}
                 onFilterChange={setFilterIndividual}
+                setFilterIndividualApplied={setFilterIndividualApplied}
+                individualFilterInitial={individualFilterInitial}
               />
               <LookUpIndividualTable
-                filter={debouncedFilterIndividual}
+                filter={filterIndividualApplied}
                 businessArea={businessArea}
                 setFieldValue={setFieldValue}
                 initialValues={initialValues}
