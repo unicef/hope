@@ -148,7 +148,7 @@ export function HouseholdFilters({
                 onFilterChange({ ...filter, adminArea: undefined });
                 return;
               }
-              onFilterChange({ ...filter, adminArea: option.node.id });
+              onFilterChange({ ...filter, adminArea: option });
             }}
           />
         </Grid>

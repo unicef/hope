@@ -33,14 +33,15 @@ export const LookUpRelatedTicketsModal = ({
 }): React.ReactElement => {
   const businessArea = useBusinessArea();
 
-  const [filter, setFilter] = useState({
+  const filterInitial = {
     search: '',
     status: '',
     fsp: '',
     createdAtRange: '',
     admin: '',
-  });
-  const debouncedFilter = useDebounce(filter, 500);
+  };
+  const [filterApplied, setFilterApplied] = useState(filterInitial);
+  const [filter, setFilter] = useState(filterInitial);
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -74,11 +75,13 @@ export const LookUpRelatedTicketsModal = ({
           <DialogContent>
             <LookUpRelatedTicketsFilters
               choicesData={choicesData}
-              filter={debouncedFilter}
+              filter={filter}
+              setFilterApplied={setFilterApplied}
+              filterInitial={filterInitial}
               onFilterChange={setFilter}
             />
             <LookUpRelatedTicketsTable
-              filter={debouncedFilter}
+              filter={filterApplied}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
               initialValues={initialValues}
