@@ -238,6 +238,25 @@ export function validate(
 ) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors: { [id: string]: any } = {};
+  if (values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
+    if (
+      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
+    ) {
+      if (!values.selectedHousehold) {
+        errors.selectedHousehold = 'Household is Required';
+      }
+    }
+    if (
+      values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL ||
+      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+    ) {
+      if (!values.selectedIndividual) {
+        errors.selectedIndividual = 'Individual is Required';
+      }
+    }
+  }
+
   if (
     values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
     values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL

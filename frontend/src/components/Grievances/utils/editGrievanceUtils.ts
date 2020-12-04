@@ -197,15 +197,6 @@ function prepareGrievanceComplaintVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
-        extras: {
-          category: {
-            grievanceComplaintTicketExtras: {
-              household: values.selectedHousehold?.id,
-              individual: values.selectedIndividual?.id,
-              paymentRecord: values.selectedPaymentRecords,
-            },
-          },
-        },
       },
     },
   };
@@ -218,15 +209,6 @@ function prepareSesitiveVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
-        extras: {
-          category: {
-            sensitiveGrievanceTicketExtras: {
-              household: values.selectedHousehold?.id,
-              individual: values.selectedIndividual?.id,
-              paymentRecord: values.selectedPaymentRecords,
-            },
-          },
-        },
       },
     },
   };
