@@ -36,7 +36,7 @@ export const LookUpHouseholdTable = ({
     programs: [filter.programs],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     residenceStatus: filter.residenceStatus,
-    admin2: [decodeIdString(filter.admin2)],
+    admin2: [decodeIdString(filter?.admin2?.node?.id)],
     familySize: JSON.stringify(filter.size),
   };
   if (filter.program) {

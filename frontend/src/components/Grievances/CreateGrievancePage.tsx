@@ -104,11 +104,6 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedRelatedTickets: [],
     identityVerified: false,
     issueType: null,
-    givenName: '',
-    middleName: '',
-    familyName: '',
-    sex: '',
-    birthDate: '',
   };
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea },
