@@ -221,6 +221,7 @@ class HouseholdNode(DjangoObjectType):
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
+    consent_sharing = graphene.List(graphene.String)
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -264,6 +265,7 @@ class IndividualNode(DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    observed_disability = graphene.List(graphene.String)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()

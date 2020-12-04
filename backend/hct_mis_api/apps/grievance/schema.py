@@ -403,6 +403,7 @@ class Query(graphene.ObjectType):
         ACCEPTABLE_FIELDS = [
             "status",
             "consent",
+            "consent_sharing",
             "residence_status",
             "country_origin",
             "country",

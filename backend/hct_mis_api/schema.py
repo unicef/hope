@@ -1,11 +1,12 @@
 import graphene
-from django.forms import MultipleChoiceField
+
+# DO NOT DELETE THIS IMPORT
+import core.converters
+
 from graphene_django.debug import DjangoDebug
-from graphene_django.forms.converter import convert_form_field
 
 import account.schema
 import core.schema
-import graphene
 
 import grievance.schema
 import grievance.mutations
@@ -22,12 +23,6 @@ import sanction_list.mutations
 import targeting.mutations
 import targeting.schema
 import steficon.schema
-
-
-# proper multi choice conversion
-@convert_form_field.register(MultipleChoiceField)
-def convert_form_field_to_string_list(field):
-    return graphene.List(graphene.String, description=field.help_text, required=field.required)
 
 
 class Query(
