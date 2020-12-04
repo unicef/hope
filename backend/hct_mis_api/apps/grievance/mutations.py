@@ -3,14 +3,13 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from core.utils import to_snake_case
 from graphql import GraphQLError
 
 from account.schema import UserNode
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
-from core.utils import decode_id_string
+from core.utils import decode_id_string, to_snake_case
 from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.data_change import (
     save_data_change_extras,

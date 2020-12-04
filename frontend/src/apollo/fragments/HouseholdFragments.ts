@@ -46,6 +46,37 @@ export const householdDetailed = gql`
     ...householdMinimal
     countryOrigin
     country
+    femaleAgeGroup05Count
+    femaleAgeGroup611Count
+    femaleAgeGroup1217Count
+    femaleAdultsCount
+    pregnantCount
+    maleAgeGroup05Count
+    maleAgeGroup611Count
+    maleAgeGroup1217Count
+    maleAdultsCount
+    femaleAgeGroup05DisabledCount
+    femaleAgeGroup611DisabledCount
+    femaleAgeGroup1217DisabledCount
+    femaleAdultsDisabledCount
+    maleAgeGroup05DisabledCount
+    maleAgeGroup611DisabledCount
+    maleAgeGroup1217DisabledCount
+    maleAdultsDisabledCount
+    fchildHoh
+    childHoh
+    start
+    end
+    deviceid
+    orgNameEnumerator
+    returnee
+    address
+    nameEnumerator
+    lastSyncAt
+    consentSharing
+    orgEnumerator
+    updatedAt
+    consent
     individuals {
       totalCount
       edges {
