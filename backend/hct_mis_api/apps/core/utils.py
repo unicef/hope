@@ -1,18 +1,8 @@
-import datetime as dt
-import re
 from collections import MutableMapping, OrderedDict
 from typing import List
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q, F, Model
-from django.db.models.functions import Lower
-from django.forms import model_to_dict
-from django.shortcuts import get_object_or_404
-from django.template.defaultfilters import slugify
-from django.utils.itercompat import is_iterable
 from django_filters import OrderingFilter
-from django_filters.constants import EMPTY_VALUES
-from graphene.utils.str_converters import to_camel_case
 
 
 class CaseInsensitiveTuple(tuple):
@@ -72,6 +62,8 @@ def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_
     ``queryset`` usually doesn't need to be explicitly provided - it'll default
     to using the ``.all()`` queryset from the model's default manager.
     """
+    from django.template.defaultfilters import slugify
+
     slug_field = instance._meta.get_field(slug_field_name)
 
     slug = getattr(instance, slug_field.attname)
@@ -107,6 +99,8 @@ def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_
 
 
 def _slug_strip(value, separator="-"):
+    import re
+
     """
     Cleans up a slug by removing slug separator characters that occur at the
     beginning or end of a slug.
@@ -132,6 +126,8 @@ def _slug_strip(value, separator="-"):
 
 
 def serialize_flex_attributes():
+    from django.db.models import F
+
     """
     Flexible Attributes objects to dict mapping:
         "individuals": {
@@ -216,6 +212,9 @@ def get_combined_attributes():
 
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):
+    import datetime as dt
+    from django.db.models import Q
+
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
@@ -319,6 +318,9 @@ def encode_ids(results: List[dict], model_name: str, key: str) -> List[dict]:
 
 
 def to_dict(instance, fields=None, dict_fields=None):
+    from django.db.models import Model
+    from django.forms import model_to_dict
+
     if fields is None:
         fields = [f.name for f in instance._meta.fields]
 
@@ -377,6 +379,9 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
 
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
+        from django.db.models.functions import Lower
+        from django_filters.constants import EMPTY_VALUES
+
         if value in EMPTY_VALUES:
             return qs
 
@@ -401,6 +406,9 @@ class CustomOrderingFilter(OrderingFilter):
         """
         Normalize the fields into an ordered map of {field name: param name}
         """
+        from django.db.models.functions import Lower
+        from django.utils.itercompat import is_iterable
+
         # fields is a mapping, copy into new OrderedDict
         if isinstance(fields, dict):
             return OrderedDict(fields)
@@ -444,12 +452,16 @@ def choices_to_dict(choices):
 
 
 def decode_and_get_object(encoded_id, model, required):
+    from django.shortcuts import get_object_or_404
+
     if required is True or encoded_id is not None:
         decoded_id = decode_id_string(encoded_id)
         return get_object_or_404(model, id=decoded_id)
 
 
 def dict_to_camel_case(dictionary):
+    from graphene.utils.str_converters import to_camel_case
+
     if isinstance(dictionary, dict):
         return {to_camel_case(key): value for key, value in dictionary.items()}
     return {}

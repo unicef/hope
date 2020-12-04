@@ -875,13 +875,6 @@ export type GroupAttributeNodeFlexAttributesArgs = {
   flexField?: Maybe<Scalars['Boolean']>
 };
 
-export enum HouseholdConsentSharing {
-  Unicef = 'UNICEF',
-  HumanitarianPartner = 'HUMANITARIAN_PARTNER',
-  PrivatePartner = 'PRIVATE_PARTNER',
-  GovernmentPartner = 'GOVERNMENT_PARTNER'
-}
-
 export type HouseholdDataChangeApproveMutation = {
    __typename?: 'HouseholdDataChangeApproveMutation',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -901,7 +894,7 @@ export type HouseholdNode = Node & {
   status: HouseholdStatus,
   consentSign: Scalars['String'],
   consent: Scalars['Boolean'],
-  consentSharing: HouseholdConsentSharing,
+  consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
   residenceStatus: HouseholdResidenceStatus,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
@@ -1099,6 +1092,7 @@ export enum HouseholdStatus {
 export type HouseholdUpdateDataObjectType = {
   status?: Maybe<Scalars['String']>,
   consent?: Maybe<Scalars['Boolean']>,
+  consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
@@ -1815,7 +1809,7 @@ export type IndividualNode = Node & {
   sanctionListPossibleMatch: Scalars['Boolean'],
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant: Scalars['Boolean'],
-  observedDisability: IndividualObservedDisability,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
   seeingDisability?: Maybe<IndividualSeeingDisability>,
   hearingDisability?: Maybe<IndividualHearingDisability>,
   physicalDisability?: Maybe<IndividualPhysicalDisability>,
@@ -1897,16 +1891,6 @@ export type IndividualNodeEdge = {
   node?: Maybe<IndividualNode>,
   cursor: Scalars['String'],
 };
-
-export enum IndividualObservedDisability {
-  None = 'NONE',
-  Seeing = 'SEEING',
-  Hearing = 'HEARING',
-  Walking = 'WALKING',
-  Memory = 'MEMORY',
-  SelfCare = 'SELF_CARE',
-  Communicating = 'COMMUNICATING'
-}
 
 export enum IndividualPhysicalDisability {
   SomeDifficulty = 'SOME_DIFFICULTY',
@@ -4385,7 +4369,7 @@ export type HouseholdMinimalFragment = (
 
 export type HouseholdDetailedFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'flexFields'>
+  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAdultsCount' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAdultsCount' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAdultsDisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAdultsDisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'end' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
   & { individuals: (
     { __typename?: 'IndividualNodeConnection' }
     & Pick<IndividualNodeConnection, 'totalCount'>
@@ -4475,7 +4459,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -6744,6 +6728,37 @@ export const HouseholdDetailedFragmentDoc = gql`
   ...householdMinimal
   countryOrigin
   country
+  femaleAgeGroup05Count
+  femaleAgeGroup611Count
+  femaleAgeGroup1217Count
+  femaleAdultsCount
+  pregnantCount
+  maleAgeGroup05Count
+  maleAgeGroup611Count
+  maleAgeGroup1217Count
+  maleAdultsCount
+  femaleAgeGroup05DisabledCount
+  femaleAgeGroup611DisabledCount
+  femaleAgeGroup1217DisabledCount
+  femaleAdultsDisabledCount
+  maleAgeGroup05DisabledCount
+  maleAgeGroup611DisabledCount
+  maleAgeGroup1217DisabledCount
+  maleAdultsDisabledCount
+  fchildHoh
+  childHoh
+  start
+  end
+  deviceid
+  orgNameEnumerator
+  returnee
+  address
+  nameEnumerator
+  lastSyncAt
+  consentSharing
+  orgEnumerator
+  updatedAt
+  consent
   individuals {
     totalCount
     edges {
@@ -6803,6 +6818,24 @@ export const IndividualDetailedFragmentDoc = gql`
   estimatedBirthDate
   pregnant
   status
+  lastSyncAt
+  deduplicationBatchStatus
+  disability
+  importedIndividualId
+  commsDisability
+  firstRegistrationDate
+  whoAnswersAltPhone
+  memoryDisability
+  middleName
+  whoAnswersPhone
+  phoneNoAlternative
+  hearingDisability
+  observedDisability
+  individualId
+  seeingDisability
+  physicalDisability
+  selfcareDisability
+  workStatus
   documents {
     edges {
       node {
@@ -12639,7 +12672,6 @@ export type ResolversTypes = {
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
   HouseholdStatus: HouseholdStatus,
-  HouseholdConsentSharing: HouseholdConsentSharing,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
   IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
@@ -12660,7 +12692,6 @@ export type ResolversTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  IndividualObservedDisability: IndividualObservedDisability,
   IndividualSeeingDisability: IndividualSeeingDisability,
   IndividualHearingDisability: IndividualHearingDisability,
   IndividualPhysicalDisability: IndividualPhysicalDisability,
@@ -12929,7 +12960,6 @@ export type ResolversParentTypes = {
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
   HouseholdStatus: HouseholdStatus,
-  HouseholdConsentSharing: HouseholdConsentSharing,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: IndividualNodeConnection,
   IndividualNodeEdge: IndividualNodeEdge,
@@ -12950,7 +12980,6 @@ export type ResolversParentTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
-  IndividualObservedDisability: IndividualObservedDisability,
   IndividualSeeingDisability: IndividualSeeingDisability,
   IndividualHearingDisability: IndividualHearingDisability,
   IndividualPhysicalDisability: IndividualPhysicalDisability,
@@ -13639,7 +13668,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   status?: Resolver<ResolversTypes['HouseholdStatus'], ParentType, ContextType>,
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  consentSharing?: Resolver<ResolversTypes['HouseholdConsentSharing'], ParentType, ContextType>,
+  consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
   countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -13943,7 +13972,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  observedDisability?: Resolver<ResolversTypes['IndividualObservedDisability'], ParentType, ContextType>,
+  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   seeingDisability?: Resolver<Maybe<ResolversTypes['IndividualSeeingDisability']>, ParentType, ContextType>,
   hearingDisability?: Resolver<Maybe<ResolversTypes['IndividualHearingDisability']>, ParentType, ContextType>,
   physicalDisability?: Resolver<Maybe<ResolversTypes['IndividualPhysicalDisability']>, ParentType, ContextType>,

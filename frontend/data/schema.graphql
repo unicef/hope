@@ -616,13 +616,6 @@ type GroupAttributeNode {
   labelEn: String
 }
 
-enum HouseholdConsentSharing {
-  UNICEF
-  HUMANITARIAN_PARTNER
-  PRIVATE_PARTNER
-  GOVERNMENT_PARTNER
-}
-
 type HouseholdDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -640,7 +633,7 @@ type HouseholdNode implements Node {
   status: HouseholdStatus!
   consentSign: String!
   consent: Boolean!
-  consentSharing: HouseholdConsentSharing!
+  consentSharing: [String]
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
@@ -743,6 +736,7 @@ enum HouseholdStatus {
 input HouseholdUpdateDataObjectType {
   status: String
   consent: Boolean
+  consentSharing: [String]
   residenceStatus: String
   countryOrigin: String
   country: String
@@ -1419,7 +1413,7 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean!
-  observedDisability: IndividualObservedDisability!
+  observedDisability: [String]
   seeingDisability: IndividualSeeingDisability
   hearingDisability: IndividualHearingDisability
   physicalDisability: IndividualPhysicalDisability
@@ -1450,16 +1444,6 @@ type IndividualNodeConnection {
 type IndividualNodeEdge {
   node: IndividualNode
   cursor: String!
-}
-
-enum IndividualObservedDisability {
-  NONE
-  SEEING
-  HEARING
-  WALKING
-  MEMORY
-  SELF_CARE
-  COMMUNICATING
 }
 
 enum IndividualPhysicalDisability {

@@ -38,6 +38,7 @@ from utils.schema import Arg
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     status = graphene.String()
     consent = graphene.Boolean()
+    consent_sharing = graphene.List(graphene.String)
     residence_status = graphene.String()
     country_origin = graphene.String()
     country = graphene.String()
