@@ -64,12 +64,8 @@ export function RequestedHouseholdDataChange({
           })
           .map((row) => row[0]),
         selectedFlexFields: flexFieldsEntries
-          .filter((row) => {
-            const valueDetails = mapKeys(row[1], (v, k) => k) as {
-              value: string;
-              approveStatus: boolean;
-            };
-            return valueDetails.approveStatus;
+          .filter((row: [string, { approve_status: boolean }]) => {
+            return row[1].approve_status;
           })
           .map((row) => row[0]),
       }}

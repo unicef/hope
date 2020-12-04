@@ -105,7 +105,7 @@ function renderRow(
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue
-      : ticket.householdDataUpdateTicketDetails.household[fieldName];
+      : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
   return (
     <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
