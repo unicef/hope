@@ -23,7 +23,17 @@ function prepareInitialValueAddIndividual(
   const individualData = {
     ...ticket.addIndividualTicketDetails.individualData,
   };
+  const flexFields = individualData.flex_fields;
+  delete individualData.flex_fields;
   initialValues.individualData = Object.entries(individualData).reduce(
+    (previousValue, currentValue: [string, { value: string }]) => {
+      // eslint-disable-next-line no-param-reassign,prefer-destructuring
+      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      return previousValue;
+    },
+    {},
+  );
+  initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
       previousValue[camelCase(currentValue[0])] = currentValue[1];
@@ -44,15 +54,27 @@ function prepareInitialValueEditIndividual(
   };
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
-  initialValues.individualDataUpdateFields = Object.entries(individualData).map(
+  delete individualData.flex_fields;
+  const individualDataArray = Object.entries(individualData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
       fieldValue: entry[1].value,
     }),
   );
+  const flexFieldsArray = Object.entries(flexFields).map(
+    (entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }),
+  );
+  initialValues.individualDataUpdateFields = [
+    ...individualDataArray,
+    ...flexFieldsArray,
+  ];
   initialValues.individualDataUpdateFieldsDocuments = documents.map(
     (item) => item.value,
   );
@@ -70,12 +92,24 @@ function prepareInitialValueEditHousehold(
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
-  initialValues.householdDataUpdateFields = Object.entries(householdData).map(
+  const flexFields = householdData.flex_fields;
+  delete householdData.flex_fields;
+  const householdDataArray = Object.entries(householdData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
       fieldValue: entry[1].value,
     }),
   );
+  const flexFieldsArray = Object.entries(flexFields).map(
+    (entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }),
+  );
+  initialValues.householdDataUpdateFields = [
+    ...householdDataArray,
+    ...flexFieldsArray,
+  ];
   return initialValues;
 }
 
@@ -218,6 +252,21 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
+  const individualData = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  individualData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -226,13 +275,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
         extras: {
           individualDataUpdateIssueTypeExtras: {
             individualData: {
-              ...values.individualDataUpdateFields
-                .filter((item) => item.fieldName)
-                .reduce((prev, current) => {
-                  // eslint-disable-next-line no-param-reassign
-                  prev[camelCase(current.fieldName)] = current.fieldValue;
-                  return prev;
-                }, {}),
+              ...individualData,
               documents: values.individualDataUpdateFieldsDocuments,
               documentsToRemove: values.individualDataUpdateDocumentsToRemove,
             },
@@ -245,6 +288,21 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
+  const householdData = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[current.fieldName] = current.fieldValue;
+      return prev;
+    }, {});
+  householdData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -252,13 +310,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           householdDataUpdateIssueTypeExtras: {
-            householdData: values.householdDataUpdateFields
-              .filter((item) => item.fieldName)
-              .reduce((prev, current) => {
-                // eslint-disable-next-line no-param-reassign
-                prev[camelCase(current.fieldName)] = current.fieldValue;
-                return prev;
-              }, {}),
+            householdData,
           },
         },
       },

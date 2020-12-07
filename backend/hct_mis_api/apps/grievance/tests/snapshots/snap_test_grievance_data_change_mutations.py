@@ -72,6 +72,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                                 'approve_status': False,
                                 'previous_value': 0,
                                 'value': 14
+                            },
+                            'flex_fields': {
                             }
                         }
                     },
@@ -107,6 +109,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                             ],
                             'documents_to_remove': [
                             ],
+                            'flex_fields': {
+                            },
                             'full_name': {
                                 'approve_status': False,
                                 'previous_value': 'Benjamin Butler',
