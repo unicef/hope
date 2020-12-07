@@ -42,7 +42,6 @@ from core.models import BusinessArea
 
 @unique
 class Permissions(Enum):
-
     def _generate_next_value_(name, *args):
         return name
 
@@ -63,7 +62,7 @@ class Permissions(Enum):
 
     @classmethod
     def choices(cls):
-        return tuple((i.value, i.value.replace('_', ' ')) for i in cls)
+        return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
 # PERMISSIONS_CHOICES = [(f"{key}.{perm}", f"{key}.{perm}") for key, value in PERMISSIONS_DICT.items() for perm in value]
@@ -114,7 +113,7 @@ def hopePermissionClass(permission):
                 business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
                 if business_area is None:
                     return False
-            return info.context.user.has_permission(permission, business_area)
+            return info.context.user.has_permission(permission.value, business_area)
 
     return XDPerm
 
