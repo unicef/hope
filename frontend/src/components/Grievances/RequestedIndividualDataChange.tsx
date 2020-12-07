@@ -36,15 +36,22 @@ export function RequestedIndividualDataChange({
   let allApprovedCount = 0;
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const flexFields = individualData.flex_fields;
+  delete individualData.flex_field
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
 
   const entries = Object.entries(individualData);
+  const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approve_status).length;
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
     .length;
   allApprovedCount += entries.filter(
+    ([key, value]: [string, { approve_status: boolean }]) =>
+      value.approve_status,
+  ).length;
+  allApprovedCount += entriesFlexFields.filter(
     ([key, value]: [string, { approve_status: boolean }]) =>
       value.approve_status,
   ).length;
@@ -83,7 +90,15 @@ export function RequestedIndividualDataChange({
             return valueDetails.approveStatus;
           })
           .map((row) => camelCase(row[0])),
-        selectedFlexFields: [],
+        selectedFlexFields: entriesFlexFields
+          .filter((row) => {
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
+            return valueDetails.approveStatus;
+          })
+          .map((row) => row[0]),
         selectedDocuments,
         selectedDocumentsToRemove,
       }}
@@ -95,7 +110,11 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
-        const flexFieldsApproveData = values.selectedFlexFields;
+        const flexFieldsApproveData = values.selectedFlexFields.reduce((prev, curr) => {
+          // eslint-disable-next-line no-param-reassign
+          prev[curr] = true;
+          return prev;
+        }, {});
         try {
           await mutate({
             variables: {
@@ -103,7 +122,7 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
-              // approvedFlexFields
+              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData)
             },
           });
           showMessage('Changes Approved');
