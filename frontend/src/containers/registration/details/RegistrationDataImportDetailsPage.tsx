@@ -13,6 +13,9 @@ import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PermissionDenied } from '../../../components/PermissionDenied';
 
 const Container = styled.div`
   && {
@@ -56,6 +59,7 @@ function TabPanel({
 }
 export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
+  const permissions = usePermissions();
   const { data, loading } = useRegistrationDataImportQuery({
     variables: { id },
   });
@@ -64,19 +68,25 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
+  
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
 
-  if (!data || !choices) {
+  if (!data || !choices || permissions === null) {
     return null;
+  }
+  if (!hasPermissions([PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_MERGE_IMPORT, PERMISSIONS.RDI_RERUN_DEDUPE], permissions)) {
+    return <PermissionDenied />;
   }
   return (
     <div>
       <RegistrationDataImportDetailsPageHeader
         registration={data.registrationDataImport}
+        canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
+        canRerunDedupe={hasPermissions(PERMISSIONS.RDI_RERUN_DEDUPE, permissions)}
       />
-      <Container>
+      {hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions) && <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
         <TableWrapper>
           <Paper>
@@ -104,7 +114,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
             </TabPanel>
           </Paper>
         </TableWrapper>
-      </Container>
+      </Container>}
     </div>
   );
 }
