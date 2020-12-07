@@ -379,6 +379,7 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_REFERRAL,
         ):
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
