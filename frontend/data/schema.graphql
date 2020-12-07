@@ -39,6 +39,7 @@ input AddIndividualDataObjectType {
   whoAnswersAltPhone: String
   role: String
   documents: [IndividualDocumentObjectType]
+  flexFields: Arg
 }
 
 input AddIndividualIssueTypeExtras {
@@ -615,13 +616,6 @@ type GroupAttributeNode {
   labelEn: String
 }
 
-enum HouseholdConsentSharing {
-  UNICEF
-  HUMANITARIAN_PARTNER
-  PRIVATE_PARTNER
-  GOVERNMENT_PARTNER
-}
-
 type HouseholdDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -639,7 +633,7 @@ type HouseholdNode implements Node {
   status: HouseholdStatus!
   consentSign: String!
   consent: Boolean!
-  consentSharing: HouseholdConsentSharing!
+  consentSharing: [String]
   residenceStatus: HouseholdResidenceStatus!
   countryOrigin: String
   country: String
@@ -742,6 +736,7 @@ enum HouseholdStatus {
 input HouseholdUpdateDataObjectType {
   status: String
   consent: Boolean
+  consentSharing: [String]
   residenceStatus: String
   countryOrigin: String
   country: String
@@ -773,6 +768,7 @@ input HouseholdUpdateDataObjectType {
   orgEnumerator: String
   orgNameEnumerator: String
   village: String
+  flexFields: Arg
 }
 
 enum ImportDataDataType {
@@ -1417,7 +1413,7 @@ type IndividualNode implements Node {
   sanctionListPossibleMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean!
-  observedDisability: IndividualObservedDisability!
+  observedDisability: [String]
   seeingDisability: IndividualSeeingDisability
   hearingDisability: IndividualHearingDisability
   physicalDisability: IndividualPhysicalDisability
@@ -1448,16 +1444,6 @@ type IndividualNodeConnection {
 type IndividualNodeEdge {
   node: IndividualNode
   cursor: String!
-}
-
-enum IndividualObservedDisability {
-  NONE
-  SEEING
-  HEARING
-  WALKING
-  MEMORY
-  SELF_CARE
-  COMMUNICATING
 }
 
 enum IndividualPhysicalDisability {
@@ -1551,6 +1537,7 @@ input IndividualUpdateDataObjectType {
   role: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
+  flexFields: Arg
 }
 
 enum IndividualWorkStatus {
@@ -1648,8 +1635,8 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
-  approveHouseholdDataChange(grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): DeleteIndividualApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation
