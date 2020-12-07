@@ -15,7 +15,6 @@ def delivery_type_labels_to_valid_choices(apps, schema_editor):
         )
     CashPlan.objects.bulk_update(all_cash_plans, ["delivery_type"])
 
-
 def empty_reverse(apps, schema_editor):
     pass
 
