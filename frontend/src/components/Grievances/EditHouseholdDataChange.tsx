@@ -189,7 +189,7 @@ export const EditHouseholdDataChangeFieldRow = ({
       <CurrentValue
         field={field}
         value={
-          field?.isFlexField ? household[name] : household.flexFields[name]
+          !field?.isFlexField ? household[name] : household.flexFields[name]
         }
       />
       {itemValue.fieldName ? (
