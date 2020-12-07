@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 import {
   Box,
+  Button,
   FormControl,
   Grid,
   InputAdornment,
@@ -35,11 +36,15 @@ interface LookUpRelatedTicketsFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
+  setFilterApplied?;
+  filterInitial?;
 }
 export function LookUpRelatedTicketsFilters({
   onFilterChange,
   filter,
   choicesData,
+  setFilterApplied,
+  filterInitial,
 }: LookUpRelatedTicketsFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -51,6 +56,7 @@ export function LookUpRelatedTicketsFilters({
             label='Search'
             variant='outlined'
             margin='dense'
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             InputProps={{
               startAdornment: (
@@ -91,6 +97,7 @@ export function LookUpRelatedTicketsFilters({
             label='FSP'
             variant='outlined'
             margin='dense'
+            value={filter.fsp}
             onChange={(e) => handleFilterChange(e, 'fsp')}
             InputProps={{
               startAdornment: (
@@ -156,9 +163,27 @@ export function LookUpRelatedTicketsFilters({
                 onFilterChange({ ...filter, admin: undefined });
                 return;
               }
-              onFilterChange({ ...filter, admin: option.node.id });
+              onFilterChange({ ...filter, admin: option });
             }}
           />
+        </Grid>
+        <Grid container justify='flex-end'>
+          <Button
+            color='primary'
+            onClick={() => {
+              setFilterApplied(filterInitial);
+              onFilterChange(filterInitial);
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            color='primary'
+            variant='outlined'
+            onClick={() => setFilterApplied(filter)}
+          >
+            Apply
+          </Button>
         </Grid>
       </Grid>
     </ContainerWithBorder>
