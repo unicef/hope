@@ -29,7 +29,7 @@ export const HouseholdTable = ({
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
     search: filter.text,
-    adminArea: filter.adminArea,
+    adminArea: filter.adminArea?.node?.id,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
@@ -45,7 +45,13 @@ export const HouseholdTable = ({
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
-        renderRow={(row) => <HouseHoldTableRow key={row.id} household={row} choicesData={choicesData}/>}
+        renderRow={(row) => (
+          <HouseHoldTableRow
+            key={row.id}
+            household={row}
+            choicesData={choicesData}
+          />
+        )}
       />
     </TableWrapper>
   );

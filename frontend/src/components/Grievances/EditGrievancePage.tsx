@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Field, Formik } from 'formik';
 import { Box, Button, DialogActions, Grid } from '@material-ui/core';
-import camelCase from 'lodash/camelCase';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -13,11 +12,10 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
   useAllUsersQuery,
-  useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
+  useGrievanceTicketStatusChangeMutation,
   useUpdateGrievanceMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -25,7 +23,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
   decodeIdString,
@@ -35,9 +33,6 @@ import {
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
-import { AddIndividualDataChange } from './AddIndividualDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -89,6 +84,7 @@ export function EditGrievancePage(): React.ReactElement {
   } = useGrievancesChoiceDataQuery();
 
   const [mutate] = useUpdateGrievanceMutation();
+  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
 
   if (userDataLoading || choicesLoading || ticketLoading) {
     return <LoadingComponent />;
@@ -96,10 +92,14 @@ export function EditGrievancePage(): React.ReactElement {
   if (!choicesData || !userData || !ticketData) return null;
 
   const ticket = ticketData?.grievanceTicket;
-  const mappedLinkedTickets = ticketData?.grievanceTicket?.relatedTickets?.map(
-    (edge) => edge.id,
-  );
-
+  const changeState = (status) => {
+    mutateStatus({
+      variables: {
+        grievanceTicketId: ticket.id,
+        status,
+      },
+    });
+  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValues: any = prepareInitialValues(ticket);
 
@@ -139,13 +139,19 @@ export function EditGrievancePage(): React.ReactElement {
               },
             ],
           }).then((res) => {
-            return showMessage('Grievance Ticket created.', {
+            return showMessage('Grievance Ticket edited.', {
               pathname: `/${businessArea}/grievance-and-feedback/${res.data.updateGrievanceTicket.grievanceTicket.id}`,
               historyMethod: 'push',
             });
           });
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
+        }
+        if (
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
+        ) {
+          changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
       validationSchema={validationSchema}
