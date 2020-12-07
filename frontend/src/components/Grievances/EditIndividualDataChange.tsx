@@ -229,6 +229,7 @@ export const EditIndividualDataChange = ({
     data: fullIndividual,
     loading: fullIndividualLoading,
   } = useIndividualQuery({ variables: { id: individual?.id } });
+
   useEffect(() => {
     if (
       !values.individualDataUpdateFields ||
@@ -244,6 +245,8 @@ export const EditIndividualDataChange = ({
   if (loading || fullIndividualLoading || addIndividualFieldsLoading) {
     return <LoadingComponent />;
   }
+  if (!fullIndividual) return null;
+
   if (!individual) {
     return <div>You have to select an individual earlier</div>;
   }

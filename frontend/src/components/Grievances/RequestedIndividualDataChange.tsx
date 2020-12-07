@@ -9,6 +9,7 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import {
   GrievanceTicketQuery,
   useApproveIndividualDataChangeMutation,
+  useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { RequestedIndividualDataChangeTable } from './RequestedIndividualDataChangeTable';
@@ -56,7 +57,15 @@ export function RequestedIndividualDataChange({
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
-
+  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const changeState = (status) => {
+    mutateStatus({
+      variables: {
+        grievanceTicketId: ticket.id,
+        status,
+      },
+    });
+  };
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   // eslint-disable-next-line no-plusplus
@@ -114,6 +123,9 @@ export function RequestedIndividualDataChange({
           setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
+        }
+        if (isEdit) {
+          changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
     >

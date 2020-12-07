@@ -7,6 +7,7 @@ import camelCase from 'lodash/camelCase';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
+  useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
@@ -37,6 +38,15 @@ export function RequestedHouseholdDataChange({
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
+  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const changeState = (status) => {
+    mutateStatus({
+      variables: {
+        grievanceTicketId: ticket.id,
+        status,
+      },
+    });
+  };
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
@@ -95,6 +105,9 @@ export function RequestedHouseholdDataChange({
           setEdit(values.selected.length === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
+        }
+        if (isEdit) {
+          changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
     >
