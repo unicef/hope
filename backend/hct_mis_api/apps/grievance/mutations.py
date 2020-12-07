@@ -461,7 +461,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
                         document_data["approve_status"] = True
                     else:
                         document_data["approve_status"] = False
-            if field_name == "flex_fields":
+            elif field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
                         flex_field_name
