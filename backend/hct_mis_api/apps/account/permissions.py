@@ -1,5 +1,6 @@
 from functools import partial
 from typing import List, Tuple
+from enum import unique, auto, Enum
 
 from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
@@ -10,49 +11,76 @@ from model_utils import Choices
 
 from core.models import BusinessArea
 
-PERMISSION_CREATE = "CREATE"
-PERMISSION_UPDATE = "UPDATE"
-PERMISSION_DELETE = "DELETE"
-PERMISSION_READ = "READ"
-PERMISSION_LIST = "LIST"
-PERMISSION_RUN = "RUN"
+# PERMISSION_CREATE = "CREATE"
+# PERMISSION_UPDATE = "UPDATE"
+# PERMISSION_DELETE = "DELETE"
+# PERMISSION_READ = "READ"
+# PERMISSION_LIST = "LIST"
+# PERMISSION_RUN = "RUN"
 
 
-PERMISSION_DASHBOARD = "DASHBOARD"
-PERMISSION_RDI_LIST = "RDI"
+# PERMISSION_DASHBOARD = "DASHBOARD"
+# PERMISSION_RDI_LIST = "RDI"
 
-PERMISSION_RDI_IMPORT = "PERMISSION_RDI_IMPORT"
-PERMISSION_RDI_RERUN_DEDUPLICATION = "PERMISSION_RDI_RERUN_DEDUPLICATION"
-PERMISSION_RDI_MERGE = "PERMISSION_RDI_MERGE"
-PERMISSION_RDI_KOBO = "PERMISSION_RDI_KOBO"
-PERMISSION_RDI_XLSX = "PERMISSION_RDI_XLSX"
-PERMISSION_PROGRAM = "PERMISSION_PROGRAM"
-PERMISSIONS_DICT = {
-    PERMISSION_DASHBOARD: [PERMISSION_READ],
-    PERMISSION_RDI_LIST: [PERMISSION_READ],
-    PERMISSION_RDI_IMPORT: [PERMISSION_CREATE, PERMISSION_READ],
-    PERMISSION_RDI_MERGE: [PERMISSION_RUN],
-    PERMISSION_RDI_RERUN_DEDUPLICATION: [PERMISSION_RUN],
-    PERMISSION_RDI_KOBO: [PERMISSION_CREATE],
-    PERMISSION_RDI_XLSX: [PERMISSION_CREATE],
-    PERMISSION_PROGRAM: [PERMISSION_LIST, PERMISSION_READ, PERMISSION_CREATE, PERMISSION_UPDATE, PERMISSION_DELETE],
-}
+# PERMISSION_RDI_IMPORT = "PERMISSION_RDI_IMPORT"
+# PERMISSION_RDI_RERUN_DEDUPLICATION = "PERMISSION_RDI_RERUN_DEDUPLICATION"
+# PERMISSION_RDI_MERGE = "PERMISSION_RDI_MERGE"
+# PERMISSION_RDI_KOBO = "PERMISSION_RDI_KOBO"
+# PERMISSION_RDI_XLSX = "PERMISSION_RDI_XLSX"
+# PERMISSION_PROGRAM = "PERMISSION_PROGRAM"
+# PERMISSIONS_DICT = {
+#     PERMISSION_DASHBOARD: [PERMISSION_READ],
+#     PERMISSION_RDI_LIST: [PERMISSION_READ],
+#     PERMISSION_RDI_IMPORT: [PERMISSION_CREATE, PERMISSION_READ],
+#     PERMISSION_RDI_MERGE: [PERMISSION_RUN],
+#     PERMISSION_RDI_RERUN_DEDUPLICATION: [PERMISSION_RUN],
+#     PERMISSION_RDI_KOBO: [PERMISSION_CREATE],
+#     PERMISSION_RDI_XLSX: [PERMISSION_CREATE],
+#     PERMISSION_PROGRAM: [PERMISSION_LIST, PERMISSION_READ, PERMISSION_CREATE, PERMISSION_UPDATE, PERMISSION_DELETE],
+# }
 
-PERMISSIONS_CHOICES = [(f"{key}.{perm}", f"{key}.{perm}") for key, value in PERMISSIONS_DICT.items() for perm in value]
 
-# Tribute to Akul Senior Software Developer, he was a cool guy
-def dict_to_choices() -> List[Tuple[str, str]]:
-    """Change dict to choices"""
-    # declaring empty list for choices
-    choices = []
-    # iteration over keys and values in PERMISSIONS_DICT items
-    for key, value in PERMISSIONS_DICT.items():
-        # iteration over permissions in value list
-        for perm in value:
-            # adding key and value into tuple
-            choices.append((f"{key}.{perm}", f"{key}.{perm}"))
-    #  returning choices list
-    return choices
+@unique
+class Permissions(Enum):
+
+    def _generate_next_value_(name, *args):
+        return name
+
+    # RDI
+    RDI_VIEW_LIST = auto()
+    RDI_VIEW_DETAILS = auto()
+    RDI_IMPORT_DATA = auto()
+    RDI_RERUN_DEDUPE = auto()
+    RDI_MERGE_IMPORT = auto()
+
+    # Population
+    POPULATION_VIEW_HOUSEHOLDS_LIST = auto()
+    POPULATION_VIEW_HOUSEHOLDS_DETAILS = auto()
+    POPULATION_VIEW_INDIVIDUALS_LIST = auto()
+    POPULATION_VIEW_INDIVIDUALS_DETAILS = auto()
+
+    # ...
+
+    @classmethod
+    def choices(cls):
+        return tuple((i.value, i.value.replace('_', ' ')) for i in cls)
+
+
+# PERMISSIONS_CHOICES = [(f"{key}.{perm}", f"{key}.{perm}") for key, value in PERMISSIONS_DICT.items() for perm in value]
+
+# # Tribute to Akul Senior Software Developer, he was a cool guy
+# def dict_to_choices() -> List[Tuple[str, str]]:
+#     """Change dict to choices"""
+#     # declaring empty list for choices
+#     choices = []
+#     # iteration over keys and values in PERMISSIONS_DICT items
+#     for key, value in PERMISSIONS_DICT.items():
+#         # iteration over permissions in value list
+#         for perm in value:
+#             # adding key and value into tuple
+#             choices.append((f"{key}.{perm}", f"{key}.{perm}"))
+#     #  returning choices list
+#     return choices
 
 
 class BasePermission:
