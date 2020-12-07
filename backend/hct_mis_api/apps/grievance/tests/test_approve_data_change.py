@@ -42,13 +42,15 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION = """
     mutation ApproveIndividualDataChange(
       $grievanceTicketId: ID!, 
-      $individualApproveData: JSONString, 
+      $individualApproveData: JSONString,
+      $flexFieldsApproveData: JSONString, 
       $approvedDocumentsToCreate: [Int], 
       $approvedDocumentsToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId, 
         individualApproveData: $individualApproveData,
+        flexFieldsApproveData: $flexFieldsApproveData,
         approvedDocumentsToCreate: $approvedDocumentsToCreate, 
         approvedDocumentsToRemove: $approvedDocumentsToRemove
       ) {
@@ -63,9 +65,15 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
     """
 
     APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION = """
-    mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString) {
+    mutation ApproveHouseholdDataChange(
+        $grievanceTicketId: ID!, 
+        $householdApproveData: JSONString, 
+        $flexFieldsApproveData: JSONString
+    ) {
       approveHouseholdDataChange(
-        grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData
+        grievanceTicketId: $grievanceTicketId, 
+        householdApproveData: $householdApproveData, 
+        flexFieldsApproveData: $flexFieldsApproveData
       ) {
         grievanceTicket {
           id
@@ -83,10 +91,17 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        program_one = ProgramFactory(
+            name="Test program ONE",
+            business_area=BusinessArea.objects.first(),
+        )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
@@ -153,8 +168,16 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "documents": [
-                    {"country": "POL", "type": IDENTIFICATION_TYPE_NATIONAL_ID, "number": "123-XYZ-321",},
-                    {"country": "POL", "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, "number": "QWE4567",},
+                    {
+                        "country": "POL",
+                        "type": IDENTIFICATION_TYPE_NATIONAL_ID,
+                        "number": "123-XYZ-321",
+                    },
+                    {
+                        "country": "POL",
+                        "type": IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+                        "number": "QWE4567",
+                    },
                 ],
             },
             approve_status=False,
@@ -187,6 +210,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": False},
                     {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
                 ],
+                "flex_fields": {},
             },
         )
 
@@ -200,7 +224,11 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
         TicketHouseholdDataUpdateDetailsFactory(
             ticket=self.household_data_change_grievance_ticket,
             household=self.household_one,
-            household_data={"village": {"value": "Test Village"}, "size": {"value": 19}},
+            household_data={
+                "village": {"value": "Test Village"},
+                "size": {"value": 19},
+                "flex_fields": {},
+            },
         )
 
     def test_approve_add_individual(self):
@@ -224,6 +252,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
                 "approvedDocumentsToCreate": [0],
                 "approvedDocumentsToRemove": [0],
+                "flexFieldsApproveData": json.dumps({}),
             },
         )
 
@@ -236,5 +265,6 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                     self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "householdApproveData": json.dumps({"village": True}),
+                "flexFieldsApproveData": json.dumps({}),
             },
         )

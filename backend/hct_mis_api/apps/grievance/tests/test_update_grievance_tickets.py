@@ -241,7 +241,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "given_name": "John",
             "family_name": "Example",
             "marital_status": "SINGLE",
-            'flex_fields': {}
+            "flex_fields": {},
         }
         self.assertEqual(result, expected_result)
         self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
