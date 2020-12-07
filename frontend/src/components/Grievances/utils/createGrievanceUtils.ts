@@ -239,6 +239,14 @@ export function validate(
       }
     }
   }
+  if (
+    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
+    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
+  ) {
+    if (!values.issueType) {
+      errors.issueType = 'Issue Type is required';
+    }
+  }
 
   if (
     values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
