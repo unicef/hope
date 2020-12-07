@@ -7,6 +7,37 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': {
+                        'household': {
+                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                        },
+                        'householdData': {
+                            'female_age_group_6_11_count': {
+                                'approve_status': False,
+                                'previous_value': 0,
+                                'value': 14
+                            },
+                            'flex_fields': {
+                            }
+                        }
+                    },
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 13,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change 1'] = {
     'data': {
         'createGrievanceTicket': {
@@ -19,6 +50,8 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                         'individualData': {
                             'birth_date': '1980-02-01',
                             'family_name': 'Romaniak',
+                            'flex_fields': {
+                            },
                             'full_name': 'Test Test',
                             'given_name': 'Test',
                             'marital_status': 'SINGLE',
@@ -48,37 +81,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 15,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': {
-                        'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
-                        },
-                        'householdData': {
-                            'female_age_group_6_11_count': {
-                                'approve_status': False,
-                                'previous_value': 0,
-                                'value': 14
-                            },
-                            'flex_fields': {
-                            }
-                        }
-                    },
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 13,
                     'sensitiveTicketDetails': None
                 }
             ]
