@@ -1,12 +1,9 @@
-import json
 from collections import Iterable
 from operator import itemgetter
 
-from constance import config
-
 import graphene
 from auditlog.models import LogEntry
-from django.contrib.gis.db.models import GeometryField
+from constance import config
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django_filters import FilterSet, CharFilter
@@ -24,7 +21,6 @@ from graphene.types.resolver import (
     dict_resolver,
 )
 from graphene_django import DjangoObjectType
-from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
@@ -241,17 +237,6 @@ class KoboAssetObjectConnection(Connection):
 
     class Meta:
         node = KoboAssetObject
-
-
-class GeoJSON(graphene.Scalar):
-    @classmethod
-    def serialize(cls, value):
-        return json.loads(value.geojson)
-
-
-@convert_django_field.register(GeometryField)
-def convert_field_to_geojson(field, registry=None):
-    return graphene.Field(GeoJSON, description=field.help_text, required=not field.null)
 
 
 def get_fields_attr_generators(flex_field):
