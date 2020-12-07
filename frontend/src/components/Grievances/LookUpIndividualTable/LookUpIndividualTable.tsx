@@ -44,7 +44,7 @@ export const LookUpIndividualTable = ({
     programs: [decodeIdString(filter.programs)],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     status: [filter.status],
-    admin2: [decodeIdString(filter.admin2)],
+    admin2: [decodeIdString(filter?.admin2?.node?.id)],
     sex: [filter.sex],
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold.id)

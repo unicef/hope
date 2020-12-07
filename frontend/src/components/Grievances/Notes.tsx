@@ -34,6 +34,7 @@ const Date = styled.span`
 `;
 const DescMargin = styled.div`
   margin-bottom: 35px;
+  overflow: auto;
 `;
 const StyledBox = styled(Paper)`
   display: flex;
