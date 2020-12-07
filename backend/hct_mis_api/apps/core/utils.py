@@ -468,6 +468,8 @@ def dict_to_camel_case(dictionary):
 
 
 def to_snake_case(camel_case_string):
+    if "_" in camel_case_string:
+        return camel_case_string
     import re
 
     snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
