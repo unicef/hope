@@ -87,8 +87,8 @@ function renderRow(
   countriesDict,
   ticket,
   isEdit,
-  handleSelectBioData
-)  {
+  handleSelectBioData,
+) {
   const fieldName = row[0];
   const field = fieldsDict[row[0]];
   const isItemSelected = isSelected(fieldName);
@@ -102,10 +102,13 @@ function renderRow(
     fieldName === 'country' || fieldName === 'countryOrigin'
       ? countriesDict[valueDetails.previousValue]
       : valueDetails.previousValue;
+  const householdValue = field.isFlexField
+    ? ticket.householdDataUpdateTicketDetails.household.flexFields[fieldName]
+    : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? previousValue
-      : ticket.householdDataUpdateTicketDetails.household[camelCase(fieldName)];
+      : householdValue;
   return (
     <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
@@ -128,7 +131,9 @@ function renderRow(
         )}
       </TableCell>
       <TableCell id={labelId} scope='row' align='left'>
-        <Capitalize>{row[0].replaceAll('_h_f','').replaceAll('_', ' ')}</Capitalize>
+        <Capitalize>
+          {row[0].replaceAll('_h_f', '').replaceAll('_', ' ')}
+        </Capitalize>
       </TableCell>
       <TableCell align='left'>
         <CurrentValue field={field} value={currentValue} />
@@ -155,12 +160,12 @@ export function RequestedHouseholdDataChangeTable({
   const { data, loading } = useAllEditHouseholdFieldsQuery();
   const selectedBioData = values.selected;
   const { selectedFlexFields } = values;
-  const householdData = {...ticket.householdDataUpdateTicketDetails.householdData}
+  const householdData = {
+    ...ticket.householdDataUpdateTicketDetails.householdData,
+  };
   const flexFields = householdData.flex_fields;
   delete householdData.flex_fields;
-  const entries = Object.entries(
-    householdData,
-  );
+  const entries = Object.entries(householdData);
   const entriesFlexFields = Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
     data?.allEditHouseholdFieldsAttributes,
