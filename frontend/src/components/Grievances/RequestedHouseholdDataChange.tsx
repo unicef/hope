@@ -122,10 +122,6 @@ export function RequestedHouseholdDataChange({
                       variant='contained'
                       color='primary'
                       disabled={
-                        !(
-                          values.selected.length +
-                          values.selectedFlexFields.length
-                        ) ||
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                     >
