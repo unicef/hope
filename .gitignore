@@ -110,3 +110,6 @@ venv.bak/
 
 *.tgz
 
+/.DS_Store
+/.vscode
+/HCT-MIS.code-workspace
