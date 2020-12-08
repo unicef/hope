@@ -5,6 +5,9 @@ import { IndividualsListTable } from '../tables/IndividualsListTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { IndividualsFilter } from '../../components/population/IndividualsFilter';
 import { useDebounce } from '../../hooks/useDebounce';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const Container = styled.div`
   display: flex;
@@ -14,11 +17,23 @@ const Container = styled.div`
 
 export function PopulationIndividualsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const [filter, setFilter] = useState({
     sex: [],
     age: { min: undefined, max: undefined },
   });
   const debouncedFilter = useDebounce(filter, 500);
+
+  if (permissions === null) {
+    return null;
+  }
+
+  if (
+    !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
+  ) {
+    return <PermissionDenied />;
+  }
 
   return (
     <>
