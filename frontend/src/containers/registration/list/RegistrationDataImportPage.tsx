@@ -18,21 +18,30 @@ export function RegistrationDataImportPage(): React.ReactElement {
     return null;
   }
 
-  if (!hasPermissions([PERMISSIONS.RDI_VIEW_LIST, PERMISSIONS.RDI_IMPORT_DATA], permissions)) {
+  if (
+    !hasPermissions(
+      [PERMISSIONS.RDI_VIEW_LIST, PERMISSIONS.RDI_IMPORT_DATA],
+      permissions,
+    )
+  ) {
     return <PermissionDenied />;
   }
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
-      {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) &&<RegistrationDataImport />}
+      {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
+        <RegistrationDataImport />
+      )}
     </PageHeader>
   );
   return (
     <div>
       {toolbar}
-      {hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions) && <>
-      <RegistrationFilters onFilterChange={setFilter} filter={filter} />
-      <RegistrationDataImportTable filter={debounceFilter} />
-      </>}
+      {hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions) && (
+        <>
+          <RegistrationFilters onFilterChange={setFilter} filter={filter} />
+          <RegistrationDataImportTable filter={debounceFilter} />
+        </>
+      )}
     </div>
   );
 }
