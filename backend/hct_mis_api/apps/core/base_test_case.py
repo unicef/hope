@@ -7,6 +7,7 @@ from elasticsearch_dsl import connections
 from graphene.test import Client
 from snapshottest.django import TestCase as SnapshotTestTestCase
 
+from account.models import Role, UserRole
 from household.elasticsearch_utils import rebuild_search_index
 from household.models import IDENTIFICATION_TYPE_CHOICE, DocumentType
 
@@ -23,7 +24,9 @@ class APITestCase(SnapshotTestTestCase):
             context = {}
 
         graphql_request = self.client.execute(
-            request_string, variables=variables, context=self.generate_context(**context),
+            request_string,
+            variables=variables,
+            context=self.generate_context(**context),
         )
 
         self.assertMatchSnapshot(graphql_request)
@@ -33,7 +36,9 @@ class APITestCase(SnapshotTestTestCase):
             context = {}
 
         return self.client.execute(
-            request_string, variables=variables, context=self.generate_context(**context),
+            request_string,
+            variables=variables,
+            context=self.generate_context(**context),
         )
 
     def generate_context(self, user=None, files=None):
@@ -61,6 +66,18 @@ class APITestCase(SnapshotTestTestCase):
         if isinstance(files, dict):
             for name, file in files.items():
                 context.FILES[name] = file
+
+    @staticmethod
+    def create_user_role_with_permissions(user, permissions, business_area):
+        permission_list = [perm.value for perm in permissions]
+        role, created = Role.objects.get_or_create(
+            name="Role with Permissions", defaults={"permissions": permission_list}
+        )
+        if not created:
+            role.permissions = permission_list
+            role.save()
+        user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
+        return user_role
 
 
 class BaseElasticSearchTestCase(TestCase):
