@@ -70,7 +70,9 @@ class UserRole(TimeStampedUUIDModel):
 
 class Role(TimeStampedUUIDModel):
     name = models.CharField(max_length=250)
-    permissions = ChoiceArrayField(models.CharField(choices=Permissions.choices(), max_length=255))
+    permissions = ChoiceArrayField(
+        models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
+    )
 
     def __str__(self):
         return self.name
