@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { menuItems } from './menuItems';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissionInModule } from '../../config/permissions';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -35,6 +37,7 @@ interface Props {
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions()
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
@@ -50,10 +53,16 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
+  if (permissions === null) {
+    return null
+  }
 
   return (
     <div>
       {menuItems.map((item, index) => {
+        if (item.permissionModule && !hasPermissionInModule(item.permissionModule, permissions)) {
+          return null
+        }
         if (item.collapsable) {
           return (
             <div key={item.name + item.href}>
