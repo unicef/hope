@@ -201,7 +201,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         )
 
 
-class MutationPermissionMixin(Mutation):
+class PermissionMutationMixin(Mutation):
     @classmethod
     def is_authenticated(cls, info):
         if not info.context.user.is_authenticated:
