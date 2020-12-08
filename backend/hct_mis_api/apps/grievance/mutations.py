@@ -279,7 +279,6 @@ class UpdateGrievanceTicketMutation(graphene.Mutation):
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
-
         for field, value in input.items():
             current_value = getattr(grievance_ticket, field, None)
             if not current_value:
