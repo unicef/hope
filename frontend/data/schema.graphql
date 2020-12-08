@@ -1169,6 +1169,7 @@ enum ImportedHouseholdResidenceStatus {
 }
 
 enum ImportedIndividualCommsDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1189,6 +1190,7 @@ enum ImportedIndividualDeduplicationGoldenRecordStatus {
 }
 
 enum ImportedIndividualHearingDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1210,6 +1212,7 @@ enum ImportedIndividualMaritalStatus {
 }
 
 enum ImportedIndividualMemoryDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1282,18 +1285,21 @@ enum ImportedIndividualObservedDisability {
 }
 
 enum ImportedIndividualPhysicalDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
 }
 
 enum ImportedIndividualSeeingDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
 }
 
 enum ImportedIndividualSelfcareDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1311,6 +1317,7 @@ enum ImportedIndividualWorkStatus {
 }
 
 enum IndividualCommsDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1350,6 +1357,7 @@ input IndividualDocumentObjectType {
 }
 
 enum IndividualHearingDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1371,6 +1379,7 @@ enum IndividualMaritalStatus {
 }
 
 enum IndividualMemoryDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1447,6 +1456,7 @@ type IndividualNodeEdge {
 }
 
 enum IndividualPhysicalDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
@@ -1486,12 +1496,14 @@ enum IndividualRoleInHouseholdRole {
 }
 
 enum IndividualSeeingDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO
 }
 
 enum IndividualSelfcareDisability {
+  A_
   SOME_DIFFICULTY
   LOT_DIFFICULTY
   CANNOT_DO

@@ -11681,6 +11681,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11709,6 +11715,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -11739,6 +11751,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11767,6 +11785,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -11797,6 +11821,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11825,6 +11855,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -27056,6 +27092,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27084,6 +27126,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -27114,6 +27162,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27142,6 +27196,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -27172,6 +27232,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27200,6 +27266,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
