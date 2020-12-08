@@ -190,7 +190,11 @@ export const EditIndividualDataChangeFieldRow = ({
 
       <CurrentValue
         field={field}
-        value={individual[camelCase(itemValue.fieldName)]}
+        value={
+          !field?.isFlexField
+            ? individual[camelCase(itemValue.fieldName)]
+            : individual.flexFields[itemValue.fieldName]
+        }
       />
       {itemValue.fieldName ? (
         <EditIndividualDataChangeField
