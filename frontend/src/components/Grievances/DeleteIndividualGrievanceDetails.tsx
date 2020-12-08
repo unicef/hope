@@ -79,7 +79,7 @@ export function DeleteIndividualGrievanceDetails({
         if (fieldAttribute?.type === 'SELECT_ONE') {
           textValue = fieldAttribute.choices.find(
             (item) => item.value === value,
-          ).labelEn;
+          )?.labelEn;
         }
         if (fieldAttribute?.type === 'DATE') {
           textValue = <UniversalMoment>{textValue}</UniversalMoment>;
