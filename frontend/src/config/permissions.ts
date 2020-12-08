@@ -22,4 +22,8 @@ export function hasPermissions(permission: string | string[], allowedPermissions
   return allowedPermissions.includes(permission)
 }
 
+export function hasPermissionInModule(module: string, allowedPermissions: string[]): boolean {
+  return allowedPermissions.some(perm => perm.includes(module))
+}
+
 
