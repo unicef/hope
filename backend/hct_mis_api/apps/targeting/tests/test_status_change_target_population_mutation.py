@@ -1,3 +1,5 @@
+import unittest
+
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
@@ -88,6 +90,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
+    @unittest.skip("needs adjudication")
     def test_approve_target_population(self):
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
@@ -310,6 +313,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
             },
         )
 
+    @unittest.skip("needs adjudication")
     def test_finalize_target_population(self):
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
