@@ -1544,6 +1544,7 @@ export enum ImportedHouseholdResidenceStatus {
 }
 
 export enum ImportedIndividualCommsDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1564,6 +1565,7 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
 }
 
 export enum ImportedIndividualHearingDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1586,6 +1588,7 @@ export enum ImportedIndividualMaritalStatus {
 }
 
 export enum ImportedIndividualMemoryDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1669,18 +1672,21 @@ export enum ImportedIndividualObservedDisability {
 }
 
 export enum ImportedIndividualPhysicalDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
 }
 
 export enum ImportedIndividualSeeingDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
 }
 
 export enum ImportedIndividualSelfcareDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1704,6 +1710,7 @@ export type ImportXlsxCashPlanVerification = {
 };
 
 export enum IndividualCommsDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1744,6 +1751,7 @@ export type IndividualDocumentObjectType = {
 };
 
 export enum IndividualHearingDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1766,6 +1774,7 @@ export enum IndividualMaritalStatus {
 }
 
 export enum IndividualMemoryDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1893,6 +1902,7 @@ export type IndividualNodeEdge = {
 };
 
 export enum IndividualPhysicalDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
@@ -1933,12 +1943,14 @@ export enum IndividualRoleInHouseholdRole {
 }
 
 export enum IndividualSeeingDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
 }
 
 export enum IndividualSelfcareDisability {
+  A = 'A_',
   SomeDifficulty = 'SOME_DIFFICULTY',
   LotDifficulty = 'LOT_DIFFICULTY',
   CannotDo = 'CANNOT_DO'
