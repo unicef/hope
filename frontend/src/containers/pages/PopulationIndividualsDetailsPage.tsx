@@ -12,6 +12,9 @@ import {
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
 
 const Container = styled.div`
   padding: 20px;
@@ -25,13 +28,24 @@ const Container = styled.div`
 export function PopulationIndividualsDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const { data, loading } = useIndividualQuery({
     variables: {
       id,
     },
   });
 
-  if (loading) return null;
+  if (loading || permissions === null) return null;
+
+  if (
+    !hasPermissions(
+      PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+      permissions,
+    )
+  ) {
+    return <PermissionDenied />;
+  }
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

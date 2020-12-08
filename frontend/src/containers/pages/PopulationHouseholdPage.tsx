@@ -11,6 +11,9 @@ import {
 } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;
@@ -24,6 +27,8 @@ export function PopulationHouseholdPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
   });
@@ -33,6 +38,17 @@ export function PopulationHouseholdPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
   });
+
+  if (permissions === null) {
+    return null;
+  }
+
+  if (
+    !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions)
+  ) {
+    return <PermissionDenied />;
+  }
+
   if (loading || choicesLoading) return <LoadingComponent />;
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
