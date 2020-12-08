@@ -67,6 +67,10 @@ export function PopulationHouseholdPage(): React.ReactElement {
           filter={debouncedFilter}
           businessArea={businessArea}
           choicesData={choicesData}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            permissions,
+          )}
         />
       </Container>
     </div>

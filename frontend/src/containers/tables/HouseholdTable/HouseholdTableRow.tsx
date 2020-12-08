@@ -15,11 +15,13 @@ import { FlagTooltip } from '../../../components/FlagTooltip';
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  canViewDetails: boolean;
 }
 
 export function HouseHoldTableRow({
   household,
   choicesData,
+  canViewDetails,
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -33,7 +35,7 @@ export function HouseHoldTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.unicefId}
     >
