@@ -43,6 +43,10 @@ export function PopulationIndividualsPage(): React.ReactElement {
         <IndividualsListTable
           filter={debouncedFilter}
           businessArea={businessArea}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
+            permissions,
+          )}
         />
       </Container>
     </>
