@@ -2,6 +2,8 @@ from functools import partial
 from typing import List, Tuple
 from enum import unique, auto, Enum
 
+from django.core.exceptions import PermissionDenied
+from graphene import Mutation
 from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
 from graphene_django.filter.utils import get_filtering_args_from_filterset, get_filterset_class
@@ -113,7 +115,7 @@ def hopePermissionClass(permission):
                 business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
                 if business_area is None:
                     return False
-            return info.context.user.has_permission(permission.value, business_area)
+            return info.context.user.has_permission(permission.name, business_area)
 
     return XDPerm
 
@@ -197,3 +199,48 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
             filtering_args=self.filtering_args,
             permission_classes=self.permission_classes,
         )
+
+
+class MutationPermissionMixin(Mutation):
+    @classmethod
+    def is_authenticated(cls, info):
+        if not info.context.user.is_authenticated:
+            cls.raise_permission_denied_error(True)
+        return True
+
+    @classmethod
+    def has_permission(cls, info, permission, business_area_arg):
+        cls.is_authenticated(info)
+        if not isinstance(permission, list):
+            permissions = (permission,)
+        else:
+            permissions = permission
+        if isinstance(business_area_arg, BusinessArea):
+            business_area = business_area_arg
+        else:
+            if business_area_arg is None:
+                cls.raise_permission_denied_error()
+            business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+            if business_area is None:
+                cls.raise_permission_denied_error()
+        print("PERMISSIONS", permissions, business_area)
+        if not any(
+            [
+                permission.name
+                for permission in permissions
+                if info.context.user.has_permission(permission.name, business_area)
+            ]
+        ):
+            cls.raise_permission_denied_error()
+        return True
+
+    @staticmethod
+    def raise_permission_denied_error(not_authenticated=False):
+        if not_authenticated:
+            raise PermissionDenied("Permission Denied: User is not authenticated.")
+        else:
+            raise PermissionDenied("Permission Denied: User does not have correct permission.")
+
+    @classmethod
+    def mutate(cls, root, info, **kwargs):
+        return super().mutate(root, info, **kwargs)
