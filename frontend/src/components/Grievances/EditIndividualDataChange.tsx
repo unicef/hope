@@ -233,6 +233,7 @@ export const EditIndividualDataChange = ({
     data: fullIndividual,
     loading: fullIndividualLoading,
   } = useIndividualQuery({ variables: { id: individual?.id } });
+
   useEffect(() => {
     if (
       !values.individualDataUpdateFields ||
