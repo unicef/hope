@@ -63,7 +63,6 @@ export function RequestedIndividualDataChange({
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
-
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   // eslint-disable-next-line no-plusplus
@@ -152,6 +151,7 @@ export function RequestedIndividualDataChange({
                     onClick={() => setEdit(true)}
                     variant='outlined'
                     color='primary'
+                    disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                   >
                     EDIT
                   </Button>
