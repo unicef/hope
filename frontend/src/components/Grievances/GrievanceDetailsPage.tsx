@@ -247,7 +247,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
       return (
         <PaddingContainer>
           <Box display='flex' flexDirection='column'>
-            <ReassignRoleBox shouldDisplayButton={false} ticket={ticket} />
+            <ReassignRoleBox shouldDisplayButton ticket={ticket} />
           </Box>
         </PaddingContainer>
       );
