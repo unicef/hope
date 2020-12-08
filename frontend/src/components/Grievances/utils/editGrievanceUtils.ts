@@ -358,7 +358,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values.admin,
+    admin: values.admin?.id,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
