@@ -67,28 +67,31 @@ function individualDataRow(
   ticket,
   fieldsDict,
   isEdit,
-  handleSelectBioData
+  handleSelectBioData,
 ) {
   const fieldName = camelCase(row[0]);
-  const isItemSelected = isSelected(fieldName);
+  const isItemSelected = isSelected(row[0]);
   const labelId = `enhanced-table-checkbox-${index}`;
   const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
     value: string;
     previousValue: string;
     approveStatus: boolean;
   };
+  const field = fieldsDict[row[0]];
+  const individualValue = field.isFlexField
+    ? ticket.individualDataUpdateTicketDetails.individual.flexFields[row[0]]
+    : ticket.individualDataUpdateTicketDetails.individual[camelCase(fieldName)];
   const currentValue =
     ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
       ? valueDetails.previousValue
-      : ticket.individualDataUpdateTicketDetails.individual[fieldName];
-  const field = fieldsDict[row[0]];
+      : individualValue;
   return (
     <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
       <TableCell>
         {isEdit ? (
           <Checkbox
             onChange={(event) =>
-              handleSelectBioData(fieldName, event.target.checked)
+              handleSelectBioData(row[0], event.target.checked)
             }
             color='primary'
             disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
@@ -167,11 +170,11 @@ export function RequestedIndividualDataChangeTable({
 
   const handleSelectBioData = (name, selected) => {
     const newSelected = [...selectedBioData];
-    const selectedIndex = newSelected.indexOf(name);
+    const selectedIndex = newSelected.indexOf(camelCase(name));
     if (selectedIndex !== -1) {
       newSelected.splice(selectedIndex, 1);
     } else {
-      newSelected.push(name);
+      newSelected.push(camelCase(name));
     }
     setFieldValue('selected', newSelected);
   };
@@ -207,7 +210,8 @@ export function RequestedIndividualDataChangeTable({
     setFieldValue('selectedDocumentsToRemove', newSelected);
   };
 
-  const isSelected = (name: string): boolean => selectedBioData.includes(name);
+  const isSelected = (name: string): boolean =>
+    selectedBioData.includes(camelCase(name));
   const isSelectedFlexfields = (name: string): boolean =>
     selectedFlexFields.includes(name);
   const documentsTableHead = (
