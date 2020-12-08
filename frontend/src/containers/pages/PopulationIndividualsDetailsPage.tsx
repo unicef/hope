@@ -15,6 +15,7 @@ import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   padding: 20px;
@@ -36,9 +37,12 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     },
   });
 
-  if (loading || permissions === null) return null;
+  if (loading) {
+    return <LoadingComponent />;
+  }
 
   if (
+    permissions &&
     !hasPermissions(
       PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
       permissions,
@@ -46,6 +50,8 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   ) {
     return <PermissionDenied />;
   }
+
+  if (!data || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

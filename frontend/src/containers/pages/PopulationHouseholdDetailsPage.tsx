@@ -22,6 +22,7 @@ import { UniversalMoment } from '../../components/UniversalMoment';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   padding: 20px;
@@ -67,13 +68,19 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  if (loading || choicesLoading || permissions === null) return null;
+
+  if (loading || choicesLoading) {
+    return <LoadingComponent />;
+  }
 
   if (
+    permissions &&
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS, permissions)
   ) {
     return <PermissionDenied />;
   }
+
+  if (!data || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
