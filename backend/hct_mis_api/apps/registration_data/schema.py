@@ -1,8 +1,7 @@
 import graphene
 from django.db.models.functions import Lower
-from django_filters import FilterSet, OrderingFilter, DateFilter, CharFilter
+from django_filters import FilterSet, DateFilter, CharFilter
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from account.permissions import (
     DjangoPermissionFilterConnectionField,
