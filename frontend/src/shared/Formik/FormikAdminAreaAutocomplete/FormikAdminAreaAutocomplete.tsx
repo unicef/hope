@@ -4,18 +4,22 @@ import { AdminAreasAutocomplete } from '../../../components/population/AdminArea
 export const FormikAdminAreaAutocomplete = ({
   field,
   form,
-  disabled
+  disabled,
 }): React.ReactElement => {
   const handleChange = (e, option): void => {
     if (!option) {
       form.setFieldValue(field.name, undefined);
     } else {
-      form.setFieldValue(field.name, option.node.title);
+      form.setFieldValue(field.name, option);
     }
   };
   return (
     <>
-      <AdminAreasAutocomplete disabled={disabled} value={field.value} onChange={handleChange} />
+      <AdminAreasAutocomplete
+        disabled={disabled}
+        value={field.value}
+        onChange={handleChange}
+      />
     </>
   );
 };
