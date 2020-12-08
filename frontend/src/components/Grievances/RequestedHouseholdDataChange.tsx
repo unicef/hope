@@ -2,8 +2,6 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React, { useState } from 'react';
 import { Formik } from 'formik';
-import mapKeys from 'lodash/mapKeys';
-import camelCase from 'lodash/camelCase';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
@@ -108,6 +106,7 @@ export function RequestedHouseholdDataChange({
                   onClick={() => setEdit(true)}
                   variant='outlined'
                   color='primary'
+                  disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
                   EDIT
                 </Button>
@@ -122,10 +121,6 @@ export function RequestedHouseholdDataChange({
                       variant='contained'
                       color='primary'
                       disabled={
-                        !(
-                          values.selected.length +
-                          values.selectedFlexFields.length
-                        ) ||
                         ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                       }
                     >
