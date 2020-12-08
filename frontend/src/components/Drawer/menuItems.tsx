@@ -24,7 +24,7 @@ export const menuItems = [
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
-    permissionModule: 'RDI'
+    permissionModule: 'RDI',
   },
   {
     name: 'Population',

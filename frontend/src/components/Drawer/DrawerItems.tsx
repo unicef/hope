@@ -37,7 +37,7 @@ interface Props {
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
-  const permissions = usePermissions()
+  const permissions = usePermissions();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
@@ -54,14 +54,17 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
     initialIndex !== -1 ? initialIndex : null,
   );
   if (permissions === null) {
-    return null
+    return null;
   }
 
   return (
     <div>
       {menuItems.map((item, index) => {
-        if (item.permissionModule && !hasPermissionInModule(item.permissionModule, permissions)) {
-          return null
+        if (
+          item.permissionModule &&
+          !hasPermissionInModule(item.permissionModule, permissions)
+        ) {
+          return null;
         }
         if (item.collapsable) {
           return (
