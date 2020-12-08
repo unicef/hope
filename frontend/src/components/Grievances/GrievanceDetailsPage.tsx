@@ -215,13 +215,18 @@ export function GrievanceDetailsPage(): React.ReactElement {
     ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
   const hasRolesToReassign =
     householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
-  const shouldShowReassignBox = (): boolean => {
+  const shouldShowReassignBoxDataChange = (): boolean => {
     const isRightCategory =
       ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
       ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
     return isRightCategory && (isHeadOfHousehold || hasRolesToReassign);
   };
+
+  // const shouldShowReassignBoxFlag = (): boolean => {
+  //   //add condition here
+  //   return true;
+  // };
 
   const renderRightSection = (): React.ReactElement => {
     if (
@@ -238,15 +243,23 @@ export function GrievanceDetailsPage(): React.ReactElement {
           </Box>
         </Box>
       );
-    if (shouldShowReassignBox()) {
+    if (shouldShowReassignBoxDataChange()) {
       return (
         <PaddingContainer>
           <Box display='flex' flexDirection='column'>
-            <ReassignRoleBox ticket={ticket} />
+            <ReassignRoleBox shouldDisplayButton={false} ticket={ticket} />
           </Box>
         </PaddingContainer>
       );
     }
+    // if (shouldShowReassignBoxFlag())
+    //   return (
+    //     <PaddingContainer>
+    //       <Box display='flex' flexDirection='column'>
+    //         <ReassignRoleBox shouldDisplayButton={false} ticket={ticket} />
+    //       </Box>
+    //     </PaddingContainer>
+    //   );
     return (
       <PaddingContainer>
         <Box display='flex' flexDirection='column'>
