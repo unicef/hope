@@ -5,8 +5,13 @@ import graphene
 from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter, MultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
+from account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    BaseNodePermissionMixin,
+    Permissions,
+    hopePermissionClass,
+)
 from core.countries import Countries
 from program.models import Program
 from targeting.models import HouseholdSelection
@@ -213,7 +218,9 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
-class HouseholdNode(DjangoObjectType):
+class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),)
+
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
@@ -259,7 +266,9 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
-class IndividualNode(DjangoObjectType):
+class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),)
+
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
@@ -292,14 +301,16 @@ class IndividualNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoFilterConnectionField(
+    all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
+        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST),),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoFilterConnectionField(
+    all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
+        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
