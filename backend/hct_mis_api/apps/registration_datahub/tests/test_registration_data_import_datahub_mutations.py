@@ -1,4 +1,5 @@
 import io
+from parameterized import parameterized
 
 from PIL import Image
 from django.conf import settings
@@ -9,7 +10,9 @@ from django.core.files.uploadedfile import (
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
+from core.models import BusinessArea
 from registration_datahub.models import ImportData
 
 
@@ -87,6 +90,8 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         super().setUp()
         self.user = UserFactory()
         call_command("loadbusinessareas")
+        self.business_area_slug = "afghanistan"
+        self.business_area = BusinessArea.objects.get(slug=self.business_area_slug)
 
         img = io.BytesIO(Image.new("RGB", (60, 30), color="red").tobytes())
 
@@ -106,23 +111,46 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
         with open(xlsx_valid_file_path, "rb") as file:
             self.valid_file = SimpleUploadedFile(file.name, file.read())
 
-    def test_registration_data_import_datahub_upload(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.RDI_IMPORT_DATA], True),
+            ("without_permission", [], False),
+        ]
+    )
+    def test_registration_data_import_datahub_upload(self, _, permissions, should_have_import_data):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.UPLOAD_REGISTRATION_DATA_IMPORT_DATAHUB,
             context={"user": self.user},
-            variables={"file": self.valid_file, "businessAreaSlug": "afghanistan"},
+            variables={"file": self.valid_file, "businessAreaSlug": self.business_area_slug},
         )
 
-        import_data_obj = ImportData.objects.first()
-        self.assertIn(
-            "new_reg_data_import", import_data_obj.file.name,
-        )
+        if should_have_import_data:
+            import_data_obj = ImportData.objects.first()
+            self.assertIn(
+                "new_reg_data_import",
+                import_data_obj.file.name,
+            )
 
-    def test_registration_data_import_create(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.RDI_IMPORT_DATA],
+            ),
+            (
+                "without_permission",
+                [],
+            ),
+        ]
+    )
+    def test_registration_data_import_create(self, _, permissions):
         import_data_obj = ImportData.objects.create(
-            file=self.valid_file, number_of_households=3, number_of_individuals=6,
+            file=self.valid_file,
+            number_of_households=3,
+            number_of_individuals=6,
         )
-
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
         self.snapshot_graphql_request(
             request_string=self.CREATE_REGISTRATION_DATA_IMPORT,
             context={"user": self.user},
@@ -130,7 +158,7 @@ class TestRegistrationDataImportDatahubMutations(APITestCase):
                 "registrationDataImportData": {
                     "importDataId": self.id_to_base64(import_data_obj.id, "ImportDataNode"),
                     "name": "New Import of Data 123",
-                    "businessAreaSlug": "afghanistan",
+                    "businessAreaSlug": self.business_area_slug,
                 }
             },
         )
