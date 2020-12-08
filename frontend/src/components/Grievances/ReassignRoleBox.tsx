@@ -30,8 +30,10 @@ const WarnIcon = styled(WarningIcon)`
 
 export const ReassignRoleBox = ({
   ticket,
+  shouldDisplayButton,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  shouldDisplayButton?: boolean;
 }) => {
   const businessArea = useBusinessArea();
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
@@ -53,11 +55,13 @@ export const ReassignRoleBox = ({
             </ContentLink>
           </LabelizedField>
         </Box>
-        <LookUpReassignRole
-          individualRole={{ role: el.role, id: el.id }}
-          ticket={ticket}
-          household={el.household}
-        />
+        {shouldDisplayButton ? (
+          <LookUpReassignRole
+            individualRole={{ role: el.role, id: el.id }}
+            ticket={ticket}
+            household={el.household}
+          />
+        ) : null}
       </Box>
     ));
 
@@ -87,11 +91,13 @@ export const ReassignRoleBox = ({
                 </ContentLink>
               </LabelizedField>
             </Box>
-            <LookUpReassignRole
-              individualRole={{ role: 'HEAD', id: 'HEAD' }}
-              ticket={ticket}
-              household={ticket?.household}
-            />
+            {shouldDisplayButton ? (
+              <LookUpReassignRole
+                individualRole={{ role: 'HEAD', id: 'HEAD' }}
+                ticket={ticket}
+                household={ticket?.household}
+              />
+            ) : null}
           </Box>
         )}
         {mappedLookUpsForExternalHouseholds}
