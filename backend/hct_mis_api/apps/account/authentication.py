@@ -65,6 +65,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     user.save()
     if business_area_code:
         guest_user_role = UserRole()
+        # TODO: maybe switch to use one of the default roles, like Basic or Authorizer with minimal permissions
         guest_user_role.role = Role.objects.filter(name="Guest").first()
         guest_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
         guest_user_role.user = user
