@@ -7,13 +7,31 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('account', '0005_migration'),
+        ("account", "0005_migration"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='role',
-            name='permissions',
-            field=account.models.ChoiceArrayField(base_field=models.CharField(choices=[('RDI_VIEW_LIST', 'RDI VIEW LIST'), ('RDI_VIEW_DETAILS', 'RDI VIEW DETAILS'), ('RDI_IMPORT_DATA', 'RDI IMPORT DATA'), ('RDI_RERUN_DEDUPE', 'RDI RERUN DEDUPE'), ('RDI_MERGE_IMPORT', 'RDI MERGE IMPORT'), ('POPULATION_VIEW_HOUSEHOLDS_LIST', 'POPULATION VIEW HOUSEHOLDS LIST'), ('POPULATION_VIEW_HOUSEHOLDS_DETAILS', 'POPULATION VIEW HOUSEHOLDS DETAILS'), ('POPULATION_VIEW_INDIVIDUALS_LIST', 'POPULATION VIEW INDIVIDUALS LIST'), ('POPULATION_VIEW_INDIVIDUALS_DETAILS', 'POPULATION VIEW INDIVIDUALS DETAILS')], max_length=255), size=None),
+            model_name="role",
+            name="permissions",
+            field=account.models.ChoiceArrayField(
+                base_field=models.CharField(
+                    choices=[
+                        ("RDI_VIEW_LIST", "RDI VIEW LIST"),
+                        ("RDI_VIEW_DETAILS", "RDI VIEW DETAILS"),
+                        ("RDI_IMPORT_DATA", "RDI IMPORT DATA"),
+                        ("RDI_RERUN_DEDUPE", "RDI RERUN DEDUPE"),
+                        ("RDI_MERGE_IMPORT", "RDI MERGE IMPORT"),
+                        ("POPULATION_VIEW_HOUSEHOLDS_LIST", "POPULATION VIEW HOUSEHOLDS LIST"),
+                        ("POPULATION_VIEW_HOUSEHOLDS_DETAILS", "POPULATION VIEW HOUSEHOLDS DETAILS"),
+                        ("POPULATION_VIEW_INDIVIDUALS_LIST", "POPULATION VIEW INDIVIDUALS LIST"),
+                        ("POPULATION_VIEW_INDIVIDUALS_DETAILS", "POPULATION VIEW INDIVIDUALS DETAILS"),
+                    ],
+                    max_length=255,
+                ),
+                blank=True,
+                null=True,
+                size=None,
+            ),
         ),
     ]
