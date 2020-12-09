@@ -70,12 +70,9 @@ class APITestCase(SnapshotTestTestCase):
     @staticmethod
     def create_user_role_with_permissions(user, permissions, business_area):
         permission_list = [perm.value for perm in permissions]
-        role, created = Role.objects.get_or_create(
+        role, created = Role.objects.update_or_create(
             name="Role with Permissions", defaults={"permissions": permission_list}
         )
-        if not created:
-            role.permissions = permission_list
-            role.save()
         user_role, _ = UserRole.objects.get_or_create(user=user, role=role, business_area=business_area)
         return user_role
 
