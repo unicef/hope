@@ -39,7 +39,17 @@ export function RegistrationDataImportPage(): React.ReactElement {
       {hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions) && (
         <>
           <RegistrationFilters onFilterChange={setFilter} filter={filter} />
-          <RegistrationDataImportTable filter={debounceFilter} />
+          <RegistrationDataImportTable
+            filter={debounceFilter}
+            canViewDetails={hasPermissions(
+              [
+                PERMISSIONS.RDI_VIEW_DETAILS,
+                PERMISSIONS.RDI_MERGE_IMPORT,
+                PERMISSIONS.RDI_RERUN_DEDUPE,
+              ],
+              permissions,
+            )}
+          />
         </>
       )}
     </div>
