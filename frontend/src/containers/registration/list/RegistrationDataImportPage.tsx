@@ -14,18 +14,16 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({});
   const debounceFilter = useDebounce(filter, 500);
-  if (permissions === null) {
-    return null;
-  }
+  if (permissions === null) return null;
 
   if (
     !hasPermissions(
       [PERMISSIONS.RDI_VIEW_LIST, PERMISSIONS.RDI_IMPORT_DATA],
       permissions,
     )
-  ) {
+  )
     return <PermissionDenied />;
-  }
+
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
       {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (

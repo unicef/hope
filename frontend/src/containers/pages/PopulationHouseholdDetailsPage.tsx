@@ -69,18 +69,16 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
 
-  if (loading || choicesLoading) {
-    return <LoadingComponent />;
-  }
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (permissions === null) return null;
 
   if (
     permissions &&
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS, permissions)
-  ) {
+  )
     return <PermissionDenied />;
-  }
 
-  if (!data || !choicesData || permissions === null) return null;
+  if (!data || !choicesData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

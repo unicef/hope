@@ -25,15 +25,12 @@ export function PopulationIndividualsPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
 
-  if (permissions === null) {
-    return null;
-  }
+  if (permissions === null) return null;
 
   if (
     !hasPermissions(PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST, permissions)
-  ) {
+  )
     return <PermissionDenied />;
-  }
 
   return (
     <>
