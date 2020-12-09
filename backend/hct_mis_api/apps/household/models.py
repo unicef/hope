@@ -478,6 +478,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
 
         return sha256(";".join(values).encode()).hexdigest()
 
+    @property
+    def business_area(self):
+        return self.household.business_area
+
     def __str__(self):
         return self.full_name
 
