@@ -2,7 +2,13 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Field, Formik } from 'formik';
-import { Box, Button, DialogActions, Grid } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  DialogActions,
+  FormHelperText,
+  Grid,
+} from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -12,6 +18,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
+  useAllAddIndividualFieldsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -27,6 +34,7 @@ import {
 } from '../../utils/constants';
 import {
   decodeIdString,
+  isInvalid,
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
@@ -40,6 +48,7 @@ import {
   prepareVariables,
   validationSchema,
 } from './utils/editGrievanceUtils';
+import { validate } from './utils/validateGrievance';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -85,8 +94,17 @@ export function EditGrievancePage(): React.ReactElement {
 
   const [mutate] = useUpdateGrievanceMutation();
   const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const {
+    data: allAddIndividualFieldsData,
+    loading: allAddIndividualFieldsDataLoading,
+  } = useAllAddIndividualFieldsQuery();
 
-  if (userDataLoading || choicesLoading || ticketLoading) {
+  if (
+    userDataLoading ||
+    choicesLoading ||
+    ticketLoading ||
+    allAddIndividualFieldsDataLoading
+  ) {
     return <LoadingComponent />;
   }
   if (!choicesData || !userData || !ticketData) return null;
@@ -123,6 +141,13 @@ export function EditGrievancePage(): React.ReactElement {
     },
     {},
   );
+  const dataChangeErrors = (errors, touched) =>
+    ['householdDataUpdateFields', 'individualDataUpdateFields'].map(
+      (fieldname) =>
+        isInvalid(fieldname, errors, touched) && (
+          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+        ),
+    );
 
   return (
     <Formik
@@ -154,6 +179,7 @@ export function EditGrievancePage(): React.ReactElement {
           changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
+      validate={(values) => validate(values, allAddIndividualFieldsData)}
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
@@ -291,6 +317,7 @@ export function EditGrievancePage(): React.ReactElement {
                         values={values}
                         setFieldValue={setFieldValue}
                       />
+                      {dataChangeErrors(errors, touched)}
                     </BoxPadding>
 
                     <DialogFooter>
