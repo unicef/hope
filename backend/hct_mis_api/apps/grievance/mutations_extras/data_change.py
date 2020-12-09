@@ -180,6 +180,12 @@ def to_date_string(dict, field_name):
         dict[field_name] = date.isoformat()
 
 
+def to_phone_number_str(dict, field_name):
+    phone_number = dict.get(field_name)
+    if phone_number:
+        dict[field_name] = str(phone_number)
+
+
 def save_data_change_extras(root, info, input, grievance_ticket, extras, **kwargs):
     issue_type = input.get("issue_type")
     if issue_type == GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE:
@@ -282,6 +288,8 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
     individual_data = individual_data_update_issue_type_extras.get("individual_data", {})
     documents = individual_data.pop("documents", [])
     documents_to_remove = individual_data.pop("documents_to_remove", [])
+    to_phone_number_str(individual_data, "phone_no")
+    to_phone_number_str(individual_data, "phone_no_alternative")
     to_date_string(individual_data, "birth_date")
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
@@ -330,6 +338,9 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
     documents = new_individual_data.pop("documents", [])
     documents_to_remove = new_individual_data.pop("documents_to_remove", [])
     flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
+
+    to_phone_number_str(new_individual_data, "phone_no")
+    to_phone_number_str(new_individual_data, "phone_no_alternative")
     to_date_string(new_individual_data, "birth_date")
     verify_flex_fields(flex_fields, "individuals")
 
@@ -389,6 +400,8 @@ def save_add_individual_extras(root, info, input, grievance_ticket, extras, **kw
     household_id = decode_id_string(household_encoded_id)
     household = get_object_or_404(Household, id=household_id)
     individual_data = add_individual_issue_type_extras.get("individual_data", {})
+    to_phone_number_str(individual_data, "phone_no")
+    to_phone_number_str(individual_data, "phone_no_alternative")
     to_date_string(individual_data, "birth_date")
     individual_data = {to_snake_case(key): value for key, value in individual_data.items()}
     flex_fields = {to_snake_case(field): value for field, value in individual_data.pop("flex_fields", {}).items()}
@@ -409,11 +422,13 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     new_add_individual_extras = extras.get("add_individual_issue_type_extras")
 
     new_individual_data = new_add_individual_extras.get("individual_data", {})
+    to_phone_number_str(new_individual_data, "phone_no")
+    to_phone_number_str(new_individual_data, "phone_no_alternative")
     to_date_string(new_individual_data, "birth_date")
     new_individual_data = {to_snake_case(key): value for key, value in new_individual_data.items()}
     flex_fields = {to_snake_case(field): value for field, value in new_individual_data.pop("flex_fields", {}).items()}
     verify_flex_fields(flex_fields, "individuals")
-    new_individual_data['flex_fields'] = flex_fields
+    new_individual_data["flex_fields"] = flex_fields
 
     ticket_details.individual_data = new_individual_data
     ticket_details.approve_status = False
