@@ -155,7 +155,11 @@ export function CreateGrievancePage(): React.ReactElement {
   }));
 
   const dataChangeErrors = (errors, touched) =>
-    ['householdDataUpdateFields', 'individualDataUpdateFields'].map(
+    [
+      'householdDataUpdateFields',
+      'individualDataUpdateFields',
+      'individualDataUpdateFieldsDocuments',
+    ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
           <FormHelperText error>{errors[fieldname]}</FormHelperText>
