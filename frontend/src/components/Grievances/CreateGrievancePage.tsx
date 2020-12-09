@@ -152,10 +152,20 @@ export function CreateGrievancePage(): React.ReactElement {
       onSubmit={async (values) => {
         try {
           const response = await mutate(prepareVariables(businessArea, values));
-          showMessage('Grievance Ticket created.', {
-            pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
-            historyMethod: 'push',
-          });
+          if (values.selectedPaymentRecords.length > 1) {
+            showMessage(
+              `${values.selectedPaymentRecords.length} Grievance Tickets created.`,
+              {
+                pathname: `/${businessArea}/grievance-and-feedback`,
+                historyMethod: 'push',
+              },
+            );
+          } else {
+            showMessage('Grievance Ticket created.', {
+              pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+              historyMethod: 'push',
+            });
+          }
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
