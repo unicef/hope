@@ -56,6 +56,19 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   if (permissions === null) {
     return null;
   }
+  const getInitialHrefForCollapsible = (secondaryActions) => {
+    let resultHref = '';
+    for (const item of secondaryActions) {
+      if (
+        item.permissionModule &&
+        hasPermissionInModule(item.permissionModule, permissions)
+      ) {
+        resultHref = item.href;
+        break;
+      }
+    }
+    return resultHref;
+  };
 
   return (
     <div>
@@ -67,8 +80,11 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
           return null;
         }
         if (item.collapsable) {
+          const hrefForCollapsibleItem = getInitialHrefForCollapsible(
+            item.secondaryActions,
+          );
           return (
-            <div key={item.name + item.href}>
+            <div key={item.name + hrefForCollapsibleItem}>
               <ListItem
                 button
                 onClick={() => {
@@ -77,8 +93,8 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                   } else {
                     setExpandedItem(index);
                   }
-                  if (item.href) {
-                    history.push(`/${businessArea}${item.href}`);
+                  if (hrefForCollapsibleItem) {
+                    history.push(`/${businessArea}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
@@ -93,20 +109,27 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
               <Collapse in={expandedItem !== null && expandedItem === index}>
                 <SubList component='div'>
                   {item.secondaryActions &&
-                    item.secondaryActions.map((secondary) => (
-                      <ListItem
-                        button
-                        component={Link}
-                        key={secondary.name}
-                        to={`/${businessArea}${secondary.href}`}
-                        selected={Boolean(
-                          secondary.selectedRegexp.exec(clearLocation),
-                        )}
-                      >
-                        <Icon>{secondary.icon}</Icon>
-                        <Text primary={secondary.name} />
-                      </ListItem>
-                    ))}
+                    item.secondaryActions.map(
+                      (secondary) =>
+                        secondary.permissionModule &&
+                        hasPermissionInModule(
+                          secondary.permissionModule,
+                          permissions,
+                        ) && (
+                          <ListItem
+                            button
+                            component={Link}
+                            key={secondary.name}
+                            to={`/${businessArea}${secondary.href}`}
+                            selected={Boolean(
+                              secondary.selectedRegexp.exec(clearLocation),
+                            )}
+                          >
+                            <Icon>{secondary.icon}</Icon>
+                            <Text primary={secondary.name} />
+                          </ListItem>
+                        ),
+                    )}
                 </SubList>
               </Collapse>
             </div>
