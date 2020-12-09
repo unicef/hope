@@ -39,17 +39,15 @@ export function PopulationHouseholdPage(): React.ReactElement {
     variables: { businessArea },
   });
 
-  if (permissions === null) {
-    return null;
-  }
-
-  if (
-    !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions)
-  ) {
-    return <PermissionDenied />;
-  }
-
   if (loading || choicesLoading) return <LoadingComponent />;
+
+  if (permissions === null) return null;
+
+  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
+    return <PermissionDenied />;
+
+  if (!data || !choicesData) return null;
+
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
 

@@ -72,8 +72,8 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
+  if (permissions === null) return null;
   if (
-    permissions &&
     !hasPermissions(
       [
         PERMISSIONS.RDI_VIEW_DETAILS,
@@ -82,13 +82,10 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
       ],
       permissions,
     )
-  ) {
+  )
     return <PermissionDenied />;
-  }
 
-  if (!data || !choices || permissions === null) {
-    return null;
-  }
+  if (!data || !choices) return null;
 
   const rdiDetails = (
     <Container>
