@@ -6,10 +6,7 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
-import {
-  AllAddIndividualFieldsQuery,
-  GrievanceTicketQuery,
-} from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
@@ -361,34 +358,4 @@ export function prepareVariables(businessArea, values, ticket) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function validate(
-  values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: { [id: string]: any } = {};
-  if (
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-  ) {
-    const individualDataErrors = {};
-    const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
-      }
-    }
-  }
-  return errors;
 }
