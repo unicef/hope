@@ -1,4 +1,4 @@
-import { Box, FormHelperText, Typography } from '@material-ui/core';
+import { Box, FormHelperText } from '@material-ui/core';
 import React, { useState } from 'react';
 import { isInvalid } from '../../../utils/utils';
 import { LookUpButton } from '../LookUpButton';

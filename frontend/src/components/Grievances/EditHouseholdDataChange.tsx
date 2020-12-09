@@ -153,6 +153,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  // eslint-disable-next-line
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );

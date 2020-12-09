@@ -46,7 +46,6 @@ export const LookUpReassignRole = ({
             <LookUpReassignRoleDisplay
               setLookUpDialogOpen={setLookUpDialogOpen}
               values={values}
-              onValueChange={setFieldValue}
             />
           ) : (
             <LookUpButton
