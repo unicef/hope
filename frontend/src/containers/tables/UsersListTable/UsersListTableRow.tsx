@@ -27,7 +27,7 @@ export function UsersListTableRow({
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
-    <p>
+    <p key={el.role.name}>
       {el.businessArea.name} / {el.role.name}
     </p>
   ));

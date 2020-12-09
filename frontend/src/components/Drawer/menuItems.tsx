@@ -85,6 +85,7 @@ export const menuItems = [
     href: '/users-list',
     selectedRegexp: /^\/test.*$/,
     icon: <SupervisedUserCircle />,
+    permissionModule: 'USER_MANAGEMENT',
   },
   {
     name: 'Settings',
