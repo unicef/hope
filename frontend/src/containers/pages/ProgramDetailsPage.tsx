@@ -12,6 +12,9 @@ import {
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   && {
@@ -54,16 +57,32 @@ export function ProgramDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
-  if (loading || choicesLoading) {
-    return <LoadingComponent />;
-  }
-  if (!data || !choices) {
-    return null;
-  }
+  const permissions = usePermissions();
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+
+  if (permissions === null) return null;
+
+  if (
+    !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
+  )
+    return <PermissionDenied />;
+
+  if (!data || !choices) return null;
+
   const program = data.program as ProgramNode;
   return (
     <div>
-      <ProgramDetailsPageHeader program={program} />
+      <ProgramDetailsPageHeader
+        program={program}
+        canActivate={hasPermissions(
+          PERMISSIONS.PROGRAMME_ACTIVATE,
+          permissions,
+        )}
+        canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
+        canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
+        canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+      />
       <Container>
         <ProgramDetails program={program} choices={choices} />
         {program.status === ProgramStatus.Draft ? (
