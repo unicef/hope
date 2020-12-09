@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
