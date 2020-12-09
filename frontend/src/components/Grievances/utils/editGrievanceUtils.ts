@@ -238,13 +238,6 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
-        extras: {
-          issueType: {
-            individualDeleteIssueTypeExtras: {
-              individual: values.selectedIndividual?.id,
-            },
-          },
-        },
       },
     },
   };
