@@ -32,18 +32,21 @@ export const menuItems = [
     selectedRegexp: /^\/population.*$/,
     icon: <PeopleIcon />,
     collapsable: true,
+    permissionModule: 'POPULATION',
     secondaryActions: [
       {
         name: 'Households',
         href: '/population/household',
         selectedRegexp: /^\/population\/household.*$/,
         icon: <PeopleAltRoundedIcon />,
+        permissionModule: 'HOUSEHOLDS',
       },
       {
         name: 'Individuals',
         href: '/population/individuals',
         selectedRegexp: /^\/population\/individuals.*$/,
         icon: <FaceIcon />,
+        permissionModule: 'INDIVIDUALS',
       },
     ],
   },
