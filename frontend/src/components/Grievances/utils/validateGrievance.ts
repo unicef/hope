@@ -30,8 +30,18 @@ export function validate(
         (!values.householdDataUpdateFields[0]?.fieldName ||
           !values.householdDataUpdateFields[0]?.fieldValue)
       ) {
-        console.log('warunek dodaje sie tu');
         errors.householdDataUpdateFields = 'Household Data Change is Required';
+      }
+      if (
+        values.householdDataUpdateFields?.length &&
+        values.householdDataUpdateFields[0]?.fieldName
+      ) {
+        values.householdDataUpdateFields.forEach((el) => {
+          if (!el.fieldName || !el.fieldValue) {
+            errors.householdDataUpdateFields =
+              'Field and field value are required';
+          }
+        });
       }
     }
     if (issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
@@ -53,12 +63,26 @@ export function validate(
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';
       }
+      if (
+        values.individualDataUpdateFields?.length &&
+        values.individualDataUpdateFields[0]?.fieldName
+      ) {
+        values.individualDataUpdateFields.forEach((el) => {
+          if (!el.fieldName || !el.fieldValue) {
+            errors.individualDataUpdateFields =
+              'Field and field value are required';
+          }
+        });
+      }
+
       if (values.individualDataUpdateFieldsDocuments?.length) {
-        const doc = values.individualDataUpdateFieldsDocuments[0];
-        if (!doc.country || !doc.type || !doc.number) {
-          errors.individualDataUpdateFields =
-            'Document country, type and number are required';
-        }
+        values.individualDataUpdateFieldsDocuments.forEach((el, index) => {
+          const doc = values.individualDataUpdateFieldsDocuments[index];
+          if (!doc.country || !doc.type || !doc.number) {
+            errors.individualDataUpdateFieldsDocuments =
+              'Document country, type and number are required';
+          }
+        });
       }
     }
   }
@@ -91,6 +115,5 @@ export function validate(
       }
     }
   }
-  console.log('😎 ~ file: validateGrievance.ts ~ line 98 ~ errors', errors);
   return errors;
 }
