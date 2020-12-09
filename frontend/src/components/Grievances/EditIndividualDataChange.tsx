@@ -157,6 +157,7 @@ export const EditIndividualDataChangeFieldRow = ({
   onDelete,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  // eslint-disable-next-line
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );

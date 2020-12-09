@@ -1,16 +1,11 @@
 import moment from 'moment';
-import get from 'lodash/get';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  TARGETING_STATES,
-} from './constants';
+import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],

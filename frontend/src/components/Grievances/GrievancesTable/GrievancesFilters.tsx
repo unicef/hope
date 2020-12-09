@@ -60,6 +60,7 @@ export function GrievancesFilters({
               ),
             }}
             data-cy='filters-search'
+            value={filter.search || ''}
           />
         </Grid>
         <Grid item>
@@ -154,7 +155,7 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin}
+            value={filter.admin || null}
             onChange={(e, option) => {
               if (!option) {
                 onFilterChange({ ...filter, admin: undefined });
