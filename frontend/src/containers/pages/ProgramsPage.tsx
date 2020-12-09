@@ -8,6 +8,9 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgrammesTable } from '../tables/ProgrammesTable/ProgrammesTable';
 import { useDebounce } from '../../hooks/useDebounce';
 import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
@@ -26,6 +29,7 @@ export function ProgramsPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
 
   const {
     data: choicesData,
@@ -33,28 +37,41 @@ export function ProgramsPage(): React.ReactElement {
   } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
+  if (choicesLoading) return <LoadingComponent />;
+
+  if (permissions === null) return null;
+
+  const canViewListAndDetails = hasPermissions(
+    PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+    permissions,
+  );
+  const canCreate = hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions);
+
+  if (!canViewListAndDetails && !canCreate) return <PermissionDenied />;
+
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
       <CreateProgram />
     </PageHeader>
   );
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
 
   return (
     <div>
-      {toolbar}
-      <ProgrammesFilters
-        filter={filter}
-        onFilterChange={setFilter}
-        choicesData={choicesData}
-      />
-      <ProgrammesTable
-        businessArea={businessArea}
-        choicesData={choicesData}
-        filter={debouncedFilter}
-      />
+      {canCreate && toolbar}
+      {canViewListAndDetails && (
+        <>
+          <ProgrammesFilters
+            filter={filter}
+            onFilterChange={setFilter}
+            choicesData={choicesData}
+          />
+          <ProgrammesTable
+            businessArea={businessArea}
+            choicesData={choicesData}
+            filter={debouncedFilter}
+          />
+        </>
+      )}
     </div>
   );
 }
