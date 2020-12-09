@@ -37,21 +37,18 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     },
   });
 
-  if (loading) {
-    return <LoadingComponent />;
-  }
+  if (loading) return <LoadingComponent />;
+  if (permissions === null) return null;
 
   if (
-    permissions &&
     !hasPermissions(
       PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
       permissions,
     )
-  ) {
+  )
     return <PermissionDenied />;
-  }
 
-  if (!data || permissions === null) return null;
+  if (!data) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
