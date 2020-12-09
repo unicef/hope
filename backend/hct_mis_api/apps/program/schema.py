@@ -12,7 +12,12 @@ from graphene import ConnectionField, relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
+from account.permissions import (
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    hopePermissionClass,
+    Permissions,
+)
 from account.schema import LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
 from core.filters import DecimalRangeFilter, IntegerRangeFilter
@@ -58,8 +63,12 @@ class ProgramFilter(FilterSet):
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
-    # TODO Enable permissions below
-    # permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+
     budget = graphene.Decimal()
     total_entitled_quantity = graphene.Decimal()
     total_delivered_quantity = graphene.Decimal()
@@ -140,8 +149,11 @@ class Query(graphene.ObjectType):
     all_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
-        # TODO Enable permissions below
-        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            ),
+        ),
     )
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
