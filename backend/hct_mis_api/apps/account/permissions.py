@@ -30,6 +30,51 @@ class Permissions(Enum):
     POPULATION_VIEW_INDIVIDUALS_LIST = auto()
     POPULATION_VIEW_INDIVIDUALS_DETAILS = auto()
 
+    # Programme
+    PRORGRAMME_VIEW_LIST_AND_DETAILS = auto()
+    PROGRAMME_CREATE = auto()
+    PROGRAMME_UPDATE = auto()
+    PROGRAMME_REMOVE = auto()
+    PROGRAMME_ACTIVATE = auto()
+    PROGRAMME_FINISH = auto()
+
+    # Targeting
+    TARGETING_VIEW_LIST = auto()
+    TARGETING_VIEW_DETAILS = auto()
+    TARGETING_UPDATE = auto()
+    TARGETING_DUPLICATE = auto()
+    TARGETING_REMOVE = auto()
+    TARGETING_LOCK = auto()
+    TARGETING_UNLOCK = auto()
+    TARGETING_SEND = auto()
+
+    # Payment Verification
+    PAYMENT_VERIFICATION_VIEW_LIST = auto()
+    PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
+    PAYMENT_VERIFICATION_CREATE = auto()
+    PAYMENT_VERIFICATION_UPDATE = auto()
+    PAYMENT_VERIFICATION_ACTIVATE = auto()
+    PAYMENT_VERIFICATION_DISCARD = auto()
+    PAYMENT_VERIFICATION_FINISH = auto()
+    PAYMENT_VERIFICATION_EXPORT = auto()
+    PAYMENT_VERIFICATION_IMPORT = auto()
+    PAYMENT_VERIFICATION_VERIFY = auto()
+    PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
+
+    # User Management
+    USER_MANAGEMENT_VIEW_LIST = auto()
+
+    # Dashboard
+    DASHBOARD_VIEW_HQ = auto()
+    DASHBOARD_VIEW_COUNTRY = auto()
+    DASHBOARD_EXPORT = auto()
+
+    # Grievances
+    # ...
+
+    # Django Admin
+    # ...
+
     # ...
 
     @classmethod
