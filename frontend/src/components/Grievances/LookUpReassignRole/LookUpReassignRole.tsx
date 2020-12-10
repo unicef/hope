@@ -28,6 +28,10 @@ export const LookUpReassignRole = ({
   const { data: individualData, loading } = useIndividualQuery({
     variables: { id: reAssigneeRole?.individual },
   });
+  const [selectedHousehold, setSelectedHousehold] = useState(household || null);
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    individualData?.individual || null,
+  );
 
   if (loading) return <LoadingComponent />;
 
@@ -59,6 +63,10 @@ export const LookUpReassignRole = ({
             initialValues={values}
             onValueChange={setFieldValue}
             ticket={ticket}
+            selectedIndividual={selectedIndividual}
+            selectedHousehold={selectedHousehold}
+            setSelectedHousehold={setSelectedHousehold}
+            setSelectedIndividual={setSelectedIndividual}
           />
         </>
       )}
