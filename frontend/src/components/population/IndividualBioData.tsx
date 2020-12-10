@@ -60,14 +60,14 @@ export function IndividualsBioData({
   );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3}>
+    <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
         <div>{edge.node.documentNumber}</div>
       </LabelizedField>
     </Grid>
   ));
   const mappedIdentities = individual.identities?.map((item) => (
-    <Grid item xs={3}>
+    <Grid item xs={3} key={item.id}>
       <LabelizedField label={`${item.type} ID`}>
         <div>{item.number}</div>
       </LabelizedField>

@@ -30,6 +30,7 @@ export function IndividualVulnerabilities({
   for (const flexFieldKey in individual.flexFields) {
     fields.push(
       <LabelizedField
+        key={flexFieldKey}
         label={flexFieldKey}
         value={individual.flexFields[flexFieldKey] || '-'}
       />,
