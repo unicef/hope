@@ -124,6 +124,7 @@ export const LookUpReassignRoleModal = ({
               setSelectedHousehold={setSelectedHousehold}
               selectedIndividual={selectedIndividual}
               setSelectedIndividual={setSelectedIndividual}
+              ticket={ticket}
             />
           </DialogContent>
           <DialogFooter>
