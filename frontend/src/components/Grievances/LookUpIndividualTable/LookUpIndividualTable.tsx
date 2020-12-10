@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
@@ -19,11 +19,11 @@ interface LookUpIndividualTableProps {
   businessArea?: string;
   setFieldValue;
   valuesInner;
-  initialValues;
-  selectedIndividual?;
-  selectedHousehold?;
-  setSelectedIndividual?;
-  setSelectedHousehold?;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
+  ticket?;
 }
 
 export const LookUpIndividualTable = ({
@@ -31,11 +31,10 @@ export const LookUpIndividualTable = ({
   filter,
   setFieldValue,
   valuesInner,
-  initialValues,
   selectedIndividual,
-  selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  ticket,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
@@ -46,10 +45,6 @@ export const LookUpIndividualTable = ({
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
-  console.log(
-    '😎 ~ file: LookUpIndividualTable.tsx ~ line 40 ~ valuesInner',
-    valuesInner,
-  );
 
   const initialVariables = {
     businessArea,
@@ -62,6 +57,7 @@ export const LookUpIndividualTable = ({
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
+    excludedId: ticket?.individual?.id || null,
   };
 
   return (
