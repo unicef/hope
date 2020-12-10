@@ -16,7 +16,13 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD, KOBO_COLLECTOR_FIELD
+from core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    _INDIVIDUAL,
+    _HOUSEHOLD,
+    KOBO_COLLECTOR_FIELD,
+    FIELDS_EXCLUDED_FROM_RDI,
+)
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea, FlexibleAttribute
@@ -221,7 +227,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_household(grievance_ticket, info):
+    def resolve_related_tickets(grievance_ticket, info):
         return grievance_ticket.related_tickets
 
     def resolve_household(grievance_ticket, info):
@@ -353,6 +359,9 @@ class Query(graphene.ObjectType):
             if value in GrievanceTicket.MANUAL_CATEGORIES
         ]
 
+    def resolve_grievance_ticket_all_category_choices(self, info, **kwargs):
+        return [{"name": name, "value": value} for value, name in GrievanceTicket.CATEGORY_CHOICES]
+
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
@@ -387,6 +396,7 @@ class Query(graphene.ObjectType):
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
+            "business_area",
         ]
 
         yield from [
@@ -395,6 +405,7 @@ class Query(graphene.ObjectType):
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
         yield KOBO_COLLECTOR_FIELD.get("role_i_c")
+        yield FIELDS_EXCLUDED_FROM_RDI.get("business_area")
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         ).order_by("name")
