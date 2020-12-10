@@ -1,8 +1,10 @@
 import unittest
+from parameterized import parameterized
 
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import create_household
@@ -34,21 +36,23 @@ class TestApproveTargetPopulationMutation(APITestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        business_area = BusinessArea.objects.first()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         cls.user = UserFactory.create()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
+        tp = TargetPopulation(
+            name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -59,6 +63,7 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
             status=TargetPopulation.STATUS_APPROVED,
+            business_area=cls.business_area,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -71,7 +76,9 @@ class TestApproveTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
+        tp = TargetPopulation(
+            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -91,7 +98,15 @@ class TestApproveTargetPopulationMutation(APITestCase):
         return targeting_criteria
 
     @unittest.skip("needs adjudication")
-    def test_approve_target_population(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_LOCK]),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_target_population(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -101,6 +116,8 @@ class TestApproveTargetPopulationMutation(APITestCase):
         )
 
     def test_approve_fail_target_population(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_LOCK], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -138,19 +155,21 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         call_command("loadbusinessareas")
-        business_area = BusinessArea.objects.first()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
+        tp = TargetPopulation(
+            name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -161,6 +180,7 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
             status=TargetPopulation.STATUS_APPROVED,
+            business_area=cls.business_area,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -173,7 +193,9 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
+        tp = TargetPopulation(
+            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -192,7 +214,15 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    def test_unapprove_target_population(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_UNLOCK]),
+            ("without_permission", []),
+        ]
+    )
+    def test_unapprove_target_population(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -205,6 +235,8 @@ class TestUnapproveTargetPopulationMutation(APITestCase):
         )
 
     def test_unapprove_fail_target_population(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_UNLOCK], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.UNAPPROVE_TARGET_MUTATION,
             context={"user": self.user},
@@ -245,19 +277,21 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         cls.user = UserFactory.create()
         cls.households = []
         call_command("loadbusinessareas")
-        business_area = BusinessArea.objects.first()
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_1 = household
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "HOST", "business_area": business_area},
+            {"size": 2, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_2 = household
         cls.households.append(cls.household_size_1)
         cls.households.append(cls.household_size_2)
 
-        tp = TargetPopulation(name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT)
+        tp = TargetPopulation(
+            name="Draft Target Population", status=TargetPopulation.STATUS_DRAFT, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
@@ -268,6 +302,7 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp = TargetPopulation(
             name="Approved Target Population with final filters",
             status=TargetPopulation.STATUS_APPROVED,
+            business_area=cls.business_area,
         )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
@@ -280,12 +315,14 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp
 
-        tp = TargetPopulation(name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED)
+        tp = TargetPopulation(
+            name="Approved Target Population", status=TargetPopulation.STATUS_APPROVED, business_area=cls.business_area
+        )
 
         tp.candidate_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
-        program = ProgramFactory(business_area=business_area, status=Program.ACTIVE)
+        program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
         tp.program = program
         tp.save()
         tp.households.set(cls.households)
@@ -302,6 +339,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         return targeting_criteria
 
     def test_finalize_target_population_with_final_criteria(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
@@ -314,7 +353,15 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
     @unittest.skip("needs adjudication")
-    def test_finalize_target_population(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.TARGETING_SEND]),
+            ("without_permission", []),
+        ]
+    )
+    def test_finalize_target_population(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
@@ -322,6 +369,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         )
 
     def test_finalize_fail_target_population(self):
+        self.create_user_role_with_permissions(self.user, [Permissions.TARGETING_SEND], self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
