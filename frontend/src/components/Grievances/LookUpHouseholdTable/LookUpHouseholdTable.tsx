@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
@@ -20,7 +20,6 @@ interface LookUpHouseholdTableProps {
   filter;
   choicesData: HouseholdChoiceDataQuery;
   setFieldValue;
-  selectedIndividual?;
   selectedHousehold?;
   setSelectedIndividual?;
   setSelectedHousehold?;
@@ -31,7 +30,6 @@ export const LookUpHouseholdTable = ({
   filter,
   choicesData,
   setFieldValue,
-  selectedIndividual,
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
