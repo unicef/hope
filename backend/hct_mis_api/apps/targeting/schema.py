@@ -199,8 +199,10 @@ class StatsObjectType(graphene.ObjectType):
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     """Defines an individual target population record."""
 
-    permission_classes = hopePermissionClass(
-        Permissions.TARGETING_VIEW_DETAILS,
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.TARGETING_VIEW_DETAILS,
+        ),
     )
 
     total_households = graphene.Int(source="total_households")
