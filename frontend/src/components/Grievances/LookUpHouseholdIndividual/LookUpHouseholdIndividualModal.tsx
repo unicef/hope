@@ -113,13 +113,14 @@ export const LookUpHouseholdIndividualModal = ({
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize
       onSubmit={(values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
         setLookUpDialogOpen(false);
       }}
     >
-      {({ submitForm, setFieldValue, values }) => (
+      {({ submitForm, setFieldValue, values, resetForm }) => (
         <Dialog
           maxWidth='lg'
           fullWidth
@@ -208,7 +209,9 @@ export const LookUpHouseholdIndividualModal = ({
                   type='submit'
                   color='primary'
                   variant='contained'
-                  onClick={submitForm}
+                  onClick={async () => {
+                    await submitForm();
+                  }}
                   disabled={values.identityVerified === false}
                   data-cy='button-submit'
                 >
