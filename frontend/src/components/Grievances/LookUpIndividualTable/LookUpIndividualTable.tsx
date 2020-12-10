@@ -18,28 +18,38 @@ interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
   setFieldValue;
-  initialValues;
   valuesInner;
+  initialValues;
+  selectedIndividual?;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
   setFieldValue,
-  initialValues,
   valuesInner,
+  initialValues,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
 }: LookUpIndividualTableProps): React.ReactElement => {
-  const [selectedIndividual, setSelectedIndividual] = useState(
-    initialValues.selectedIndividual,
-  );
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
       setFieldValue('selectedHousehold', individual.household);
+      setSelectedHousehold(individual.household);
     }
     setSelectedIndividual(individual);
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
+  console.log(
+    '😎 ~ file: LookUpIndividualTable.tsx ~ line 40 ~ valuesInner',
+    valuesInner,
+  );
 
   const initialVariables = {
     businessArea,

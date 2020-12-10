@@ -46,6 +46,19 @@ export const LookUpHouseholdIndividualModal = ({
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
+}: {
+  onValueChange;
+  initialValues;
+  lookUpDialogOpen;
+  setLookUpDialogOpen;
+  selectedIndividual?;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
   const householdFilterInitial = {
@@ -153,7 +166,10 @@ export const LookUpHouseholdIndividualModal = ({
                 businessArea={businessArea}
                 choicesData={choicesData}
                 setFieldValue={setFieldValue}
-                initialValues={initialValues}
+                selectedHousehold={selectedHousehold}
+                setSelectedHousehold={setSelectedHousehold}
+                selectedIndividual={selectedIndividual}
+                setSelectedIndividual={setSelectedIndividual}
               />
             </TabPanel>
             <TabPanel value={selectedTab} index={1}>
@@ -168,8 +184,12 @@ export const LookUpHouseholdIndividualModal = ({
                 filter={filterIndividualApplied}
                 businessArea={businessArea}
                 setFieldValue={setFieldValue}
-                initialValues={initialValues}
                 valuesInner={values}
+                initialValues={initialValues}
+                selectedHousehold={selectedHousehold}
+                setSelectedHousehold={setSelectedHousehold}
+                selectedIndividual={selectedIndividual}
+                setSelectedIndividual={setSelectedIndividual}
               />
             </TabPanel>
           </DialogContent>

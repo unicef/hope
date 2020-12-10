@@ -20,7 +20,10 @@ interface LookUpHouseholdTableProps {
   filter;
   choicesData: HouseholdChoiceDataQuery;
   setFieldValue;
-  initialValues;
+  selectedIndividual?;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }
 
 export const LookUpHouseholdTable = ({
@@ -28,7 +31,10 @@ export const LookUpHouseholdTable = ({
   filter,
   choicesData,
   setFieldValue,
-  initialValues,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -42,15 +48,14 @@ export const LookUpHouseholdTable = ({
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
-  const [selectedHousehold, setSelectedHousehold] = useState(
-    initialValues.selectedHousehold,
-  );
+
   const handleRadioChange = (
     household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
   ): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
+    setSelectedIndividual(null);
     setFieldValue('identityVerified', false);
   };
   return (
