@@ -1,7 +1,7 @@
 import graphene
 from django.db import transaction
 
-from account.permissions import PermissionMutationMixin, Permissions
+from account.permissions import PermissionMutation, Permissions
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
@@ -48,7 +48,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     individual_data_needed = graphene.Boolean()
 
 
-class CreateProgram(CommonValidator, PermissionMutationMixin):
+class CreateProgram(CommonValidator, PermissionMutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -75,7 +75,7 @@ class CreateProgram(CommonValidator, PermissionMutationMixin):
         return CreateProgram(program)
 
 
-class UpdateProgram(ProgramValidator, PermissionMutationMixin):
+class UpdateProgram(ProgramValidator, PermissionMutation):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -125,7 +125,7 @@ class UpdateProgram(ProgramValidator, PermissionMutationMixin):
         return UpdateProgram(program)
 
 
-class DeleteProgram(ProgramDeletionValidator, PermissionMutationMixin):
+class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
     ok = graphene.Boolean()
 
     class Arguments:
