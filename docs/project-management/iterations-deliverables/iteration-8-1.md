@@ -4,7 +4,7 @@
 
 The goal of Iteration 8 is to implement the remaining critical features for the MVP of the HOPE product as well as ensure areas that are developed are functioning securely through system hardening.
 
-Expected start/end date: December 7, 2020 - March 5, 2021 \(13 weeks\)
+**Expected start/end date: December 7, 2020 - March 5, 2021 \(13 weeks\)**
 
 ##  Architecture / Project Management Deliverables
 
