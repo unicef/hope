@@ -41,6 +41,7 @@ class Permissions(Enum):
     # Targeting
     TARGETING_VIEW_LIST = auto()
     TARGETING_VIEW_DETAILS = auto()
+    TARGETING_CREATE = auto()
     TARGETING_UPDATE = auto()
     TARGETING_DUPLICATE = auto()
     TARGETING_REMOVE = auto()
