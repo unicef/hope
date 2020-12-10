@@ -42,9 +42,10 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
 
 
-class ValidatedMutation(graphene.Mutation):
+class ValidatedMutation(PermissionMutationMixin):
     arguments_validators = []
     object_validators = []
+    permissions = None
 
     model_class = None
 
@@ -54,6 +55,9 @@ class ValidatedMutation(graphene.Mutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
+        print("MODEL", model_object)
+        if cls.permissions:
+            cls.has_permission(info, cls.permissions, model_object.business_area)
         return cls.validated_mutate(root, info, model_object=model_object, **kwargs)
 
     @classmethod
@@ -204,6 +208,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [ApproveTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_LOCK]
 
     class Arguments:
         id = graphene.ID(required=True)
@@ -226,6 +231,7 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [UnapproveTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_UNLOCK]
 
     class Arguments:
         id = graphene.ID(required=True)
