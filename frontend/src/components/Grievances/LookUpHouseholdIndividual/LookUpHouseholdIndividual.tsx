@@ -19,7 +19,12 @@ export const LookUpHouseholdIndividual = ({
   touched?;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
-
+  const [selectedHousehold, setSelectedHousehold] = useState(
+    values.selectedHousehold,
+  );
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    values.selectedIndividual,
+  );
   return (
     <>
       <Box display='flex' flexDirection='column'>
@@ -29,6 +34,10 @@ export const LookUpHouseholdIndividual = ({
             values={values}
             disabled={disabled}
             onValueChange={onValueChange}
+            selectedHousehold={selectedHousehold}
+            setSelectedHousehold={setSelectedHousehold}
+            selectedIndividual={selectedIndividual}
+            setSelectedIndividual={setSelectedIndividual}
           />
         ) : (
           <LookUpButton
@@ -49,6 +58,10 @@ export const LookUpHouseholdIndividual = ({
         setLookUpDialogOpen={setLookUpDialogOpen}
         initialValues={values}
         onValueChange={onValueChange}
+        selectedHousehold={selectedHousehold}
+        setSelectedHousehold={setSelectedHousehold}
+        selectedIndividual={selectedIndividual}
+        setSelectedIndividual={setSelectedIndividual}
       />
     </>
   );
