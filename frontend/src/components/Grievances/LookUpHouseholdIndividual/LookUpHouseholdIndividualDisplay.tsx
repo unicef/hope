@@ -52,7 +52,6 @@ export const LookUpHouseholdIndividualDisplay = ({
     setSelectedIndividual(null);
     onValueChange('identityVerified', false);
   };
-
   return (
     <StyledBox disabled={disabled}>
       <Grid container>
@@ -68,7 +67,7 @@ export const LookUpHouseholdIndividualDisplay = ({
             </span>
           </Box>
         </Grid>
-        {disabled || (
+        {!disabled && (
           <Grid item>
             <Box p={2}>
               <Grid container justify='center' alignItems='center'>
