@@ -10,8 +10,8 @@ export function validate(
   values,
   allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
 ) {
-  const category = values.category.toString();
-  const issueType = values.issueType.toString();
+  const category = values.category?.toString();
+  const issueType = values.issueType?.toString();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors: { [id: string]: any } = {};

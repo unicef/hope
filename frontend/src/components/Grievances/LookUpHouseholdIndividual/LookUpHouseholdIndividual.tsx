@@ -58,9 +58,9 @@ export const LookUpHouseholdIndividual = ({
         setLookUpDialogOpen={setLookUpDialogOpen}
         initialValues={values}
         onValueChange={onValueChange}
+        selectedIndividual={selectedIndividual}
         selectedHousehold={selectedHousehold}
         setSelectedHousehold={setSelectedHousehold}
-        selectedIndividual={selectedIndividual}
         setSelectedIndividual={setSelectedIndividual}
       />
     </>

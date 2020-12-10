@@ -39,6 +39,10 @@ export const LookUpReassignRoleModal = ({
   lookUpDialogOpen,
   setLookUpDialogOpen,
   ticket,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
 }): React.ReactElement => {
   const { id } = useParams();
   const { showMessage } = useSnackbar();
@@ -115,8 +119,12 @@ export const LookUpReassignRoleModal = ({
               filter={debouncedFilterIndividual}
               businessArea={businessArea}
               setFieldValue={setFieldValue}
-              initialValues={initialValues}
               valuesInner={values}
+              selectedHousehold={selectedHousehold}
+              setSelectedHousehold={setSelectedHousehold}
+              selectedIndividual={selectedIndividual}
+              setSelectedIndividual={setSelectedIndividual}
+              ticket={ticket}
             />
           </DialogContent>
           <DialogFooter>
