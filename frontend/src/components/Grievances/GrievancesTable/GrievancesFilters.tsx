@@ -72,7 +72,7 @@ export function GrievancesFilters({
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
               label='Status'
-              value={filter.status || null}
+              value={filter.status || ''}
             >
               <MenuItem value=''>
                 <em>None</em>

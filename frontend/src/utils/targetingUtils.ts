@@ -33,7 +33,8 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
 export const clearField = (arrayHelpers, index): void => {
   return arrayHelpers.replace(index, {});
 };
-export function mapFiltersToInitialValues(filters) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapFiltersToInitialValues(filters): any[] {
   const mappedFilters = [];
   if (filters) {
     filters.map((each) => {
@@ -84,6 +85,7 @@ export function mapFiltersToInitialValues(filters) {
   return mappedFilters;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function mapCriteriaToInitialValues(criteria) {
   const filters = criteria.filters || [];
   const individualsFiltersBlocks = criteria.individualsFiltersBlocks || [];
@@ -97,7 +99,7 @@ export function mapCriteriaToInitialValues(criteria) {
   };
 }
 
-// TODO Marcin make Type to this function
+// TODO Marącin make Type to this function
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function formatCriteriaFilters(filters) {
   return filters.map((each) => {

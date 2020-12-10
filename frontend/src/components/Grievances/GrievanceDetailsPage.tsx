@@ -34,7 +34,6 @@ import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
-import { FlagDetails } from './FlagDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;

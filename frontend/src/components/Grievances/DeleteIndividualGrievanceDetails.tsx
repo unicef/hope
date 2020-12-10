@@ -72,7 +72,7 @@ export function DeleteIndividualGrievanceDetails({
   ];
   const labels =
     Object.entries(ticket.individual || {})
-      .filter(([key, value]) => {
+      .filter(([key]) => {
         const snakeKey = snakeCase(key);
         const fieldAttribute = fieldsDict[snakeKey];
         return fieldAttribute && !excludedFields.includes(key);

@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import {
   Button,
+  DialogActions,
   DialogContent,
   DialogTitle,
-  DialogActions,
 } from '@material-ui/core';
 import { Dialog } from '../containers/dialogs/Dialog';
 
@@ -56,32 +56,38 @@ export class ConfirmationDialog extends React.Component<
     }
   };
 
-  hide = () => {
+  hide = (): void => {
+    const { onClose } = this.props;
     this.setState({
       open: false,
       callback: null,
     });
-    if (this.props.onClose) this.props.onClose();
+    if (onClose) onClose();
   };
 
-  confirm = async () => {
-    let result = null;
-    if (!this.props.onSubmit) {
-      result = await this.state.callback();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  confirm = async (): Promise<any> => {
+    let result;
+    const { onSubmit } = this.props;
+    const { callback } = this.state;
+    if (!onSubmit) {
+      result = await callback();
     } else {
-      result = await this.props.onSubmit();
+      result = await onSubmit();
     }
     this.hide();
     return result;
   };
 
-  render() {
+  render(): React.ReactElement {
     const { title, content, continueText } = this.props;
+    const { children } = this.props;
+    const { open } = this.state;
     return (
       <>
-        {this.props.children(this.show)}
+        {children(this.show)}
         <Dialog
-          open={this.state.open}
+          open={open}
           onClose={() => this.hide()}
           scroll='paper'
           aria-labelledby='form-dialog-title'
