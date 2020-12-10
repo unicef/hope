@@ -33,15 +33,26 @@ export const LookUpHouseholdIndividualDisplay = ({
   setLookUpDialogOpen,
   onValueChange,
   disabled,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
 }: {
   values;
   setLookUpDialogOpen;
   onValueChange;
   disabled?: boolean;
+  selectedIndividual?;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }): React.ReactElement => {
   const handleRemove = (): void => {
-    onValueChange('selectedHousehold', '');
-    onValueChange('selectedIndividual', '');
+    onValueChange('selectedHousehold', null);
+    setSelectedHousehold(null);
+    onValueChange('selectedIndividual', null);
+    setSelectedIndividual(null);
+    onValueChange('identityVerified', false);
   };
 
   return (
@@ -55,10 +66,7 @@ export const LookUpHouseholdIndividualDisplay = ({
             </span>
             <span>
               Individual ID:
-              <BlueText>
-                {' '}
-                {values?.selectedIndividual?.unicefId || '-'}
-              </BlueText>
+              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
