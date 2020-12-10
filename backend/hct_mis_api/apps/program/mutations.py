@@ -68,7 +68,7 @@ class CreateProgram(CommonValidator, PermissionMutationMixin):
 
         program = Program.objects.create(
             **program_data,
-            status="DRAFT",
+            status=Program.DRAFT,
             business_area=business_area,
         )
 
@@ -90,14 +90,16 @@ class UpdateProgram(ProgramValidator, PermissionMutationMixin):
         program = Program.objects.select_for_update().get(id=program_id)
         business_area = program.business_area
 
-        # NOTE: we should separate status change and other updates into separate mutations since they have different permissions
-        # what if they try to activate and update some fields in one go but have a permission to only activate, this check would still pass
-        # and fields will get updated
-        if program.status != "ACTIVE" and program_data.get("status") == "ACTIVE":
-            cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
-        elif program.status != "FINISHED" and program_data.get("status") == "FINISHED":
-            cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
-        else:
+        # status update permissions if status is passed
+        status_to_set = program_data.get("status")
+        if status_to_set and program.status != status_to_set:
+            if status_to_set == Program.ACTIVE:
+                cls.has_permission(info, Permissions.PROGRAMME_ACTIVATE, business_area)
+            elif status_to_set == Program.FINISHED:
+                cls.has_permission(info, Permissions.PROGRAMME_FINISH, business_area)
+
+        # permission if updating any other fields
+        if [k for k, v in program_data.items() if k != "status"]:
             cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
 
         # TODO: check if you can really update business area when editing programme (I don't see it in the form)
