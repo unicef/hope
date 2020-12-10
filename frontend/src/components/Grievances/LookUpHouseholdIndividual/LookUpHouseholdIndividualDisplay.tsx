@@ -33,8 +33,6 @@ export const LookUpHouseholdIndividualDisplay = ({
   setLookUpDialogOpen,
   onValueChange,
   disabled,
-  selectedIndividual,
-  selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
 }: {

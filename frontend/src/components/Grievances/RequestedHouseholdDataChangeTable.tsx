@@ -34,7 +34,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   if (field?.name === 'country' || field?.name === 'country_origin') {
     displayValue = value || '-';
   } else {
@@ -57,7 +57,7 @@ export function NewValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
@@ -177,7 +177,7 @@ export function RequestedHouseholdDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleFlexFields = (name, selected) => {
+  const handleFlexFields = (name): void => {
     const newSelected = [...selectedFlexFields];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {
@@ -187,7 +187,7 @@ export function RequestedHouseholdDataChangeTable({
     }
     setFieldValue('selectedFlexFields', newSelected);
   };
-  const handleSelectBioData = (name, selected) => {
+  const handleSelectBioData = (name): void => {
     const newSelected = [...selectedBioData];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {

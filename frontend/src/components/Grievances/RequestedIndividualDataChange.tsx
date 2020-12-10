@@ -48,12 +48,10 @@ export function RequestedIndividualDataChange({
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
     .length;
   allApprovedCount += entries.filter(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ([_, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
   allApprovedCount += entriesFlexFields.filter(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ([_, value]: [string, { approve_status: boolean }]) => value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
