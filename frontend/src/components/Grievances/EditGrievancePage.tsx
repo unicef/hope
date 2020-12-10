@@ -110,7 +110,7 @@ export function EditGrievancePage(): React.ReactElement {
   if (!choicesData || !userData || !ticketData) return null;
 
   const ticket = ticketData?.grievanceTicket;
-  const changeState = (status) => {
+  const changeState = (status): void => {
     mutateStatus({
       variables: {
         grievanceTicketId: ticket.id,
@@ -141,7 +141,7 @@ export function EditGrievancePage(): React.ReactElement {
     },
     {},
   );
-  const dataChangeErrors = (errors, touched) =>
+  const dataChangeErrors = (errors, touched): React.ReactElement[] =>
     [
       'householdDataUpdateFields',
       'individualDataUpdateFields',

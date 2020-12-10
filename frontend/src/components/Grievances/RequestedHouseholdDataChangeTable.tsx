@@ -88,7 +88,7 @@ function renderRow(
   ticket,
   isEdit,
   handleSelectBioData,
-) {
+): ReactElement {
   const fieldName = row[0];
   const field = fieldsDict[row[0]];
   const isItemSelected = isSelected(fieldName);

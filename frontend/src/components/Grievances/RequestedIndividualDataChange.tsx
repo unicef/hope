@@ -37,7 +37,7 @@ export function RequestedIndividualDataChange({
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
   const flexFields = individualData.flex_fields;
-  delete individualData.flex_field
+  delete individualData.flex_field;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
@@ -48,16 +48,16 @@ export function RequestedIndividualDataChange({
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
     .length;
   allApprovedCount += entries.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ([_, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
   allApprovedCount += entriesFlexFields.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ([_, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const getConfirmationText = (allChangesLength) => {
+  const getConfirmationText = (allChangesLength): string => {
     return `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
@@ -109,11 +109,14 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
-        const flexFieldsApproveData = values.selectedFlexFields.reduce((prev, curr) => {
-          // eslint-disable-next-line no-param-reassign
-          prev[curr] = true;
-          return prev;
-        }, {});
+        const flexFieldsApproveData = values.selectedFlexFields.reduce(
+          (prev, curr) => {
+            // eslint-disable-next-line no-param-reassign
+            prev[curr] = true;
+            return prev;
+          },
+          {},
+        );
         try {
           await mutate({
             variables: {
@@ -121,7 +124,7 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
-              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData)
+              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });
           showMessage('Changes Approved');
