@@ -14,7 +14,6 @@ import {
   IndividualQuery,
   useAllAddIndividualFieldsQuery,
   useIndividualLazyQuery,
-  useIndividualQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -283,6 +282,8 @@ export const EditIndividualDataChange = ({
                 {(values.individualDataUpdateFields || []).map(
                   (item, index) => (
                     <EditIndividualDataChangeFieldRow
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`${index}-${item?.fieldName}`}
                       itemValue={item}
                       index={index}
                       individual={fullIndividual.individual}
@@ -296,7 +297,7 @@ export const EditIndividualDataChange = ({
                   <Button
                     color='primary'
                     onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: null });
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
                   >
                     <AddIcon />
