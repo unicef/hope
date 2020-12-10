@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from account.permissions import PermissionMutationMixin, Permissions
 from core import utils
 from core.airflow_api import AirflowApi
 from core.models import BusinessArea
@@ -103,7 +104,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input):
     return targeting_criteria
 
 
-class CreateTargetPopulationMutation(graphene.Mutation):
+class CreateTargetPopulationMutation(PermissionMutationMixin):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -116,9 +117,15 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         user = info.context.user
         input = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
+
+        cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
+
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
+
         targeting_criteria_input = input.get("targeting_criteria")
+
+        # TODO: should we get this from program.business_area instead of user's input? What if this business area does not match program?
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
@@ -129,7 +136,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         return cls(target_population=target_population)
 
 
-class UpdateTargetPopulationMutation(graphene.Mutation):
+class UpdateTargetPopulationMutation(PermissionMutationMixin):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -142,6 +149,9 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
+
+        cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
+
         name = input.get("name")
         program_id_encoded = input.get("program_id")
         vulnerability_score_min = input.get("vulnerability_score_min")

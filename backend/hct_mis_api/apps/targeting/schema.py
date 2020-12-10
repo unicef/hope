@@ -18,6 +18,12 @@ from household.schema import HouseholdNode
 from program.models import Program
 from targeting.validators import TargetingCriteriaInputValidator
 from utils.schema import Arg
+from account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    hopePermissionClass,
+    Permissions,
+    BaseNodePermissionMixin,
+)
 
 
 class HouseholdFilter(FilterSet):
@@ -42,22 +48,38 @@ class TargetPopulationFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
     created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
     candidate_list_total_households_min = IntegerFilter(
-        field_name="candidate_list_total_households", lookup_expr="gte",
+        field_name="candidate_list_total_households",
+        lookup_expr="gte",
     )
     candidate_list_total_households_max = IntegerFilter(
-        field_name="candidate_list_total_households", lookup_expr="lte",
+        field_name="candidate_list_total_households",
+        lookup_expr="lte",
     )
     candidate_list_total_individuals_min = IntegerFilter(
-        field_name="candidate_list_total_individuals", lookup_expr="gte",
+        field_name="candidate_list_total_individuals",
+        lookup_expr="gte",
     )
     candidate_list_total_individuals_max = IntegerFilter(
-        field_name="candidate_list_total_individuals", lookup_expr="lte",
+        field_name="candidate_list_total_individuals",
+        lookup_expr="lte",
     )
 
-    final_list_total_households_min = IntegerFilter(field_name="final_list_total_households", lookup_expr="gte",)
-    final_list_total_households_max = IntegerFilter(field_name="final_list_total_households", lookup_expr="lte",)
-    final_list_total_individuals_min = IntegerFilter(field_name="final_list_total_individuals", lookup_expr="gte",)
-    final_list_total_individuals_max = IntegerFilter(field_name="final_list_total_individuals", lookup_expr="lte",)
+    final_list_total_households_min = IntegerFilter(
+        field_name="final_list_total_households",
+        lookup_expr="gte",
+    )
+    final_list_total_households_max = IntegerFilter(
+        field_name="final_list_total_households",
+        lookup_expr="lte",
+    )
+    final_list_total_individuals_min = IntegerFilter(
+        field_name="final_list_total_individuals",
+        lookup_expr="gte",
+    )
+    final_list_total_individuals_max = IntegerFilter(
+        field_name="final_list_total_individuals",
+        lookup_expr="lte",
+    )
     business_area = CharFilter(field_name="business_area__slug")
     program = ModelMultipleChoiceFilter(field_name="program", to_field_name="id", queryset=Program.objects.all())
 
@@ -174,8 +196,12 @@ class StatsObjectType(graphene.ObjectType):
     adult_female = graphene.Int()
 
 
-class TargetPopulationNode(DjangoObjectType):
+class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):
     """Defines an individual target population record."""
+
+    permission_classes = hopePermissionClass(
+        Permissions.TARGETING_VIEW_DETAILS,
+    )
 
     total_households = graphene.Int(source="total_households")
     total_family_size = graphene.Int(source="total_family_size")
@@ -236,19 +262,26 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
 def prefetch_selections(qs, target_population=None):
     return qs.prefetch_related(
         Prefetch(
-            "selections", queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population),
+            "selections",
+            queryset=target_models.HouseholdSelection.objects.filter(target_population=target_population),
         )
     )
 
 
 class Query(graphene.ObjectType):
     target_population = relay.Node.Field(TargetPopulationNode)
-    all_target_population = DjangoFilterConnectionField(TargetPopulationNode)
+    all_target_population = DjangoPermissionFilterConnectionField(
+        TargetPopulationNode, permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),)
+    )
     golden_record_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode, targeting_criteria=TargetingCriteriaObjectType(required=True), filterset_class=HouseholdFilter,
+        HouseholdNode,
+        targeting_criteria=TargetingCriteriaObjectType(required=True),
+        filterset_class=HouseholdFilter,
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
-        HouseholdNode, target_population=graphene.Argument(graphene.ID, required=True), filterset_class=HouseholdFilter,
+        HouseholdNode,
+        target_population=graphene.Argument(graphene.ID, required=True),
+        filterset_class=HouseholdFilter,
     )
     final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
@@ -294,7 +327,10 @@ class Query(graphene.ObjectType):
                     )
                 else:
                     return (
-                        prefetch_selections(target_population_model.households, target_population_model,)
+                        prefetch_selections(
+                            target_population_model.households,
+                            target_population_model,
+                        )
                         .order_by("created_at")
                         .all()
                     )
