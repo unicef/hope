@@ -7,6 +7,7 @@ from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea
 from program.fixtures import ProgramFactory
+from program.models import Program
 
 
 class TestChangeProgramStatus(APITestCase):
@@ -31,25 +32,30 @@ class TestChangeProgramStatus(APITestCase):
 
     @parameterized.expand(
         [
-            ("draft_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], "DRAFT", "ACTIVE"),
-            ("draft_to_acive_without_permission", [Permissions.PROGRAMME_FINISH], "DRAFT", "ACTIVE"),
-            ("finish_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], "FINISHED", "ACTIVE"),
-            ("finish_to_active_without_permission", [], "FINISHED", "ACTIVE"),
-            ("draft_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], "DRAFT", "FINISHED"),
-            ("draft_to_finished_without_permission", [], "DRAFT", "FINISHED"),
-            ("active_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], "ACTIVE", "FINISHED"),
-            ("active_to_finished_without_permission", [Permissions.PROGRAMME_ACTIVATE], "ACTIVE", "FINISHED"),
+            ("draft_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.DRAFT, Program.ACTIVE),
+            ("draft_to_acive_without_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.ACTIVE),
+            ("finish_to_active_with_permission", [Permissions.PROGRAMME_ACTIVATE], Program.FINISHED, Program.ACTIVE),
+            ("finish_to_active_without_permission", [], Program.FINISHED, Program.ACTIVE),
+            ("draft_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.DRAFT, Program.FINISHED),
+            ("draft_to_finished_without_permission", [], Program.DRAFT, Program.FINISHED),
+            ("active_to_finished_with_permission", [Permissions.PROGRAMME_FINISH], Program.ACTIVE, Program.FINISHED),
+            (
+                "active_to_finished_without_permission",
+                [Permissions.PROGRAMME_ACTIVATE],
+                Program.ACTIVE,
+                Program.FINISHED,
+            ),
             (
                 "active_to_draft",
                 [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
-                "ACTIVE",
-                "DRAFT",
+                Program.ACTIVE,
+                Program.DRAFT,
             ),
             (
                 "finished_to_draft",
                 [Permissions.PROGRAMME_ACTIVATE, Permissions.PROGRAMME_FINISH, Permissions.PROGRAMME_UPDATE],
-                "FINISHED",
-                "DRAFT",
+                Program.FINISHED,
+                Program.DRAFT,
             ),
         ]
     )
