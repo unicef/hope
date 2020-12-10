@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
@@ -19,7 +19,6 @@ interface LookUpIndividualTableProps {
   businessArea?: string;
   setFieldValue;
   valuesInner;
-  initialValues;
   selectedIndividual?;
   selectedHousehold?;
   setSelectedIndividual?;
@@ -31,9 +30,7 @@ export const LookUpIndividualTable = ({
   filter,
   setFieldValue,
   valuesInner,
-  initialValues,
   selectedIndividual,
-  selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
 }: LookUpIndividualTableProps): React.ReactElement => {
@@ -46,10 +43,6 @@ export const LookUpIndividualTable = ({
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
-  console.log(
-    '😎 ~ file: LookUpIndividualTable.tsx ~ line 40 ~ valuesInner',
-    valuesInner,
-  );
 
   const initialVariables = {
     businessArea,
