@@ -23,6 +23,7 @@ interface LookUpIndividualTableProps {
   selectedHousehold;
   setSelectedIndividual;
   setSelectedHousehold;
+  ticket?;
 }
 
 export const LookUpIndividualTable = ({
@@ -33,6 +34,7 @@ export const LookUpIndividualTable = ({
   selectedIndividual,
   setSelectedIndividual,
   setSelectedHousehold,
+  ticket,
 }: LookUpIndividualTableProps): React.ReactElement => {
   const handleRadioChange = (individual): void => {
     if (individual.household?.id) {
@@ -55,6 +57,7 @@ export const LookUpIndividualTable = ({
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
+    excludedId: ticket?.individual?.id || null,
   };
 
   return (
