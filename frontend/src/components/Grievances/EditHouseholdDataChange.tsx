@@ -13,7 +13,7 @@ import {
   AllHouseholdsQuery,
   HouseholdQuery,
   useAllEditHouseholdFieldsQuery,
-  useHouseholdQuery,
+  useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -153,8 +153,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  // eslint-disable-next-line
-  const [fieldNotUsed, metaNotUsed, helpers] = useField(
+  const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );
   const name = !field?.isFlexField
@@ -219,10 +218,16 @@ export const EditHouseholdDataChange = ({
 }: EditHouseholdDataChangeProps): React.ReactElement => {
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const {
-    data: fullHousehold,
-    loading: fullHouseholdLoading,
-  } = useHouseholdQuery({ variables: { id: household?.id } });
+  const [
+    getHousehold,
+    { data: fullHousehold, loading: fullHouseholdLoading },
+  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  useEffect(() => {
+    if (values.selectedHousehold) {
+      getHousehold();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedHousehold]);
   useEffect(() => {
     if (
       !values.householdDataUpdateFields ||
@@ -238,11 +243,11 @@ export const EditHouseholdDataChange = ({
     data: householdFieldsData,
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
-  if (fullHouseholdLoading || householdFieldsLoading) {
-    return <LoadingComponent />;
-  }
   if (!household) {
     return <div>You have to select a household earlier</div>;
+  }
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+    return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,

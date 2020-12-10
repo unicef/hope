@@ -173,7 +173,7 @@ export function LookUpHouseholdFilters({
               onChange={(e) => handleFilterChange(e, 'residenceStatus')}
               variant='outlined'
               label='Status'
-              value={filter.residenceStatus || null}
+              value={filter.residenceStatus || ''}
             >
               <MenuItem value=''>
                 <em>None</em>

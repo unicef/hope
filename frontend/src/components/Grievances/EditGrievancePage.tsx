@@ -278,7 +278,7 @@ export function EditGrievancePage(): React.ReactElement {
                             name='description'
                             multiline
                             fullWidth
-                            disabled={ticket.description}
+                            disabled={Boolean(ticket.description)}
                             variant='outlined'
                             label='Description*'
                             component={FormikTextField}
@@ -288,7 +288,7 @@ export function EditGrievancePage(): React.ReactElement {
                           <Field
                             name='admin'
                             label='Administrative Level 2'
-                            disabled={ticket.admin}
+                            disabled={Boolean(ticket.admin)}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
                           />
@@ -297,7 +297,7 @@ export function EditGrievancePage(): React.ReactElement {
                           <Field
                             name='area'
                             fullWidth
-                            disabled={ticket.area}
+                            disabled={Boolean(ticket.area)}
                             variant='outlined'
                             label='Area / Village / Pay point'
                             component={FormikTextField}
@@ -308,7 +308,7 @@ export function EditGrievancePage(): React.ReactElement {
                             name='language'
                             multiline
                             fullWidth
-                            disabled={ticket.language}
+                            disabled={Boolean(ticket.language)}
                             variant='outlined'
                             label='Languages Spoken*'
                             component={FormikTextField}
