@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from account.permissions import PermissionMutationMixin, Permissions
+from account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
 from core import utils
 from core.airflow_api import AirflowApi
 from core.models import BusinessArea
@@ -42,7 +42,7 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
 
 
-class ValidatedMutation(PermissionMutationMixin):
+class ValidatedMutation(PermissionMutation):
     arguments_validators = []
     object_validators = []
     permissions = None
@@ -108,7 +108,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input):
     return targeting_criteria
 
 
-class CreateTargetPopulationMutation(PermissionMutationMixin):
+class CreateTargetPopulationMutation(PermissionMutation):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -140,7 +140,7 @@ class CreateTargetPopulationMutation(PermissionMutationMixin):
         return cls(target_population=target_population)
 
 
-class UpdateTargetPopulationMutation(PermissionMutationMixin):
+class UpdateTargetPopulationMutation(PermissionMutation):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -248,6 +248,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [FinalizeTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_SEND]
 
     class Arguments:
         id = graphene.ID(required=True)
@@ -278,7 +279,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         return cls(target_population=target_population)
 
 
-class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Input:
@@ -293,6 +294,9 @@ class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValida
         name = target_population_data.pop("name")
         target_id = utils.decode_id_string(target_population_data.pop("id"))
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
+
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
@@ -324,7 +328,7 @@ class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValida
         return targeting_criteria_copy
 
 
-class DeleteTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     ok = graphene.Boolean()
 
     class Input:
@@ -335,12 +339,15 @@ class DeleteTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetVali
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(_info, Permissions.TARGETING_REMOVE, target_population.business_area)
+
         cls.validate_is_finalized(target_population.status)
         target_population.delete()
         return DeleteTargetPopulationMutation(ok=True)
 
 
-class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Input:
@@ -358,6 +365,9 @@ class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation,
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
+
         encoded_steficon_rule_id = kwargs["steficon_rule_id"]
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
