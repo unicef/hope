@@ -3,6 +3,7 @@ from enum import unique, auto, Enum
 
 from django.core.exceptions import PermissionDenied
 from graphene import Mutation
+from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
 from graphene_django.filter.utils import get_filtering_args_from_filterset, get_filterset_class
@@ -200,7 +201,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         )
 
 
-class PermissionMutationMixin(Mutation):
+class BaseMutationPermissionMixin:
     @classmethod
     def is_authenticated(cls, info):
         if not info.context.user.is_authenticated:
@@ -239,6 +240,14 @@ class PermissionMutationMixin(Mutation):
         else:
             raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
+
+class PermissionMutation(BaseMutationPermissionMixin, Mutation):
     @classmethod
     def mutate(cls, root, info, **kwargs):
         return super().mutate(root, info, **kwargs)
+
+
+class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        return super().mutate_and_get_payload(root, info, **kwargs)
