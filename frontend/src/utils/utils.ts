@@ -303,6 +303,7 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -323,7 +324,10 @@ export function descendingComparator(a, b, orderBy): number {
   return 0;
 }
 
-export function getComparator(order, orderBy) {
+export function getComparator(
+  order,
+  orderBy,
+): (a: number, b: number) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);

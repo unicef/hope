@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
@@ -154,7 +154,7 @@ export function CreateGrievancePage(): React.ReactElement {
     value: edge.node.id,
   }));
 
-  const dataChangeErrors = (errors, touched) =>
+  const dataChangeErrors = (errors, touched): ReactElement[] =>
     [
       'householdDataUpdateFields',
       'individualDataUpdateFields',

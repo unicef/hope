@@ -84,6 +84,7 @@ export function VerificationRecordsTable({
           showMessage('Your import was successful!');
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e);
       }
     }
