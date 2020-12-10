@@ -153,7 +153,14 @@ export function formatCriteriaIndividualsFiltersBlocks(
   }));
 }
 
-function mapFilterToVariable(filter) {
+function mapFilterToVariable(
+  filter,
+): {
+  comparisionMethod: string;
+  arguments;
+  fieldName: string;
+  isFlexField: boolean;
+} {
   return {
     comparisionMethod: filter.comparisionMethod,
     arguments: filter.arguments,
