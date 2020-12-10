@@ -56,6 +56,13 @@ class BusinessArea(TimeStampedUUIDModel):
     def can_import_ocha_response_plans(self):
         return any([c.details for c in self.countries.all()])
 
+    @property
+    def get_business_areas_as_choices(self):
+        return [
+            {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
+            for business_area in self.objects.all()
+        ]
+
 
 class AdminAreaType(TimeStampedUUIDModel):
     """
