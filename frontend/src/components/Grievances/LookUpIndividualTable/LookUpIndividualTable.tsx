@@ -19,10 +19,10 @@ interface LookUpIndividualTableProps {
   businessArea?: string;
   setFieldValue;
   valuesInner;
-  selectedIndividual?;
-  selectedHousehold?;
-  setSelectedIndividual?;
-  setSelectedHousehold?;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
 }
 
 export const LookUpIndividualTable = ({
