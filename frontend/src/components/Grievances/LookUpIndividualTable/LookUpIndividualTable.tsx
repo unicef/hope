@@ -33,6 +33,9 @@ export const LookUpIndividualTable = ({
     initialValues.selectedIndividual,
   );
   const handleRadioChange = (individual): void => {
+    if (individual.household?.id) {
+      setFieldValue('selectedHousehold', individual.household);
+    }
     setSelectedIndividual(individual);
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
