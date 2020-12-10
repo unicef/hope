@@ -15,7 +15,7 @@ from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
-from core.utils import CustomOrderingFilter, encode_ids, to_choice_object
+from core.utils import CustomOrderingFilter, encode_ids, to_choice_object, decode_id_string
 from household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -103,6 +103,7 @@ class IndividualFilter(FilterSet):
         field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
+    excluded_id = CharFilter(method="filter_excluded_id")
 
     class Meta:
         model = Individual
@@ -139,6 +140,9 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__id__icontains=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
+
+    def filter_excluded_id(self, qs, name, value):
+        return qs.exclude(id=decode_id_string(value))
 
 
 class DocumentTypeNode(DjangoObjectType):
