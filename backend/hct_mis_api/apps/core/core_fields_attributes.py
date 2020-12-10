@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from core.countries import Countries
-from core.models import AdminArea
+from core.models import AdminArea, BusinessArea
 from core.utils import LazyEvalMethodsDict, age_to_birth_date_query
 from household.models import (
     DATA_SHARING_CHOICES,
@@ -1169,6 +1169,22 @@ KOBO_COLLECTOR_FIELD = {
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "role_i_c",
     },
+}
+
+FIELDS_EXCLUDED_FROM_RDI = {
+    "business_area": LazyEvalMethodsDict(
+        {
+            "type": TYPE_SELECT_ONE,
+            "name": "business_area",
+            "lookup": "business_area",
+            "required": False,
+            "label": {"English(EN)": "Business Area"},
+            "hint": "",
+            "choices": lambda: BusinessArea.get_business_areas_as_choices,
+            "associated_with": _INDIVIDUAL,
+            "xlsx_field": "business_area",
+        }
+    ),
 }
 
 

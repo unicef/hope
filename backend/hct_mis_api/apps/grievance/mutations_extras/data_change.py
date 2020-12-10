@@ -4,10 +4,9 @@ import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
-from core.utils import to_snake_case
-from graphql import GraphQLError
 
 from core.utils import decode_id_string
+from core.utils import to_snake_case
 from grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
@@ -20,6 +19,7 @@ from grievance.mutations_extras.utils import (
     handle_role,
     prepare_previous_documents,
     verify_flex_fields,
+    remove_individual_and_reassign_roles,
 )
 from household.models import (
     Individual,
@@ -27,9 +27,6 @@ from household.models import (
     HEAD,
     Document,
     ROLE_NO_ROLE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold,
 )
 from household.schema import HouseholdNode, IndividualNode
 from utils.schema import Arg
@@ -140,6 +137,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     who_answers_alt_phone = graphene.String()
     role = graphene.String()
     documents = graphene.List(IndividualDocumentObjectType)
+    business_area = graphene.String()
     flex_fields = Arg()
 
 
@@ -553,58 +551,10 @@ def close_update_household_grievance_ticket(grievance_ticket):
 
 
 def close_delete_individual_ticket(grievance_ticket):
-    ticket_details = grievance_ticket.delete_individual_ticket_details
+    ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
 
     individual_to_remove = ticket_details.individual
 
-    roles_to_bulk_update = []
-    for role_data in ticket_details.role_reassign_data.values():
-        role_name = role_data.get("role")
-        individual_id = decode_id_string(role_data.get("individual"))
-        household_id = decode_id_string(role_data.get("household"))
-        new_individual = get_object_or_404(Individual, id=individual_id)
-        household = get_object_or_404(Household, id=household_id)
-
-        if role_name == HEAD:
-            household.head_of_household = new_individual
-            # can be directly saved, because there is always only one head of household to update
-            household.save()
-            household.individuals.exclude(id=new_individual.id).update(relationship="")
-            new_individual.relationship = HEAD
-            new_individual.save()
-        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
-            role = get_object_or_404(
-                IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
-            )
-            role.individual = new_individual
-            roles_to_bulk_update.append(role)
-
-    if len(roles_to_bulk_update) != individual_to_remove.households_and_roles.exclude(role=ROLE_NO_ROLE).count():
-        raise GraphQLError("Ticket cannot be closed not all roles has been reassigned")
-
-    if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
-
-    removed_individual_household = individual_to_remove.household
-
-    if removed_individual_household:
-        removed_individual_is_head = removed_individual_household.head_of_household.id == individual_to_remove.id
-    else:
-        removed_individual_is_head = False
-
-    if (
-        not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-        and removed_individual_is_head
-    ):
-        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
-
-    individual_to_remove.delete()
-
-    if removed_individual_household:
-        if removed_individual_household.individuals.count() == 0:
-            removed_individual_household.delete()
-        else:
-            removed_individual_household.size -= 1
-            removed_individual_household.save()
+    remove_individual_and_reassign_roles(ticket_details, individual_to_remove)

@@ -22,7 +22,8 @@ class GrievanceTicket(TimeStampedUUIDModel):
     CATEGORY_NEGATIVE_FEEDBACK = 5
     CATEGORY_REFERRAL = 6
     CATEGORY_POSITIVE_FEEDBACK = 7
-    CATEGORY_DEDUPLICATION = 8
+    CATEGORY_NEEDS_ADJUDICATION = 8
+    CATEGORY_SYSTEM_FLAGGING = 9
 
     ISSUE_TYPE_DATA_BREACH = 1
     ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK = 2
@@ -81,7 +82,8 @@ class GrievanceTicket(TimeStampedUUIDModel):
         (CATEGORY_NEGATIVE_FEEDBACK, _("Negative Feedback")),
         (CATEGORY_REFERRAL, _("Referral")),
         (CATEGORY_POSITIVE_FEEDBACK, _("Positive Feedback")),
-        (CATEGORY_DEDUPLICATION, _("Deduplication")),
+        (CATEGORY_NEEDS_ADJUDICATION, _("Needs Adjudication")),
+        (CATEGORY_SYSTEM_FLAGGING, _("System Flagging")),
     )
     MANUAL_CATEGORIES = (
         CATEGORY_DATA_CHANGE,
@@ -124,6 +126,36 @@ class GrievanceTicket(TimeStampedUUIDModel):
         "delete_individual_ticket_details": ("individual",),
     }
 
+    TICKET_DETAILS_NAME_MAPPING = {
+        CATEGORY_DATA_CHANGE: {
+            ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: "household_data_update_ticket_details",
+            ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: "individual_data_update_ticket_details",
+            ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: "add_individual_ticket_details",
+            ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: "delete_individual_ticket_details",
+        },
+        CATEGORY_SENSITIVE_GRIEVANCE: {
+            ISSUE_TYPE_DATA_BREACH: "sensitive_ticket_details",
+            ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: "sensitive_ticket_details",
+            ISSUE_TYPE_FRAUD_FORGERY: "sensitive_ticket_details",
+            ISSUE_TYPE_FRAUD_MISUSE: "sensitive_ticket_details",
+            ISSUE_TYPE_HARASSMENT: "sensitive_ticket_details",
+            ISSUE_TYPE_INAPPROPRIATE_STAFF_CONDUCT: "sensitive_ticket_details",
+            ISSUE_TYPE_UNAUTHORIZED_USE: "sensitive_ticket_details",
+            ISSUE_TYPE_CONFLICT_OF_INTEREST: "sensitive_ticket_details",
+            ISSUE_TYPE_GROSS_MISMANAGEMENT: "sensitive_ticket_details",
+            ISSUE_TYPE_PERSONAL_DISPUTES: "sensitive_ticket_details",
+            ISSUE_TYPE_SEXUAL_HARASSMENT: "sensitive_ticket_details",
+            ISSUE_TYPE_MISCELLANEOUS: "sensitive_ticket_details",
+        },
+        CATEGORY_PAYMENT_VERIFICATION: "",
+        CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
+        CATEGORY_NEGATIVE_FEEDBACK: None,
+        CATEGORY_REFERRAL: None,
+        CATEGORY_POSITIVE_FEEDBACK: None,
+        CATEGORY_NEEDS_ADJUDICATION: "needs_adjudication_ticket_details",
+        CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
+    }
+
     user_modified = models.DateTimeField(
         verbose_name=_("Modified"),
         null=True,
@@ -157,12 +189,24 @@ class GrievanceTicket(TimeStampedUUIDModel):
     language = models.TextField()
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
-    linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related")
+    linked_tickets = models.ManyToManyField(
+        to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
+    )
 
     @property
     def related_tickets(self):
         yield from self.linked_tickets.all()
         yield from self.linked_tickets_related.all()
+
+    @property
+    def ticket_details(self):
+        nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
+        if isinstance(nested_dict_or_value, dict):
+            details_name = nested_dict_or_value.get(self.issue_type)
+        else:
+            details_name = nested_dict_or_value
+
+        return getattr(self, details_name, None)
 
     class Meta:
         ordering = (
@@ -316,3 +360,29 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
     @property
     def household(self):
         return self.individual.household
+
+
+class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="system_flagging_ticket_details", on_delete=models.CASCADE
+    )
+    golden_records_individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
+    sanction_list_individual = models.ForeignKey("sanction_list.SanctionListIndividual", on_delete=models.CASCADE)
+    approve_status = models.BooleanField(default=True)
+    role_reassign_data = JSONField(default=dict)
+
+
+class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="needs_adjudication_ticket_details", on_delete=models.CASCADE
+    )
+    golden_records_individual = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
+    possible_duplicate = models.ForeignKey("household.Individual", related_name="+", on_delete=models.CASCADE)
+    selected_individual = models.UUIDField(null=True)
+    role_reassign_data = JSONField(default=dict)
+
+
+# class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
+#     ticket = models.OneToOneField(
+#         "grievance.GrievanceTicket", related_name="needs_adjudication_ticket_details", on_delete=models.CASCADE
+#     )

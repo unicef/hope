@@ -3,6 +3,7 @@ import logging
 from constance import config
 from django.utils import timezone
 
+from grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
 from household.documents import IndividualDocument
 from household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
 from sanction_list.models import SanctionListIndividual
@@ -52,6 +53,8 @@ class CheckAgainstSanctionListPreMergeTask:
         possible_match_score = config.SANCTION_LIST_MATCH_SCORE
         document = IndividualDocument
 
+        tickets_to_create = []
+        ticket_details_to_create = []
         possible_matches = set()
         for individual in individuals:
             query_dict = cls._get_query_dict(individual)
@@ -62,7 +65,20 @@ class CheckAgainstSanctionListPreMergeTask:
             for individual_hit in results:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
-                    possible_matches.add(individual_hit.id)
+                    marked_individual = Individual.objects.filter(individual_hit.id).first()
+                    if marked_individual:
+                        possible_matches.add(marked_individual.id)
+                        ticket = GrievanceTicket(
+                            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+                            business_area=marked_individual.business_area,
+                        )
+                        ticket_details = TicketSystemFlaggingDetails(
+                            ticket=ticket,
+                            golden_records_individual=marked_individual,
+                            sanction_list_individual=individual,
+                        )
+                        tickets_to_create.append(ticket)
+                        ticket_details_to_create.append(ticket_details)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
@@ -76,3 +92,6 @@ class CheckAgainstSanctionListPreMergeTask:
         Individual.objects.exclude(id__in=possible_matches).update(
             sanction_list_possible_match=False, sanction_list_last_check=timezone.now()
         )
+
+        GrievanceTicket.objects.bulk_create(tickets_to_create)
+        TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)

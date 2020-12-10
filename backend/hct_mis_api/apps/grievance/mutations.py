@@ -28,6 +28,7 @@ from grievance.mutations_extras.main import (
 )
 from grievance.mutations_extras.payment_verification import save_payment_verification_extras
 from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
+from grievance.mutations_extras.system_tickets import close_needs_adjudication_ticket, close_system_flagging_ticket
 from grievance.mutations_extras.utils import verify_required_arguments, remove_parsed_data_fields
 from grievance.schema import GrievanceTicketNode, TicketNoteNode
 from grievance.validators import DataChangeValidator
@@ -112,7 +113,14 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
                 "extras.category.grievance_complaint_ticket_extras",
             ],
         },
-        GrievanceTicket.CATEGORY_DEDUPLICATION: {
+        GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: {
+            "required": [],
+            "not_allowed": [
+                "extras.category.sensitive_grievance_ticket_extras",
+                "extras.category.grievance_complaint_ticket_extras",
+            ],
+        },
+        GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: {
             "required": [],
             "not_allowed": [
                 "extras.category.sensitive_grievance_ticket_extras",
@@ -352,7 +360,8 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: _no_operation_close_method,
         GrievanceTicket.CATEGORY_REFERRAL: _no_operation_close_method,
         GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: _no_operation_close_method,
-        GrievanceTicket.CATEGORY_DEDUPLICATION: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION: close_needs_adjudication_ticket,
+        GrievanceTicket.CATEGORY_SYSTEM_FLAGGING: close_system_flagging_ticket,
     }
 
     class Arguments:
@@ -521,7 +530,7 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
         return cls(grievance_ticket=grievance_ticket)
 
 
-class AddIndividualApproveMutation(graphene.Mutation):
+class SimpleApproveMutation(graphene.Mutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -534,28 +543,7 @@ class AddIndividualApproveMutation(graphene.Mutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        individual_details = grievance_ticket.add_individual_ticket_details
-        individual_details.approve_status = approve_status
-        individual_details.save()
-        grievance_ticket.refresh_from_db()
-
-        return cls(grievance_ticket=grievance_ticket)
-
-
-class DeleteIndividualApproveMutation(graphene.Mutation):
-    grievance_ticket = graphene.Field(GrievanceTicketNode)
-
-    class Arguments:
-        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        approve_status = graphene.Boolean(required=True)
-
-    @classmethod
-    @is_authenticated
-    @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
-        grievance_ticket_id = decode_id_string(grievance_ticket_id)
-        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        individual_details = grievance_ticket.delete_individual_ticket_details
+        individual_details = grievance_ticket.ticket_details
         individual_details.approve_status = approve_status
         individual_details.save()
         grievance_ticket.refresh_from_db()
@@ -607,14 +595,21 @@ class ReassignRoleMutation(graphene.Mutation):
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         household = get_object_or_404(Household, id=decoded_household_id)
         individual = get_object_or_404(Individual, id=decoded_individual_id)
-        ticket_details = grievance_ticket.delete_individual_ticket_details
-        cls.verify_if_role_exists(household, ticket_details.individual, role)
+
+        ticket_details = grievance_ticket.ticket_details
+        if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
+            ticket_individual = ticket_details.golden_records_individual
+        elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
+            ticket_individual = ticket_details.selected_individual
+        else:
+            ticket_individual = ticket_details.individual
+        cls.verify_if_role_exists(household, ticket_individual, role)
 
         if role == HEAD:
-            role_data_key = "HEAD"
+            role_data_key = role
         else:
             role_object = get_object_or_404(
-                IndividualRoleInHousehold, individual=ticket_details.individual, household=household, role=role
+                IndividualRoleInHousehold, individual=ticket_individual, household=household, role=role
             )
             role_data_key = str(role_object.id)
 
@@ -635,6 +630,7 @@ class Mutations(graphene.ObjectType):
     create_ticket_note = CreateTicketNoteMutation.Field()
     approve_individual_data_change = IndividualDataChangeApproveMutation.Field()
     approve_household_data_change = HouseholdDataChangeApproveMutation.Field()
-    approve_add_individual = AddIndividualApproveMutation.Field()
-    approve_delete_individual = DeleteIndividualApproveMutation.Field()
+    approve_add_individual = SimpleApproveMutation.Field()
+    approve_delete_individual = SimpleApproveMutation.Field()
+    approve_system_flagging = SimpleApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

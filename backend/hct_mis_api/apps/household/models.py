@@ -456,6 +456,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
 
     @property
     def age(self):
