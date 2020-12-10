@@ -12,17 +12,17 @@ import { EditIndividualDataChange } from '../EditIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
 
 interface EditValuesTypes {
-  description?: string,
-  assignedTo?: string,
-  issueType?: string|number,
-  category?: string|number,
-  language: string,
-  admin: string,
-  area: string,
-  selectedHousehold?,
-  selectedIndividual?,
-  selectedPaymentRecords:string[];
-  selectedRelatedTickets :string[];
+  description?: string;
+  assignedTo?: string;
+  issueType?: string | number;
+  category?: string | number;
+  language: string;
+  admin: string;
+  area: string;
+  selectedHousehold?;
+  selectedIndividual?;
+  selectedPaymentRecords: string[];
+  selectedRelatedTickets: string[];
   individualData?;
   householdDataUpdateFields?;
 }
@@ -30,7 +30,7 @@ interface EditValuesTypes {
 function prepareInitialValueAddIndividual(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-):EditValuesTypes {
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
@@ -59,7 +59,7 @@ function prepareInitialValueAddIndividual(
 function prepareInitialValueEditIndividual(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-) :EditValuesTypes{
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedIndividual = ticket.individual;
   const individualData = {
@@ -99,7 +99,7 @@ function prepareInitialValueEditIndividual(
 function prepareInitialValueEditHousehold(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-):EditValuesTypes {
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const householdData = {
@@ -136,7 +136,7 @@ const prepareInitialValueDict = {
 
 export function prepareInitialValues(
   ticket: GrievanceTicketQuery['grievanceTicket'],
-):EditValuesTypes {
+): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
     description: ticket.description || '',
@@ -160,7 +160,10 @@ export function prepareInitialValues(
     prepareInitialValueDict,
     (initialValue) => initialValue,
   );
-  initialValues = prepareInitialValueFunction(initialValues, ticket) as EditValuesTypes;
+  initialValues = prepareInitialValueFunction(
+    initialValues,
+    ticket,
+  ) as EditValuesTypes;
   return initialValues;
 }
 export const validationSchema = Yup.object().shape({
@@ -362,7 +365,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values.admin?.id,
+    admin: values.node.admin?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(

@@ -81,7 +81,7 @@ export const LookUpHouseholdIndividualModal = ({
     programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
     status: '',
-    admin2: '',
+    admin2: null,
     sex: '',
   };
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(

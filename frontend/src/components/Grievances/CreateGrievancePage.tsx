@@ -104,7 +104,7 @@ export function CreateGrievancePage(): React.ReactElement {
     category: null,
     language: '',
     consent: false,
-    admin: '',
+    admin: null,
     area: '',
     selectedHousehold: null,
     selectedIndividual: null,

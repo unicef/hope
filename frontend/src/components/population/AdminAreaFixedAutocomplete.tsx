@@ -20,7 +20,7 @@ const StyledAutocomplete = styled(Autocomplete)`
   }
 `;
 
-export function AdminAreasAutocomplete({
+export function AdminAreaFixedAutocomplete({
   value,
   onChange,
   disabled,
@@ -37,15 +37,24 @@ export function AdminAreasAutocomplete({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
-      first: 100,
       title: debouncedInputText,
       businessArea,
     },
   });
+
   useEffect(() => {
-    setNewValue(value);
+    if (data) {
+      setNewValue(
+        typeof value === 'string'
+          ? data.allAdminAreas.edges.find((item) => item.node.title === value)
+          : value,
+      );
+    } else {
+      setNewValue(null);
+    }
     onInputTextChange('');
   }, [data, value]);
+
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
@@ -58,8 +67,8 @@ export function AdminAreasAutocomplete({
       onClose={() => {
         setOpen(false);
       }}
-      getOptionSelected={(option, value1) => {
-        return value1?.node?.id === option.node.id;
+      getOptionSelected={(option, selectedValue) => {
+        return selectedValue.node.id === option.node.id;
       }}
       getOptionLabel={(option) => {
         if (!option.node) {

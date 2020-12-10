@@ -277,7 +277,7 @@ export function RequestedIndividualDataChangeTable({
             <TableBody>
               {documents?.map((row, index) => {
                 return (
-                  <TableRow>
+                  <TableRow key={`${row.value.type}-${row.value.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox
@@ -327,7 +327,7 @@ export function RequestedIndividualDataChangeTable({
               {documentsToRemove?.map((row, index) => {
                 const document = previousDocuments[row.value];
                 return (
-                  <TableRow>
+                  <TableRow key={`${document.label}-${document.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox

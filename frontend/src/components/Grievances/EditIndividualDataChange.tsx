@@ -13,6 +13,7 @@ import {
   AllIndividualsQuery,
   IndividualQuery,
   useAllAddIndividualFieldsQuery,
+  useIndividualLazyQuery,
   useIndividualQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -230,10 +231,17 @@ export const EditIndividualDataChange = ({
     loading: addIndividualFieldsLoading,
   } = useAllAddIndividualFieldsQuery();
 
-  const {
-    data: fullIndividual,
-    loading: fullIndividualLoading,
-  } = useIndividualQuery({ variables: { id: individual?.id } });
+  const [
+    getIndividual,
+    { data: fullIndividual, loading: fullIndividualLoading },
+  ] = useIndividualLazyQuery({ variables: { id: individual?.id } });
+
+  useEffect(() => {
+    if (individual) {
+      getIndividual();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedIndividual]);
 
   useEffect(() => {
     if (
@@ -247,11 +255,16 @@ export const EditIndividualDataChange = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullIndividualLoading || addIndividualFieldsLoading) {
-    return <LoadingComponent />;
-  }
   if (!individual) {
     return <div>You have to select an individual earlier</div>;
+  }
+  if (
+    loading ||
+    fullIndividualLoading ||
+    addIndividualFieldsLoading ||
+    !fullIndividual
+  ) {
+    return <LoadingComponent />;
   }
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
