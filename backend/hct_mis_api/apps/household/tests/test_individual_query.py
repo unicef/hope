@@ -1,6 +1,8 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.models import BusinessArea
 from household.fixtures import (
@@ -13,7 +15,7 @@ from program.fixtures import ProgramFactory
 class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals {
-      allIndividuals {
+      allIndividuals(businessArea: "afghanistan") {
         edges {
           node {
             fullName
@@ -28,7 +30,7 @@ class TestIndividualQuery(APITestCase):
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
     query AllIndividuals($programs: [ID]) {
-      allIndividuals(programs: $programs, orderBy: "birth_date") {
+      allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
         edges {
           node {
             givenName
@@ -36,7 +38,7 @@ class TestIndividualQuery(APITestCase):
             phoneNo
             birthDate
             household {
-              programs { 
+              programs {
                 edges {
                   node {
                     name
@@ -65,8 +67,15 @@ class TestIndividualQuery(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory()
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
-        self.program_two = ProgramFactory(name="Test program TWO", business_area=BusinessArea.objects.first(),)
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
+        program_one = ProgramFactory(
+            name="Test program ONE",
+            business_area=self.business_area,
+        )
+        self.program_two = ProgramFactory(
+            name="Test program TWO",
+            business_area=self.business_area,
+        )
 
         household_one = HouseholdFactory.build()
         household_two = HouseholdFactory.build()
@@ -124,19 +133,44 @@ class TestIndividualQuery(APITestCase):
         household_one.save()
         household_two.save()
 
-    def test_individual_query_all(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_individual_query_all(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_INDIVIDUALS_QUERY, context={"user": self.user},
+            request_string=self.ALL_INDIVIDUALS_QUERY,
+            context={"user": self.user},
         )
 
-    def test_individual_query_single(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]),
+            ("without_permission", []),
+        ]
+    )
+    def test_individual_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
             variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_individual_programme_filter(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_individual_programme_filter(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
             context={"user": self.user},
