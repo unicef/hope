@@ -149,7 +149,11 @@ export function DeleteIndividualGrievanceDetails({
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
                 })}
-                variant='contained'
+                variant={
+                  ticket.deleteIndividualTicketDetails?.approveStatus
+                    ? 'outlined'
+                    : 'contained'
+                }
                 color='primary'
                 disabled={!approveEnabled}
               >
