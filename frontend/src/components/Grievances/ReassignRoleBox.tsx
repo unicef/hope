@@ -34,7 +34,7 @@ export const ReassignRoleBox = ({
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
-}) => {
+}): React.ReactElement => {
   const businessArea = useBusinessArea();
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
   const isHeadOfHousehold =
