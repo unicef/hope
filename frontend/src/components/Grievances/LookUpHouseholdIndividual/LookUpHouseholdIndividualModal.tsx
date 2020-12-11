@@ -46,6 +46,19 @@ export const LookUpHouseholdIndividualModal = ({
   initialValues,
   lookUpDialogOpen,
   setLookUpDialogOpen,
+  selectedIndividual,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
+}: {
+  onValueChange;
+  initialValues;
+  lookUpDialogOpen;
+  setLookUpDialogOpen;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
 }): React.ReactElement => {
   const [selectedTab, setSelectedTab] = useState(0);
   const householdFilterInitial = {
@@ -68,7 +81,7 @@ export const LookUpHouseholdIndividualModal = ({
     programs: '',
     lastRegistrationDate: { min: undefined, max: undefined },
     status: '',
-    admin2: '',
+    admin2: null,
     sex: '',
   };
   const [filterIndividualApplied, setFilterIndividualApplied] = useState(
@@ -100,6 +113,7 @@ export const LookUpHouseholdIndividualModal = ({
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize
       onSubmit={(values) => {
         onValueChange('selectedHousehold', values.selectedHousehold);
         onValueChange('selectedIndividual', values.selectedIndividual);
@@ -153,7 +167,9 @@ export const LookUpHouseholdIndividualModal = ({
                 businessArea={businessArea}
                 choicesData={choicesData}
                 setFieldValue={setFieldValue}
-                initialValues={initialValues}
+                selectedHousehold={selectedHousehold}
+                setSelectedHousehold={setSelectedHousehold}
+                setSelectedIndividual={setSelectedIndividual}
               />
             </TabPanel>
             <TabPanel value={selectedTab} index={1}>
@@ -168,8 +184,11 @@ export const LookUpHouseholdIndividualModal = ({
                 filter={filterIndividualApplied}
                 businessArea={businessArea}
                 setFieldValue={setFieldValue}
-                initialValues={initialValues}
                 valuesInner={values}
+                selectedHousehold={selectedHousehold}
+                setSelectedHousehold={setSelectedHousehold}
+                selectedIndividual={selectedIndividual}
+                setSelectedIndividual={setSelectedIndividual}
               />
             </TabPanel>
           </DialogContent>
@@ -188,7 +207,9 @@ export const LookUpHouseholdIndividualModal = ({
                   type='submit'
                   color='primary'
                   variant='contained'
-                  onClick={submitForm}
+                  onClick={async () => {
+                    await submitForm();
+                  }}
                   disabled={values.identityVerified === false}
                   data-cy='button-submit'
                 >

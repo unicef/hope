@@ -2,28 +2,37 @@ from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
 
 import graphene
-from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter, MultipleChoiceFilter
+from django_filters import (
+    CharFilter,
+    FilterSet,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+)
 from graphene import relay
 from graphene_django import DjangoObjectType
+from targeting.models import HouseholdSelection
 
 from account.permissions import (
-    DjangoPermissionFilterConnectionField,
     BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
 from core.countries import Countries
-from program.models import Program
-from targeting.models import HouseholdSelection
-
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
-from core.utils import CustomOrderingFilter, encode_ids, to_choice_object
+from core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    encode_ids,
+    to_choice_object,
+)
 from household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
+    IDENTIFICATION_TYPE_CHOICE,
     INDIVIDUAL_HOUSEHOLD_STATUS,
     MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -37,8 +46,8 @@ from household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    IDENTIFICATION_TYPE_CHOICE,
 )
+from program.models import Program
 from registration_datahub.schema import DeduplicationResultNode
 
 
@@ -108,6 +117,7 @@ class IndividualFilter(FilterSet):
         field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
+    excluded_id = CharFilter(method="filter_excluded_id")
 
     class Meta:
         model = Individual
@@ -144,6 +154,9 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__id__icontains=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
+
+    def filter_excluded_id(self, qs, name, value):
+        return qs.exclude(id=decode_id_string(value))
 
 
 class DocumentTypeNode(DjangoObjectType):
