@@ -1909,6 +1909,7 @@ export enum IndividualPhysicalDisability {
 }
 
 export enum IndividualRelationship {
+  Unknown = 'UNKNOWN',
   NonBeneficiary = 'NON_BENEFICIARY',
   Head = 'HEAD',
   SonDaughter = 'SON_DAUGHTER',
