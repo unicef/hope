@@ -162,7 +162,9 @@ export function CreateGrievancePage(): React.ReactElement {
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
-          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+          <FormHelperText key={fieldname} error>
+            {errors[fieldname]}
+          </FormHelperText>
         ),
     );
 

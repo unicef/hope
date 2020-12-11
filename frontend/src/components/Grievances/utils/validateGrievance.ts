@@ -26,15 +26,16 @@ export function validate(
         errors.selectedHousehold = 'Household is Required';
       }
       if (
+        //xD
         values.selectedHousehold &&
-        (!values.householdDataUpdateFields[0]?.fieldName ||
-          !values.householdDataUpdateFields[0]?.fieldValue)
+        (!values.householdDataUpdateFields?.[0]?.fieldName ||
+          !values.householdDataUpdateFields?.[0]?.fieldValue)
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
       if (
         values.householdDataUpdateFields?.length &&
-        values.householdDataUpdateFields[0]?.fieldName
+        values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
           if (!el.fieldName || !el.fieldValue) {
