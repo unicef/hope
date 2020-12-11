@@ -10,11 +10,16 @@ import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
   filter;
+  businessArea: string;
+  canViewDetails: boolean;
 }
 export function PaymentVerificationTable({
   filter,
+  canViewDetails,
+  businessArea,
 }: PaymentVerificationTableProps): ReactElement {
   const initialVariables: AllCashPlansQueryVariables = {
+    businessArea,
     program: filter.program,
     search: filter.search,
     assistanceThrough: filter.assistanceThrough,
@@ -31,7 +36,11 @@ export function PaymentVerificationTable({
       queriedObjectName='allCashPlans'
       initialVariables={initialVariables}
       renderRow={(row) => (
-        <PaymentVerificationTableRow key={row.id} plan={row} />
+        <PaymentVerificationTableRow
+          key={row.id}
+          plan={row}
+          canViewDetails={canViewDetails}
+        />
       )}
     />
   );
