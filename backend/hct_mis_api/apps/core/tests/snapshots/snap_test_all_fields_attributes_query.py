@@ -18288,6 +18288,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SON_DAUGHTER'
                     },
                     {
+                        'labelEn': 'Unknown',
+                        'labels': [
+                            {
+                                'label': 'Unknown',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UNKNOWN'
+                    },
+                    {
                         'labelEn': 'Wife / Husband',
                         'labels': [
                             {

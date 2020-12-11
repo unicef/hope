@@ -28,7 +28,7 @@ export function RequestedHouseholdDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const getConfirmationText = (values) => {
+  const getConfirmationText = (values): string => {
     return `You approved ${values.selected.length +
       values.selectedFlexFields.length || 0} change${
       values.selected.length === 1 ? '' : 's'
@@ -44,12 +44,10 @@ export function RequestedHouseholdDataChange({
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
   allApprovedCount += flexFieldsEntries.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
