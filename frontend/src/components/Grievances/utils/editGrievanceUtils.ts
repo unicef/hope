@@ -172,7 +172,7 @@ export const validationSchema = Yup.object().shape({
   category: Yup.string()
     .required('Category is required')
     .nullable(),
-  admin: Yup.string(),
+  admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
