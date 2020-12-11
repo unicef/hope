@@ -12,6 +12,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         window.location.replace('/login');
       }
       if (message.toLowerCase().includes('user does not have correct permission')) {
+        // eslint-disable-next-line no-console
         console.error(`Permission denied for mutation`);
       }
     });
