@@ -7,6 +7,9 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { PaymentVerificationTable } from '../tables/PaymentVerificationTable';
 import { PaymentFilters } from '../tables/PaymentVerificationTable/PaymentFilters';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;
@@ -16,6 +19,7 @@ const Container = styled.div`
 
 export function PaymentVerificationPage(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
 
   const [filter, setFilter] = useState({
     search: '',
@@ -31,6 +35,9 @@ export function PaymentVerificationPage(): React.ReactElement {
     variables: { businessArea },
   });
   if (loading) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
+    return <PermissionDenied />;
 
   const { allPrograms } = data;
   const programs = allPrograms.edges.map((edge) => edge.node);
@@ -44,7 +51,14 @@ export function PaymentVerificationPage(): React.ReactElement {
         onFilterChange={setFilter}
       />
       <Container data-cy='page-details-container'>
-        <PaymentVerificationTable filter={debouncedFilter} />
+        <PaymentVerificationTable
+          filter={debouncedFilter}
+          businessArea={businessArea}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+            permissions,
+          )}
+        />
       </Container>
     </div>
   );

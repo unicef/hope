@@ -107,6 +107,7 @@ def hopePermissionClass(permission):
         @classmethod
         def has_permission(cls, info, **kwargs):
             business_area_arg = kwargs.get("business_area")
+            print("BUSINESS AREA", business_area_arg)
             if isinstance(business_area_arg, BusinessArea):
                 business_area = business_area_arg
             else:
@@ -186,6 +187,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
 
     @classmethod
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
+        print("RESOLVING", filtering_args)
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if not all((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
             raise GraphQLError("Permission Denied")
