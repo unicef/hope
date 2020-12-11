@@ -28,7 +28,7 @@ export const headCells: HeadCell<ImportedHouseholdMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'admin1',
     numeric: false,
   },
