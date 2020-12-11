@@ -10,7 +10,6 @@ from django_filters import (
 )
 from graphene import ConnectionField, relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from account.permissions import (
     BaseNodePermissionMixin,
