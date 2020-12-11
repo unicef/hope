@@ -19,6 +19,10 @@ import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 import { UniversalMoment } from '../../components/UniversalMoment';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const Container = styled.div`
   padding: 20px;
@@ -55,6 +59,8 @@ const SubTitle = styled(Typography)`
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const { data, loading } = useHouseholdQuery({
     variables: { id },
   });
@@ -62,7 +68,17 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  if (loading || choicesLoading) return null;
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (permissions === null) return null;
+
+  if (
+    permissions &&
+    !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS, permissions)
+  )
+    return <PermissionDenied />;
+
+  if (!data || !choicesData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
