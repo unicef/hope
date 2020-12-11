@@ -51,8 +51,8 @@ class DeduplicateTask:
             if role and individual_id:
                 queries.extend(
                     [
-                        {"match": {"households_and_role.role": {"query": role}}},
-                        {"match": {"households_and_role.individual": {"query": individual_id}}},
+                        {"match": {"households_and_role.role": {"query": role, "boost": 0.6}}},
+                        {"match": {"households_and_role.individual": {"query": individual_id, "boost": 0.6}}},
                     ]
                 )
 
@@ -61,8 +61,13 @@ class DeduplicateTask:
     @classmethod
     def _prepare_household_query(cls, household_data):
         queries = []
+        important_fields = (
+            "address",
+            "country",
+            "country_origin",
+        )
         for key, data in household_data.items():
-            if not data:
+            if not data or key not in important_fields:
                 continue
 
             if "." in key:
@@ -81,10 +86,17 @@ class DeduplicateTask:
                         "admin2": data.children.filter(admin_area_type__admin_level=2).first(),
                     }
                 queries.extend([{"match": {admin_area: {"query": value}}} for admin_area, value in admin_areas.items()])
-            elif isinstance(data, Country):
-                queries.append({"match": {f"household.{key}": {"query": data.alpha3}}})
             else:
-                queries.append({"match": {f"household.{key}": {"query": data}}})
+                queries.append(
+                    {
+                        "match": {
+                            f"household.{key}": {
+                                "query": data.alpha3 if isinstance(data, Country) else data,
+                                "boost": 0.4,
+                            }
+                        }
+                    }
+                )
 
         return queries
 
@@ -103,7 +115,7 @@ class DeduplicateTask:
             if doc_number and doc_type:
                 queries.extend(
                     [
-                        {"match": {f"{prefix}.number": {"query": doc_number}}},
+                        {"match": {f"{prefix}.number": {"query": doc_number, "boost": 3.5}}},
                         {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
                     ]
                 )
@@ -113,19 +125,58 @@ class DeduplicateTask:
     @classmethod
     def _prepare_query_dict(cls, individual, fields, min_score, only_in_rdi=False):
         query_fields = []
+        boosted_match_fields = (
+            "birth_date",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+        )
         for field_name, field_value in fields.items():
             if field_name == "household":
-                queries_to_append = cls._prepare_household_query(field_value)
+                # queries_to_append = cls._prepare_household_query(field_value)
+                # ignore household fields because it gives better results
+                queries_to_append = []
             elif field_name == "documents":
                 queries_to_append = cls._prepare_identities_or_documents_query(field_value, "document")
             elif field_name == "identities":
                 queries_to_append = cls._prepare_identities_or_documents_query(field_value, "identity")
             elif field_name == "households_and_roles":
                 queries_to_append = cls.prepare_households_and_roles(field_value)
-            elif field_name in ("birth_date", "sex", "relationship"):
-                queries_to_append = [{"match": {field_name: {"query": field_value}}}]
-            elif field_name == "full_name":
-                queries_to_append = [{"match": {field_name: {"query": field_value, "boost": 2.0}}}]
+            elif field_name in (
+                "first_registration_date",
+                "last_registration_date",
+            ):
+                queries_to_append = [
+                    {
+                        "match": {
+                            field_name: {
+                                "query": field_value,
+                                "boost": 0.3,
+                            }
+                        }
+                    }
+                ]
+            elif field_name in (
+                "birth_date",
+                "sex",
+                "relationship",
+                "phone_no",
+                "phone_no_alternative",
+                "given_name",
+                "middle_name",
+                "family_name",
+                "full_name",
+            ):
+                queries_to_append = [
+                    {
+                        "match": {
+                            field_name: {
+                                "query": field_value,
+                                "boost": 2.0 if field_name in boosted_match_fields else 1.0,
+                            }
+                        }
+                    }
+                ]
             else:
                 queries_to_append = [
                     {"fuzzy": {field_name: {"value": field_value, "fuzziness": "AUTO", "transpositions": True}}}
@@ -249,10 +300,18 @@ class DeduplicateTask:
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
         # query_dict = cls._prepare_query_dict(individual, fields, config.DEDUPLICATION_BATCH_MIN_SCORE, only_in_rdi,)
-        query_dict = cls._prepare_query_dict(individual, fields, 0, only_in_rdi,)
+        query_dict = cls._prepare_query_dict(
+            individual,
+            fields,
+            0,
+            only_in_rdi,
+        )
 
         return cls._get_duplicates_tuple(
-            query_dict, config.DEDUPLICATION_BATCH_DUPLICATE_SCORE, ImportedIndividualDocument, individual,
+            query_dict,
+            config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
+            ImportedIndividualDocument,
+            individual,
         )
 
     @classmethod
@@ -305,11 +364,17 @@ class DeduplicateTask:
         fields = cls._prepare_fields(individual, fields_names, dict_fields)
 
         query_dict = cls._prepare_query_dict(
-            individual, fields, config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE, only_in_rdi,
+            individual,
+            fields,
+            config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
+            only_in_rdi,
         )
 
         return cls._get_duplicates_tuple(
-            query_dict, config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE, IndividualDocument, individual,
+            query_dict,
+            config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE,
+            IndividualDocument,
+            individual,
         )
 
     @classmethod
@@ -366,7 +431,8 @@ class DeduplicateTask:
         )
 
         Individual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_golden_record_results"],
+            to_bulk_update_results,
+            ["deduplication_golden_record_results"],
         )
 
     @staticmethod
@@ -504,14 +570,16 @@ class DeduplicateTask:
         ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
         ImportedIndividual.objects.bulk_update(
-            to_bulk_update_results, ["deduplication_batch_results", "deduplication_golden_record_results"],
+            to_bulk_update_results,
+            ["deduplication_batch_results", "deduplication_golden_record_results"],
         )
         registration_data_import_datahub.refresh_from_db()
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
             registration_data_import_datahub.individuals.filter(
                 Q(deduplication_batch_status=UNIQUE_IN_BATCH) & Q(deduplication_golden_record_status=UNIQUE)
             ).exclude(id__in=checked_individuals_ids).update(
-                deduplication_batch_status=NOT_PROCESSED, deduplication_golden_record_status=NOT_PROCESSED,
+                deduplication_batch_status=NOT_PROCESSED,
+                deduplication_golden_record_status=NOT_PROCESSED,
             )
         else:
             registration_data_import_datahub.individuals.exclude(
