@@ -18,10 +18,12 @@ import { LoadingComponent } from '../../../components/LoadingComponent';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
+  canViewDetails: boolean;
 }
 
 export function IndividualsListTableRow({
   individual,
+  canViewDetails,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -47,7 +49,7 @@ export function IndividualsListTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={individual.id}
     >

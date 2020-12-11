@@ -1,25 +1,29 @@
 export const PERMISSIONS = {
-  CREATE: 'CREATE',
-  UPDATE: 'UPDATE',
-  DELETE: 'DELETE',
-  READ: 'READ',
-  LIST: 'LIST',
-  RUN: 'RUN',
+  // RDI
+    RDI_VIEW_LIST: 'RDI_VIEW_LIST',
+    RDI_VIEW_DETAILS: 'RDI_VIEW_DETAILS',
+    RDI_IMPORT_DATA: 'RDI_IMPORT_DATA',
+    RDI_RERUN_DEDUPE: 'RDI_RERUN_DEDUPE',
+    RDI_MERGE_IMPORT: 'RDI_MERGE_IMPORT',
 
-  DASHBOARD: 'DASHBOARD',
-  RDI_LIST: 'RDI',
-
-  RDI_IMPORT: 'PERMISSION_RDI_IMPORT',
-  RDI_RERUN_DEDUPLICATION: 'PERMISSION_RDI_RERUN_DEDUPLICATION',
-  RDI_MERGE: 'PERMISSION_RDI_MERGE',
-  RDI_KOBO: 'PERMISSION_RDI_KOBO',
-  RDI_XLSX: 'PERMISSION_RDI_XLSX',
+    // Population
+    POPULATION_VIEW_HOUSEHOLDS_LIST: 'POPULATION_VIEW_HOUSEHOLDS_LIST',
+    POPULATION_VIEW_HOUSEHOLDS_DETAILS: 'POPULATION_VIEW_HOUSEHOLDS_DETAILS',
+    POPULATION_VIEW_INDIVIDUALS_LIST: 'POPULATION_VIEW_INDIVIDUALS_LIST',
+    POPULATION_VIEW_INDIVIDUALS_DETAILS: 'POPULATION_VIEW_INDIVIDUALS_DETAILS'
 };
 
-export function hasPermissions(
-  permission: string[],
-  allowedPermissions: string[],
-): boolean {
-  const stringPermission = permission.join('.');
-  return allowedPermissions.includes(stringPermission);
+export function hasPermissions(permission: string | string[], allowedPermissions: string[]): boolean {
+// checks to see if has one permission or at least one from the array
+
+  if (Array.isArray(permission)) {
+    return allowedPermissions.some(perm => permission.includes(perm));
+  }
+  return allowedPermissions.includes(permission)
 }
+
+export function hasPermissionInModule(module: string, allowedPermissions: string[]): boolean {
+  return allowedPermissions.some(perm => perm.includes(module))
+}
+
+

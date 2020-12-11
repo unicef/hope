@@ -14,22 +14,42 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const { t } = useTranslation();
   const [filter, setFilter] = useState({});
   const debounceFilter = useDebounce(filter, 500);
-  if (permissions === null) {
-    return null;
-  }
-  if (!hasPermissions([PERMISSIONS.RDI_LIST, PERMISSIONS.READ], permissions)) {
+  if (permissions === null) return null;
+
+  if (
+    !hasPermissions(
+      [PERMISSIONS.RDI_VIEW_LIST, PERMISSIONS.RDI_IMPORT_DATA],
+      permissions,
+    )
+  )
     return <PermissionDenied />;
-  }
+
   const toolbar = (
     <PageHeader title={t('Registration Data Import')}>
-      <RegistrationDataImport />
+      {hasPermissions(PERMISSIONS.RDI_IMPORT_DATA, permissions) && (
+        <RegistrationDataImport />
+      )}
     </PageHeader>
   );
   return (
     <div>
       {toolbar}
-      <RegistrationFilters onFilterChange={setFilter} filter={filter} />
-      <RegistrationDataImportTable filter={debounceFilter} />
+      {hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions) && (
+        <>
+          <RegistrationFilters onFilterChange={setFilter} filter={filter} />
+          <RegistrationDataImportTable
+            filter={debounceFilter}
+            canViewDetails={hasPermissions(
+              [
+                PERMISSIONS.RDI_VIEW_DETAILS,
+                PERMISSIONS.RDI_MERGE_IMPORT,
+                PERMISSIONS.RDI_RERUN_DEDUPE,
+              ],
+              permissions,
+            )}
+          />
+        </>
+      )}
     </div>
   );
 }

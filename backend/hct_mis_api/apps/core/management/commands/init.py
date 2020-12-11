@@ -4,7 +4,6 @@ from django.core.management import call_command
 from django.core.management.commands import makemigrations
 
 from account.models import Role
-from account.permissions import PERMISSION_READ, PERMISSION_DASHBOARD
 
 
 class Command(makemigrations.Command):
@@ -44,6 +43,7 @@ class Command(makemigrations.Command):
         call_command("loadflexfieldsattributes")
         call_command("generatefixtures", "--noinput", flush=False)
         guest_role = Role()
-        guest_role.permissions = [f"{PERMISSION_DASHBOARD}.{PERMISSION_READ}"]
+        # TODO: add permissions later when all are done
+        guest_role.permissions = []
         guest_role.name = "Guest"
         guest_role.save()
