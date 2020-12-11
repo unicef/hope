@@ -9,9 +9,9 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { menuItems } from './menuItems';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissionInModule } from '../../config/permissions';
+import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
   .MuiTypography-body1 {
@@ -55,7 +55,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   );
   if (permissions === null) return null;
 
-  const getInitialHrefForCollapsible = (secondaryActions) => {
+  const getInitialHrefForCollapsible = (secondaryActions): string => {
     let resultHref = '';
     for (const item of secondaryActions) {
       if (

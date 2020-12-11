@@ -27,7 +27,7 @@ const WarnIcon = styled(WarningIcon)`
   margin-right: 10px;
 `;
 
-export const TicketsAlreadyExist = ({ values }) => {
+export function TicketsAlreadyExist({ values }): React.ReactElement {
   const businessArea = useBusinessArea();
 
   const { data, loading } = useExistingGrievanceTicketsQuery({
@@ -71,4 +71,4 @@ export const TicketsAlreadyExist = ({ values }) => {
       </Box>
     </StyledBox>
   ) : null;
-};
+}

@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
-import { Box, Button, DialogActions, Grid } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  DialogActions,
+  FormHelperText,
+  Grid,
+} from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -26,6 +32,7 @@ import {
 } from '../../utils/constants';
 import { useArrayToDict } from '../../hooks/useArrayToDict';
 import {
+  isInvalid,
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
@@ -36,7 +43,8 @@ import { AddIndividualDataChange } from './AddIndividualDataChange';
 import { EditIndividualDataChange } from './EditIndividualDataChange';
 import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import { TicketsAlreadyExist } from './TicketsAlreadyExist';
-import { prepareVariables, validate } from './utils/createGrievanceUtils';
+import { prepareVariables } from './utils/createGrievanceUtils';
+import { validate } from './utils/validateGrievance';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -74,7 +82,7 @@ const validationSchema = Yup.object().shape({
   category: Yup.string()
     .required('Category is required')
     .nullable(),
-  admin: Yup.string(),
+  admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
@@ -96,7 +104,7 @@ export function CreateGrievancePage(): React.ReactElement {
     category: null,
     language: '',
     consent: false,
-    admin: '',
+    admin: null,
     area: '',
     selectedHousehold: null,
     selectedIndividual: null,
@@ -146,16 +154,38 @@ export function CreateGrievancePage(): React.ReactElement {
     value: edge.node.id,
   }));
 
+  const dataChangeErrors = (errors, touched): ReactElement[] =>
+    [
+      'householdDataUpdateFields',
+      'individualDataUpdateFields',
+      'individualDataUpdateFieldsDocuments',
+    ].map(
+      (fieldname) =>
+        isInvalid(fieldname, errors, touched) && (
+          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+        ),
+    );
+
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={async (values) => {
         try {
           const response = await mutate(prepareVariables(businessArea, values));
-          showMessage('Grievance Ticket created.', {
-            pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
-            historyMethod: 'push',
-          });
+          if (values.selectedPaymentRecords.length > 1) {
+            showMessage(
+              `${values.selectedPaymentRecords.length} Grievance Tickets created.`,
+              {
+                pathname: `/${businessArea}/grievance-and-feedback`,
+                historyMethod: 'push',
+              },
+            );
+          } else {
+            showMessage('Grievance Ticket created.', {
+              pathname: `/${businessArea}/grievance-and-feedback/${response.data.createGrievanceTicket.grievanceTickets[0].id}`,
+              historyMethod: 'push',
+            });
+          }
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
@@ -284,8 +314,8 @@ export function CreateGrievancePage(): React.ReactElement {
                         values={values}
                         setFieldValue={setFieldValue}
                       />
+                      {dataChangeErrors(errors, touched)}
                     </BoxPadding>
-
                     <DialogFooter>
                       <DialogActions>
                         <Button

@@ -57,7 +57,7 @@ export const GrievanceDetailsToolbar = ({
   const closingConfirmationText =
     'Are you sure you want to close the ticket ? By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found.';
 
-  const changeState = (status) => {
+  const changeState = (status): void => {
     mutate({
       variables: {
         grievanceTicketId: ticket.id,

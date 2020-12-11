@@ -30,6 +30,7 @@ export function NewDocumentFieldArray({
                 (item, index) => (
                   <DocumentField
                     index={index}
+                    key={`${index}-${item?.country}-${item?.type}`}
                     onDelete={() => arrayHelpers.remove(index)}
                     countryChoices={addIndividualFieldsData.countriesChoices}
                     documentTypeChoices={
