@@ -169,10 +169,10 @@ export function DedupeResults({
                     {row.age || 'Not provided'}
                   </TableCell>
                   <TableCell align='left'>{row.location}</TableCell>
-                  <TableCell align='left'>{row.score.toFixed(2)}</TableCell>
+                  <TableCell align='left'>{row.score}</TableCell>
                   <TableCell align='left'>
                     {row.proximityToScore > 0 && '+'}{' '}
-                    {row.proximityToScore.toFixed(2)}
+                    {row.proximityToScore}
                   </TableCell>
                 </TableRow>
               ))}
