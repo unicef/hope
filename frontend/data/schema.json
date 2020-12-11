@@ -10876,6 +10876,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "UNKNOWN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "NON_BENEFICIARY",
             "description": null,
             "isDeprecated": false,
