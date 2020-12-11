@@ -1463,6 +1463,7 @@ enum IndividualPhysicalDisability {
 }
 
 enum IndividualRelationship {
+  UNKNOWN
   NON_BENEFICIARY
   HEAD
   SON_DAUGHTER
