@@ -31,7 +31,7 @@ export function FieldChooser({
     <FlexWrapper>
       <Field
         name={`${baseName}.fieldName`}
-        label='Choose field type'
+        label='Select Field'
         required
         choices={choices}
         index={index}
