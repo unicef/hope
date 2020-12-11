@@ -1749,6 +1749,16 @@
                 "defaultValue": null
               },
               {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "search",
                 "description": null,
                 "type": {

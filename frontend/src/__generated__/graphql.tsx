@@ -2890,6 +2890,7 @@ export type QueryAllCashPlansArgs = {
   endDate?: Maybe<Scalars['DateTime']>,
   endDate_Lte?: Maybe<Scalars['DateTime']>,
   endDate_Gte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -5229,7 +5230,8 @@ export type AllCashPlansQueryVariables = {
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['DateTime']>,
-  endDateLte?: Maybe<Scalars['DateTime']>
+  endDateLte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -9165,8 +9167,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -9244,6 +9246,7 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      verificationStatus: // value for 'verificationStatus'
  *      startDateGte: // value for 'startDateGte'
  *      endDateLte: // value for 'endDateLte'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
