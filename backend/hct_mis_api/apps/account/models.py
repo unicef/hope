@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import UUIDModel
 
-from account.permissions import PERMISSIONS_CHOICES
+from account.permissions import Permissions
 from utils.models import TimeStampedUUIDModel
 
 INVITED = "INVITED"
@@ -70,7 +70,9 @@ class UserRole(TimeStampedUUIDModel):
 
 class Role(TimeStampedUUIDModel):
     name = models.CharField(max_length=250)
-    permissions = ChoiceArrayField(models.CharField(choices=PERMISSIONS_CHOICES, max_length=255))
+    permissions = ChoiceArrayField(
+        models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
+    )
 
     def __str__(self):
         return self.name

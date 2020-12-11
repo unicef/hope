@@ -162,6 +162,7 @@ export function HouseholdDetails({
               <div>
                 {household.programs.edges.map((item) => (
                   <ContentLink
+                    key={item.node.id}
                     href={`/${businessArea}/programs/${item.node.id}`}
                   >
                     {item.node.name}
