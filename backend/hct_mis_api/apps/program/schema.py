@@ -98,6 +98,9 @@ class CashPlanFilter(FilterSet):
     verification_status = MultipleChoiceFilter(
         field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
+    business_area = CharFilter(
+        field_name="business_area__slug",
+    )
 
     class Meta:
         fields = {
@@ -105,6 +108,7 @@ class CashPlanFilter(FilterSet):
             "assistance_through": ["exact", "icontains"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
+            "business_area": ["exact"],
         }
         model = CashPlan
 
@@ -134,7 +138,13 @@ class CashPlanFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class CashPlanNode(DjangoObjectType):
+class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
+        ),
+    )
+
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
 
@@ -156,7 +166,11 @@ class Query(graphene.ObjectType):
         ),
     )
     cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
+    all_cash_plans = DjangoPermissionFilterConnectionField(
+        CashPlanNode,
+        filterset_class=CashPlanFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),),
+    )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)
