@@ -202,7 +202,7 @@ PROJECT_APPS = [
     "mis_datahub",
     "erp_datahub",
     "sanction_list",
-    "steficon"
+    "steficon",
 ]
 
 DJANGO_APPS = [
@@ -389,14 +389,18 @@ CONSTANCE_ADDITIONAL_FIELDS = {
         "django.forms.fields.IntegerField",
         {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
     ),
+    "positive_floats": (
+        "django.forms.fields.FloatField",
+        {"widget": "django.forms.widgets.NumberInput", "validators": [MinValueValidator(0)]},
+    ),
 }
 
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
-        50.0,
+        9.0,
         "Results equal or above this score are considered duplicates",
-        "positive_integers",
+        "positive_floats",
     ),
     # "DEDUPLICATION_BATCH_MIN_SCORE": (
     #     15.0,
@@ -415,14 +419,14 @@ CONSTANCE_CONFIG = {
     ),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        25.0,
+        9.0,
         "Results below the minimum score will not be taken into account",
-        "positive_integers",
+        "positive_floats",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        40.0,
+        11.0,
         "Results equal or above this score are considered duplicates",
-        "positive_integers",
+        "positive_floats",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE": (
         50,
