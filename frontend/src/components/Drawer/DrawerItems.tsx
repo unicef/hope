@@ -9,6 +9,8 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import styled from 'styled-components';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissionInModule } from '../../config/permissions';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -35,6 +37,7 @@ interface Props {
 }
 export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const clearLocation = currentLocation.replace(`/${businessArea}`, '');
   const history = useHistory();
   const initialIndex = menuItems.findIndex((item) => {
@@ -50,13 +53,37 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   const [expandedItem, setExpandedItem] = React.useState(
     initialIndex !== -1 ? initialIndex : null,
   );
+  if (permissions === null) return null;
+
+  const getInitialHrefForCollapsible = (secondaryActions) => {
+    let resultHref = '';
+    for (const item of secondaryActions) {
+      if (
+        item.permissionModule &&
+        hasPermissionInModule(item.permissionModule, permissions)
+      ) {
+        resultHref = item.href;
+        break;
+      }
+    }
+    return resultHref;
+  };
 
   return (
     <div>
       {menuItems.map((item, index) => {
+        if (
+          item.permissionModule &&
+          !hasPermissionInModule(item.permissionModule, permissions)
+        ) {
+          return null;
+        }
         if (item.collapsable) {
+          const hrefForCollapsibleItem = getInitialHrefForCollapsible(
+            item.secondaryActions,
+          );
           return (
-            <div key={item.name + item.href}>
+            <div key={item.name + hrefForCollapsibleItem}>
               <ListItem
                 button
                 onClick={() => {
@@ -65,8 +92,8 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
                   } else {
                     setExpandedItem(index);
                   }
-                  if (item.href) {
-                    history.push(`/${businessArea}${item.href}`);
+                  if (hrefForCollapsibleItem) {
+                    history.push(`/${businessArea}${hrefForCollapsibleItem}`);
                   }
                 }}
               >
@@ -81,20 +108,27 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
               <Collapse in={expandedItem !== null && expandedItem === index}>
                 <SubList component='div'>
                   {item.secondaryActions &&
-                    item.secondaryActions.map((secondary) => (
-                      <ListItem
-                        button
-                        component={Link}
-                        key={secondary.name}
-                        to={`/${businessArea}${secondary.href}`}
-                        selected={Boolean(
-                          secondary.selectedRegexp.exec(clearLocation),
-                        )}
-                      >
-                        <Icon>{secondary.icon}</Icon>
-                        <Text primary={secondary.name} />
-                      </ListItem>
-                    ))}
+                    item.secondaryActions.map(
+                      (secondary) =>
+                        secondary.permissionModule &&
+                        hasPermissionInModule(
+                          secondary.permissionModule,
+                          permissions,
+                        ) && (
+                          <ListItem
+                            button
+                            component={Link}
+                            key={secondary.name}
+                            to={`/${businessArea}${secondary.href}`}
+                            selected={Boolean(
+                              secondary.selectedRegexp.exec(clearLocation),
+                            )}
+                          >
+                            <Icon>{secondary.icon}</Icon>
+                            <Text primary={secondary.name} />
+                          </ListItem>
+                        ),
+                    )}
                 </SubList>
               </Collapse>
             </div>
