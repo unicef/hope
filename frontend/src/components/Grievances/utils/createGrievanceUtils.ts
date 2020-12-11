@@ -218,7 +218,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values.admin.node.title,
+    admin: values?.admin?.node?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
