@@ -13,7 +13,7 @@ import {
   AllHouseholdsQuery,
   HouseholdQuery,
   useAllEditHouseholdFieldsQuery,
-  useHouseholdQuery,
+  useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -153,7 +153,7 @@ export const EditHouseholdDataChangeFieldRow = ({
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
-  const [fieldNotUsed, metaNotUsed, helpers] = useField(
+  const [, , helpers] = useField(
     `householdDataUpdateFields[${index}].isFlexField`,
   );
   const name = !field?.isFlexField
@@ -218,17 +218,23 @@ export const EditHouseholdDataChange = ({
 }: EditHouseholdDataChangeProps): React.ReactElement => {
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const {
-    data: fullHousehold,
-    loading: fullHouseholdLoading,
-  } = useHouseholdQuery({ variables: { id: household?.id } });
+  const [
+    getHousehold,
+    { data: fullHousehold, loading: fullHouseholdLoading },
+  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  useEffect(() => {
+    if (values.selectedHousehold) {
+      getHousehold();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedHousehold]);
   useEffect(() => {
     if (
       !values.householdDataUpdateFields ||
       values.householdDataUpdateFields.length === 0
     ) {
       setFieldValue('householdDataUpdateFields', [
-        { fieldName: null, fieldValue: null },
+        { fieldName: null, fieldValue: '' },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -237,11 +243,11 @@ export const EditHouseholdDataChange = ({
     data: householdFieldsData,
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
-  if (fullHouseholdLoading || householdFieldsLoading) {
-    return <LoadingComponent />;
-  }
   if (!household) {
     return <div>You have to select a household earlier</div>;
+  }
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+    return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
@@ -258,6 +264,8 @@ export const EditHouseholdDataChange = ({
             <>
               {(values.householdDataUpdateFields || []).map((item, index) => (
                 <EditHouseholdDataChangeFieldRow
+                  /* eslint-disable-next-line react/no-array-index-key */
+                  key={`${index}-${item.fieldName}`}
                   itemValue={item}
                   index={index}
                   household={fullHousehold.household}
@@ -270,7 +278,7 @@ export const EditHouseholdDataChange = ({
                 <Button
                   color='primary'
                   onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    arrayHelpers.push({ fieldName: null, fieldValue: '' });
                   }}
                 >
                   <AddIcon />

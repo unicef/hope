@@ -1,4 +1,4 @@
-import { Box, FormHelperText, Typography } from '@material-ui/core';
+import { Box, FormHelperText } from '@material-ui/core';
 import React, { useState } from 'react';
 import { isInvalid } from '../../../utils/utils';
 import { LookUpButton } from '../LookUpButton';
@@ -19,7 +19,12 @@ export const LookUpHouseholdIndividual = ({
   touched?;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
-
+  const [selectedHousehold, setSelectedHousehold] = useState(
+    values.selectedHousehold,
+  );
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    values.selectedIndividual,
+  );
   return (
     <>
       <Box display='flex' flexDirection='column'>
@@ -29,6 +34,10 @@ export const LookUpHouseholdIndividual = ({
             values={values}
             disabled={disabled}
             onValueChange={onValueChange}
+            selectedHousehold={selectedHousehold}
+            setSelectedHousehold={setSelectedHousehold}
+            selectedIndividual={selectedIndividual}
+            setSelectedIndividual={setSelectedIndividual}
           />
         ) : (
           <LookUpButton
@@ -49,6 +58,10 @@ export const LookUpHouseholdIndividual = ({
         setLookUpDialogOpen={setLookUpDialogOpen}
         initialValues={values}
         onValueChange={onValueChange}
+        selectedIndividual={selectedIndividual}
+        selectedHousehold={selectedHousehold}
+        setSelectedHousehold={setSelectedHousehold}
+        setSelectedIndividual={setSelectedIndividual}
       />
     </>
   );

@@ -38,7 +38,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
@@ -68,7 +68,7 @@ function individualDataRow(
   fieldsDict,
   isEdit,
   handleSelectBioData,
-) {
+): ReactElement {
   const fieldName = camelCase(row[0]);
   const isItemSelected = isSelected(row[0]);
   const labelId = `enhanced-table-checkbox-${index}`;
@@ -168,7 +168,7 @@ export function RequestedIndividualDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleSelectBioData = (name, selected) => {
+  const handleSelectBioData = (name): void => {
     const newSelected = [...selectedBioData];
     const selectedIndex = newSelected.indexOf(camelCase(name));
     if (selectedIndex !== -1) {
@@ -178,7 +178,7 @@ export function RequestedIndividualDataChangeTable({
     }
     setFieldValue('selected', newSelected);
   };
-  const handleFlexFields = (name, selected) => {
+  const handleFlexFields = (name): void => {
     const newSelected = [...selectedFlexFields];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {
@@ -188,7 +188,7 @@ export function RequestedIndividualDataChangeTable({
     }
     setFieldValue('selectedFlexFields', newSelected);
   };
-  const handleSelectDocument = (documentIndex, selected) => {
+  const handleSelectDocument = (documentIndex): void => {
     const newSelected = [...selectedDocuments];
     const selectedIndex = newSelected.indexOf(documentIndex);
     if (selectedIndex !== -1) {
@@ -199,7 +199,7 @@ export function RequestedIndividualDataChangeTable({
     setFieldValue('selectedDocuments', newSelected);
   };
 
-  const handleSelectDocumentToRemove = (documentIndex, selected) => {
+  const handleSelectDocumentToRemove = (documentIndex): void => {
     const newSelected = [...selectedDocumentsToRemove];
     const selectedIndex = newSelected.indexOf(documentIndex);
     if (selectedIndex !== -1) {
@@ -277,13 +277,13 @@ export function RequestedIndividualDataChangeTable({
             <TableBody>
               {documents?.map((row, index) => {
                 return (
-                  <TableRow>
+                  <TableRow key={`${row.value.type}-${row.value.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox
                           color='primary'
-                          onChange={(event) => {
-                            handleSelectDocument(index, event.target.checked);
+                          onChange={(): void => {
+                            handleSelectDocument(index);
                           }}
                           disabled={
                             ticket.status !==
@@ -327,15 +327,12 @@ export function RequestedIndividualDataChangeTable({
               {documentsToRemove?.map((row, index) => {
                 const document = previousDocuments[row.value];
                 return (
-                  <TableRow>
+                  <TableRow key={`${document.label}-${document.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox
-                          onChange={(event) => {
-                            handleSelectDocumentToRemove(
-                              index,
-                              event.target.checked,
-                            );
+                          onChange={(): void => {
+                            handleSelectDocumentToRemove(index);
                           }}
                           color='primary'
                           disabled={

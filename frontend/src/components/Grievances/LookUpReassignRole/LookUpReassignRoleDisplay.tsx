@@ -26,7 +26,6 @@ const LightGrey = styled.span`
 export const LookUpReassignRoleDisplay = ({
   values,
   setLookUpDialogOpen,
-  onValueChange,
 }): React.ReactElement => {
   return (
     <StyledBox>
