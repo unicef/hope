@@ -1,9 +1,14 @@
 import graphene
 from django.db.models.functions import Lower
-from django_filters import FilterSet, OrderingFilter, DateFilter, CharFilter
+from django_filters import FilterSet, DateFilter, CharFilter
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
+from account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    hopePermissionClass,
+    Permissions,
+    BaseNodePermissionMixin,
+)
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
 from core.utils import get_count_and_percentage, CustomOrderingFilter
@@ -27,8 +32,14 @@ class RegistrationDataImportFilter(FilterSet):
         }
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "import_date", "number_of_individuals",
-                "number_of_households", Lower("imported_by__given_name"),)
+        fields=(
+            Lower("name"),
+            "status",
+            "import_date",
+            "number_of_individuals",
+            "number_of_households",
+            Lower("imported_by__given_name"),
+        )
     )
 
 
@@ -37,7 +48,9 @@ class CountAndPercentageNode(graphene.ObjectType):
     percentage = graphene.Float()
 
 
-class RegistrationDataImportNode(DjangoObjectType):
+class RegistrationDataImportNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.RDI_VIEW_DETAILS),)
+
     batch_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     golden_record_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
     batch_possible_duplicates_count_and_percentage = graphene.Field(CountAndPercentageNode)
@@ -77,9 +90,13 @@ class RegistrationDataImportNode(DjangoObjectType):
 
 
 class Query(graphene.ObjectType):
-    registration_data_import = graphene.relay.Node.Field(RegistrationDataImportNode,)
-    all_registration_data_imports = DjangoFilterConnectionField(
-        RegistrationDataImportNode, filterset_class=RegistrationDataImportFilter,
+    registration_data_import = graphene.relay.Node.Field(
+        RegistrationDataImportNode,
+    )
+    all_registration_data_imports = DjangoPermissionFilterConnectionField(
+        RegistrationDataImportNode,
+        filterset_class=RegistrationDataImportFilter,
+        permission_classes=(hopePermissionClass(Permissions.RDI_VIEW_LIST),),
     )
     registration_data_status_choices = graphene.List(ChoiceObject)
 

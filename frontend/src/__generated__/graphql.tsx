@@ -3312,7 +3312,7 @@ export type RoleNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
-  permissions: Array<Maybe<Scalars['String']>>,
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   userRoles: Array<UserRoleNode>,
 };
 
@@ -5374,7 +5374,8 @@ export type AllIndividualsQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
-  excludedId?: Maybe<Scalars['String']>
+  excludedId?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -9491,8 +9492,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea) {
     totalCount
     pageInfo {
       startCursor
@@ -9551,6 +9552,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      householdId: // value for 'householdId'
  *      excludedId: // value for 'excludedId'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -14459,7 +14461,7 @@ export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversPar
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  permissions?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>,
+  permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
 };
 
