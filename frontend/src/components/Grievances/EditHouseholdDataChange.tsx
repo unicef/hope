@@ -264,6 +264,7 @@ export const EditHouseholdDataChange = ({
             <>
               {(values.householdDataUpdateFields || []).map((item, index) => (
                 <EditHouseholdDataChangeFieldRow
+                  // key={}
                   itemValue={item}
                   index={index}
                   household={fullHousehold.household}
