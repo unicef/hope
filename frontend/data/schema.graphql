@@ -2096,7 +2096,7 @@ type RoleNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  permissions: [String]!
+  permissions: [String]
   userRoles: [UserRoleNode!]!
 }
 

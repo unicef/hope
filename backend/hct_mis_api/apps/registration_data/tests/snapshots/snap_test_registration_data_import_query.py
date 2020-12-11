@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_all 1'] = {
+snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_all_0_with_permission 1'] = {
     'data': {
         'allRegistrationDataImports': {
             'edges': [
@@ -43,7 +43,27 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
     }
 }
 
-snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_single 1'] = {
+snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_all_1_without_permission 1'] = {
+    'data': {
+        'allRegistrationDataImports': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allRegistrationDataImports'
+            ]
+        }
+    ]
+}
+
+snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_single_with_permission_0_with_permission 1'] = {
     'data': {
         'registrationDataImport': {
             'dataSource': 'XLS',
@@ -53,4 +73,24 @@ snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahu
             'status': 'IN_REVIEW'
         }
     }
+}
+
+snapshots['TestRegistrationDataImportQuery::test_registration_data_import_datahub_query_single_with_permission_1_without_permission 1'] = {
+    'data': {
+        'registrationDataImport': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'registrationDataImport'
+            ]
+        }
+    ]
 }

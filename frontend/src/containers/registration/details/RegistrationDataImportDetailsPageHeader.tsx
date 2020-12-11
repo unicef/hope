@@ -12,6 +12,8 @@ import { RerunDedupe } from './RerunDedupe';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
+  canMerge: boolean;
+  canRerunDedupe: boolean;
 }
 
 const MergeButtonContainer = styled.span`
@@ -20,6 +22,8 @@ const MergeButtonContainer = styled.span`
 
 export function RegistrationDataImportDetailsPageHeader({
   registration,
+  canMerge,
+  canRerunDedupe,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -27,18 +31,22 @@ export function RegistrationDataImportDetailsPageHeader({
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>
-          <MergeButtonContainer>
-            <MergeRegistrationDataImportDialog registration={registration} />
-          </MergeButtonContainer>
+          {canMerge && (
+            <MergeButtonContainer>
+              <MergeRegistrationDataImportDialog registration={registration} />
+            </MergeButtonContainer>
+          )}
         </div>
       );
       break;
     case RegistrationDataImportStatus.DeduplicationFailed:
       buttons = (
         <div>
-          <MergeButtonContainer>
-            <RerunDedupe registration={registration} />
-          </MergeButtonContainer>
+          {canRerunDedupe && (
+            <MergeButtonContainer>
+              <RerunDedupe registration={registration} />
+            </MergeButtonContainer>
+          )}
         </div>
       );
       break;
