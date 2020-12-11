@@ -55,7 +55,7 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
   );
   if (permissions === null) return null;
 
-  const getInitialHrefForCollapsible = (secondaryActions) => {
+  const getInitialHrefForCollapsible = (secondaryActions): string => {
     let resultHref = '';
     for (const item of secondaryActions) {
       if (
