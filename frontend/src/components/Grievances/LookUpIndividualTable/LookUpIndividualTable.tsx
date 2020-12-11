@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
@@ -18,21 +18,29 @@ interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
   setFieldValue;
-  initialValues;
   valuesInner;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
+  ticket?;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
   setFieldValue,
-  initialValues,
   valuesInner,
+  selectedIndividual,
+  setSelectedIndividual,
+  setSelectedHousehold,
+  ticket,
 }: LookUpIndividualTableProps): React.ReactElement => {
-  const [selectedIndividual, setSelectedIndividual] = useState(
-    initialValues.selectedIndividual,
-  );
   const handleRadioChange = (individual): void => {
+    if (individual.household?.id) {
+      setFieldValue('selectedHousehold', individual.household);
+      setSelectedHousehold(individual.household);
+    }
     setSelectedIndividual(individual);
     setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
@@ -49,6 +57,7 @@ export const LookUpIndividualTable = ({
     householdId: valuesInner.selectedHousehold
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
+    excludedId: ticket?.individual?.id || null,
   };
 
   return (

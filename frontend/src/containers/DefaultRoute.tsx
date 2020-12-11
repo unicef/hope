@@ -3,7 +3,9 @@ import React from 'react';
 import { useMeQuery } from '../__generated__/graphql';
 
 export function DefaultRoute(): React.ReactElement {
-  const { data } = useMeQuery();
+  const { data } = useMeQuery({
+    fetchPolicy: 'cache-first',
+  });
   if (!data || !data.me) {
     return null;
   }
