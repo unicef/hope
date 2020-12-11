@@ -4,7 +4,6 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareFeedbackVariables(requiredVariables, values) {
@@ -219,7 +218,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values.admin?.id,
+    admin: values?.admin?.node?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
@@ -229,61 +228,4 @@ export function prepareVariables(businessArea, values) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function validate(
-  values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: { [id: string]: any } = {};
-  if (values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
-    if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
-      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
-    ) {
-      if (!values.selectedHousehold) {
-        errors.selectedHousehold = 'Household is Required';
-      }
-    }
-    if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL ||
-      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
-    ) {
-      if (!values.selectedIndividual) {
-        errors.selectedIndividual = 'Individual is Required';
-      }
-    }
-  }
-  if (
-    values.category === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE ||
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE
-  ) {
-    if (!values.issueType) {
-      errors.issueType = 'Issue Type is required';
-    }
-  }
-
-  if (
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-  ) {
-    const individualDataErrors = {};
-    const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
-      }
-    }
-  }
-  return errors;
 }

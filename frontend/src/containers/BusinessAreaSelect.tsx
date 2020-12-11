@@ -44,7 +44,7 @@ const CountrySelect = styled(Select)`
 
 export function BusinessAreaSelect(): React.ReactElement {
   const { data } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   });
   const businessArea = useBusinessArea();
   const history = useHistory();

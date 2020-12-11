@@ -1,9 +1,10 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Table, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import { EnhancedTableHead } from '../../../../components/table/EnhancedTableHead';
-import { stableSort, getComparator } from '../../../../utils/utils';
+import { getComparator, stableSort } from '../../../../utils/utils';
+import { AllFieldsAttributesQuery } from '../../../../__generated__/graphql';
 import { headCells } from './HeadCells';
 
 const TableWrapper = styled.div`
@@ -58,7 +59,7 @@ export const FlexFieldsTable = ({
     setOrderBy(property);
   };
 
-  const filterTable = () => {
+  const filterTable = (): AllFieldsAttributesQuery['allFieldsAttributes'] => {
     const filters = {
       labelEn: searchValue,
       associatedWith: selectedOption,
@@ -71,7 +72,7 @@ export const FlexFieldsTable = ({
     } else if (selectedFieldType === 'Core field') {
       filteredByFieldType = fields.filter((el) => el.isFlexField === false);
     }
-    const filteredFields = filteredByFieldType.filter((each) => {
+    return filteredByFieldType.filter((each) => {
       //eslint-disable-next-line
       for (const key in filters) {
         if (
@@ -84,10 +85,9 @@ export const FlexFieldsTable = ({
       }
       return true;
     });
-    return filteredFields;
   };
-
-  const orderResults = () => {
+  type orderedType = () => AllFieldsAttributesQuery['allFieldsAttributes'];
+  const orderResults: orderedType = () => {
     return stableSort(filterTable(), getComparator(order, orderBy));
   };
 
