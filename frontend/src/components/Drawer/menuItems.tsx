@@ -55,18 +55,21 @@ export const menuItems = [
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <FlashOnRounded />,
+    permissionsModule: 'PROGRAMME',
   },
   {
     name: 'Targeting',
     href: '/target-population',
     selectedRegexp: /^\/target-population.*$/,
     icon: <ListAltRounded />,
+    permissionModule: 'TARGETING',
   },
   {
     name: 'Payment Verification',
     href: '/payment-verification',
     selectedRegexp: /^\/payment-verification*$/,
     icon: <AttachMoney />,
+    permissionModule: 'PAYMENT_VERIFICATION',
   },
   {
     name: 'Grievance and Feedback',
