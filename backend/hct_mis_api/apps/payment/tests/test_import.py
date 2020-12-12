@@ -1,13 +1,15 @@
 import io
 import uuid
+from parameterized import parameterized
 
 from django.core.management import call_command
-from django.test import TestCase
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.models import BusinessArea, AdminArea
+from core.base_test_case import APITestCase
 from household.fixtures import (
     create_household,
     EntitlementCardFactory,
@@ -25,31 +27,30 @@ from registration_data.fixtures import RegistrationDataImportFactory
 from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
-class TestXlsxVerificationImport(TestCase):
+class TestXlsxVerificationImport(APITestCase):
     # verification = None
 
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
         payment_record_amount = 10
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        user = UserFactory()
+        cls.user = UserFactory()
 
-        program = ProgramFactory(business_area=BusinessArea.objects.first())
+        program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
-            created_by=user,
-            candidate_list_targeting_criteria=targeting_criteria,
-            business_area=BusinessArea.objects.first(),
+            created_by=cls.user, candidate_list_targeting_criteria=targeting_criteria, business_area=cls.business_area
         )
-        cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+        cash_plan = CashPlanFactory.build(program=program, business_area=cls.business_area)
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first()
+                imported_by=cls.user, business_area=BusinessArea.objects.first()
             )
             household, individuals = create_household(
                 {
@@ -62,7 +63,9 @@ class TestXlsxVerificationImport(TestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan, household=household, target_population=target_population,
+                cash_plan=cash_plan,
+                household=household,
+                target_population=target_population,
             )
 
             PaymentVerificationFactory(
@@ -74,43 +77,22 @@ class TestXlsxVerificationImport(TestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.verifications.first()
 
-    def test_export_received_from_pending(self):
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
-        wb = export_service.generate_workbook()
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, None)
+    @parameterized.expand(
+        [
+            ("from_pending", PaymentVerification.STATUS_PENDING, None),
+            ("from_not_received", PaymentVerification.STATUS_NOT_RECEIVED, "NO"),
+            ("from_received", PaymentVerification.STATUS_RECEIVED, "YES"),
+            ("from_received_with_issues", PaymentVerification.STATUS_RECEIVED_WITH_ISSUES, "YES"),
+        ]
+    )
+    def test_export_received_from_pending(self, _, initial_status, result):
+        self.create_user_role_with_permissions(self.user, [Permissions.PAYMENT_VERIFICATION_IMPORT], self.business_area)
 
-    def test_export_received_from_not_received(self):
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_NOT_RECEIVED
-        )
+        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(status=initial_status)
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
-        wb = export_service.generate_workbook()
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_PENDING
-        )
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "NO")
 
-    def test_export_received_from_received(self):
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_RECEIVED
-        )
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
         wb = export_service.generate_workbook()
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_PENDING
-        )
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "YES")
-
-    def test_export_received_from_received_with_issues(self):
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
-        )
-        export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
-        wb = export_service.generate_workbook()
-        TestXlsxVerificationImport.verification.payment_record_verifications.all().update(
-            status=PaymentVerification.STATUS_PENDING
-        )
-        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, "YES")
+        self.assertEqual(wb.active[f"{XlsxVerificationExportService.RECEIVED_COLUMN_LETTER}2"].value, result)
 
     def test_validation_valid_not_changed_file(self):
         export_service = XlsxVerificationExportService(TestXlsxVerificationImport.verification)
@@ -282,10 +264,12 @@ class TestXlsxVerificationImport(TestCase):
 
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+            payment_verification.status,
+            PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
         )
         self.assertEqual(
-            payment_verification.received_amount, payment_verification.payment_record.delivered_quantity - 1,
+            payment_verification.received_amount,
+            payment_verification.payment_record.delivered_quantity - 1,
         )
 
     def test_import_valid_status_changed_received_yes_full(self):
@@ -307,8 +291,10 @@ class TestXlsxVerificationImport(TestCase):
 
         payment_verification = PaymentVerification.objects.get(payment_record__id=payment_record_id)
         self.assertEqual(
-            payment_verification.status, PaymentVerification.STATUS_RECEIVED,
+            payment_verification.status,
+            PaymentVerification.STATUS_RECEIVED,
         )
         self.assertEqual(
-            payment_verification.received_amount, payment_verification.payment_record.delivered_quantity,
+            payment_verification.received_amount,
+            payment_verification.payment_record.delivered_quantity,
         )

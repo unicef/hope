@@ -7,12 +7,33 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestDiscardVerificationMutation::test_discard_active 1'] = {
+snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permission 1'] = {
     'data': {
         'discardCashPlanPaymentVerification': {
             'cashPlan': {
-                'name': 'TEST'
+                'name': 'TEST',
+                'status': 'DISTRIBUTION_COMPLETED'
             }
         }
     }
+}
+
+snapshots['TestDiscardVerificationMutation::test_discard_active_1_without_permission 1'] = {
+    'data': {
+        'discardCashPlanPaymentVerification': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'discardCashPlanPaymentVerification'
+            ]
+        }
+    ]
 }
