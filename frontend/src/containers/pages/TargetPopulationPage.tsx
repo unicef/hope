@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import get from 'lodash/get';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -46,17 +47,13 @@ export function TargetPopulationPage(): React.ReactElement {
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  const canViewList = hasPermissions(
-    PERMISSIONS.TARGETING_VIEW_LIST,
-    permissions,
-  );
   const canCreate = hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions);
 
-  if (!canViewList && !canCreate) return <PermissionDenied />;
-  if (!data) return null;
+  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions))
+    return <PermissionDenied />;
 
-  const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  const allPrograms = get(data, 'allPrograms.edges', []);
+  const programs = allPrograms.map((edge) => edge.node);
 
   const redirectToCreate = (): void => {
     const path = `/${businessArea}/target-population/create`;
@@ -87,25 +84,21 @@ export function TargetPopulationPage(): React.ReactElement {
           )}
         </>
       </PageHeader>
-      {canViewList && (
-        <>
-          <TargetPopulationFilters
-            //targetPopulations={targetPopulations as TargetPopulationNode[]}
-            filter={filter}
-            programs={programs as ProgramNode[]}
-            onFilterChange={setFilter}
-          />
-          <Container>
-            <TargetPopulationTable
-              filter={debouncedFilter}
-              canViewDetails={hasPermissions(
-                PERMISSIONS.TARGETING_VIEW_DETAILS,
-                permissions,
-              )}
-            />
-          </Container>
-        </>
-      )}
+      <TargetPopulationFilters
+        //targetPopulations={targetPopulations as TargetPopulationNode[]}
+        filter={filter}
+        programs={programs as ProgramNode[]}
+        onFilterChange={setFilter}
+      />
+      <Container>
+        <TargetPopulationTable
+          filter={debouncedFilter}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.TARGETING_VIEW_DETAILS,
+            permissions,
+          )}
+        />
+      </Container>
     </div>
   );
 }
