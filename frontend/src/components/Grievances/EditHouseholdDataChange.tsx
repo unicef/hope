@@ -235,7 +235,7 @@ export const EditHouseholdDataChange = ({
       values.householdDataUpdateFields.length === 0
     ) {
       setFieldValue('householdDataUpdateFields', [
-        { fieldName: null, fieldValue: null },
+        { fieldName: null, fieldValue: '' },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -265,7 +265,8 @@ export const EditHouseholdDataChange = ({
             <>
               {(values.householdDataUpdateFields || []).map((item, index) => (
                 <EditHouseholdDataChangeFieldRow
-                  // key={}
+                  /* eslint-disable-next-line react/no-array-index-key */
+                  key={`${index}-${item.fieldName}`}
                   itemValue={item}
                   index={index}
                   household={fullHousehold.household}
@@ -278,7 +279,7 @@ export const EditHouseholdDataChange = ({
                 <Button
                   color='primary'
                   onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    arrayHelpers.push({ fieldName: null, fieldValue: '' });
                   }}
                 >
                   <AddIcon />
