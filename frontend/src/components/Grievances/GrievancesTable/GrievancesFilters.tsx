@@ -60,6 +60,7 @@ export function GrievancesFilters({
               ),
             }}
             data-cy='filters-search'
+            value={filter.search || ''}
           />
         </Grid>
         <Grid item>
@@ -71,7 +72,7 @@ export function GrievancesFilters({
               onChange={(e) => handleFilterChange(e, 'status')}
               variant='outlined'
               label='Status'
-              value={filter.status || null}
+              value={filter.status || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
@@ -154,13 +155,13 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin}
+            value={filter.admin || null}
             onChange={(e, option) => {
               if (!option) {
                 onFilterChange({ ...filter, admin: undefined });
                 return;
               }
-              onFilterChange({ ...filter, admin: option.node.id });
+              onFilterChange({ ...filter, admin: option });
             }}
           />
         </Grid>

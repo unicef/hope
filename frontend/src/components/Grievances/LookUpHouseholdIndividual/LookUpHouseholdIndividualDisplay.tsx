@@ -3,13 +3,9 @@ import React from 'react';
 import styled from 'styled-components';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import {
-  useHouseholdQuery,
-  useIndividualQuery,
-} from '../../../__generated__/graphql';
 
 const StyledBox = styled.div`
-  border: 1.5px solid #043e91;
+  border: ${({ disabled }) => (disabled ? 0 : 1.5)}px solid #043e91;
   border-radius: 5px;
   font-size: 16px;
   padding: 16px;
@@ -36,70 +32,67 @@ export const LookUpHouseholdIndividualDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
+  disabled,
+  setSelectedIndividual,
+  setSelectedHousehold,
+}: {
+  values;
+  setLookUpDialogOpen;
+  onValueChange;
+  disabled?: boolean;
+  selectedIndividual?;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }): React.ReactElement => {
   const handleRemove = (): void => {
-    onValueChange('selectedHousehold', '');
-    onValueChange('selectedIndividual', '');
+    onValueChange('selectedHousehold', null);
+    setSelectedHousehold(null);
+    onValueChange('selectedIndividual', null);
+    setSelectedIndividual(null);
+    onValueChange('identityVerified', false);
   };
-
-  const { data, loading } = useHouseholdQuery({
-    variables: {
-      id: values.selectedHousehold,
-    },
-  });
-
-  const {
-    data: individualData,
-    loading: individualLoading,
-  } = useIndividualQuery({
-    variables: {
-      id: values.selectedIndividual,
-    },
-  });
-
-  if (loading || individualLoading) return null;
-  const { household } = data;
-  const { individual } = individualData;
-
   return (
-    <StyledBox>
+    <StyledBox disabled={disabled}>
       <Grid container>
         <Grid item>
           <Box display='flex' flexDirection='column'>
             <span>
               Household ID:
-              <BlueText>{household?.unicefId || '-'}</BlueText>
+              <BlueText> {values?.selectedHousehold?.unicefId || '-'}</BlueText>
             </span>
             <span>
               Individual ID:
-              <BlueText>{individual?.unicefId || '-'}</BlueText>
+              <BlueText>{values?.selectedIndividual?.unicefId || '-'}</BlueText>
             </span>
           </Box>
         </Grid>
-        <Grid item>
-          <Box p={2}>
-            <Grid container justify='center' alignItems='center'>
-              <Grid item>
-                <LightGrey>
-                  <EditIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => setLookUpDialogOpen(true)}
-                  />
-                </LightGrey>
+        {!disabled && (
+          <Grid item>
+            <Box p={2}>
+              <Grid container justify='center' alignItems='center'>
+                <Grid item>
+                  <LightGrey>
+                    <EditIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => setLookUpDialogOpen(true)}
+                    />
+                  </LightGrey>
+                </Grid>
+                <Grid item>
+                  <DarkGrey>
+                    <DeleteIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => handleRemove()}
+                    />
+                  </DarkGrey>
+                </Grid>
               </Grid>
-              <Grid item>
-                <DarkGrey>
-                  <DeleteIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => handleRemove()}
-                  />
-                </DarkGrey>
-              </Grid>
-            </Grid>
-          </Box>
-        </Grid>
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </StyledBox>
   );

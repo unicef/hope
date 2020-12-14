@@ -11,6 +11,9 @@ import {
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import { PermissionDenied } from '../../../components/PermissionDenied';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
 
@@ -56,6 +59,7 @@ function TabPanel({
 }
 export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
+  const permissions = usePermissions();
   const { data, loading } = useRegistrationDataImportQuery({
     variables: { id },
   });
@@ -64,47 +68,68 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
+
   if (loading || choicesLoading) {
     return <LoadingComponent />;
   }
+  if (permissions === null) return null;
+  if (
+    !hasPermissions(
+      [
+        PERMISSIONS.RDI_VIEW_DETAILS,
+        PERMISSIONS.RDI_MERGE_IMPORT,
+        PERMISSIONS.RDI_RERUN_DEDUPE,
+      ],
+      permissions,
+    )
+  )
+    return <PermissionDenied />;
 
-  if (!data || !choices) {
-    return null;
-  }
+  if (!data || !choices) return null;
+
+  const rdiDetails = (
+    <Container>
+      <RegistrationDetails registration={data.registrationDataImport} />
+      <TableWrapper>
+        <Paper>
+          <Title variant='h6'>Import Preview</Title>
+          <TabsContainer>
+            <StyledTabs
+              value={selectedTab}
+              onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                setSelectedTab(newValue)
+              }
+              indicatorColor='primary'
+              textColor='primary'
+              variant='fullWidth'
+              aria-label='full width tabs example'
+            >
+              <Tab label='Households' />
+              <Tab label='Individuals' />
+            </StyledTabs>
+          </TabsContainer>
+          <TabPanel value={selectedTab} index={0}>
+            <ImportedHouseholdTable rdiId={id} />
+          </TabPanel>
+          <TabPanel value={selectedTab} index={1}>
+            <ImportedIndividualsTable showCheckbox rdiId={id} />
+          </TabPanel>
+        </Paper>
+      </TableWrapper>
+    </Container>
+  );
+
   return (
     <div>
       <RegistrationDataImportDetailsPageHeader
         registration={data.registrationDataImport}
+        canMerge={hasPermissions(PERMISSIONS.RDI_MERGE_IMPORT, permissions)}
+        canRerunDedupe={hasPermissions(
+          PERMISSIONS.RDI_RERUN_DEDUPE,
+          permissions,
+        )}
       />
-      <Container>
-        <RegistrationDetails registration={data.registrationDataImport} />
-        <TableWrapper>
-          <Paper>
-            <Title variant='h6'>Import Preview</Title>
-            <TabsContainer>
-              <StyledTabs
-                value={selectedTab}
-                onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                  setSelectedTab(newValue)
-                }
-                indicatorColor='primary'
-                textColor='primary'
-                variant='fullWidth'
-                aria-label='full width tabs example'
-              >
-                <Tab label='Households' />
-                <Tab label='Individuals' />
-              </StyledTabs>
-            </TabsContainer>
-            <TabPanel value={selectedTab} index={0}>
-              <ImportedHouseholdTable rdiId={id} />
-            </TabPanel>
-            <TabPanel value={selectedTab} index={1}>
-              <ImportedIndividualsTable showCheckbox rdiId={id} />
-            </TabPanel>
-          </Paper>
-        </TableWrapper>
-      </Container>
+      {hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions) && rdiDetails}
     </div>
   );
 }

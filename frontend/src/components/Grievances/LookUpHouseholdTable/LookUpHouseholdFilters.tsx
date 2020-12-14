@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 import {
   Box,
+  Button,
   Grid,
   InputAdornment,
   MenuItem,
@@ -22,7 +23,6 @@ import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
 import { FieldLabel } from '../../FieldLabel';
-import { Missing } from '../../Missing';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -55,12 +55,16 @@ interface LookUpHouseholdFiltersProps {
   filter;
   programs: ProgramNode[];
   choicesData: HouseholdChoiceDataQuery;
+  setFilterHouseholdApplied?;
+  householdFilterInitial?;
 }
 export function LookUpHouseholdFilters({
   onFilterChange,
   filter,
   programs,
   choicesData,
+  setFilterHouseholdApplied,
+  householdFilterInitial,
 }: LookUpHouseholdFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -72,6 +76,7 @@ export function LookUpHouseholdFilters({
             label='Search'
             variant='outlined'
             margin='dense'
+            value={filter.search}
             onChange={(e) => handleFilterChange(e, 'search')}
             InputProps={{
               startAdornment: (
@@ -92,7 +97,6 @@ export function LookUpHouseholdFilters({
               onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
               label='Programme'
-              multiple
               value={filter.programs || []}
               InputProps={{
                 startAdornment: (
@@ -169,7 +173,7 @@ export function LookUpHouseholdFilters({
               onChange={(e) => handleFilterChange(e, 'residenceStatus')}
               variant='outlined'
               label='Status'
-              value={filter.residenceStatus || null}
+              value={filter.residenceStatus || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
@@ -186,13 +190,13 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin2}
+            value={filter.admin2 || null}
             onChange={(e, option) => {
               if (!option) {
                 onFilterChange({ ...filter, admin2: undefined });
                 return;
               }
-              onFilterChange({ ...filter, admin2: option.node.id });
+              onFilterChange({ ...filter, admin2: option });
             }}
           />
         </Grid>
@@ -201,7 +205,7 @@ export function LookUpHouseholdFilters({
             <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='minFilter'
-              value={filter.size.min}
+              value={filter.size.min || ''}
               variant='outlined'
               margin='dense'
               placeholder='From'
@@ -230,7 +234,7 @@ export function LookUpHouseholdFilters({
             <FieldLabel>Household Size</FieldLabel>
             <TextContainer
               id='maxFilter'
-              value={filter.size.max}
+              value={filter.size.max || ''}
               variant='outlined'
               margin='dense'
               placeholder='To'
@@ -253,6 +257,24 @@ export function LookUpHouseholdFilters({
               }}
             />
           </Box>
+        </Grid>
+        <Grid container justify='flex-end'>
+          <Button
+            color='primary'
+            onClick={() => {
+              setFilterHouseholdApplied(householdFilterInitial);
+              onFilterChange(householdFilterInitial);
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            color='primary'
+            variant='outlined'
+            onClick={() => setFilterHouseholdApplied(filter)}
+          >
+            Apply
+          </Button>
         </Grid>
       </Grid>
     </ContainerWithBorder>

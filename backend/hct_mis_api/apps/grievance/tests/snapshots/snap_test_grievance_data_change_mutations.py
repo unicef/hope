@@ -7,6 +7,37 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': {
+                        'household': {
+                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                        },
+                        'householdData': {
+                            'female_age_group_6_11_count': {
+                                'approve_status': False,
+                                'previous_value': 0,
+                                'value': 14
+                            },
+                            'flex_fields': {
+                            }
+                        }
+                    },
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 13,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change 1'] = {
     'data': {
         'createGrievanceTicket': {
@@ -17,9 +48,13 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'individualData': {
+                            'birth_date': '1980-02-01',
                             'family_name': 'Romaniak',
+                            'flex_fields': {
+                            },
                             'full_name': 'Test Test',
                             'given_name': 'Test',
+                            'marital_status': 'SINGLE',
                             'sex': 'MALE'
                         }
                     },
@@ -28,33 +63,6 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                     'householdDataUpdateTicketDetails': None,
                     'individualDataUpdateTicketDetails': None,
                     'issueType': 16,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': {
-                        'individual': {
-                            'fullName': 'Benjamin Butler'
-                        },
-                        'individualData': {
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'sex': 'MALE'
-                        }
-                    },
-                    'issueType': 14,
                     'sensitiveTicketDetails': None
                 }
             ]
@@ -80,7 +88,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individu
     }
 }
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change 1'] = {
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change 1'] = {
     'data': {
         'createGrievanceTicket': {
             'grievanceTickets': [
@@ -88,16 +96,48 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                     'addIndividualTicketDetails': None,
                     'category': 2,
                     'description': 'Test',
-                    'householdDataUpdateTicketDetails': {
-                        'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': {
+                        'individual': {
+                            'fullName': 'Benjamin Butler'
                         },
-                        'householdData': {
-                            'female_age_group_6_11_count': 14
+                        'individualData': {
+                            'birth_date': {
+                                'approve_status': False,
+                                'previous_value': '1943-07-30',
+                                'value': '1980-02-01'
+                            },
+                            'documents': [
+                            ],
+                            'documents_to_remove': [
+                            ],
+                            'flex_fields': {
+                            },
+                            'full_name': {
+                                'approve_status': False,
+                                'previous_value': 'Benjamin Butler',
+                                'value': 'Test Test'
+                            },
+                            'given_name': {
+                                'approve_status': False,
+                                'previous_value': 'Benjamin',
+                                'value': 'Test'
+                            },
+                            'marital_status': {
+                                'approve_status': False,
+                                'previous_value': 'WIDOWED',
+                                'value': 'SINGLE'
+                            },
+                            'previous_documents': {
+                            },
+                            'sex': {
+                                'approve_status': False,
+                                'previous_value': 'FEMALE',
+                                'value': 'MALE'
+                            }
                         }
                     },
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 13,
+                    'issueType': 14,
                     'sensitiveTicketDetails': None
                 }
             ]

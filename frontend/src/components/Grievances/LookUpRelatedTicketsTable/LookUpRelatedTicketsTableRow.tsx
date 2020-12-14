@@ -39,7 +39,7 @@ export function LookUpRelatedTicketsTableRow({
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
     const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    const win = window.open(path, '_blank rel=noopener');
+    const win = window.open(path);
     if (win != null) {
       win.focus();
     }

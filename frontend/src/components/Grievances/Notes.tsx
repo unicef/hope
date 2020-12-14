@@ -1,21 +1,26 @@
 import React from 'react';
-import { Avatar, Box, Button, Grid, Typography } from '@material-ui/core';
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  Paper,
+  Typography,
+} from '@material-ui/core';
 import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Field, Form, Formik } from 'formik';
 import styled from 'styled-components';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { OverviewContainerColumn } from '../OverviewContainerColumn';
-import { Missing } from '../Missing';
 import {
+  GrievanceTicketDocument,
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../__generated__/graphql';
 import { renderUserName } from '../../utils/utils';
-import { GrievanceTicket } from '../../apollo/queries/GrievanceTicket';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -29,6 +34,13 @@ const Date = styled.span`
 `;
 const DescMargin = styled.div`
   margin-bottom: 35px;
+  overflow: auto;
+`;
+const StyledBox = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 26px 22px;
 `;
 
 export function Notes({
@@ -98,14 +110,16 @@ export function Notes({
           variables: {
             noteInput: { ticket: id, description: values.newNote },
           },
-          refetchQueries: () => [{ query: GrievanceTicket, variables: { id } }],
+          refetchQueries: () => [
+            { query: GrievanceTicketDocument, variables: { id } },
+          ],
         });
         resetForm({});
       }}
       validationSchema={validationSchema}
     >
       {({ submitForm }) => (
-        <ContainerColumnWithBorder>
+        <StyledBox>
           <Title>
             <Typography variant='h6'>Notes</Typography>
           </Title>
@@ -150,7 +164,7 @@ export function Notes({
               </Grid>
             </Grid>
           </OverviewContainerColumn>
-        </ContainerColumnWithBorder>
+        </StyledBox>
       )}
     </Formik>
   );

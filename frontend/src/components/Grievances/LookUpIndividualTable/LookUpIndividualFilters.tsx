@@ -6,6 +6,7 @@ import WcIcon from '@material-ui/icons/Wc';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import {
   Box,
+  Button,
   Grid,
   InputAdornment,
   MenuItem,
@@ -17,9 +18,7 @@ import { ContainerWithBorder } from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import { FieldLabel } from '../../FieldLabel';
-import { HouseholdChoiceDataQuery } from '../../../__generated__/graphql';
 import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { Missing } from '../../Missing';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;
@@ -41,13 +40,15 @@ interface LookUpIndividualFiltersProps {
   onFilterChange;
   filter;
   programs;
-  choicesData: HouseholdChoiceDataQuery;
+  setFilterIndividualApplied?;
+  individualFilterInitial?;
 }
 export function LookUpIndividualFilters({
   onFilterChange,
   filter,
   programs,
-  choicesData,
+  setFilterIndividualApplied,
+  individualFilterInitial,
 }: LookUpIndividualFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -79,7 +80,6 @@ export function LookUpIndividualFilters({
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'programs')}
               variant='outlined'
-              multiple
               label='Programme'
               value={filter.programs || []}
               InputProps={{
@@ -184,7 +184,7 @@ export function LookUpIndividualFilters({
                 onFilterChange({ ...filter, admin2: undefined });
                 return;
               }
-              onFilterChange({ ...filter, admin2: option.node.id });
+              onFilterChange({ ...filter, admin2: option });
             }}
           />
         </Grid>
@@ -219,6 +219,24 @@ export function LookUpIndividualFilters({
               <MenuItem value='FEMALE'>Female</MenuItem>
             </Select>
           </StyledFormControl>
+        </Grid>
+        <Grid container justify='flex-end'>
+          <Button
+            color='primary'
+            onClick={() => {
+              setFilterIndividualApplied(individualFilterInitial);
+              onFilterChange(individualFilterInitial);
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            color='primary'
+            variant='outlined'
+            onClick={() => setFilterIndividualApplied(filter)}
+          >
+            Apply
+          </Button>
         </Grid>
       </Grid>
     </ContainerWithBorder>

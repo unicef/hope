@@ -34,7 +34,7 @@ export const LookUpRelatedTicketsTable = ({
     status: [filter.status],
     fsp: [filter.fsp],
     createdAtRange: JSON.stringify(filter.createdAtRange),
-    admin: [decodeIdString(filter.admin)],
+    admin: [decodeIdString(filter?.admin?.node?.id)],
   };
   const [selected, setSelected] = useState(
     initialValues.selectedRelatedTickets,

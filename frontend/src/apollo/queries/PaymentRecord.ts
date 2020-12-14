@@ -58,6 +58,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       household {
         id
         size
+        unicefId
         headOfHousehold {
           id
           phoneNo

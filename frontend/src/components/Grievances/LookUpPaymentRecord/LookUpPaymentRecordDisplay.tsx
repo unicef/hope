@@ -6,7 +6,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { decodeIdString } from '../../../utils/utils';
 
 const StyledBox = styled.div`
-  border: 1.5px solid #043e91;
+  border: ${({ disabled }) => (disabled ? 0 : 1.5)}px solid #043e91;
   border-radius: 5px;
   font-size: 16px;
   padding: 16px;
@@ -33,6 +33,12 @@ export const LookUpPaymentRecordDisplay = ({
   values,
   setLookUpDialogOpen,
   onValueChange,
+  disabled,
+}: {
+  values;
+  setLookUpDialogOpen;
+  onValueChange;
+  disabled?;
 }): React.ReactElement => {
   const handleRemove = (): void => {
     onValueChange('selectedPaymentRecords', []);
@@ -46,7 +52,7 @@ export const LookUpPaymentRecordDisplay = ({
     return <BlueText>-</BlueText>;
   };
   return (
-    <StyledBox>
+    <StyledBox disabled={disabled}>
       <Grid container>
         <Grid item>
           <Box display='flex' flexDirection='column'>
@@ -54,30 +60,32 @@ export const LookUpPaymentRecordDisplay = ({
             {renderPaymentRecords()}
           </Box>
         </Grid>
-        <Grid item>
-          <Box p={2}>
-            <Grid container justify='center' alignItems='center'>
-              <Grid item>
-                <LightGrey>
-                  <EditIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => setLookUpDialogOpen(true)}
-                  />
-                </LightGrey>
+        {disabled || (
+          <Grid item>
+            <Box p={2}>
+              <Grid container justify='center' alignItems='center'>
+                <Grid item>
+                  <LightGrey>
+                    <EditIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => setLookUpDialogOpen(true)}
+                    />
+                  </LightGrey>
+                </Grid>
+                <Grid item>
+                  <DarkGrey>
+                    <DeleteIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => handleRemove()}
+                    />
+                  </DarkGrey>
+                </Grid>
               </Grid>
-              <Grid item>
-                <DarkGrey>
-                  <DeleteIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => handleRemove()}
-                  />
-                </DarkGrey>
-              </Grid>
-            </Grid>
-          </Box>
-        </Grid>
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </StyledBox>
   );

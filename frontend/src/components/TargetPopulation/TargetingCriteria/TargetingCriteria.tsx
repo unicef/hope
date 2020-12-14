@@ -1,12 +1,15 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import {useTranslation} from 'react-i18next';
-import {Button, Paper, Typography,} from '@material-ui/core';
-import {AddCircleOutline} from '@material-ui/icons';
-import {TargetCriteriaForm} from '../../../containers/forms/TargetCriteriaForm';
-import {AllProgramsQuery, TargetPopulationQuery,} from '../../../__generated__/graphql';
-import {Criteria} from './Criteria';
-import {ContentWrapper, VulnerabilityScoreComponent} from "./VulnerabilityScoreComponent";
+import { useTranslation } from 'react-i18next';
+import { Button, Paper, Typography } from '@material-ui/core';
+import { AddCircleOutline } from '@material-ui/icons';
+import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { TargetPopulationQuery } from '../../../__generated__/graphql';
+import { Criteria } from './Criteria';
+import {
+  ContentWrapper,
+  VulnerabilityScoreComponent,
+} from './VulnerabilityScoreComponent';
 
 const PaperContainer = styled(Paper)`
   margin: ${({ theme }) => theme.spacing(5)}px;
@@ -69,7 +72,6 @@ interface TargetingCriteriaProps {
   candidateListRules?;
   isEdit?: boolean;
   helpers?;
-  selectedProgram?: AllProgramsQuery['allPrograms']['edges'][number]['node'];
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
 }
 
@@ -77,7 +79,6 @@ export function TargetingCriteria({
   candidateListRules,
   isEdit = false,
   helpers,
-  selectedProgram,
   targetPopulation,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
