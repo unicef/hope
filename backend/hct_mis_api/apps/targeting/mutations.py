@@ -55,7 +55,6 @@ class ValidatedMutation(PermissionMutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
-        print("MODEL", model_object)
         if cls.permissions:
             cls.has_permission(info, cls.permissions, model_object.business_area)
         return cls.validated_mutate(root, info, model_object=model_object, **kwargs)
