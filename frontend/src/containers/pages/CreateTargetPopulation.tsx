@@ -17,6 +17,10 @@ import { CreateTable } from '../tables/TargetPopulation/Create';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
 import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
 import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -44,18 +48,26 @@ export function CreateTargetPopulation(): React.ReactElement {
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
-  const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Targeting',
-      to: `/${businessArea}/target-population/`,
-    },
-  ];
+  const permissions = usePermissions();
+
   const {
     data: allProgramsData,
     loading: loadingPrograms,
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
   });
+
+  if (loadingPrograms) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+    return <PermissionDenied />;
+
+  const breadCrumbsItems: BreadCrumbsItem[] = [
+    {
+      title: 'Targeting',
+      to: `/${businessArea}/target-population/`,
+    },
+  ];
 
   return (
     <Formik
