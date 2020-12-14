@@ -5686,6 +5686,16 @@ export type CashPlanQuery = (
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentRecordNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & { targetPopulation: (
+            { __typename?: 'TargetPopulationNode' }
+            & Pick<TargetPopulationNode, 'id' | 'name'>
+          ) }
+        )> }
+      )>> }
     ) }
   )> }
 );
@@ -10219,6 +10229,14 @@ export const CashPlanDocument = gql`
     paymentRecords {
       totalCount
       edgeCount
+      edges {
+        node {
+          targetPopulation {
+            id
+            name
+          }
+        }
+      }
     }
   }
 }

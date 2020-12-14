@@ -40,6 +40,7 @@ export const EditHouseholdDataChangeField = ({
     case 'DECIMAL':
       fieldProps = {
         component: FormikTextField,
+        type: 'number',
       };
       break;
     case 'STRING':
