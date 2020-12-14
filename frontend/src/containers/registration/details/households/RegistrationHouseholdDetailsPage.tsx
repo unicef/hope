@@ -68,11 +68,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
-          registrationDate={`${(
-            <UniversalMoment>
-              {importedHousehold.firstRegistrationDate}
-            </UniversalMoment>
-          )}`}
+          registrationDate={importedHousehold.firstRegistrationDate}
         />
       </Container>
     </div>
