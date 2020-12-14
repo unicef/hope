@@ -8,6 +8,10 @@ import { decodeIdString } from '../../../../utils/utils';
 import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
 import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
 import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PermissionDenied } from '../../../../components/PermissionDenied';
 
 const Container = styled.div`
   padding: 20px;
@@ -21,13 +25,18 @@ const Container = styled.div`
 export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const { data, loading } = useImportedIndividualQuery({
     variables: {
       id,
     },
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions))
+    return <PermissionDenied />;
+  if (!data) return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
