@@ -23,4 +23,12 @@ export const GRIEVANCE_CATEGORIES = {
   REFERRAL: '6',
   POSITIVE_FEEDBACK: '7',
   DEDUPLICATION: '8',
+  //system flagging missing
+};
+
+export const GRIEVANCE_ISSUE_TYPES = {
+  EDIT_HOUSEHOLD: '13',
+  EDIT_INDIVIDUAL: '14',
+  DELETE_INDIVIDUAL: '15',
+  ADD_INDIVIDUAL: '16',
 };

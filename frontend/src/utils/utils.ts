@@ -5,7 +5,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_TICKET_STATES, TARGETING_STATES } from './constants';
+import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -303,6 +303,7 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -323,7 +324,10 @@ export function descendingComparator(a, b, orderBy): number {
   return 0;
 }
 
-export function getComparator(order, orderBy) {
+export function getComparator(
+  order,
+  orderBy,
+): (a: number, b: number) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -337,8 +341,46 @@ export function reduceChoices(choices): { [id: number]: string } {
   }, {});
 }
 
-export function renderUserName(user) {
+export function renderUserName(user): string {
   return user?.firstName
     ? `${user.firstName} ${user.lastName}`
     : `${user.email}`;
 }
+
+const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
+  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.REFERRAL]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: true,
+  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function thingForSpecificGrievanceType(
+  ticket: { category: number | string; issueType?: number | string },
+  thingDict,
+  defaultThing = null,
+  categoryWithIssueTypeDict = grievanceTypeIssueTypeDict,
+) {
+  const category = ticket.category?.toString();
+  const issueType = ticket.issueType?.toString();
+  if (!(category in thingDict)) {
+    return defaultThing;
+  }
+  const categoryThing = thingDict[category];
+  if (
+    categoryWithIssueTypeDict[category] === 'IGNORE' ||
+    (!categoryWithIssueTypeDict[category] &&
+      (issueType === null || issueType === undefined))
+  ) {
+    return categoryThing;
+  }
+  if (!(issueType in categoryThing)) {
+    return defaultThing;
+  }
+  return categoryThing[issueType];
+}
+
+export const isInvalid = (fieldname: string, errors, touched): boolean =>
+  errors[fieldname] && touched[fieldname];

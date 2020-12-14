@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import reduce
 
 from django.core.exceptions import ValidationError
@@ -30,6 +31,21 @@ TYPE_IMAGE = "IMAGE"
 TYPE_SELECT_ONE = "SELECT_ONE"
 TYPE_SELECT_MANY = "SELECT_MANY"
 TYPE_GEOPOINT = "GEOPOINT"
+TYPE_DECIMAL = "DECIMAL"
+
+FIELD_TYPES_TO_INTERNAL_TYPE = {
+    TYPE_ID: str,
+    TYPE_INTEGER: int,
+    TYPE_STRING: str,
+    TYPE_LIST_OF_IDS: list,
+    TYPE_BOOL: bool,
+    TYPE_DATE: datetime,
+    TYPE_IMAGE: str,
+    TYPE_SELECT_ONE: str,
+    TYPE_SELECT_MANY: str,
+    TYPE_GEOPOINT: str,
+    TYPE_DECIMAL: str,
+}
 
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
@@ -53,6 +69,7 @@ def country_generic_query(comparision_method, args, lookup):
 
 def country_query(comparision_method, args):
     return country_generic_query(comparision_method, args, "country")
+
 
 def country_origin_query(comparision_method, args):
     return country_generic_query(comparision_method, args, "country_origin")

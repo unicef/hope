@@ -1,8 +1,8 @@
 import { Box, Button } from '@material-ui/core';
+import { useParams, Link } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 import { MiśTheme } from '../../theme';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import {
@@ -14,7 +14,6 @@ import {
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { Missing } from '../Missing';
 import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -47,6 +46,8 @@ export const GrievanceDetailsToolbar = ({
   const isInProgress = ticket.status === GRIEVANCE_TICKET_STATES.IN_PROGRESS;
   const isForApproval = ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   const isOnHold = ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD;
+  const isClosed = ticket.status === GRIEVANCE_TICKET_STATES.CLOSED;
+  const isEditable = !isClosed;
 
   const isFeedbackType =
     ticket.category.toString() === GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK ||
@@ -56,7 +57,7 @@ export const GrievanceDetailsToolbar = ({
   const closingConfirmationText =
     'Are you sure you want to close the ticket ? By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found.';
 
-  const changeState = (status) => {
+  const changeState = (status): void => {
     mutate({
       variables: {
         grievanceTicketId: ticket.id,
@@ -69,26 +70,31 @@ export const GrievanceDetailsToolbar = ({
       title={`Ticket #${decodeIdString(id)}`}
       breadCrumbs={breadCrumbsItems}
     >
-      <>
-        {isNew && (
-          <Box display='flex' alignItems='center'>
+      <Box display='flex' alignItems='center'>
+        {isEditable && (
+          <>
             <Button
               color='primary'
               variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
+              component={Link}
+              to={`/${businessArea}/grievance-and-feedback/edit-ticket/${id}`}
               startIcon={<EditIcon />}
             >
               Edit
             </Button>
             <Separator />
+          </>
+        )}
+        {isNew && (
+          <>
             <Button
               color='primary'
               variant='contained'
               onClick={() => changeState(GRIEVANCE_TICKET_STATES.ASSIGNED)}
             >
-              ASSIGN TO ME <Missing />
+              ASSIGN TO ME
             </Button>
-          </Box>
+          </>
         )}
         {isAssigned && (
           <Button
@@ -100,16 +106,7 @@ export const GrievanceDetailsToolbar = ({
           </Button>
         )}
         {isInProgress && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -149,19 +146,10 @@ export const GrievanceDetailsToolbar = ({
                 )}
               </ConfirmationDialog>
             )}
-          </Box>
+          </>
         )}
         {isOnHold && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -201,19 +189,10 @@ export const GrievanceDetailsToolbar = ({
                 )}
               </ConfirmationDialog>
             )}
-          </Box>
+          </>
         )}
         {isForApproval && (
-          <Box display='flex' alignItems='center'>
-            <Button
-              color='primary'
-              variant='outlined'
-              onClick={() => console.log('🖌edit ticket')}
-              startIcon={<EditIcon />}
-            >
-              Edit
-            </Button>
-            <Separator />
+          <>
             <Box mr={3}>
               <Button
                 color='primary'
@@ -240,9 +219,9 @@ export const GrievanceDetailsToolbar = ({
                 </Button>
               )}
             </ConfirmationDialog>
-          </Box>
+          </>
         )}
-      </>
+      </Box>
     </PageHeader>
   );
 };

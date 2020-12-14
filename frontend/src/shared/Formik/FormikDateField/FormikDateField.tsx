@@ -2,6 +2,7 @@ import React from 'react';
 import { InputAdornment } from '@material-ui/core';
 import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
+import get from "lodash/get";
 
 export const FormikDateField = ({
   field,
@@ -10,7 +11,9 @@ export const FormikDateField = ({
   decoratorEnd,
   ...otherProps
 }): React.ReactElement => {
-  const isInvalid = form.errors[field.name] && form.touched[field.name];
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount>0);
   const dateFormat = 'DD/MM/YYYY';
   let formattedValue = field.value === '' ? null : field.value;
   if (formattedValue) {
@@ -27,7 +30,7 @@ export const FormikDateField = ({
       value={formattedValue}
       error={isInvalid}
       onBlur={null}
-      helperText={isInvalid && form.errors[field.name]}
+      helperText={isInvalid && get(form.errors, field.name)}
       autoOk
       onClose={() => {
         setTimeout(() => {

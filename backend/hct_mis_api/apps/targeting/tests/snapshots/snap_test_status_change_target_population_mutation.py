@@ -27,33 +27,6 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_populat
     ]
 }
 
-snapshots['TestApproveTargetPopulationMutation::test_approve_target_population 1'] = {
-    'data': {
-        'approveTargetPopulation': {
-            'targetPopulation': {
-                'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
-                    'totalCount': 2
-                },
-                'status': 'APPROVED'
-            }
-        }
-    }
-}
-
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
     'data': {
         'unapproveTargetPopulation': None
@@ -119,49 +92,6 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_popul
             ]
         }
     ]
-}
-
-snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population 1'] = {
-    'data': {
-        'finalizeTargetPopulation': {
-            'targetPopulation': {
-                'finalList': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ]
-                },
-                'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
-                    'totalCount': 2
-                },
-                'status': 'FINALIZED'
-            }
-        }
-    }
 }
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {

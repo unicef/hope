@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from graphene_file_upload.scalars import Upload
 
+from account.permissions import Permissions, PermissionMutationMixin
 from core.airflow_api import AirflowApi
 from core.kobo.api import KoboAPI
 from core.kobo.common import count_population
@@ -40,7 +41,9 @@ def create_registration_data_import_objects(registration_data_import_data, user,
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
 
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
-        business_area_slug=business_area.slug, import_data=import_data_obj, **registration_data_import_data,
+        business_area_slug=business_area.slug,
+        import_data=import_data_obj,
+        **registration_data_import_data,
     )
     created_obj_hct = RegistrationDataImport.objects.create(
         status=RegistrationDataImport.IMPORTING,
@@ -78,7 +81,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
 
 
-class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
+class RegistrationXlsxImportMutation(BaseValidator, PermissionMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -94,6 +97,8 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
             business_area,
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "XLS")
 
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportXLSX",
             context={
@@ -106,7 +111,7 @@ class RegistrationXlsxImportMutation(BaseValidator, graphene.Mutation):
         return RegistrationXlsxImportMutation(created_obj_hct)
 
 
-class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
+class RegistrationDeduplicationMutation(BaseValidator, PermissionMutationMixin):
     ok = graphene.Boolean()
 
     class Arguments:
@@ -124,6 +129,8 @@ class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
     def mutate(cls, root, info, registration_data_import_datahub_id):
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
 
+        cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
+
         cls.validate(rdi_obj=rdi_obj)
 
         rdi_obj.status = RegistrationDataImport.DEDUPLICATION
@@ -137,7 +144,7 @@ class RegistrationDeduplicationMutation(BaseValidator, graphene.Mutation):
         return cls(ok=True)
 
 
-class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
+class RegistrationKoboImportMutation(BaseValidator, PermissionMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -153,6 +160,8 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
             business_area,
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
+
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportKobo",
             context={
@@ -165,7 +174,7 @@ class RegistrationKoboImportMutation(BaseValidator, graphene.Mutation):
         return RegistrationXlsxImportMutation(created_obj_hct)
 
 
-class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
+class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -181,19 +190,23 @@ class MergeRegistrationDataImportMutation(BaseValidator, graphene.Mutation):
     @is_authenticated
     def mutate(cls, root, info, id):
         decode_id = decode_id_string(id)
-        obj_hct = RegistrationDataImport.objects.get(id=decode_id,)
+        obj_hct = RegistrationDataImport.objects.get(
+            id=decode_id,
+        )
+
+        cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
+
         cls.validate(status=obj_hct.status)
         AirflowApi.start_dag(
-            dag_id="MergeRegistrationImportData", context={"registration_data_import_id": decode_id},
+            dag_id="MergeRegistrationImportData",
+            context={"registration_data_import_id": decode_id},
         )
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
-class UploadImportDataXLSXFile(
-    UploadXLSXValidator, graphene.Mutation,
-):
+class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutationMixin):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
 
@@ -204,8 +217,10 @@ class UploadImportDataXLSXFile(
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, file, business_area_slug):
-        errors = cls.validate(file=file, business_area_slug=business_area_slug)
 
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+
+        errors = cls.validate(file=file, business_area_slug=business_area_slug)
 
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
@@ -232,13 +247,15 @@ class UploadImportDataXLSXFile(
             number_of_individuals += 1
 
         created = ImportData.objects.create(
-            file=file, number_of_households=number_of_households, number_of_individuals=number_of_individuals,
+            file=file,
+            number_of_households=number_of_households,
+            number_of_individuals=number_of_individuals,
         )
 
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, graphene.Mutation):
+class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutationMixin):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -249,6 +266,9 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, graphene
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, uid, business_area_slug):
+
+        cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
+
         kobo_api = KoboAPI(business_area_slug)
 
         submissions = kobo_api.get_project_submissions(uid)
@@ -267,7 +287,9 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, graphene
         file = File(BytesIO(json.dumps(submissions).encode()), name=import_file_name)
 
         created = ImportData.objects.create(
-            file=file, number_of_households=number_of_households, number_of_individuals=number_of_individuals,
+            file=file,
+            number_of_households=number_of_households,
+            number_of_individuals=number_of_individuals,
         )
 
         return SaveKoboProjectImportDataMutation(created, [])

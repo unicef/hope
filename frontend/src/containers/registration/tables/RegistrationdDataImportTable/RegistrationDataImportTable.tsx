@@ -16,7 +16,10 @@ const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-export function RegistrationDataImportTable({ filter }): ReactElement {
+export function RegistrationDataImportTable({
+  filter,
+  canViewDetails,
+}): ReactElement {
   const businessArea = useBusinessArea();
   const initialVariables = {
     // eslint-disable-next-line @typescript-eslint/camelcase
@@ -52,6 +55,7 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
           <RegistrationDataImportTableRow
             key={row.id}
             registrationDataImport={row}
+            canViewDetails={canViewDetails}
           />
         )}
       />

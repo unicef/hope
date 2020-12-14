@@ -173,6 +173,51 @@ def create_household(household_args=None, individual_args=None):
     return household, individuals
 
 
+def create_household_for_fixtures(household_args=None, individual_args=None):
+    if household_args is None:
+        household_args = {}
+    if individual_args is None:
+        individual_args = {}
+    household = HouseholdFactory.build(**household_args)
+    individuals = IndividualFactory.create_batch(household.size, household=None, **individual_args)
+
+    household.head_of_household = individuals[0]
+    household.registration_data_import.imported_by.save()
+    household.registration_data_import.save()
+    household.save()
+
+    individuals_to_update = []
+    for index, individual in enumerate(individuals):
+        if index == 0:
+            individual.relationship = "HEAD"
+        individual.household = household
+        individuals_to_update.append(individual)
+
+    Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
+
+    if random.choice([True, False]) and len(individuals) >= 2:
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[0], household=household, role=ROLE_PRIMARY
+        )
+        IndividualRoleInHousehold.objects.create(
+            individual=individuals[1], household=household, role=ROLE_ALTERNATE
+        )
+    else:
+        primary_collector, alternate_collector = IndividualFactory.create_batch(
+            2, household=None, relationship="NON_BENEFICIARY"
+        )
+        primary_collector_irh = IndividualRoleInHousehold(
+            individual=primary_collector, household=household, role=ROLE_PRIMARY
+        )
+        primary_collector_irh.save()
+        alternate_collector_irh = IndividualRoleInHousehold(
+            individual=alternate_collector, household=household, role=ROLE_ALTERNATE
+        )
+        alternate_collector_irh.save()
+
+    return household, individuals
+
+
 def create_household_and_individuals(household_data=None, individuals_data=None, imported=False):
     if household_data is None:
         household_data = {}

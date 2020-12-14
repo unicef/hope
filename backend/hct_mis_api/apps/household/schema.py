@@ -2,22 +2,37 @@ from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
 
 import graphene
-from django_filters import CharFilter, FilterSet, ModelMultipleChoiceFilter, MultipleChoiceFilter
+from django_filters import (
+    CharFilter,
+    FilterSet,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+)
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
-
-from program.models import Program
 from targeting.models import HouseholdSelection
 
+from account.permissions import (
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+)
+from core.countries import Countries
 from core.extended_connection import ExtendedConnection
 from core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from core.models import AdminArea
 from core.schema import ChoiceObject
-from core.utils import CustomOrderingFilter, encode_ids, to_choice_object
+from core.utils import (
+    CustomOrderingFilter,
+    decode_id_string,
+    encode_ids,
+    to_choice_object,
+)
 from household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
+    IDENTIFICATION_TYPE_CHOICE,
     INDIVIDUAL_HOUSEHOLD_STATUS,
     MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
@@ -32,6 +47,7 @@ from household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from program.models import Program
 from registration_datahub.schema import DeduplicationResultNode
 
 
@@ -101,6 +117,7 @@ class IndividualFilter(FilterSet):
         field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
+    excluded_id = CharFilter(method="filter_excluded_id")
 
     class Meta:
         model = Individual
@@ -137,6 +154,9 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__id__icontains=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
+
+    def filter_excluded_id(self, qs, name, value):
+        return qs.exclude(id=decode_id_string(value))
 
 
 class DocumentTypeNode(DjangoObjectType):
@@ -211,7 +231,9 @@ class HouseholdSelection(DjangoObjectType):
         model = HouseholdSelection
 
 
-class HouseholdNode(DjangoObjectType):
+class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),)
+
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
@@ -219,6 +241,7 @@ class HouseholdNode(DjangoObjectType):
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
+    consent_sharing = graphene.List(graphene.String)
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -256,12 +279,15 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
         model = IndividualRoleInHousehold
 
 
-class IndividualNode(DjangoObjectType):
+class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),)
+
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
+    observed_disability = graphene.List(graphene.String)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -288,20 +314,24 @@ class IndividualNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
-    all_households = DjangoFilterConnectionField(
+    all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
+        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST),),
     )
     individual = relay.Node.Field(IndividualNode)
-    all_individuals = DjangoFilterConnectionField(
+    all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
+        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
+    document_type_choices = graphene.List(ChoiceObject)
+    countries_choices = graphene.List(ChoiceObject)
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
@@ -320,3 +350,9 @@ class Query(graphene.ObjectType):
 
     def resolve_role_choices(self, info, **kwargs):
         return to_choice_object(ROLE_CHOICE)
+
+    def resolve_document_type_choices(self, info, **kwargs):
+        return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
+
+    def resolve_countries_choices(self, info, **kwargs):
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])

@@ -62,10 +62,30 @@ export const individualDetailed = gql`
     estimatedBirthDate
     pregnant
     status
+    lastSyncAt
+    deduplicationBatchStatus
+    disability
+    importedIndividualId
+    commsDisability
+    firstRegistrationDate
+    whoAnswersAltPhone
+    memoryDisability
+    middleName
+    whoAnswersPhone
+    phoneNoAlternative
+    hearingDisability
+    observedDisability
+    individualId
+    seeingDisability
+    physicalDisability
+    selfcareDisability
+    workStatus
     documents {
       edges {
         node {
+          id
           type {
+            country
             label
           }
           documentNumber

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
 import {
+  AllIndividualsQuery,
   AllIndividualsQueryVariables,
-  IndividualNode,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
 import { headCells } from './LookUpIndividualTableHeadCells';
@@ -18,23 +18,31 @@ interface LookUpIndividualTableProps {
   filter;
   businessArea?: string;
   setFieldValue;
-  initialValues;
   valuesInner;
+  selectedIndividual;
+  selectedHousehold;
+  setSelectedIndividual;
+  setSelectedHousehold;
+  ticket?;
 }
 
 export const LookUpIndividualTable = ({
   businessArea,
   filter,
   setFieldValue,
-  initialValues,
   valuesInner,
+  selectedIndividual,
+  setSelectedIndividual,
+  setSelectedHousehold,
+  ticket,
 }: LookUpIndividualTableProps): React.ReactElement => {
-  const [selectedIndividual, setSelectedIndividual] = useState(
-    initialValues.selectedIndividual,
-  );
-  const handleRadioChange = (event): void => {
-    setSelectedIndividual(event.target.value);
-    setFieldValue('selectedIndividual', event.target.value);
+  const handleRadioChange = (individual): void => {
+    if (individual.household?.id) {
+      setFieldValue('selectedHousehold', individual.household);
+      setSelectedHousehold(individual.household);
+    }
+    setSelectedIndividual(individual);
+    setFieldValue('selectedIndividual', individual);
     setFieldValue('identityVerified', false);
   };
 
@@ -44,16 +52,20 @@ export const LookUpIndividualTable = ({
     programs: [decodeIdString(filter.programs)],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     status: [filter.status],
-    admin2: [decodeIdString(filter.admin2)],
+    admin2: [decodeIdString(filter?.admin2?.node?.id)],
     sex: [filter.sex],
     householdId: valuesInner.selectedHousehold
-      ? decodeIdString(valuesInner.selectedHousehold)
+      ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
+    excludedId: ticket?.individual?.id || null,
   };
 
   return (
     <TableWrapper>
-      <UniversalTable<IndividualNode, AllIndividualsQueryVariables>
+      <UniversalTable<
+        AllIndividualsQuery['allIndividuals']['edges'][number]['node'],
+        AllIndividualsQueryVariables
+      >
         headCells={headCells}
         rowsPerPageOptions={[10, 15, 20]}
         query={useAllIndividualsQuery}

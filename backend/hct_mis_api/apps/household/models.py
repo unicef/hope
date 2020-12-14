@@ -1,7 +1,7 @@
 import re
 from datetime import date
 
-from django.contrib.gis.db.models import PointField
+from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -10,6 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
+from model_utils.managers import SoftDeletableManager
+from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
@@ -30,12 +32,17 @@ SEX_CHOICE = (
     (MALE, _("Male")),
     (FEMALE, _("Female")),
 )
+SINGLE = "SINGLE"
+MARRIED = "MARRIED"
+WIDOWED = "WIDOWED"
+DIVORCED = "DIVORCED"
+SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
-    ("SINGLE", _("Single")),
-    ("MARRIED", _("Married")),
-    ("WIDOWED", _("Widowed")),
-    ("DIVORCED", _("Divorced")),
-    ("SEPARATED", _("Separated")),
+    (SINGLE, _("Single")),
+    (MARRIED, _("Married")),
+    (WIDOWED, _("Widowed")),
+    (DIVORCED, _("Divorced")),
+    (SEPARATED, _("Separated")),
 )
 
 NONE = "NONE"
@@ -52,7 +59,10 @@ DISABILITY_CHOICE = (
     (WALKING, _("Difficulty walking or climbing steps")),
     (MEMORY, _("Difficulty remembering or concentrating")),
     (SELF_CARE, _("Difficulty with self care (washing, dressing)")),
-    (COMMUNICATING, _("Difficulty communicating " "(e.g understanding or being understood)"),),
+    (
+        COMMUNICATING,
+        _("Difficulty communicating " "(e.g understanding or being understood)"),
+    ),
 )
 NON_BENEFICIARY = "NON_BENEFICIARY"
 HEAD = "HEAD"
@@ -68,8 +78,13 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_CHOICE = (
-    (NON_BENEFICIARY, "Not a Family Member. Can only act as a recipient.",),
+    (RELATIONSHIP_UNKNOWN, "Unknown"),
+    (
+        NON_BENEFICIARY,
+        "Not a Family Member. Can only act as a recipient.",
+    ),
     (HEAD, "Head of household (self)"),
     (SON_DAUGHTER, "Son / Daughter"),
     (WIFE_HUSBAND, "Wife / Husband"),
@@ -153,6 +168,7 @@ SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
 SEVERITY_OF_DISABILITY_CHOICES = (
+    ("", "NONE"),
     (SOME_DIFFICULTY, "Some difficulty"),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
@@ -213,9 +229,15 @@ class Household(TimeStampedUUIDModel, AbstractSyncable):
     male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
     male_adults_disabled_count = models.PositiveIntegerField(default=0)
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport", related_name="households", on_delete=models.CASCADE,
+        "registration_data.RegistrationDataImport",
+        related_name="households",
+        on_delete=models.CASCADE,
     )
-    programs = models.ManyToManyField("program.Program", related_name="households", blank=True,)
+    programs = models.ManyToManyField(
+        "program.Program",
+        related_name="households",
+        blank=True,
+    )
     returnee = models.BooleanField(default=False, null=True)
     flex_fields = JSONField(default=dict)
     first_registration_date = models.DateField()
@@ -262,11 +284,14 @@ class DocumentType(TimeStampedUUIDModel):
         return f"{self.label} in {self.country}"
 
 
-class Document(TimeStampedUUIDModel):
+class Document(SoftDeletableModel, TimeStampedUUIDModel):
     document_number = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
+
+    objects = models.Manager()
+    existing_objects = SoftDeletableManager()
 
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -275,10 +300,19 @@ class Document(TimeStampedUUIDModel):
             if not re.match(validator.regex, self.document_number):
                 raise ValidationError("Document number is not validating")
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["document_number", "type"], condition=Q(is_removed=False), name="unique_if_not_removed"
+            )
+        ]
+
 
 class Agency(models.Model):
     type = models.CharField(max_length=100, unique=True)
-    label = models.CharField(max_length=100,)
+    label = models.CharField(
+        max_length=100,
+    )
 
     def __str__(self):
         return self.label
@@ -287,7 +321,9 @@ class Agency(models.Model):
 class HouseholdIdentity(models.Model):
     agency = models.ForeignKey("Agency", related_name="households_identities", on_delete=models.CASCADE)
     household = models.ForeignKey("Household", related_name="identities", on_delete=models.CASCADE)
-    document_number = models.CharField(max_length=255,)
+    document_number = models.CharField(
+        max_length=255,
+    )
 
     def __str__(self):
         return f"{self.agency} {self.household} {self.document_number}"
@@ -296,7 +332,9 @@ class HouseholdIdentity(models.Model):
 class IndividualIdentity(models.Model):
     agency = models.ForeignKey("Agency", related_name="individual_identities", on_delete=models.CASCADE)
     individual = models.ForeignKey("Individual", related_name="identities", on_delete=models.CASCADE)
-    number = models.CharField(max_length=255,)
+    number = models.CharField(
+        max_length=255,
+    )
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.number}"
@@ -304,12 +342,20 @@ class IndividualIdentity(models.Model):
 
 class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
     individual = models.ForeignKey(
-        "household.Individual", on_delete=models.CASCADE, related_name="households_and_roles",
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="households_and_roles",
     )
     household = models.ForeignKey(
-        "household.Household", on_delete=models.CASCADE, related_name="individuals_and_roles",
+        "household.Household",
+        on_delete=models.CASCADE,
+        related_name="individuals_and_roles",
     )
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+    role = models.CharField(
+        max_length=255,
+        blank=True,
+        choices=ROLE_CHOICE,
+    )
 
     class Meta:
         unique_together = ("role", "household")
@@ -322,14 +368,32 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    full_name = models.CharField(max_length=255, validators=[MinLengthValidator(3), MaxLengthValidator(255)],)
-    given_name = models.CharField(max_length=85, blank=True,)
-    middle_name = models.CharField(max_length=85, blank=True,)
-    family_name = models.CharField(max_length=85, blank=True,)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
+    full_name = models.CharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+    )
+    given_name = models.CharField(
+        max_length=85,
+        blank=True,
+    )
+    middle_name = models.CharField(
+        max_length=85,
+        blank=True,
+    )
+    family_name = models.CharField(
+        max_length=85,
+        blank=True,
+    )
+    sex = models.CharField(
+        max_length=255,
+        choices=SEX_CHOICE,
+    )
     birth_date = models.DateField()
     estimated_birth_date = models.BooleanField(default=False)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
+    marital_status = models.CharField(
+        max_length=255,
+        choices=MARITAL_STATUS_CHOICE,
+    )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
     relationship = models.CharField(
@@ -351,10 +415,18 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
             and not a member of one.""",
     )
     registration_data_import = models.ForeignKey(
-        "registration_data.RegistrationDataImport", related_name="individuals", on_delete=models.CASCADE,
+        "registration_data.RegistrationDataImport",
+        related_name="individuals",
+        on_delete=models.CASCADE,
+        null=True,
     )
     disability = models.BooleanField(default=False)
-    work_status = models.CharField(max_length=20, choices=WORK_STATUS_CHOICE, blank=True, default=NOT_PROVIDED,)
+    work_status = models.CharField(
+        max_length=20,
+        choices=WORK_STATUS_CHOICE,
+        blank=True,
+        default=NOT_PROVIDED,
+    )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
@@ -362,10 +434,14 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     administration_of_rutf = models.BooleanField(default=False)
     unicef_id = models.CharField(max_length=250, blank=True)
     deduplication_golden_record_status = models.CharField(
-        max_length=50, default=UNIQUE, choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
+        max_length=50,
+        default=UNIQUE,
+        choices=DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     )
     deduplication_batch_status = models.CharField(
-        max_length=50, default=UNIQUE_IN_BATCH, choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
+        max_length=50,
+        default=UNIQUE_IN_BATCH,
+        choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
     )
     deduplication_golden_record_results = JSONField(default=dict)
     deduplication_batch_results = JSONField(default=dict)
@@ -404,6 +480,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
 
         return sha256(";".join(values).encode()).hexdigest()
 
+    @property
+    def business_area(self):
+        return self.household.business_area
+
     def __str__(self):
         return self.full_name
 
@@ -412,11 +492,24 @@ class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
     ERRONEOUS = "ERRONEOUS"
     CLOSED = "CLOSED"
-    STATUS_CHOICE = Choices((ACTIVE, _("Active")), (ERRONEOUS, _("Erroneous")), (CLOSED, _("Closed")),)
+    STATUS_CHOICE = Choices(
+        (ACTIVE, _("Active")),
+        (ERRONEOUS, _("Erroneous")),
+        (CLOSED, _("Closed")),
+    )
     card_number = models.CharField(max_length=255)
-    status = models.CharField(choices=STATUS_CHOICE, default=ACTIVE, max_length=10,)
+    status = models.CharField(
+        choices=STATUS_CHOICE,
+        default=ACTIVE,
+        max_length=10,
+    )
     card_type = models.CharField(max_length=255)
     current_card_size = models.CharField(max_length=255)
     card_custodian = models.CharField(max_length=255)
     service_provider = models.CharField(max_length=255)
-    household = models.ForeignKey("Household", related_name="entitlement_cards", on_delete=models.SET_NULL, null=True,)
+    household = models.ForeignKey(
+        "Household",
+        related_name="entitlement_cards",
+        on_delete=models.SET_NULL,
+        null=True,
+    )

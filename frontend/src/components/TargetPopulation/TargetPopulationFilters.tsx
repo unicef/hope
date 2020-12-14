@@ -8,14 +8,14 @@ import {
   Grid,
   Box,
 } from '@material-ui/core';
+import FlashOnIcon from '@material-ui/icons/FlashOn';
 import { Person, Search, Group } from '@material-ui/icons';
 import Select from '../../shared/Select';
 import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
-import FlashOnIcon from "@material-ui/icons/FlashOn";
-import {ProgramNode} from "../../__generated__/graphql";
+import { ProgramNode } from '../../__generated__/graphql';
 
 const TextContainer = styled(TextField)`
   .MuiFilledInput-root {
@@ -127,7 +127,7 @@ export function TargetPopulationFilters({
             </Select>
           </StyledFormControl>
         </Grid>
-          <Grid item>
+        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
