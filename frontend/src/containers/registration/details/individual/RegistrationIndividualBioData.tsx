@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import {
   decodeIdString,
   getAgeFromDob,
@@ -16,6 +15,7 @@ import { LabelizedField } from '../../../../components/LabelizedField';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { ContentLink } from '../../../../components/ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -27,10 +27,6 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const ContentLink = styled.div`
-  text-decoration: underline;
-  cursor: pointer;
-`;
 const BorderBox = styled.div`
   border-bottom: 1px solid #e1e1e1;
 `;
@@ -41,7 +37,6 @@ interface RegistrationIndividualBioDataProps {
 export function RegistrationIndividualsBioData({
   individual,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   let age: number | null;
@@ -50,11 +45,6 @@ export function RegistrationIndividualsBioData({
     age = getAgeFromDob(birthDate);
   }
 
-  const openHousehold = (): void => {
-    history.push(
-      `/${businessArea}/registration-data-import/household/${individual.household.id}`,
-    );
-  };
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -149,7 +139,9 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink onClick={() => openHousehold()}>
+            <ContentLink
+              href={`/${businessArea}/registration-data-import/household/${individual.household.id}`}
+            >
               {decodeIdString(individual.household.id)}
             </ContentLink>
           </LabelizedField>

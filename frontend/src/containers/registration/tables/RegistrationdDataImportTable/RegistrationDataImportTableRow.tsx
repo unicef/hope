@@ -16,10 +16,12 @@ const StatusContainer = styled.div`
 
 interface PaymentRecordTableRowProps {
   registrationDataImport: RegistrationDataImportNode;
+  canViewDetails: boolean;
 }
 
 export function RegistrationDataImportTableRow({
   registrationDataImport,
+  canViewDetails,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -33,7 +35,7 @@ export function RegistrationDataImportTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={registrationDataImport.id}
     >

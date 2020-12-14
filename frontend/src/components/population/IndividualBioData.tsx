@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
@@ -15,6 +14,7 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { UniversalMoment } from '../UniversalMoment';
+import { ContentLink } from '../ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,11 +24,6 @@ const Overview = styled(Paper)`
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
-`;
-
-const ContentLink = styled.div`
-  text-decoration: underline;
-  cursor: pointer;
 `;
 
 const BorderBox = styled.div`
@@ -41,7 +36,6 @@ interface IndividualBioDataProps {
 export function IndividualsBioData({
   individual,
 }: IndividualBioDataProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   let age: number | null;
@@ -49,12 +43,6 @@ export function IndividualsBioData({
   if (birthDate) {
     age = getAgeFromDob(birthDate);
   }
-
-  const openHousehold = (): void => {
-    history.push(
-      `/${businessArea}/population/household/${individual.household.id}`,
-    );
-  };
 
   const {
     data: choicesData,
@@ -72,14 +60,14 @@ export function IndividualsBioData({
   );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3}>
+    <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
         <div>{edge.node.documentNumber}</div>
       </LabelizedField>
     </Grid>
   ));
   const mappedIdentities = individual.identities?.map((item) => (
-    <Grid item xs={3}>
+    <Grid item xs={3} key={item.id}>
       <LabelizedField label={`${item.type} ID`}>
         <div>{item.number}</div>
       </LabelizedField>
@@ -150,9 +138,15 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink onClick={() => openHousehold()}>
-              {individual.household.unicefId}
-            </ContentLink>
+            {individual.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/population/household/${individual.household?.id}`}
+              >
+                {individual.household?.unicefId}
+              </ContentLink>
+            ) : (
+              <span>-</span>
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

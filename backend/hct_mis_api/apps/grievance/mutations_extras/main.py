@@ -5,6 +5,9 @@ from grievance.mutations_extras.data_change import (
     IndividualDataUpdateIssueTypeExtras,
     IndividualDeleteIssueTypeExtras,
     AddIndividualIssueTypeExtras,
+    UpdateHouseholdDataUpdateIssueTypeExtras,
+    UpdateIndividualDataUpdateIssueTypeExtras,
+    UpdateAddIndividualIssueTypeExtras,
 )
 from grievance.mutations_extras.grievance_complaint import GrievanceComplaintTicketExtras
 from grievance.mutations_extras.sensitive_grievance import SensitiveGrievanceTicketExtras
@@ -25,3 +28,18 @@ class CategoryExtrasInput(graphene.InputObjectType):
 class CreateGrievanceTicketExtrasInput(graphene.InputObjectType):
     category = CategoryExtrasInput()
     issue_type = IssueTypeExtrasInput()
+
+
+class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
+    household_data_update_issue_type_extras = UpdateHouseholdDataUpdateIssueTypeExtras()
+    individual_data_update_issue_type_extras = UpdateIndividualDataUpdateIssueTypeExtras()
+    add_individual_issue_type_extras = UpdateAddIndividualIssueTypeExtras()
+
+
+# TODO: Remove it when all methods for closing tickets are implemented
+def _not_implemented_close_method(*args, **kwargs):
+    raise NotImplementedError
+
+
+def _no_operation_close_method(*args, **kwargs):
+    pass

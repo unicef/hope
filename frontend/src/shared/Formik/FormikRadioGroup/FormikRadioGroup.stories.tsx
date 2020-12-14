@@ -24,7 +24,6 @@ export const RadioGroup = () => {
         <Formik
           initialValues={{ choiceField: sampleChoices[0].value }}
           onSubmit={(values) => {
-            return console.log(values);
           }}
         >
           {() => (

@@ -10,13 +10,16 @@ from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from cash_assist_datahub.models import Session, Programme
 from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from core.models import BusinessArea, AdminArea
-from grievance.fixtures import GrievanceTicketFactory, SensitiveGrievanceTicketWithoutExtrasFactory, \
-    GrievanceComplaintTicketWithoutExtrasFactory
+from grievance.fixtures import (
+    GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    GrievanceComplaintTicketWithoutExtrasFactory,
+)
 from household.elasticsearch_utils import rebuild_search_index
 from household.fixtures import (
     EntitlementCardFactory,
     DocumentFactory,
-    create_household,
+    create_household_for_fixtures,
 )
 from household.models import DocumentType
 from payment.fixtures import (
@@ -129,7 +132,7 @@ class Command(BaseCommand):
                 registration_data_import = RegistrationDataImportFactory(
                     imported_by=user, business_area=BusinessArea.objects.first()
                 )
-                household, individuals = create_household(
+                household, individuals = create_household_for_fixtures(
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": BusinessArea.objects.first(),

@@ -23,12 +23,17 @@ const StyledAutocomplete = styled(Autocomplete)`
 export function AdminAreasAutocomplete({
   value,
   onChange,
+  disabled,
+}: {
+  value;
+  onChange;
+  disabled?;
 }): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
 
   const debouncedInputText = useDebounce(inputValue, 500);
-  const [newValue, setNewValue] = useState();
+  const [newValue, setNewValue] = useState(null);
   const businessArea = useBusinessArea();
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
@@ -37,7 +42,10 @@ export function AdminAreasAutocomplete({
       businessArea,
     },
   });
-  useEffect(() => setNewValue(value), [data, value]);
+  useEffect(() => {
+    setNewValue(value);
+    onInputTextChange('');
+  }, [data, value]);
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
@@ -51,7 +59,7 @@ export function AdminAreasAutocomplete({
         setOpen(false);
       }}
       getOptionSelected={(option, value1) => {
-        return value1 === option.node.id;
+        return value1?.node?.id === option.node.id;
       }}
       getOptionLabel={(option) => {
         if (!option.node) {
@@ -59,6 +67,7 @@ export function AdminAreasAutocomplete({
         }
         return `${option.node.title}`;
       }}
+      disabled={disabled}
       options={get(data, 'allAdminAreas.edges', [])}
       loading={loading}
       renderInput={(params) => (
