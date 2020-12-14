@@ -173,7 +173,7 @@ export function TargetCriteriaForm({
     return errors;
   };
 
-  const handleSubmit = (values, bag) => {
+  const handleSubmit = (values, bag): void => {
     const filters = formatCriteriaFilters(values.filters);
     const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
       values.individualsFiltersBlocks,
