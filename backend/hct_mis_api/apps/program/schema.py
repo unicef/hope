@@ -139,9 +139,8 @@ class CashPlanFilter(FilterSet):
 
 class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
-        hopePermissionClass(
-            Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS,
-        ),
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
     )
 
     bank_reconciliation_success = graphene.Int()
