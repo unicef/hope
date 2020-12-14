@@ -172,20 +172,23 @@ export function TargetCriteriaForm({
     }
     return errors;
   };
-  if (loading) return null;
+
+  const handleSubmit = (values, bag) => {
+    const filters = formatCriteriaFilters(values.filters);
+    const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
+      values.individualsFiltersBlocks,
+    );
+    addCriteria({ filters, individualsFiltersBlocks });
+    return bag.resetForm();
+  };
+
+  if (loading || !open) return null;
 
   return (
     <DialogContainer>
       <Formik
         initialValues={initialValue}
-        onSubmit={(values, bag) => {
-          const filters = formatCriteriaFilters(values.filters);
-          const individualsFiltersBlocks = formatCriteriaIndividualsFiltersBlocks(
-            values.individualsFiltersBlocks,
-          );
-          addCriteria({ filters, individualsFiltersBlocks });
-          return bag.resetForm();
-        }}
+        onSubmit={handleSubmit}
         validate={validate}
         validationSchema={validationSchema}
         enableReinitialize
@@ -331,7 +334,7 @@ export function TargetCriteriaForm({
                         Cancel
                       </Button>
                       <Button
-                        onClick={() => submitForm()}
+                        onClick={submitForm}
                         type='submit'
                         color='primary'
                         variant='contained'
