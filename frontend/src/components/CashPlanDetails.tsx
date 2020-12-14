@@ -4,12 +4,13 @@ import { Grid, Typography } from '@material-ui/core';
 import { CashPlanNode } from '../__generated__/graphql';
 import { MiśTheme } from '../theme';
 import { cashPlanStatusToColor } from '../utils/utils';
+import { useBusinessArea } from '../hooks/useBusinessArea';
 import { LabelizedField } from './LabelizedField';
 import { StatusBox } from './StatusBox';
-import { Missing } from './Missing';
 import { UniversalMoment } from './UniversalMoment';
 import { ContainerWithBorder } from './ContainerWithBorder';
 import { OverviewContainer } from './OverviewContainer';
+import { ContentLink } from './ContentLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -42,6 +43,41 @@ interface CashPlanProps {
 export function CashPlanDetails({
   cashPlan,
 }: CashPlanProps): React.ReactElement {
+  const businessArea = useBusinessArea();
+
+  const filteredTps = (): Array<{
+    id: string;
+    name: string;
+  }> => {
+    const mappedTPs = cashPlan.paymentRecords?.edges.map((edge) => ({
+      id: edge.node.targetPopulation?.id,
+      name: edge.node.targetPopulation?.name,
+    }));
+
+    const uniques = [];
+    for (const obj of mappedTPs) {
+      if (obj && !uniques.find((el) => el?.id === obj?.id)) {
+        uniques.push(obj);
+      }
+    }
+    return uniques;
+  };
+
+  const renderTargetPopulations = ():
+    | React.ReactElement
+    | Array<React.ReactElement> => {
+    return filteredTps().length ? (
+      filteredTps().map((el) => (
+        <span key={el.id}>
+          <ContentLink href={`/${businessArea}/target-population/${el.id}`}>
+            {el.name}
+          </ContentLink>{' '}
+        </span>
+      ))
+    ) : (
+      <span>-</span>
+    );
+  };
   return (
     <ContainerWithBorder>
       <Title>
@@ -101,7 +137,10 @@ export function CashPlanDetails({
             <LabelizedField label='dp id' value={cashPlan.downPayment} />
           </Grid>
           <Grid item xs={4}>
-            <Missing />
+            <LabelizedField
+              label='Target population(s)'
+              value={renderTargetPopulations()}
+            />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
