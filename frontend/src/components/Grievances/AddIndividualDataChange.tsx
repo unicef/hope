@@ -37,6 +37,7 @@ export const AddIndividualDataChangeField = ({
     case 'DECIMAL':
       fieldProps = {
         component: FormikTextField,
+        type: 'number',
       };
       break;
     case 'INTEGER':
