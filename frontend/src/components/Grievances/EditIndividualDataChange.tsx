@@ -47,6 +47,7 @@ export const EditIndividualDataChangeField = ({
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
+        fullWidth: true,
         component: FormikTextField,
         type: 'number',
       };
@@ -59,18 +60,21 @@ export const EditIndividualDataChangeField = ({
       break;
     case 'STRING':
       fieldProps = {
+        fullWidth: true,
         component: FormikTextField,
       };
       break;
     case 'SELECT_ONE':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
       };
       break;
     case 'SELECT_MANY':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
         multiple: true,
       };
@@ -78,12 +82,14 @@ export const EditIndividualDataChangeField = ({
     case 'SELECT_MULTIPLE':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
       };
       break;
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
+        fullWidth: true,
         decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
       };
       break;
@@ -101,7 +107,6 @@ export const EditIndividualDataChangeField = ({
       <Grid item xs={4}>
         <Field
           name={name}
-          fullWidth
           variant='outlined'
           label={field.labelEn}
           required={field.required}
@@ -249,7 +254,7 @@ export const EditIndividualDataChange = ({
       values.individualDataUpdateFields.length === 0
     ) {
       setFieldValue('individualDataUpdateFields', [
-        { fieldName: null, fieldValue: null },
+        { fieldName: null, fieldValue: '' },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
