@@ -1929,11 +1929,11 @@ type Query {
   userPartnerChoices: [ChoiceObject]
   hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
   importedHousehold(id: ID!): ImportedHouseholdNode
-  allImportedHouseholds(before: String, after: String, first: Int, last: Int, rdiId: String, orderBy: String): ImportedHouseholdNodeConnection
+  allImportedHouseholds(before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
   registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
   allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
   importedIndividual(id: ID!): ImportedIndividualNode
-  allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, orderBy: String): ImportedIndividualNodeConnection
+  allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
   importData(id: ID!): ImportDataNode
   deduplicationBatchStatusChoices: [ChoiceObject]
   deduplicationGoldenRecordStatusChoices: [ChoiceObject]
