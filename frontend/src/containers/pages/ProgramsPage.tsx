@@ -41,13 +41,10 @@ export function ProgramsPage(): React.ReactElement {
 
   if (permissions === null) return null;
 
-  const canViewListAndDetails = hasPermissions(
-    PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-    permissions,
-  );
-  const canCreate = hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions);
-
-  if (!canViewListAndDetails && !canCreate) return <PermissionDenied />;
+  if (
+    !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
+  )
+    return <PermissionDenied />;
 
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
@@ -57,21 +54,17 @@ export function ProgramsPage(): React.ReactElement {
 
   return (
     <div>
-      {canCreate && toolbar}
-      {canViewListAndDetails && (
-        <>
-          <ProgrammesFilters
-            filter={filter}
-            onFilterChange={setFilter}
-            choicesData={choicesData}
-          />
-          <ProgrammesTable
-            businessArea={businessArea}
-            choicesData={choicesData}
-            filter={debouncedFilter}
-          />
-        </>
-      )}
+      {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
+      <ProgrammesFilters
+        filter={filter}
+        onFilterChange={setFilter}
+        choicesData={choicesData}
+      />
+      <ProgrammesTable
+        businessArea={businessArea}
+        choicesData={choicesData}
+        filter={debouncedFilter}
+      />
     </div>
   );
 }

@@ -33,6 +33,7 @@ class Permissions(Enum):
 
     # Programme
     PRORGRAMME_VIEW_LIST_AND_DETAILS = auto()
+    PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS = auto()
     PROGRAMME_CREATE = auto()
     PROGRAMME_UPDATE = auto()
     PROGRAMME_REMOVE = auto()
@@ -126,7 +127,7 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
-        if not all((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+        if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
             raise GraphQLError("Permission Denied")
 
     @classmethod
