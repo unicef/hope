@@ -12,7 +12,7 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permissio
         'discardCashPlanPaymentVerification': {
             'cashPlan': {
                 'name': 'TEST',
-                'status': 'DISTRIBUTION_COMPLETED'
+                'status': 'DISTRIBUTION_COMPLETED_WITH_ERRORS'
             }
         }
     }
