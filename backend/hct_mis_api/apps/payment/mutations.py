@@ -452,9 +452,8 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
             )
             payment_record_verifications_to_create.append(payment_record_verification)
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
-        cs = cashplan_payment_verification.cash_plan
-        cs.verification_status = CashPlanPaymentVerification.STATUS_PENDING
-        cs.save()
+        cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
+        cash_plan.save()
         cashplan_payment_verification.save()
         return DiscardCashPlanVerificationMutation(cash_plan)
 
