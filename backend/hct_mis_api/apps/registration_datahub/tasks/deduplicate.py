@@ -51,8 +51,15 @@ class DeduplicateTask:
             if role and individual_id:
                 queries.extend(
                     [
-                        {"match": {"households_and_role.role": {"query": role, "boost": 0.6}}},
-                        {"match": {"households_and_role.individual": {"query": individual_id, "boost": 0.6}}},
+                        {
+                            "bool": {
+                                "must": [
+                                    {"match": {"households_and_role.role": {"query": role}}},
+                                    {"match": {"households_and_role.individual": {"query": individual_id}}},
+                                ],
+                                "boost": 2,
+                            }
+                        }
                     ]
                 )
 
@@ -115,8 +122,15 @@ class DeduplicateTask:
             if doc_number and doc_type:
                 queries.extend(
                     [
-                        {"match": {f"{prefix}.number": {"query": doc_number, "boost": 3.5}}},
-                        {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
+                        {
+                            "bool": {
+                                "must": [
+                                    {"match": {f"{prefix}.number": {"query": doc_number}}},
+                                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
+                                ],
+                                "boost": 2,
+                            },
+                        }
                     ]
                 )
 
@@ -130,6 +144,7 @@ class DeduplicateTask:
             "phone_no",
             "phone_no_alternative",
             "relationship",
+            "full_name",
         )
         for field_name, field_value in fields.items():
             if field_name == "household":
@@ -173,6 +188,7 @@ class DeduplicateTask:
                             field_name: {
                                 "query": field_value,
                                 "boost": 2.0 if field_name in boosted_match_fields else 1.0,
+                                "operator": "AND" if field_name == "full_name" else "OR",
                             }
                         }
                     }
@@ -188,8 +204,8 @@ class DeduplicateTask:
             "min_score": min_score,
             "query": {
                 "bool": {
-                    "must": [{"dis_max": {"queries": query_fields}}],
-                    "must_not": [{"match": {"id": {"query": str(individual.id)}}}],
+                    "must": [{"dis_max": {"queries": query_fields, "tie_breaker": 1.0}}],
+                    "must_not": [{"match": {"id": {"query": str(individual.id), "boost": 0}}}],
                 }
             },
         }
@@ -212,8 +228,7 @@ class DeduplicateTask:
         possible_duplicates = []
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
-        query = document.search().from_dict(query_dict)
-
+        query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
 
