@@ -78,7 +78,9 @@ SISTERINLAW_BROTHERINLAW = "SISTERINLAW_BROTHERINLAW"
 GRANDDAUGHER_GRANDSON = "GRANDDAUGHER_GRANDSON"
 NEPHEW_NIECE = "NEPHEW_NIECE"
 COUSIN = "COUSIN"
+RELATIONSHIP_UNKNOWN = "UNKNOWN"
 RELATIONSHIP_CHOICE = (
+    (RELATIONSHIP_UNKNOWN, "Unknown"),
     (
         NON_BENEFICIARY,
         "Not a Family Member. Can only act as a recipient.",
@@ -478,6 +480,10 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         values = [str(getattr(self, field)) for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
+
+    @property
+    def business_area(self):
+        return self.household.business_area
 
     def __str__(self):
         return self.full_name

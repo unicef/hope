@@ -61,6 +61,7 @@ export function UniversalTable<T, K>({
     }
   }, [initialVariables]);
   if (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
   if (!data) {
