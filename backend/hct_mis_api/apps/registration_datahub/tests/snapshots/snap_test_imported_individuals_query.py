@@ -22,24 +22,6 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_wit
                 },
                 {
                     'node': {
-                        'birthDate': '1946-02-15',
-                        'familyName': 'Ford',
-                        'fullName': 'Robin Ford',
-                        'givenName': 'Robin',
-                        'phoneNo': '+18663567905'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1983-12-21',
-                        'familyName': 'Perry',
-                        'fullName': 'Timothy Perry',
-                        'givenName': 'Timothy',
-                        'phoneNo': '(548)313-1700-902'
-                    }
-                },
-                {
-                    'node': {
                         'birthDate': '1973-03-23',
                         'familyName': 'Torres',
                         'fullName': 'Eric Torres',
@@ -54,6 +36,24 @@ snapshots['TestImportedIndividualQuery::test_imported_individual_query_0_all_wit
                         'fullName': 'Jenna Franklin',
                         'givenName': 'Jenna',
                         'phoneNo': '001-296-358-5428-607'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
+                        'fullName': 'Robin Ford',
+                        'givenName': 'Robin',
+                        'phoneNo': '+18663567905'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1983-12-21',
+                        'familyName': 'Perry',
+                        'fullName': 'Timothy Perry',
+                        'givenName': 'Timothy',
+                        'phoneNo': '(548)313-1700-902'
                     }
                 }
             ]
