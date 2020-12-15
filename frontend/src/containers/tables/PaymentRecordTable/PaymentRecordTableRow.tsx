@@ -7,6 +7,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
+  anon,
   decodeIdString,
   formatCurrency,
   paymentRecordStatusToColor,
@@ -53,7 +54,7 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{paymentRecord.fullName}</TableCell>
+      <TableCell align='left'>{anon(paymentRecord.fullName, true)}</TableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>

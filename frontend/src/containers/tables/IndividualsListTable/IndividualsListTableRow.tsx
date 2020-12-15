@@ -9,6 +9,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
 import {
+  anon,
   choicesToDict,
   getAgeFromDob,
   sexToCapitalize,
@@ -19,11 +20,13 @@ import { LoadingComponent } from '../../../components/LoadingComponent';
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
   canViewDetails: boolean;
+  filter?;
 }
 
 export function IndividualsListTableRow({
   individual,
   canViewDetails,
+  filter,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -60,7 +63,9 @@ export function IndividualsListTableRow({
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
+      <TableCell align='left'>
+        {anon(individual.fullName, !filter?.text)}
+      </TableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>

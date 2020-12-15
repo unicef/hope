@@ -8,6 +8,7 @@ import {
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import {
+  anon,
   choicesToDict,
   decodeIdString,
   sexToCapitalize,
@@ -46,7 +47,7 @@ export function ImportedIndividualsTableRow({
       <TableCell onClick={handleClick} align='left'>
         <Pointer>{decodeIdString(individual.id)}</Pointer>
       </TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
+      <TableCell align='left'>{anon(individual.fullName, true)}</TableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align='left'>
         {relationshipChoicesDict[individual.relationship]}
