@@ -5,6 +5,7 @@ import Paper from '@material-ui/core/Paper';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
 import { Missing } from '../../../../components/Missing';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const Title = styled.div`
   width: 100%;
@@ -55,14 +56,7 @@ export function RegistrationDetails({
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Registered Date'>
-            <div>{registrationDate}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Number of Rooms'>
-            <div>
-              <Missing />
-            </div>
+            <UniversalMoment>{registrationDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>
