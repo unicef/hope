@@ -27,10 +27,16 @@ const ButtonContainer = styled.span`
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
+  canUnlock: boolean;
+  canDuplicate: boolean;
+  canSend: boolean;
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
+  canSend,
+  canDuplicate,
+  canUnlock,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
@@ -39,48 +45,54 @@ export function ApprovedTargetPopulationHeaderButtons({
 
   return (
     <div>
-      <IconContainer>
-        <Button onClick={() => setOpenDuplicate(true)}>
-          <FileCopy />
-        </Button>
-      </IconContainer>
-      <ButtonContainer>
-        <Button
-          color='primary'
-          variant='outlined'
-          onClick={() => {
-            mutate({
-              variables: { id: targetPopulation.id },
-            }).then(() => {
-              showMessage('Target Population Unlocked');
-            });
-          }}
-          data-cy='button-target-population-unlocked'
-        >
-          Unlock
-        </Button>
-      </ButtonContainer>
-      <ButtonContainer>
-        <Tooltip
-          title={
-            targetPopulation.program.status !== 'ACTIVE'
-              ? 'Assigned programme is not ACTIVE'
-              : 'Send to cash assist'
-          }
-        >
-          <span>
-            <Button
-              variant='contained'
-              color='primary'
-              disabled={targetPopulation.program.status !== 'ACTIVE'}
-              onClick={() => setOpenFinalize(true)}
-              data-cy='button-target-population-send-to-cash-assist'
-            >
-              Send to cash assist
-            </Button>
-          </span>
-        </Tooltip>
-      </ButtonContainer>
+      {canDuplicate && (
+        <IconContainer>
+          <Button onClick={() => setOpenDuplicate(true)}>
+            <FileCopy />
+          </Button>
+        </IconContainer>
+      )}
+      {canUnlock && (
+        <ButtonContainer>
+          <Button
+            color='primary'
+            variant='outlined'
+            onClick={() => {
+              mutate({
+                variables: { id: targetPopulation.id },
+              }).then(() => {
+                showMessage('Target Population Unlocked');
+              });
+            }}
+            data-cy='button-target-population-unlocked'
+          >
+            Unlock
+          </Button>
+        </ButtonContainer>
+      )}
+      {canSend && (
+        <ButtonContainer>
+          <Tooltip
+            title={
+              targetPopulation.program.status !== 'ACTIVE'
+                ? 'Assigned programme is not ACTIVE'
+                : 'Send to cash assist'
+            }
+          >
+            <span>
+              <Button
+                variant='contained'
+                color='primary'
+                disabled={targetPopulation.program.status !== 'ACTIVE'}
+                onClick={() => setOpenFinalize(true)}
+                data-cy='button-target-population-send-to-cash-assist'
+              >
+                Send to cash assist
+              </Button>
+            </span>
+          </Tooltip>
+        </ButtonContainer>
+      )}
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}

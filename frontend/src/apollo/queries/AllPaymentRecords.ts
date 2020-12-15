@@ -9,6 +9,7 @@ export const AllPaymentRecords = gql`
     $orderBy: String
     $first: Int
     $last: Int
+    $businessArea: String
   ) {
     allPaymentRecords(
       cashPlan: $cashPlan
@@ -18,6 +19,7 @@ export const AllPaymentRecords = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
@@ -35,7 +37,7 @@ export const AllPaymentRecords = gql`
           statusDate
           status
           caId
-          
+
           totalPersonsCovered
           household {
             id
@@ -43,7 +45,7 @@ export const AllPaymentRecords = gql`
           }
           entitlementQuantity
           deliveredQuantity
-          deliveryDate 
+          deliveryDate
           cashPlan {
             id
             program {

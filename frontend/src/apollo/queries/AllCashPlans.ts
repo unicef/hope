@@ -14,6 +14,7 @@ export const AllCashPlans = gql`
     $verificationStatus: [String]
     $startDateGte: DateTime
     $endDateLte: DateTime
+    $businessArea: String
   ) {
     allCashPlans(
       program: $program
@@ -28,6 +29,7 @@ export const AllCashPlans = gql`
       verificationStatus: $verificationStatus
       startDate_Gte: $startDateGte
       endDate_Lte: $endDateLte
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage

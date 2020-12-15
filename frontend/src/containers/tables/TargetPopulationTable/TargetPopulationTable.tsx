@@ -17,10 +17,12 @@ const TableWrapper = styled.div`
 
 interface TargetPopulationProps {
   filter;
+  canViewDetails: boolean;
 }
 
 export const TargetPopulationTable = ({
   filter,
+  canViewDetails,
 }: TargetPopulationProps): ReactElement => {
   const businessArea = useBusinessArea();
   const initialVariables: AllTargetPopulationsQueryVariables = {
@@ -51,7 +53,11 @@ export const TargetPopulationTable = ({
         defaultOrderDirection='desc'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <TargetPopulationTableRow key={row.id} targetPopulation={row} />
+          <TargetPopulationTableRow
+            key={row.id}
+            targetPopulation={row}
+            canViewDetails={canViewDetails}
+          />
         )}
       />
     </TableWrapper>
