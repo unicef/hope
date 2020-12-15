@@ -11,12 +11,12 @@ import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { HouseholdDetails } from './HouseholdDetails';
-import { RegistrationDetails } from './RegistrationDetails';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '../../../../components/PermissionDenied';
+import { HouseholdDetails } from './HouseholdDetails';
+import { RegistrationDetails } from './RegistrationDetails';
 
 const Container = styled.div`
   padding: 20px;
