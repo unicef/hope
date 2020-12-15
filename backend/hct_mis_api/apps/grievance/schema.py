@@ -7,6 +7,7 @@ from django_filters import (
     CharFilter,
     ModelMultipleChoiceFilter,
     OrderingFilter,
+    MultipleChoiceFilter,
     TypedMultipleChoiceFilter,
     ChoiceFilter,
     ModelChoiceFilter,
@@ -15,7 +16,12 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
+from account.permissions import (
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+)
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD, KOBO_COLLECTOR_FIELD
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
@@ -64,6 +70,7 @@ class GrievanceTicketFilter(FilterSet):
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
+    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
     class Meta:
         fields = {
@@ -126,6 +133,55 @@ class GrievanceTicketFilter(FilterSet):
         if value:
             return qs.filter(admin__in=[admin.title for admin in value])
         return qs
+
+    def permissions_filter(self, qs, name, value):
+        can_view_ex_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE.value in value
+        can_view_sensitive_all = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE.value in value
+        can_view_ex_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR.value in value
+        can_view_ex_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER.value in value
+        can_view_sensitive_creator = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR.value in value
+        can_view_sensitive_owner = Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER.value in value
+
+        # can view all
+        if can_view_ex_sensitive_all and can_view_sensitive_all:
+            return qs
+
+        filters_1 = {}
+        filters_1_exclude = {}
+        filters_2 = {}
+        filters_2_exclude = {}
+        sensitive_category_filter = {"category": GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE}
+        created_by_filter = {"created_by": self.request.user}
+        assigned_to_filter = {"assigned_to": self.request.user}
+
+        # can view one group full and potentially some of other group
+        if can_view_ex_sensitive_all or can_view_sensitive_all:
+            if can_view_sensitive_creator or can_view_ex_sensitive_creator:
+                filters_1.update(created_by_filter)
+            if can_view_sensitive_owner or can_view_ex_sensitive_owner:
+                filters_2.update(assigned_to_filter)
+
+            if can_view_ex_sensitive_all:
+                return qs.filter(~Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_2))
+            else:
+                return qs.filter(Q(**sensitive_category_filter) | Q(**filters_1) | Q(**filters_1))
+
+        else:
+            # no full lists so only creator and/or owner lists
+            if can_view_ex_sensitive_creator:
+                filters_1.update(created_by_filter)
+                if not can_view_sensitive_creator:
+                    filters_1_exclude.update(sensitive_category_filter)
+            if can_view_ex_sensitive_owner:
+                filters_2.update(assigned_to_filter)
+                if not can_view_sensitive_owner:
+                    filters_2_exclude.update(sensitive_category_filter)
+            if filters_1 or filters_2:
+                return qs.filter(
+                    Q(Q(**filters_1), ~Q(**filters_1_exclude)) | Q(Q(**filters_2), ~Q(**filters_2_exclude))
+                )
+            else:
+                return GrievanceTicket.objects.none()
 
 
 class ExistingGrievanceTicketFilter(FilterSet):
@@ -320,8 +376,14 @@ class Query(graphene.ObjectType):
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
         GrievanceTicketNode,
         filterset_class=GrievanceTicketFilter,
-        # TODO Enable permissions below
-        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
+        permission_classes=(
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
+        ),
     )
     existing_grievance_tickets = DjangoPermissionFilterConnectionField(
         GrievanceTicketNode,

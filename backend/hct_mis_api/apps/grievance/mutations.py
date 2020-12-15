@@ -6,6 +6,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from account.schema import UserNode
+from account.permissions import PermissionMutation, Permissions
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
@@ -65,7 +66,7 @@ class CreateTicketNoteInput(graphene.InputObjectType):
     ticket = graphene.GlobalID(node=GrievanceTicketNode, required=True)
 
 
-class CreateGrievanceTicketMutation(graphene.Mutation):
+class CreateGrievanceTicketMutation(PermissionMutation):
     grievance_tickets = graphene.List(GrievanceTicketNode)
 
     CATEGORY_OPTIONS = {
@@ -173,6 +174,8 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
     @transaction.atomic
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name, default=None: input.get(name, default)
+        cls.has_permission(info, Permissions.GRIEVANCES_CREATE, arg("business_area"))
+
         verify_required_arguments(input, "category", cls.CATEGORY_OPTIONS)
         if arg("issue_type"):
             verify_required_arguments(input, "issue_type", cls.ISSUE_TYPE_OPTIONS)
