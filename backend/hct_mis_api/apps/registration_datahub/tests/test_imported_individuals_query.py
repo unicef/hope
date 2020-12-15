@@ -12,11 +12,11 @@ query AllImportedIndividuals {
   allImportedIndividuals(businessArea: "afghanistan") {
     edges {
       node {
+        birthDate
+        familyName
         fullName
         givenName
-        familyName
         phoneNo
-        birthDate
       }
     }
   }
@@ -27,11 +27,11 @@ query AllImportedIndividuals {
   allImportedIndividuals(orderBy: "birth_date", businessArea: "afghanistan") {
     edges {
       node {
+        birthDate
+        familyName
         fullName
         givenName
-        familyName
         phoneNo
-        birthDate
       }
     }
   }
@@ -42,11 +42,11 @@ query AllImportedIndividuals {
   allImportedIndividuals(orderBy: "-birth_date", businessArea: "afghanistan") {
     edges {
       node {
+        birthDate
+        familyName
         fullName
         givenName
-        familyName
         phoneNo
-        birthDate
       }
     }
   }
@@ -55,11 +55,11 @@ query AllImportedIndividuals {
 IMPORTED_INDIVIDUAL_QUERY = """
 query ImportedIndividual($id: ID!) {
   importedIndividual(id: $id) {
-    fullName
-    givenName
-    familyName
-    phoneNo
     birthDate
+        familyName
+        fullName
+        givenName
+        phoneNo
   }
 }
 """
