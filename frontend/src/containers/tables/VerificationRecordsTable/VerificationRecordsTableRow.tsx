@@ -6,6 +6,7 @@ import { TableRow } from '@material-ui/core';
 import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
+  anon,
   decodeIdString,
   formatCurrency,
   verificationRecordsStatusToColor,
@@ -47,7 +48,7 @@ export function VerificationRecordsTableRow({ record }): React.ReactElement {
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {record.paymentRecord.household.headOfHousehold.fullName}
+        {anon(record.paymentRecord.household.headOfHousehold.fullName, true)}
       </TableCell>
       <TableCell align='left'>
         {record.paymentRecord.household.unicefId}
