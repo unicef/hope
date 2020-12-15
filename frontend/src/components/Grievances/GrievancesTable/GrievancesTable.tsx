@@ -8,6 +8,7 @@ import {
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../LoadingComponent';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 
@@ -37,9 +38,9 @@ export const GrievancesTable = ({
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
-  if (choicesLoading) {
-    return null;
-  }
+  if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
+
   const statusChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketStatusChoices);

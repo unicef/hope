@@ -244,8 +244,12 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     @classmethod
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
-        if not all((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
+        if not any((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
             raise GraphQLError("Permission Denied")
+        if "permissions" in filtering_args:
+            filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
+                filter_kwargs.get("business_area")
+            )
         qs = super(DjangoPermissionFilterConnectionField, cls).resolve_queryset(connection, iterable, info, args)
         return filterset_class(data=filter_kwargs, queryset=qs, request=info.context).qs
 
