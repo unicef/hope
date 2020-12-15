@@ -1,4 +1,3 @@
-import base64
 from parameterized import parameterized
 
 from django.core.management import call_command
@@ -23,6 +22,17 @@ from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
 class TestDiscardVerificationMutation(APITestCase):
+
+    DISCARD_MUTATION = """
+        mutation DiscardVerification($cashPlanVerificationId: ID!){
+          discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
+            cashPlan{
+                name
+                status
+            }
+          }
+        }
+        """
 
     # verification = None
 
@@ -89,21 +99,10 @@ class TestDiscardVerificationMutation(APITestCase):
     def test_discard_active(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        encoded_id = base64.b64encode(f"CashPlanPaymentVerificationNode:{self.verification.id}".encode("ascii")).decode(
-            "ascii"
-        )
-
-        DISCARD_MUTATION_GQL = f"""
-        mutation DiscardVerification{{
-          discardCashPlanPaymentVerification(cashPlanVerificationId:"{encoded_id}") {{
-            cashPlan{{
-                name
-                status
-            }}
-          }}
-        }}
-        """
         self.snapshot_graphql_request(
-            request_string=DISCARD_MUTATION_GQL,
+            request_string=self.DISCARD_MUTATION,
             context={"user": self.user},
+            variables={
+                "cashPlanVerificationId": [self.id_to_base64(self.verification.id, "CashPlanPaymentVerificationNode")]
+            },
         )
