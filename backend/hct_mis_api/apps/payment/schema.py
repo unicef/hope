@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from account.permissions import (
     DjangoPermissionFilterConnectionField,
