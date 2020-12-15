@@ -8,11 +8,7 @@ from snapshottest import Snapshot
 snapshots = Snapshot()
 
 snapshots["TestDiscardVerificationMutation::test_discard_active_0_with_permission 1"] = {
-    "data": {
-        "discardCashPlanPaymentVerification": {
-            "cashPlan": {"name": "TEST", "status": "DISTRIBUTION_COMPLETED_WITH_ERRORS"}
-        }
-    }
+    "data": {"discardCashPlanPaymentVerification": {"cashPlan": {"name": "TEST"}}}
 }
 
 snapshots["TestDiscardVerificationMutation::test_discard_active_1_without_permission 1"] = {
