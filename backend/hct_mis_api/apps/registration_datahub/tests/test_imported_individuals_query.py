@@ -9,7 +9,7 @@ from core.models import BusinessArea
 
 ALL_IMPORTED_INDIVIDUALS_QUERY = """
 query AllImportedIndividuals {
-  allImportedIndividuals(businessArea: "afghanistan") {
+  allImportedIndividuals(orderBy: "full_name", businessArea: "afghanistan") {
     edges {
       node {
         birthDate
