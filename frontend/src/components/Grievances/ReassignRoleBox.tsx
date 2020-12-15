@@ -31,9 +31,11 @@ const WarnIcon = styled(WarningIcon)`
 export const ReassignRoleBox = ({
   ticket,
   shouldDisplayButton,
+  shouldDisableButton,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
   shouldDisplayButton?: boolean;
+  shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const businessArea = useBusinessArea();
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
@@ -57,6 +59,7 @@ export const ReassignRoleBox = ({
         </Box>
         {shouldDisplayButton ? (
           <LookUpReassignRole
+            shouldDisableButton={shouldDisableButton}
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
@@ -93,6 +96,7 @@ export const ReassignRoleBox = ({
             </Box>
             {shouldDisplayButton ? (
               <LookUpReassignRole
+                shouldDisableButton={shouldDisableButton}
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
                 household={ticket?.household}
