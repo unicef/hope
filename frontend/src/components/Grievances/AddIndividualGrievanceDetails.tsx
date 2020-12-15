@@ -74,7 +74,10 @@ export function AddIndividualGrievanceDetails({
       }
       return (
         <Grid key={key} item xs={6}>
-          <LabelizedField label={key.replaceAll("_i_f","").replace(/_/g, ' ')} value={textValue} />
+          <LabelizedField
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={textValue}
+          />
         </Grid>
       );
     }) || [];
@@ -123,7 +126,11 @@ export function AddIndividualGrievanceDetails({
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
                 })}
-                variant='contained'
+                variant={
+                  ticket.addIndividualTicketDetails?.approveStatus
+                    ? 'outlined'
+                    : 'contained'
+                }
                 color='primary'
                 disabled={
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL

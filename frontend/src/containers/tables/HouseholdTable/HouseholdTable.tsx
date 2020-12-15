@@ -18,12 +18,14 @@ interface HouseholdTableProps {
   businessArea: string;
   filter;
   choicesData: HouseholdChoiceDataQuery;
+  canViewDetails: boolean;
 }
 
 export const HouseholdTable = ({
   businessArea,
   filter,
   choicesData,
+  canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -50,6 +52,7 @@ export const HouseholdTable = ({
             key={row.id}
             household={row}
             choicesData={choicesData}
+            canViewDetails={canViewDetails}
           />
         )}
       />

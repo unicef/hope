@@ -1,5 +1,5 @@
 import React from 'react';
-import { AdminAreasAutocomplete } from '../../../components/population/AdminAreaAutocomplete';
+import { AdminAreaFixedAutocomplete } from '../../../components/population/AdminAreaFixedAutocomplete';
 
 export const FormikAdminAreaAutocomplete = ({
   field,
@@ -8,14 +8,14 @@ export const FormikAdminAreaAutocomplete = ({
 }): React.ReactElement => {
   const handleChange = (e, option): void => {
     if (!option) {
-      form.setFieldValue(field.name, undefined);
+      form.setFieldValue(field.name, null);
     } else {
       form.setFieldValue(field.name, option);
     }
   };
   return (
     <>
-      <AdminAreasAutocomplete
+      <AdminAreaFixedAutocomplete
         disabled={disabled}
         value={field.value}
         onChange={handleChange}

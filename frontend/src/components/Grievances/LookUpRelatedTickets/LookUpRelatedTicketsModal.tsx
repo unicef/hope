@@ -9,7 +9,6 @@ import {
 } from '@material-ui/core';
 import { Formik } from 'formik';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
 import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
 import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
