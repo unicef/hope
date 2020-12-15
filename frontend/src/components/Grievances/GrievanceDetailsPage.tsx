@@ -246,7 +246,13 @@ export function GrievanceDetailsPage(): React.ReactElement {
       return (
         <PaddingContainer>
           <Box display='flex' flexDirection='column'>
-            <ReassignRoleBox shouldDisplayButton ticket={ticket} />
+            <ReassignRoleBox
+              shouldDisplayButton
+              shouldDisableButton={
+                ticket.deleteIndividualTicketDetails?.approveStatus
+              }
+              ticket={ticket}
+            />
           </Box>
         </PaddingContainer>
       );
