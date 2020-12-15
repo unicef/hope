@@ -72,7 +72,7 @@ export function DeleteIndividualGrievanceDetails({
   ];
   const labels =
     Object.entries(ticket.individual || {})
-      .filter(([key, value]) => {
+      .filter(([key]) => {
         const snakeKey = snakeCase(key);
         const fieldAttribute = fieldsDict[snakeKey];
         return fieldAttribute && !excludedFields.includes(key);
@@ -149,7 +149,11 @@ export function DeleteIndividualGrievanceDetails({
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
                 })}
-                variant='contained'
+                variant={
+                  ticket.deleteIndividualTicketDetails?.approveStatus
+                    ? 'outlined'
+                    : 'contained'
+                }
                 color='primary'
                 disabled={!approveEnabled}
               >

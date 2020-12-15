@@ -15,12 +15,14 @@ const TableWrapper = styled.div`
 
 interface IndividualsListTableProps {
   filter;
-  businessArea?: string;
+  businessArea: string;
+  canViewDetails: boolean;
 }
 
 export const IndividualsListTable = ({
   businessArea,
   filter,
+  canViewDetails,
 }: IndividualsListTableProps): React.ReactElement => {
   const initialVariables = {
     age: JSON.stringify(filter.age),
@@ -39,7 +41,11 @@ export const IndividualsListTable = ({
         queriedObjectName='allIndividuals'
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <IndividualsListTableRow key={row.id} individual={row} />
+          <IndividualsListTableRow
+            key={row.id}
+            individual={row}
+            canViewDetails={canViewDetails}
+          />
         )}
       />
     </TableWrapper>

@@ -30,9 +30,13 @@ const WarnIcon = styled(WarningIcon)`
 
 export const ReassignRoleBox = ({
   ticket,
+  shouldDisplayButton,
+  shouldDisableButton,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}) => {
+  shouldDisplayButton?: boolean;
+  shouldDisableButton?: boolean;
+}): React.ReactElement => {
   const businessArea = useBusinessArea();
   const householdsAndRoles = ticket?.individual?.householdsAndRoles;
   const isHeadOfHousehold =
@@ -53,11 +57,14 @@ export const ReassignRoleBox = ({
             </ContentLink>
           </LabelizedField>
         </Box>
-        <LookUpReassignRole
-          individualRole={{ role: el.role, id: el.id }}
-          ticket={ticket}
-          household={el.household}
-        />
+        {shouldDisplayButton ? (
+          <LookUpReassignRole
+            shouldDisableButton={shouldDisableButton}
+            individualRole={{ role: el.role, id: el.id }}
+            ticket={ticket}
+            household={el.household}
+          />
+        ) : null}
       </Box>
     ));
 
@@ -87,11 +94,14 @@ export const ReassignRoleBox = ({
                 </ContentLink>
               </LabelizedField>
             </Box>
-            <LookUpReassignRole
-              individualRole={{ role: 'HEAD', id: 'HEAD' }}
-              ticket={ticket}
-              household={ticket?.household}
-            />
+            {shouldDisplayButton ? (
+              <LookUpReassignRole
+                shouldDisableButton={shouldDisableButton}
+                individualRole={{ role: 'HEAD', id: 'HEAD' }}
+                ticket={ticket}
+                household={ticket?.household}
+              />
+            ) : null}
           </Box>
         )}
         {mappedLookUpsForExternalHouseholds}

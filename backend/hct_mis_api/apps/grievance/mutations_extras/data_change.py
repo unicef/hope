@@ -27,6 +27,9 @@ from household.models import (
     HEAD,
     Document,
     ROLE_NO_ROLE,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    IndividualRoleInHousehold, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN,
 )
 from household.schema import HouseholdNode, IndividualNode
 from utils.schema import Arg
@@ -460,12 +463,12 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         individual.save()
         if relationship_to_head_of_household == HEAD:
             household.head_of_household = individual
-            household.individuals.exclude(id=individual.id).update(relationship="")
+            household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             household.save(update_fields=["head_of_household"])
         household.size += 1
         household.save()
     else:
-        individual.relationship = ""
+        individual.relationship = NON_BENEFICIARY
         individual.save()
 
     handle_role(role, household, individual)
@@ -507,7 +510,7 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     relationship_to_head_of_household = individual_data.get("relationship")
     if household and relationship_to_head_of_household == HEAD:
         household.head_of_household = individual
-        household.individuals.exclude(id=individual.id).update(relationship="")
+        household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
         household.save()
 
     if role_data.get("approve_status") is True:

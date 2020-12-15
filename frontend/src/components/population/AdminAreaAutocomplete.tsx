@@ -46,7 +46,6 @@ export function AdminAreasAutocomplete({
     setNewValue(value);
     onInputTextChange('');
   }, [data, value]);
-
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
@@ -60,7 +59,7 @@ export function AdminAreasAutocomplete({
         setOpen(false);
       }}
       getOptionSelected={(option, value1) => {
-        return value1 === option.node.id;
+        return value1?.node?.id === option.node.id;
       }}
       getOptionLabel={(option) => {
         if (!option.node) {

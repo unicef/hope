@@ -1,3 +1,6 @@
+from household.models import RELATIONSHIP_UNKNOWN
+
+
 def handle_role(role, household, individual):
     from household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
 
@@ -127,7 +130,7 @@ def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
             household.head_of_household = new_individual
             # can be directly saved, because there is always only one head of household to update
             household.save()
-            household.individuals.exclude(id=new_individual.id).update(relationship="")
+            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
