@@ -1,7 +1,7 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
+import { PaymentVerificationNode } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
+export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',

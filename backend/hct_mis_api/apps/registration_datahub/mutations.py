@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from graphene_file_upload.scalars import Upload
 
-from account.permissions import Permissions, PermissionMutationMixin
+from account.permissions import Permissions, PermissionMutation
 from core.airflow_api import AirflowApi
 from core.kobo.api import KoboAPI
 from core.kobo.common import count_population
@@ -81,7 +81,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
 
 
-class RegistrationXlsxImportMutation(BaseValidator, PermissionMutationMixin):
+class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -111,7 +111,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutationMixin):
         return RegistrationXlsxImportMutation(created_obj_hct)
 
 
-class RegistrationDeduplicationMutation(BaseValidator, PermissionMutationMixin):
+class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     ok = graphene.Boolean()
 
     class Arguments:
@@ -144,7 +144,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutationMixin):
         return cls(ok=True)
 
 
-class RegistrationKoboImportMutation(BaseValidator, PermissionMutationMixin):
+class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -174,7 +174,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutationMixin):
         return RegistrationXlsxImportMutation(created_obj_hct)
 
 
-class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutationMixin):
+class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -206,7 +206,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutationMixin
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
-class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutationMixin):
+class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
 
@@ -255,7 +255,7 @@ class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutationMixin):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutationMixin):
+class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 

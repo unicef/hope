@@ -107,6 +107,10 @@ class ImportedHousehold(TimeStampedUUIDModel):
     org_name_enumerator = models.CharField(max_length=250)
     village = models.CharField(max_length=250, blank=True)
 
+    @property
+    def business_area(self):
+        return self.registration_data_import.business_area
+
     def __str__(self):
         return f"Household ID: {self.id}"
 
@@ -214,6 +218,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
     def __str__(self):
         return self.full_name
 
+    @property
+    def business_area(self):
+        return self.registration_data_import.business_area
+
 
 class ImportedIndividualRoleInHousehold(TimeStampedUUIDModel):
     individual = models.ForeignKey(
@@ -263,6 +271,10 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 
     def __str__(self):
         return self.name
+
+    @property
+    def business_area(self):
+        return self.business_area_slug
 
 
 class ImportData(TimeStampedUUIDModel):

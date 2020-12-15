@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { Button, Paper, Typography } from '@material-ui/core';
@@ -141,10 +141,9 @@ export function TargetingCriteria({
           {candidateListRules.length ? (
             candidateListRules.map((criteria, index) => {
               return (
-                <>
+                //eslint-disable-next-line
+                <Fragment key={criteria.id || index}>
                   <Criteria
-                    //eslint-disable-next-line
-                    key={criteria.id || index}
                     isEdit={isEdit}
                     canRemove={candidateListRules.length > 1}
                     rules={criteria.filters}
@@ -161,7 +160,7 @@ export function TargetingCriteria({
                       <DividerLabel>Or</DividerLabel>
                     </Divider>
                   )}
-                </>
+                </Fragment>
               );
             })
           ) : (
