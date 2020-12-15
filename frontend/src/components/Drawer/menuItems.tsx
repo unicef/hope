@@ -11,6 +11,7 @@ import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import SettingsRounded from '@material-ui/icons/SettingsRounded';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import React from 'react';
+import { PERMISSIONS } from '../../config/permissions';
 
 export const menuItems = [
   {
@@ -24,7 +25,7 @@ export const menuItems = [
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
-    permissionModule: 'RDI',
+    permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
   },
   {
     name: 'Population',
@@ -55,21 +56,31 @@ export const menuItems = [
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <FlashOnRounded />,
-    permissionsModule: 'PROGRAMME',
+    permissions: [
+      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
   },
   {
     name: 'Targeting',
     href: '/target-population',
     selectedRegexp: /^\/target-population.*$/,
     icon: <ListAltRounded />,
-    permissionModule: 'TARGETING',
+    permissions: [
+      PERMISSIONS.TARGETING_VIEW_LIST,
+      PERMISSIONS.TARGETING_VIEW_DETAILS,
+    ],
   },
   {
     name: 'Payment Verification',
     href: '/payment-verification',
     selectedRegexp: /^\/payment-verification*$/,
     icon: <AttachMoney />,
-    permissionModule: 'PAYMENT_VERIFICATION',
+    permissions: [
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
   },
   {
     name: 'Grievance and Feedback',
@@ -88,7 +99,7 @@ export const menuItems = [
     href: '/users-list',
     selectedRegexp: /^\/test.*$/,
     icon: <SupervisedUserCircle />,
-    permissionModule: 'USER_MANAGEMENT',
+    permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
   },
   {
     name: 'Settings',
