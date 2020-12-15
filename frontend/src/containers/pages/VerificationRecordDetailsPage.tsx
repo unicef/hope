@@ -39,7 +39,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
+      to: `/${businessArea}/payment-verification`,
     },
     {
       title: `Cash Plan ${decodeIdString(

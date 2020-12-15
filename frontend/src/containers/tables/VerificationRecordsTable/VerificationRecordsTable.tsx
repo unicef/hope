@@ -37,6 +37,7 @@ export function VerificationRecordsTable({
   canImport,
   canExport,
   canViewRecordDetails,
+  businessArea,
 }): ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -48,6 +49,7 @@ export function VerificationRecordsTable({
     cashPlanPaymentVerification: id,
     search: filter.search,
     status: filter.status,
+    businessArea,
   };
 
   const useStyles = makeStyles(() => ({
@@ -172,6 +174,7 @@ export function VerificationRecordsTable({
         initialVariables={initialVariables}
         renderRow={(row) => (
           <VerificationRecordsTableRow
+            key={row.id}
             record={row}
             canViewRecordDetails={canViewRecordDetails}
           />

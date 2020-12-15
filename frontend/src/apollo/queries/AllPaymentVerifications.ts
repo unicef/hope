@@ -10,6 +10,7 @@ export const AllPaymentVerifications = gql`
     $cashPlanPaymentVerification: ID
     $search: String
     $status: String
+    $businessArea: String
   ) {
     allPaymentVerifications(
       after: $after
@@ -20,6 +21,7 @@ export const AllPaymentVerifications = gql`
       cashPlanPaymentVerification: $cashPlanPaymentVerification
       search: $search
       status: $status
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
