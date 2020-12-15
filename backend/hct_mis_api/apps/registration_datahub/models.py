@@ -109,7 +109,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
 
     @property
     def business_area(self):
-        return self.registration_data_import.business_area_slug
+        return self.registration_data_import.business_area
 
     def __str__(self):
         return f"Household ID: {self.id}"
