@@ -115,7 +115,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
+      to: `/${businessArea}/payment-verification`,
     },
   ];
   const bankReconciliationSuccessPercentage =
@@ -231,7 +231,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
-                <Grid item xs={4}>
+                <Grid item xs={4} key={el.label}>
                   <LabelizedField label={el.label}>
                     <p>{el.value}</p>
                   </LabelizedField>
@@ -349,7 +349,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     ),
                   },
                 ].map((el) => (
-                  <Grid item xs={3}>
+                  <Grid item xs={3} key={el.label}>
                     <LabelizedField label={el.label}>
                       <p>{el.value}</p>
                     </LabelizedField>
@@ -421,6 +421,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
+              businessArea={businessArea}
               canImport={hasPermissions(
                 PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
                 permissions,

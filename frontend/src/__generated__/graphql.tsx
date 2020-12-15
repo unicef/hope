@@ -2785,6 +2785,7 @@ export type QueryAllPaymentVerificationsArgs = {
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   status?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5486,7 +5487,8 @@ export type AllPaymentVerificationsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   search?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  status?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -9751,8 +9753,8 @@ export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRe
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
 export const AllPaymentVerificationsDocument = gql`
-    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String) {
-  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status) {
+    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String, $businessArea: String) {
+  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -9823,6 +9825,7 @@ export function withAllPaymentVerifications<TProps, TChildProps = {}>(operationO
  *      cashPlanPaymentVerification: // value for 'cashPlanPaymentVerification'
  *      search: // value for 'search'
  *      status: // value for 'status'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */

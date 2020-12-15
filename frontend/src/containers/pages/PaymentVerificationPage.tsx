@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import get from 'lodash/get';
 import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
@@ -39,8 +40,8 @@ export function PaymentVerificationPage(): React.ReactElement {
   if (!hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
-  const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  const allPrograms = get(data, 'allPrograms.edges', []);
+  const programs = allPrograms.map((edge) => edge.node);
 
   return (
     <div>

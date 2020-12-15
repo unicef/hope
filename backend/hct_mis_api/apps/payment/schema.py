@@ -60,6 +60,7 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
+    business_area = CharFilter(field_name="payment_record__business_area__slug")
 
     class Meta:
         fields = ("cash_plan_payment_verification", "status")
@@ -173,9 +174,10 @@ class Query(graphene.ObjectType):
         filterset_class=PaymentRecordFilter,
         permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
     )
-    all_payment_verifications = DjangoFilterConnectionField(
+    all_payment_verifications = DjangoPermissionFilterConnectionField(
         PaymentVerificationNode,
         filterset_class=PaymentVerificationFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
