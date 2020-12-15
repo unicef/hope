@@ -28,7 +28,6 @@ class TestDiscardVerificationMutation(APITestCase):
           discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
-                status
             }
           }
         }
