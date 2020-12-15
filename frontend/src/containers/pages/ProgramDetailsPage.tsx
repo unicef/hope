@@ -11,10 +11,10 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
   && {
