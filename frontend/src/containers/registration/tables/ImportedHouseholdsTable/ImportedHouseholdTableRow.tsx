@@ -3,7 +3,7 @@ import React from 'react';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../../utils/utils';
+import { anon, decodeIdString } from '../../../../utils/utils';
 import { FlagTooltip } from '../../../../components/FlagTooltip';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 
@@ -36,7 +36,9 @@ export function ImportedHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>{household?.headOfHousehold?.fullName}</TableCell>
+      <TableCell align='left'>
+        {anon(household?.headOfHousehold?.fullName, true)}
+      </TableCell>
       <TableCell align='right'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin1}</TableCell>
       <TableCell align='left'>

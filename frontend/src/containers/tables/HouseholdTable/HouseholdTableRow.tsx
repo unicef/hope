@@ -7,7 +7,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { choicesToDict, formatCurrency } from '../../../utils/utils';
+import { anon, choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { FlagTooltip } from '../../../components/FlagTooltip';
@@ -16,12 +16,14 @@ interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
+  filter?;
 }
 
 export function HouseHoldTableRow({
   household,
   choicesData,
   canViewDetails,
+  filter,
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -44,7 +46,9 @@ export function HouseHoldTableRow({
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
+      <TableCell align='left'>
+        {anon(household.headOfHousehold.fullName, !filter?.text)}
+      </TableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
