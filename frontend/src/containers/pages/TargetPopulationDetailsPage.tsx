@@ -7,11 +7,11 @@ import {
 import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
-import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();

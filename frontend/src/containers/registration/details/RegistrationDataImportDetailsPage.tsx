@@ -11,9 +11,9 @@ import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/PermissionDenied';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 const Container = styled.div`
   && {
