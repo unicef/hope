@@ -8,6 +8,9 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { ProgrammesTable } from '../tables/ProgrammesTable/ProgrammesTable';
 import { useDebounce } from '../../hooks/useDebounce';
 import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({
@@ -26,6 +29,7 @@ export function ProgramsPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
 
   const {
     data: choicesData,
@@ -33,18 +37,24 @@ export function ProgramsPage(): React.ReactElement {
   } = useProgrammeChoiceDataQuery();
   const { t } = useTranslation();
 
+  if (choicesLoading) return <LoadingComponent />;
+
+  if (permissions === null) return null;
+
+  if (
+    !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
+  )
+    return <PermissionDenied />;
+
   const toolbar = (
     <PageHeader title={t('Programme Management')}>
       <CreateProgram />
     </PageHeader>
   );
-  if (choicesLoading) {
-    return <LoadingComponent />;
-  }
 
   return (
     <div>
-      {toolbar}
+      {hasPermissions(PERMISSIONS.PROGRAMME_CREATE, permissions) && toolbar}
       <ProgrammesFilters
         filter={filter}
         onFilterChange={setFilter}
