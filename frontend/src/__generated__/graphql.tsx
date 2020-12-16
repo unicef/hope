@@ -5180,6 +5180,9 @@ export type AllGrievanceTicketQuery = (
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        )>, createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id'>
         )>, household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -9228,6 +9231,9 @@ export const AllGrievanceTicketDocument = gql`
           firstName
           lastName
           email
+        }
+        createdBy {
+          id
         }
         category
         createdAt
