@@ -24,9 +24,9 @@ from registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 @override_config(
-    DEDUPLICATION_BATCH_DUPLICATE_SCORE=4.0,
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=3.0,
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=4.0,
+    DEDUPLICATION_BATCH_DUPLICATE_SCORE=14.0,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=11.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=14.0,
     DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE=100,
     DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE=100,
     DEDUPLICATION_BATCH_DUPLICATES_ALLOWED=10,
@@ -256,18 +256,18 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             deduplication_golden_record_status=UNIQUE
         )
 
-        self.assertEqual(duplicate_in_golden_record.count(), 6)
+        self.assertEqual(duplicate_in_golden_record.count(), 5)
         self.assertEqual(unique_in_golden_record.count(), 1)
-        self.assertEqual(needs_adjudication_in_golden_record.count(), 0)
+        self.assertEqual(needs_adjudication_in_golden_record.count(), 1)
 
         expected_duplicates_gr = (
-            "Tescik Testowski",
             "Tessta Testowski",
             "Tessta Testowski",
             "Test Example",
             "Test Testowski",
             "Test Testowski",
         )
+
         expected_uniques_gr = ("Tesa Testowski",)
 
         self.assertEqual(
@@ -281,8 +281,8 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
 
 
 @override_config(
-    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=4.0,
-    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=5.0,
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE=11.0,
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE=14.0,
 )
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
     multi_db = True
