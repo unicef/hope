@@ -53,7 +53,6 @@ export const HouseholdTable = ({
             household={row}
             choicesData={choicesData}
             canViewDetails={canViewDetails}
-            filter={filter}
           />
         )}
       />

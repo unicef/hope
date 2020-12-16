@@ -17,14 +17,12 @@ interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
   canViewDetails: boolean;
-  filter?;
 }
 
 export function HouseHoldTableRow({
   household,
   choicesData,
   canViewDetails,
-  filter,
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -47,7 +45,7 @@ export function HouseHoldTableRow({
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <AnonTableCell anonymize={!filter?.text} align='left'>
+      <AnonTableCell anonymize align='left'>
         {household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
