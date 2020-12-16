@@ -13,7 +13,7 @@ import {
   AllIndividualsQuery,
   IndividualQuery,
   useAllAddIndividualFieldsQuery,
-  useIndividualQuery,
+  useIndividualLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -47,7 +47,9 @@ export const EditIndividualDataChangeField = ({
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
+        fullWidth: true,
         component: FormikTextField,
+        type: 'number',
       };
       break;
     case 'INTEGER':
@@ -58,18 +60,21 @@ export const EditIndividualDataChangeField = ({
       break;
     case 'STRING':
       fieldProps = {
+        fullWidth: true,
         component: FormikTextField,
       };
       break;
     case 'SELECT_ONE':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
       };
       break;
     case 'SELECT_MANY':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
         multiple: true,
       };
@@ -77,12 +82,14 @@ export const EditIndividualDataChangeField = ({
     case 'SELECT_MULTIPLE':
       fieldProps = {
         choices: field.choices,
+        fullWidth: true,
         component: FormikSelectField,
       };
       break;
     case 'DATE':
       fieldProps = {
         component: FormikDateField,
+        fullWidth: true,
         decoratorEnd: <CalendarTodayRoundedIcon color='disabled' />,
       };
       break;
@@ -100,7 +107,6 @@ export const EditIndividualDataChangeField = ({
       <Grid item xs={4}>
         <Field
           name={name}
-          fullWidth
           variant='outlined'
           label={field.labelEn}
           required={field.required}
@@ -157,6 +163,7 @@ export const EditIndividualDataChangeFieldRow = ({
   onDelete,
 }: EditIndividualDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  // eslint-disable-next-line
   const [fieldNotUsed, metaNotUsed, helpers] = useField(
     `individualDataUpdateFields[${index}].isFlexField`,
   );
@@ -229,10 +236,17 @@ export const EditIndividualDataChange = ({
     loading: addIndividualFieldsLoading,
   } = useAllAddIndividualFieldsQuery();
 
-  const {
-    data: fullIndividual,
-    loading: fullIndividualLoading,
-  } = useIndividualQuery({ variables: { id: individual?.id } });
+  const [
+    getIndividual,
+    { data: fullIndividual, loading: fullIndividualLoading },
+  ] = useIndividualLazyQuery({ variables: { id: individual?.id } });
+
+  useEffect(() => {
+    if (individual) {
+      getIndividual();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedIndividual]);
 
   useEffect(() => {
     if (
@@ -240,17 +254,22 @@ export const EditIndividualDataChange = ({
       values.individualDataUpdateFields.length === 0
     ) {
       setFieldValue('individualDataUpdateFields', [
-        { fieldName: null, fieldValue: null },
+        { fieldName: null, fieldValue: '' },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const { data, loading } = useAllAddIndividualFieldsQuery();
-  if (loading || fullIndividualLoading || addIndividualFieldsLoading) {
-    return <LoadingComponent />;
-  }
   if (!individual) {
     return <div>You have to select an individual earlier</div>;
+  }
+  if (
+    loading ||
+    fullIndividualLoading ||
+    addIndividualFieldsLoading ||
+    !fullIndividual
+  ) {
+    return <LoadingComponent />;
   }
   const notAvailableItems = (values.individualDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
@@ -269,6 +288,8 @@ export const EditIndividualDataChange = ({
                 {(values.individualDataUpdateFields || []).map(
                   (item, index) => (
                     <EditIndividualDataChangeFieldRow
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`${index}-${item?.fieldName}`}
                       itemValue={item}
                       index={index}
                       individual={fullIndividual.individual}
@@ -282,7 +303,7 @@ export const EditIndividualDataChange = ({
                   <Button
                     color='primary'
                     onClick={() => {
-                      arrayHelpers.push({ fieldName: null, fieldValue: null });
+                      arrayHelpers.push({ fieldName: null, fieldValue: '' });
                     }}
                   >
                     <AddIcon />

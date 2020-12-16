@@ -1,4 +1,5 @@
 import React from 'react';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import { Box, Paper, Typography } from '@material-ui/core';
 import { Field } from 'formik';
@@ -33,7 +34,8 @@ export function TargetPopulationProgramme({
 }): React.ReactElement {
   if (loading) return <LoadingComponent />;
 
-  const mappedPrograms = allPrograms.allPrograms.edges.map((edge) => ({
+  const allProgramsEdges = get(allPrograms, 'allPrograms.edges', []);
+  const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node.name,
     value: edge.node.id,
   }));
