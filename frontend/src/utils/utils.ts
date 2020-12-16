@@ -394,3 +394,6 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
         .join(' ')
     : inputStr;
 };
+
+export const isPermissionDeniedError = (error) =>
+  error && error.message.includes('Permission Denied');
