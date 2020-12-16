@@ -157,3 +157,19 @@ export function hasPermissionInModule(
 ): boolean {
   return allowedPermissions.some((perm) => perm.includes(module));
 }
+
+export function hasCreatorOrOwnerPermissions(
+  generalPermission: string,
+  isCreator: boolean,
+  creatorPermission: string,
+  isOwner: boolean,
+  ownerPermission: string,
+  allowedPermissions: string[],
+) {
+  // use where we have to check 3 different permissions, for ex. grievances
+  return (
+    allowedPermissions.includes(generalPermission) ||
+    (isCreator && allowedPermissions.includes(creatorPermission)) ||
+    (isOwner && allowedPermissions.includes(ownerPermission))
+  );
+}

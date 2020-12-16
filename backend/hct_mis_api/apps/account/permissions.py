@@ -270,7 +270,7 @@ class BaseMutationPermissionMixin:
         return True
 
     @classmethod
-    def has_permission(cls, info, permission, business_area_arg):
+    def has_permission(cls, info, permission, business_area_arg, raise_error=True):
         cls.is_authenticated(info)
         if not isinstance(permission, list):
             permissions = (permission,)
@@ -280,10 +280,10 @@ class BaseMutationPermissionMixin:
             business_area = business_area_arg
         else:
             if business_area_arg is None:
-                cls.raise_permission_denied_error()
+                return cls.raise_permission_denied_error(raise_error=raise_error)
             business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
             if business_area is None:
-                cls.raise_permission_denied_error()
+                return cls.raise_permission_denied_error(raise_error=raise_error)
         if not any(
             [
                 permission.name
@@ -291,11 +291,25 @@ class BaseMutationPermissionMixin:
                 if info.context.user.has_permission(permission.name, business_area)
             ]
         ):
-            cls.raise_permission_denied_error()
+            return cls.raise_permission_denied_error(raise_error=raise_error)
         return True
 
+    @classmethod
+    def has_creator_or_owner_permission(
+        cls, info, business_area_arg, general_permission, is_creator, creator_permission, is_owner, owner_permission
+    ):
+        cls.is_authenticated(info)
+        if not (
+            cls.has_permission(info, general_permission, business_area_arg, False)
+            or (is_creator and cls.has_permission(info, creator_permission, business_area_arg, False))
+            or (is_owner and cls.has_permission(info, owner_permission, business_area_arg, False))
+        ):
+            cls.raise_permission_denied_error()
+
     @staticmethod
-    def raise_permission_denied_error(not_authenticated=False):
+    def raise_permission_denied_error(not_authenticated=False, raise_error=True):
+        if not raise_error:
+            return False
         if not_authenticated:
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         else:
