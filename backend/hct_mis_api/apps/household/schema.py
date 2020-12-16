@@ -10,8 +10,9 @@ from django_filters import (
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
-from targeting.models import HouseholdSelection
+from graphql import GraphQLError
 
+from targeting.models import HouseholdSelection
 from account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -29,6 +30,7 @@ from core.utils import (
     encode_ids,
     to_choice_object,
 )
+from grievance.models import GrievanceTicket
 from household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -232,7 +234,12 @@ class HouseholdSelection(DjangoObjectType):
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),)
+    permission_classes = (
+        hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
+    )
 
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -266,6 +273,28 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
+    @classmethod
+    def check_node_permission(cls, info, object_instance):
+        super().check_node_permission(info, object_instance)
+        business_area = object_instance.business_area
+        user = info.context.user
+        grievance_tickets = GrievanceTicket.objects.filter(
+            complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+        )
+        if not (
+            user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, business_area)
+            or user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value, business_area)
+            or (
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR)
+            )
+            or (
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER)
+            )
+        ):
+            raise GraphQLError("Permission Denied")
 
     class Meta:
         model = Household

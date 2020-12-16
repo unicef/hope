@@ -9,6 +9,7 @@ import { OverviewContainer } from '../OverviewContainer';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
+  isPermissionDeniedError,
   reduceChoices,
   renderUserName,
 } from '../../utils/utils';
@@ -16,6 +17,7 @@ import { LoadingComponent } from '../LoadingComponent';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
+  useMeQuery,
 } from '../../__generated__/graphql';
 import {
   GRIEVANCE_CATEGORIES,
@@ -35,7 +37,11 @@ import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
 import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissionInModule } from '../../config/permissions';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
 import { PermissionDenied } from '../PermissionDenied';
 
 const PaddingContainer = styled.div`
@@ -53,6 +59,11 @@ const StatusContainer = styled.div`
 
 export function GrievanceDetailsPage(): React.ReactElement {
   const { id } = useParams();
+  const permissions = usePermissions();
+  const {
+    data: currentUserData,
+    loading: currentUserDataLoading,
+  } = useMeQuery();
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
   });
@@ -62,11 +73,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  if (choicesLoading || loading) return <LoadingComponent />;
-  if (error && error.message.includes('Permission Denied'))
-    return <PermissionDenied />;
+  if (choicesLoading || loading || currentUserDataLoading)
+    return <LoadingComponent />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData) return null;
+  if (!data || !choicesData || !currentUserData) return null;
 
   const statusChoices: {
     [id: number]: string;
@@ -77,6 +88,23 @@ export function GrievanceDetailsPage(): React.ReactElement {
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
   const ticket = data.grievanceTicket;
+  const currentUserId = currentUserData.me.id;
+
+  const canViewHouseholdDetails =
+    hasPermissions(
+      PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
+      permissions,
+    ) ||
+    (currentUserId === ticket.createdBy.id &&
+      hasPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
+        permissions,
+      )) ||
+    (currentUserId === ticket.assignedTo.id &&
+      hasPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
+        permissions,
+      ));
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -119,7 +147,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
         <span>
           {ticket.household?.id ? (
             <ContentLink
-              href={`/${businessArea}/population/household/${ticket.household.id}`}
+              href={
+                canViewHouseholdDetails
+                  ? `/${businessArea}/population/household/${ticket.household.id}`
+                  : undefined
+              }
             >
               {ticket.household.unicefId}
             </ContentLink>
