@@ -11,6 +11,7 @@ import {
 } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import {
+  GrievanceTicketDocument,
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
@@ -63,6 +64,12 @@ export const GrievanceDetailsToolbar = ({
         grievanceTicketId: ticket.id,
         status,
       },
+      refetchQueries: () => [
+        {
+          query: GrievanceTicketDocument,
+          variables: { id: ticket.id },
+        },
+      ],
     });
   };
   return (
