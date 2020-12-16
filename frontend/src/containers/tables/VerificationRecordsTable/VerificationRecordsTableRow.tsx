@@ -6,12 +6,12 @@ import { TableRow } from '@material-ui/core';
 import { PaymentVerificationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
-  anon,
   decodeIdString,
   formatCurrency,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -54,9 +54,9 @@ export function VerificationRecordsTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>
-        {anon(record.paymentRecord.household.headOfHousehold.fullName, true)}
-      </TableCell>
+      <AnonTableCell anonymize align='left'>
+        {record.paymentRecord.household.headOfHousehold.fullName}
+      </AnonTableCell>
       <TableCell align='left'>
         {record.paymentRecord.household.unicefId}
       </TableCell>

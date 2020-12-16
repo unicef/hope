@@ -9,7 +9,6 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
 import {
-  anon,
   choicesToDict,
   getAgeFromDob,
   sexToCapitalize,
