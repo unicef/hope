@@ -170,7 +170,7 @@ class LogEntryObjectConnection(graphene.Connection):
 
 
 class Query(graphene.ObjectType):
-    me = graphene.Field(UserObjectType)
+    me = graphene.Field(UserNode)
     all_users = DjangoPermissionFilterConnectionField(
         UserNode,
         filterset_class=UsersFilter,

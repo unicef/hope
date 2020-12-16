@@ -2669,7 +2669,7 @@ export type Query = {
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
-  me?: Maybe<UserObjectType>,
+  me?: Maybe<UserNode>,
   allUsers?: Maybe<UserNodeConnection>,
   allLogEntries?: Maybe<LogEntryObjectConnection>,
   userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -2714,6 +2714,7 @@ export type QueryAllGrievanceTicketArgs = {
   fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -4179,148 +4180,6 @@ export type UserNodeEdge = {
    __typename?: 'UserNodeEdge',
   node?: Maybe<UserNode>,
   cursor: Scalars['String'],
-};
-
-export type UserObjectType = {
-   __typename?: 'UserObjectType',
-  id: Scalars['UUID'],
-  lastLogin?: Maybe<Scalars['DateTime']>,
-  isSuperuser: Scalars['Boolean'],
-  username: Scalars['String'],
-  firstName: Scalars['String'],
-  lastName: Scalars['String'],
-  email: Scalars['String'],
-  isStaff: Scalars['Boolean'],
-  isActive: Scalars['Boolean'],
-  dateJoined: Scalars['DateTime'],
-  status: UserStatus,
-  partner: UserPartner,
-  availableForExport: Scalars['Boolean'],
-  userRoles: Array<UserRoleNode>,
-  createdTickets: GrievanceTicketNodeConnection,
-  assignedTickets: GrievanceTicketNodeConnection,
-  ticketNotes: TicketNoteNodeConnection,
-  targetPopulations: TargetPopulationNodeConnection,
-  approvedTargetPopulations: TargetPopulationNodeConnection,
-  finalizedTargetPopulations: TargetPopulationNodeConnection,
-  registrationDataImports: RegistrationDataImportNodeConnection,
-  businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
-};
-
-
-export type UserObjectTypeCreatedTicketsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type UserObjectTypeAssignedTicketsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type UserObjectTypeTicketNotesArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type UserObjectTypeTargetPopulationsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>,
-  createdByName?: Maybe<Scalars['String']>,
-  createdAt?: Maybe<Scalars['DateTime']>,
-  updatedAt?: Maybe<Scalars['DateTime']>,
-  status?: Maybe<Scalars['String']>,
-  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type UserObjectTypeApprovedTargetPopulationsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>,
-  createdByName?: Maybe<Scalars['String']>,
-  createdAt?: Maybe<Scalars['DateTime']>,
-  updatedAt?: Maybe<Scalars['DateTime']>,
-  status?: Maybe<Scalars['String']>,
-  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type UserObjectTypeFinalizedTargetPopulationsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  name?: Maybe<Scalars['String']>,
-  createdByName?: Maybe<Scalars['String']>,
-  createdAt?: Maybe<Scalars['DateTime']>,
-  updatedAt?: Maybe<Scalars['DateTime']>,
-  status?: Maybe<Scalars['String']>,
-  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
-  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
-  businessArea?: Maybe<Scalars['String']>,
-  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
-  orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type UserObjectTypeRegistrationDataImportsArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
-
-export type UserObjectTypeBusinessAreasArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  id?: Maybe<Scalars['UUID']>
 };
 
 export enum UserPartner {
@@ -5960,8 +5819,8 @@ export type MeQueryVariables = {};
 export type MeQuery = (
   { __typename?: 'Query' }
   & { me: Maybe<(
-    { __typename?: 'UserObjectType' }
-    & Pick<UserObjectType, 'id' | 'username' | 'email' | 'firstName' | 'lastName'>
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'username' | 'email' | 'firstName' | 'lastName'>
     & { businessAreas: Maybe<(
       { __typename?: 'UserBusinessAreaNodeConnection' }
       & { edges: Array<Maybe<(
@@ -12869,7 +12728,6 @@ export type ResolversTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  UserObjectType: ResolverTypeWrapper<UserObjectType>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
@@ -13157,7 +13015,6 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  UserObjectType: UserObjectType,
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
   ImportedHouseholdNode: ImportedHouseholdNode,
@@ -14363,7 +14220,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
-  me?: Resolver<Maybe<ResolversTypes['UserObjectType']>, ParentType, ContextType>,
+  me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
   allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -14918,31 +14775,6 @@ export type UserNodeEdgeResolvers<ContextType = any, ParentType extends Resolver
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
-export type UserObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserObjectType'] = ResolversParentTypes['UserObjectType']> = {
-  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
-  lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
-  partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
-  availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
-  createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserObjectTypeCreatedTicketsArgs>,
-  assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserObjectTypeAssignedTicketsArgs>,
-  ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserObjectTypeTicketNotesArgs>,
-  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeTargetPopulationsArgs>,
-  approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeApprovedTargetPopulationsArgs>,
-  finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserObjectTypeFinalizedTargetPopulationsArgs>,
-  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserObjectTypeRegistrationDataImportsArgs>,
-  businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserObjectTypeBusinessAreasArgs>,
-};
-
 export type UserRoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserRoleNode'] = ResolversParentTypes['UserRoleNode']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -15139,7 +14971,6 @@ export type Resolvers<ContextType = any> = {
   UserNode?: UserNodeResolvers<ContextType>,
   UserNodeConnection?: UserNodeConnectionResolvers<ContextType>,
   UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
-  UserObjectType?: UserObjectTypeResolvers<ContextType>,
   UserRoleNode?: UserRoleNodeResolvers<ContextType>,
   UUID?: GraphQLScalarType,
   XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,

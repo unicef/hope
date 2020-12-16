@@ -287,11 +287,11 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             or user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value, business_area)
             or (
                 any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value, business_area)
             )
             or (
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value, business_area)
             )
         ):
             raise GraphQLError("Permission Denied")
@@ -309,7 +309,12 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),)
+    permission_classes = (
+        hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER),
+    )
 
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
@@ -333,6 +338,28 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
+
+    @classmethod
+    def check_node_permission(cls, info, object_instance):
+        super().check_node_permission(info, object_instance)
+        business_area = object_instance.business_area
+        user = info.context.user
+        grievance_tickets = GrievanceTicket.objects.filter(
+            complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+        )
+        if not (
+            user.has_permission(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, business_area)
+            or user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS.value, business_area)
+            or (
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR.value, business_area)
+            )
+            or (
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets)
+                and user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value, business_area)
+            )
+        ):
+            raise GraphQLError("Permission Denied")
 
     class Meta:
         model = Individual
