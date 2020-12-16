@@ -1,6 +1,68 @@
+from parameterized import parameterized
+from django.core.management import call_command
+
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from registration_datahub.fixtures import ImportedIndividualFactory
+from core.models import BusinessArea
+
+ALL_IMPORTED_INDIVIDUALS_QUERY = """
+query AllImportedIndividuals {
+  allImportedIndividuals(orderBy: "full_name", businessArea: "afghanistan") {
+    edges {
+      node {
+        birthDate
+        familyName
+        fullName
+        givenName
+        phoneNo
+      }
+    }
+  }
+}
+"""
+ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY = """
+query AllImportedIndividuals {
+  allImportedIndividuals(orderBy: "birth_date", businessArea: "afghanistan") {
+    edges {
+      node {
+        birthDate
+        familyName
+        fullName
+        givenName
+        phoneNo
+      }
+    }
+  }
+}
+"""
+ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY = """
+query AllImportedIndividuals {
+  allImportedIndividuals(orderBy: "-birth_date", businessArea: "afghanistan") {
+    edges {
+      node {
+        birthDate
+        familyName
+        fullName
+        givenName
+        phoneNo
+      }
+    }
+  }
+}
+"""
+IMPORTED_INDIVIDUAL_QUERY = """
+query ImportedIndividual($id: ID!) {
+  importedIndividual(id: $id) {
+    birthDate
+        familyName
+        fullName
+        givenName
+        phoneNo
+  }
+}
+"""
 
 
 class TestImportedIndividualQuery(APITestCase):
@@ -11,66 +73,11 @@ class TestImportedIndividualQuery(APITestCase):
     MAX_AGE = 51
     MIN_AGE = 37
 
-    ALL_IMPORTED_INDIVIDUALS_QUERY = """
-    query AllImportedIndividuals {
-      allImportedIndividuals {
-        edges {
-          node {
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }
-        }
-      }
-    }
-    """
-    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY = """
-    query AllImportedIndividuals {
-      allImportedIndividuals(orderBy: "birth_date") {
-        edges {
-          node {
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }
-        }
-      }
-    }
-    """
-    ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY = """
-    query AllImportedIndividuals {
-      allImportedIndividuals(orderBy: "-birth_date") {
-        edges {
-          node {
-            fullName
-            givenName
-            familyName
-            phoneNo
-            birthDate
-          }
-        }
-      }
-    }
-    """
-    IMPORTED_INDIVIDUAL_QUERY = """
-    query ImportedIndividual($id: ID!) {
-      importedIndividual(id: $id) {
-        fullName
-        givenName
-        familyName
-        phoneNo
-        birthDate
-      }
-    }
-    """
-
     def setUp(self):
         super().setUp()
         self.user = UserFactory.create()
+        call_command("loadbusinessareas")
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         self.individuals_to_create = [
             {
                 "full_name": "Benjamin Butler",
@@ -115,25 +122,50 @@ class TestImportedIndividualQuery(APITestCase):
         ]
 
         self.individuals = [ImportedIndividualFactory(**individual) for individual in self.individuals_to_create]
+        for individual in self.individuals:
+            individual.registration_data_import.business_area_slug = "afghanistan"
+            individual.registration_data_import.save()
 
-    def test_imported_individual_query_all(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_QUERY, context={"user": self.user},
-        )
+    @parameterized.expand(
+        [
+            ("all_with_permission", [Permissions.RDI_VIEW_DETAILS], ALL_IMPORTED_INDIVIDUALS_QUERY),
+            ("all_without_permission", [], ALL_IMPORTED_INDIVIDUALS_QUERY),
+            (
+                "order_by_dob_all_with_permission",
+                [Permissions.RDI_VIEW_DETAILS],
+                ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY,
+            ),
+            (
+                "order_by_dob_d_all_with_permission",
+                [Permissions.RDI_VIEW_DETAILS],
+                ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY,
+            ),
+        ]
+    )
+    def test_imported_individual_query(self, _, permissions, query):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-    def test_imported_individual_query_order_by_dob_a_all(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_A_QUERY, context={"user": self.user},
-        )
-
-    def test_imported_individual_query_order_by_dob_d_all(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_IMPORTED_INDIVIDUALS_ORDER_BY_BIRTH_DATE_D_QUERY, context={"user": self.user},
-        )
-
-    def test_imported_individual_query_single(self):
-        self.snapshot_graphql_request(
-            request_string=self.IMPORTED_INDIVIDUAL_QUERY,
+            request_string=query,
             context={"user": self.user},
-            variables={"id": self.id_to_base64(self.individuals[0].id, "ImportedIndividualNode",)},
+        )
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.RDI_VIEW_DETAILS]),
+            ("without_permission", []),
+        ]
+    )
+    def test_imported_individual_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=IMPORTED_INDIVIDUAL_QUERY,
+            context={"user": self.user},
+            variables={
+                "id": self.id_to_base64(
+                    self.individuals[0].id,
+                    "ImportedIndividualNode",
+                )
+            },
         )

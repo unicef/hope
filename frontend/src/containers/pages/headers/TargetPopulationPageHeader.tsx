@@ -29,12 +29,24 @@ const StatusWrapper = styled.div`
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
+  canEdit: boolean;
+  canRemove: boolean;
+  canDuplicate: boolean;
+  canLock: boolean;
+  canUnlock: boolean;
+  canSend: boolean;
 }
 
 export function TargetPopulationPageHeader({
-                                             targetPopulation,
-                                             setEditState,
-                                           }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
+  targetPopulation,
+  setEditState,
+  canEdit,
+  canRemove,
+  canDuplicate,
+  canLock,
+  canUnlock,
+  canSend,
+}: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -51,6 +63,10 @@ export function TargetPopulationPageHeader({
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
+          canDuplicate={canDuplicate}
+          canRemove={canRemove}
+          canEdit={canEdit}
+          canLock={canLock}
         />
       );
       break;
@@ -58,6 +74,9 @@ export function TargetPopulationPageHeader({
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
+          canDuplicate={canDuplicate}
+          canUnlock={canUnlock}
+          canSend={canSend}
         />
       );
       break;
@@ -66,6 +85,7 @@ export function TargetPopulationPageHeader({
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
+          canDuplicate={canDuplicate}
         />
       );
       break;
