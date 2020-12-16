@@ -405,7 +405,7 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
-class CreateTicketNoteMutation(graphene.Mutation):
+class CreateTicketNoteMutation(PermissionMutation):
     grievance_ticket_note = graphene.Field(TicketNoteNode)
 
     class Arguments:
@@ -417,6 +417,16 @@ class CreateTicketNoteMutation(graphene.Mutation):
     def mutate(cls, root, info, note_input, **kwargs):
         grievance_ticket_id = decode_id_string(note_input["ticket"])
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_ADD_NOTE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_ADD_NOTE_AS_OWNER,
+        )
+
         description = note_input["description"]
         created_by = info.context.user
 

@@ -121,6 +121,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const canAddNote = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_ADD_NOTE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_OWNER,
+    permissions,
+  );
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -374,7 +383,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </PaddingContainer>
           )}
           <PaddingContainer>
-            <Notes notes={ticket.ticketNotes} />
+            <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
           </PaddingContainer>
         </Grid>
         <Grid item xs={5}>
