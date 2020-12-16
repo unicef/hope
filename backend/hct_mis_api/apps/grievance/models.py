@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from payment.models import PaymentVerification
 from utils.models import TimeStampedUUIDModel
 from django.utils.translation import ugettext_lazy as _
 
@@ -171,6 +172,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         related_name="created_tickets",
         null=True,
+        blank=True,
         verbose_name=_("Created by"),
     )
     assigned_to = models.ForeignKey(
@@ -178,6 +180,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         related_name="assigned_tickets",
         null=True,
+        blank=True,
         verbose_name=_("Assigned to"),
     )
     status = models.IntegerField(verbose_name=_("Status"), choices=STATUS_CHOICES, default=STATUS_NEW)
@@ -190,7 +193,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
     )
     admin = models.CharField(max_length=250, blank=True)
     area = models.CharField(max_length=250, blank=True)
-    language = models.TextField()
+    language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
     linked_tickets = models.ManyToManyField(
@@ -386,7 +389,12 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     role_reassign_data = JSONField(default=dict)
 
 
-# class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
-#     ticket = models.OneToOneField(
-#         "grievance.GrievanceTicket", related_name="needs_adjudication_ticket_details", on_delete=models.CASCADE
-#     )
+class TicketPaymentVerificationDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="payment_verification_ticket_details", on_delete=models.CASCADE
+    )
+    payment_verifications = models.ManyToManyField("payment.PaymentVerification", related_name="ticket_details")
+    payment_verification_status = models.CharField(
+        max_length=50,
+        choices=PaymentVerification.STATUS_CHOICES,
+    )
