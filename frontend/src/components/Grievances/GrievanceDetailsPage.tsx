@@ -38,6 +38,7 @@ import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
+  hasCreatorOrOwnerPermissions,
   hasPermissionInModule,
   hasPermissions,
   PERMISSIONS,
@@ -90,38 +91,35 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
   const ticket = data.grievanceTicket;
   const currentUserId = currentUserData.me.id;
-  console.log(currentUserId, ticket.assignedTo.id);
-  const canViewHouseholdDetails =
-    hasPermissions(
-      PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
-      permissions,
-    ) ||
-    (currentUserId === ticket.createdBy.id &&
-      hasPermissions(
-        PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
-        permissions,
-      )) ||
-    (currentUserId === ticket.assignedTo.id &&
-      hasPermissions(
-        PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
-        permissions,
-      ));
+  const isCreator = currentUserId === ticket.createdBy?.id;
+  const isOwner = currentUserId === ticket.assignedTo?.id;
 
-  const canViewIndividualDetails =
-    hasPermissions(
-      PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
-      permissions,
-    ) ||
-    (currentUserId === ticket.createdBy.id &&
-      hasPermissions(
-        PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR,
-        permissions,
-      )) ||
-    (currentUserId === ticket.assignedTo.id &&
-      hasPermissions(
-        PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER,
-        permissions,
-      ));
+  const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
+    permissions,
+  );
+
+  const canViewIndividualDetails = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER,
+    permissions,
+  );
+
+  const canEdit = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_UPDATE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+    permissions,
+  );
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -329,7 +327,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
   return (
     <div>
-      <GrievanceDetailsToolbar ticket={ticket} />
+      <GrievanceDetailsToolbar canEdit={canEdit} ticket={ticket} />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>

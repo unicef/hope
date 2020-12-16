@@ -6,7 +6,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from account.schema import UserNode
-from account.permissions import PermissionMutation, Permissions
+from account.permissions import PermissionMutation, Permissions, PermissionMutation
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
@@ -217,7 +217,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         return grievance_ticket, extras
 
 
-class UpdateGrievanceTicketMutation(graphene.Mutation):
+class UpdateGrievanceTicketMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     EXTRAS_OPTIONS = {
@@ -257,6 +257,16 @@ class UpdateGrievanceTicketMutation(graphene.Mutation):
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name, default=None: input.get(name, default)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
+        business_area = grievance_ticket.business_area
+        cls.has_creator_or_owner_permission(
+            info,
+            business_area,
+            Permissions.GRIEVANCES_UPDATE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+        )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
             raise GraphQLError("Grievance Ticket on status Closed is not editable")

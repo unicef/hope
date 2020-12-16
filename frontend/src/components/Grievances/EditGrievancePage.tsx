@@ -23,6 +23,7 @@ import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
+  useMeQuery,
   useUpdateGrievanceMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -35,6 +36,7 @@ import {
 import {
   decodeIdString,
   isInvalid,
+  isPermissionDeniedError,
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
@@ -49,6 +51,12 @@ import {
   validationSchema,
 } from './utils/editGrievanceUtils';
 import { validate } from './utils/validateGrievance';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionDenied } from '../PermissionDenied';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -74,14 +82,23 @@ const BoxWithBorders = styled.div`
 
 export function EditGrievancePage(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const { showMessage } = useSnackbar();
   const { id } = useParams();
 
-  const { data: ticketData, loading: ticketLoading } = useGrievanceTicketQuery({
+  const {
+    data: ticketData,
+    loading: ticketLoading,
+    error,
+  } = useGrievanceTicketQuery({
     variables: {
       id,
     },
   });
+  const {
+    data: currentUserData,
+    loading: currentUserDataLoading,
+  } = useMeQuery();
 
   const { data: userData, loading: userDataLoading } = useAllUsersQuery({
     variables: { businessArea },
@@ -103,13 +120,31 @@ export function EditGrievancePage(): React.ReactElement {
     userDataLoading ||
     choicesLoading ||
     ticketLoading ||
-    allAddIndividualFieldsDataLoading
-  ) {
+    allAddIndividualFieldsDataLoading ||
+    currentUserDataLoading
+  )
     return <LoadingComponent />;
-  }
-  if (!choicesData || !userData || !ticketData) return null;
+  if (permissions === null) return null;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!choicesData || !userData || !ticketData || !currentUserData) return null;
 
-  const ticket = ticketData?.grievanceTicket;
+  const currentUserId = currentUserData.me.id;
+  const ticket = ticketData.grievanceTicket;
+
+  const isCreator = ticket.createdBy?.id === currentUserId;
+  const isOwner = ticket.assignedTo?.id === currentUserId;
+  if (
+    !hasCreatorOrOwnerPermissions(
+      PERMISSIONS.GRIEVANCES_UPDATE,
+      isCreator,
+      PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+      isOwner,
+      PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+      permissions,
+    )
+  )
+    return <PermissionDenied />;
+
   const changeState = (status): void => {
     mutateStatus({
       variables: {
