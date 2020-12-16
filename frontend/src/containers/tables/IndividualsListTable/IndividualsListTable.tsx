@@ -45,7 +45,6 @@ export const IndividualsListTable = ({
             key={row.id}
             individual={row}
             canViewDetails={canViewDetails}
-            filter={filter}
           />
         )}
       />
