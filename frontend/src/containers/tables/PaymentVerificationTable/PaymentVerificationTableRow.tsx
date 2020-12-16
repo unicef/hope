@@ -2,7 +2,10 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {AllCashPlansQuery, useCashPlanVerificationStatusChoicesQuery} from '../../../__generated__/graphql';
+import {
+  AllCashPlansQuery,
+  useCashPlanVerificationStatusChoicesQuery,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
@@ -20,10 +23,12 @@ const StatusContainer = styled.div`
 `;
 interface PaymentVerificationTableRowProps {
   plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
+  canViewDetails: boolean;
 }
 
 export function PaymentVerificationTableRow({
   plan,
+  canViewDetails,
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -45,7 +50,7 @@ export function PaymentVerificationTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={plan.id}
     >
@@ -59,7 +64,9 @@ export function PaymentVerificationTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>{plan.assistanceThrough}</TableCell>
-      <TableCell align='left'>{deliveryTypeChoicesDict[plan.deliveryType]}</TableCell>
+      <TableCell align='left'>
+        {deliveryTypeChoicesDict[plan.deliveryType]}
+      </TableCell>
       <TableCell align='right'>
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>

@@ -91,7 +91,9 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--noinput", action="store_true", help="Suppresses all user prompts.",
+            "--noinput",
+            action="store_true",
+            help="Suppresses all user prompts.",
         )
 
     def _generate_admin_areas(self):
@@ -99,10 +101,12 @@ class Command(BaseCommand):
         state_area_type = AdminAreaTypeFactory(name="State", business_area=business_area, admin_level=1)
         province_area_type = AdminAreaTypeFactory(name="Province", business_area=business_area, admin_level=2)
         AdminAreaFactory.create_batch(
-            6, admin_area_type=state_area_type,
+            6,
+            admin_area_type=state_area_type,
         )
         AdminAreaFactory.create_batch(
-            6, admin_area_type=province_area_type,
+            6,
+            admin_area_type=province_area_type,
         )
 
     @staticmethod
@@ -126,7 +130,10 @@ class Command(BaseCommand):
             business_area=BusinessArea.objects.first(),
         )
         for _ in range(cash_plans_amount):
-            cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+            cash_plan = CashPlanFactory.build(
+                program=program,
+                business_area=BusinessArea.objects.first(),
+            )
             cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
@@ -146,7 +153,9 @@ class Command(BaseCommand):
                 household.programs.add(program)
 
                 payment_record = PaymentRecordFactory(
-                    cash_plan=cash_plan, household=household, target_population=target_population,
+                    cash_plan=cash_plan,
+                    household=household,
+                    target_population=target_population,
                 )
 
                 should_create_grievance = random.choice((True, False))
@@ -184,7 +193,9 @@ class Command(BaseCommand):
             call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
-                "loaddata", "hct_mis_api/apps/account/fixtures/superuser.json", verbosity=0,
+                "loaddata",
+                "hct_mis_api/apps/account/fixtures/superuser.json",
+                verbosity=0,
             )
         start_time = time.time()
         programs_amount = options["programs_amount"]
@@ -222,12 +233,15 @@ class Command(BaseCommand):
         # Data imports generation
 
         for rdi in RegistrationDataImport.objects.all():
-            rdi_datahub = RegistrationDataImportDatahubFactory(name=rdi.name, hct_id=rdi.id)
+            rdi_datahub = RegistrationDataImportDatahubFactory(
+                name=rdi.name, hct_id=rdi.id, business_area_slug=rdi.business_area.slug
+            )
             rdi.datahub_id = rdi_datahub.id
             rdi.save()
             for _ in range(10):
                 create_imported_household(
-                    {"registration_data_import": rdi_datahub}, {"registration_data_import": rdi_datahub},
+                    {"registration_data_import": rdi_datahub},
+                    {"registration_data_import": rdi_datahub},
                 )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()

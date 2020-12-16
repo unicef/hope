@@ -3,7 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { TableRow } from '@material-ui/core';
-import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
+import { PaymentVerificationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   anon,
@@ -21,12 +21,16 @@ const Pointer = styled.span`
   cursor: pointer;
 `;
 interface VerificationRecordsTableRowProps {
-  record: PaymentVerificationNodeEdge;
-  selected: Array<string>;
-  checkboxClickHandler: () => void;
+  record: PaymentVerificationNode;
+  canViewRecordDetails: boolean;
+  // selected: Array<string>;
+  // checkboxClickHandler: () => void;
 }
 
-export function VerificationRecordsTableRow({ record }): React.ReactElement {
+export function VerificationRecordsTableRow({
+  record,
+  canViewRecordDetails,
+}: VerificationRecordsTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
   const handleClick = (): void => {
@@ -36,7 +40,10 @@ export function VerificationRecordsTableRow({ record }): React.ReactElement {
 
   return (
     <TableRow hover role='checkbox' key={record.id}>
-      <TableCell onClick={() => handleClick()} align='left'>
+      <TableCell
+        onClick={canViewRecordDetails ? handleClick : undefined}
+        align='left'
+      >
         <Pointer>{decodeIdString(record.paymentRecord.id)}</Pointer>
       </TableCell>
       <TableCell align='left'>

@@ -8,6 +8,7 @@ export const ALL_IMPORTED_HOUSEHOLDS_QUERY = gql`
     $last: Int
     $rdiId: String
     $orderBy: String
+    $businessArea: String
   ) {
     allImportedHouseholds(
       after: $after
@@ -16,6 +17,7 @@ export const ALL_IMPORTED_HOUSEHOLDS_QUERY = gql`
       last: $last
       rdiId: $rdiId
       orderBy: $orderBy
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
