@@ -10,7 +10,10 @@ import styled from 'styled-components';
 import React from 'react';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissionInModule } from '../../config/permissions';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+} from '../../config/permissions';
 import { menuItems } from './menuItems';
 
 const Text = styled(ListItemText)`
@@ -75,9 +78,11 @@ export function DrawerItems({ currentLocation }: Props): React.ReactElement {
         if (
           item.permissionModule &&
           !hasPermissionInModule(item.permissionModule, permissions)
-        ) {
+        )
           return null;
-        }
+
+        if (item.permissions && !hasPermissions(item.permissions, permissions))
+          return null;
         if (item.collapsable) {
           const hrefForCollapsibleItem = getInitialHrefForCollapsible(
             item.secondaryActions,

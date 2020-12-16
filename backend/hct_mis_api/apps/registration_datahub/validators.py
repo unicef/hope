@@ -560,7 +560,12 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         individuals_sheet = wb["Individuals"]
         households_sheet = wb["Households"]
         first_row = individuals_sheet[1]
-        household_ids = {str(cell.value) for cell in households_sheet["A"][2:] if cell.value}
+
+        household_ids = {
+            str(int(cell.value)) if isinstance(cell.value, float) and cell.value.is_integer() else str(cell.value)
+            for cell in households_sheet["A"][2:]
+            if cell.value
+        }
 
         primary_collectors_data = {}
         alternate_collectors_data = {}

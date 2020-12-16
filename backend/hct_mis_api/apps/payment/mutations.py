@@ -9,6 +9,7 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from account.permissions import PermissionMutation, Permissions
 from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
@@ -26,7 +27,7 @@ from program.models import CashPlan
 from program.schema import CashPlanNode
 
 
-class CreatePaymentVerificationMutation(graphene.Mutation):
+class CreatePaymentVerificationMutation(PermissionMutation):
 
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -85,6 +86,9 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
 
         cash_plan_id = decode_id_string(arg("cash_plan_id"))
         cash_plan = get_object_or_404(CashPlan, id=cash_plan_id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_CREATE, cash_plan.business_area)
+
         verification_channel = arg("verification_channel")
         if cash_plan.verifications.count() > 0:
             raise GraphQLError("Verification plan for this Cash Plan already exists")
@@ -149,12 +153,17 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get("min"),
+                age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
             payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count, confidence_interval, margin_of_error,
+                payment_records_sample_count,
+                confidence_interval,
+                margin_of_error,
             )
             payment_records = payment_records.order_by("?")[:payment_records_sample_count]
         return (
@@ -183,7 +192,7 @@ class CreatePaymentVerificationMutation(graphene.Mutation):
         cash_plan_payment_verification.save()
 
 
-class EditPaymentVerificationMutation(graphene.Mutation):
+class EditPaymentVerificationMutation(PermissionMutation):
 
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -242,6 +251,9 @@ class EditPaymentVerificationMutation(graphene.Mutation):
         cash_plan_payment_verification_id = decode_id_string(arg("cash_plan_payment_verification_id"))
 
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_payment_verification_id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
+
         if cash_plan_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can only edit PENDING Cash Plan Verification")
         cash_plan = cash_plan_verification.cash_plan
@@ -307,12 +319,17 @@ class EditPaymentVerificationMutation(graphene.Mutation):
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get("min"),
+                age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
             payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count, confidence_interval, margin_of_error,
+                payment_records_sample_count,
+                confidence_interval,
+                margin_of_error,
             )
             payment_records = payment_records.order_by("?")[:payment_records_sample_count]
         return (
@@ -341,7 +358,7 @@ class EditPaymentVerificationMutation(graphene.Mutation):
         cash_plan_payment_verification.save()
 
 
-class ActivateCashPlanVerificationMutation(graphene.Mutation):
+class ActivateCashPlanVerificationMutation(PermissionMutation):
 
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -354,6 +371,9 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cashplan_payment_verification.business_area)
+
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
             raise GraphQLError("You can activate only PENDING verification")
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_ACTIVE
@@ -368,7 +388,7 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
 
     @classmethod
     def activate_rapidpro(cls, cashplan_payment_verification):
-        business_area_slug = cashplan_payment_verification.cash_plan.business_area.slug
+        business_area_slug = cashplan_payment_verification.business_area.slug
         api = RapidProAPI(business_area_slug)
         phone_numbers = list(
             Individual.objects.filter(
@@ -380,7 +400,7 @@ class ActivateCashPlanVerificationMutation(graphene.Mutation):
         cashplan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
 
 
-class FinishCashPlanVerificationMutation(graphene.Mutation):
+class FinishCashPlanVerificationMutation(PermissionMutation):
 
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -393,6 +413,8 @@ class FinishCashPlanVerificationMutation(graphene.Mutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, cashplan_payment_verification.business_area)
+
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can finish only ACTIVE verification")
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
@@ -401,7 +423,7 @@ class FinishCashPlanVerificationMutation(graphene.Mutation):
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
 
-class DiscardCashPlanVerificationMutation(graphene.Mutation):
+class DiscardCashPlanVerificationMutation(PermissionMutation):
 
     cash_plan = graphene.Field(CashPlanNode)
 
@@ -414,6 +436,9 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cashplan_payment_verification.business_area)
+
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
         cash_plan = cashplan_payment_verification.cash_plan
@@ -427,9 +452,8 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
             )
             payment_record_verifications_to_create.append(payment_record_verification)
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
-        cs = cashplan_payment_verification.cash_plan
-        cs.verification_status = CashPlanPaymentVerification.STATUS_PENDING
-        cs.save()
+        cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
+        cash_plan.save()
         cashplan_payment_verification.save()
         return DiscardCashPlanVerificationMutation(cash_plan)
 
@@ -446,12 +470,16 @@ class DiscardCashPlanVerificationMutation(graphene.Mutation):
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get("min"), age.get("max"),
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get("min"),
+                age.get("max"),
             )
         return payment_records
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
+    # TODO I don't think this is being used now, add permission if in use
 
     payment_verification = graphene.Field(PaymentVerificationNode)
 
@@ -460,7 +488,8 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         received_amount = graphene.Decimal(required=True)
         status = graphene.Argument(
             graphene.Enum(
-                "PaymentVerificationStatusForUpdate", [(x[0], x[0]) for x in PaymentVerification.STATUS_CHOICES],
+                "PaymentVerificationStatusForUpdate",
+                [(x[0], x[0]) for x in PaymentVerification.STATUS_CHOICES],
             )
         )
 
@@ -468,7 +497,13 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root, info, payment_verification_id, received_amount, status, **kwargs,
+        cls,
+        root,
+        info,
+        payment_verification_id,
+        received_amount,
+        status,
+        **kwargs,
     ):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
         if (
@@ -513,7 +548,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
-class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
+class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
 
     payment_verification = graphene.Field(PaymentVerificationNode)
 
@@ -526,11 +561,19 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root, info, payment_verification_id, received_amount, received, **kwargs,
+        cls,
+        root,
+        info,
+        payment_verification_id,
+        received_amount,
+        received,
+        **kwargs,
     ):
         if math.isnan(received_amount):
             received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.cash_plan_payment_verification.verification_method
             != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
@@ -547,7 +590,9 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(graphene.Mutation):
         if received is None and received_amount is not None:
             raise GraphQLError(f"You can't set received_amount {received_amount} and not set received to YES")
         elif received_amount == 0 and received:
-            raise GraphQLError(f"If received_amount is 0, you should set received to NO",)
+            raise GraphQLError(
+                f"If received_amount is 0, you should set received to NO",
+            )
         elif received_amount is not None and received_amount != 0 and not received:
             raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
@@ -575,7 +620,7 @@ class XlsxErrorNode(graphene.ObjectType):
         return parent[2]
 
 
-class ImportXlsxCashPlanVerification(graphene.Mutation,):
+class ImportXlsxCashPlanVerification(PermissionMutation):
     cash_plan = graphene.Field(CashPlanNode)
     errors = graphene.List(XlsxErrorNode)
 
@@ -588,6 +633,9 @@ class ImportXlsxCashPlanVerification(graphene.Mutation,):
     def mutate(cls, root, info, file, cash_plan_verification_id):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+
+        cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_IMPORT, cashplan_payment_verification.business_area)
+
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can only import verification for active CashPlan verification")
         if cashplan_payment_verification.verification_method != CashPlanPaymentVerification.VERIFICATION_METHOD_XLSX:

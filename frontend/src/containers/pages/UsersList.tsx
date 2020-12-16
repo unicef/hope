@@ -6,7 +6,10 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { PageHeader } from '../../components/PageHeader';
 import { UsersListTable } from '../tables/UsersListTable';
 import { UsersListFilters } from '../../components/UserManagement/UsersListFilters';
-import {useBusinessArea} from "../../hooks/useBusinessArea";
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   && {
@@ -18,6 +21,7 @@ const Container = styled.div`
 
 export function UsersList(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const { t } = useTranslation();
   const [filter, setFilter] = useState({
     search: '',
@@ -27,6 +31,11 @@ export function UsersList(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
 
+  if (permissions === null) return null;
+
+  if (!hasPermissions(PERMISSIONS.USER_MANAGEMENT_VIEW_LIST, permissions))
+    return <PermissionDenied />;
+
   return (
     <div>
       <PageHeader title={t('User Management')}>
@@ -35,7 +44,7 @@ export function UsersList(): React.ReactElement {
             variant='contained'
             color='primary'
             onClick={() => null}
-            component="a"
+            component='a'
             href={`/api/download-exported-users/${businessArea}`}
             data-cy='button-target-population-create-new'
           >
