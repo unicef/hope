@@ -37,6 +37,8 @@ from grievance.models import (
     TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketSystemFlaggingDetails,
 )
 from household.models import Household, Individual
 from household.schema import HouseholdNode, IndividualNode
@@ -59,6 +61,8 @@ class GrievanceTicketFilter(FilterSet):
             "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
         },
         "add_individual_ticket_details": {"household": ("id",)},
+        "system_flagging_ticket_details": {"golden_records_individual": ("id",)},
+        "needs_adjudication_ticket_details": {"golden_records_individual": ("id",)},
     }
     TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
 
@@ -104,6 +108,8 @@ class GrievanceTicketFilter(FilterSet):
                 "add_individual_ticket_details__household__unicef_id",
                 "household_data_update_ticket_details__household__unicef_id",
                 "delete_individual_ticket_details__individual__household__unicef_id",
+                "system_flagging_ticket_details__golden_records_individual__household__unicef_id",
+                "needs_adjudication_ticket_details__golden_records_individual__household__unicef_id",
             )
         )
 
@@ -217,7 +223,12 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
         for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
             extras_field = getattr(grievance_ticket_obj, field, {})
-            obj = getattr(extras_field, lookup_name, None)
+            real_lookup = lookup_name
+            for lookup in lookups:
+                if isinstance(lookup, dict):
+                    real_lookup = lookup.get(lookup_name)
+                    break
+            obj = getattr(extras_field, real_lookup, None)
             if obj is not None:
                 return obj
 
@@ -299,6 +310,22 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 
     class Meta:
         model = TicketHouseholdDataUpdateDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketNeedsAdjudicationDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketSystemFlaggingDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketSystemFlaggingDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

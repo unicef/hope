@@ -543,9 +543,9 @@ class SimpleApproveMutation(graphene.Mutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        individual_details = grievance_ticket.ticket_details
-        individual_details.approve_status = approve_status
-        individual_details.save()
+        ticket_details = grievance_ticket.ticket_details
+        ticket_details.approve_status = approve_status
+        ticket_details.save()
         grievance_ticket.refresh_from_db()
 
         return cls(grievance_ticket=grievance_ticket)
