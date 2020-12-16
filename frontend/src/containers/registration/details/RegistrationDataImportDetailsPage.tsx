@@ -4,16 +4,14 @@ import styled from 'styled-components';
 import { Paper, Tab } from '@material-ui/core';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
-import {
-  useProgrammeChoiceDataQuery,
-  useRegistrationDataImportQuery,
-} from '../../../__generated__/graphql';
+import { useRegistrationDataImportQuery } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { ImportedHouseholdTable } from '../tables/ImportedHouseholdsTable';
 import { ImportedIndividualsTable } from '../tables/ImportedIndividualsTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/PermissionDenied';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
 
@@ -60,64 +58,18 @@ function TabPanel({
 export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
+  const businessArea = useBusinessArea();
   const { data, loading } = useRegistrationDataImportQuery({
     variables: { id },
   });
   const [selectedTab, setSelectedTab] = useState(0);
-  const {
-    data: choices,
-    loading: choicesLoading,
-  } = useProgrammeChoiceDataQuery();
 
-  if (loading || choicesLoading) {
-    return <LoadingComponent />;
-  }
+  if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
-  if (
-    !hasPermissions(
-      [
-        PERMISSIONS.RDI_VIEW_DETAILS,
-        PERMISSIONS.RDI_MERGE_IMPORT,
-        PERMISSIONS.RDI_RERUN_DEDUPE,
-      ],
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions))
     return <PermissionDenied />;
 
-  if (!data || !choices) return null;
-
-  const rdiDetails = (
-    <Container>
-      <RegistrationDetails registration={data.registrationDataImport} />
-      <TableWrapper>
-        <Paper>
-          <Title variant='h6'>Import Preview</Title>
-          <TabsContainer>
-            <StyledTabs
-              value={selectedTab}
-              onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
-                setSelectedTab(newValue)
-              }
-              indicatorColor='primary'
-              textColor='primary'
-              variant='fullWidth'
-              aria-label='full width tabs example'
-            >
-              <Tab label='Households' />
-              <Tab label='Individuals' />
-            </StyledTabs>
-          </TabsContainer>
-          <TabPanel value={selectedTab} index={0}>
-            <ImportedHouseholdTable rdiId={id} />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <ImportedIndividualsTable showCheckbox rdiId={id} />
-          </TabPanel>
-        </Paper>
-      </TableWrapper>
-    </Container>
-  );
+  if (!data) return null;
 
   return (
     <div>
@@ -129,7 +81,39 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
           permissions,
         )}
       />
-      {hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions) && rdiDetails}
+      <Container>
+        <RegistrationDetails registration={data.registrationDataImport} />
+        <TableWrapper>
+          <Paper>
+            <Title variant='h6'>Import Preview</Title>
+            <TabsContainer>
+              <StyledTabs
+                value={selectedTab}
+                onChange={(event: React.ChangeEvent<{}>, newValue: number) =>
+                  setSelectedTab(newValue)
+                }
+                indicatorColor='primary'
+                textColor='primary'
+                variant='fullWidth'
+                aria-label='full width tabs example'
+              >
+                <Tab label='Households' />
+                <Tab label='Individuals' />
+              </StyledTabs>
+            </TabsContainer>
+            <TabPanel value={selectedTab} index={0}>
+              <ImportedHouseholdTable rdiId={id} businessArea={businessArea} />
+            </TabPanel>
+            <TabPanel value={selectedTab} index={1}>
+              <ImportedIndividualsTable
+                showCheckbox
+                rdiId={id}
+                businessArea={businessArea}
+              />
+            </TabPanel>
+          </Paper>
+        </TableWrapper>
+      </Container>
     </div>
   );
 }

@@ -1909,6 +1909,7 @@ export enum IndividualPhysicalDisability {
 }
 
 export enum IndividualRelationship {
+  Unknown = 'UNKNOWN',
   NonBeneficiary = 'NON_BENEFICIARY',
   Head = 'HEAD',
   SonDaughter = 'SON_DAUGHTER',
@@ -2771,6 +2772,7 @@ export type QueryAllPaymentRecordsArgs = {
   cashPlan?: Maybe<Scalars['ID']>,
   household?: Maybe<Scalars['ID']>,
   individual?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2783,6 +2785,7 @@ export type QueryAllPaymentVerificationsArgs = {
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   status?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -2889,6 +2892,7 @@ export type QueryAllCashPlansArgs = {
   endDate?: Maybe<Scalars['DateTime']>,
   endDate_Lte?: Maybe<Scalars['DateTime']>,
   endDate_Gte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -3010,6 +3014,7 @@ export type QueryAllIndividualsArgs = {
   lastRegistrationDate?: Maybe<Scalars['String']>,
   admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  excludedId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3053,6 +3058,7 @@ export type QueryAllImportedHouseholdsArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   rdiId?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3083,6 +3089,7 @@ export type QueryAllImportedIndividualsArgs = {
   household?: Maybe<Scalars['ID']>,
   rdiId?: Maybe<Scalars['String']>,
   duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -5227,7 +5234,8 @@ export type AllCashPlansQueryVariables = {
   deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
   verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
   startDateGte?: Maybe<Scalars['DateTime']>,
-  endDateLte?: Maybe<Scalars['DateTime']>
+  endDateLte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -5373,6 +5381,7 @@ export type AllIndividualsQueryVariables = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
+  excludedId?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>
 };
 
@@ -5435,7 +5444,8 @@ export type AllPaymentRecordsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -5477,7 +5487,8 @@ export type AllPaymentVerificationsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
   search?: Maybe<Scalars['String']>,
-  status?: Maybe<Scalars['String']>
+  status?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -5681,6 +5692,16 @@ export type CashPlanQuery = (
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentRecordNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & { targetPopulation: (
+            { __typename?: 'TargetPopulationNode' }
+            & Pick<TargetPopulationNode, 'id' | 'name'>
+          ) }
+        )> }
+      )>> }
     ) }
   )> }
 );
@@ -6136,7 +6157,8 @@ export type AllImportedHouseholdsQueryVariables = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   rdiId?: Maybe<Scalars['String']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -6167,7 +6189,8 @@ export type AllImportedIndividualsQueryVariables = {
   rdiId?: Maybe<Scalars['String']>,
   household?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>,
-  duplicatesOnly?: Maybe<Scalars['Boolean']>
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>
 };
 
 
@@ -9162,8 +9185,8 @@ export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAr
 export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
-    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte) {
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -9241,6 +9264,7 @@ export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: Ap
  *      verificationStatus: // value for 'verificationStatus'
  *      startDateGte: // value for 'startDateGte'
  *      endDateLte: // value for 'endDateLte'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -9490,8 +9514,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $businessArea: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, businessArea: $businessArea) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea) {
     totalCount
     pageInfo {
       startCursor
@@ -9549,6 +9573,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      status: // value for 'status'
  *      lastRegistrationDate: // value for 'lastRegistrationDate'
  *      householdId: // value for 'householdId'
+ *      excludedId: // value for 'excludedId'
  *      businessArea: // value for 'businessArea'
  *   },
  * });
@@ -9637,8 +9662,8 @@ export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQue
 export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
 export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
 export const AllPaymentRecordsDocument = gql`
-    query AllPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int) {
-  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query AllPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
+  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -9714,6 +9739,7 @@ export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions
  *      orderBy: // value for 'orderBy'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -9727,8 +9753,8 @@ export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRe
 export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
 export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
 export const AllPaymentVerificationsDocument = gql`
-    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String) {
-  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status) {
+    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String, $businessArea: String) {
+  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -9799,6 +9825,7 @@ export function withAllPaymentVerifications<TProps, TChildProps = {}>(operationO
  *      cashPlanPaymentVerification: // value for 'cashPlanPaymentVerification'
  *      search: // value for 'search'
  *      status: // value for 'status'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -10212,6 +10239,14 @@ export const CashPlanDocument = gql`
     paymentRecords {
       totalCount
       edgeCount
+      edges {
+        node {
+          targetPopulation {
+            id
+            name
+          }
+        }
+      }
     }
   }
 }
@@ -11430,8 +11465,8 @@ export type UserChoiceDataQueryHookResult = ReturnType<typeof useUserChoiceDataQ
 export type UserChoiceDataLazyQueryHookResult = ReturnType<typeof useUserChoiceDataLazyQuery>;
 export type UserChoiceDataQueryResult = ApolloReactCommon.QueryResult<UserChoiceDataQuery, UserChoiceDataQueryVariables>;
 export const AllImportedHouseholdsDocument = gql`
-    query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String) {
-  allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy) {
+    query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
+  allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11484,6 +11519,7 @@ export function withAllImportedHouseholds<TProps, TChildProps = {}>(operationOpt
  *      last: // value for 'last'
  *      rdiId: // value for 'rdiId'
  *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */
@@ -11497,8 +11533,8 @@ export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImpor
 export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
 export type AllImportedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>;
 export const AllImportedIndividualsDocument = gql`
-    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean) {
-  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly) {
+    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean, $businessArea: String) {
+  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11553,6 +11589,7 @@ export function withAllImportedIndividuals<TProps, TChildProps = {}>(operationOp
  *      household: // value for 'household'
  *      orderBy: // value for 'orderBy'
  *      duplicatesOnly: // value for 'duplicatesOnly'
+ *      businessArea: // value for 'businessArea'
  *   },
  * });
  */

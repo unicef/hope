@@ -141,7 +141,9 @@ export function DedupeResults({
                 <TableCell style={{ width: 100 }}>Individual ID</TableCell>
                 <TableCell style={{ width: 100 }}>Full Name</TableCell>
                 <TableCell style={{ width: 100 }}>Age</TableCell>
-                <TableCell style={{ width: 100 }}>Location</TableCell>
+                <TableCell style={{ width: 100 }}>
+                  Administrative Level 2
+                </TableCell>
                 <TableCell style={{ width: 100 }} align='left'>
                   Similarity Score
                 </TableCell>

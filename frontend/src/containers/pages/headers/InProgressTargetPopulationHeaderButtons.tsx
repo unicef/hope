@@ -25,50 +25,66 @@ const ButtonContainer = styled.span`
 export interface InProgressTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
   setEditState: Function;
+  canDuplicate: boolean;
+  canRemove: boolean;
+  canEdit: boolean;
+  canLock: boolean;
 }
 
 export function InProgressTargetPopulationHeaderButtons({
-                                                          targetPopulation,
-                                                          setEditState,
-                                                        }: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
+  targetPopulation,
+  setEditState,
+  canDuplicate,
+  canEdit,
+  canLock,
+  canRemove,
+}: InProgressTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openApprove, setOpenApprove] = useState(false);
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   return (
     <div>
-      <IconContainer>
-        <Button
-          onClick={() => setOpenDuplicate(true)}
-          data-cy='button-target-population-duplicate'
-        >
-          <FileCopy />
-        </Button>
-      </IconContainer>
-      <IconContainer>
-        <Button onClick={() => setOpenDelete(true)}>
-          <Delete />
-        </Button>
-      </IconContainer>
-      <ButtonContainer>
-        <Button
-          variant='outlined'
-          color='primary'
-          startIcon={<EditRounded />}
-          onClick={() => setEditState(true)}
-        >
-          Edit
-        </Button>
-      </ButtonContainer>
-      <ButtonContainer>
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={() => setOpenApprove(true)}
-          data-cy='button-target-population-close'
-        >
-          Lock
-        </Button>
-      </ButtonContainer>
+      {canDuplicate && (
+        <IconContainer>
+          <Button
+            onClick={() => setOpenDuplicate(true)}
+            data-cy='button-target-population-duplicate'
+          >
+            <FileCopy />
+          </Button>
+        </IconContainer>
+      )}
+      {canRemove && (
+        <IconContainer>
+          <Button onClick={() => setOpenDelete(true)}>
+            <Delete />
+          </Button>
+        </IconContainer>
+      )}
+      {canEdit && (
+        <ButtonContainer>
+          <Button
+            variant='outlined'
+            color='primary'
+            startIcon={<EditRounded />}
+            onClick={() => setEditState(true)}
+          >
+            Edit
+          </Button>
+        </ButtonContainer>
+      )}
+      {canLock && (
+        <ButtonContainer>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={() => setOpenApprove(true)}
+            data-cy='button-target-population-close'
+          >
+            Lock
+          </Button>
+        </ButtonContainer>
+      )}
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}

@@ -27,7 +27,7 @@ const BlueBold = styled.div`
   cursor: pointer;
 `;
 
-export const OtherRelatedTicketsCreate = ({ values }) => {
+export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
   const businessArea = useBusinessArea();
   const [show, setShow] = useState(false);
 
@@ -45,7 +45,7 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
   if (!data) return null;
 
   const householdTickets = data.existingGrievanceTickets.edges;
-  const renderIds = (tickets) =>
+  const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
@@ -107,4 +107,4 @@ export const OtherRelatedTicketsCreate = ({ values }) => {
       </Box>
     </StyledBox>
   ) : null;
-};
+}

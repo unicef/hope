@@ -19,11 +19,13 @@ const StatusContainer = styled.div`
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
+  canViewDetails: boolean;
 }
 
 export function TargetPopulationTableRow({
   targetPopulation,
-}): React.ReactElement {
+  canViewDetails,
+}: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -34,7 +36,7 @@ export function TargetPopulationTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={targetPopulation.id}
     >
@@ -58,7 +60,7 @@ export function TargetPopulationTableRow({
         <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <UniversalMoment>{targetPopulation.lastEditedAt}</UniversalMoment>
+        <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
         {targetPopulation.createdBy.firstName}{' '}

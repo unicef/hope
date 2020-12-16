@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -34,7 +34,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   if (field?.name === 'country' || field?.name === 'country_origin') {
     displayValue = value || '-';
   } else {
@@ -57,7 +57,7 @@ export function NewValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
@@ -88,7 +88,7 @@ function renderRow(
   ticket,
   isEdit,
   handleSelectBioData,
-) {
+): ReactElement {
   const fieldName = row[0];
   const field = fieldsDict[row[0]];
   const isItemSelected = isSelected(fieldName);
@@ -177,7 +177,7 @@ export function RequestedHouseholdDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleFlexFields = (name, selected) => {
+  const handleFlexFields = (name): void => {
     const newSelected = [...selectedFlexFields];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {
@@ -187,7 +187,7 @@ export function RequestedHouseholdDataChangeTable({
     }
     setFieldValue('selectedFlexFields', newSelected);
   };
-  const handleSelectBioData = (name, selected) => {
+  const handleSelectBioData = (name): void => {
     const newSelected = [...selectedBioData];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {
