@@ -7,12 +7,12 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
-  anon,
   decodeIdString,
   formatCurrency,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -54,7 +54,9 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{anon(paymentRecord.fullName, true)}</TableCell>
+      <AnonTableCell anonymize={true} align='left'>
+        {paymentRecord.fullName}
+      </AnonTableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>

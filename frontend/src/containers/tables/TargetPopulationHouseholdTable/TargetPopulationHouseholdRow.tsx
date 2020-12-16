@@ -3,7 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { HouseholdNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { anon } from '../../../utils/utils';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -29,10 +29,10 @@ export function TargetPopulationHouseholdTableRow({
       key={household.id}
     >
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{`${anon(
-        household.headOfHousehold.givenName,
-        true,
-      )} ${anon(household.headOfHousehold.familyName, true)}`}</TableCell>
+      <AnonTableCell
+        anonymize={true}
+        align='left'
+      >{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>

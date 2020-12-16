@@ -3,9 +3,10 @@ import React from 'react';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { anon, decodeIdString } from '../../../../utils/utils';
+import { decodeIdString } from '../../../../utils/utils';
 import { FlagTooltip } from '../../../../components/FlagTooltip';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { AnonTableCell } from '../../../../components/AnonTableCell';
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;
@@ -36,9 +37,9 @@ export function ImportedHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>
-        {anon(household?.headOfHousehold?.fullName, true)}
-      </TableCell>
+      <AnonTableCell anonymize={true} align='left'>
+        {household?.headOfHousehold?.fullName}
+      </AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin1}</TableCell>
       <TableCell align='left'>
