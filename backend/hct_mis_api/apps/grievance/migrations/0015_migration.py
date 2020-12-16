@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sanction_list', '0007_migration'),
-        ('household', '0037_migration'),
+        ('household', '0039_migration'),
         ('grievance', '0014_migration'),
     ]
 
