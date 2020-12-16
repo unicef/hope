@@ -440,8 +440,9 @@ CONSTANCE_CONFIG = {
     ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (
-        6.0,
+        3.5,
         "Results equal or above this score are considered possible matches",
+        "positive_floats",
     ),
     # RAPID PRO
     "RAPID_PRO_PROVIDER": ("tel", "Rapid pro messages provider (telegram/tel)"),
