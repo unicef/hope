@@ -20,9 +20,9 @@ import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { isPermissionDeniedError } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;
@@ -61,7 +61,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data, loading } = useHouseholdQuery({
+  const { data, loading, error } = useHouseholdQuery({
     variables: { id },
   });
   const {
@@ -72,11 +72,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   if (loading || choicesLoading) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (
-    permissions &&
-    !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS, permissions)
-  )
-    return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (!data || !choicesData) return null;
 
