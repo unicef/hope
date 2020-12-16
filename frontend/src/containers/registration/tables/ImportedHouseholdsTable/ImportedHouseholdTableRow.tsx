@@ -37,7 +37,7 @@ export function ImportedHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <AnonTableCell anonymize={true} align='left'>
+      <AnonTableCell anonymize align='left'>
         {household?.headOfHousehold?.fullName}
       </AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>
