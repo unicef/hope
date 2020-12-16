@@ -16,6 +16,7 @@ import { PermissionDenied } from '../../components/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { isPermissionDeniedError } from '../../utils/utils';
 
 const Container = styled.div`
   padding: 20px;
@@ -31,7 +32,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data, loading } = useIndividualQuery({
+  const { data, loading, error } = useIndividualQuery({
     variables: {
       id,
     },
@@ -40,13 +41,7 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   if (loading) return <LoadingComponent />;
   if (permissions === null) return null;
 
-  if (
-    !hasPermissions(
-      PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_DETAILS,
-      permissions,
-    )
-  )
-    return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
   if (!data) return null;
 

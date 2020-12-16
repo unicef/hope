@@ -77,7 +77,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
     return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData || !currentUserData) return null;
+  if (!data || !choicesData || !currentUserData || permissions === null)
+    return null;
 
   const statusChoices: {
     [id: number]: string;
@@ -89,7 +90,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
   const ticket = data.grievanceTicket;
   const currentUserId = currentUserData.me.id;
-
+  console.log(currentUserId, ticket.assignedTo.id);
   const canViewHouseholdDetails =
     hasPermissions(
       PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
@@ -103,6 +104,22 @@ export function GrievanceDetailsPage(): React.ReactElement {
     (currentUserId === ticket.assignedTo.id &&
       hasPermissions(
         PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
+        permissions,
+      ));
+
+  const canViewIndividualDetails =
+    hasPermissions(
+      PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
+      permissions,
+    ) ||
+    (currentUserId === ticket.createdBy.id &&
+      hasPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR,
+        permissions,
+      )) ||
+    (currentUserId === ticket.assignedTo.id &&
+      hasPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER,
         permissions,
       ));
 
@@ -168,7 +185,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
         <span>
           {ticket.individual?.id ? (
             <ContentLink
-              href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+              href={
+                canViewIndividualDetails
+                  ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                  : undefined
+              }
             >
               {ticket.individual.unicefId}
             </ContentLink>
