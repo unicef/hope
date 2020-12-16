@@ -1863,7 +1863,7 @@ enum ProgramStatus {
 
 type Query {
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Icontains: UUID, category: String, area: String, area_Icontains: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   allAddIndividualsFieldsAttributes: [FieldAttributeNode]
@@ -1921,7 +1921,7 @@ type Query {
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
-  me: UserObjectType
+  me: UserNode
   allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
   allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   userRolesChoices: [ChoiceObject]
@@ -2641,31 +2641,6 @@ type UserNodeConnection {
 type UserNodeEdge {
   node: UserNode
   cursor: String!
-}
-
-type UserObjectType {
-  id: UUID!
-  lastLogin: DateTime
-  isSuperuser: Boolean!
-  username: String!
-  firstName: String!
-  lastName: String!
-  email: String!
-  isStaff: Boolean!
-  isActive: Boolean!
-  dateJoined: DateTime!
-  status: UserStatus!
-  partner: UserPartner!
-  availableForExport: Boolean!
-  userRoles: [UserRoleNode!]!
-  createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
-  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 
 enum UserPartner {
