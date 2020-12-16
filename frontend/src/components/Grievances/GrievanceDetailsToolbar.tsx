@@ -28,8 +28,10 @@ const Separator = styled.div`
 
 export const GrievanceDetailsToolbar = ({
   ticket,
+  canEdit,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canEdit: boolean;
 }): React.ReactElement => {
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -71,7 +73,7 @@ export const GrievanceDetailsToolbar = ({
       breadCrumbs={breadCrumbsItems}
     >
       <Box display='flex' alignItems='center'>
-        {isEditable && (
+        {isEditable && canEdit && (
           <>
             <Button
               color='primary'
