@@ -11,21 +11,33 @@ const ButtonContainer = styled.span`
 
 export interface DraftProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
+  canRemove: boolean;
+  canEdit: boolean;
+  canActivate: boolean;
 }
 export function DraftProgramDetailsPageHeaderButtons({
   program,
+  canRemove,
+  canEdit,
+  canActivate,
 }: DraftProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <div>
-      <ButtonContainer>
-        <DeleteProgram program={program} />
-      </ButtonContainer>
-      <ButtonContainer>
-        <EditProgram program={program} />
-      </ButtonContainer>
-      <ButtonContainer>
-        <ActivateProgram program={program} />
-      </ButtonContainer>
+      {canRemove && (
+        <ButtonContainer>
+          <DeleteProgram program={program} />
+        </ButtonContainer>
+      )}
+      {canEdit && (
+        <ButtonContainer>
+          <EditProgram program={program} />
+        </ButtonContainer>
+      )}
+      {canActivate && (
+        <ButtonContainer>
+          <ActivateProgram program={program} />
+        </ButtonContainer>
+      )}
     </div>
   );
 }

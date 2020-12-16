@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
@@ -13,8 +14,10 @@ interface CashPlanTableProps {
   program: ProgramNode;
 }
 export function CashPlanTable({ program }: CashPlanTableProps): ReactElement {
+  const businessArea = useBusinessArea();
   const initialVariables = {
     program: program.id,
+    businessArea,
   };
 
   return (
