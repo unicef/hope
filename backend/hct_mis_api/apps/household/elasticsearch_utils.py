@@ -2,6 +2,12 @@ from django.core.management import CommandError
 from django_elasticsearch_dsl.registries import registry
 
 
+DEFAULT_SCRIPT = (
+    "double tf = Math.sqrt(doc.freq); double idf = 1.0; double norm = 1/"
+    "Math.sqrt(doc.length); return query.boost * tf * idf * norm;"
+)
+
+
 def populate_index(queryset, doc, parallel=False):
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
@@ -18,10 +24,7 @@ def _get_models(args):
                 if model._meta.app_label == arg:
                     models.append(model)
                     match_found = True
-                elif '{}.{}'.format(
-                    model._meta.app_label.lower(),
-                    model._meta.model_name.lower()
-                ) == arg:
+                elif "{}.{}".format(model._meta.app_label.lower(), model._meta.model_name.lower()) == arg:
                     models.append(model)
                     match_found = True
 
@@ -39,7 +42,7 @@ def _create(models, options):
 
 
 def _populate(models, options):
-    parallel = options['parallel']
+    parallel = options["parallel"]
     for doc in registry.get_documents(models):
         qs = doc().get_indexing_queryset()
         doc().update(qs, parallel=parallel)
@@ -67,4 +70,3 @@ def rebuild_search_index(models=None, options=None):
 
 def populate_all_indexes():
     _populate(models=None, options={"parallel": False, "quiet": True})
-

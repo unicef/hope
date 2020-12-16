@@ -2,7 +2,7 @@ import React from 'react';
 import { InputAdornment } from '@material-ui/core';
 import { DatePicker } from '@material-ui/pickers';
 import moment from 'moment';
-import get from "lodash/get";
+import get from 'lodash/get';
 
 export const FormikDateField = ({
   field,
@@ -13,8 +13,8 @@ export const FormikDateField = ({
 }): React.ReactElement => {
   const isInvalid =
     get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount>0);
-  const dateFormat = 'DD/MM/YYYY';
+    (get(form.touched, field.name) || form.submitCount > 0);
+  const dateFormat = 'YYYY-MM-DD';
   let formattedValue = field.value === '' ? null : field.value;
   if (formattedValue) {
     formattedValue = moment(formattedValue).toISOString();
