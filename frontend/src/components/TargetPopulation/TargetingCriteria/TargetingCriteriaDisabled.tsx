@@ -61,7 +61,7 @@ export function TargetingCriteriaDisabled(): React.ReactElement {
           >
             <IconWrapper>
               <AddCircleOutline />
-              <p>Add Criteria</p>
+              <p>Add Filter</p>
             </IconWrapper>
           </AddCriteria>
         </ContentWrapper>

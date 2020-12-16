@@ -24,7 +24,7 @@ export function ExistingDocumentFieldArray({
   const documentsLabels = individual?.documents?.edges?.map((item) => {
     const removed = documentsToRemove.includes(item.node.id);
     return (
-      <>
+      <React.Fragment key={item.node.id}>
         <Grid item xs={4}>
           <DisabledDiv disabled={removed}>
             <LabelizedField label='ID TYPE1' value={item.node.type.label} />
@@ -61,7 +61,7 @@ export function ExistingDocumentFieldArray({
             </Box>
           )}
         </Grid>
-      </>
+      </React.Fragment>
     );
   });
   return (

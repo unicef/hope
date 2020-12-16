@@ -11,20 +11,27 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
 import { decodeIdString } from '../../utils/utils';
 import { VerifyManual } from '../../components/payments/VerifyManual';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
+  const permissions = usePermissions();
   const { data, loading } = usePaymentRecordVerificationQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
-  if (!data) {
-    return null;
-  }
+  if (loading) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (
+    !hasPermissions(
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+      permissions,
+    )
+  )
+    return <PermissionDenied />;
+  if (!data) return null;
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
   const verification =
@@ -32,7 +39,7 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
+      to: `/${businessArea}/payment-verification`,
     },
     {
       title: `Cash Plan ${decodeIdString(
@@ -49,7 +56,8 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
       )}`}
       breadCrumbs={breadCrumbsItems}
     >
-      {verification.verificationMethod === 'MANUAL' ? (
+      {verification.verificationMethod === 'MANUAL' &&
+      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
         <VerifyManual paymentVerificationId={paymentVerification.id} />
       ) : null}
     </PageHeader>

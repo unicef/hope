@@ -16,12 +16,7 @@ export function RegistrationDataImportPage(): React.ReactElement {
   const debounceFilter = useDebounce(filter, 500);
   if (permissions === null) return null;
 
-  if (
-    !hasPermissions(
-      [PERMISSIONS.RDI_VIEW_LIST, PERMISSIONS.RDI_IMPORT_DATA],
-      permissions,
-    )
-  )
+  if (!hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions))
     return <PermissionDenied />;
 
   const toolbar = (
@@ -34,22 +29,14 @@ export function RegistrationDataImportPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
-      {hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions) && (
-        <>
-          <RegistrationFilters onFilterChange={setFilter} filter={filter} />
-          <RegistrationDataImportTable
-            filter={debounceFilter}
-            canViewDetails={hasPermissions(
-              [
-                PERMISSIONS.RDI_VIEW_DETAILS,
-                PERMISSIONS.RDI_MERGE_IMPORT,
-                PERMISSIONS.RDI_RERUN_DEDUPE,
-              ],
-              permissions,
-            )}
-          />
-        </>
-      )}
+      <RegistrationFilters onFilterChange={setFilter} filter={filter} />
+      <RegistrationDataImportTable
+        filter={debounceFilter}
+        canViewDetails={hasPermissions(
+          PERMISSIONS.RDI_VIEW_DETAILS,
+          permissions,
+        )}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ from enum import unique, auto, Enum
 
 from django.core.exceptions import PermissionDenied
 from graphene import Mutation
+from graphene.relay import ClientIDMutation
 from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
 from graphene_django.filter.utils import get_filtering_args_from_filterset, get_filterset_class
@@ -29,6 +30,53 @@ class Permissions(Enum):
     POPULATION_VIEW_HOUSEHOLDS_DETAILS = auto()
     POPULATION_VIEW_INDIVIDUALS_LIST = auto()
     POPULATION_VIEW_INDIVIDUALS_DETAILS = auto()
+
+    # Programme
+    PRORGRAMME_VIEW_LIST_AND_DETAILS = auto()
+    PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS = auto()
+    PROGRAMME_CREATE = auto()
+    PROGRAMME_UPDATE = auto()
+    PROGRAMME_REMOVE = auto()
+    PROGRAMME_ACTIVATE = auto()
+    PROGRAMME_FINISH = auto()
+
+    # Targeting
+    TARGETING_VIEW_LIST = auto()
+    TARGETING_VIEW_DETAILS = auto()
+    TARGETING_CREATE = auto()
+    TARGETING_UPDATE = auto()
+    TARGETING_DUPLICATE = auto()
+    TARGETING_REMOVE = auto()
+    TARGETING_LOCK = auto()
+    TARGETING_UNLOCK = auto()
+    TARGETING_SEND = auto()
+
+    # Payment Verification
+    PAYMENT_VERIFICATION_VIEW_LIST = auto()
+    PAYMENT_VERIFICATION_VIEW_DETAILS = auto()
+    PAYMENT_VERIFICATION_CREATE = auto()
+    PAYMENT_VERIFICATION_UPDATE = auto()
+    PAYMENT_VERIFICATION_ACTIVATE = auto()
+    PAYMENT_VERIFICATION_DISCARD = auto()
+    PAYMENT_VERIFICATION_FINISH = auto()
+    PAYMENT_VERIFICATION_EXPORT = auto()
+    PAYMENT_VERIFICATION_IMPORT = auto()
+    PAYMENT_VERIFICATION_VERIFY = auto()
+    PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS = auto()
+
+    # User Management
+    USER_MANAGEMENT_VIEW_LIST = auto()
+
+    # Dashboard
+    DASHBOARD_VIEW_HQ = auto()
+    DASHBOARD_VIEW_COUNTRY = auto()
+    DASHBOARD_EXPORT = auto()
+
+    # Grievances
+    # ...
+
+    # Django Admin
+    # ...
 
     # ...
 
@@ -79,7 +127,7 @@ class BaseNodePermissionMixin:
     @classmethod
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
-        if not all((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+        if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
             raise GraphQLError("Permission Denied")
 
     @classmethod
@@ -154,7 +202,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
         )
 
 
-class PermissionMutationMixin(Mutation):
+class BaseMutationPermissionMixin:
     @classmethod
     def is_authenticated(cls, info):
         if not info.context.user.is_authenticated:
@@ -193,6 +241,14 @@ class PermissionMutationMixin(Mutation):
         else:
             raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
+
+class PermissionMutation(BaseMutationPermissionMixin, Mutation):
     @classmethod
     def mutate(cls, root, info, **kwargs):
         return super().mutate(root, info, **kwargs)
+
+
+class PermissionRelayMutation(BaseMutationPermissionMixin, ClientIDMutation):
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **kwargs):
+        return super().mutate_and_get_payload(root, info, **kwargs)

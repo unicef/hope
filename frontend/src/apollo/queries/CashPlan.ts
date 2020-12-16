@@ -53,6 +53,14 @@ export const CashPlan = gql`
       paymentRecords {
         totalCount
         edgeCount
+        edges {
+          node {
+            targetPopulation {
+              id
+              name
+            }
+          }
+        }
       }
     }
   }
