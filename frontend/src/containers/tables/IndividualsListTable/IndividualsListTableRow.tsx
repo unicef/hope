@@ -20,13 +20,11 @@ import { AnonTableCell } from '../../../components/AnonTableCell';
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
   canViewDetails: boolean;
-  filter?;
 }
 
 export function IndividualsListTableRow({
   individual,
   canViewDetails,
-  filter,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -63,7 +61,7 @@ export function IndividualsListTableRow({
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
-      <AnonTableCell anonymize={!filter?.text} align='left'>
+      <AnonTableCell anonymize align='left'>
         {individual.fullName}
       </AnonTableCell>
       <TableCell align='left'>
