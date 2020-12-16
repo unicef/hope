@@ -14,6 +14,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
+from account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
 from core.extended_connection import ExtendedConnection
 from core.models import BusinessArea
 from core.schema import ChoiceObject, BusinessAreaNode
@@ -44,7 +45,9 @@ class UsersFilter(FilterSet):
             "roles": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email"))
+    order_by = CustomOrderingFilter(
+        fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email")
+    )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -168,7 +171,11 @@ class LogEntryObjectConnection(graphene.Connection):
 
 class Query(graphene.ObjectType):
     me = graphene.Field(UserObjectType)
-    all_users = DjangoFilterConnectionField(UserNode, filterset_class=UsersFilter)
+    all_users = DjangoPermissionFilterConnectionField(
+        UserNode,
+        filterset_class=UsersFilter,
+        permission_classes=(hopePermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST),),
+    )
     all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=True))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)

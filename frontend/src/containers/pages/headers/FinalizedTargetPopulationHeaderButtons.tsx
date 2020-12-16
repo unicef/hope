@@ -22,19 +22,23 @@ const ButtonContainer = styled.span`
 
 export interface FinalizedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
+  canDuplicate: boolean;
 }
 
 export function FinalizedTargetPopulationHeaderButtons({
   targetPopulation,
+  canDuplicate,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   return (
     <div>
-      <IconContainer>
-        <Button onClick={() => setOpenDuplicate(true)}>
-          <FileCopy />
-        </Button>
-      </IconContainer>
+      {canDuplicate && (
+        <IconContainer>
+          <Button onClick={() => setOpenDuplicate(true)}>
+            <FileCopy />
+          </Button>
+        </IconContainer>
+      )}
       <ButtonContainer>
         <Button
           variant='contained'

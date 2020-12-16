@@ -19,24 +19,45 @@ class CheckAgainstSanctionListPreMergeTask:
             for doc in individual.documents.all()
             if doc.type_of_document.title() == "National Identification Number"
         ]
+        document_queries = [
+            {
+                "bool": {
+                    "must": [
+                        {"match": {"documents.number": number}},
+                        {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
+                    ],
+                }
+            }
+            for number in documents_numbers
+        ]
+
+        queries = [
+            {
+                "multi_match": {
+                    "query": individual.full_name,
+                    "fields": [
+                        "full_name",
+                        "first_name",
+                        "second_name",
+                        "third_name",
+                        "fourth_name",
+                        "alias_name.name",
+                    ],
+                    "boost": 2.0,
+                }
+            },
+            {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
+        ]
+        queries.extend(document_queries)
+
         query_dict = {
             "query": {
                 "bool": {
                     "must": [
                         {
                             "dis_max": {
-                                "queries": [
-                                    {"match": {"full_name": {"query": individual.full_name}}},
-                                    {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
-                                    {"terms": {"documents.number": documents_numbers}},
-                                    {
-                                        "terms": {
-                                            "documents.type": [
-                                                IDENTIFICATION_TYPE_NATIONAL_ID for _ in documents_numbers
-                                            ]
-                                        }
-                                    },
-                                ]
+                                "queries": queries,
+                                "tie_breaker": 1.0,
                             }
                         }
                     ],
@@ -82,7 +103,7 @@ class CheckAgainstSanctionListPreMergeTask:
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
-                f"Scores: ",
+                f" Scores: ",
             )
             log.debug([(r.full_name, r.meta.score) for r in results])
 

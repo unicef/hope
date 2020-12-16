@@ -17,6 +17,7 @@ interface ImportedIndividualsTableProps {
   showCheckbox?: boolean;
   rowsPerPageOptions?: number[];
   isOnPaper?: boolean;
+  businessArea: string;
 }
 
 export function ImportedIndividualsTable({
@@ -26,6 +27,7 @@ export function ImportedIndividualsTable({
   household,
   rowsPerPageOptions = [10, 15, 20],
   showCheckbox,
+  businessArea,
 }: ImportedIndividualsTableProps): ReactElement {
   const [showDuplicates, setShowDuplicates] = useState(false);
 
@@ -33,6 +35,7 @@ export function ImportedIndividualsTable({
     rdiId,
     household,
     duplicatesOnly: showDuplicates,
+    businessArea,
   };
 
   const { data: choicesData } = useHouseholdChoiceDataQuery();
