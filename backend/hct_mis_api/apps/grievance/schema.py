@@ -15,6 +15,7 @@ from django_filters import (
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
+from graphql import GraphQLError
 
 from account.permissions import (
     BaseNodePermissionMixin,
@@ -258,6 +259,15 @@ class TicketNoteFilter(FilterSet):
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
+
+    permission_classes = (
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER),
+    )
     household = graphene.Field(HouseholdNode)
     individual = graphene.Field(IndividualNode)
     payment_record = graphene.Field(PaymentRecordNode)
@@ -270,6 +280,45 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             obj = getattr(extras_field, lookup_name, None)
             if obj is not None:
                 return obj
+
+    @classmethod
+    def check_node_permission(cls, info, object_instance):
+        super().check_node_permission(info, object_instance)
+        business_area = object_instance.business_area
+        user = info.context.user
+
+        if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
+            if not (
+                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value, business_area)
+                or (
+                    object_instance.created_by == user
+                    and user.has_permission(
+                        Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value, business_area
+                    )
+                )
+                or (
+                    object_instance.assigned_to == user
+                    and user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area)
+                )
+            ):
+                raise GraphQLError("Permission Denied")
+        else:
+            if not (
+                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value, business_area)
+                or (
+                    object_instance.created_by == user
+                    and user.has_permission(
+                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value, business_area
+                    )
+                )
+                or (
+                    object_instance.assigned_to == user
+                    and user.has_permission(
+                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value, business_area
+                    )
+                )
+            ):
+                raise GraphQLError("Permission Denied")
 
     class Meta:
         model = GrievanceTicket

@@ -34,6 +34,9 @@ import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissionInModule } from '../../config/permissions';
+import { PermissionDenied } from '../PermissionDenied';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -50,26 +53,20 @@ const StatusContainer = styled.div`
 
 export function GrievanceDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = useGrievanceTicketQuery({
+  const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
-
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  if (choicesLoading) {
-    return null;
-  }
-  if (loading || choicesLoading) {
-    return <LoadingComponent />;
-  }
+  if (choicesLoading || loading) return <LoadingComponent />;
+  if (error && error.message.includes('Permission Denied'))
+    return <PermissionDenied />;
 
-  if (!data || !choicesData) {
-    return null;
-  }
+  if (!data || !choicesData) return null;
 
   const statusChoices: {
     [id: number]: string;
