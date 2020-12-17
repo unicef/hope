@@ -17,6 +17,11 @@ from core.models import BusinessArea
 from core.utils import build_arg_dict_from_dict
 
 
+class UserRoleInline(admin.TabularInline):
+    model = UserRole
+    extra = 0
+
+
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
@@ -39,6 +44,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
+    inlines = (UserRoleInline,)
 
     @link()
     def load_ad_users(self, request):
