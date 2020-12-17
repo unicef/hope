@@ -9,9 +9,9 @@ from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketSystemFlaggingDetailsFactory,
+    TicketSystemFlaggingDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
 )
-from grievance.models import GrievanceTicket
+from grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 from household.fixtures import HouseholdFactory, IndividualFactory
 from program.fixtures import ProgramFactory
 from sanction_list.models import SanctionListIndividual
@@ -25,6 +25,20 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
           id
           systemFlaggingTicketDetails {
             approveStatus
+          }
+        }
+      }
+    }
+    """
+    APPROVE_NEEDS_ADJUDICATION_MUTATION = """
+    mutation ApproveNeedsAdjudicationTicket($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+      approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+        grievanceTicket {
+          id
+          needsAdjudicationTicketDetails {
+            selectedIndividual {
+              id
+            }
           }
         }
       }
@@ -56,6 +70,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
 
         self.individuals_to_create = [
             {
+                "id": "f9e27ca8-11f7-4386-bafb-e077b0bb47f3",
                 "full_name": "Benjamin Butler",
                 "given_name": "Benjamin",
                 "family_name": "Butler",
@@ -63,6 +78,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                 "birth_date": "1943-07-30",
             },
             {
+                "id": "94b09ff2-9e6d-4f34-a72c-c319e1db7115",
                 "full_name": "Robin Ford",
                 "given_name": "Robin",
                 "family_name": "Ford",
@@ -75,6 +91,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             IndividualFactory(household=household_one, **individual) for individual in self.individuals_to_create
         ]
         first_individual = self.individuals[0]
+        second_individual = self.individuals[1]
 
         household_one.head_of_household = first_individual
         household_one.save()
@@ -93,10 +110,10 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             "reference_number": "QDi.135",
             "listed_on": datetime(2003, 11, 3, 0, 0),
             "comments": "Father’s name is Sheikh Ibrahim Ali Kaskar, mother’s name is Amina Bi, wife’s "
-                        "name is Mehjabeen Shaikh. International arrest warrant issued by the Government of India. "
-                        "Review pursuant to Security Council resolution 1822 (2008) was concluded on 20 May"
-                        "2010. INTERPOL-UN Security Council Special Notice web link: "
-                        "https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals",
+            "name is Mehjabeen Shaikh. International arrest warrant issued by the Government of India. "
+            "Review pursuant to Security Council resolution 1822 (2008) was concluded on 20 May"
+            "2010. INTERPOL-UN Security Council Special Notice web link: "
+            "https://www.interpol.int/en/How-we-work/Notices/View-UN-Notices-Individuals",
             "designation": "",
             "list_type": "UN List",
             "street": "House Nu 37 - 30th Street - defence, Housing Authority, Karachi",
@@ -122,6 +139,21 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             approve_status=True,
         )
 
+        self.needs_adjudication_grievance_ticket = GrievanceTicketFactory(
+            id="2b419ce3-3297-47ee-a47f-43442abac73e",
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            issue_type=None,
+            admin=self.admin_area_1.title,
+            business_area=self.business_area,
+        )
+
+        TicketNeedsAdjudicationDetailsFactory(
+            ticket=self.needs_adjudication_grievance_ticket,
+            golden_records_individual=first_individual,
+            possible_duplicate=second_individual,
+            selected_individual=None,
+        )
+
     def test_approve_system_flagging(self):
         self.snapshot_graphql_request(
             request_string=self.APPROVE_SYSTEM_FLAGGING_MUTATION,
@@ -129,5 +161,17 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             variables={
                 "grievanceTicketId": self.id_to_base64(self.system_flagging_grievance_ticket.id, "GrievanceTicketNode"),
                 "approveStatus": False,
+            },
+        )
+
+    def test_approve_needs_adjudication(self):
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "selectedIndividualId": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
             },
         )

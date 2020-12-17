@@ -623,6 +623,33 @@ class ReassignRoleMutation(graphene.Mutation):
         return cls(household=household, individual=individual)
 
 
+class NeedsAdjudicationApproveMutation(graphene.Mutation):
+    grievance_ticket = graphene.Field(GrievanceTicketNode)
+
+    class Arguments:
+        grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
+        selected_individual_id = graphene.Argument(graphene.ID, required=True)
+
+    @classmethod
+    @is_authenticated
+    @transaction.atomic
+    def mutate(cls, root, info, grievance_ticket_id, selected_individual_id, **kwargs):
+        grievance_ticket_id = decode_id_string(grievance_ticket_id)
+        grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        decoded_selected_individual_id = decode_id_string(selected_individual_id)
+        selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+        ticket_details = grievance_ticket.ticket_details
+
+        if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
+            raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+
+        ticket_details.selected_individual = selected_individual
+        ticket_details.save()
+        grievance_ticket.refresh_from_db()
+
+        return cls(grievance_ticket=grievance_ticket)
+
+
 class Mutations(graphene.ObjectType):
     create_grievance_ticket = CreateGrievanceTicketMutation.Field()
     update_grievance_ticket = UpdateGrievanceTicketMutation.Field()
@@ -633,4 +660,5 @@ class Mutations(graphene.ObjectType):
     approve_add_individual = SimpleApproveMutation.Field()
     approve_delete_individual = SimpleApproveMutation.Field()
     approve_system_flagging = SimpleApproveMutation.Field()
+    approve_needs_adjudication = NeedsAdjudicationApproveMutation.Field()
     reassign_role = ReassignRoleMutation.Field()

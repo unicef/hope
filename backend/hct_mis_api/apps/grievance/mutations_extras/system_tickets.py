@@ -39,7 +39,6 @@ def _clear_deduplication_individuals_fields(individuals):
 
 def close_needs_adjudication_ticket(grievance_ticket):
     ticket_details = grievance_ticket.ticket_details
-    individual_to_remove_id = decode_id_string(ticket_details.selected_individual)
 
     if not ticket_details:
         return
@@ -49,9 +48,9 @@ def close_needs_adjudication_ticket(grievance_ticket):
     if ticket_details.selected_individual is None:
         _clear_deduplication_individuals_fields(both_individuals)
     else:
-        individual_to_remove = get_object_or_404(Individual, id=individual_to_remove_id)
+        individual_to_remove = ticket_details.selected_individual
         unique_individuals = [
-            individual for individual in both_individuals if str(individual.id) != individual_to_remove_id
+            individual for individual in both_individuals if individual.id != individual_to_remove.id
         ]
         _clear_deduplication_individuals_fields(unique_individuals)
         remove_individual_and_reassign_roles(ticket_details, individual_to_remove)

@@ -19,3 +19,18 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging 1
         }
     }
 }
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication 1'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedIndividual': {
+                        'id': 'SW5kaXZpZHVhbE5vZGU6OTRiMDlmZjItOWU2ZC00ZjM0LWE3MmMtYzMxOWUxZGI3MTE1'
+                    }
+                }
+            }
+        }
+    }
+}
