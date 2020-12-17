@@ -82,6 +82,45 @@ export const GrievanceTicket = gql`
         roleReassignData
         approveStatus
       }
+      systemFlaggingTicketDetails {
+        id
+        approveStatus
+        roleReassignData
+        goldenRecordsIndividual {
+          id
+          fullName
+          birthDate
+          documents{
+            edges{
+              node{
+                documentNumber
+              }
+            }
+          }
+        }
+        sanctionListIndividual {
+          fullName
+          referenceNumber
+          
+          datesOfBirth {
+            edges {
+              node {
+                id
+                date
+              }
+            }
+          }
+          documents {
+            edges {
+              node {
+                id
+                documentNumber
+                typeOfDocument
+              }
+            }
+          }
+        }
+      }
       paymentVerificationTicketDetails {
         paymentVerificationStatus
         paymentVerifications {

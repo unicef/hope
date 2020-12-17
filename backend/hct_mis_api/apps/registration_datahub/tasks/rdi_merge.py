@@ -32,7 +32,9 @@ from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgain
 
 class RdiMergeTask:
     HOUSEHOLD_FIELDS = (
+        "consent_sign",
         "consent",
+        "consent_sharing",
         "residence_status",
         "country_origin",
         "size",
@@ -58,6 +60,13 @@ class RdiMergeTask:
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
+        "start",
+        "end",
+        "deviceid",
+        "name_enumerator",
+        "org_enumerator",
+        "org_name_enumerator",
+        "village",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -80,6 +89,15 @@ class RdiMergeTask:
         "last_registration_date",
         "deduplication_batch_status",
         "deduplication_batch_results",
+        "observed_disability",
+        "seeing_disability",
+        "hearing_disability",
+        "physical_disability",
+        "memory_disability",
+        "selfcare_disability",
+        "comms_disability",
+        "who_answers_phone",
+        "who_answers_alt_phone",
     )
 
     def create_grievance_ticket_with_details(self, main_individual, possible_duplicate, business_area):
@@ -108,9 +126,10 @@ class RdiMergeTask:
         for possible_duplicate in individuals_queryset:
             linked_tickets = []
             for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
+                print(individual)
                 ticket, ticket_details = self.create_grievance_ticket_with_details(
-                    main_individual=individual,
-                    possible_duplicate=Individual.objects.get(id=possible_duplicate.get("hit_id")),
+                    main_individual=Individual.objects.get(id=individual.get("hit_id")),
+                    possible_duplicate=possible_duplicate,
                     business_area=business_area,
                 )
                 if ticket is not None and ticket_details is not None:
@@ -291,7 +310,7 @@ class RdiMergeTask:
         ticket_details = self.create_needs_adjudication_tickets(
             golden_record_duplicates, "duplicates", obj_hct.business_area
         )
-        ticket_details_to_create.append(ticket_details)
+        ticket_details_to_create.extend(ticket_details)
 
         needs_adjudication = Individual.objects.filter(
             registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
@@ -300,7 +319,7 @@ class RdiMergeTask:
         ticket_details = self.create_needs_adjudication_tickets(
             needs_adjudication, "possible_duplicates", obj_hct.business_area
         )
-        ticket_details_to_create.append(ticket_details)
+        ticket_details_to_create.extend(ticket_details)
 
         TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create)
 

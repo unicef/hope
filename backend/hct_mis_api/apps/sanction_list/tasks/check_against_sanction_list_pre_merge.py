@@ -86,7 +86,7 @@ class CheckAgainstSanctionListPreMergeTask:
             for individual_hit in results:
                 score = individual_hit.meta.score
                 if score >= possible_match_score:
-                    marked_individual = Individual.objects.filter(individual_hit.id).first()
+                    marked_individual = Individual.objects.filter(id=individual_hit.id).first()
                     if marked_individual:
                         possible_matches.add(marked_individual.id)
                         ticket = GrievanceTicket(
@@ -101,11 +101,11 @@ class CheckAgainstSanctionListPreMergeTask:
                         tickets_to_create.append(ticket)
                         ticket_details_to_create.append(ticket_details)
 
-            log.debug(
+            print(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
                 f" Scores: ",
             )
-            log.debug([(r.full_name, r.meta.score) for r in results])
+            print([(r.full_name, r.meta.score) for r in results])
 
         Individual.objects.filter(id__in=possible_matches).update(
             sanction_list_possible_match=True, sanction_list_last_check=timezone.now()

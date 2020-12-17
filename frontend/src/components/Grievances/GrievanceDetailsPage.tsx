@@ -34,6 +34,7 @@ import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
+import { FlagDetails } from './FlagDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -216,10 +217,18 @@ export function GrievanceDetailsPage(): React.ReactElement {
     householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
   const shouldShowReassignBoxDataChange = (): boolean => {
     const isRightCategory =
-      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+        ticket.issueType.toString() ===
+          GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+        ticket?.systemFlaggingTicketDetails?.approveStatus);
+    const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-    return isRightCategory && (isHeadOfHousehold || hasRolesToReassign);
+    return (
+      isRightCategory &&
+      isRightStatus &&
+      (isHeadOfHousehold || hasRolesToReassign)
+    );
   };
 
   // const shouldShowReassignBoxFlag = (): boolean => {
@@ -235,7 +244,10 @@ export function GrievanceDetailsPage(): React.ReactElement {
         <Box display='flex' flexDirection='column'>
           <Box mt={6}>
             <PaymentIds
-              verifications={ticket.paymentVerificationTicketDetails?.paymentVerifications?.edges}
+              verifications={
+                ticket.paymentVerificationTicketDetails?.paymentVerifications
+                  ?.edges
+              }
             />
           </Box>
           <Box mt={6}>
@@ -302,9 +314,12 @@ export function GrievanceDetailsPage(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
-          {/* <PaddingContainer>
-            <FlagDetails ticket={ticket} />
-          </PaddingContainer> */}
+          {ticket?.category?.toString() ===
+            GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
+            <PaddingContainer>
+              <FlagDetails ticket={ticket} />
+            </PaddingContainer>
+          )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>

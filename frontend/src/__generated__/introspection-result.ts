@@ -84,6 +84,15 @@
             "name": "TicketSystemFlaggingDetailsNode"
           },
           {
+            "name": "SanctionListIndividualNode"
+          },
+          {
+            "name": "SanctionListIndividualDocumentNode"
+          },
+          {
+            "name": "SanctionListIndividualDateOfBirthNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {
