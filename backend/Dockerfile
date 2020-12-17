@@ -25,14 +25,17 @@ RUN apt-get install -y --no-install-recommends \
     libgdal-dev \
     libgdal20
 
-RUN pip install --upgrade pip
-
 WORKDIR /tmp
 
-RUN pip install "poetry==1.1.4"
+ARG APP_ENV=prod
+ENV POETRY_VERSION=1.1.4
+
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+ENV PATH = "${PATH}:/root/.poetry/bin"
+
 ADD pyproject.toml poetry.lock /tmp/
 RUN poetry config virtualenvs.create false \
-  && poetry install --no-dev --no-interaction --no-ansi
+  && poetry install $(test "$APP_ENV" == prod && echo "--no-dev")  --no-interaction --no-ansi
 
 ADD . /code/
 
