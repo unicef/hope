@@ -22,9 +22,11 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
-RUN pip install --upgrade pip
+ENV POETRY_VERSION=1.1.4
 
-RUN pip install "poetry==1.1.4"
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+ENV PATH = "${PATH}:/root/.poetry/bin"
+
 ADD pyproject.toml poetry.lock /usr/local/airflow/
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi

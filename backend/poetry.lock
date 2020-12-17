@@ -728,6 +728,17 @@ python-versions = "*"
 Pillow = "*"
 
 [[package]]
+name = "parameterized"
+version = "0.7.4"
+description = "Parameterized testing with any Python test framework"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+dev = ["jinja2"]
+
+[[package]]
 name = "parso"
 version = "0.7.1"
 description = "A Python Parser"
@@ -1186,7 +1197,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7.3"
-content-hash = "36bef5fbfd914c13e7ce9b921e36c51592e52b2171e85fb86b927b96ff611096"
+content-hash = "91f3f2f732dcd7adde79f704787701b901ebc267682a690b3c6d60996c81539f"
 
 [metadata.files]
 admin-extra-urls = [
@@ -1560,6 +1571,10 @@ openpyxl = [
 openpyxl-image-loader = [
     {file = "openpyxl-image-loader-1.0.5.tar.gz", hash = "sha256:6d9d7fa5c35ac0a3e620b9eaf7334420a7693ccdb2a16e940a3a92bc3ec87fe8"},
     {file = "openpyxl_image_loader-1.0.5-py3-none-any.whl", hash = "sha256:103e6ad4dc433cc3bb18d1f6c413139ad4a91a5f3de0e39783534e22ff0c9c0b"},
+]
+parameterized = [
+    {file = "parameterized-0.7.4-py2.py3-none-any.whl", hash = "sha256:59ab908e31c01505a987a2be78854e19cb1630c047bbab7848169c371d614d56"},
+    {file = "parameterized-0.7.4.tar.gz", hash = "sha256:190f8cc7230eee0b56b30d7f074fd4d165f7c45e6077582d0813c8557e738490"},
 ]
 parso = [
     {file = "parso-0.7.1-py2.py3-none-any.whl", hash = "sha256:97218d9159b2520ff45eb78028ba8b50d2bc61dcc062a9682666f2dc4bd331ea"},
