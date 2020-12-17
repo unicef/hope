@@ -1,6 +1,8 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -23,7 +25,11 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
         self.grievance_ticket1 = GrievanceTicket.objects.create(
@@ -48,20 +54,46 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=self.business_area,
         )
 
-    def test_grievance_status_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_status_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "status": GrievanceTicket.STATUS_ASSIGNED,
             "grievanceTicketId": self.id_to_base64(self.grievance_ticket1.id, "GrievanceTicketNode"),
         }
         self.snapshot_graphql_request(
-            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=variables,
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
         )
 
-    def test_grievance_status_change_fail(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK, Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_status_change_fail(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "status": GrievanceTicket.STATUS_CLOSED,
             "grievanceTicketId": self.id_to_base64(self.grievance_ticket2.id, "GrievanceTicketNode"),
         }
         self.snapshot_graphql_request(
-            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION, context={"user": self.user}, variables=variables,
+            request_string=self.CREATE_DATA_CHANGE_GRIEVANCE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
         )
