@@ -502,7 +502,7 @@ class CreateTicketNoteMutation(PermissionMutation):
         return cls(grievance_ticket_note=ticket_note)
 
 
-class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation):
+class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -532,6 +532,15 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
     ):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
         cls.verify_approve_data(individual_approve_data)
         cls.verify_approve_data(flex_fields_approve_data)
         individual_approve_data = {to_snake_case(key): value for key, value in individual_approve_data.items()}
@@ -567,7 +576,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         return cls(grievance_ticket=grievance_ticket)
 
 
-class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation):
+class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -585,6 +594,15 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
     def mutate(cls, root, info, grievance_ticket_id, household_approve_data, flex_fields_approve_data, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
         cls.verify_approve_data(household_approve_data)
         cls.verify_approve_data(flex_fields_approve_data)
         household_approve_data = {to_snake_case(key): value for key, value in household_approve_data.items()}
@@ -611,7 +629,7 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
         return cls(grievance_ticket=grievance_ticket)
 
 
-class AddIndividualApproveMutation(graphene.Mutation):
+class AddIndividualApproveMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -624,6 +642,15 @@ class AddIndividualApproveMutation(graphene.Mutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
         individual_details = grievance_ticket.add_individual_ticket_details
         individual_details.approve_status = approve_status
         individual_details.save()
@@ -632,7 +659,7 @@ class AddIndividualApproveMutation(graphene.Mutation):
         return cls(grievance_ticket=grievance_ticket)
 
 
-class DeleteIndividualApproveMutation(graphene.Mutation):
+class DeleteIndividualApproveMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -645,6 +672,15 @@ class DeleteIndividualApproveMutation(graphene.Mutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+        )
         individual_details = grievance_ticket.delete_individual_ticket_details
         individual_details.approve_status = approve_status
         individual_details.save()

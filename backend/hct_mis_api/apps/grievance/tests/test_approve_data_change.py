@@ -1,10 +1,12 @@
 import json
 from datetime import date
+from parameterized import parameterized
 
 from django.core.management import call_command
 from django_countries.fields import Country
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -231,7 +233,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             },
         )
 
-    def test_approve_add_individual(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_add_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_ADD_INDIVIDUAL_MUTATION,
             context={"user": self.user},
@@ -241,7 +254,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             },
         )
 
-    def test_approve_update_individual(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_update_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_INDIVIDUAL_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},
@@ -256,7 +280,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             },
         )
 
-    def test_approve_update_household(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_DATA_CHANGE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_update_household(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_HOUSEHOLD_DATA_CHANGE_GRIEVANCE_MUTATION,
             context={"user": self.user},
