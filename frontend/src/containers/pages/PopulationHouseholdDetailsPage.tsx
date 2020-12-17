@@ -23,6 +23,7 @@ import { PermissionDenied } from '../../components/PermissionDenied';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { isPermissionDeniedError } from '../../utils/utils';
+import { HouseholdCompositionTable } from '../tables/HouseholdCompositionTable';
 
 const Container = styled.div`
   padding: 20px;
@@ -96,6 +97,9 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
       <HouseholdDetails
         choicesData={choicesData}
         household={household as HouseholdNode}
+      />
+      <HouseholdCompositionTable
+        household={household as HouseholdDetailedFragment}
       />
       <Container>
         <HouseholdIndividualsTable
