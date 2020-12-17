@@ -23,8 +23,13 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
-COPY ./airflow/requirements.txt /usr/local/airflow/requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+
+RUN pip install "poetry==1.1.4"
+ADD pyproject.toml poetry.lock /usr/local/airflow/
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-dev --no-interaction --no-ansi
+
 RUN mkdir /code
 
 RUN wget -O /code/psql-cert.crt https://www.digicert.com/CACerts/BaltimoreCyberTrustRoot.crt.pem
