@@ -22,8 +22,13 @@ RUN chown -R airflow: ${AIRFLOW_HOME}
 
 ENV PATH="/usr/local/airflow/.local/bin:$PATH"
 
-COPY requirements.txt /usr/local/airflow/requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+
+RUN pip install "poetry==1.1.4"
+ADD pyproject.toml poetry.lock /usr/local/airflow/
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
+
 
 ADD ./dags/. /usr/local/airflow/dags
 ADD ./connectors/. /usr/local/airflow/connectors
