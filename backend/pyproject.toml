@@ -47,7 +47,7 @@ skip = "migrations"
 name = "HCT MIS Backend"
 version = "0.1.0"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
-authors = ["Dominik Grafik <dominik.grafik@tivix.com>"]
+authors = ["Tivix"]
 
 [tool.poetry.dependencies]
 python = "3.7.3"
@@ -89,6 +89,7 @@ gevent = "20.9.0"
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"
 snapshottest = "0.5.1"
+parameterized = "0.7.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
