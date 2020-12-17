@@ -36,8 +36,7 @@ const Overview = styled.div`
 `;
 const OverviewPaper = styled(Paper)`
   margin: 20px 20px 0 20px;
-  padding: 20px;
-  ${({ theme }) => theme.spacing(11)}px;
+  padding: 20px ${({ theme }) => theme.spacing(11)}px;
 `;
 const Title = styled.div`
   width: 100%;
