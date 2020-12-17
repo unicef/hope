@@ -1,9 +1,11 @@
 from datetime import date
+from parameterized import parameterized
 
 from django.core.management import call_command
 from django_countries.fields import Country
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -25,7 +27,6 @@ from household.models import (
     DocumentType,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IndividualRoleInHousehold,
-    ROLE_ALTERNATE,
     HEAD,
 )
 from program.fixtures import ProgramFactory
@@ -51,10 +52,17 @@ class TestCloseDataChangeTickets(APITestCase):
         self.generate_document_types_for_all_countries()
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(),)
+        program_one = ProgramFactory(
+            name="Test program ONE",
+            business_area=BusinessArea.objects.first(),
+        )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
         household_one.registration_data_import.imported_by.save()
@@ -129,7 +137,9 @@ class TestCloseDataChangeTickets(APITestCase):
         household_two.save()
         self.household_two = household_two
         self.role_primary = IndividualRoleInHousehold.objects.create(
-            role=ROLE_PRIMARY, individual=self.individuals_household_two[0], household=household_two,
+            role=ROLE_PRIMARY,
+            individual=self.individuals_household_two[0],
+            household=household_two,
         )
 
         self.add_individual_grievance_ticket = GrievanceTicketFactory(
@@ -231,7 +241,15 @@ class TestCloseDataChangeTickets(APITestCase):
             approve_status=True,
         )
 
-    def test_close_add_individual(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
+            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+        ]
+    )
+    def test_close_add_individual(self, _, permissions, should_close):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
@@ -241,21 +259,34 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         created_individual = Individual.objects.exclude(id="257f6f84-313c-43bd-8f0e-89b96c41a7d5").filter(
-            given_name="Test", full_name="Test Example", family_name="Example", sex="MALE",
+            given_name="Test",
+            full_name="Test Example",
+            family_name="Example",
+            sex="MALE",
         )
-        self.assertTrue(created_individual.exists())
+        if should_close:
+            self.assertTrue(created_individual.exists())
+            created_individual = created_individual.first()
 
-        created_individual = created_individual.first()
+            document = Document.objects.get(document_number="123-123-UX-321")
+            self.assertEqual(document.type.country, Country("POL"))
 
-        document = Document.objects.get(document_number="123-123-UX-321")
-        self.assertEqual(document.type.country, Country("POL"))
+            role = created_individual.households_and_roles.get(
+                role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
+            )
+            self.assertEqual(str(role.household.id), str(self.household_one.id))
+        else:
+            self.assertFalse(created_individual.exists())
 
-        role = created_individual.households_and_roles.get(
-            role=ROLE_PRIMARY, household=self.household_one, individual=created_individual
-        )
-        self.assertEqual(str(role.household.id), str(self.household_one.id))
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
+            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+        ]
+    )
+    def test_close_update_individual(self, _, permissions, should_close):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-    def test_close_update_individual(self):
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
@@ -269,23 +300,36 @@ class TestCloseDataChangeTickets(APITestCase):
         individual = self.individuals[0]
         individual.refresh_from_db()
 
-        self.assertEqual(individual.given_name, "Test")
-        self.assertEqual(individual.full_name, "Test Example")
-        self.assertEqual(individual.family_name, "Example")
-        self.assertEqual(individual.marital_status, SINGLE)
-        self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
+        if should_close:
+            self.assertEqual(individual.given_name, "Test")
+            self.assertEqual(individual.full_name, "Test Example")
+            self.assertEqual(individual.family_name, "Example")
+            self.assertEqual(individual.marital_status, SINGLE)
+            self.assertNotEqual(individual.birth_date, date(year=1980, month=2, day=1))
 
-        role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
-        self.assertEqual(str(role.household.id), str(self.household_one.id))
+            role = individual.households_and_roles.get(role=ROLE_PRIMARY, individual=individual)
+            self.assertEqual(str(role.household.id), str(self.household_one.id))
 
-        document = Document.objects.get(document_number="999-888-777")
-        self.assertEqual(document.type.country, Country("POL"))
-        self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
+            document = Document.objects.get(document_number="999-888-777")
+            self.assertEqual(document.type.country, Country("POL"))
+            self.assertEqual(document.type.type, IDENTIFICATION_TYPE_NATIONAL_ID)
 
-        self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
-        self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
+            self.assertFalse(Document.objects.filter(id=self.national_id.id).exists())
+            self.assertTrue(Document.objects.filter(id=self.birth_certificate.id).exists())
+        else:
+            self.assertEqual(individual.given_name, "Benjamin")
+            self.assertEqual(individual.full_name, "Benjamin Butler")
+            self.assertEqual(individual.family_name, "Butler")
 
-    def test_close_update_household(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
+            ("without_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK], False),
+        ]
+    )
+    def test_close_update_household(self, _, permissions, should_close):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
@@ -297,10 +341,19 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         self.household_one.refresh_from_db()
-        self.assertEqual(self.household_one.size, 19)
-        self.assertEqual(self.household_one.village, "Test Village")
+        if should_close:
+            self.assertEqual(self.household_one.size, 19)
+            self.assertEqual(self.household_one.village, "Test Village")
 
-    def test_close_individual_delete(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK], True),
+            ("without_permission", [], False),
+        ]
+    )
+    def test_close_individual_delete(self, _, permissions, should_close):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.graphql_request(
             request_string=self.STATUS_CHANGE_MUTATION,
             context={"user": self.user},
@@ -311,8 +364,11 @@ class TestCloseDataChangeTickets(APITestCase):
                 "status": GrievanceTicket.STATUS_CLOSED,
             },
         )
-        self.assertFalse(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
-        changed_role_exists = IndividualRoleInHousehold.objects.filter(
-            role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
-        ).exists()
-        self.assertTrue(changed_role_exists)
+        if should_close:
+            self.assertFalse(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
+            changed_role_exists = IndividualRoleInHousehold.objects.filter(
+                role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
+            ).exists()
+            self.assertTrue(changed_role_exists)
+        else:
+            self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())

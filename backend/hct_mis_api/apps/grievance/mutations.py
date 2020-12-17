@@ -368,7 +368,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         GrievanceTicket.CATEGORY_DEDUPLICATION: _not_implemented_close_method,
     }
 
-    NEW_STATUS_FROM_STATUS_PERMISSION_MAPPING = {
+    MOVE_TO_STATUS_PERMISSION_MAPPING = {
         GrievanceTicket.STATUS_ASSIGNED: {
             "any": [
                 Permissions.GRIEVANCES_UPDATE,
@@ -434,17 +434,17 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.status == status:
             return cls(grievance_ticket)
 
-        if cls.NEW_STATUS_PERMISSION_MAPPING.get(status):
+        if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
             permissions_to_use = None
-            if cls.NEW_STATUS_PERMISSION_MAPPING[status].get("feedback"):
+            if cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback"):
                 if grievance_ticket.is_feedback:
-                    permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get("feedback")
+                    permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("feedback")
                 else:
-                    permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get("any")
+                    permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("any")
             else:
-                permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get(
+                permissions_to_use = cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get(
                     grievance_ticket.status
-                ) or cls.NEW_STATUS_PERMISSION_MAPPING[status].get("any")
+                ) or cls.MOVE_TO_STATUS_PERMISSION_MAPPING[status].get("any")
             if permissions_to_use:
                 cls.has_creator_or_owner_permission(
                     info,
