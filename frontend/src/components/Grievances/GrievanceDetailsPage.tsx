@@ -189,6 +189,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
         permissions,
       ));
 
+  const canApproveDataChange = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+    permissions,
+  );
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -428,25 +437,37 @@ export function GrievanceDetailsPage(): React.ReactElement {
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>
-              <AddIndividualGrievanceDetails ticket={ticket} />
+              <AddIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
             <PaddingContainer>
-              <DeleteIndividualGrievanceDetails ticket={ticket} />
+              <DeleteIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
             <PaddingContainer>
-              <RequestedIndividualDataChange ticket={ticket} />
+              <RequestedIndividualDataChange
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
             <PaddingContainer>
-              <RequestedHouseholdDataChange ticket={ticket} />
+              <RequestedHouseholdDataChange
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           <PaddingContainer>
