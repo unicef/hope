@@ -1,8 +1,10 @@
 from datetime import date
+from parameterized import parameterized
 
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -134,7 +136,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         self.household_one = household_one
 
-    def test_grievance_create_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_create_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -167,7 +180,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_update_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_update_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -199,7 +223,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_delete_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_delete_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -224,7 +259,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_update_household_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_update_household_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
