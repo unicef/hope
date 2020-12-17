@@ -11,6 +11,7 @@ import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { FlagTooltip } from '../../../components/FlagTooltip';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -44,7 +45,9 @@ export function HouseHoldTableRow({
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
+      <AnonTableCell anonymize align='left'>
+        {household.headOfHousehold.fullName}
+      </AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
