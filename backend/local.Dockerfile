@@ -32,7 +32,7 @@ WORKDIR /tmp
 RUN pip install "poetry==1.1.4"
 ADD pyproject.toml poetry.lock /tmp/
 RUN poetry config virtualenvs.create false \
-  && poetry install --no-dev --no-interaction --no-ansi
+  && poetry install --no-interaction --no-ansi
 
 ADD . /code/
 
