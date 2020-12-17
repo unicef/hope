@@ -10,7 +10,6 @@ import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
