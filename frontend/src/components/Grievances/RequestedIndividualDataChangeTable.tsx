@@ -38,7 +38,7 @@ export function CurrentValue({
   field,
   value,
 }: CurrentValueProps): React.ReactElement {
-  let displayValue = value;
+  let displayValue;
   switch (field?.type) {
     case 'SELECT_ONE':
       displayValue =
@@ -59,6 +59,68 @@ interface RequestedIndividualDataChangeTableProps {
   values;
   isEdit;
 }
+
+function individualDataRow(
+  row,
+  isSelected,
+  index,
+  ticket,
+  fieldsDict,
+  isEdit,
+  handleSelectBioData,
+): ReactElement {
+  const fieldName = camelCase(row[0]);
+  const isItemSelected = isSelected(row[0]);
+  const labelId = `enhanced-table-checkbox-${index}`;
+  const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+    value: string;
+    previousValue: string;
+    approveStatus: boolean;
+  };
+  const field = fieldsDict[row[0]];
+  const individualValue = field.isFlexField
+    ? ticket.individualDataUpdateTicketDetails.individual.flexFields[row[0]]
+    : ticket.individualDataUpdateTicketDetails.individual[camelCase(fieldName)];
+  const currentValue =
+    ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
+      ? valueDetails.previousValue
+      : individualValue;
+  return (
+    <TableRow role='checkbox' aria-checked={isItemSelected} key={fieldName}>
+      <TableCell>
+        {isEdit ? (
+          <Checkbox
+            onChange={(event) =>
+              handleSelectBioData(row[0], event.target.checked)
+            }
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+            checked={isItemSelected}
+            inputProps={{ 'aria-labelledby': labelId }}
+          />
+        ) : (
+          isItemSelected && (
+            <GreenIcon>
+              <CheckCircleIcon />
+            </GreenIcon>
+          )
+        )}
+      </TableCell>
+      <TableCell id={labelId} scope='row' align='left'>
+        <Capitalize>
+          {row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+        </Capitalize>
+      </TableCell>
+      <TableCell align='left'>
+        <CurrentValue field={field} value={currentValue} />
+      </TableCell>
+      <TableCell align='left'>
+        <CurrentValue field={field} value={valueDetails.value} />
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export function RequestedIndividualDataChangeTable({
   setFieldValue,
   ticket,
@@ -75,6 +137,7 @@ export function RequestedIndividualDataChangeTable({
   const selectedBioData = values.selected;
   const { selectedDocuments } = values;
   const { selectedDocumentsToRemove } = values;
+  const { selectedFlexFields } = values;
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -82,11 +145,13 @@ export function RequestedIndividualDataChangeTable({
   const documents = individualData?.documents;
   const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
+  delete individualData.flex_fields;
   const entries = Object.entries(individualData);
-
+  const entriesFlexFields = Object.entries(flexFields);
   const fieldsDict = useArrayToDict(
     data?.allAddIndividualsFieldsAttributes,
     'name',
@@ -103,17 +168,27 @@ export function RequestedIndividualDataChangeTable({
     return <LoadingComponent />;
   }
 
-  const handleSelectBioData = (name, selected) => {
+  const handleSelectBioData = (name): void => {
     const newSelected = [...selectedBioData];
+    const selectedIndex = newSelected.indexOf(camelCase(name));
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(camelCase(name));
+    }
+    setFieldValue('selected', newSelected);
+  };
+  const handleFlexFields = (name): void => {
+    const newSelected = [...selectedFlexFields];
     const selectedIndex = newSelected.indexOf(name);
     if (selectedIndex !== -1) {
       newSelected.splice(selectedIndex, 1);
     } else {
       newSelected.push(name);
     }
-    setFieldValue('selected', newSelected);
+    setFieldValue('selectedFlexFields', newSelected);
   };
-  const handleSelectDocument = (documentIndex, selected) => {
+  const handleSelectDocument = (documentIndex): void => {
     const newSelected = [...selectedDocuments];
     const selectedIndex = newSelected.indexOf(documentIndex);
     if (selectedIndex !== -1) {
@@ -124,7 +199,7 @@ export function RequestedIndividualDataChangeTable({
     setFieldValue('selectedDocuments', newSelected);
   };
 
-  const handleSelectDocumentToRemove = (documentIndex, selected) => {
+  const handleSelectDocumentToRemove = (documentIndex): void => {
     const newSelected = [...selectedDocumentsToRemove];
     const selectedIndex = newSelected.indexOf(documentIndex);
     if (selectedIndex !== -1) {
@@ -135,7 +210,10 @@ export function RequestedIndividualDataChangeTable({
     setFieldValue('selectedDocumentsToRemove', newSelected);
   };
 
-  const isSelected = (name: string): boolean => selectedBioData.includes(name);
+  const isSelected = (name: string): boolean =>
+    selectedBioData.includes(camelCase(name));
+  const isSelectedFlexfields = (name: string): boolean =>
+    selectedFlexFields.includes(name);
   const documentsTableHead = (
     <TableHead>
       <TableRow>
@@ -164,58 +242,25 @@ export function RequestedIndividualDataChangeTable({
         </TableHead>
         <TableBody>
           {entries.map((row, index) => {
-            const fieldName = camelCase(row[0]);
-            const isItemSelected = isSelected(fieldName);
-            const labelId = `enhanced-table-checkbox-${index}`;
-            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-              value: string;
-              previousValue: string;
-              approveStatus: boolean;
-            };
-            const currentValue =
-              ticket.status === GRIEVANCE_TICKET_STATES.CLOSED
-                ? valueDetails.previousValue
-                : ticket.individualDataUpdateTicketDetails.individual[
-                    fieldName
-                  ];
-            const field = fieldsDict[row[0]];
-            return (
-              <TableRow
-                role='checkbox'
-                aria-checked={isItemSelected}
-                key={fieldName}
-              >
-                <TableCell>
-                  {isEdit ? (
-                    <Checkbox
-                      onChange={(event) =>
-                        handleSelectBioData(fieldName, event.target.checked)
-                      }
-                      color='primary'
-                      disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
-                      checked={isItemSelected}
-                      inputProps={{ 'aria-labelledby': labelId }}
-                    />
-                  ) : (
-                    isItemSelected && (
-                      <GreenIcon>
-                        <CheckCircleIcon />
-                      </GreenIcon>
-                    )
-                  )}
-                </TableCell>
-                <TableCell id={labelId} scope='row' align='left'>
-                  <Capitalize>{row[0].replaceAll('_', ' ')}</Capitalize>
-                </TableCell>
-                <TableCell align='left'>
-                  <CurrentValue field={field} value={currentValue} />
-                </TableCell>
-                <TableCell align='left'>
-                  <CurrentValue field={field} value={valueDetails.value} />
-                </TableCell>
-              </TableRow>
+            return individualDataRow(
+              row,
+              isSelected,
+              index,
+              ticket,
+              fieldsDict,
+              isEdit,
+              handleSelectBioData,
+            );
+          })}
+          {entriesFlexFields.map((row, index) => {
+            return individualDataRow(
+              row,
+              isSelectedFlexfields,
+              index,
+              ticket,
+              fieldsDict,
+              isEdit,
+              handleFlexFields,
             );
           })}
         </TableBody>
@@ -232,13 +277,13 @@ export function RequestedIndividualDataChangeTable({
             <TableBody>
               {documents?.map((row, index) => {
                 return (
-                  <TableRow>
+                  <TableRow key={`${row.value.type}-${row.value.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox
                           color='primary'
-                          onChange={(event) => {
-                            handleSelectDocument(index, event.target.checked);
+                          onChange={(): void => {
+                            handleSelectDocument(index);
                           }}
                           disabled={
                             ticket.status !==
@@ -282,15 +327,12 @@ export function RequestedIndividualDataChangeTable({
               {documentsToRemove?.map((row, index) => {
                 const document = previousDocuments[row.value];
                 return (
-                  <TableRow>
+                  <TableRow key={`${document.label}-${document.country}`}>
                     <TableCell align='left'>
                       {isEdit ? (
                         <Checkbox
-                          onChange={(event) => {
-                            handleSelectDocumentToRemove(
-                              index,
-                              event.target.checked,
-                            );
+                          onChange={(): void => {
+                            handleSelectDocumentToRemove(index);
                           }}
                           color='primary'
                           disabled={

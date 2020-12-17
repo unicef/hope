@@ -8,9 +8,10 @@ import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
 import { headCells } from './ImportedHouseholdTableHeadCells';
 
-export function ImportedHouseholdTable({ rdiId }): ReactElement {
+export function ImportedHouseholdTable({ rdiId, businessArea }): ReactElement {
   const initialVariables = {
     rdiId,
+    businessArea,
   };
   return (
     <UniversalTable<

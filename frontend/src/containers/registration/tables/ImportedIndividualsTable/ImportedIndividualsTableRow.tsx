@@ -15,6 +15,7 @@ import {
 import { DedupeResults } from '../../details/DedupeResults';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { Pointer } from '../../../../components/Pointer';
+import { AnonTableCell } from '../../../../components/AnonTableCell';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -46,7 +47,9 @@ export function ImportedIndividualsTableRow({
       <TableCell onClick={handleClick} align='left'>
         <Pointer>{decodeIdString(individual.id)}</Pointer>
       </TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
+      <AnonTableCell anonymize align='left'>
+        {individual.fullName}
+      </AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align='left'>
         {relationshipChoicesDict[individual.relationship]}

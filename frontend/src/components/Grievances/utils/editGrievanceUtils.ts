@@ -6,24 +6,47 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
-import {
-  AllAddIndividualFieldsQuery,
-  GrievanceTicketQuery,
-} from '../../../__generated__/graphql';
+import { GrievanceTicketQuery } from '../../../__generated__/graphql';
 import { AddIndividualDataChange } from '../AddIndividualDataChange';
 import { EditIndividualDataChange } from '../EditIndividualDataChange';
 import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
 
+interface EditValuesTypes {
+  description?: string;
+  assignedTo?: string;
+  issueType?: string | number;
+  category?: string | number;
+  language: string;
+  admin: string;
+  area: string;
+  selectedHousehold?;
+  selectedIndividual?;
+  selectedPaymentRecords: string[];
+  selectedRelatedTickets: string[];
+  individualData?;
+  householdDataUpdateFields?;
+}
+
 function prepareInitialValueAddIndividual(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-) {
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const individualData = {
     ...ticket.addIndividualTicketDetails.individualData,
   };
+  const flexFields = individualData.flex_fields;
+  delete individualData.flex_fields;
   initialValues.individualData = Object.entries(individualData).reduce(
+    (previousValue, currentValue: [string, { value: string }]) => {
+      // eslint-disable-next-line no-param-reassign,prefer-destructuring
+      previousValue[camelCase(currentValue[0])] = currentValue[1];
+      return previousValue;
+    },
+    {},
+  );
+  initialValues.individualData.flexFields = Object.entries(flexFields).reduce(
     (previousValue, currentValue: [string, { value: string }]) => {
       // eslint-disable-next-line no-param-reassign,prefer-destructuring
       previousValue[camelCase(currentValue[0])] = currentValue[1];
@@ -36,7 +59,7 @@ function prepareInitialValueAddIndividual(
 function prepareInitialValueEditIndividual(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-) {
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedIndividual = ticket.individual;
   const individualData = {
@@ -44,15 +67,27 @@ function prepareInitialValueEditIndividual(
   };
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
-  initialValues.individualDataUpdateFields = Object.entries(individualData).map(
+  delete individualData.flex_fields;
+  const individualDataArray = Object.entries(individualData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
       fieldValue: entry[1].value,
     }),
   );
+  const flexFieldsArray = Object.entries(flexFields).map(
+    (entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }),
+  );
+  initialValues.individualDataUpdateFields = [
+    ...individualDataArray,
+    ...flexFieldsArray,
+  ];
   initialValues.individualDataUpdateFieldsDocuments = documents.map(
     (item) => item.value,
   );
@@ -64,18 +99,30 @@ function prepareInitialValueEditIndividual(
 function prepareInitialValueEditHousehold(
   initialValuesArg,
   ticket: GrievanceTicketQuery['grievanceTicket'],
-) {
+): EditValuesTypes {
   const initialValues = initialValuesArg;
   initialValues.selectedHousehold = ticket.household;
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
-  initialValues.householdDataUpdateFields = Object.entries(householdData).map(
+  const flexFields = householdData.flex_fields;
+  delete householdData.flex_fields;
+  const householdDataArray = Object.entries(householdData).map(
     (entry: [string, { value: string }]) => ({
       fieldName: entry[0],
       fieldValue: entry[1].value,
     }),
   );
+  const flexFieldsArray = Object.entries(flexFields).map(
+    (entry: [string, { value: string }]) => ({
+      fieldName: entry[0],
+      fieldValue: entry[1].value,
+    }),
+  );
+  initialValues.householdDataUpdateFields = [
+    ...householdDataArray,
+    ...flexFieldsArray,
+  ];
   return initialValues;
 }
 
@@ -89,19 +136,17 @@ const prepareInitialValueDict = {
 
 export function prepareInitialValues(
   ticket: GrievanceTicketQuery['grievanceTicket'],
-) {
+): EditValuesTypes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let initialValues: { [id: string]: any } = {
+  let initialValues: EditValuesTypes = {
     description: ticket.description || '',
     assignedTo: ticket.assignedTo.id || '',
     category: ticket.category || null,
     language: ticket.language || '',
-    consent: ticket.consent || false,
     admin: ticket.admin || '',
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
-    identityVerified: false,
     issueType: ticket.issueType || null,
     selectedPaymentRecords: ticket?.paymentRecord?.id
       ? [ticket.paymentRecord.id]
@@ -115,7 +160,10 @@ export function prepareInitialValues(
     prepareInitialValueDict,
     (initialValue) => initialValue,
   );
-  initialValues = prepareInitialValueFunction(initialValues, ticket);
+  initialValues = prepareInitialValueFunction(
+    initialValues,
+    ticket,
+  ) as EditValuesTypes;
   return initialValues;
 }
 export const validationSchema = Yup.object().shape({
@@ -124,7 +172,7 @@ export const validationSchema = Yup.object().shape({
   category: Yup.string()
     .required('Category is required')
     .nullable(),
-  admin: Yup.string(),
+  admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
@@ -204,13 +252,6 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
-        extras: {
-          issueType: {
-            individualDeleteIssueTypeExtras: {
-              individual: values.selectedIndividual?.id,
-            },
-          },
-        },
       },
     },
   };
@@ -218,6 +259,21 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
+  const individualData = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  individualData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -226,13 +282,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
         extras: {
           individualDataUpdateIssueTypeExtras: {
             individualData: {
-              ...values.individualDataUpdateFields
-                .filter((item) => item.fieldName)
-                .reduce((prev, current) => {
-                  // eslint-disable-next-line no-param-reassign
-                  prev[camelCase(current.fieldName)] = current.fieldValue;
-                  return prev;
-                }, {}),
+              ...individualData,
               documents: values.individualDataUpdateFieldsDocuments,
               documentsToRemove: values.individualDataUpdateDocumentsToRemove,
             },
@@ -245,6 +295,21 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
+  const householdData = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[current.fieldName] = current.fieldValue;
+      return prev;
+    }, {});
+  householdData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -252,13 +317,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           householdDataUpdateIssueTypeExtras: {
-            householdData: values.householdDataUpdateFields
-              .filter((item) => item.fieldName)
-              .reduce((prev, current) => {
-                // eslint-disable-next-line no-param-reassign
-                prev[camelCase(current.fieldName)] = current.fieldValue;
-                return prev;
-              }, {}),
+            householdData,
           },
         },
       },
@@ -306,7 +365,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values.admin,
+    admin: values?.node?.admin?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
@@ -316,34 +375,4 @@ export function prepareVariables(businessArea, values, ticket) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function validate(
-  values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: { [id: string]: any } = {};
-  if (
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-  ) {
-    const individualDataErrors = {};
-    const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
-      }
-    }
-  }
-  return errors;
 }

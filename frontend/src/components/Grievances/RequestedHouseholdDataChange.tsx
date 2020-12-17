@@ -2,8 +2,6 @@ import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
 import React, { useState } from 'react';
 import { Formik } from 'formik';
-import mapKeys from 'lodash/mapKeys';
-import camelCase from 'lodash/camelCase';
 import {
   GrievanceTicketQuery,
   useApproveHouseholdDataChangeMutation,
@@ -30,8 +28,9 @@ export function RequestedHouseholdDataChange({
   ticket: GrievanceTicketQuery['grievanceTicket'];
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
-  const getConfirmationText = (values) => {
-    return `You approved ${values.selected.length || 0} change${
+  const getConfirmationText = (values): string => {
+    return `You approved ${values.selected.length +
+      values.selectedFlexFields.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
@@ -40,26 +39,31 @@ export function RequestedHouseholdDataChange({
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
   let allApprovedCount = 0;
+  const flexFields = householdData?.flex_fields || {};
+  delete householdData.flexFields;
+  const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+  ).length;
+  allApprovedCount += flexFieldsEntries.filter(
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-
   return (
     <Formik
       initialValues={{
         selected: entries
-          .filter((row) => {
-            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
-              value: string;
-              approveStatus: boolean;
-            };
-            return valueDetails.approveStatus;
+          .filter((row: [string, { approve_status: boolean }]) => {
+            return row[1].approve_status;
           })
-          .map((row) => camelCase(row[0])),
+          .map((row) => row[0]),
+        selectedFlexFields: flexFieldsEntries
+          .filter((row: [string, { approve_status: boolean }]) => {
+            return row[1].approve_status;
+          })
+          .map((row) => row[0]),
       }}
       onSubmit={async (values) => {
         const householdApproveData = values.selected.reduce((prev, curr) => {
@@ -67,11 +71,20 @@ export function RequestedHouseholdDataChange({
           prev[curr] = true;
           return prev;
         }, {});
+        const flexFieldsApproveData = values.selectedFlexFields.reduce(
+          (prev, curr) => {
+            // eslint-disable-next-line no-param-reassign
+            prev[curr] = true;
+            return prev;
+          },
+          {},
+        );
         try {
           await mutate({
             variables: {
               grievanceTicketId: ticket.id,
               householdApproveData: JSON.stringify(householdApproveData),
+              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });
           showMessage('Changes Approved');
@@ -91,6 +104,7 @@ export function RequestedHouseholdDataChange({
                   onClick={() => setEdit(true)}
                   variant='outlined'
                   color='primary'
+                  disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                 >
                   EDIT
                 </Button>
@@ -119,6 +133,7 @@ export function RequestedHouseholdDataChange({
             ticket={ticket}
             setFieldValue={setFieldValue}
             isEdit={isEdit}
+            values={values}
           />
         </StyledBox>
       )}
