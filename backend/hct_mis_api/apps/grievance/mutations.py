@@ -336,7 +336,7 @@ POSSIBLE_FEEDBACK_STATUS_FLOW = {
 }
 
 
-class GrievanceStatusChangeMutation(graphene.Mutation):
+class GrievanceStatusChangeMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     CATEGORY_ISSUE_TYPE_TO_CLOSE_FUNCTION_MAPPING = {
@@ -368,6 +368,52 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         GrievanceTicket.CATEGORY_DEDUPLICATION: _not_implemented_close_method,
     }
 
+    NEW_STATUS_FROM_STATUS_PERMISSION_MAPPING = {
+        GrievanceTicket.STATUS_ASSIGNED: {
+            "any": [
+                Permissions.GRIEVANCES_UPDATE,
+                Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+                Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+            ],
+        },
+        GrievanceTicket.STATUS_IN_PROGRESS: {
+            GrievanceTicket.STATUS_ASSIGNED: [
+                Permissions.GRIEVANCES_SET_IN_PROGRESS,
+                Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+                Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+            ],
+            GrievanceTicket.STATUS_ON_HOLD: [
+                Permissions.GRIEVANCES_SET_IN_PROGRESS,
+                Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+                Permissions.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+            ],
+            GrievanceTicket.STATUS_FOR_APPROVAL: [
+                Permissions.GRIEVANCES_SEND_BACK,
+                Permissions.GRIEVANCES_SEND_BACK_AS_CREATOR,
+                Permissions.GRIEVANCES_SEND_BACK_AS_OWNER,
+            ],
+        },
+        GrievanceTicket.STATUS_ON_HOLD: {
+            "any": [
+                Permissions.GRIEVANCES_SET_ON_HOLD,
+                Permissions.GRIEVANCES_SET_ON_HOLD_AS_CREATOR,
+                Permissions.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
+            ]
+        },
+        GrievanceTicket.STATUS_CLOSED: {
+            "feedback": [
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+            ],
+            "any": [
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+                Permissions.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+            ],
+        },
+    }
+
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID)
         status = graphene.Int()
@@ -387,12 +433,31 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         if grievance_ticket.status == status:
             return cls(grievance_ticket)
+
+        if cls.NEW_STATUS_PERMISSION_MAPPING.get(status):
+            permissions_to_use = None
+            if cls.NEW_STATUS_PERMISSION_MAPPING[status].get("feedback"):
+                if grievance_ticket.is_feedback:
+                    permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get("feedback")
+                else:
+                    permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get("any")
+            else:
+                permissions_to_use = cls.NEW_STATUS_PERMISSION_MAPPING[status].get(
+                    grievance_ticket.status
+                ) or cls.NEW_STATUS_PERMISSION_MAPPING[status].get("any")
+            if permissions_to_use:
+                cls.has_creator_or_owner_permission(
+                    info,
+                    grievance_ticket.business_area,
+                    permissions_to_use[0],
+                    grievance_ticket.created_by == info.context.user,
+                    permissions_to_use[1],
+                    grievance_ticket.assigned_to == info.context.user,
+                    permissions_to_use[2],
+                )
+
         status_flow = POSSIBLE_STATUS_FLOW
-        if grievance_ticket.category in (
-            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
-            GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-            GrievanceTicket.CATEGORY_REFERRAL,
-        ):
+        if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
             raise GraphQLError("New status is incorrect")
@@ -400,6 +465,8 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket)
         grievance_ticket.status = status
+        if status == GrievanceTicket.STATUS_ASSIGNED:
+            grievance_ticket.assigned_to = info.context.user
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
         return cls(grievance_ticket=grievance_ticket)

@@ -157,12 +157,22 @@ class GrievanceTicket(TimeStampedUUIDModel):
     language = models.TextField()
     consent = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", related_name="tickets", on_delete=models.CASCADE)
-    linked_tickets = models.ManyToManyField(to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related")
+    linked_tickets = models.ManyToManyField(
+        to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
+    )
 
     @property
     def related_tickets(self):
         yield from self.linked_tickets.all()
         yield from self.linked_tickets_related.all()
+
+    @property
+    def is_feedback(self):
+        return self.category in (
+            self.CATEGORY_NEGATIVE_FEEDBACK,
+            self.CATEGORY_POSITIVE_FEEDBACK,
+            self.CATEGORY_REFERRAL,
+        )
 
     class Meta:
         ordering = (
