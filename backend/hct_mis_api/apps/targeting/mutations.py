@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
+from account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
 from core import utils
 from core.airflow_api import AirflowApi
 from core.models import BusinessArea
@@ -41,9 +42,10 @@ class CopyTargetPopulationInput(graphene.InputObjectType):
     name = graphene.String()
 
 
-class ValidatedMutation(graphene.Mutation):
+class ValidatedMutation(PermissionMutation):
     arguments_validators = []
     object_validators = []
+    permissions = None
 
     model_class = None
 
@@ -53,6 +55,8 @@ class ValidatedMutation(graphene.Mutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
+        if cls.permissions:
+            cls.has_permission(info, cls.permissions, model_object.business_area)
         return cls.validated_mutate(root, info, model_object=model_object, **kwargs)
 
     @classmethod
@@ -103,7 +107,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input):
     return targeting_criteria
 
 
-class CreateTargetPopulationMutation(graphene.Mutation):
+class CreateTargetPopulationMutation(PermissionMutation):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -116,9 +120,15 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         user = info.context.user
         input = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
+
+        cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
+
         if program.status != Program.ACTIVE:
             raise ValidationError("Only Active program can be assigned to Targeting")
+
         targeting_criteria_input = input.get("targeting_criteria")
+
+        # TODO: should we get this from program.business_area instead of user's input? What if this business area does not match program?
         business_area = BusinessArea.objects.get(slug=input.pop("business_area_slug"))
         TargetingCriteriaInputValidator.validate(targeting_criteria_input)
         targeting_criteria = from_input_to_targeting_criteria(targeting_criteria_input)
@@ -129,7 +139,7 @@ class CreateTargetPopulationMutation(graphene.Mutation):
         return cls(target_population=target_population)
 
 
-class UpdateTargetPopulationMutation(graphene.Mutation):
+class UpdateTargetPopulationMutation(PermissionMutation):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -142,6 +152,9 @@ class UpdateTargetPopulationMutation(graphene.Mutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
+
+        cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
+
         name = input.get("name")
         program_id_encoded = input.get("program_id")
         vulnerability_score_min = input.get("vulnerability_score_min")
@@ -194,6 +207,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [ApproveTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_LOCK]
 
     class Arguments:
         id = graphene.ID(required=True)
@@ -216,6 +230,7 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [UnapproveTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_UNLOCK]
 
     class Arguments:
         id = graphene.ID(required=True)
@@ -232,6 +247,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     target_population = graphene.Field(TargetPopulationNode)
     object_validators = [FinalizeTargetPopulationValidator]
     model_class = TargetPopulation
+    permissions = [Permissions.TARGETING_SEND]
 
     class Arguments:
         id = graphene.ID(required=True)
@@ -262,7 +278,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         return cls(target_population=target_population)
 
 
-class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Input:
@@ -277,6 +293,9 @@ class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValida
         name = target_population_data.pop("name")
         target_id = utils.decode_id_string(target_population_data.pop("id"))
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
+
         target_population_copy = TargetPopulation(
             name=name,
             created_by=user,
@@ -308,7 +327,7 @@ class CopyTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValida
         return targeting_criteria_copy
 
 
-class DeleteTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     ok = graphene.Boolean()
 
     class Input:
@@ -319,12 +338,15 @@ class DeleteTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetVali
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(_info, Permissions.TARGETING_REMOVE, target_population.business_area)
+
         cls.validate_is_finalized(target_population.status)
         target_population.delete()
         return DeleteTargetPopulationMutation(ok=True)
 
 
-class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation, TargetValidator):
+class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Input:
@@ -342,6 +364,9 @@ class SetSteficonRuleOnTargetPopulationMutation(graphene.relay.ClientIDMutation,
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
+
+        cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
+
         encoded_steficon_rule_id = kwargs["steficon_rule_id"]
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)

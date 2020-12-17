@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Button, Grid, IconButton, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import { Field, FieldArray } from 'formik';
+import { Field, FieldArray, useField } from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { AddCircleOutline, Delete } from '@material-ui/icons';
 import camelCase from 'lodash/camelCase';
@@ -13,7 +13,7 @@ import {
   AllHouseholdsQuery,
   HouseholdQuery,
   useAllEditHouseholdFieldsQuery,
-  useHouseholdQuery,
+  useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
@@ -37,6 +37,12 @@ export const EditHouseholdDataChangeField = ({
 }: EditHouseholdDataChangeField): React.ReactElement => {
   let fieldProps;
   switch (field.type) {
+    case 'DECIMAL':
+      fieldProps = {
+        component: FormikTextField,
+        type: 'number',
+      };
+      break;
     case 'STRING':
       fieldProps = {
         component: FormikTextField,
@@ -148,6 +154,16 @@ export const EditHouseholdDataChangeFieldRow = ({
   onDelete,
 }: EditHouseholdDataChangeFieldRowProps): React.ReactElement => {
   const field = fields.find((item) => item.name === itemValue.fieldName);
+  const [, , helpers] = useField(
+    `householdDataUpdateFields[${index}].isFlexField`,
+  );
+  const name = !field?.isFlexField
+    ? camelCase(itemValue.fieldName)
+    : itemValue.fieldName;
+  useEffect(() => {
+    helpers.setValue(field?.isFlexField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemValue.fieldName]);
   return (
     <>
       <Grid item xs={4}>
@@ -173,7 +189,9 @@ export const EditHouseholdDataChangeFieldRow = ({
 
       <CurrentValue
         field={field}
-        value={household[camelCase(itemValue.fieldName)]}
+        value={
+          !field?.isFlexField ? household[name] : household.flexFields[name]
+        }
       />
       {itemValue.fieldName ? (
         <EditHouseholdDataChangeField
@@ -201,17 +219,23 @@ export const EditHouseholdDataChange = ({
 }: EditHouseholdDataChangeProps): React.ReactElement => {
   const household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'] =
     values.selectedHousehold;
-  const {
-    data: fullHousehold,
-    loading: fullHouseholdLoading,
-  } = useHouseholdQuery({ variables: { id: household?.id } });
+  const [
+    getHousehold,
+    { data: fullHousehold, loading: fullHouseholdLoading },
+  ] = useHouseholdLazyQuery({ variables: { id: household?.id } });
+  useEffect(() => {
+    if (values.selectedHousehold) {
+      getHousehold();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.selectedHousehold]);
   useEffect(() => {
     if (
       !values.householdDataUpdateFields ||
       values.householdDataUpdateFields.length === 0
     ) {
       setFieldValue('householdDataUpdateFields', [
-        { fieldName: null, fieldValue: null },
+        { fieldName: null, fieldValue: '' },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,11 +244,11 @@ export const EditHouseholdDataChange = ({
     data: householdFieldsData,
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
-  if (fullHouseholdLoading || householdFieldsLoading) {
-    return <LoadingComponent />;
-  }
   if (!household) {
     return <div>You have to select a household earlier</div>;
+  }
+  if (fullHouseholdLoading || householdFieldsLoading || !fullHousehold) {
+    return <LoadingComponent />;
   }
   const notAvailableItems = (values.householdDataUpdateFields || []).map(
     (fieldItem) => fieldItem.fieldName,
@@ -241,6 +265,8 @@ export const EditHouseholdDataChange = ({
             <>
               {(values.householdDataUpdateFields || []).map((item, index) => (
                 <EditHouseholdDataChangeFieldRow
+                  /* eslint-disable-next-line react/no-array-index-key */
+                  key={`${index}-${item.fieldName}`}
                   itemValue={item}
                   index={index}
                   household={fullHousehold.household}
@@ -253,7 +279,7 @@ export const EditHouseholdDataChange = ({
                 <Button
                   color='primary'
                   onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: null });
+                    arrayHelpers.push({ fieldName: null, fieldValue: '' });
                   }}
                 >
                   <AddIcon />

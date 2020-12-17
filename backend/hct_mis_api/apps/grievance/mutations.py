@@ -3,14 +3,13 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from graphene.utils.str_converters import to_snake_case
 from graphql import GraphQLError
 
 from account.schema import UserNode
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
-from core.utils import decode_id_string
+from core.utils import decode_id_string, to_snake_case
 from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.data_change import (
     save_data_change_extras,
@@ -125,11 +124,17 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
     ISSUE_TYPE_OPTIONS = {
         GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.household_data_update_issue_type_extras"],
-            "not_allowed": ["individual_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
+            "not_allowed": [
+                "individual_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: {
             "required": ["extras.issue_type.individual_data_update_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "individual_delete_issue_type_extras",],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_delete_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: {
             "required": ["extras.issue_type.add_individual_issue_type_extras"],
@@ -141,7 +146,10 @@ class CreateGrievanceTicketMutation(graphene.Mutation):
         },
         GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: {
             "required": ["extras.issue_type.individual_delete_issue_type_extras"],
-            "not_allowed": ["household_data_update_issue_type_extras", "individual_data_update_issue_type_extras",],
+            "not_allowed": [
+                "household_data_update_issue_type_extras",
+                "individual_data_update_issue_type_extras",
+            ],
         },
         GrievanceTicket.ISSUE_TYPE_DATA_BREACH: {"required": [], "not_allowed": []},
         GrievanceTicket.ISSUE_TYPE_BRIBERY_CORRUPTION_KICKBACK: {"required": [], "not_allowed": []},
@@ -271,7 +279,6 @@ class UpdateGrievanceTicketMutation(graphene.Mutation):
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "assigned_to"))
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
-
         for field, value in input.items():
             current_value = getattr(grievance_ticket, field, None)
             if not current_value:
@@ -371,6 +378,7 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         if grievance_ticket.category in (
             GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            GrievanceTicket.CATEGORY_REFERRAL,
         ):
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
@@ -416,6 +424,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         individual_approve_data = graphene.JSONString()
         approved_documents_to_create = graphene.List(graphene.Int)
         approved_documents_to_remove = graphene.List(graphene.Int)
+        flex_fields_approve_data = graphene.JSONString()
 
     @classmethod
     @is_authenticated
@@ -428,15 +437,18 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
         individual_approve_data,
         approved_documents_to_create,
         approved_documents_to_remove,
+        flex_fields_approve_data,
         **kwargs,
     ):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         cls.verify_approve_data(individual_approve_data)
+        cls.verify_approve_data(flex_fields_approve_data)
         individual_approve_data = {to_snake_case(key): value for key, value in individual_approve_data.items()}
         individual_data_details = grievance_ticket.individual_data_update_ticket_details
         individual_data = individual_data_details.individual_data
         cls.verify_approve_data_against_object_data(individual_data, individual_approve_data)
+        cls.verify_approve_data_against_object_data(individual_data.get("flex_fields"), flex_fields_approve_data)
         for field_name, item in individual_data.items():
             field_to_approve = individual_approve_data.get(field_name)
             if field_name in ("documents", "documents_to_remove"):
@@ -448,6 +460,11 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, graphene.Mutation
                         document_data["approve_status"] = True
                     else:
                         document_data["approve_status"] = False
+            elif field_name == "flex_fields":
+                for flex_field_name in item.keys():
+                    individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
+                        flex_field_name
+                    )
             elif field_to_approve:
                 individual_data[field_name]["approve_status"] = True
             else:
@@ -470,21 +487,29 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, graphene.Mutation)
         indicating whether field change is approved or not.
         """
         household_approve_data = graphene.JSONString()
+        flex_fields_approve_data = graphene.JSONString()
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, household_approve_data, **kwargs):
+    def mutate(cls, root, info, grievance_ticket_id, household_approve_data, flex_fields_approve_data, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         cls.verify_approve_data(household_approve_data)
+        cls.verify_approve_data(flex_fields_approve_data)
         household_approve_data = {to_snake_case(key): value for key, value in household_approve_data.items()}
         household_data_details = grievance_ticket.household_data_update_ticket_details
         household_data = household_data_details.household_data
         cls.verify_approve_data_against_object_data(household_data, household_approve_data)
+        cls.verify_approve_data_against_object_data(household_data.get("flex_fields"), flex_fields_approve_data)
 
         for field_name, item in household_data.items():
-            if household_approve_data.get(field_name):
+            if field_name == "flex_fields":
+                for flex_field_name in item.keys():
+                    household_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
+                        flex_field_name
+                    )
+            elif household_approve_data.get(field_name):
                 household_data[field_name]["approve_status"] = True
             else:
                 household_data[field_name]["approve_status"] = False
@@ -565,7 +590,14 @@ class ReassignRoleMutation(graphene.Mutation):
     @is_authenticated
     @transaction.atomic
     def mutate(
-        cls, root, info, household_id, individual_id, grievance_ticket_id, role, **kwargs,
+        cls,
+        root,
+        info,
+        household_id,
+        individual_id,
+        grievance_ticket_id,
+        role,
+        **kwargs,
     ):
         cls.verify_role_choices(role)
         decoded_household_id = decode_id_string(household_id)

@@ -11,15 +11,18 @@ import { choicesToDict, formatCurrency } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { FlagTooltip } from '../../../components/FlagTooltip';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
   choicesData: HouseholdChoiceDataQuery;
+  canViewDetails: boolean;
 }
 
 export function HouseHoldTableRow({
   household,
   choicesData,
+  canViewDetails,
 }: HouseHoldTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -33,7 +36,7 @@ export function HouseHoldTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.unicefId}
     >
@@ -42,7 +45,9 @@ export function HouseHoldTableRow({
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
+      <AnonTableCell anonymize align='left'>
+        {household.headOfHousehold.fullName}
+      </AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>

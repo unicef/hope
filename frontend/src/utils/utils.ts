@@ -1,16 +1,11 @@
 import moment from 'moment';
-import get from 'lodash/get';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  TARGETING_STATES,
-} from './constants';
+import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -308,6 +303,7 @@ export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -328,7 +324,10 @@ export function descendingComparator(a, b, orderBy): number {
   return 0;
 }
 
-export function getComparator(order, orderBy) {
+export function getComparator(
+  order,
+  orderBy,
+): (a: number, b: number) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
@@ -385,3 +384,13 @@ export function thingForSpecificGrievanceType(
 
 export const isInvalid = (fieldname: string, errors, touched): boolean =>
   errors[fieldname] && touched[fieldname];
+
+export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
+  if (!inputStr) return null;
+  return shouldAnonymize
+    ? inputStr
+        .split(' ')
+        .map((el) => el.substring(0, 2) + '*'.repeat(3))
+        .join(' ')
+    : inputStr;
+};

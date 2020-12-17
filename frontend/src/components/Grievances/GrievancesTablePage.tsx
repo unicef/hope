@@ -17,7 +17,7 @@ export function GrievancesTablePage(): React.ReactElement {
     status: '',
     fsp: '',
     createdAtRange: '',
-    admin: '',
+    admin: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {

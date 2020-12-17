@@ -7,29 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestCashPlanQueries::test_get_single_cash_plan 1'] = {
-    'data': {
-        'cashPlan': {
-            'assistanceMeasurement': 'Syrian pound',
-            'assistanceThrough': 'Cairo Amman Bank',
-            'caId': '7ff3542c-8c48-4ed4-8283-41966093995b',
-            'coverageDuration': 21,
-            'coverageUnit': 'Day(s)',
-            'deliveryType': 'DEPOSIT_TO_CARD',
-            'dispersionDate': '2020-04-25T00:00:00',
-            'endDate': '2064-03-14T22:52:54',
-            'name': 'Far yet reveal area bar almost dinner.',
-            'startDate': '2051-11-30T00:02:09',
-            'status': 'TRANSACTION_COMPLETED',
-            'totalDeliveredQuantity': 53477453.27,
-            'totalEntitledQuantity': 56657648.82,
-            'totalPersonsCovered': 540,
-            'totalUndeliveredQuantity': 55497021.04
-        }
-    }
-}
-
-snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
+snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
     'data': {
         'allCashPlans': {
             'edges': [
@@ -74,4 +52,66 @@ snapshots['TestCashPlanQueries::test_get_all_cash_plans 1'] = {
             ]
         }
     }
+}
+
+snapshots['TestCashPlanQueries::test_cash_plans_1_all_without_permission 1'] = {
+    'data': {
+        'allCashPlans': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allCashPlans'
+            ]
+        }
+    ]
+}
+
+snapshots['TestCashPlanQueries::test_cash_plans_2_single_with_permission 1'] = {
+    'data': {
+        'cashPlan': {
+            'assistanceMeasurement': 'Syrian pound',
+            'assistanceThrough': 'Cairo Amman Bank',
+            'caId': '7ff3542c-8c48-4ed4-8283-41966093995b',
+            'coverageDuration': 21,
+            'coverageUnit': 'Day(s)',
+            'deliveryType': 'DEPOSIT_TO_CARD',
+            'dispersionDate': '2020-04-25T00:00:00',
+            'endDate': '2064-03-14T22:52:54',
+            'name': 'Far yet reveal area bar almost dinner.',
+            'startDate': '2051-11-30T00:02:09',
+            'status': 'TRANSACTION_COMPLETED',
+            'totalDeliveredQuantity': 53477453.27,
+            'totalEntitledQuantity': 56657648.82,
+            'totalPersonsCovered': 540,
+            'totalUndeliveredQuantity': 55497021.04
+        }
+    }
+}
+
+snapshots['TestCashPlanQueries::test_cash_plans_3_single_without_permission 1'] = {
+    'data': {
+        'cashPlan': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 3,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'cashPlan'
+            ]
+        }
+    ]
 }

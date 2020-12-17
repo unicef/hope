@@ -12,18 +12,26 @@ const ButtonContainer = styled.span`
 
 export interface ActiveProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
+  canFinish: boolean;
+  canEdit: boolean;
 }
 export function ActiveProgramDetailsPageHeaderButtons({
   program,
+  canFinish,
+  canEdit,
 }: ActiveProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <div>
-      <ButtonContainer>
-        <FinishProgram program={program} />
-      </ButtonContainer>
-      <ButtonContainer>
-        <EditProgram program={program} />
-      </ButtonContainer>
+      {canFinish && (
+        <ButtonContainer>
+          <FinishProgram program={program} />
+        </ButtonContainer>
+      )}
+      {canEdit && (
+        <ButtonContainer>
+          <EditProgram program={program} />
+        </ButtonContainer>
+      )}
       <ButtonContainer>
         <Button
           variant='contained'

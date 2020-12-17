@@ -38,7 +38,7 @@ export const OtherRelatedTickets = ({
 }: {
   linkedTickets: GrievanceTicketQuery['grievanceTicket']['relatedTickets'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
-}) => {
+}): React.ReactElement => {
   const businessArea = useBusinessArea();
   const { id } = useParams();
 
@@ -57,7 +57,7 @@ export const OtherRelatedTickets = ({
   if (!data) return null;
 
   const householdTickets = data.existingGrievanceTickets.edges;
-  const renderIds = (tickets) =>
+  const renderIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.node.id} mb={1}>
@@ -69,7 +69,7 @@ export const OtherRelatedTickets = ({
           </Box>
         ))
       : '-';
-  const renderRelatedIds = (tickets) =>
+  const renderRelatedIds = (tickets): React.ReactElement =>
     tickets.length
       ? tickets.map((edge) => (
           <Box key={edge.id} mb={1}>

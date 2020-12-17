@@ -32,7 +32,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'admin_area__title',
     numeric: false,
     dataCy: 'household-location',

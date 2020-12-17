@@ -15,13 +15,16 @@ import {
 } from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { LoadingComponent } from '../../../components/LoadingComponent';
+import { AnonTableCell } from '../../../components/AnonTableCell';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
+  canViewDetails: boolean;
 }
 
 export function IndividualsListTableRow({
   individual,
+  canViewDetails,
 }: IndividualsListTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -47,7 +50,7 @@ export function IndividualsListTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={individual.id}
     >
@@ -58,7 +61,9 @@ export function IndividualsListTableRow({
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
+      <AnonTableCell anonymize align='left'>
+        {individual.fullName}
+      </AnonTableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
