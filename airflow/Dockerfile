@@ -28,7 +28,7 @@ ENV POETRY_VERSION=1.1.4
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 ENV PATH = "${PATH}:/root/.poetry/bin"
 
-ADD pyproject.toml poetry.lock /usr/local/airflow/
+ADD ./airflow/pyproject.toml ./airflow/poetry.lock /usr/local/airflow/
 RUN poetry config virtualenvs.create false \
   && poetry install --no-dev --no-interaction --no-ansi
 
