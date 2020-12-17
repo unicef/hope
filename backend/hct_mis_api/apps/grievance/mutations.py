@@ -355,7 +355,7 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
             GrievanceTicket.ISSUE_TYPE_SEXUAL_HARASSMENT: _no_operation_close_method,
             GrievanceTicket.ISSUE_TYPE_MISCELLANEOUS: _no_operation_close_method,
         },
-        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: _not_implemented_close_method,
+        GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION: _no_operation_close_method,
         GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: _no_operation_close_method,
         GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: _no_operation_close_method,
         GrievanceTicket.CATEGORY_REFERRAL: _no_operation_close_method,
@@ -395,6 +395,8 @@ class GrievanceStatusChangeMutation(graphene.Mutation):
         if status == GrievanceTicket.STATUS_CLOSED:
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket)
+        if status == GrievanceTicket.STATUS_ASSIGNED and not grievance_ticket.assigned_to:
+            grievance_ticket.assigned_to = info.context.user
         grievance_ticket.status = status
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()

@@ -82,6 +82,16 @@ export const GrievanceTicket = gql`
         roleReassignData
         approveStatus
       }
+      paymentVerificationTicketDetails {
+        paymentVerificationStatus
+        paymentVerifications {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
       issueType
       ticketNotes {
         edges {

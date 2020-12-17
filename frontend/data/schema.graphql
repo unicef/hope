@@ -7,10 +7,6 @@ type ActivateCashPlanVerificationMutation {
   cashPlan: CashPlanNode
 }
 
-type AddIndividualApproveMutation {
-  grievanceTicket: GrievanceTicketNode
-}
-
 input AddIndividualDataObjectType {
   fullName: String!
   givenName: String
@@ -39,6 +35,7 @@ input AddIndividualDataObjectType {
   whoAnswersAltPhone: String
   role: String
   documents: [IndividualDocumentObjectType]
+  businessArea: String
   flexFields: Arg
 }
 
@@ -130,10 +127,11 @@ type BusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
-  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
+  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
@@ -410,10 +408,6 @@ type DeduplicationResultNode {
   age: Int
 }
 
-type DeleteIndividualApproveMutation {
-  grievanceTicket: GrievanceTicketNode
-}
-
 type DeleteProgram {
   ok: Boolean
 }
@@ -590,6 +584,9 @@ type GrievanceTicketNode implements Node {
   individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
   addIndividualTicketDetails: TicketAddIndividualDetailsNode
   deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
+  systemFlaggingTicketDetails: TicketSystemFlaggingDetailsNode
+  needsAdjudicationTicketDetails: TicketNeedsAdjudicationDetailsNode
+  paymentVerificationTicketDetails: TicketPaymentVerificationDetailsNode
   household: HouseholdNode
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
@@ -677,13 +674,13 @@ type HouseholdNode implements Node {
   orgEnumerator: HouseholdOrgEnumerator!
   orgNameEnumerator: String!
   village: String!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
   addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
@@ -1431,10 +1428,12 @@ type IndividualNode implements Node {
   commsDisability: IndividualCommsDisability
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
+  businessArea: UserBusinessAreaNode!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
   deleteIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
+  ticketsystemflaggingdetailsSet(before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
   representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   headingHousehold: HouseholdNode
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
@@ -1650,8 +1649,9 @@ type Mutations {
   createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
   approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
-  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): AddIndividualApproveMutation
-  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): DeleteIndividualApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
@@ -1731,9 +1731,9 @@ type PaymentRecordNode implements Node {
   serviceProvider: ServiceProviderNode!
   transactionReferenceId: String
   visionId: String
+  verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
-  verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
 }
 
 type PaymentRecordNodeConnection {
@@ -1763,6 +1763,7 @@ type PaymentVerificationNode implements Node {
   status: PaymentVerificationStatus!
   statusDate: Date
   receivedAmount: Float
+  ticketDetails(before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
 }
 
 type PaymentVerificationNodeConnection {
@@ -2154,6 +2155,10 @@ type SetSteficonRuleOnTargetPopulationMutationPayload {
   clientMutationId: String
 }
 
+type SimpleApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
 type StatsObjectType {
   childMale: Int
   childFemale: Int
@@ -2437,6 +2442,16 @@ type TicketIndividualDataUpdateDetailsNodeEdge {
   cursor: String!
 }
 
+type TicketNeedsAdjudicationDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  goldenRecordsIndividual: IndividualNode!
+  possibleDuplicate: IndividualNode!
+  selectedIndividual: UUID
+  roleReassignData: JSONString!
+}
+
 type TicketNoteNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2457,6 +2472,33 @@ type TicketNoteNodeEdge {
   cursor: String!
 }
 
+type TicketPaymentVerificationDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
+}
+
+type TicketPaymentVerificationDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketPaymentVerificationDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketPaymentVerificationDetailsNodeEdge {
+  node: TicketPaymentVerificationDetailsNode
+  cursor: String!
+}
+
+enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
 type TicketSensitiveDetailsNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -2475,6 +2517,27 @@ type TicketSensitiveDetailsNodeConnection {
 
 type TicketSensitiveDetailsNodeEdge {
   node: TicketSensitiveDetailsNode
+  cursor: String!
+}
+
+type TicketSystemFlaggingDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  goldenRecordsIndividual: IndividualNode!
+  approveStatus: Boolean!
+  roleReassignData: JSONString!
+}
+
+type TicketSystemFlaggingDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketSystemFlaggingDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketSystemFlaggingDetailsNodeEdge {
+  node: TicketSystemFlaggingDetailsNode
   cursor: String!
 }
 
@@ -2583,10 +2646,11 @@ type UserBusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
-  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
-  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
+  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!

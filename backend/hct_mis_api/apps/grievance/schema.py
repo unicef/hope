@@ -39,6 +39,7 @@ from grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
     TicketSystemFlaggingDetails,
+    TicketPaymentVerificationDetails,
 )
 from household.models import Household, Individual
 from household.schema import HouseholdNode, IndividualNode
@@ -222,12 +223,17 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
         for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
-            extras_field = getattr(grievance_ticket_obj, field, {})
+            # print(grievance_ticket_obj.status, lookup_name)
+            extras_field = getattr(grievance_ticket_obj, field, None)
+            if extras_field is None:
+                continue
+            # print(extras_field)
             real_lookup = lookup_name
             for lookup in lookups:
                 if isinstance(lookup, dict):
                     real_lookup = lookup.get(lookup_name)
                     break
+            print(extras_field, real_lookup)
             obj = getattr(extras_field, real_lookup, None)
             if obj is not None:
                 return obj
@@ -326,6 +332,14 @@ class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
 class TicketSystemFlaggingDetailsNode(DjangoObjectType):
     class Meta:
         model = TicketSystemFlaggingDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketPaymentVerificationDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketPaymentVerificationDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
