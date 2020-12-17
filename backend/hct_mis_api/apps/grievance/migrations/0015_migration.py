@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('selected_individual', models.UUIDField(null=True)),
+                ('selected_individual', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='household.Individual')),
                 ('role_reassign_data', django.contrib.postgres.fields.jsonb.JSONField(default=dict)),
                 ('golden_records_individual', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='household.Individual')),
                 ('possible_duplicate', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='household.Individual')),
