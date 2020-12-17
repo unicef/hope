@@ -130,6 +130,65 @@ export function GrievanceDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const canSetInProgress = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+    permissions,
+  );
+
+  const canSetOnHold = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
+    permissions,
+  );
+
+  const canSendForApproval = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER,
+    permissions,
+  );
+  const canSendBack = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SEND_BACK,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_OWNER,
+    permissions,
+  );
+  const isFeedbackType = [
+    GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK,
+    GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK,
+    GRIEVANCE_CATEGORIES.REFERRAL,
+  ].includes(ticket.category.toString());
+  const canClose =
+    (isFeedbackType &&
+      hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+        isCreator,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+        isOwner,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+        permissions,
+      )) ||
+    (!isFeedbackType &&
+      hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        isCreator,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+        isOwner,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        permissions,
+      ));
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -336,7 +395,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
   return (
     <div>
-      <GrievanceDetailsToolbar canEdit={canEdit} ticket={ticket} />
+      <GrievanceDetailsToolbar
+        ticket={ticket}
+        canEdit={canEdit}
+        canSetInProgress={canSetInProgress}
+        canSetOnHold={canSetOnHold}
+        canSendForApproval={canSendForApproval}
+        canSendBack={canSendBack}
+        canClose={canClose}
+      />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
