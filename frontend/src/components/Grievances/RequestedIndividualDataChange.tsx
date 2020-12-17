@@ -36,27 +36,31 @@ export function RequestedIndividualDataChange({
   let allApprovedCount = 0;
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const flexFields = individualData.flex_fields;
+  delete individualData.flex_field;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
 
   const entries = Object.entries(individualData);
+  const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approve_status).length;
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
     .length;
   allApprovedCount += entries.filter(
-    ([key, value]: [string, { approve_status: boolean }]) =>
-      value.approve_status,
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
+  ).length;
+  allApprovedCount += entriesFlexFields.filter(
+    ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
-  const getConfirmationText = (allChangesLength) => {
+  const getConfirmationText = (allChangesLength): string => {
     return `You approved ${allChangesLength || 0} change${
       allChangesLength === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveIndividualDataChangeMutation();
-
   const selectedDocuments = [];
   const selectedDocumentsToRemove = [];
   // eslint-disable-next-line no-plusplus
@@ -83,6 +87,15 @@ export function RequestedIndividualDataChange({
             return valueDetails.approveStatus;
           })
           .map((row) => camelCase(row[0])),
+        selectedFlexFields: entriesFlexFields
+          .filter((row) => {
+            const valueDetails = mapKeys(row[1], (v, k) => camelCase(k)) as {
+              value: string;
+              approveStatus: boolean;
+            };
+            return valueDetails.approveStatus;
+          })
+          .map((row) => row[0]),
         selectedDocuments,
         selectedDocumentsToRemove,
       }}
@@ -94,6 +107,14 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
+        const flexFieldsApproveData = values.selectedFlexFields.reduce(
+          (prev, curr) => {
+            // eslint-disable-next-line no-param-reassign
+            prev[curr] = true;
+            return prev;
+          },
+          {},
+        );
         try {
           await mutate({
             variables: {
@@ -101,6 +122,7 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
+              flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });
           showMessage('Changes Approved');
@@ -130,6 +152,7 @@ export function RequestedIndividualDataChange({
                     onClick={() => setEdit(true)}
                     variant='outlined'
                     color='primary'
+                    disabled={ticket.status === GRIEVANCE_TICKET_STATES.CLOSED}
                   >
                     EDIT
                   </Button>

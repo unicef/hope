@@ -755,6 +755,16 @@
                 "defaultValue": null
               },
               {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -839,6 +849,16 @@
               },
               {
                 "name": "search",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -1744,6 +1764,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "DateTime",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -2880,6 +2910,16 @@
                 "defaultValue": null
               },
               {
+                "name": "excludedId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -3375,6 +3415,16 @@
                 "defaultValue": null
               },
               {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "orderBy",
                 "description": null,
                 "type": {
@@ -3570,6 +3620,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Boolean",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "businessArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -8027,11 +8087,11 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "ENUM",
-                "name": "HouseholdConsentSharing",
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -9520,41 +9580,6 @@
       },
       {
         "kind": "ENUM",
-        "name": "HouseholdConsentSharing",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "UNICEF",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "HUMANITARIAN_PARTNER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "PRIVATE_PARTNER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "GOVERNMENT_PARTNER",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
         "name": "HouseholdResidenceStatus",
         "description": null,
         "fields": null,
@@ -10254,11 +10279,11 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "ENUM",
-                "name": "IndividualObservedDisability",
+                "kind": "SCALAR",
+                "name": "String",
                 "ofType": null
               }
             },
@@ -10900,6 +10925,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "UNKNOWN",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "NON_BENEFICIARY",
             "description": null,
@@ -11709,65 +11740,18 @@
       },
       {
         "kind": "ENUM",
-        "name": "IndividualObservedDisability",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "NONE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "SEEING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "HEARING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "WALKING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "MEMORY",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "SELF_CARE",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "COMMUNICATING",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
         "name": "IndividualSeeingDisability",
         "description": null,
         "fields": null,
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -11798,6 +11782,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11826,6 +11816,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -11856,6 +11852,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11885,6 +11887,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -11913,6 +11921,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -20741,16 +20755,12 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "name": null,
               "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                }
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
               }
             },
             "isDeprecated": false,
@@ -27144,6 +27154,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27172,6 +27188,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -27202,6 +27224,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27230,6 +27258,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -27260,6 +27294,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SOME_DIFFICULTY",
             "description": null,
             "isDeprecated": false,
@@ -27288,6 +27328,12 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "A_",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "SOME_DIFFICULTY",
             "description": null,
@@ -29858,6 +29904,16 @@
                 "defaultValue": null
               },
               {
+                "name": "flexFieldsApproveData",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "JSONString",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "grievanceTicketId",
                 "description": null,
                 "type": {
@@ -29894,6 +29950,16 @@
             "name": "approveHouseholdDataChange",
             "description": null,
             "args": [
+              {
+                "name": "flexFieldsApproveData",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "JSONString",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
               {
                 "name": "grievanceTicketId",
                 "description": null,
@@ -31321,6 +31387,20 @@
             "defaultValue": null
           },
           {
+            "name": "consentSharing",
+            "description": null,
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "residenceStatus",
             "description": null,
             "type": {
@@ -31626,6 +31706,16 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
               "ofType": null
             },
             "defaultValue": null
@@ -31979,6 +32069,16 @@
                 "name": "ID",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "defaultValue": null
           }
@@ -32401,6 +32501,16 @@
                 "name": "IndividualDocumentObjectType",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "flexFields",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "defaultValue": null
           }

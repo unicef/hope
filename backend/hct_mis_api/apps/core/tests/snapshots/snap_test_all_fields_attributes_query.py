@@ -18288,6 +18288,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'SON_DAUGHTER'
                     },
                     {
+                        'labelEn': 'Unknown',
+                        'labels': [
+                            {
+                                'label': 'Unknown',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UNKNOWN'
+                    },
+                    {
                         'labelEn': 'Wife / Husband',
                         'labels': [
                             {
@@ -19114,6 +19124,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
+                    {
                         'labelEn': 'Cannot do at all',
                         'labels': [
                             {
@@ -19160,6 +19180,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
                     {
                         'labelEn': 'Cannot do at all',
                         'labels': [
@@ -19208,6 +19238,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
+                    {
                         'labelEn': 'Cannot do at all',
                         'labels': [
                             {
@@ -19254,6 +19294,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
                     {
                         'labelEn': 'Cannot do at all',
                         'labels': [
@@ -19302,6 +19352,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
+                    {
                         'labelEn': 'Cannot do at all',
                         'labels': [
                             {
@@ -19348,6 +19408,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'NONE',
+                        'labels': [
+                            {
+                                'label': 'NONE',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': ''
+                    },
                     {
                         'labelEn': 'Cannot do at all',
                         'labels': [

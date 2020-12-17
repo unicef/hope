@@ -26,7 +26,11 @@ const LightGrey = styled.span`
 export const LookUpReassignRoleDisplay = ({
   values,
   setLookUpDialogOpen,
-  onValueChange,
+  disabled,
+}: {
+  values;
+  setLookUpDialogOpen;
+  disabled?: boolean;
 }): React.ReactElement => {
   return (
     <StyledBox>
@@ -47,13 +51,15 @@ export const LookUpReassignRoleDisplay = ({
           <Box p={2}>
             <Grid container justify='center' alignItems='center'>
               <Grid item>
-                <LightGrey>
-                  <EditIcon
-                    color='inherit'
-                    fontSize='small'
-                    onClick={() => setLookUpDialogOpen(true)}
-                  />
-                </LightGrey>
+                {disabled ? null : (
+                  <LightGrey>
+                    <EditIcon
+                      color='inherit'
+                      fontSize='small'
+                      onClick={() => setLookUpDialogOpen(true)}
+                    />
+                  </LightGrey>
+                )}
               </Grid>
             </Grid>
           </Box>

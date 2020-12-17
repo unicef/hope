@@ -2,8 +2,13 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { Field, Formik } from 'formik';
-import { Box, Button, DialogActions, Grid } from '@material-ui/core';
-import camelCase from 'lodash/camelCase';
+import {
+  Box,
+  Button,
+  DialogActions,
+  FormHelperText,
+  Grid,
+} from '@material-ui/core';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { PageHeader } from '../PageHeader';
 import { BreadCrumbsItem } from '../BreadCrumbs';
@@ -13,11 +18,11 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
-  GrievanceTicketQuery,
+  useAllAddIndividualFieldsQuery,
   useAllUsersQuery,
-  useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
+  useGrievanceTicketStatusChangeMutation,
   useUpdateGrievanceMutation,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
@@ -25,19 +30,17 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import {
   GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
+  GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import {
   decodeIdString,
+  isInvalid,
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
-import { AddIndividualDataChange } from './AddIndividualDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -45,6 +48,7 @@ import {
   prepareVariables,
   validationSchema,
 } from './utils/editGrievanceUtils';
+import { validate } from './utils/validateGrievance';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -89,17 +93,31 @@ export function EditGrievancePage(): React.ReactElement {
   } = useGrievancesChoiceDataQuery();
 
   const [mutate] = useUpdateGrievanceMutation();
+  const [mutateStatus] = useGrievanceTicketStatusChangeMutation();
+  const {
+    data: allAddIndividualFieldsData,
+    loading: allAddIndividualFieldsDataLoading,
+  } = useAllAddIndividualFieldsQuery();
 
-  if (userDataLoading || choicesLoading || ticketLoading) {
+  if (
+    userDataLoading ||
+    choicesLoading ||
+    ticketLoading ||
+    allAddIndividualFieldsDataLoading
+  ) {
     return <LoadingComponent />;
   }
   if (!choicesData || !userData || !ticketData) return null;
 
   const ticket = ticketData?.grievanceTicket;
-  const mappedLinkedTickets = ticketData?.grievanceTicket?.relatedTickets?.map(
-    (edge) => edge.id,
-  );
-
+  const changeState = (status): void => {
+    mutateStatus({
+      variables: {
+        grievanceTicketId: ticket.id,
+        status,
+      },
+    });
+  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValues: any = prepareInitialValues(ticket);
 
@@ -123,6 +141,17 @@ export function EditGrievancePage(): React.ReactElement {
     },
     {},
   );
+  const dataChangeErrors = (errors, touched): React.ReactElement[] =>
+    [
+      'householdDataUpdateFields',
+      'individualDataUpdateFields',
+      'individualDataUpdateFieldsDocuments',
+    ].map(
+      (fieldname) =>
+        isInvalid(fieldname, errors, touched) && (
+          <FormHelperText error>{errors[fieldname]}</FormHelperText>
+        ),
+    );
 
   return (
     <Formik
@@ -139,7 +168,7 @@ export function EditGrievancePage(): React.ReactElement {
               },
             ],
           }).then((res) => {
-            return showMessage('Grievance Ticket created.', {
+            return showMessage('Grievance Ticket edited.', {
               pathname: `/${businessArea}/grievance-and-feedback/${res.data.updateGrievanceTicket.grievanceTicket.id}`,
               historyMethod: 'push',
             });
@@ -147,7 +176,14 @@ export function EditGrievancePage(): React.ReactElement {
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
+        if (
+          ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+          ticket.status === GRIEVANCE_TICKET_STATES.ON_HOLD
+        ) {
+          changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
+        }
       }}
+      validate={(values) => validate(values, allAddIndividualFieldsData)}
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
@@ -242,7 +278,7 @@ export function EditGrievancePage(): React.ReactElement {
                             name='description'
                             multiline
                             fullWidth
-                            disabled={ticket.description}
+                            disabled={Boolean(ticket.description)}
                             variant='outlined'
                             label='Description*'
                             component={FormikTextField}
@@ -252,7 +288,7 @@ export function EditGrievancePage(): React.ReactElement {
                           <Field
                             name='admin'
                             label='Administrative Level 2'
-                            disabled={ticket.admin}
+                            disabled={Boolean(ticket.admin)}
                             variant='outlined'
                             component={FormikAdminAreaAutocomplete}
                           />
@@ -261,7 +297,7 @@ export function EditGrievancePage(): React.ReactElement {
                           <Field
                             name='area'
                             fullWidth
-                            disabled={ticket.area}
+                            disabled={Boolean(ticket.area)}
                             variant='outlined'
                             label='Area / Village / Pay point'
                             component={FormikTextField}
@@ -272,7 +308,7 @@ export function EditGrievancePage(): React.ReactElement {
                             name='language'
                             multiline
                             fullWidth
-                            disabled={ticket.language}
+                            disabled={Boolean(ticket.language)}
                             variant='outlined'
                             label='Languages Spoken*'
                             component={FormikTextField}
@@ -285,6 +321,7 @@ export function EditGrievancePage(): React.ReactElement {
                         values={values}
                         setFieldValue={setFieldValue}
                       />
+                      {dataChangeErrors(errors, touched)}
                     </BoxPadding>
 
                     <DialogFooter>

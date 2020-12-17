@@ -7,7 +7,7 @@ import { GetApp, Publish } from '@material-ui/icons';
 import { UniversalTable } from '../UniversalTable';
 import {
   useAllPaymentVerificationsQuery,
-  PaymentVerificationNodeEdge,
+  PaymentVerificationNode,
   AllPaymentVerificationsQueryVariables,
   useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
@@ -34,6 +34,10 @@ export function VerificationRecordsTable({
   id,
   verificationMethod,
   filter,
+  canImport,
+  canExport,
+  canViewRecordDetails,
+  businessArea,
 }): ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
@@ -45,6 +49,7 @@ export function VerificationRecordsTable({
     cashPlanPaymentVerification: id,
     search: filter.search,
     status: filter.status,
+    businessArea,
   };
 
   const useStyles = makeStyles(() => ({
@@ -84,13 +89,14 @@ export function VerificationRecordsTable({
           showMessage('Your import was successful!');
         }
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e);
       }
     }
   };
 
   const exportButton =
-    verificationMethod === 'XLSX' ? (
+    verificationMethod === 'XLSX' && canExport ? (
       <Box mr={3}>
         <a
           download
@@ -110,7 +116,7 @@ export function VerificationRecordsTable({
     ) : null;
 
   const importButton =
-    verificationMethod === 'XLSX' ? (
+    verificationMethod === 'XLSX' && canImport ? (
       <Box>
         <Button
           startIcon={<Publish />}
@@ -157,7 +163,7 @@ export function VerificationRecordsTable({
   return (
     <>
       <UniversalTable<
-        PaymentVerificationNodeEdge,
+        PaymentVerificationNode,
         AllPaymentVerificationsQueryVariables
       >
         title='Verification Records'
@@ -166,7 +172,13 @@ export function VerificationRecordsTable({
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
-        renderRow={(row) => <VerificationRecordsTableRow record={row} />}
+        renderRow={(row) => (
+          <VerificationRecordsTableRow
+            key={row.id}
+            record={row}
+            canViewRecordDetails={canViewRecordDetails}
+          />
+        )}
       />
       <Dialog
         open={open}

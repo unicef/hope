@@ -68,18 +68,26 @@ export function DeleteIndividualGrievanceDetails({
     'createdAt',
     'updatedAt',
     'typeName',
+    'commsDisability',
   ];
   const labels =
     Object.entries(ticket.individual || {})
-      .filter(([key, value]) => !excludedFields.includes(key))
+      .filter(([key]) => {
+        const snakeKey = snakeCase(key);
+        const fieldAttribute = fieldsDict[snakeKey];
+        return fieldAttribute && !excludedFields.includes(key);
+      })
       .map(([key, value]) => {
         let textValue = value;
         const snakeKey = snakeCase(key);
         const fieldAttribute = fieldsDict[snakeKey];
+
         if (fieldAttribute?.type === 'SELECT_ONE') {
-          textValue = fieldAttribute.choices.find(
-            (item) => item.value === value,
-          ).labelEn;
+          textValue = textValue === 'A_' ? null : textValue;
+          textValue = textValue
+            ? fieldAttribute.choices.find((item) => item.value === textValue)
+                .labelEn
+            : '-';
         }
         if (fieldAttribute?.type === 'DATE') {
           textValue = <UniversalMoment>{textValue}</UniversalMoment>;
@@ -141,7 +149,11 @@ export function DeleteIndividualGrievanceDetails({
                     e.graphQLErrors.map((x) => showMessage(x.message));
                   }
                 })}
-                variant='contained'
+                variant={
+                  ticket.deleteIndividualTicketDetails?.approveStatus
+                    ? 'outlined'
+                    : 'contained'
+                }
                 color='primary'
                 disabled={!approveEnabled}
               >

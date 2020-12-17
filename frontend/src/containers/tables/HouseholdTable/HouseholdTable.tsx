@@ -18,18 +18,20 @@ interface HouseholdTableProps {
   businessArea: string;
   filter;
   choicesData: HouseholdChoiceDataQuery;
+  canViewDetails: boolean;
 }
 
 export const HouseholdTable = ({
   businessArea,
   filter,
   choicesData,
+  canViewDetails,
 }: HouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
     familySize: JSON.stringify(filter.householdSize),
     search: filter.text,
-    adminArea: filter.adminArea,
+    adminArea: filter.adminArea?.node?.id,
     residenceStatus: filter.residenceStatus,
   };
   if (filter.program) {
@@ -45,7 +47,14 @@ export const HouseholdTable = ({
         query={useAllHouseholdsQuery}
         queriedObjectName='allHouseholds'
         initialVariables={initialVariables}
-        renderRow={(row) => <HouseHoldTableRow key={row.id} household={row} choicesData={choicesData}/>}
+        renderRow={(row) => (
+          <HouseHoldTableRow
+            key={row.id}
+            household={row}
+            choicesData={choicesData}
+            canViewDetails={canViewDetails}
+          />
+        )}
       />
     </TableWrapper>
   );

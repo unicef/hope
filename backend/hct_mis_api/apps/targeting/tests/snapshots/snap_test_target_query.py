@@ -4,20 +4,21 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots['TestTargetPopulationQuery::test_simple_all_targets_query 1'] = {
+snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permission 1'] = {
     'data': {
         'allTargetPopulation': {
             'edges': [
                 {
                     'node': {
                         'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 2,
-                        'finalListTotalHouseholds': None,
-                        'finalListTotalIndividuals': None,
-                        'name': 'target_population_size_2',
-                        'status': 'DRAFT'
+                        'candidateListTotalIndividuals': 1,
+                        'finalListTotalHouseholds': 1,
+                        'finalListTotalIndividuals': 1,
+                        'name': 'target_population_size_1_approved',
+                        'status': 'APPROVED'
                     }
                 },
                 {
@@ -33,11 +34,11 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query 1'] = {
                 {
                     'node': {
                         'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 1,
-                        'finalListTotalHouseholds': 1,
-                        'finalListTotalIndividuals': 1,
-                        'name': 'target_population_size_1_approved',
-                        'status': 'APPROVED'
+                        'candidateListTotalIndividuals': 2,
+                        'finalListTotalHouseholds': None,
+                        'finalListTotalIndividuals': None,
+                        'name': 'target_population_size_2',
+                        'status': 'DRAFT'
                     }
                 }
             ]
@@ -45,7 +46,27 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query 1'] = {
     }
 }
 
-snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_filter_finalListTotalHouseholdsMin 1'] = {
+snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_1_without_permission 1'] = {
+    'data': {
+        'allTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 17,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allTargetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_2_with_permission_filter_finalListTotalHouseholdsMin 1'] = {
     'data': {
         'allTargetPopulation': {
             'edges': [
@@ -64,7 +85,7 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_filter_final
     }
 }
 
-snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
+snapshots['TestTargetPopulationQuery::test_simple_target_query_0_with_permission 1'] = {
     'data': {
         'targetPopulation': {
             'candidateListTargetingCriteria': {
@@ -98,7 +119,27 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query 1'] = {
     }
 }
 
-snapshots['TestTargetPopulationQuery::test_simple_target_query_2 1'] = {
+snapshots['TestTargetPopulationQuery::test_simple_target_query_1_without_permission 1'] = {
+    'data': {
+        'targetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'targetPopulation'
+            ]
+        }
+    ]
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_2_0_with_permission 1'] = {
     'data': {
         'targetPopulation': {
             'candidateListTargetingCriteria': {
@@ -130,4 +171,24 @@ snapshots['TestTargetPopulationQuery::test_simple_target_query_2 1'] = {
             'status': 'DRAFT'
         }
     }
+}
+
+snapshots['TestTargetPopulationQuery::test_simple_target_query_2_1_without_permission 1'] = {
+    'data': {
+        'targetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 11,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'targetPopulation'
+            ]
+        }
+    ]
 }

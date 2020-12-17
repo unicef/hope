@@ -13,12 +13,14 @@ export const LookUpReassignRole = ({
   household,
   ticket,
   individualRole,
+  shouldDisableButton,
 }: {
   household:
     | GrievanceTicketQuery['grievanceTicket']['household']
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
+  shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
   const reAssigneeRole = JSON.parse(
@@ -28,6 +30,10 @@ export const LookUpReassignRole = ({
   const { data: individualData, loading } = useIndividualQuery({
     variables: { id: reAssigneeRole?.individual },
   });
+  const [selectedHousehold, setSelectedHousehold] = useState(household || null);
+  const [selectedIndividual, setSelectedIndividual] = useState(
+    individualData?.individual || null,
+  );
 
   if (loading) return <LoadingComponent />;
 
@@ -46,7 +52,7 @@ export const LookUpReassignRole = ({
             <LookUpReassignRoleDisplay
               setLookUpDialogOpen={setLookUpDialogOpen}
               values={values}
-              onValueChange={setFieldValue}
+              disabled={shouldDisableButton}
             />
           ) : (
             <LookUpButton
@@ -60,6 +66,10 @@ export const LookUpReassignRole = ({
             initialValues={values}
             onValueChange={setFieldValue}
             ticket={ticket}
+            selectedIndividual={selectedIndividual}
+            selectedHousehold={selectedHousehold}
+            setSelectedHousehold={setSelectedHousehold}
+            setSelectedIndividual={setSelectedIndividual}
           />
         </>
       )}

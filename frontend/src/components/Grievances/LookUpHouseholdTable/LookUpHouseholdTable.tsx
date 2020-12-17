@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { decodeIdString } from '../../../utils/utils';
@@ -20,7 +20,9 @@ interface LookUpHouseholdTableProps {
   filter;
   choicesData: HouseholdChoiceDataQuery;
   setFieldValue;
-  initialValues;
+  selectedHousehold?;
+  setSelectedIndividual?;
+  setSelectedHousehold?;
 }
 
 export const LookUpHouseholdTable = ({
@@ -28,7 +30,9 @@ export const LookUpHouseholdTable = ({
   filter,
   choicesData,
   setFieldValue,
-  initialValues,
+  selectedHousehold,
+  setSelectedIndividual,
+  setSelectedHousehold,
 }: LookUpHouseholdTableProps): React.ReactElement => {
   const initialVariables: AllHouseholdsQueryVariables = {
     businessArea,
@@ -36,21 +40,20 @@ export const LookUpHouseholdTable = ({
     programs: [filter.programs],
     lastRegistrationDate: JSON.stringify(filter.lastRegistrationDate),
     residenceStatus: filter.residenceStatus,
-    admin2: [decodeIdString(filter.admin2)],
+    admin2: [decodeIdString(filter?.admin2?.node?.id)],
     familySize: JSON.stringify(filter.size),
   };
   if (filter.program) {
     initialVariables.programs = [filter.program];
   }
-  const [selectedHousehold, setSelectedHousehold] = useState(
-    initialValues.selectedHousehold,
-  );
+
   const handleRadioChange = (
     household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'],
   ): void => {
     setSelectedHousehold(household);
     setFieldValue('selectedHousehold', household);
     setFieldValue('selectedIndividual', null);
+    setSelectedIndividual(null);
     setFieldValue('identityVerified', false);
   };
   return (

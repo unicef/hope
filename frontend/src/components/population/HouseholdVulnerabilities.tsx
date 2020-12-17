@@ -30,6 +30,7 @@ export function HouseholdVulnerabilities({ household }): React.ReactElement {
   for (const flexFieldKey in household.flexFields) {
     fields.push(
       <LabelizedField
+        key={flexFieldKey}
         label={flexFieldKey}
         value={household.flexFields[flexFieldKey] || '-'}
       />,

@@ -29,6 +29,8 @@ import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/V
 import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;
@@ -93,11 +95,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useCashPlanVerificationSamplingChoicesQuery();
-  if (!data || choicesLoading || permissions === null) return null;
 
-  if (loading) {
-    return <LoadingComponent />;
-  }
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (permissions === null) return null;
+
+  if (
+    !hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS, permissions)
+  )
+    return <PermissionDenied />;
+  if (!data || !choicesData) return null;
 
   const samplingChoicesDict = choicesToDict(
     choicesData.cashPlanVerificationSamplingChoices,
@@ -109,7 +115,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
+      to: `/${businessArea}/payment-verification`,
     },
   ];
   const bankReconciliationSuccessPercentage =
@@ -120,6 +126,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     100;
 
   const canCreate =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
     cashPlan.verificationStatus === 'PENDING' &&
     cashPlan.verifications &&
     cashPlan.verifications.edges.length === 0;
@@ -129,10 +136,24 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
     cashPlan.verifications &&
     cashPlan.verifications.edges.length !== 0;
 
+  const canEdit =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
+    canEditAndActivate;
+  const canActivate =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
+    canEditAndActivate;
+
   const canFinishAndDiscard =
     cashPlan.verificationStatus === 'ACTIVE' &&
     cashPlan.verifications &&
     cashPlan.verifications.edges.length !== 0;
+
+  const canFinish =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
+    canFinishAndDiscard;
+  const canDiscard =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
+    canFinishAndDiscard;
 
   const toolbar = (
     <PageHeader
@@ -143,28 +164,36 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
         {canCreate && (
           <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
         )}
-        {canEditAndActivate && (
+        {(canEdit || canActivate) && (
           <Box alignItems='center' display='flex'>
-            <EditVerificationPlan
-              cashPlanId={cashPlan.id}
-              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-            />
-            <ActivateVerificationPlan
-              cashPlanId={cashPlan.id}
-              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-            />
+            {canEdit && (
+              <EditVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+            )}
+            {canActivate && (
+              <ActivateVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+            )}
           </Box>
         )}
-        {canFinishAndDiscard && (
+        {(canFinish || canDiscard) && (
           <Box display='flex'>
-            <FinishVerificationPlan
-              cashPlanId={cashPlan.id}
-              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-            />
-            <DiscardVerificationPlan
-              cashPlanId={cashPlan.id}
-              cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
-            />
+            {canFinish && (
+              <FinishVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+            )}
+            {canDiscard && (
+              <DiscardVerificationPlan
+                cashPlanId={cashPlan.id}
+                cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
+              />
+            )}
           </Box>
         )}
       </>
@@ -202,7 +231,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
-                <Grid item xs={4}>
+                <Grid item xs={4} key={el.label}>
                   <LabelizedField label={el.label}>
                     <p>{el.value}</p>
                   </LabelizedField>
@@ -320,7 +349,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                     ),
                   },
                 ].map((el) => (
-                  <Grid item xs={3}>
+                  <Grid item xs={3} key={el.label}>
                     <LabelizedField label={el.label}>
                       <p>{el.value}</p>
                     </LabelizedField>
@@ -392,6 +421,19 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
+              businessArea={businessArea}
+              canImport={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
+                permissions,
+              )}
+              canExport={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
+                permissions,
+              )}
+              canViewRecordDetails={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+                permissions,
+              )}
             />
           </Container>
         </>

@@ -4,7 +4,6 @@ import {
   GRIEVANCE_ISSUE_TYPES,
 } from '../../../utils/constants';
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareFeedbackVariables(requiredVariables, values) {
@@ -104,6 +103,21 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
+  const individualData = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.individualDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  individualData.flexFields = flexFields;
   return {
     variables: {
       input: {
@@ -115,13 +129,7 @@ function prepareEditIndividualVariables(requiredVariables, values) {
             individualDataUpdateIssueTypeExtras: {
               individual: values.selectedIndividual?.id,
               individualData: {
-                ...values.individualDataUpdateFields
-                  .filter((item) => item.fieldName)
-                  .reduce((prev, current) => {
-                    // eslint-disable-next-line no-param-reassign
-                    prev[camelCase(current.fieldName)] = current.fieldValue;
-                    return prev;
-                  }, {}),
+                ...individualData,
                 documents: values.individualDataUpdateFieldsDocuments,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
               },
@@ -135,6 +143,20 @@ function prepareEditIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditHouseholdVariables(requiredVariables, values) {
+  const householdData = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && !item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[camelCase(current.fieldName)] = current.fieldValue;
+      return prev;
+    }, {});
+  const flexFields = values.householdDataUpdateFields
+    .filter((item) => item.fieldName && item.isFlexField)
+    .reduce((prev, current) => {
+      // eslint-disable-next-line no-param-reassign
+      prev[current.fieldName] = current.fieldValue;
+      return prev;
+    }, {});
   return {
     variables: {
       input: {
@@ -145,13 +167,7 @@ function prepareEditHouseholdVariables(requiredVariables, values) {
           issueType: {
             householdDataUpdateIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              householdData: values.householdDataUpdateFields
-                .filter((item) => item.fieldName)
-                .reduce((prev, current) => {
-                  // eslint-disable-next-line no-param-reassign
-                  prev[camelCase(current.fieldName)] = current.fieldValue;
-                  return prev;
-                }, {}),
+              householdData: { ...householdData, flexFields },
             },
           },
         },
@@ -202,7 +218,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values.admin,
+    admin: values?.admin?.node?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
@@ -212,53 +228,4 @@ export function prepareVariables(businessArea, values) {
     grievanceTypeIssueTypeDict,
   );
   return prepareFunction(requiredVariables, values);
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function validate(
-  values,
-  allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
-) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors: { [id: string]: any } = {};
-  if (values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
-    if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL ||
-      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD
-    ) {
-      if (!values.selectedHousehold) {
-        errors.selectedHousehold = 'Household is Required';
-      }
-    }
-    if (
-      values.issueType === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL ||
-      values.issueType === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
-    ) {
-      if (!values.selectedIndividual) {
-        errors.selectedIndividual = 'Individual is Required';
-      }
-    }
-  }
-
-  if (
-    values.category === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-    values.issueType === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL
-  ) {
-    const individualDataErrors = {};
-    const individualData = values.individualData || {};
-    for (const field of allAddIndividualFieldsData.allAddIndividualsFieldsAttributes) {
-      const fieldName = camelCase(field.name);
-      if (
-        field.required &&
-        (individualData[fieldName] === null ||
-          individualData[fieldName] === undefined)
-      ) {
-        individualDataErrors[fieldName] = 'Field Required';
-      }
-      if (Object.keys(individualDataErrors).length > 0) {
-        errors.individualData = individualDataErrors;
-      }
-    }
-  }
-  return errors;
 }

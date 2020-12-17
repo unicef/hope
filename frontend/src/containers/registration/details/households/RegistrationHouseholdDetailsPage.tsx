@@ -10,7 +10,10 @@ import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { decodeIdString } from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PermissionDenied } from '../../../../components/PermissionDenied';
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
 
@@ -26,6 +29,7 @@ const Container = styled.div`
 export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const { data, loading } = useImportedHouseholdQuery({
     variables: { id },
   });
@@ -33,7 +37,12 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  if (loading || choicesLoading) return null;
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions))
+    return <PermissionDenied />;
+  if (!data) return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -65,14 +74,11 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
           isOnPaper
           rowsPerPageOptions={[5, 10, 15]}
           title='Individuals in Household'
+          businessArea={businessArea}
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
-          registrationDate={`${(
-            <UniversalMoment>
-              {importedHousehold.firstRegistrationDate}
-            </UniversalMoment>
-          )}`}
+          registrationDate={importedHousehold.firstRegistrationDate}
         />
       </Container>
     </div>

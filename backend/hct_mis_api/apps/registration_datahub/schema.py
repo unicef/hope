@@ -14,6 +14,12 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
+from account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+    BaseNodePermissionMixin,
+)
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
 from core.utils import decode_id_string, to_choice_object, encode_ids
@@ -56,12 +62,20 @@ class DeduplicationResultNode(graphene.ObjectType):
 
 class ImportedHouseholdFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
+    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
 
     class Meta:
         model = ImportedHousehold
         fields = ()
 
-    order_by = OrderingFilter(fields=("id", "head_of_household", "size", "registration_date",))
+    order_by = OrderingFilter(
+        fields=(
+            "id",
+            "head_of_household",
+            "size",
+            "registration_date",
+        )
+    )
 
     def filter_rdi_id(self, queryset, model_field, value):
         return queryset.filter(registration_data_import__hct_id=decode_id_string(value))
@@ -70,6 +84,7 @@ class ImportedHouseholdFilter(FilterSet):
 class ImportedIndividualFilter(FilterSet):
     rdi_id = CharFilter(method="filter_rdi_id")
     duplicates_only = BooleanFilter(method="filter_duplicates_only")
+    business_area = CharFilter(field_name="registration_data_import__business_area_slug")
 
     class Meta:
         model = ImportedIndividual
@@ -97,7 +112,13 @@ class ImportedIndividualFilter(FilterSet):
         return queryset
 
 
-class ImportedHouseholdNode(DjangoObjectType):
+class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.RDI_VIEW_DETAILS,
+        ),
+    )
+
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     has_duplicates = graphene.Boolean(
@@ -124,7 +145,13 @@ class ImportedHouseholdNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class ImportedIndividualNode(DjangoObjectType):
+class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.RDI_VIEW_DETAILS,
+        ),
+    )
+
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
@@ -205,14 +232,26 @@ class KoboErrorNode(graphene.ObjectType):
 
 class Query(graphene.ObjectType):
     imported_household = relay.Node.Field(ImportedHouseholdNode)
-    all_imported_households = DjangoFilterConnectionField(
-        ImportedHouseholdNode, filterset_class=ImportedHouseholdFilter,
+    all_imported_households = DjangoPermissionFilterConnectionField(
+        ImportedHouseholdNode,
+        filterset_class=ImportedHouseholdFilter,
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.RDI_VIEW_DETAILS,
+            ),
+        ),
     )
     registration_data_import_datahub = relay.Node.Field(RegistrationDataImportDatahubNode)
     all_registration_data_imports_datahub = DjangoFilterConnectionField(RegistrationDataImportDatahubNode)
     imported_individual = relay.Node.Field(ImportedIndividualNode)
-    all_imported_individuals = DjangoFilterConnectionField(
-        ImportedIndividualNode, filterset_class=ImportedIndividualFilter,
+    all_imported_individuals = DjangoPermissionFilterConnectionField(
+        ImportedIndividualNode,
+        filterset_class=ImportedIndividualFilter,
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.RDI_VIEW_DETAILS,
+            ),
+        ),
     )
     import_data = relay.Node.Field(ImportDataNode)
     deduplication_batch_status_choices = graphene.List(ChoiceObject)

@@ -6,30 +6,30 @@ from core.base_test_case import APITestCase
 
 class TestMetaDataFilterType(APITestCase):
     QUERY = """
-           query AllFieldsAttributes {
-             allFieldsAttributes{
-               name
-               type
-               labels{
-                 language
-                 label
-               }
-               labelEn
-               hint
-               required
-               isFlexField
-               associatedWith
-               choices{
-                 labels {
-                   language
-                   label
-                 }
-                 labelEn
-                 value
-               }
-             }
-           }
-           """
+    query AllFieldsAttributes {
+     allFieldsAttributes{
+       name
+       type
+       labels{
+         language
+         label
+       }
+       labelEn
+       hint
+       required
+       isFlexField
+       associatedWith
+       choices{
+         labels {
+           language
+           label
+         }
+         labelEn
+         value
+       }
+     }
+    }
+    """
 
     @classmethod
     def setUpTestData(cls):
