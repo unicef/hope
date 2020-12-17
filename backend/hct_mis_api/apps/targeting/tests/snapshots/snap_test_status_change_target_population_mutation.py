@@ -76,13 +76,13 @@ snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         }
                     ],
