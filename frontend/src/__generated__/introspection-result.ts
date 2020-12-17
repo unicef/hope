@@ -66,6 +66,9 @@
             "name": "PaymentVerificationNode"
           },
           {
+            "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
             "name": "ServiceProviderNode"
           },
           {
@@ -78,6 +81,9 @@
             "name": "TicketDeleteIndividualDetailsNode"
           },
           {
+            "name": "TicketSystemFlaggingDetailsNode"
+          },
+          {
             "name": "DocumentNode"
           },
           {
@@ -88,6 +94,9 @@
           },
           {
             "name": "TicketNoteNode"
+          },
+          {
+            "name": "TicketNeedsAdjudicationDetailsNode"
           },
           {
             "name": "BusinessAreaNode"
