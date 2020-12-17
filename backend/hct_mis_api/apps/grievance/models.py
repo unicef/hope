@@ -127,8 +127,14 @@ class GrievanceTicket(TimeStampedUUIDModel):
         "add_individual_ticket_details": ("household",),
         "household_data_update_ticket_details": ("household",),
         "delete_individual_ticket_details": ("individual",),
-        "system_flagging_ticket_details": ({"individual": "golden_records_individual"},),
-        "needs_adjudication_ticket_details": ({"individual": "golden_records_individual"},),
+        "system_flagging_ticket_details": (
+            {"individual": "golden_records_individual"},
+            {"household": "golden_records_individual.household"},
+        ),
+        "needs_adjudication_ticket_details": (
+            {"individual": "golden_records_individual"},
+            {"household": "golden_records_individual.household"},
+        ),
     }
 
     TICKET_DETAILS_NAME_MAPPING = {

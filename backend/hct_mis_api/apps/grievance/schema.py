@@ -27,7 +27,7 @@ from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea, FlexibleAttribute
 from core.schema import ChoiceObject, FieldAttributeNode
-from core.utils import to_choice_object, choices_to_dict
+from core.utils import to_choice_object, choices_to_dict, nested_getattr
 from grievance.models import (
     GrievanceTicket,
     TicketNote,
@@ -45,6 +45,8 @@ from household.models import Household, Individual
 from household.schema import HouseholdNode, IndividualNode
 from payment.models import ServiceProvider, PaymentRecord
 from payment.schema import PaymentRecordNode
+from sanction_list.models import SanctionListIndividual, SanctionListIndividualDocument, \
+    SanctionListIndividualDateOfBirth
 from utils.schema import Arg
 
 
@@ -231,10 +233,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
             real_lookup = lookup_name
             for lookup in lookups:
                 if isinstance(lookup, dict):
-                    real_lookup = lookup.get(lookup_name)
-                    break
-            print(extras_field, real_lookup)
-            obj = getattr(extras_field, real_lookup, None)
+                    tmp_lookup = lookup.get(lookup_name)
+                    if tmp_lookup is not None:
+                        real_lookup = tmp_lookup
+                        break
+            obj = nested_getattr(extras_field, real_lookup, None)
             if obj is not None:
                 return obj
 
@@ -360,6 +363,27 @@ class AddIndividualFiledObjectType(graphene.ObjectType):
     required = graphene.Boolean()
     type = graphene.String()
     flex_field = graphene.Boolean()
+
+
+class SanctionListIndividualNode(DjangoObjectType):
+    class Meta:
+        model = SanctionListIndividual
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class SanctionListIndividualDocumentNode(DjangoObjectType):
+    class Meta:
+        model = SanctionListIndividualDocument
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class SanctionListIndividualDateOfBirthNode(DjangoObjectType):
+    class Meta:
+        model = SanctionListIndividualDateOfBirth
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):

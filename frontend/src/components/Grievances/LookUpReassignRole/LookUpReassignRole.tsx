@@ -8,6 +8,7 @@ import { LoadingComponent } from '../../LoadingComponent';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
 import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 
 export const LookUpReassignRole = ({
   household,
@@ -23,8 +24,19 @@ export const LookUpReassignRole = ({
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
+  let roleReassignData;
+  switch (ticket.category.toString()){
+    case GRIEVANCE_CATEGORIES.DATA_CHANGE:
+      roleReassignData=ticket?.deleteIndividualTicketDetails?.roleReassignData;
+    break;
+    case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
+      roleReassignData=ticket?.systemFlaggingTicketDetails?.roleReassignData;
+      break;
+    default:
+      roleReassignData = null;
+  }
   const reAssigneeRole = JSON.parse(
-    ticket?.deleteIndividualTicketDetails?.roleReassignData,
+    roleReassignData,
   )[individualRole.id];
 
   const { data: individualData, loading } = useIndividualQuery({

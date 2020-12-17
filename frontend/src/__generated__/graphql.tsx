@@ -2122,6 +2122,7 @@ export type Mutations = {
   approveAddIndividual?: Maybe<SimpleApproveMutation>,
   approveDeleteIndividual?: Maybe<SimpleApproveMutation>,
   approveSystemFlagging?: Maybe<SimpleApproveMutation>,
+  approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
   reassignRole?: Maybe<ReassignRoleMutation>,
   createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
   editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
@@ -2205,6 +2206,12 @@ export type MutationsApproveDeleteIndividualArgs = {
 export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean'],
   grievanceTicketId: Scalars['ID']
+};
+
+
+export type MutationsApproveNeedsAdjudicationArgs = {
+  grievanceTicketId: Scalars['ID'],
+  selectedIndividualId: Scalars['ID']
 };
 
 
@@ -2355,6 +2362,11 @@ export type MutationsRerunDedupeArgs = {
 
 export type MutationsCheckAgainstSanctionListArgs = {
   file: Scalars['Upload']
+};
+
+export type NeedsAdjudicationApproveMutation = {
+   __typename?: 'NeedsAdjudicationApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
 };
 
 export type Node = {
@@ -3357,6 +3369,614 @@ export enum RuleLanguage {
   Python = 'PYTHON'
 }
 
+export enum SanctionListIndividualCountryOfBirth {
+  Af = 'AF',
+  Ax = 'AX',
+  Al = 'AL',
+  Dz = 'DZ',
+  As = 'AS',
+  Ad = 'AD',
+  Ao = 'AO',
+  Ai = 'AI',
+  Aq = 'AQ',
+  Ag = 'AG',
+  Ar = 'AR',
+  Am = 'AM',
+  Aw = 'AW',
+  Au = 'AU',
+  At = 'AT',
+  Az = 'AZ',
+  Bs = 'BS',
+  Bh = 'BH',
+  Bd = 'BD',
+  Bb = 'BB',
+  By = 'BY',
+  Be = 'BE',
+  Bz = 'BZ',
+  Bj = 'BJ',
+  Bm = 'BM',
+  Bt = 'BT',
+  Bo = 'BO',
+  Bq = 'BQ',
+  Ba = 'BA',
+  Bw = 'BW',
+  Bv = 'BV',
+  Br = 'BR',
+  Io = 'IO',
+  Bn = 'BN',
+  Bg = 'BG',
+  Bf = 'BF',
+  Bi = 'BI',
+  Cv = 'CV',
+  Kh = 'KH',
+  Cm = 'CM',
+  Ca = 'CA',
+  Ky = 'KY',
+  Cf = 'CF',
+  Td = 'TD',
+  Cl = 'CL',
+  Cn = 'CN',
+  Cx = 'CX',
+  Cc = 'CC',
+  Co = 'CO',
+  Km = 'KM',
+  Cg = 'CG',
+  Cd = 'CD',
+  Ck = 'CK',
+  Cr = 'CR',
+  Ci = 'CI',
+  Hr = 'HR',
+  Cu = 'CU',
+  Cw = 'CW',
+  Cy = 'CY',
+  Cz = 'CZ',
+  Dk = 'DK',
+  Dj = 'DJ',
+  Dm = 'DM',
+  Do = 'DO',
+  Ec = 'EC',
+  Eg = 'EG',
+  Sv = 'SV',
+  Gq = 'GQ',
+  Er = 'ER',
+  Ee = 'EE',
+  Sz = 'SZ',
+  Et = 'ET',
+  Fk = 'FK',
+  Fo = 'FO',
+  Fj = 'FJ',
+  Fi = 'FI',
+  Fr = 'FR',
+  Gf = 'GF',
+  Pf = 'PF',
+  Tf = 'TF',
+  Ga = 'GA',
+  Gm = 'GM',
+  Ge = 'GE',
+  De = 'DE',
+  Gh = 'GH',
+  Gi = 'GI',
+  Gr = 'GR',
+  Gl = 'GL',
+  Gd = 'GD',
+  Gp = 'GP',
+  Gu = 'GU',
+  Gt = 'GT',
+  Gg = 'GG',
+  Gn = 'GN',
+  Gw = 'GW',
+  Gy = 'GY',
+  Ht = 'HT',
+  Hm = 'HM',
+  Va = 'VA',
+  Hn = 'HN',
+  Hk = 'HK',
+  Hu = 'HU',
+  Is = 'IS',
+  In = 'IN',
+  Id = 'ID',
+  Ir = 'IR',
+  Iq = 'IQ',
+  Ie = 'IE',
+  Im = 'IM',
+  Il = 'IL',
+  It = 'IT',
+  Jm = 'JM',
+  Jp = 'JP',
+  Je = 'JE',
+  Jo = 'JO',
+  Kz = 'KZ',
+  Ke = 'KE',
+  Ki = 'KI',
+  Kw = 'KW',
+  Kg = 'KG',
+  La = 'LA',
+  Lv = 'LV',
+  Lb = 'LB',
+  Ls = 'LS',
+  Lr = 'LR',
+  Ly = 'LY',
+  Li = 'LI',
+  Lt = 'LT',
+  Lu = 'LU',
+  Mo = 'MO',
+  Mg = 'MG',
+  Mw = 'MW',
+  My = 'MY',
+  Mv = 'MV',
+  Ml = 'ML',
+  Mt = 'MT',
+  Mh = 'MH',
+  Mq = 'MQ',
+  Mr = 'MR',
+  Mu = 'MU',
+  Yt = 'YT',
+  Mx = 'MX',
+  Fm = 'FM',
+  Md = 'MD',
+  Mc = 'MC',
+  Mn = 'MN',
+  Me = 'ME',
+  Ms = 'MS',
+  Ma = 'MA',
+  Mz = 'MZ',
+  Mm = 'MM',
+  Na = 'NA',
+  Nr = 'NR',
+  Np = 'NP',
+  Nl = 'NL',
+  Nc = 'NC',
+  Nz = 'NZ',
+  Ni = 'NI',
+  Ne = 'NE',
+  Ng = 'NG',
+  Nu = 'NU',
+  Nf = 'NF',
+  Kp = 'KP',
+  Mk = 'MK',
+  Mp = 'MP',
+  No = 'NO',
+  Om = 'OM',
+  Pk = 'PK',
+  Pw = 'PW',
+  Ps = 'PS',
+  Pa = 'PA',
+  Pg = 'PG',
+  Py = 'PY',
+  Pe = 'PE',
+  Ph = 'PH',
+  Pn = 'PN',
+  Pl = 'PL',
+  Pt = 'PT',
+  Pr = 'PR',
+  Qa = 'QA',
+  Re = 'RE',
+  Ro = 'RO',
+  Ru = 'RU',
+  Rw = 'RW',
+  Bl = 'BL',
+  Sh = 'SH',
+  Kn = 'KN',
+  Lc = 'LC',
+  Mf = 'MF',
+  Pm = 'PM',
+  Vc = 'VC',
+  Ws = 'WS',
+  Sm = 'SM',
+  St = 'ST',
+  Sa = 'SA',
+  Sn = 'SN',
+  Rs = 'RS',
+  Sc = 'SC',
+  Sl = 'SL',
+  Sg = 'SG',
+  Sx = 'SX',
+  Sk = 'SK',
+  Si = 'SI',
+  Sb = 'SB',
+  So = 'SO',
+  Za = 'ZA',
+  Gs = 'GS',
+  Kr = 'KR',
+  Ss = 'SS',
+  Es = 'ES',
+  Lk = 'LK',
+  Sd = 'SD',
+  Sr = 'SR',
+  Sj = 'SJ',
+  Se = 'SE',
+  Ch = 'CH',
+  Sy = 'SY',
+  Tw = 'TW',
+  Tj = 'TJ',
+  Tz = 'TZ',
+  Th = 'TH',
+  Tl = 'TL',
+  Tg = 'TG',
+  Tk = 'TK',
+  To = 'TO',
+  Tt = 'TT',
+  Tn = 'TN',
+  Tr = 'TR',
+  Tm = 'TM',
+  Tc = 'TC',
+  Tv = 'TV',
+  Ug = 'UG',
+  Ua = 'UA',
+  Ae = 'AE',
+  Gb = 'GB',
+  Um = 'UM',
+  Us = 'US',
+  Uy = 'UY',
+  Uz = 'UZ',
+  Vu = 'VU',
+  Ve = 'VE',
+  Vn = 'VN',
+  Vg = 'VG',
+  Vi = 'VI',
+  Wf = 'WF',
+  Eh = 'EH',
+  Ye = 'YE',
+  Zm = 'ZM',
+  Zw = 'ZW'
+}
+
+export type SanctionListIndividualDateOfBirthNode = Node & {
+   __typename?: 'SanctionListIndividualDateOfBirthNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  date: Scalars['Date'],
+  individual: SanctionListIndividualNode,
+};
+
+export type SanctionListIndividualDateOfBirthNodeConnection = {
+   __typename?: 'SanctionListIndividualDateOfBirthNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualDateOfBirthNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeEdge = {
+   __typename?: 'SanctionListIndividualDateOfBirthNodeEdge',
+  node?: Maybe<SanctionListIndividualDateOfBirthNode>,
+  cursor: Scalars['String'],
+};
+
+export enum SanctionListIndividualDocumentIssuingCountry {
+  Af = 'AF',
+  Ax = 'AX',
+  Al = 'AL',
+  Dz = 'DZ',
+  As = 'AS',
+  Ad = 'AD',
+  Ao = 'AO',
+  Ai = 'AI',
+  Aq = 'AQ',
+  Ag = 'AG',
+  Ar = 'AR',
+  Am = 'AM',
+  Aw = 'AW',
+  Au = 'AU',
+  At = 'AT',
+  Az = 'AZ',
+  Bs = 'BS',
+  Bh = 'BH',
+  Bd = 'BD',
+  Bb = 'BB',
+  By = 'BY',
+  Be = 'BE',
+  Bz = 'BZ',
+  Bj = 'BJ',
+  Bm = 'BM',
+  Bt = 'BT',
+  Bo = 'BO',
+  Bq = 'BQ',
+  Ba = 'BA',
+  Bw = 'BW',
+  Bv = 'BV',
+  Br = 'BR',
+  Io = 'IO',
+  Bn = 'BN',
+  Bg = 'BG',
+  Bf = 'BF',
+  Bi = 'BI',
+  Cv = 'CV',
+  Kh = 'KH',
+  Cm = 'CM',
+  Ca = 'CA',
+  Ky = 'KY',
+  Cf = 'CF',
+  Td = 'TD',
+  Cl = 'CL',
+  Cn = 'CN',
+  Cx = 'CX',
+  Cc = 'CC',
+  Co = 'CO',
+  Km = 'KM',
+  Cg = 'CG',
+  Cd = 'CD',
+  Ck = 'CK',
+  Cr = 'CR',
+  Ci = 'CI',
+  Hr = 'HR',
+  Cu = 'CU',
+  Cw = 'CW',
+  Cy = 'CY',
+  Cz = 'CZ',
+  Dk = 'DK',
+  Dj = 'DJ',
+  Dm = 'DM',
+  Do = 'DO',
+  Ec = 'EC',
+  Eg = 'EG',
+  Sv = 'SV',
+  Gq = 'GQ',
+  Er = 'ER',
+  Ee = 'EE',
+  Sz = 'SZ',
+  Et = 'ET',
+  Fk = 'FK',
+  Fo = 'FO',
+  Fj = 'FJ',
+  Fi = 'FI',
+  Fr = 'FR',
+  Gf = 'GF',
+  Pf = 'PF',
+  Tf = 'TF',
+  Ga = 'GA',
+  Gm = 'GM',
+  Ge = 'GE',
+  De = 'DE',
+  Gh = 'GH',
+  Gi = 'GI',
+  Gr = 'GR',
+  Gl = 'GL',
+  Gd = 'GD',
+  Gp = 'GP',
+  Gu = 'GU',
+  Gt = 'GT',
+  Gg = 'GG',
+  Gn = 'GN',
+  Gw = 'GW',
+  Gy = 'GY',
+  Ht = 'HT',
+  Hm = 'HM',
+  Va = 'VA',
+  Hn = 'HN',
+  Hk = 'HK',
+  Hu = 'HU',
+  Is = 'IS',
+  In = 'IN',
+  Id = 'ID',
+  Ir = 'IR',
+  Iq = 'IQ',
+  Ie = 'IE',
+  Im = 'IM',
+  Il = 'IL',
+  It = 'IT',
+  Jm = 'JM',
+  Jp = 'JP',
+  Je = 'JE',
+  Jo = 'JO',
+  Kz = 'KZ',
+  Ke = 'KE',
+  Ki = 'KI',
+  Kw = 'KW',
+  Kg = 'KG',
+  La = 'LA',
+  Lv = 'LV',
+  Lb = 'LB',
+  Ls = 'LS',
+  Lr = 'LR',
+  Ly = 'LY',
+  Li = 'LI',
+  Lt = 'LT',
+  Lu = 'LU',
+  Mo = 'MO',
+  Mg = 'MG',
+  Mw = 'MW',
+  My = 'MY',
+  Mv = 'MV',
+  Ml = 'ML',
+  Mt = 'MT',
+  Mh = 'MH',
+  Mq = 'MQ',
+  Mr = 'MR',
+  Mu = 'MU',
+  Yt = 'YT',
+  Mx = 'MX',
+  Fm = 'FM',
+  Md = 'MD',
+  Mc = 'MC',
+  Mn = 'MN',
+  Me = 'ME',
+  Ms = 'MS',
+  Ma = 'MA',
+  Mz = 'MZ',
+  Mm = 'MM',
+  Na = 'NA',
+  Nr = 'NR',
+  Np = 'NP',
+  Nl = 'NL',
+  Nc = 'NC',
+  Nz = 'NZ',
+  Ni = 'NI',
+  Ne = 'NE',
+  Ng = 'NG',
+  Nu = 'NU',
+  Nf = 'NF',
+  Kp = 'KP',
+  Mk = 'MK',
+  Mp = 'MP',
+  No = 'NO',
+  Om = 'OM',
+  Pk = 'PK',
+  Pw = 'PW',
+  Ps = 'PS',
+  Pa = 'PA',
+  Pg = 'PG',
+  Py = 'PY',
+  Pe = 'PE',
+  Ph = 'PH',
+  Pn = 'PN',
+  Pl = 'PL',
+  Pt = 'PT',
+  Pr = 'PR',
+  Qa = 'QA',
+  Re = 'RE',
+  Ro = 'RO',
+  Ru = 'RU',
+  Rw = 'RW',
+  Bl = 'BL',
+  Sh = 'SH',
+  Kn = 'KN',
+  Lc = 'LC',
+  Mf = 'MF',
+  Pm = 'PM',
+  Vc = 'VC',
+  Ws = 'WS',
+  Sm = 'SM',
+  St = 'ST',
+  Sa = 'SA',
+  Sn = 'SN',
+  Rs = 'RS',
+  Sc = 'SC',
+  Sl = 'SL',
+  Sg = 'SG',
+  Sx = 'SX',
+  Sk = 'SK',
+  Si = 'SI',
+  Sb = 'SB',
+  So = 'SO',
+  Za = 'ZA',
+  Gs = 'GS',
+  Kr = 'KR',
+  Ss = 'SS',
+  Es = 'ES',
+  Lk = 'LK',
+  Sd = 'SD',
+  Sr = 'SR',
+  Sj = 'SJ',
+  Se = 'SE',
+  Ch = 'CH',
+  Sy = 'SY',
+  Tw = 'TW',
+  Tj = 'TJ',
+  Tz = 'TZ',
+  Th = 'TH',
+  Tl = 'TL',
+  Tg = 'TG',
+  Tk = 'TK',
+  To = 'TO',
+  Tt = 'TT',
+  Tn = 'TN',
+  Tr = 'TR',
+  Tm = 'TM',
+  Tc = 'TC',
+  Tv = 'TV',
+  Ug = 'UG',
+  Ua = 'UA',
+  Ae = 'AE',
+  Gb = 'GB',
+  Um = 'UM',
+  Us = 'US',
+  Uy = 'UY',
+  Uz = 'UZ',
+  Vu = 'VU',
+  Ve = 'VE',
+  Vn = 'VN',
+  Vg = 'VG',
+  Vi = 'VI',
+  Wf = 'WF',
+  Eh = 'EH',
+  Ye = 'YE',
+  Zm = 'ZM',
+  Zw = 'ZW'
+}
+
+export type SanctionListIndividualDocumentNode = Node & {
+   __typename?: 'SanctionListIndividualDocumentNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  documentNumber: Scalars['String'],
+  typeOfDocument: Scalars['String'],
+  dateOfIssue?: Maybe<Scalars['String']>,
+  issuingCountry?: Maybe<SanctionListIndividualDocumentIssuingCountry>,
+  note: Scalars['String'],
+  individual: SanctionListIndividualNode,
+};
+
+export type SanctionListIndividualDocumentNodeConnection = {
+   __typename?: 'SanctionListIndividualDocumentNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualDocumentNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualDocumentNodeEdge = {
+   __typename?: 'SanctionListIndividualDocumentNodeEdge',
+  node?: Maybe<SanctionListIndividualDocumentNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualNode = Node & {
+   __typename?: 'SanctionListIndividualNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  dataId: Scalars['Int'],
+  versionNum: Scalars['Int'],
+  firstName: Scalars['String'],
+  secondName: Scalars['String'],
+  thirdName: Scalars['String'],
+  fourthName: Scalars['String'],
+  fullName: Scalars['String'],
+  nameOriginalScript: Scalars['String'],
+  unListType: Scalars['String'],
+  referenceNumber: Scalars['String'],
+  listedOn: Scalars['DateTime'],
+  comments: Scalars['String'],
+  designation: Scalars['String'],
+  listType: Scalars['String'],
+  street: Scalars['String'],
+  city: Scalars['String'],
+  stateProvince: Scalars['String'],
+  addressNote: Scalars['String'],
+  countryOfBirth?: Maybe<SanctionListIndividualCountryOfBirth>,
+  active: Scalars['Boolean'],
+  ticketsystemflaggingdetailsSet: TicketSystemFlaggingDetailsNodeConnection,
+  documents: SanctionListIndividualDocumentNodeConnection,
+  datesOfBirth: SanctionListIndividualDateOfBirthNodeConnection,
+};
+
+
+export type SanctionListIndividualNodeTicketsystemflaggingdetailsSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeDatesOfBirthArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export type SaveKoboProjectImportDataMutation = {
    __typename?: 'SaveKoboProjectImportDataMutation',
   importData?: Maybe<ImportDataNode>,
@@ -3792,7 +4412,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   goldenRecordsIndividual: IndividualNode,
   possibleDuplicate: IndividualNode,
-  selectedIndividual?: Maybe<Scalars['UUID']>,
+  selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
 };
 
@@ -3887,6 +4507,7 @@ export type TicketSystemFlaggingDetailsNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   goldenRecordsIndividual: IndividualNode,
+  sanctionListIndividual: SanctionListIndividualNode,
   approveStatus: Scalars['Boolean'],
   roleReassignData: Scalars['JSONString'],
 };
@@ -4808,6 +5429,23 @@ export type ApproveIndividualDataChangeMutation = (
   { __typename?: 'Mutations' }
   & { approveIndividualDataChange: Maybe<(
     { __typename?: 'IndividualDataChangeApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveSystemFlaggingMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveSystemFlaggingMutation = (
+  { __typename?: 'Mutations' }
+  & { approveSystemFlagging: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
@@ -5934,6 +6572,45 @@ export type GrievanceTicketQuery = (
     )>, deleteIndividualTicketDetails: Maybe<(
       { __typename?: 'TicketDeleteIndividualDetailsNode' }
       & Pick<TicketDeleteIndividualDetailsNode, 'id' | 'roleReassignData' | 'approveStatus'>
+    )>, systemFlaggingTicketDetails: Maybe<(
+      { __typename?: 'TicketSystemFlaggingDetailsNode' }
+      & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
+      & { goldenRecordsIndividual: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate'>
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'documentNumber'>
+            )> }
+          )>> }
+        ) }
+      ), sanctionListIndividual: (
+        { __typename?: 'SanctionListIndividualNode' }
+        & Pick<SanctionListIndividualNode, 'fullName' | 'referenceNumber'>
+        & { datesOfBirth: (
+          { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDateOfBirthNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDateOfBirthNode' }
+              & Pick<SanctionListIndividualDateOfBirthNode, 'id' | 'date'>
+            )> }
+          )>> }
+        ), documents: (
+          { __typename?: 'SanctionListIndividualDocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDocumentNode' }
+              & Pick<SanctionListIndividualDocumentNode, 'id' | 'documentNumber' | 'typeOfDocument'>
+            )> }
+          )>> }
+        ) }
+      ) }
     )>, paymentVerificationTicketDetails: Maybe<(
       { __typename?: 'TicketPaymentVerificationDetailsNode' }
       & Pick<TicketPaymentVerificationDetailsNode, 'paymentVerificationStatus'>
@@ -7607,6 +8284,59 @@ export function useApproveIndividualDataChangeMutation(baseOptions?: ApolloReact
 export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
+export const ApproveSystemFlaggingDocument = gql`
+    mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveSystemFlaggingMutationFn = ApolloReactCommon.MutationFunction<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
+export type ApproveSystemFlaggingComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>, 'mutation'>;
+
+    export const ApproveSystemFlaggingComponent = (props: ApproveSystemFlaggingComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables> mutation={ApproveSystemFlaggingDocument} {...props} />
+    );
+    
+export type ApproveSystemFlaggingProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables> & TChildProps;
+export function withApproveSystemFlagging<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveSystemFlaggingMutation,
+  ApproveSystemFlaggingMutationVariables,
+  ApproveSystemFlaggingProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables, ApproveSystemFlaggingProps<TChildProps>>(ApproveSystemFlaggingDocument, {
+      alias: 'approveSystemFlagging',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveSystemFlaggingMutation__
+ *
+ * To run a mutation, you first call `useApproveSystemFlaggingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveSystemFlaggingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveSystemFlaggingMutation, { data, loading, error }] = useApproveSystemFlaggingMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveSystemFlaggingMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>(ApproveSystemFlaggingDocument, baseOptions);
+      }
+export type ApproveSystemFlaggingMutationHookResult = ReturnType<typeof useApproveSystemFlaggingMutation>;
+export type ApproveSystemFlaggingMutationResult = ApolloReactCommon.MutationResult<ApproveSystemFlaggingMutation>;
+export type ApproveSystemFlaggingMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
 export const ApproveTpDocument = gql`
     mutation ApproveTP($id: ID!) {
   approveTargetPopulation(id: $id) {
@@ -10595,6 +11325,44 @@ export const GrievanceTicketDocument = gql`
       roleReassignData
       approveStatus
     }
+    systemFlaggingTicketDetails {
+      id
+      approveStatus
+      roleReassignData
+      goldenRecordsIndividual {
+        id
+        fullName
+        birthDate
+        documents {
+          edges {
+            node {
+              documentNumber
+            }
+          }
+        }
+      }
+      sanctionListIndividual {
+        fullName
+        referenceNumber
+        datesOfBirth {
+          edges {
+            node {
+              id
+              date
+            }
+          }
+        }
+        documents {
+          edges {
+            node {
+              id
+              documentNumber
+              typeOfDocument
+            }
+          }
+        }
+      }
+    }
     paymentVerificationTicketDetails {
       paymentVerificationStatus
       paymentVerifications {
@@ -12962,6 +13730,15 @@ export type ResolversTypes = {
   TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
   TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<TicketSystemFlaggingDetailsNode>,
+  SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>,
+  SanctionListIndividualCountryOfBirth: SanctionListIndividualCountryOfBirth,
+  SanctionListIndividualDocumentNodeConnection: ResolverTypeWrapper<SanctionListIndividualDocumentNodeConnection>,
+  SanctionListIndividualDocumentNodeEdge: ResolverTypeWrapper<SanctionListIndividualDocumentNodeEdge>,
+  SanctionListIndividualDocumentNode: ResolverTypeWrapper<SanctionListIndividualDocumentNode>,
+  SanctionListIndividualDocumentIssuingCountry: SanctionListIndividualDocumentIssuingCountry,
+  SanctionListIndividualDateOfBirthNodeConnection: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeConnection>,
+  SanctionListIndividualDateOfBirthNodeEdge: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeEdge>,
+  SanctionListIndividualDateOfBirthNode: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNode>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -13083,6 +13860,7 @@ export type ResolversTypes = {
   IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
   HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
   SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>,
+  NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
@@ -13257,6 +14035,15 @@ export type ResolversParentTypes = {
   TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
   TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode,
+  SanctionListIndividualNode: SanctionListIndividualNode,
+  SanctionListIndividualCountryOfBirth: SanctionListIndividualCountryOfBirth,
+  SanctionListIndividualDocumentNodeConnection: SanctionListIndividualDocumentNodeConnection,
+  SanctionListIndividualDocumentNodeEdge: SanctionListIndividualDocumentNodeEdge,
+  SanctionListIndividualDocumentNode: SanctionListIndividualDocumentNode,
+  SanctionListIndividualDocumentIssuingCountry: SanctionListIndividualDocumentIssuingCountry,
+  SanctionListIndividualDateOfBirthNodeConnection: SanctionListIndividualDateOfBirthNodeConnection,
+  SanctionListIndividualDateOfBirthNodeEdge: SanctionListIndividualDateOfBirthNodeEdge,
+  SanctionListIndividualDateOfBirthNode: SanctionListIndividualDateOfBirthNode,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -13378,6 +14165,7 @@ export type ResolversParentTypes = {
   IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
   HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
   SimpleApproveMutation: SimpleApproveMutation,
+  NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
   RapidProArguments: RapidProArguments,
@@ -14302,6 +15090,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId' | 'selectedIndividualId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
@@ -14332,8 +15121,12 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
 };
 
+export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['NeedsAdjudicationApproveMutation'] = ResolversParentTypes['NeedsAdjudicationApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'GrievanceTicketNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualDateOfBirthNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -14652,6 +15445,79 @@ export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversPar
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
 };
 
+export type SanctionListIndividualDateOfBirthNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNode'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['SanctionListIndividualNode'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNode'] = ResolversParentTypes['SanctionListIndividualDocumentNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  typeOfDocument?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dateOfIssue?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  issuingCountry?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDocumentIssuingCountry']>, ParentType, ContextType>,
+  note?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['SanctionListIndividualNode'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeConnection'] = ResolversParentTypes['SanctionListIndividualDocumentNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDocumentNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeEdge'] = ResolversParentTypes['SanctionListIndividualDocumentNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDocumentNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNode'] = ResolversParentTypes['SanctionListIndividualNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  dataId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  versionNum?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  secondName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  thirdName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fourthName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameOriginalScript?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  unListType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  referenceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  listedOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  designation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  listType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  street?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  stateProvince?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  addressNote?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  countryOfBirth?: Resolver<Maybe<ResolversTypes['SanctionListIndividualCountryOfBirth']>, ParentType, ContextType>,
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  ticketsystemflaggingdetailsSet?: Resolver<ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeTicketsystemflaggingdetailsSetArgs>,
+  documents?: Resolver<ResolversTypes['SanctionListIndividualDocumentNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDocumentsArgs>,
+  datesOfBirth?: Resolver<ResolversTypes['SanctionListIndividualDateOfBirthNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDatesOfBirthArgs>,
+};
+
 export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataMutation'] = ResolversParentTypes['SaveKoboProjectImportDataMutation']> = {
   importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
@@ -14931,7 +15797,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
-  selectedIndividual?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
 };
 
@@ -15001,6 +15867,7 @@ export type TicketSystemFlaggingDetailsNodeResolvers<ContextType = any, ParentTy
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  sanctionListIndividual?: Resolver<ResolversTypes['SanctionListIndividualNode'], ParentType, ContextType>,
   approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
 };
@@ -15268,6 +16135,7 @@ export type Resolvers<ContextType = any> = {
   LogEntryObjectEdge?: LogEntryObjectEdgeResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
+  NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
   Node?: NodeResolvers,
   PageInfo?: PageInfoResolvers<ContextType>,
   PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
@@ -15294,6 +16162,13 @@ export type Resolvers<ContextType = any> = {
   RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>,
   RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>,
   RoleNode?: RoleNodeResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNode?: SanctionListIndividualDateOfBirthNodeResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNodeConnection?: SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNodeEdge?: SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualDocumentNode?: SanctionListIndividualDocumentNodeResolvers<ContextType>,
+  SanctionListIndividualDocumentNodeConnection?: SanctionListIndividualDocumentNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualDocumentNodeEdge?: SanctionListIndividualDocumentNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>,
   SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
   ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
   ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
