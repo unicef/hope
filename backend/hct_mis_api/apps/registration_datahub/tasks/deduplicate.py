@@ -120,14 +120,26 @@ class DeduplicateTask:
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
+                queries_list = [
+                    {"match": {f"{prefix}.number": {"query": doc_number}}},
+                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
+                ]
+                if prefix == "documents":
+                    country = item.get("country", "")
+                    queries_list.append(
+                        {
+                            "match": {
+                                f"{prefix}.country": {
+                                    "query": country.alpha3 if isinstance(country, Country) else country
+                                }
+                            }
+                        },
+                    )
                 queries.extend(
                     [
                         {
                             "bool": {
-                                "must": [
-                                    {"match": {f"{prefix}.number": {"query": doc_number}}},
-                                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
-                                ],
+                                "must": queries_list,
                                 "boost": 2,
                             },
                         }
@@ -255,8 +267,8 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
                 results_data["possible_duplicates"].append(results_core_data)
-        print(f"INDIVIDUAL {individual}")
-        print([(r.full_name, r.meta.score) for r in results])
+        log.debug(f"INDIVIDUAL {individual}")
+        log.debug([(r.full_name, r.meta.score) for r in results])
 
         return (
             duplicates,

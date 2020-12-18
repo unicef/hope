@@ -14,8 +14,8 @@ log = logging.getLogger(__name__)
 class CheckAgainstSanctionListPreMergeTask:
     @staticmethod
     def _get_query_dict(individual):
-        documents_numbers = [
-            doc.document_number
+        documents = [
+            doc
             for doc in individual.documents.all()
             if doc.type_of_document.title() == "National Identification Number"
         ]
@@ -23,12 +23,27 @@ class CheckAgainstSanctionListPreMergeTask:
             {
                 "bool": {
                     "must": [
-                        {"match": {"documents.number": number}},
+                        {"match": {"documents.number": doc.document_number}},
                         {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
+                        {"match": {"documents.country": doc.issuing_country.alpha3}},
                     ],
                 }
             }
-            for number in documents_numbers
+            for doc in documents
+        ]
+        alias_names_queries = [
+            {
+                "multi_match": {
+                    "query": alias_name.name,
+                    "fields": [
+                        "full_name",
+                        "first_name",
+                        "middle_name",
+                        "family_name",
+                    ],
+                    "boost": 1.3,
+                }
+            } for alias_name in individual.alias_names.all()
         ]
 
         queries = [
@@ -38,10 +53,8 @@ class CheckAgainstSanctionListPreMergeTask:
                     "fields": [
                         "full_name",
                         "first_name",
-                        "second_name",
-                        "third_name",
-                        "fourth_name",
-                        "alias_name.name",
+                        "middle_name",
+                        "family_name",
                     ],
                     "boost": 2.0,
                 }
@@ -49,6 +62,7 @@ class CheckAgainstSanctionListPreMergeTask:
             {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
         ]
         queries.extend(document_queries)
+        queries.extend(alias_names_queries)
 
         query_dict = {
             "query": {
@@ -101,11 +115,11 @@ class CheckAgainstSanctionListPreMergeTask:
                         tickets_to_create.append(ticket)
                         ticket_details_to_create.append(ticket_details)
 
-            print(
+            log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
                 f" Scores: ",
             )
-            print([(r.full_name, r.meta.score) for r in results])
+            log.debug([(r.full_name, r.meta.score) for r in results])
 
         Individual.objects.filter(id__in=possible_matches).update(
             sanction_list_possible_match=True, sanction_list_last_check=timezone.now()

@@ -440,7 +440,7 @@ CONSTANCE_CONFIG = {
     ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (
-        3.5,
+        25,
         "Results equal or above this score are considered possible matches",
         "positive_floats",
     ),
