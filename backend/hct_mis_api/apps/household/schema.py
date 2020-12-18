@@ -277,24 +277,22 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     @classmethod
     def check_node_permission(cls, info, object_instance):
         super().check_node_permission(info, object_instance)
-        business_area = object_instance.business_area
         user = info.context.user
-        grievance_tickets = GrievanceTicket.objects.filter(
-            complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
-        )
-        if not (
-            user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, business_area)
-            or user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value, business_area)
-            or (
-                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value, business_area)
+
+        # if user doesn't have permission to view all households, we check based on their grievance tickets
+        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+            grievance_tickets = GrievanceTicket.objects.filter(
+                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
             )
-            or (
-                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value, business_area)
+            cls.check_creator_or_owner_permission(
+                info,
+                object_instance,
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
-        ):
-            raise GraphQLError("Permission Denied")
 
     class Meta:
         model = Household
@@ -342,24 +340,23 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     @classmethod
     def check_node_permission(cls, info, object_instance):
         super().check_node_permission(info, object_instance)
-        business_area = object_instance.business_area
         user = info.context.user
-        grievance_tickets = GrievanceTicket.objects.filter(
-            complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
-        )
-        if not (
-            user.has_permission(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, business_area)
-            or user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS.value, business_area)
-            or (
-                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR.value, business_area)
-            )
-            or (
-                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets)
-                and user.has_permission(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value, business_area)
-            )
+        # if user can't simply view all individuals, we check if they can do it because of grievance
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
         ):
-            raise GraphQLError("Permission Denied")
+            grievance_tickets = GrievanceTicket.objects.filter(
+                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+            )
+            cls.check_creator_or_owner_permission(
+                info,
+                object_instance,
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS.value,
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR.value,
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
+            )
 
     class Meta:
         model = Individual

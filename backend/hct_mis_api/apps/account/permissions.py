@@ -118,18 +118,20 @@ class Permissions(Enum):
     GRIEVANCES_APPROVE_DATA_CHANGE = auto()
     GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_CREATOR = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_OWNER = auto()
-    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE = auto()
-    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR = auto()
-    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER = auto()
     GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK = auto()
     GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR = auto()
     GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER = auto()
     GRIEVANCES_CLOSE_TICKET_FEEDBACK = auto()
     GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR = auto()
     GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER = auto()
+    # TODO: undo approved data change and approve flag and dedupe still need to be added to code
+    # wasn't sure where exactly those actions happen
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE = auto()
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_CREATOR = auto()
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_OWNER = auto()
+    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE = auto()
+    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR = auto()
+    GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER = auto()
 
     # Django Admin
     # ...
@@ -194,6 +196,27 @@ class BaseNodePermissionMixin:
         except cls._meta.model.DoesNotExist:  # type: ignore
             object_instance = None
         return object_instance
+
+    @classmethod
+    def check_creator_or_owner_permission(
+        cls,
+        info,
+        object_instance,
+        general_permission,
+        is_creator,
+        creator_permission,
+        is_owner,
+        owner_permission,
+    ):
+        user = info.context.user
+        business_area = object_instance.business_area
+
+        if not (
+            user.has_permission(general_permission, business_area)
+            or (is_creator and user.has_permission(creator_permission, business_area))
+            or (is_owner and user.has_permission(owner_permission, business_area))
+        ):
+            raise GraphQLError("Permission Denied")
 
 
 class DjangoPermissionFilterConnectionField(DjangoConnectionField):
