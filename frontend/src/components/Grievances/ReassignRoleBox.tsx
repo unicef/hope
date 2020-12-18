@@ -47,8 +47,7 @@ export const ReassignRoleBox = ({
       ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
   }
   const householdsAndRoles = individual?.householdsAndRoles;
-  const isHeadOfHousehold =
-    individual?.id === household?.headOfHousehold?.id;
+  const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -71,6 +70,7 @@ export const ReassignRoleBox = ({
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
+            individual={individual}
           />
         ) : null}
       </Box>
@@ -108,6 +108,7 @@ export const ReassignRoleBox = ({
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
                 household={household}
+                individual={individual}
               />
             ) : null}
           </Box>

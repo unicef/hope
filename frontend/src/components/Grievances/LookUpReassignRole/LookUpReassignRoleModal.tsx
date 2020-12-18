@@ -43,6 +43,7 @@ export const LookUpReassignRoleModal = ({
   selectedHousehold,
   setSelectedIndividual,
   setSelectedHousehold,
+  excludedIndividual,
 }): React.ReactElement => {
   const { id } = useParams();
   const { showMessage } = useSnackbar();
@@ -125,6 +126,7 @@ export const LookUpReassignRoleModal = ({
               selectedIndividual={selectedIndividual}
               setSelectedIndividual={setSelectedIndividual}
               ticket={ticket}
+              excludedId={excludedIndividual.id}
             />
           </DialogContent>
           <DialogFooter>
