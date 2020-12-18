@@ -25,13 +25,15 @@ class SanctionListIndividualFilter(FilterSet):
             "reference_number": ["exact"],
         }
         model = SanctionListIndividual
-        order_by = CustomOrderingFilter(
-            fields=(
-                "id",
-                "reference_number",
-                Lower("full_name"),
-            )
+
+    order_by = CustomOrderingFilter(
+        fields=(
+            "id",
+            "reference_number",
+            Lower("full_name"),
+            "listed_on",
         )
+    )
 
 
 class SanctionListIndividualNode(DjangoObjectType):
