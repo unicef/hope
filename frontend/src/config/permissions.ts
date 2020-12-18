@@ -165,7 +165,7 @@ export function hasCreatorOrOwnerPermissions(
   isOwner: boolean,
   ownerPermission: string,
   allowedPermissions: string[],
-) {
+): boolean {
   // use where we have to check 3 different permissions, for ex. grievances
   return (
     allowedPermissions.includes(generalPermission) ||
