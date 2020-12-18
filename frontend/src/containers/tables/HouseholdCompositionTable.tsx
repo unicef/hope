@@ -40,7 +40,7 @@ export function HouseholdCompositionTable({
           <TableRow>
             <TableCell align='left'>Age Group</TableCell>
             <GreyTableCell align='left'>Females</GreyTableCell>
-            <GreyTableCell align='left'>with Disability</GreyTableCell>
+            <GreyTableCell align='left'>with disability</GreyTableCell>
             <GreyTableCell align='left'>Pregnant</GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>Males</GreyTableCell>
