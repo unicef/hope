@@ -39,11 +39,10 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   });
 
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
 
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data) return null;
+  if (!data || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -57,7 +56,14 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
     <div>
       <PageHeader
         title={`Individual ID: ${individual.unicefId}`}
-        breadCrumbs={breadCrumbsItems}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
         withFlag={individual.sanctionListPossibleMatch}
         withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       />
