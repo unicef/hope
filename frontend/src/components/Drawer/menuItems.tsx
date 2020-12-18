@@ -74,7 +74,7 @@ export const menuItems = [
   {
     name: 'Payment Verification',
     href: '/payment-verification',
-    selectedRegexp: /^\/payment-verification*$/,
+    selectedRegexp: /^\/payment-verification.*$/,
     icon: <AttachMoney />,
     permissions: [
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
