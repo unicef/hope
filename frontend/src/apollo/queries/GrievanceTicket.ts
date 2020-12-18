@@ -131,6 +131,51 @@ export const GrievanceTicket = gql`
           }
         }
       }
+      needsAdjudicationTicketDetails{
+        id
+        
+        goldenRecordsIndividual{
+          id
+          unicefId
+          household{
+            id
+            unicefId
+          }
+          fullName
+          birthDate
+          sex
+        }
+        possibleDuplicate{
+          id
+          unicefId
+          household{
+            unicefId
+            id
+          }
+          fullName
+          birthDate
+          sex
+        }
+        selectedIndividual{
+          ...individualDetailed
+          household{
+            ...householdDetailed
+          }
+          householdsAndRoles {
+            individual {
+              id
+              unicefId
+            }
+            household {
+              id
+              unicefId
+            }
+            id
+            role
+          }
+        }
+        roleReassignData
+      }
       issueType
       ticketNotes {
         edges {
