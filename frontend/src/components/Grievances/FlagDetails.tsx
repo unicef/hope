@@ -10,22 +10,20 @@ import {
   Typography,
   makeStyles,
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React from 'react';
+import moment from 'moment';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
 import { ConfirmationDialog } from '../ConfirmationDialog';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
 import { Flag } from '../Flag';
-import moment from 'moment';
 import { DATE_FORMAT } from '../../config';
 import { UniversalMoment } from '../UniversalMoment';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { ViewSanctionList } from './ViewSanctionList';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -57,7 +55,6 @@ export function FlagDetails({
     ],
   });
   const classes = useStyles();
-  const businessArea = useBusinessArea();
   const confirmationText =
     'Are you sure you want to confirm flag (sanction list match) ?';
   const removalText = 'Are you sure you want to remove the flag ?';
@@ -69,13 +66,9 @@ export function FlagDetails({
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Flag Details</Typography>
           <Box>
-            <Button
-              component={Link}
-              to={`/${businessArea}/grievance-and-feedback`}
-              color='primary'
-            >
-              VIEW SANCTION LIST
-            </Button>
+            <ViewSanctionList
+              referenceNumber={details.sanctionListIndividual.referenceNumber}
+            />
             <ConfirmationDialog
               title='Confirmation'
               content={isFlagConfirmed ? removalText : confirmationText}
