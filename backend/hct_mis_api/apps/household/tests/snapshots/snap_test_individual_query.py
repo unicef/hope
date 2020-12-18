@@ -99,6 +99,24 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
             'edges': [
                 {
                     'node': {
+                        'birthDate': '1973-03-23',
+                        'familyName': 'Torres',
+                        'fullName': 'Eric Torres',
+                        'givenName': 'Eric',
+                        'phoneNo': '+12282315473'
+                    }
+                },
+                {
+                    'node': {
+                        'birthDate': '1946-02-15',
+                        'familyName': 'Ford',
+                        'fullName': 'Robin Ford',
+                        'givenName': 'Robin',
+                        'phoneNo': '+18663567905'
+                    }
+                },
+                {
+                    'node': {
                         'birthDate': '1969-11-29',
                         'familyName': 'Franklin',
                         'fullName': 'Jenna Franklin',
@@ -122,24 +140,6 @@ snapshots['TestIndividualQuery::test_individual_query_all_0_with_permission 1'] 
                         'fullName': 'Benjamin Butler',
                         'givenName': 'Benjamin',
                         'phoneNo': '(953)682-4596'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1973-03-23',
-                        'familyName': 'Torres',
-                        'fullName': 'Eric Torres',
-                        'givenName': 'Eric',
-                        'phoneNo': '+12282315473'
-                    }
-                },
-                {
-                    'node': {
-                        'birthDate': '1946-02-15',
-                        'familyName': 'Ford',
-                        'fullName': 'Robin Ford',
-                        'givenName': 'Robin',
-                        'phoneNo': '+18663567905'
                     }
                 }
             ]
