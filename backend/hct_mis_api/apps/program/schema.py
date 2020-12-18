@@ -167,7 +167,12 @@ class Query(graphene.ObjectType):
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
         filterset_class=CashPlanFilter,
-        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),),
+        permission_classes=(
+            hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
+            hopePermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            ),
+        ),
     )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
