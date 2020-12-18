@@ -296,7 +296,15 @@ class BaseMutationPermissionMixin:
 
     @classmethod
     def has_creator_or_owner_permission(
-        cls, info, business_area_arg, general_permission, is_creator, creator_permission, is_owner, owner_permission
+        cls,
+        info,
+        business_area_arg,
+        general_permission,
+        is_creator,
+        creator_permission,
+        is_owner,
+        owner_permission,
+        raise_error=True,
     ):
         cls.is_authenticated(info)
         if not (
@@ -304,7 +312,8 @@ class BaseMutationPermissionMixin:
             or (is_creator and cls.has_permission(info, creator_permission, business_area_arg, False))
             or (is_owner and cls.has_permission(info, owner_permission, business_area_arg, False))
         ):
-            cls.raise_permission_denied_error()
+            return cls.raise_permission_denied_error(raise_error=raise_error)
+        return True
 
     @staticmethod
     def raise_permission_denied_error(not_authenticated=False, raise_error=True):
