@@ -10,10 +10,6 @@ export const SanctionListIndividualsTableRow = ({
 }: {
   individual: AllSanctionListIndividualsQuery['allSanctionListIndividuals']['edges'][number]['node'];
 }): React.ReactElement => {
-  console.log(
-    '😎 ~ file: SanctionListIndividualsTableRow.tsx ~ line 13 ~ individual',
-    individual,
-  );
   return (
     <TableRow>
       <TableCell align='left'>{individual.referenceNumber}</TableCell>
