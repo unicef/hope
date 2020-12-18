@@ -192,6 +192,7 @@ class ExistingGrievanceTicketFilter(FilterSet):
     household = ModelChoiceFilter(queryset=Household.objects.all())
     individual = ModelChoiceFilter(queryset=Individual.objects.all())
     payment_record = ModelMultipleChoiceFilter(queryset=PaymentRecord.objects.all())
+    permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
 
     class Meta:
         fields = ("id",)
@@ -248,6 +249,9 @@ class ExistingGrievanceTicketFilter(FilterSet):
             return queryset.filter(q_obj)
 
         return queryset
+
+    def permissions_filter(self, qs, name, value):
+        return GrievanceTicketFilter.permissions_filter(self, qs, name, value)
 
 
 class TicketNoteFilter(FilterSet):
@@ -437,8 +441,14 @@ class Query(graphene.ObjectType):
     existing_grievance_tickets = DjangoPermissionFilterConnectionField(
         GrievanceTicketNode,
         filterset_class=ExistingGrievanceTicketFilter,
-        # TODO Enable permissions below
-        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),))
+        permission_classes=(
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR),
+            hopePermissionClass(Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER),
+        ),
     )
     all_ticket_notes = DjangoPermissionFilterConnectionField(
         TicketNoteNode,
