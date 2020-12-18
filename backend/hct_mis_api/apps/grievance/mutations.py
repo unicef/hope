@@ -646,6 +646,7 @@ class NeedsAdjudicationApproveMutation(graphene.Mutation):
             raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
         ticket_details.selected_individual = selected_individual
+        ticket_details.role_reassign_data = {}
         ticket_details.save()
         grievance_ticket.refresh_from_db()
 
