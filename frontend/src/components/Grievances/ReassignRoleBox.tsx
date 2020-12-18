@@ -5,10 +5,10 @@ import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
