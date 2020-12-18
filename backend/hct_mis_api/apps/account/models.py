@@ -72,6 +72,9 @@ class UserRole(TimeStampedUUIDModel):
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ("business_area", "user", "role")
+
     def __str__(self):
         return f"{self.user} {self.role} in {self.business_area}"
 
