@@ -85,7 +85,7 @@ export const menuItems = [
   {
     name: 'Grievance and Feedback',
     href: '/grievance-and-feedback',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/grievance-and-feedback.*$/,
     icon: <Feedback />,
     permissions: [
       PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
@@ -111,7 +111,7 @@ export const menuItems = [
   {
     name: 'User Management',
     href: '/users-list',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,
     permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
   },

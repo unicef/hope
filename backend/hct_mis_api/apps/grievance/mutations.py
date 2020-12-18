@@ -477,8 +477,6 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
             close_function(grievance_ticket)
         grievance_ticket.status = status
-        if status == GrievanceTicket.STATUS_ASSIGNED:
-            grievance_ticket.assigned_to = info.context.user
         grievance_ticket.save()
         grievance_ticket.refresh_from_db()
         return cls(grievance_ticket=grievance_ticket)
