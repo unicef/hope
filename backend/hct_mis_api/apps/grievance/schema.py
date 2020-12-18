@@ -45,8 +45,6 @@ from household.models import Household, Individual
 from household.schema import HouseholdNode, IndividualNode
 from payment.models import ServiceProvider, PaymentRecord
 from payment.schema import PaymentRecordNode
-from sanction_list.models import SanctionListIndividual, SanctionListIndividualDocument, \
-    SanctionListIndividualDateOfBirth
 from utils.schema import Arg
 
 
@@ -363,27 +361,6 @@ class AddIndividualFiledObjectType(graphene.ObjectType):
     required = graphene.Boolean()
     type = graphene.String()
     flex_field = graphene.Boolean()
-
-
-class SanctionListIndividualNode(DjangoObjectType):
-    class Meta:
-        model = SanctionListIndividual
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class SanctionListIndividualDocumentNode(DjangoObjectType):
-    class Meta:
-        model = SanctionListIndividualDocument
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-
-class SanctionListIndividualDateOfBirthNode(DjangoObjectType):
-    class Meta:
-        model = SanctionListIndividualDateOfBirth
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
 
 
 class Query(graphene.ObjectType):

@@ -23,6 +23,7 @@ import sanction_list.mutations
 import targeting.mutations
 import targeting.schema
 import steficon.schema
+import sanction_list.schema
 
 
 class Query(
@@ -36,6 +37,7 @@ class Query(
     payment.schema.Query,
     steficon.schema.Query,
     grievance.schema.Query,
+    sanction_list.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
