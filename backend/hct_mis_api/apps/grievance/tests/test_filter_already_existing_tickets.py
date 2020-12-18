@@ -1,5 +1,7 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
+from account.permissions import Permissions
 from account.fixtures import UserFactory
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
@@ -104,7 +106,9 @@ class TestAlreadyExistingFilterTickets(APITestCase):
             ticket=grievance_1,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
-            household=self.household, individual=self.individuals[0], ticket=grievance_2,
+            household=self.household,
+            individual=self.individuals[0],
+            ticket=grievance_2,
         )
         SensitiveGrievanceTicketWithoutExtrasFactory(
             household=self.household,
@@ -115,55 +119,101 @@ class TestAlreadyExistingFilterTickets(APITestCase):
         GrievanceComplaintTicketFactory.create_batch(5)
         SensitiveGrievanceTicketFactory.create_batch(5)
 
-    def test_filter_existing_tickets_by_payment_record(self):
-        input_data = {
+        self.variables = {
             "businessArea": "afghanistan",
             "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
             "issueType": str(self.ticket.ticket.issue_type),
             "household": self.household.id,
             "individual": self.individuals[0].id,
+        }
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
+            ),
+            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+        ]
+    )
+    def test_filter_existing_tickets_by_payment_record(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        input_data = {
+            **self.variables,
             "paymentRecord": [self.payment_record.id],
         }
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY, context={"user": self.user}, variables=input_data,
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables=input_data,
         )
 
-    def test_filter_existing_tickets_by_two_payment_records(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_filter_existing_tickets_by_two_payment_records(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
-            "businessArea": "afghanistan",
-            "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.household.id,
-            "individual": self.individuals[0].id,
+            **self.variables,
             "paymentRecord": [self.payment_record.id, self.payment_record2.id],
         }
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY, context={"user": self.user}, variables=input_data,
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables=input_data,
         )
 
-    def test_filter_existing_tickets_by_household(self):
-        input_data = {
-            "businessArea": "afghanistan",
-            "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": str(self.ticket.ticket.issue_type),
-            "household": self.household.id,
-            "individual": self.individuals[0].id,
-        }
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
+            ),
+            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+        ]
+    )
+    def test_filter_existing_tickets_by_household(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY, context={"user": self.user}, variables=input_data,
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables=self.variables,
         )
 
-    def test_filter_existing_tickets_by_individual(self):
-        input_data = {
-            "businessArea": "afghanistan",
-            "category": str(GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-            "issueType": self.ticket.ticket.issue_type,
-            "individual": self.individuals[0].id,
-        }
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [
+                    Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE,
+                ],
+            ),
+            ("without_permission", [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE]),
+        ]
+    )
+    def test_filter_existing_tickets_by_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        input_data = {**self.variables}
+        del input_data["household"]
 
         self.snapshot_graphql_request(
-            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY, context={"user": self.user}, variables=input_data,
+            request_string=self.FILTER_EXISTING_GRIEVANCES_QUERY,
+            context={"user": self.user},
+            variables=input_data,
         )
