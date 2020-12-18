@@ -14,6 +14,7 @@ export const targetPopulationMinimal = gql`
       name
     }
     createdBy {
+      id
       firstName
       lastName
     }
@@ -37,6 +38,7 @@ export const targetPopulationDetailed = gql`
     approvedAt
     finalizedAt
     finalizedBy {
+      id
       firstName
       lastName
     }
