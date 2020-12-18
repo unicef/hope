@@ -153,7 +153,9 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentVerificationNode(DjangoObjectType):
+class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
+
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)

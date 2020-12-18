@@ -40,9 +40,7 @@ export function PaymentVerificationTableRow({
     data: statusChoicesData,
   } = useCashPlanVerificationStatusChoicesQuery();
 
-  if (!statusChoicesData) {
-    return null;
-  }
+  if (!statusChoicesData) return null;
   const deliveryTypeChoicesDict = choicesToDict(
     statusChoicesData.paymentRecordDeliveryTypeChoices,
   );
