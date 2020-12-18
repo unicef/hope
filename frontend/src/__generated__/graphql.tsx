@@ -1789,6 +1789,7 @@ export type IndividualNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
+  isRemoved: Scalars['Boolean'],
   status: IndividualStatus,
   individualId: Scalars['String'],
   photo: Scalars['String'],
@@ -5436,6 +5437,23 @@ export type ApproveIndividualDataChangeMutation = (
   )> }
 );
 
+export type ApproveNeedsAdjudicationMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  selectedIndividualId: Scalars['ID']
+};
+
+
+export type ApproveNeedsAdjudicationMutation = (
+  { __typename?: 'Mutations' }
+  & { approveNeedsAdjudication: Maybe<(
+    { __typename?: 'NeedsAdjudicationApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
 export type ApproveSystemFlaggingMutationVariables = {
   grievanceTicketId: Scalars['ID'],
   approveStatus: Scalars['Boolean']
@@ -6624,6 +6642,41 @@ export type GrievanceTicketQuery = (
           )> }
         )>> }
       ) }
+    )>, needsAdjudicationTicketDetails: Maybe<(
+      { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
+      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'roleReassignData'>
+      & { goldenRecordsIndividual: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        )> }
+      ), possibleDuplicate: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'unicefId' | 'id'>
+        )> }
+      ), selectedIndividual: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )>, householdsAndRoles: Array<(
+          { __typename?: 'IndividualRoleInHouseholdNode' }
+          & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
+          & { individual: (
+            { __typename?: 'IndividualNode' }
+            & Pick<IndividualNode, 'id' | 'unicefId'>
+          ), household: (
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId'>
+          ) }
+        )> }
+        & IndividualDetailedFragment
+      )> }
     )>, ticketNotes: (
       { __typename?: 'TicketNoteNodeConnection' }
       & { edges: Array<Maybe<(
@@ -8284,6 +8337,59 @@ export function useApproveIndividualDataChangeMutation(baseOptions?: ApolloReact
 export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
+export const ApproveNeedsAdjudicationDocument = gql`
+    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+  approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveNeedsAdjudicationMutationFn = ApolloReactCommon.MutationFunction<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
+export type ApproveNeedsAdjudicationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>, 'mutation'>;
+
+    export const ApproveNeedsAdjudicationComponent = (props: ApproveNeedsAdjudicationComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables> mutation={ApproveNeedsAdjudicationDocument} {...props} />
+    );
+    
+export type ApproveNeedsAdjudicationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables> & TChildProps;
+export function withApproveNeedsAdjudication<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveNeedsAdjudicationMutation,
+  ApproveNeedsAdjudicationMutationVariables,
+  ApproveNeedsAdjudicationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables, ApproveNeedsAdjudicationProps<TChildProps>>(ApproveNeedsAdjudicationDocument, {
+      alias: 'approveNeedsAdjudication',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveNeedsAdjudicationMutation__
+ *
+ * To run a mutation, you first call `useApproveNeedsAdjudicationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveNeedsAdjudicationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveNeedsAdjudicationMutation, { data, loading, error }] = useApproveNeedsAdjudicationMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      selectedIndividualId: // value for 'selectedIndividualId'
+ *   },
+ * });
+ */
+export function useApproveNeedsAdjudicationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>(ApproveNeedsAdjudicationDocument, baseOptions);
+      }
+export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useApproveNeedsAdjudicationMutation>;
+export type ApproveNeedsAdjudicationMutationResult = ApolloReactCommon.MutationResult<ApproveNeedsAdjudicationMutation>;
+export type ApproveNeedsAdjudicationMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
 export const ApproveSystemFlaggingDocument = gql`
     mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
   approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
@@ -11372,6 +11478,50 @@ export const GrievanceTicketDocument = gql`
           }
         }
       }
+    }
+    needsAdjudicationTicketDetails {
+      id
+      goldenRecordsIndividual {
+        id
+        unicefId
+        household {
+          id
+          unicefId
+        }
+        fullName
+        birthDate
+        sex
+      }
+      possibleDuplicate {
+        id
+        unicefId
+        household {
+          unicefId
+          id
+        }
+        fullName
+        birthDate
+        sex
+      }
+      selectedIndividual {
+        ...individualDetailed
+        household {
+          ...householdDetailed
+        }
+        householdsAndRoles {
+          individual {
+            id
+            unicefId
+          }
+          household {
+            id
+            unicefId
+          }
+          id
+          role
+        }
+      }
+      roleReassignData
     }
     issueType
     ticketNotes {
@@ -14928,6 +15078,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['IndividualStatus'], ParentType, ContextType>,
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,

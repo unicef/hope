@@ -1,5 +1,6 @@
 # Create your models here.
 from django.db import models
+from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
@@ -87,3 +88,30 @@ class AbstractSyncable(models.Model):
 
     class Meta:
         abstract = True
+
+
+class SoftDeletableDefaultManagerModel(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+    is_removed = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    active_objects = SoftDeletableManager()
+    objects = models.Manager()
+
+    def delete(self, using=None, soft=True, *args, **kwargs):
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.save(using=using)
+        else:
+            return super().delete(using=using, *args, **kwargs)

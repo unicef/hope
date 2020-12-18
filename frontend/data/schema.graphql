@@ -1387,6 +1387,7 @@ type IndividualNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   lastSyncAt: DateTime
+  isRemoved: Boolean!
   status: IndividualStatus!
   individualId: String!
   photo: String!
