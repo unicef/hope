@@ -14,6 +14,7 @@ import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { isPermissionDeniedError } from '../../utils/utils';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
@@ -50,7 +51,7 @@ const NoCashPlansSubTitle = styled.div`
 
 export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = useProgramQuery({
+  const { data, loading, error } = useProgramQuery({
     variables: { id },
   });
   const {
@@ -61,14 +62,9 @@ export function ProgramDetailsPage(): React.ReactElement {
 
   if (loading || choicesLoading) return <LoadingComponent />;
 
-  if (permissions === null) return null;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (
-    !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
-  )
-    return <PermissionDenied />;
-
-  if (!data || !choices) return null;
+  if (!data || !choices || permissions === null) return null;
 
   const program = data.program as ProgramNode;
   return (

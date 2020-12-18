@@ -13,11 +13,13 @@ const TableWrapper = styled.div`
 interface TargetPopulationHouseholdProps {
   id?: string;
   variables?;
+  canViewDetails?: boolean;
 }
 
 export const ApprovedTargetPopulationTable = ({
   id,
   variables,
+  canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
@@ -32,7 +34,9 @@ export const ApprovedTargetPopulationTable = ({
         query={useCandidateHouseholdsListByTargetingCriteriaQuery}
         queriedObjectName='candidateHouseholdsListByTargetingCriteria'
         initialVariables={initialVariables}
-        renderRow={(row) => <ProgrammeTableRow household={row} />}
+        renderRow={(row) => (
+          <ProgrammeTableRow household={row} canViewDetails={canViewDetails} />
+        )}
       />
     </TableWrapper>
   );
