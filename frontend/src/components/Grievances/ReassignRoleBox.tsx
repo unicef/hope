@@ -8,6 +8,7 @@ import { GrievanceTicketQuery } from '../../__generated__/graphql';
 import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
@@ -38,9 +39,16 @@ export const ReassignRoleBox = ({
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const businessArea = useBusinessArea();
-  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
+  let { individual } = ticket;
+  let { household } = ticket;
+  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+    individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
+    household =
+      ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+  }
+  const householdsAndRoles = individual?.householdsAndRoles;
   const isHeadOfHousehold =
-    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+    individual.id === household?.headOfHousehold?.id;
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -90,7 +98,7 @@ export const ReassignRoleBox = ({
                 <ContentLink
                   href={`/${businessArea}/population/household/${ticket?.household.id}`}
                 >
-                  {ticket?.household.unicefId}
+                  {household.unicefId}
                 </ContentLink>
               </LabelizedField>
             </Box>
@@ -99,7 +107,7 @@ export const ReassignRoleBox = ({
                 shouldDisableButton={shouldDisableButton}
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
-                household={ticket?.household}
+                household={household}
               />
             ) : null}
           </Box>

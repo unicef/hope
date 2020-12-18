@@ -16,7 +16,7 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import AbstractSyncable, TimeStampedUUIDModel
+from utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
 
 RESIDENCE_STATUS_CHOICE = (
     ("IDP", _("Displaced  |  Internally Displaced People")),
@@ -364,7 +364,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableDefaultManagerModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)

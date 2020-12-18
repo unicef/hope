@@ -32,6 +32,9 @@ export const LookUpReassignRole = ({
     case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
       roleReassignData=ticket?.systemFlaggingTicketDetails?.roleReassignData;
       break;
+    case GRIEVANCE_CATEGORIES.DEDUPLICATION:
+      roleReassignData=ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+      break;
     default:
       roleReassignData = null;
   }
