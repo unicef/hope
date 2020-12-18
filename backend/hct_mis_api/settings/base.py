@@ -398,7 +398,7 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 CONSTANCE_CONFIG = {
     # BATCH SETTINGS
     "DEDUPLICATION_BATCH_DUPLICATE_SCORE": (
-        7.0,
+        6.0,
         "Results equal or above this score are considered duplicates",
         "positive_floats",
     ),
@@ -419,7 +419,7 @@ CONSTANCE_CONFIG = {
     ),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
-        7.0,
+        6.0,
         "Results below the minimum score will not be taken into account",
         "positive_floats",
     ),
