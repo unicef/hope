@@ -15,10 +15,12 @@ export const LookUpReassignRole = ({
   ticket,
   individualRole,
   shouldDisableButton,
+  individual
 }: {
   household:
     | GrievanceTicketQuery['grievanceTicket']['household']
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  individual: GrievanceTicketQuery['grievanceTicket']['individual'],
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
@@ -81,6 +83,7 @@ export const LookUpReassignRole = ({
             initialValues={values}
             onValueChange={setFieldValue}
             ticket={ticket}
+            excludedIndividual={individual}
             selectedIndividual={selectedIndividual}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
