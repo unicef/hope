@@ -12,6 +12,7 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { isPermissionDeniedError } from '../../utils/utils';
 
 const Container = styled.div`
   && {
@@ -31,22 +32,18 @@ const TableWrapper = styled.div`
 export function CashPlanDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading } = useCashPlanQuery({
+  const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
 
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
-  if (
-    !hasPermissions(PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS, permissions)
-  )
-    return <PermissionDenied />;
-  if (!data) return null;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Managment',
+      title: 'Programme Management',
       to: `/${businessArea}/programs/`,
     },
     {
@@ -59,7 +56,14 @@ export function CashPlanDetailsPage(): React.ReactElement {
     <div>
       <PageHeader
         title={`Cash Plan #${data.cashPlan.caId}`}
-        breadCrumbs={breadCrumbsItems}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
       >
         <Button variant='contained' color='primary'>
           open in cashassist
