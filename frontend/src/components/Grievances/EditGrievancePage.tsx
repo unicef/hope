@@ -40,9 +40,12 @@ import {
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
-import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionDenied } from '../PermissionDenied';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -51,12 +54,9 @@ import {
   validationSchema,
 } from './utils/editGrievanceUtils';
 import { validate } from './utils/validateGrievance';
-import { usePermissions } from '../../hooks/usePermissions';
-import { PermissionDenied } from '../PermissionDenied';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
+import { Consent } from './Consent';
+import { LookUpSection } from './LookUpSection';
+import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -124,9 +124,15 @@ export function EditGrievancePage(): React.ReactElement {
     currentUserDataLoading
   )
     return <LoadingComponent />;
-  if (permissions === null) return null;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!choicesData || !userData || !ticketData || !currentUserData) return null;
+  if (
+    !choicesData ||
+    !userData ||
+    !ticketData ||
+    !currentUserData ||
+    permissions === null
+  )
+    return null;
 
   const currentUserId = currentUserData.me.id;
   const ticket = ticketData.grievanceTicket;

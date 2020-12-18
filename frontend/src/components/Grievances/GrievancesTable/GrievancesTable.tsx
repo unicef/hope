@@ -1,6 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
@@ -8,7 +11,6 @@ import { decodeIdString, reduceChoices } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
-  GrievanceTicketNode,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
   useMeQuery,
@@ -63,44 +65,28 @@ export const GrievancesTable = ({
 
   const getCanViewDetailsOfTicket = (
     ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
-  ) => {
+  ): boolean => {
     const isTicketCreator = currentUserId === ticket.createdBy?.id;
     const isTicketOwner = currentUserId === ticket.assignedTo?.id;
     if (
       ticket.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
     ) {
-      return (
-        hasPermissions(
-          PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
-          permissions,
-        ) ||
-        (isTicketCreator &&
-          hasPermissions(
-            PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
-            permissions,
-          )) ||
-        (isTicketOwner &&
-          hasPermissions(
-            PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
-            permissions,
-          ))
+      return hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+        isTicketCreator,
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+        isTicketOwner,
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        permissions,
       );
     }
-    return (
-      hasPermissions(
-        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
-        permissions,
-      ) ||
-      (isTicketCreator &&
-        hasPermissions(
-          PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
-          permissions,
-        )) ||
-      (isTicketOwner &&
-        hasPermissions(
-          PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
-          permissions,
-        ))
+    return hasCreatorOrOwnerPermissions(
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+      isTicketCreator,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+      isTicketOwner,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+      permissions,
     );
   };
 

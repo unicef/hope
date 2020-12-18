@@ -27,6 +27,12 @@ import {
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
+import { PermissionDenied } from '../PermissionDenied';
 import { Notes } from './Notes';
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { PaymentIds } from './PaymentIds';
@@ -36,14 +42,6 @@ import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
-import { usePermissions } from '../../hooks/usePermissions';
-import {
-  hasCreatorOrOwnerPermissions,
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { PermissionDenied } from '../PermissionDenied';
 
 const PaddingContainer = styled.div`
   padding: 22px;
