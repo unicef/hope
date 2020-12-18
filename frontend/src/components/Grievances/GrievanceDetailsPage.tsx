@@ -223,7 +223,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
     const householdsAndRoles = individual?.householdsAndRoles;
     const isHeadOfHousehold =
-      individual.id === household?.headOfHousehold?.id;
+      individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign =
       householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
 

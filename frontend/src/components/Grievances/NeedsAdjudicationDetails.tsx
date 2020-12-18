@@ -63,7 +63,7 @@ export function NeedsAdjudicationDetails({
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Flag Details</Typography>
+          <Typography variant='h6'>Needs Adjudication Details</Typography>
           <Box>
             {!isEditable && (
               <Button
@@ -133,8 +133,10 @@ export function NeedsAdjudicationDetails({
                 checked={
                   selectedDuplicate === details.goldenRecordsIndividual?.id
                 }
-                onChange={() =>
-                  setSelectedDuplicate(details.goldenRecordsIndividual?.id)
+                onChange={(event, checked) =>
+                  setSelectedDuplicate(
+                    checked ? details.goldenRecordsIndividual?.id : null,
+                  )
                 }
               />
             </TableCell>
@@ -155,7 +157,11 @@ export function NeedsAdjudicationDetails({
                 {details.goldenRecordsIndividual?.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>Similarity Score</TableCell>
+            <TableCell align='left'>
+              {details.goldenRecordsIndividual?.deduplicationGoldenRecordResults.find(
+                (item) => item.hitId === details.possibleDuplicate?.id,
+              )?.score || '-'}
+            </TableCell>
             <TableCell align='left'>Date TBD</TableCell>
           </TableRow>
           <TableRow>
@@ -167,8 +173,10 @@ export function NeedsAdjudicationDetails({
                   ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
                 }
                 checked={selectedDuplicate === details.possibleDuplicate?.id}
-                onChange={() =>
-                  setSelectedDuplicate(details.possibleDuplicate?.id)
+                onChange={(event, checked) =>
+                  setSelectedDuplicate(
+                    checked ? details.possibleDuplicate?.id : null,
+                  )
                 }
               />
             </TableCell>
@@ -187,7 +195,11 @@ export function NeedsAdjudicationDetails({
                 {details.possibleDuplicate?.birthDate}
               </UniversalMoment>
             </TableCell>
-            <TableCell align='left'>Similarity Score</TableCell>
+            <TableCell align='left'>
+              {details.possibleDuplicate?.deduplicationGoldenRecordResults.find(
+                (item) => item.hitId === details.goldenRecordsIndividual?.id,
+              )?.score || '-'}
+            </TableCell>
             <TableCell align='left'>Date TBD</TableCell>
           </TableRow>
         </TableBody>

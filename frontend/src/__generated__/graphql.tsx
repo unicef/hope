@@ -6651,14 +6651,20 @@ export type GrievanceTicketQuery = (
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
-        )> }
+        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>> }
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
-        )> }
+        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>> }
       ), selectedIndividual: Maybe<(
         { __typename?: 'IndividualNode' }
         & { household: Maybe<(
@@ -11491,6 +11497,11 @@ export const GrievanceTicketDocument = gql`
         fullName
         birthDate
         sex
+        deduplicationGoldenRecordResults {
+          hitId
+          proximityToScore
+          score
+        }
       }
       possibleDuplicate {
         id
@@ -11502,6 +11513,11 @@ export const GrievanceTicketDocument = gql`
         fullName
         birthDate
         sex
+        deduplicationGoldenRecordResults {
+          hitId
+          proximityToScore
+          score
+        }
       }
       selectedIndividual {
         ...individualDetailed
