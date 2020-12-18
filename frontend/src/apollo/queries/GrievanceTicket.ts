@@ -144,6 +144,11 @@ export const GrievanceTicket = gql`
           fullName
           birthDate
           sex
+          deduplicationGoldenRecordResults{
+            hitId
+            proximityToScore
+            score
+          }
         }
         possibleDuplicate{
           id
@@ -155,6 +160,11 @@ export const GrievanceTicket = gql`
           fullName
           birthDate
           sex
+          deduplicationGoldenRecordResults{
+            hitId
+            proximityToScore
+            score
+          }
         }
         selectedIndividual{
           ...individualDetailed
