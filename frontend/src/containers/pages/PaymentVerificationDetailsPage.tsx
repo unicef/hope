@@ -20,6 +20,7 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import {
   choicesToDict,
   decodeIdString,
+  isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
@@ -88,7 +89,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
-  const { data, loading } = useCashPlanQuery({
+  const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
   const {
@@ -97,13 +98,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   } = useCashPlanVerificationSamplingChoicesQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (permissions === null) return null;
 
-  if (
-    !hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS, permissions)
-  )
-    return <PermissionDenied />;
-  if (!data || !choicesData) return null;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data || !choicesData || permissions === null) return null;
 
   const samplingChoicesDict = choicesToDict(
     choicesData.cashPlanVerificationSamplingChoices,
@@ -158,7 +155,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
   const toolbar = (
     <PageHeader
       title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
-      breadCrumbs={breadCrumbsItems}
+      breadCrumbs={
+        hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
+          ? breadCrumbsItems
+          : null
+      }
     >
       <>
         {canCreate && (
