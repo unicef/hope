@@ -351,13 +351,22 @@ export function EditGrievancePage(): React.ReactElement {
                         </Grid>
                       </Grid>
                     </BoxPadding>
-                    <BoxPadding>
-                      <DatachangeComponent
-                        values={values}
-                        setFieldValue={setFieldValue}
-                      />
-                      {dataChangeErrors(errors, touched)}
-                    </BoxPadding>
+                    {hasCreatorOrOwnerPermissions(
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+                      isCreator,
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+                      isOwner,
+                      PERMISSIONS.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+                      permissions,
+                    ) && (
+                      <BoxPadding>
+                        <DatachangeComponent
+                          values={values}
+                          setFieldValue={setFieldValue}
+                        />
+                        {dataChangeErrors(errors, touched)}
+                      </BoxPadding>
+                    )}
 
                     <DialogFooter>
                       <DialogActions>

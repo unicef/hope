@@ -6,7 +6,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from account.schema import UserNode
-from account.permissions import PermissionMutation, Permissions, PermissionMutation
+from account.permissions import PermissionMutation, Permissions
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
@@ -274,13 +274,25 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         if grievance_ticket.issue_type:
             verify_required_arguments(input, "issue_type", cls.EXTRAS_OPTIONS)
         grievance_ticket, extras = cls.update_basic_data(root, info, input, grievance_ticket, **kwargs)
-        update_extra_methods = {
-            GrievanceTicket.CATEGORY_DATA_CHANGE: update_data_change_extras,
-        }
-        category = grievance_ticket.category
-        update_extra_method = update_extra_methods.get(category)
-        if update_extra_method:
-            grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
+
+        if cls.has_creator_or_owner_permission(
+            info,
+            business_area,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+            False,
+        ):
+            update_extra_methods = {
+                GrievanceTicket.CATEGORY_DATA_CHANGE: update_data_change_extras,
+            }
+            category = grievance_ticket.category
+            update_extra_method = update_extra_methods.get(category)
+            if update_extra_method:
+                grievance_ticket = update_extra_method(root, info, input, grievance_ticket, extras, **kwargs)
+
         return cls(grievance_ticket=grievance_ticket)
 
     @classmethod
