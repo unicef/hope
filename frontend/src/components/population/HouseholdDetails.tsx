@@ -143,6 +143,11 @@ export function HouseholdDetails({
                 </div>
               </LabelizedField>
             </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='IS THIS A RETURNEE HOUSEHOLD?'>
+                <div>{household.returnee ? 'Yes' : 'No'}</div>
+              </LabelizedField>
+            </Grid>
           </Grid>
         </Overview>
       </Container>

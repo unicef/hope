@@ -1,11 +1,11 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
-import moment from 'moment';
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
