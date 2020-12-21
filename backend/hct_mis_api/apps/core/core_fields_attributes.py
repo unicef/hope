@@ -1180,7 +1180,7 @@ FIELDS_EXCLUDED_FROM_RDI = {
             "required": False,
             "label": {"English(EN)": "Business Area"},
             "hint": "",
-            "choices": lambda: BusinessArea.get_business_areas_as_choices,
+            "choices": lambda: BusinessArea.get_business_areas_as_choices(),
             "associated_with": _INDIVIDUAL,
             "xlsx_field": "business_area",
         }
