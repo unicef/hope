@@ -190,7 +190,7 @@ DATA_SHARING_CHOICES = (
 )
 
 
-class Household(TimeStampedUUIDModel, AbstractSyncable):
+class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(default=True)
@@ -364,7 +364,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableDefaultManagerModel, TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
