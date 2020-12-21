@@ -27,9 +27,8 @@ from household.models import (
     HEAD,
     Document,
     ROLE_NO_ROLE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN,
+    NON_BENEFICIARY,
+    RELATIONSHIP_UNKNOWN,
 )
 from household.schema import HouseholdNode, IndividualNode
 from utils.schema import Arg
@@ -453,6 +452,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         household=household,
         first_registration_date=first_registration_date,
         last_registration_date=first_registration_date,
+        business_area=grievance_ticket.business_area,
         **individual_data,
     )
 

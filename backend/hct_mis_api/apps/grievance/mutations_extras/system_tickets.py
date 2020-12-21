@@ -1,6 +1,3 @@
-from django.shortcuts import get_object_or_404
-
-from core.utils import decode_id_string
 from grievance.mutations_extras.utils import remove_individual_and_reassign_roles
 from household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
 
@@ -49,8 +46,6 @@ def close_needs_adjudication_ticket(grievance_ticket):
         _clear_deduplication_individuals_fields(both_individuals)
     else:
         individual_to_remove = ticket_details.selected_individual
-        unique_individuals = [
-            individual for individual in both_individuals if individual.id != individual_to_remove.id
-        ]
+        unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
         _clear_deduplication_individuals_fields(unique_individuals)
         remove_individual_and_reassign_roles(ticket_details, individual_to_remove)
