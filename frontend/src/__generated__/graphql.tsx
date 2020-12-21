@@ -893,6 +893,7 @@ export type HouseholdNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   status: HouseholdStatus,
   consentSign: Scalars['String'],
@@ -1788,8 +1789,8 @@ export type IndividualNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
-  lastSyncAt?: Maybe<Scalars['DateTime']>,
   isRemoved: Scalars['Boolean'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
   status: IndividualStatus,
   individualId: Scalars['String'],
   photo: Scalars['String'],
@@ -4756,6 +4757,10 @@ export type HouseholdDetailedFragment = (
       & { node: Maybe<(
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'birthDate' | 'relationship'>
+        & { identities: Array<(
+          { __typename?: 'IndividualIdentityNode' }
+          & Pick<IndividualIdentityNode, 'id' | 'number' | 'type'>
+        )> }
         & IndividualMinimalFragment
       )> }
     )>> }
@@ -7346,6 +7351,11 @@ export const HouseholdDetailedFragmentDoc = gql`
         ...individualMinimal
         birthDate
         relationship
+        identities {
+          id
+          number
+          type
+        }
       }
     }
   }
@@ -14614,6 +14624,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['HouseholdStatus'], ParentType, ContextType>,
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -14889,8 +14900,8 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
-  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['IndividualStatus'], ParentType, ContextType>,
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
