@@ -4880,7 +4880,7 @@ export type TargetPopulationMinimalFragment = (
     & Pick<ProgramNode, 'id' | 'name'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )> }
 );
 
@@ -4892,7 +4892,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<SteficonRuleNode, 'id' | 'name'>
   )>, finalizedBy: Maybe<(
     { __typename?: 'UserNode' }
-    & Pick<UserNode, 'firstName' | 'lastName'>
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
     & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
@@ -7470,6 +7470,7 @@ export const TargetPopulationMinimalFragmentDoc = gql`
     name
   }
   createdBy {
+    id
     firstName
     lastName
   }
@@ -7493,6 +7494,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   approvedAt
   finalizedAt
   finalizedBy {
+    id
     firstName
     lastName
   }
