@@ -34,6 +34,8 @@ import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
 import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
 import { ReassignRoleBox } from './ReassignRoleBox';
 import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
+import { FlagDetails } from './FlagDetails';
+import { NeedsAdjudicationDetails } from './NeedsAdjudicationDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;
@@ -209,17 +211,37 @@ export function GrievanceDetailsPage(): React.ReactElement {
       size: 3,
     },
   ];
-  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
-  const isHeadOfHousehold =
-    ticket?.individual?.id === ticket?.household?.headOfHousehold?.id;
-  const hasRolesToReassign =
-    householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
   const shouldShowReassignBoxDataChange = (): boolean => {
+
+    let { individual } = ticket;
+    let { household } = ticket;
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+      individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
+      household =
+        ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+    }
+
+    const householdsAndRoles = individual?.householdsAndRoles;
+    const isHeadOfHousehold =
+      individual?.id === household?.headOfHousehold?.id;
+    const hasRolesToReassign =
+      householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
+
     const isRightCategory =
-      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+        ticket.issueType.toString() ===
+          GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+        ticket?.systemFlaggingTicketDetails?.approveStatus)||
+        (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
+    const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
-    return isRightCategory && (isHeadOfHousehold || hasRolesToReassign);
+    return (
+      isRightCategory &&
+      isRightStatus &&
+      (isHeadOfHousehold || hasRolesToReassign)
+    );
   };
 
   // const shouldShowReassignBoxFlag = (): boolean => {
@@ -233,7 +255,14 @@ export function GrievanceDetailsPage(): React.ReactElement {
     )
       return (
         <Box display='flex' flexDirection='column'>
-          <PaymentIds ids={['34543xx', 'Missing', '12345xx']} />
+          <Box mt={6}>
+            <PaymentIds
+              verifications={
+                ticket.paymentVerificationTicketDetails?.paymentVerifications
+                  ?.edges
+              }
+            />
+          </Box>
           <Box mt={6}>
             <OtherRelatedTickets
               ticket={ticket}
@@ -298,9 +327,18 @@ export function GrievanceDetailsPage(): React.ReactElement {
           </ContainerColumnWithBorder>
         </Grid>
         <Grid item xs={7}>
-          {/* <PaddingContainer>
-            <FlagDetails ticket={ticket} />
-          </PaddingContainer> */}
+          {ticket?.category?.toString() ===
+            GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
+            <PaddingContainer>
+              <FlagDetails ticket={ticket} />
+            </PaddingContainer>
+          )}
+          {ticket?.category?.toString() ===
+          GRIEVANCE_CATEGORIES.DEDUPLICATION && (
+            <PaddingContainer>
+              <NeedsAdjudicationDetails ticket={ticket} />
+            </PaddingContainer>
+          )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>

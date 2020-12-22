@@ -4,6 +4,7 @@ import {
   GrievanceTicketQuery,
   useIndividualQuery,
 } from '../../../__generated__/graphql';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { LoadingComponent } from '../../LoadingComponent';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
@@ -14,18 +15,34 @@ export const LookUpReassignRole = ({
   ticket,
   individualRole,
   shouldDisableButton,
+  individual,
 }: {
   household:
     | GrievanceTicketQuery['grievanceTicket']['household']
     | GrievanceTicketQuery['grievanceTicket']['individual']['householdsAndRoles'][number]['household'];
+  individual: GrievanceTicketQuery['grievanceTicket']['individual'];
   ticket: GrievanceTicketQuery['grievanceTicket'];
   individualRole: { role: string; id: string };
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
-  const reAssigneeRole = JSON.parse(
-    ticket?.deleteIndividualTicketDetails?.roleReassignData,
-  )[individualRole.id];
+  let roleReassignData;
+  switch (ticket.category.toString()) {
+    case GRIEVANCE_CATEGORIES.DATA_CHANGE:
+      roleReassignData =
+        ticket?.deleteIndividualTicketDetails?.roleReassignData;
+      break;
+    case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
+      roleReassignData = ticket?.systemFlaggingTicketDetails?.roleReassignData;
+      break;
+    case GRIEVANCE_CATEGORIES.DEDUPLICATION:
+      roleReassignData =
+        ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+      break;
+    default:
+      roleReassignData = null;
+  }
+  const reAssigneeRole = JSON.parse(roleReassignData)[individualRole.id];
 
   const { data: individualData, loading } = useIndividualQuery({
     variables: { id: reAssigneeRole?.individual },
@@ -66,6 +83,7 @@ export const LookUpReassignRole = ({
             initialValues={values}
             onValueChange={setFieldValue}
             ticket={ticket}
+            excludedIndividual={individual}
             selectedIndividual={selectedIndividual}
             selectedHousehold={selectedHousehold}
             setSelectedHousehold={setSelectedHousehold}
