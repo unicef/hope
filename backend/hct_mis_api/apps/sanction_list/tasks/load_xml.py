@@ -296,8 +296,7 @@ class LoadSanctionListXMLTask:
             # "country_of_birth",
         }
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
-
-        return [field.name for field in all_fields if field.name not in excluded_fields]
+        return [field.name for field in all_fields if field.name not in excluded_fields and field.concrete is True]
 
     @staticmethod
     def _get_individual_from_db_or_file(
