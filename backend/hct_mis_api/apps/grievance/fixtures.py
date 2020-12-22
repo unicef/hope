@@ -12,7 +12,7 @@ from grievance.models import (
     TicketComplaintDetails,
     TicketNote,
     TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketHouseholdDataUpdateDetails,
-    TicketDeleteIndividualDetails,
+    TicketDeleteIndividualDetails, TicketSystemFlaggingDetails, TicketNeedsAdjudicationDetails,
 )
 from household.fixtures import create_household
 from payment.fixtures import PaymentRecordFactory
@@ -193,3 +193,30 @@ class TicketHouseholdDataUpdateDetailsFactory(factory.DjangoModelFactory):
     )
     household = None
     household_data = {}
+
+
+class TicketSystemFlaggingDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketSystemFlaggingDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+            issue_type=None,
+        ),
+    )
+
+
+class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = TicketNeedsAdjudicationDetails
+
+    ticket = (
+        factory.SubFactory(
+            GrievanceTicketFactory,
+            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+            issue_type=None,
+        ),
+    )
+

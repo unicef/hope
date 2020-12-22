@@ -312,20 +312,10 @@ snapshots['TestHouseholdQuery::test_household_query_single_0_with_permission 1']
 
 snapshots['TestHouseholdQuery::test_household_query_single_1_without_permission 1'] = {
     'data': {
-        'household': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied',
-            'path': [
-                'household'
-            ]
+        'household': {
+            'address': 'Lorem Ipsum',
+            'countryOrigin': 'Poland',
+            'size': 2
         }
-    ]
+    }
 }

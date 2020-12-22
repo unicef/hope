@@ -84,6 +84,11 @@ export const householdDetailed = gql`
           ...individualMinimal
           birthDate
           relationship
+          identities {
+            id
+            number
+            type
+          }
         }
       }
     }

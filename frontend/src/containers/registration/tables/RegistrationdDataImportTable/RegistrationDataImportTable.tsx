@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
+import moment from 'moment';
 import {
   AllRegistrationDataImportsQueryVariables,
   RegistrationDataImportNode,
@@ -8,7 +9,6 @@ import {
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
 
@@ -24,9 +24,9 @@ export function RegistrationDataImportTable({
   const initialVariables = {
     // eslint-disable-next-line @typescript-eslint/camelcase
     name_Icontains: filter.search,
-    importDate: filter.importDate && (
-      <UniversalMoment>{filter.importDate}</UniversalMoment>
-    ),
+    importDate: filter.importDate
+      ? moment(filter.importDate).format('YYYY-MM-DD')
+      : null,
     // eslint-disable-next-line @typescript-eslint/camelcase
     importedBy_Id: filter.importedBy
       ? decodeIdString(filter.importedBy)

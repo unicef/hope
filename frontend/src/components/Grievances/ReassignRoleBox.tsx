@@ -5,6 +5,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
@@ -38,9 +39,15 @@ export const ReassignRoleBox = ({
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const businessArea = useBusinessArea();
-  const householdsAndRoles = ticket?.individual?.householdsAndRoles;
-  const isHeadOfHousehold =
-    ticket?.individual.id === ticket?.household?.headOfHousehold?.id;
+  let { individual } = ticket;
+  let { household } = ticket;
+  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+    individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
+    household =
+      ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+  }
+  const householdsAndRoles = individual?.householdsAndRoles;
+  const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -63,6 +70,7 @@ export const ReassignRoleBox = ({
             individualRole={{ role: el.role, id: el.id }}
             ticket={ticket}
             household={el.household}
+            individual={individual}
           />
         ) : null}
       </Box>
@@ -90,7 +98,7 @@ export const ReassignRoleBox = ({
                 <ContentLink
                   href={`/${businessArea}/population/household/${ticket?.household.id}`}
                 >
-                  {ticket?.household.unicefId}
+                  {household.unicefId}
                 </ContentLink>
               </LabelizedField>
             </Box>
@@ -99,7 +107,8 @@ export const ReassignRoleBox = ({
                 shouldDisableButton={shouldDisableButton}
                 individualRole={{ role: 'HEAD', id: 'HEAD' }}
                 ticket={ticket}
-                household={ticket?.household}
+                household={household}
+                individual={individual}
               />
             ) : null}
           </Box>
