@@ -14,8 +14,6 @@ import { LabelizedField } from '../LabelizedField';
 import { LoadingComponent } from '../LoadingComponent';
 
 const StyledBox = styled(Paper)`
-  border-radius: 3px;
-  background-color: #fff;
   display: flex;
   flex-direction: column;
   width: 100%;
