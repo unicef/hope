@@ -14,11 +14,11 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permi
                 {
                     'node': {
                         'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 1,
-                        'finalListTotalHouseholds': 1,
-                        'finalListTotalIndividuals': 1,
-                        'name': 'target_population_size_1_approved',
-                        'status': 'APPROVED'
+                        'candidateListTotalIndividuals': 2,
+                        'finalListTotalHouseholds': None,
+                        'finalListTotalIndividuals': None,
+                        'name': 'target_population_size_2',
+                        'status': 'DRAFT'
                     }
                 },
                 {
@@ -34,11 +34,11 @@ snapshots['TestTargetPopulationQuery::test_simple_all_targets_query_0_with_permi
                 {
                     'node': {
                         'candidateListTotalHouseholds': 1,
-                        'candidateListTotalIndividuals': 2,
-                        'finalListTotalHouseholds': None,
-                        'finalListTotalIndividuals': None,
-                        'name': 'target_population_size_2',
-                        'status': 'DRAFT'
+                        'candidateListTotalIndividuals': 1,
+                        'finalListTotalHouseholds': 1,
+                        'finalListTotalIndividuals': 1,
+                        'name': 'target_population_size_1_approved',
+                        'status': 'APPROVED'
                     }
                 }
             ]
