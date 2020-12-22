@@ -118,6 +118,7 @@ class IndividualFactory(factory.DjangoModelFactory):
     flex_fields = factory.LazyAttribute(flex_field_individual)
     first_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
     last_registration_date = factory.Faker("date_this_year", before_today=True, after_today=False)
+    business_area = factory.LazyAttribute(lambda o: o.registration_data_import.business_area)
 
 
 class EntitlementCardFactory(factory.DjangoModelFactory):

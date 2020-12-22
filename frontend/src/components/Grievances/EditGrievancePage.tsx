@@ -214,7 +214,7 @@ export function EditGrievancePage(): React.ReactElement {
                           }}
                           variant='outlined'
                           choices={
-                            choicesData.grievanceTicketManualCategoryChoices
+                            choicesData.grievanceTicketCategoryChoices
                           }
                           component={FormikSelectField}
                         />

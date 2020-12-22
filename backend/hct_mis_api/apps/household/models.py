@@ -16,7 +16,7 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from utils.models import AbstractSyncable, TimeStampedUUIDModel
+from utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
 
 RESIDENCE_STATUS_CHOICE = (
     ("IDP", _("Displaced  |  Internally Displaced People")),
@@ -190,7 +190,7 @@ DATA_SHARING_CHOICES = (
 )
 
 
-class Household(TimeStampedUUIDModel, AbstractSyncable):
+class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.BooleanField(default=True)
@@ -364,7 +364,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
@@ -458,6 +458,7 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
     comms_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     who_answers_phone = models.CharField(max_length=150, blank=True)
     who_answers_alt_phone = models.CharField(max_length=150, blank=True)
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
 
     @property
     def age(self):
@@ -479,10 +480,6 @@ class Individual(TimeStampedUUIDModel, AbstractSyncable):
         values = [str(getattr(self, field)) for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
-
-    @property
-    def business_area(self):
-        return self.household.business_area
 
     def __str__(self):
         return self.full_name
