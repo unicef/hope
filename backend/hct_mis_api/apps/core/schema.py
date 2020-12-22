@@ -175,7 +175,9 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(parent["choices"], key=itemgetter("value"))
-        return parent.choices.order_by("name").all()
+        x = _custom_dict_or_attr_resolver("choices", None, parent, info)
+        # import ipdb; ipdb.set_trace()
+        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):

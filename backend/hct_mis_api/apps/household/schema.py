@@ -226,6 +226,7 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
+# FIXME: This need to be changed to HouseholdSelectionNode
 class HouseholdSelection(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
@@ -267,6 +268,14 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
+    @classmethod
+    def get_node(cls, info, id):
+        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+        try:
+            return queryset.get(pk=id)
+        except cls._meta.model.DoesNotExist:
+            return None
+
     class Meta:
         model = Household
         filter_fields = []
@@ -304,6 +313,14 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
+
+    @classmethod
+    def get_node(cls, info, id):
+        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+        try:
+            return queryset.get(pk=id)
+        except cls._meta.model.DoesNotExist:
+            return None
 
     class Meta:
         model = Individual

@@ -120,14 +120,26 @@ class DeduplicateTask:
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
+                queries_list = [
+                    {"match": {f"{prefix}.number": {"query": doc_number}}},
+                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
+                ]
+                if prefix == "documents":
+                    country = item.get("country", "")
+                    queries_list.append(
+                        {
+                            "match": {
+                                f"{prefix}.country": {
+                                    "query": country.alpha3 if isinstance(country, Country) else country
+                                }
+                            }
+                        },
+                    )
                 queries.extend(
                     [
                         {
                             "bool": {
-                                "must": [
-                                    {"match": {f"{prefix}.number": {"query": doc_number}}},
-                                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
-                                ],
+                                "must": queries_list,
                                 "boost": 2,
                             },
                         }
