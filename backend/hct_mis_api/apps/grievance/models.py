@@ -380,7 +380,9 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
         "grievance.GrievanceTicket", related_name="system_flagging_ticket_details", on_delete=models.CASCADE
     )
     golden_records_individual = models.ForeignKey("household.Individual", on_delete=models.CASCADE)
-    sanction_list_individual = models.ForeignKey("sanction_list.SanctionListIndividual", on_delete=models.CASCADE)
+    sanction_list_individual = models.ForeignKey(
+        "sanction_list.SanctionListIndividual", related_name="+", on_delete=models.CASCADE
+    )
     approve_status = models.BooleanField(default=False)
     role_reassign_data = JSONField(default=dict)
 
