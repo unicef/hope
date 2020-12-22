@@ -88,6 +88,8 @@ class IndividualDocument(Document):
     def prepare_hash_key(self, instance):
         return instance.get_hash_key
 
+    def prepare_business_area(self, instance):
+        return instance.business_area.slug
 
     class Index:
         name = "individuals"
