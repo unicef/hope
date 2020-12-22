@@ -189,10 +189,14 @@ export function GrievanceDetailsPage(): React.ReactElement {
       value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
       size: 3,
     },
-    { label: 'DESCRIPTION', value: <span>{ticket.description}</span>, size: 6 },
+    {
+      label: 'DESCRIPTION',
+      value: <span>{ticket.description || '-'}</span>,
+      size: 6,
+    },
     {
       label: 'ASSIGNED TO',
-      value: <span>{renderUserName(ticket.assignedTo)}</span>,
+      value: <span>{renderUserName(ticket.assignedTo) || '-'}</span>,
       size: 6,
     },
     {
@@ -207,12 +211,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
     },
     {
       label: 'LANGUAGES SPOKEN',
-      value: <span>{ticket.language}</span>,
+      value: <span>{ticket.language || '-'}</span>,
       size: 3,
     },
   ];
   const shouldShowReassignBoxDataChange = (): boolean => {
-
     let { individual } = ticket;
     let { household } = ticket;
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
@@ -222,8 +225,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     }
 
     const householdsAndRoles = individual?.householdsAndRoles;
-    const isHeadOfHousehold =
-      individual?.id === household?.headOfHousehold?.id;
+    const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign =
       householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
 
@@ -232,8 +234,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
         ticket.issueType.toString() ===
           GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-        ticket?.systemFlaggingTicketDetails?.approveStatus)||
-        (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        ticket?.systemFlaggingTicketDetails?.approveStatus) ||
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
         ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -334,7 +336,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </PaddingContainer>
           )}
           {ticket?.category?.toString() ===
-          GRIEVANCE_CATEGORIES.DEDUPLICATION && (
+            GRIEVANCE_CATEGORIES.DEDUPLICATION && (
             <PaddingContainer>
               <NeedsAdjudicationDetails ticket={ticket} />
             </PaddingContainer>
