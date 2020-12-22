@@ -4,7 +4,6 @@ import {
   Grid,
   InputAdornment,
   MenuItem,
-  TextField,
 } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
@@ -15,6 +14,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
+import TextField from '../../../shared/TextField';
 import { FieldLabel } from '../../../components/FieldLabel';
 
 const Container = styled.div`
@@ -78,8 +78,8 @@ export function ProgrammesFilters({
             <Grid item>
               <SearchTextField
                 label='Search'
-                value={filter.search}
                 variant='outlined'
+                value={filter.search || ''}
                 margin='dense'
                 onChange={(e) => handleFilterChange(e, 'search')}
                 InputProps={{
@@ -89,6 +89,7 @@ export function ProgrammesFilters({
                     </InputAdornment>
                   ),
                 }}
+                data-cy='filters-search'
               />
             </Grid>
             <Grid item>
