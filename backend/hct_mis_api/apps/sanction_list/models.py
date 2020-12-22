@@ -49,9 +49,6 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     comments = models.TextField(blank=True, default="")
     designation = models.TextField(blank=True, default="")
     list_type = models.CharField(max_length=50)
-    alias_name = models.ForeignKey(
-        "SanctionListIndividualAliasName", on_delete=models.CASCADE, null=True, default=None,
-    )
     street = models.CharField(max_length=255, blank=True, default="")
     city = models.CharField(max_length=255, blank=True, default="")
     state_province = models.CharField(max_length=255, blank=True, default="")

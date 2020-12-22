@@ -68,7 +68,7 @@ export function AdminAreaFixedAutocomplete({
         setOpen(false);
       }}
       getOptionSelected={(option, selectedValue) => {
-        return selectedValue.node.id === option.node.id;
+        return selectedValue?.node?.id === option.node.id;
       }}
       getOptionLabel={(option) => {
         if (!option.node) {

@@ -12,7 +12,6 @@ from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
 from core.countries import Countries
-from household.elasticsearch_utils import rebuild_search_index
 from sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
@@ -73,7 +72,11 @@ class LoadSanctionListXMLTask:
         return ""
 
     def _get_date_of_births(
-            self, individual_tag: ET.Element, individual: SanctionListIndividual, *args, **kwargs,
+        self,
+        individual_tag: ET.Element,
+        individual: SanctionListIndividual,
+        *args,
+        **kwargs,
     ) -> Set[SanctionListIndividualDateOfBirth]:
         date_of_birth_tags = individual_tag.findall("INDIVIDUAL_DATE_OF_BIRTH")
         dates_of_birth = set()
@@ -99,7 +102,8 @@ class LoadSanctionListXMLTask:
                         parsed_date = dateutil.parser.parse(value, default=default_datetime)
                         dates_of_birth.add(
                             SanctionListIndividualDateOfBirth(
-                                individual=self._get_individual_from_db_or_file(individual), date=parsed_date.date(),
+                                individual=self._get_individual_from_db_or_file(individual),
+                                date=parsed_date.date(),
                             )
                         )
                     except Exception:
@@ -119,7 +123,11 @@ class LoadSanctionListXMLTask:
         return dates_of_birth
 
     def _get_alias_names(
-            self, individual_tag: ET.Element, individual: SanctionListIndividual, *args, **kwargs,
+        self,
+        individual_tag: ET.Element,
+        individual: SanctionListIndividual,
+        *args,
+        **kwargs,
     ) -> Set[SanctionListIndividualAliasName]:
         path = "INDIVIDUAL_ALIAS"
         alias_names_tags = individual_tag.findall(path)
@@ -134,7 +142,8 @@ class LoadSanctionListXMLTask:
                 if quality_tag.text.lower() in ("good", "a.k.a") and alias_name_tag.text:
                     aliases.add(
                         SanctionListIndividualAliasName(
-                            individual=self._get_individual_from_db_or_file(individual), name=alias_name_tag.text,
+                            individual=self._get_individual_from_db_or_file(individual),
+                            name=alias_name_tag.text,
                         )
                     )
 
@@ -157,14 +166,19 @@ class LoadSanctionListXMLTask:
             return ""
 
     def _get_countries(
-            self, individual_tag: ET.Element, individual: SanctionListIndividual, *args, **kwargs,
+        self,
+        individual_tag: ET.Element,
+        individual: SanctionListIndividual,
+        *args,
+        **kwargs,
     ) -> Set[SanctionListIndividualCountries]:
         path = "INDIVIDUAL_ADDRESS/COUNTRY"
         result = self._get_country_field(individual_tag, path)
         if result:
             return set(
                 SanctionListIndividualCountries(
-                    individual=self._get_individual_from_db_or_file(individual), country=alpha2,
+                    individual=self._get_individual_from_db_or_file(individual),
+                    country=alpha2,
                 )
                 for alpha2 in result
             )
@@ -179,21 +193,30 @@ class LoadSanctionListXMLTask:
             return countries
 
     def _get_nationalities(
-            self, individual_tag: ET.Element, individual: SanctionListIndividual, *args, **kwargs,
+        self,
+        individual_tag: ET.Element,
+        individual: SanctionListIndividual,
+        *args,
+        **kwargs,
     ) -> Set[SanctionListIndividualNationalities]:
         path = "NATIONALITY/VALUE"
         result = self._get_country_field(individual_tag, path)
         if result:
             return set(
                 SanctionListIndividualNationalities(
-                    individual=self._get_individual_from_db_or_file(individual), nationality=alpha2,
+                    individual=self._get_individual_from_db_or_file(individual),
+                    nationality=alpha2,
                 )
                 for alpha2 in result
             )
         return set()
 
     def _get_documents(
-            self, individual_tag: ET.Element, individual: SanctionListIndividual, *args, **kwargs,
+        self,
+        individual_tag: ET.Element,
+        individual: SanctionListIndividual,
+        *args,
+        **kwargs,
     ) -> Set[SanctionListIndividualDocument]:
         document_tags = individual_tag.findall("INDIVIDUAL_DOCUMENT")
         documents = set()
@@ -208,13 +231,17 @@ class LoadSanctionListXMLTask:
             date_of_issue = None
             if isinstance(date_of_issue_tag, ET.Element):
                 date_of_issue = self._cast_field_value_to_correct_type(
-                    SanctionListIndividualDocument, "date_of_issue", date_of_issue_tag.text,
+                    SanctionListIndividualDocument,
+                    "date_of_issue",
+                    date_of_issue_tag.text,
                 )
             note_tag = document_tag.find("NOTE")
             note = ""
             if isinstance(note_tag, ET.Element):
                 note = self._cast_field_value_to_correct_type(
-                    SanctionListIndividualDocument, "note", document_tag.find("NOTE"),
+                    SanctionListIndividualDocument,
+                    "note",
+                    document_tag.find("NOTE"),
                 )
             if isinstance(document_number_tag, ET.Element) and isinstance(type_of_document_tag, ET.Element):
                 document = SanctionListIndividualDocument(
@@ -269,11 +296,12 @@ class LoadSanctionListXMLTask:
             # "country_of_birth",
         }
         all_fields = SanctionListIndividual._meta.get_fields(include_parents=False)
-
-        return [field.name for field in all_fields if field.name not in excluded_fields]
+        return [field.name for field in all_fields if field.name not in excluded_fields and field.concrete is True]
 
     @staticmethod
-    def _get_individual_from_db_or_file(individual: SanctionListIndividual, ) -> SanctionListIndividual:
+    def _get_individual_from_db_or_file(
+        individual: SanctionListIndividual,
+    ) -> SanctionListIndividual:
         try:
             return SanctionListIndividual.all_objects.get(reference_number=individual.reference_number)
         except ObjectDoesNotExist:
@@ -287,20 +315,20 @@ class LoadSanctionListXMLTask:
         return self._get_all_individuals_from_db.filter(reference_number__in=individuals_reference_numbers)
 
     def _get_individuals_to_create(
-            self, individuals_from_file: Iterable[SanctionListIndividual]
+        self, individuals_from_file: Iterable[SanctionListIndividual]
     ) -> Set[SanctionListIndividual]:
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
         return {
             individual
             for individual in individuals_from_file
             if individual.reference_number
-               not in self._get_existing_individuals(individuals_reference_numbers).values_list(
+            not in self._get_existing_individuals(individuals_reference_numbers).values_list(
                 "reference_number", flat=True
             )
         }
 
     def _get_individuals_to_update(
-            self, individuals_from_file: Iterable[SanctionListIndividual]
+        self, individuals_from_file: Iterable[SanctionListIndividual]
     ) -> Set[SanctionListIndividual]:
         individuals_to_update = set()
         individuals_reference_numbers = self._get_reference_numbers_list(individuals_from_file)
@@ -308,8 +336,8 @@ class LoadSanctionListXMLTask:
             new_individual_data_dict = model_to_dict(individual, fields=self._get_individual_fields)
             old_individual = (
                 self._get_existing_individuals(individuals_reference_numbers)
-                    .filter(reference_number=new_individual_data_dict["reference_number"])
-                    .first()
+                .filter(reference_number=new_individual_data_dict["reference_number"])
+                .first()
             )
             if old_individual:
                 old_individual_data_dict = model_to_dict(old_individual, fields=self._get_individual_fields)
@@ -329,14 +357,16 @@ class LoadSanctionListXMLTask:
         return ids
 
     @staticmethod
-    def _get_reference_numbers_list(individuals_from_file: Iterable[SanctionListIndividual], ) -> Set[str]:
+    def _get_reference_numbers_list(
+        individuals_from_file: Iterable[SanctionListIndividual],
+    ) -> Set[str]:
         return {i.reference_number for i in individuals_from_file}
 
     @staticmethod
     def _cast_field_value_to_correct_type(model, field_name: str, value: Any):
         field = model._meta.get_field(field_name)
         # silencing lxml warning
-        with open(os.devnull, 'w') as devnull:
+        with open(os.devnull, "w") as devnull:
             with contextlib.redirect_stderr(devnull):
                 if not value:
                     return field.default
@@ -345,7 +375,13 @@ class LoadSanctionListXMLTask:
             year, month, day, *time = value.split("-")
             if time:
                 hour, minute = time[0].split(":")
-                return datetime(year=int(year), month=int(month), day=int(day), hour=int(hour), minute=int(minute), )
+                return datetime(
+                    year=int(year),
+                    month=int(month),
+                    day=int(day),
+                    hour=int(hour),
+                    minute=int(minute),
+                )
         if field.get_internal_type() == "DateField":
             year, month, day, *time = value.split("-")
             return date(year=int(year), month=int(month), day=int(day))
@@ -382,8 +418,8 @@ class LoadSanctionListXMLTask:
                     f"{individual.third_name} "
                     f"{individual.fourth_name}"
                 )
-                    .strip()
-                    .title()
+                .strip()
+                .title()
             )
             individuals_from_file.add(individual)
 
@@ -403,7 +439,9 @@ class LoadSanctionListXMLTask:
 
         if individuals_to_update:
             SanctionListIndividual.all_objects.bulk_update(
-                self._get_individuals_to_update(individuals_from_file), self._get_individual_fields, 1000,
+                self._get_individuals_to_update(individuals_from_file),
+                self._get_individual_fields,
+                1000,
             )
         individuals_ids_to_delete = self._get_individuals_to_deactivate(individuals_from_file)
         SanctionListIndividual.objects.filter(id__in=individuals_ids_to_delete).delete()
@@ -442,16 +480,14 @@ class LoadSanctionListXMLTask:
         if dob_from_file:
             for single_dob in dob_from_file:
                 dob_obj, created = SanctionListIndividualDateOfBirth.objects.get_or_create(
-                    individual=single_dob.individual, date=single_dob.date,
+                    individual=single_dob.individual,
+                    date=single_dob.date,
                 )
                 if created is True:
                     individuals_to_check_against_sanction_list.append(dob_obj.individual)
 
         individuals_to_check_against_sanction_list.extend(individuals_to_create)
         individuals_to_check_against_sanction_list.extend(individuals_to_update)
-
-        # we can rebuild whole search_index because amount of people in sanctions list is low
-        rebuild_search_index(models=["sanction_list.SanctionListIndividual"])
 
         if individuals_to_check_against_sanction_list:
             CheckAgainstSanctionListPreMergeTask.execute(individuals_to_check_against_sanction_list)
