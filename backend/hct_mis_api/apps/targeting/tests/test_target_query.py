@@ -1,3 +1,5 @@
+import unittest
+
 from django.core.management import call_command
 from parameterized import parameterized
 
@@ -135,6 +137,7 @@ class TestTargetPopulationQuery(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
+    @unittest.skip("needs adjudication")
     @parameterized.expand(
         [
             (
