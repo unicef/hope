@@ -12,8 +12,33 @@ const InlineField = styled.div`
   width: 48%;
 `;
 
-export const SubField = ({field, index, baseName}): React.ReactElement => {
+export const SubField = ({ field, index, baseName }): React.ReactElement => {
   switch (field.fieldAttribute.type) {
+    case 'DECIMAL':
+      return (
+        <FlexWrapper>
+          <InlineField>
+            <Field
+              name={`${baseName}.value.from`}
+              label={`${field.fieldAttribute.labelEn} from`}
+              type='number'
+              variant='outlined'
+              fullWidth
+              component={FormikTextField}
+            />
+          </InlineField>
+          <InlineField>
+            <Field
+              name={`${baseName}.value.to`}
+              label={`${field.fieldAttribute.labelEn} to`}
+              type='number'
+              variant='outlined'
+              fullWidth
+              component={FormikTextField}
+            />
+          </InlineField>
+        </FlexWrapper>
+      );
     case 'INTEGER':
       return (
         <FlexWrapper>
