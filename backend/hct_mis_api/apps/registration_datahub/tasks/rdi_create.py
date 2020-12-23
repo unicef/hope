@@ -173,6 +173,24 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "photo": file.name,
             }
 
+    def _handle_document_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+
+        if header.startswith("other_id"):
+            document_data = self.documents.get(f"individual_{row_num}_other")
+        else:
+            document_data = self.documents.get(f"individual_{row_num}_{header}")
+
+        if document_data:
+            document_data["issuing_country"] = Country(value)
+        else:
+            suffix = "other" if header.startswith("other_id") else header.replace("issuer", "no")
+            self.documents[f"individual_{row_num}_{suffix}"] = {
+                "individual": individual,
+                "issuing_country": Country(value),
+            }
+
     def _handle_image_field(self, cell, is_flex_field=False, *args, **kwargs):
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
@@ -203,37 +221,18 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if value is None:
             return
 
-        agency = ImportedAgency.objects.get(type="WFP" if header == "scope_id_no_i_c" else "UNHCR")
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
 
-        identities_data = self.identities.get(f"individual_{row_num}_{agency.type}")
+        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
 
         if identities_data:
             identities_data["number"] = value
-            identities_data["agency"] = agency
+            identities_data["agency"] = agency_type
 
-        self.identities[f"individual_{row_num}_{agency.type}"] = {
+        self.identities[f"individual_{row_num}_{agency_type}"] = {
             "individual": individual,
             "number": value,
-            "agency": agency,
-        }
-
-    def _handle_household_identity_fields(self, value, header, row_num, household, *args, **kwargs):
-        if value is None:
-            return
-
-        agency_name = header.split("_")[0].upper()
-        agency = ImportedAgency.objects.get(type=agency_name)
-
-        identities_data = self.household_identities.get(f"household_{row_num}")
-
-        if identities_data:
-            identities_data["document_number"] = value
-            identities_data["agency"] = agency
-
-        self.household_identities[f"household_{row_num}"] = {
-            "household": household,
-            "document_number": value,
-            "agency": agency,
+            "agency": agency_type,
         }
 
     def _handle_identity_photo(self, cell, row_num, header, individual, *args, **kwargs):
@@ -260,6 +259,22 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "photo": file_name,
             }
 
+    def _handle_identity_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+
+        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
+
+        if identities_data:
+            identities_data["issuing_country"] = Country(value)
+
+        self.identities[f"individual_{row_num}_{agency_type}"] = {
+            "individual": individual,
+            "issuing_country": Country(value),
+        }
+
     def _handle_collectors(self, value, header, individual, *args, **kwargs):
         list_of_ids = collectors_str_ids_to_list(value)
         if list_of_ids is None:
@@ -272,8 +287,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
+            issuing_country = document_data.get("issuing_country")
             doc_type = ImportedDocumentType.objects.get(
-                country=Country(COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())),
+                country=issuing_country,
                 type=document_data["type"],
             )
             photo = document_data.get("photo")
@@ -292,7 +308,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_identities(self):
         idents_to_create = [
             ImportedIndividualIdentity(
-                agency=ident_data["agency"],
+                agency=ImportedAgency.objects.get(country=ident_data["issuing_country"], type=ident_data["agency"]),
                 individual=ident_data["individual"],
                 document_number=ident_data["number"],
             )
@@ -300,18 +316,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         ]
 
         ImportedIndividualIdentity.objects.bulk_create(idents_to_create)
-
-    def _create_household_identities(self):
-        idents_to_create = [
-            ImportedHouseholdIdentity(
-                agency=ident_data["agency"],
-                household=ident_data["household"],
-                document_number=ident_data["document_number"],
-            )
-            for ident_data in self.household_identities.values()
-        ]
-
-        ImportedHouseholdIdentity.objects.bulk_create(idents_to_create)
 
     def _create_collectors(self):
         collectors_to_create = []
@@ -348,7 +352,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
-                "unhcr_id_h_c": self._handle_household_identity_fields,
             },
         }
 
@@ -537,26 +540,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         "other_id_photo_i_c",
     }
 
-    HOUSEHOLD_IDENTITIES_FIELDS = ("unhcr_id_h_c",)
-
     reduced_submissions = None
     business_area = None
     attachments = None
-
-    def _handle_household_identities(self, field, value, household_obj):
-        if value is None:
-            return
-
-        agency_name = field.split("_")[0].upper()
-        agency = ImportedAgency.objects.get(type=agency_name)
-
-        household_identity = ImportedHouseholdIdentity(
-            agency=agency,
-            household=household_obj,
-            document_number=value,
-        )
-
-        return household_identity
 
     def _handle_image_field(self, value):
         download_url = ""
@@ -673,17 +659,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create = []
         individuals_to_create = {}
         documents_and_identities_to_create = []
-        household_identities_to_create = []
         collectors_to_create = defaultdict(list)
         for household in self.reduced_submissions:
             collectors_count = 0
             household_obj = ImportedHousehold()
             self.attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
-                if hh_field in self.HOUSEHOLD_IDENTITIES_FIELDS:
-                    hh_identity = self._handle_household_identities(hh_field, hh_value, household_obj)
-                    if hh_identity is not None:
-                        household_identities_to_create.append(hh_identity)
                 self._cast_and_assign(hh_value, hh_field, household_obj)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
@@ -746,7 +727,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
-        ImportedHouseholdIdentity.objects.bulk_create(household_identities_to_create)
         self._handle_collectors(collectors_to_create, individuals_to_create)
         self._handle_documents_and_identities(
             documents_and_identities_to_create,

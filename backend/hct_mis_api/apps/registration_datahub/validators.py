@@ -16,16 +16,16 @@ from openpyxl_image_loader import SheetImageLoader
 from core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    KOBO_COLLECTOR_FIELD,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
+    KOBO_ONLY_FIELDS,
+    _core_fields_to_separated_dict,
 )
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
 from core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
 from core.validators import BaseValidator
-from household.models import ROLE_ALTERNATE, ROLE_PRIMARY, IndividualIdentity
-from registration_datahub.models import ImportedIndividualIdentity
+from household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from registration_datahub.tasks.utils import collectors_str_ids_to_list
 
 
@@ -84,15 +84,15 @@ class ImportDataValidator(BaseValidator):
         invalid_rows = []
         for key, values in documents_numbers_dict.items():
             if key == "other_id_type_i_c":
-                for name, validation_data in zip(values["names"], values["validation_data"]):
+                for name, validation_data, issuing_country in zip(
+                    values["names"], values["validation_data"], values["issuing_countries"]
+                ):
                     value = validation_data["value"]
                     row_number = validation_data.get("row_number")
                     if not name and value:
                         error = {
                             "header": key,
-                            "message": f"Name for other_id_type is "
-                            f"required, when number is "
-                            f"provided: no: {value}",
+                            "message": f"Name for other_id_type is required, when number is provided: no: {value}",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -100,75 +100,52 @@ class ImportDataValidator(BaseValidator):
                     if name and not value:
                         error = {
                             "header": key,
-                            "message": "Number for other_id_no_i_c is " "required, when name is provided",
+                            "message": "Number for other_id_no_i_c is required, when name is provided",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
+                    if name or value and not issuing_country:
+                        error = {
+                            "header": key,
+                            "message": "Issuing country for other_id_no_i_c is required, "
+                            "when any document data are provided",
+                        }
+                        if is_xlsx is True:
+                            error["row_number"] = row_number
+            else:
+                for validation_data, issuing_country in zip(values["validation_data"], values["issuing_countries"]):
+                    value = validation_data["value"]
+                    row_number = validation_data.get("row_number")
+                    if value and not issuing_country:
+                        error = {
+                            "header": key,
+                            "message": "Issuing country for other_id_no_i_c is required, "
+                            "when any document data are provided",
+                        }
+                        if is_xlsx is True:
+                            error["row_number"] = row_number
 
         return invalid_rows
 
     @classmethod
     def identity_validator(cls, identities_numbers_dict, is_xlsx=True, *args, **kwargs):
         invalid_rows = []
-        message = "Duplicated identity document"
         for key, values in identities_numbers_dict.items():
-            seen = {}
-            dupes = []
-            for data_dict in values["validation_data"]:
+            for data_dict, issuing_country in zip(values["validation_data"], values["issuing_countries"]):
                 value = data_dict["value"]
                 row_number = data_dict.get("row_number")
 
-                if not value:
+                if not value and not issuing_country:
                     continue
-
-                if value not in seen:
-                    seen[value] = 1
-                else:
-                    if seen[value] == 1:
-                        dupes.append(row_number)
-                    seen[value] += 1
-
-                for number in dupes:
+                elif value and not issuing_country:
                     error = {
                         "header": key,
-                        "message": f"{message}: " f"{values['agency']} no: {value}",
+                        "message": "Issuing country is required: " f"{values['agency']} no: {value}",
                     }
                     if is_xlsx is True:
-                        error["row_number"] = number
+                        error["row_number"] = row_number
                     invalid_rows.append(error)
-
-            imp_ident_obj = []
-            ident_obj = []
-            if imp_ident_obj:
-                imp_ident_obj = ImportedIndividualIdentity.objects.filter(
-                    agency=values["agency"],
-                    document_number__in=values["numbers"],
-                )
-
-            if ident_obj:
-                ident_obj = IndividualIdentity.objects.filter(
-                    agency=values["agency"],
-                    document_number__in=values["numbers"],
-                )
-
-            for obj in imp_ident_obj:
-                error = {
-                    "header": key,
-                    "message": f"{message}: " f"{values['agency']} no: {obj.document_number}" f" in RDH Database",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = 0
-                invalid_rows.append(error)
-
-            for obj in ident_obj:
-                error = {
-                    "header": key,
-                    "message": f"{message}: " f"{values['agency']} no: {obj.document_number}" f" in HCT Database",
-                }
-                if is_xlsx is True:
-                    error["row_number"] = 0
-                invalid_rows.append(error)
 
         return invalid_rows
 
@@ -349,17 +326,69 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         head_of_household_count = defaultdict(int)
 
         identities_numbers = {
-            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": []},
-            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": []},
+            "unhcr_id_no_i_c": {
+                "agency": "UNHCR",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "scope_id_no_i_c": {
+                "agency": "WFP",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
         }
         documents_numbers = {
-            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": []},
-            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": []},
-            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": []},
-            "national_id_no_i_c": {"type": "NATIONAL_ID", "validation_data": [], "numbers": []},
-            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": []},
-            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": []},
+            "birth_certificate_no_i_c": {
+                "type": "BIRTH_CERTIFICATE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "drivers_license_no_i_c": {
+                "type": "DRIVERS_LICENSE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "electoral_card_no_i_c": {
+                "type": "ELECTORAL_CARD",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_id_no_i_c": {
+                "type": "NATIONAL_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_passport_i_c": {
+                "type": "NATIONAL_PASSPORT",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_type_i_c": {
+                "type": "OTHER",
+                "names": [],
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
             "other_id_no_i_c": None,
+        }
+        documents_issuing_countries_mapping = {
+            "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
+            "drivers_license_issuer_i_c": "drivers_license_no_i_c",
+            "electoral_card_issuer_i_c": "electoral_card_no_i_c",
+            "national_id_issuer_i_c": "national_id_no_i_c",
+            "national_passport_issuer_i_c": "national_passport_i_c",
+            "other_id_issuer_i_c": "other_id_no_i_c",
+            # identities
+            "scope_id_issuer_i_c": "scope_id_no_i_c",
+            "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
         }
         for row in sheet.iter_rows(min_row=3):
             # openpyxl keeps iterating on empty rows so need to omit empty rows
@@ -406,6 +435,13 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                             {"row_number": cell.row, "value": value}
                         )
                         documents_numbers[header.value]["numbers"].append(str(value))
+
+                if header.value in documents_issuing_countries_mapping.keys():
+                    document_key = documents_issuing_countries_mapping.get(header.value)
+                    documents_dict = documents_numbers
+                    if document_key in identities_numbers.keys():
+                        documents_dict = identities_numbers
+                    documents_dict[document_key]["issuing_countries"].append(value)
 
                 if header.value in identities_numbers:
                     identities_numbers[header.value]["numbers"].append(value)
@@ -588,7 +624,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
 
 class KoboProjectImportDataValidator(ImportDataValidator):
-    CORE_FIELDS: dict = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    CORE_FIELDS: dict = _core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
     FLEX_FIELDS: dict = serialize_flex_attributes()
     ALL_FIELDS = get_combined_attributes()
 
@@ -850,8 +886,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         # have fun debugging this ;_;
 
         identities_numbers = {
-            "unhcr_id_no": {"agency": "UNHCR", "validation_data": [], "numbers": []},
-            "scope_id_no": {"agency": "WFP", "validation_data": [], "numbers": []},
+            "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": []},
+            "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": []},
         }
         documents_numbers = {
             "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": []},
@@ -875,7 +911,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                     for individual in hh_value:
                         expected_i_fields = {
                             *cls.EXPECTED_INDIVIDUALS_FIELDS,
-                            *KOBO_COLLECTOR_FIELD.keys(),
+                            *KOBO_ONLY_FIELDS.keys(),
                         }
                         current_individual_docs_and_identities = defaultdict(dict)
                         for i_field, i_value in individual.items():
