@@ -9,6 +9,7 @@ import {
   SnackbarContent,
   Snackbar,
 } from '@material-ui/core';
+import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../__generated__/graphql';
 import { DropzoneField } from '../../components/DropzoneField';
 import { PageHeader } from '../../components/PageHeader';
@@ -50,24 +51,30 @@ export function SanctionList(): React.ReactElement {
   let importFile = null;
   importFile = (
     <>
-      <DropzoneField
-        loading={fileLoading}
-        dontShowFilename={!fileToImport}
-        onChange={(files) => {
-          if (files.length === 0) {
-            return;
-          }
-          const file = files[0];
-          const fileSizeMB = file.size / (1024 * 1024);
-          if (fileSizeMB > 200) {
-            showMessage(
-              `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
-            );
-            return;
-          }
-          setFileToImport(file);
+      <Sentry.ErrorBoundary
+        beforeCapture={(scope) => {
+          scope.setTag("location", "/sanction-list")
         }}
-      />
+      >
+        <DropzoneField
+          loading={fileLoading}
+          dontShowFilename={!fileToImport}
+          onChange={(files) => {
+            if (files.length === 0) {
+              return;
+            }
+            const file = files[0];
+            const fileSizeMB = file.size / (1024 * 1024);
+            if (fileSizeMB > 200) {
+              showMessage(
+                `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+              );
+              return;
+            }
+            setFileToImport(file);
+          }}
+        />
+      </Sentry.ErrorBoundary>
     </>
   );
 
