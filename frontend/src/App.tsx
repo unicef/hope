@@ -7,6 +7,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import moment from 'moment';
 import MomentUtils from '@date-io/moment';
 import { ApolloProvider } from '@apollo/react-hooks';
+import * as Sentry from '@sentry/react';
 import { theme } from './theme';
 import { HomeRouter } from './containers/HomeRouter';
 import { ProfilePage } from './containers/pages/ProfilePage';
@@ -25,8 +26,14 @@ export const App: React.FC = () => {
             <CssBaseline />
             <Router>
               <Switch>
-                <Route path='/login'>
-                  <LoginPage />
+                <Route path='/login'>                    
+                  <Sentry.ErrorBoundary
+                    beforeCapture={(scope) => {
+                      scope.setTag("location", "/login")
+                    }}
+                  >
+                    <LoginPage />
+                  </Sentry.ErrorBoundary>
                 </Route>
                 <ProtectedRoute
                   path='/sanction-list'
@@ -34,7 +41,13 @@ export const App: React.FC = () => {
                   location={window.location}
                 />
                 <Route path='/accounts/profile/'>
-                  <ProfilePage />
+                  <Sentry.ErrorBoundary
+                    beforeCapture={(scope) => {
+                      scope.setTag("location", "/login")
+                    }}
+                  >
+                    <ProfilePage />
+                  </Sentry.ErrorBoundary>
                 </Route>
                 <Route path='/:businessArea/'>
                   <HomeRouter />
