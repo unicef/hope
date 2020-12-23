@@ -20,8 +20,8 @@ from core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     _HOUSEHOLD,
-    KOBO_COLLECTOR_FIELD,
     FIELDS_EXCLUDED_FROM_RDI,
+    KOBO_ONLY_FIELDS, XLSX_ONLY_FIELDS,
 )
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
@@ -446,8 +446,9 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
-        yield KOBO_COLLECTOR_FIELD.get("role_i_c")
+        yield KOBO_ONLY_FIELDS.get("role_i_c")
         yield FIELDS_EXCLUDED_FROM_RDI.get("business_area")
+        yield XLSX_ONLY_FIELDS
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         ).order_by("name")
