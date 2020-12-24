@@ -22,7 +22,7 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                         'householdData': {
                             'female_age_group_6_11_count': {
                                 'approve_status': False,
-                                'previous_value': 0,
+                                'previous_value': None,
                                 'value': 14
                             },
                             'flex_fields': {

@@ -21,7 +21,8 @@ from core.core_fields_attributes import (
     _INDIVIDUAL,
     _HOUSEHOLD,
     FIELDS_EXCLUDED_FROM_RDI,
-    KOBO_ONLY_FIELDS, XLSX_ONLY_FIELDS,
+    XLSX_ONLY_FIELDS,
+    KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
@@ -446,7 +447,7 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
-        yield KOBO_ONLY_FIELDS.get("role_i_c")
+        yield from KOBO_ONLY_INDIVIDUAL_FIELDS
         yield FIELDS_EXCLUDED_FROM_RDI.get("business_area")
         yield XLSX_ONLY_FIELDS
         yield from FlexibleAttribute.objects.filter(
@@ -466,20 +467,24 @@ class Query(graphene.ObjectType):
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
-            "female_adults_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
             "pregnant_count",
             "male_age_group_0_5_count",
             "male_age_group_6_11_count",
             "male_age_group_12_17_count",
-            "male_adults_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",
             "female_age_group_12_17_disabled_count",
-            "female_adults_disabled_count",
+            "female_age_group_18_59_disabled_count",
+            "female_age_group_60_disabled_count",
             "male_age_group_0_5_disabled_count",
             "male_age_group_6_11_disabled_count",
             "male_age_group_12_17_disabled_count",
-            "male_adults_disabled_count",
+            "male_age_group_18_59_disabled_count",
+            "male_age_group_60_disabled_count",
             "returnee",
             "fchild_hoh",
             "child_hoh",
@@ -489,6 +494,10 @@ class Query(graphene.ObjectType):
             "org_enumerator",
             "org_name_enumerator",
             "village",
+            "registration_method",
+            "collect_individual_data",
+            "currency",
+            "unhcr_id",
         ]
 
         # yield from FlexibleAttribute.objects.order_by("name").all()
