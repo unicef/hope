@@ -18,8 +18,9 @@ from core.core_fields_attributes import (
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
-    KOBO_ONLY_FIELDS,
-    _core_fields_to_separated_dict,
+    core_fields_to_separated_dict,
+    KOBO_ONLY_INDIVIDUAL_FIELDS,
+    KOBO_ONLY_HOUSEHOLD_FIELDS,
 )
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
@@ -83,9 +84,14 @@ class ImportDataValidator(BaseValidator):
     def documents_validator(cls, documents_numbers_dict, is_xlsx=True, *args, **kwargs):
         invalid_rows = []
         for key, values in documents_numbers_dict.items():
+            if key == "other_id_no_i_c":
+                continue
+            issuing_countries = values.get("issuing_countries")
+            if not issuing_countries:
+                issuing_countries = [None] * len(values["validation_data"])
             if key == "other_id_type_i_c":
                 for name, validation_data, issuing_country in zip(
-                    values["names"], values["validation_data"], values["issuing_countries"]
+                    values["names"], values["validation_data"], issuing_countries
                 ):
                     value = validation_data["value"]
                     row_number = validation_data.get("row_number")
@@ -105,7 +111,7 @@ class ImportDataValidator(BaseValidator):
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
-                    if name or value and not issuing_country:
+                    if (name or value) and not issuing_country:
                         error = {
                             "header": key,
                             "message": "Issuing country for other_id_no_i_c is required, "
@@ -113,8 +119,9 @@ class ImportDataValidator(BaseValidator):
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
+                        invalid_rows.append(error)
             else:
-                for validation_data, issuing_country in zip(values["validation_data"], values["issuing_countries"]):
+                for validation_data, issuing_country in zip(values["validation_data"], issuing_countries):
                     value = validation_data["value"]
                     row_number = validation_data.get("row_number")
                     if value and not issuing_country:
@@ -125,6 +132,7 @@ class ImportDataValidator(BaseValidator):
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
+                        invalid_rows.append(error)
 
         return invalid_rows
 
@@ -132,7 +140,10 @@ class ImportDataValidator(BaseValidator):
     def identity_validator(cls, identities_numbers_dict, is_xlsx=True, *args, **kwargs):
         invalid_rows = []
         for key, values in identities_numbers_dict.items():
-            for data_dict, issuing_country in zip(values["validation_data"], values["issuing_countries"]):
+            issuing_countries = values.get("issuing_countries")
+            if not issuing_countries:
+                issuing_countries = [None] * len(values["validation_data"])
+            for data_dict, issuing_country in zip(values["validation_data"], issuing_countries):
                 value = data_dict["value"]
                 row_number = data_dict.get("row_number")
 
@@ -141,7 +152,7 @@ class ImportDataValidator(BaseValidator):
                 elif value and not issuing_country:
                     error = {
                         "header": key,
-                        "message": "Issuing country is required: " f"{values['agency']} no: {value}",
+                        "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
                     }
                     if is_xlsx is True:
                         error["row_number"] = row_number
@@ -272,15 +283,14 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         if isinstance(value, bool):
             return True
 
-        if not cls.required_validator(value, header):
+        if cls.ALL_FIELDS[header]["required"] is False and (value is None or value == ""):
             return True
-
-        if value is None:
-            return False
 
         value = value.capitalize()
         if value in ("True", "False"):
             return True
+
+        return False
 
     @classmethod
     def required_validator(cls, value, header, *args, **kwargs):
@@ -385,7 +395,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             "electoral_card_issuer_i_c": "electoral_card_no_i_c",
             "national_id_issuer_i_c": "national_id_no_i_c",
             "national_passport_issuer_i_c": "national_passport_i_c",
-            "other_id_issuer_i_c": "other_id_no_i_c",
+            "other_id_issuer_i_c": "other_id_type_i_c",
             # identities
             "scope_id_issuer_i_c": "scope_id_no_i_c",
             "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
@@ -624,7 +634,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
 
 class KoboProjectImportDataValidator(ImportDataValidator):
-    CORE_FIELDS: dict = _core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
+    CORE_FIELDS: dict = core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
     FLEX_FIELDS: dict = serialize_flex_attributes()
     ALL_FIELDS = get_combined_attributes()
 
@@ -903,7 +913,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             head_of_hh_counter = 0
             primary_collector_counter = 0
             alternate_collector_counter = 0
-            expected_hh_fields = cls.EXPECTED_HOUSEHOLD_FIELDS.copy()
+            expected_hh_fields = {*cls.EXPECTED_HOUSEHOLD_FIELDS, *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
             attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
                 expected_hh_fields.discard(hh_field)
@@ -911,7 +921,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                     for individual in hh_value:
                         expected_i_fields = {
                             *cls.EXPECTED_INDIVIDUALS_FIELDS,
-                            *KOBO_ONLY_FIELDS.keys(),
+                            *KOBO_ONLY_INDIVIDUAL_FIELDS,
                         }
                         current_individual_docs_and_identities = defaultdict(dict)
                         for i_field, i_value in individual.items():

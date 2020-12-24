@@ -20,6 +20,7 @@ from django_countries.fields import Country
 from PIL import Image
 
 from core.models import AdminArea, AdminAreaType, BusinessArea
+from household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
 from registration_data.fixtures import RegistrationDataImportFactory
 from registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
 from registration_datahub.models import (
@@ -267,9 +268,9 @@ class TestRdiCreateTask(TestCase):
         image = File(BytesIO(content), name="image.png")
         task.business_area = self.business_area
         doc_type = ImportedDocumentType.objects.create(
-            country="AF",
+            country=Country("AFG"),
             label="Birth Certificate",
-            type="BIRTH_CERTIFICATE",
+            type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         task.documents = {
             "individual_14_birth_certificate_no_i_c": {
@@ -277,6 +278,7 @@ class TestRdiCreateTask(TestCase):
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
                 "value": "CD1247246Q12W",
+                "issuing_country": Country("AFG"),
                 "photo": image,
             }
         }
@@ -338,7 +340,7 @@ class TestRdiKoboCreateTask(TestCase):
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/kobo_submissions.json"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions.json")
         cls.import_data = ImportData.objects.create(
@@ -348,7 +350,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         content = Path(
-            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests" "/test_file/kobo_submissions_collectors.json"
+            f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions_collectors.json"
         ).read_bytes()
         file = File(BytesIO(content), name="kobo_submissions_collectors.json")
         cls.import_data_collectors = ImportData.objects.create(

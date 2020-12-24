@@ -590,7 +590,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "national_passport_i_c",
+        "xlsx_field": "national_passport_issuer_i_c",
     },
     {
         "id": "234a1b5b-7900-4f67-86a9-5fcaede3d09d",
@@ -626,7 +626,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "national_id_i_c",
+        "xlsx_field": "national_id_issuer_i_c",
     },
     {
         "id": "d43304d9-91e4-4317-9356-f7066b898b16",
@@ -662,7 +662,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "scope_id_i_c",
+        "xlsx_field": "scope_id_issuer_i_c",
     },
     {
         "id": "4aa3d595-131a-48df-8752-ec171eabe3be",
@@ -710,7 +710,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "other_id_i_c",
+        "xlsx_field": "other_id_issuer_i_c",
     },
     {
         "id": "d4279a74-377f-4f74-baf2-e1ebd001ec5c",
@@ -1298,13 +1298,13 @@ FIELDS_EXCLUDED_FROM_RDI = {
     ),
 }
 
-KOBO_ONLY_FIELDS = {
+KOBO_ONLY_HOUSEHOLD_FIELDS = {
     "start_h_c": {
         "id": "9da8c56a-3c65-47d9-8149-699761842ce4",
         "type": TYPE_STRING,
         "name": "start",
         "lookup": "start",
-        "required": False,
+        "required": True,
         "label": {"English(EN)": "Data collection start date"},
         "hint": "",
         "choices": [],
@@ -1316,13 +1316,15 @@ KOBO_ONLY_FIELDS = {
         "type": TYPE_STRING,
         "name": "end",
         "lookup": "end",
-        "required": False,
+        "required": True,
         "label": {"English(EN)": "Data collection end date"},
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "end_h_c",
     },
+}
+KOBO_ONLY_INDIVIDUAL_FIELDS = {
     "role_i_c": {
         "type": TYPE_SELECT_ONE,
         "name": "role",
@@ -1369,7 +1371,7 @@ def _reduce_core_field_attr(old, new):
     return old
 
 
-def _core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
+def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
     result_dict = {
         "individuals": {},
         "households": {},
@@ -1381,7 +1383,7 @@ def _core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
         core_fields_attrs = HOUSEHOLD_ID_FIELDS + CORE_FIELDS_ATTRIBUTES
 
     if append_xlsx is True:
-        core_fields_attrs = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        core_fields_attrs += XLSX_ONLY_FIELDS
 
     for field in core_fields_attrs:
         associated_key = field["associated_with"].lower() + "s"
@@ -1394,4 +1396,4 @@ FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get(
 
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES, {})
 
-CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = _core_fields_to_separated_dict()
+CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()
