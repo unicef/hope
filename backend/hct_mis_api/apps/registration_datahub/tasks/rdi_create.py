@@ -463,7 +463,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         if sheet_title == "households":
             ImportedHousehold.objects.bulk_create(self.households.values())
-            self._create_household_identities()
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
@@ -664,6 +663,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             collectors_count = 0
             household_obj = ImportedHousehold()
             self.attachments = household.get("_attachments", [])
+            registration_date = None
+            current_individuals = []
             for hh_field, hh_value in household.items():
                 self._cast_and_assign(hh_value, hh_field, household_obj)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
@@ -683,19 +684,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     value_key = "number"
                                 current_individual_docs_and_identities[key][value_key] = i_value
                                 current_individual_docs_and_identities[key]["individual"] = individual_obj
-                            elif i_field == "is_only_collector":
-                                if i_value == YES:
-                                    only_collector_flag = True
-                                    collectors_count += 1
+                            elif i_field == "relationship_i_c" and i_value == NON_BENEFICIARY:
+                                only_collector_flag = True
+                                collectors_count += 1
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
                         if individual_obj.relationship == HEAD and only_collector_flag is False:
                             head_of_households_mapping[household_obj] = individual_obj
-
-                        if only_collector_flag is True:
-                            individual_obj.relationship = NON_BENEFICIARY
 
                         individual_obj.last_registration_date = individual_obj.first_registration_date
                         individual_obj.registration_data_import = registration_data_import
@@ -720,10 +717,20 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
+                        current_individuals.append(individual_obj.get_hash_key)
+                elif hh_field == "end_h_c":
+                    registration_date = parse(hh_value)
+
             household_obj.size = household_obj.size - collectors_count
-            household_obj.last_registration_date = household_obj.first_registration_date
+            household_obj.first_registration_date = registration_date
+            household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
             households_to_create.append(household_obj)
+
+            for ind_hash_key in current_individuals:
+                ind = individuals_to_create[ind_hash_key]
+                ind.first_registration_date = registration_date
+                ind.last_registration_date = registration_date
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
