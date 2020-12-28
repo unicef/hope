@@ -177,9 +177,13 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of last screening against sanctions list'>
-            <UniversalMoment>
-              {individual.sanctionListLastCheck}
-            </UniversalMoment>
+            {individual.sanctionListLastCheck ? (
+              <UniversalMoment>
+                {individual.sanctionListLastCheck}
+              </UniversalMoment>
+            ) : (
+              '-'
+            )}
           </LabelizedField>
         </Grid>
       </Grid>

@@ -154,14 +154,16 @@ export function HouseholdDetails({
           <Grid item xs={4}>
             <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
               <div>
-                {household.programs.edges.map((item) => (
-                  <ContentLink
-                    key={item.node.id}
-                    href={`/${businessArea}/programs/${item.node.id}`}
-                  >
-                    {item.node.name}
-                  </ContentLink>
-                ))}
+                {household.programs.edges.length
+                  ? household.programs.edges.map((item) => (
+                      <ContentLink
+                        key={item.node.id}
+                        href={`/${businessArea}/programs/${item.node.id}`}
+                      >
+                        {item.node.name}
+                      </ContentLink>
+                    ))
+                  : '-'}
               </div>
             </LabelizedField>
           </Grid>
