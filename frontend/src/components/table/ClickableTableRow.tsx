@@ -2,7 +2,7 @@ import React, { MouseEventHandler, useState } from 'react';
 import TableRow, { TableRowProps } from '@material-ui/core/TableRow';
 import styled from 'styled-components';
 
-const StyledTableRov = styled(TableRow)`
+const StyledTableRow = styled(TableRow)`
   cursor: pointer;
 `;
 function getSelectedText(): string {
@@ -47,7 +47,7 @@ export function ClickableTableRow({
     };
   }
   return (
-    <StyledTableRov
+    <StyledTableRow
       {...props}
       onMouseDown={onMouseDown}
       onClick={realOnClick}
