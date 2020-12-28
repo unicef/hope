@@ -90,7 +90,7 @@ export const menuItems = [
   },
   {
     name: 'Reporting',
-    href: '/#',
+    href: '/reporting',
     selectedRegexp: /^\/test.*$/,
     icon: <TrendingUpRounded />,
   },
