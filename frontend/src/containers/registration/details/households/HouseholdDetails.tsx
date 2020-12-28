@@ -44,22 +44,22 @@ export function HouseholdDetails({
         <Grid container spacing={6}>
           <Grid item xs={3}>
             <LabelizedField label='Household Size'>
-              <div>{household.size}</div>
+              {household.size}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='Location'>
-              <div>{household.country}</div>
+              {household.country}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='Residence Status'>
-              <div>{residenceChoicesDict[household.residenceStatus]}</div>
+              {residenceChoicesDict[household.residenceStatus]}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='Country of Origin'>
-              <div>{household.countryOrigin}</div>
+              {household.countryOrigin}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
@@ -73,17 +73,13 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='Total Cash Received'>
-              <div>
-                <Missing />
-                {/* <div>{formatCurrency(household.totalCashReceived)}</div> */}
-              </div>
+              <Missing />
+              {/* {formatCurrency(household.totalCashReceived)} */}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='Programme (Enrolled)'>
-              <div>
-                <Missing />
-              </div>
+              <Missing />
             </LabelizedField>
           </Grid>
         </Grid>
