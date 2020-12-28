@@ -71,56 +71,32 @@ export const ReportingDetailsPage = () => {
     },
     {
       label: 'Report Type',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: <span>fkofko</span>,
       size: 3,
     },
     {
       label: 'Timeframe',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: null,
       size: 3,
     },
     {
       label: 'Administrative Level 2',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: null,
       size: 3,
     },
     {
       label: 'Programme',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: null,
       size: 3,
     },
     {
       label: 'Created By',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: null,
       size: 3,
     },
     {
       label: 'Creation Date',
-      value: (
-        <span>
-          <Missing />
-        </span>
-      ),
+      value: null,
       size: 3,
     },
   ];

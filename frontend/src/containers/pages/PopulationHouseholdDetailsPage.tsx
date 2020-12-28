@@ -162,7 +162,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='User name'>
-                <div> {household.registrationDataImport.importedBy.email}</div>
+                {household.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
           </Grid>
