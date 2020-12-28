@@ -16,7 +16,7 @@ const Value = styled.span`
 
 export interface Props {
   value?: React.ReactNode;
-  children?: React.ReactElement | string | number;
+  children?: React.ReactElement | string | number | boolean;
   label: string;
   dataCy?: string;
 }
