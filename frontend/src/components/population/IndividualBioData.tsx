@@ -62,15 +62,13 @@ export function IndividualsBioData({
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
-        <div>{edge.node.documentNumber}</div>
+        {edge.node.documentNumber}
       </LabelizedField>
     </Grid>
   ));
   const mappedIdentities = individual.identities?.map((item) => (
     <Grid item xs={3} key={item.id}>
-      <LabelizedField label={`${item.type} ID`}>
-        <div>{item.number}</div>
-      </LabelizedField>
+      <LabelizedField label={`${item.type} ID`}>{item.number}</LabelizedField>
     </Grid>
   ));
 
@@ -82,33 +80,31 @@ export function IndividualsBioData({
       <Grid container spacing={6}>
         <Grid item xs={3}>
           <LabelizedField label='Full Name'>
-            <div>{individual.fullName}</div>
+            {individual.fullName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Given Name'>
-            <div>{individual.givenName}</div>
+            {individual.givenName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Middle Name'>
-            <div>{individual.middleName}</div>
+            {individual.middleName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Family Name'>
-            <div>{individual.familyName}</div>
+            {individual.familyName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Gender'>
-            <div>{sexToCapitalize(individual.sex)}</div>
+            {sexToCapitalize(individual.sex)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>
-            <div>{age}</div>
-          </LabelizedField>
+          <LabelizedField label='Age'>{age}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
@@ -117,23 +113,19 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            <div>
-              {individual.estimatedBirthDate
-                ? individual.estimatedBirthDate
-                : 'No'}
-            </div>
+            {individual.estimatedBirthDate
+              ? individual.estimatedBirthDate
+              : 'No'}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
-            <div>{maritalStatusChoicesDict[individual.maritalStatus]}</div>
+            {maritalStatusChoicesDict[individual.maritalStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
-            <div>
-              <div>{individual.pregnant ? 'Yes' : 'No'}</div>
-            </div>
+            {individual.pregnant ? 'Yes' : 'No'}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -151,12 +143,12 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Role'>
-            <div>{roleChoicesDict[individual.role]}</div>
+            {roleChoicesDict[individual.role]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Relationship to HOH'>
-            <div>{relationshipChoicesDict[individual.relationship]}</div>
+            {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
         {!mappedIndividualDocuments.length &&
@@ -172,12 +164,12 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Phone Number'>
-            <div>{individual.phoneNo}</div>
+            {individual.phoneNo}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Alternate Phone Number'>
-            <div>{individual.phoneNoAlternative}</div>
+            {individual.phoneNoAlternative}
           </LabelizedField>
         </Grid>
         <Grid item xs={12}>
@@ -185,11 +177,9 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of last screening against sanctions list'>
-            <div>
-              <UniversalMoment>
-                {individual.sanctionListLastCheck}
-              </UniversalMoment>
-            </div>
+            <UniversalMoment>
+              {individual.sanctionListLastCheck}
+            </UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>
