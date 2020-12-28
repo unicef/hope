@@ -74,7 +74,6 @@ export function HouseholdDetails({
           <Grid item xs={3}>
             <LabelizedField label='Total Cash Received'>
               <Missing />
-              {/* {formatCurrency(household.totalCashReceived)} */}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
