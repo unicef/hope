@@ -195,11 +195,7 @@ export function PaymentRecordDetails({
             <LabelizedField
               label='DELIVERY DATE'
               value={
-                (
-                  <UniversalMoment>
-                    {paymentRecord.deliveryDate}
-                  </UniversalMoment>
-                ) || '-'
+                <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
               }
             />
           </Grid>

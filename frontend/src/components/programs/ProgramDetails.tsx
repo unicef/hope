@@ -76,17 +76,13 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='START DATE'
-              value={
-                <UniversalMoment>{program.startDate}</UniversalMoment> || '-'
-              }
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='END DATE'
-              value={
-                <UniversalMoment>{program.endDate}</UniversalMoment> || '-'
-              }
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
 

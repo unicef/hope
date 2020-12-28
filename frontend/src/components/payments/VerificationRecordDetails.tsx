@@ -63,11 +63,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label='STATUS DATE'
               value={
-                (
-                  <UniversalMoment>
-                    {paymentVerification.paymentRecord.statusDate}
-                  </UniversalMoment>
-                ) || '-'
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.statusDate}
+                </UniversalMoment>
               }
             />
           </Grid>
@@ -109,11 +107,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label='STATUS DATE'
               value={
-                (
-                  <UniversalMoment>
-                    {paymentVerification.statusDate}
-                  </UniversalMoment>
-                ) || '-'
+                <UniversalMoment>
+                  {paymentVerification.statusDate}
+                </UniversalMoment>
               }
             />
           </Grid>
@@ -201,11 +197,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label='DELIVERY DATE'
               value={
-                (
-                  <UniversalMoment>
-                    {paymentVerification.paymentRecord.deliveryDate}
-                  </UniversalMoment>
-                ) || '-'
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.deliveryDate}
+                </UniversalMoment>
               }
             />
           </Grid>
@@ -224,11 +218,9 @@ export function VerificationRecordDetails({
             <LabelizedField
               label='ENTITLEMENT CARD ISSUE DATE'
               value={
-                (
-                  <UniversalMoment>
-                    {paymentVerification.paymentRecord.entitlementCardIssueDate}
-                  </UniversalMoment>
-                ) || '-'
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
               }
             />
           </Grid>
