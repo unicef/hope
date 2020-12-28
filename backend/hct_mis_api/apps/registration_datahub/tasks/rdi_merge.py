@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from django.forms import model_to_dict
 
 from core.models import AdminArea
@@ -23,6 +24,7 @@ from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
+    KoboImportedSubmission,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
@@ -280,6 +282,18 @@ class RdiMergeTask:
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
+
+        kobo_submissions = []
+        for imported_household in imported_households:
+            kobo_submission_uuid = imported_household.kobo_submission_uuid
+            kobo_asset_id = imported_household.kobo_asset_id
+            if kobo_submission_uuid and kobo_asset_id:
+                submission = KoboImportedSubmission(
+                    kobo_submission_uuid=kobo_submission_uuid, kobo_asset_id=kobo_asset_id
+                )
+                kobo_submissions.append(submission)
+        if kobo_submissions:
+            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
 
         # DEDUPLICATION
         ticket_details_to_create = []
