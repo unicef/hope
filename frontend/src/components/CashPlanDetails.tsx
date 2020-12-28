@@ -98,13 +98,13 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='plan start date'
-              value={<UniversalMoment>{cashPlan.startDate}</UniversalMoment>}
+              value={<UniversalMoment>{cashPlan?.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='plan end date'
-              value={<UniversalMoment>{cashPlan.endDate}</UniversalMoment>}
+              value={<UniversalMoment>{cashPlan?.endDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
@@ -126,7 +126,7 @@ export function CashPlanDetails({
             <LabelizedField
               label='dispertion date'
               value={
-                <UniversalMoment>{cashPlan.dispersionDate}</UniversalMoment>
+                <UniversalMoment>{cashPlan?.dispersionDate}</UniversalMoment>
               }
             />
           </Grid>

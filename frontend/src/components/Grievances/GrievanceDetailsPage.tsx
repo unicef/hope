@@ -197,12 +197,12 @@ export function GrievanceDetailsPage(): React.ReactElement {
     },
     {
       label: 'ADMINISTRATIVE LEVEL 2',
-      value: <span>{ticket.admin || '-'}</span>,
+      value: <span>{ticket.admin}</span>,
       size: 3,
     },
     {
       label: 'AREA / VILLAGE / PAY POINT',
-      value: <span>{ticket.area || '-'}</span>,
+      value: <span>{ticket.area}</span>,
       size: 3,
     },
     {
@@ -212,7 +212,6 @@ export function GrievanceDetailsPage(): React.ReactElement {
     },
   ];
   const shouldShowReassignBoxDataChange = (): boolean => {
-
     let { individual } = ticket;
     let { household } = ticket;
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
@@ -222,8 +221,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     }
 
     const householdsAndRoles = individual?.householdsAndRoles;
-    const isHeadOfHousehold =
-      individual?.id === household?.headOfHousehold?.id;
+    const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
     const hasRolesToReassign =
       householdsAndRoles?.filter((el) => el.role !== 'NO_ROLE').length > 0;
 
@@ -232,8 +230,8 @@ export function GrievanceDetailsPage(): React.ReactElement {
         ticket.issueType.toString() ===
           GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
-        ticket?.systemFlaggingTicketDetails?.approveStatus)||
-        (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        ticket?.systemFlaggingTicketDetails?.approveStatus) ||
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
         ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
@@ -334,7 +332,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </PaddingContainer>
           )}
           {ticket?.category?.toString() ===
-          GRIEVANCE_CATEGORIES.DEDUPLICATION && (
+            GRIEVANCE_CATEGORIES.DEDUPLICATION && (
             <PaddingContainer>
               <NeedsAdjudicationDetails ticket={ticket} />
             </PaddingContainer>
