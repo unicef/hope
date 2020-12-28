@@ -16,7 +16,7 @@ const Value = styled.span`
 
 export interface Props {
   value?: React.ReactNode;
-  children?: React.ReactElement;
+  children?: React.ReactElement | string | number;
   label: string;
   dataCy?: string;
 }
@@ -30,7 +30,11 @@ export function LabelizedField({
   return (
     <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
       <Label color='textSecondary'>{label}</Label>
-      <div>{children || <Value color='textSecondary'>{value}</Value>}</div>
+      <div>
+        {children || value
+          ? children || <Value color='textSecondary'>{value}</Value>
+          : '-'}
+      </div>
     </div>
   );
 }

@@ -92,7 +92,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Middle Name'>
-            <div>{individual.middleName || '-'}</div>
+            <div>{individual.middleName}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -132,7 +132,7 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
             <div>
-              <div>{individual.pregnant ? 'Yes' : 'No' || '-'}</div>
+              <div>{individual.pregnant ? 'Yes' : 'No'}</div>
             </div>
           </LabelizedField>
         </Grid>
@@ -177,7 +177,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Alternate Phone Number'>
-            <div>{individual.phoneNoAlternative || '-'}</div>
+            <div>{individual.phoneNoAlternative}</div>
           </LabelizedField>
         </Grid>
         <Grid item xs={12}>

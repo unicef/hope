@@ -65,12 +65,12 @@ export function HouseholdDetails({
           <Grid container spacing={3}>
             <Grid item xs={3}>
               <LabelizedField label='Household Size'>
-                <div>{household.size}</div>
+                {household.size}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Residence Status'>
-                <div>{residenceChoicesDict[household.residenceStatus]}</div>
+                {residenceChoicesDict[household.residenceStatus]}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
@@ -84,68 +84,58 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Country'>
-                <div>{household.country || '-'}</div>
+                {household.country}
               </LabelizedField>
             </Grid>
 
             <Grid item xs={3}>
               <LabelizedField label='Country of Origin'>
-                <div>{household.countryOrigin}</div>
+                {household.countryOrigin}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Address'>
-                <div>
-                  <div>{household.address}</div>
-                </div>
+                {household.address}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Village'>
-                <div>
-                  <div>{household.village || '-'}</div>
-                </div>
+                {household.village}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 1'>
-                <div>{household.address || '-'}</div>
+                {household.address}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 2'>
-                <div>{household.adminArea?.title || '-'}</div>
+                {household.adminArea?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
               <LabelizedField label='Geolocation'>
-                <div>{household.geopoint || '-'}</div>
+                {household.geopoint}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='UNHCR CASE ID'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='LENGTH OF TIME SINCE ARRIVAL'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='NUMBER OF TIMES DISPLACED'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='IS THIS A RETURNEE HOUSEHOLD?'>
-                <div>{household.returnee ? 'Yes' : 'No'}</div>
+                {household.returnee ? 'Yes' : 'No'}
               </LabelizedField>
             </Grid>
           </Grid>
@@ -158,7 +148,7 @@ export function HouseholdDetails({
         <Grid container>
           <Grid item xs={4}>
             <LabelizedField label='Total Cash Received'>
-              <div>{formatCurrency(household.totalCashReceived)}</div>
+              {formatCurrency(household.totalCashReceived)}
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
