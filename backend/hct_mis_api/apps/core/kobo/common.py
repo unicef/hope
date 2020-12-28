@@ -64,10 +64,16 @@ def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> l
 
 
 def count_population(results: list) -> Tuple[int, int]:
+    from registration_datahub.tasks.utils import get_submission_metadata
+    from registration_datahub.models import KoboImportedSubmission
+
+    total_households_count = 0
     total_individuals_count = 0
     for result in results:
-        total_individuals_count += len(result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME])
-
-    total_households_count = len(results)
+        submission_meta_data = get_submission_metadata(result)
+        submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+        if submission_exists is False:
+            total_households_count += 1
+            total_individuals_count += len(result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME])
 
     return total_households_count, total_individuals_count
