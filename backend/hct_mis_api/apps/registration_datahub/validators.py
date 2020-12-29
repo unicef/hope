@@ -27,7 +27,8 @@ from core.models import BusinessArea
 from core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
 from core.validators import BaseValidator
 from household.models import ROLE_ALTERNATE, ROLE_PRIMARY
-from registration_datahub.tasks.utils import collectors_str_ids_to_list
+from registration_datahub.models import KoboImportedSubmission
+from registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 
 class XLSXValidator(BaseValidator):
@@ -910,6 +911,10 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         }
 
         for household in reduced_submissions:
+            submission_meta_data = get_submission_metadata(household)
+            submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+            if submission_exists is True:
+                continue
             head_of_hh_counter = 0
             primary_collector_counter = 0
             alternate_collector_counter = 0
