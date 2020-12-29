@@ -46,6 +46,7 @@ from household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    HouseholdIdentity,
 )
 from program.models import Program
 from registration_datahub.schema import DeduplicationResultNode

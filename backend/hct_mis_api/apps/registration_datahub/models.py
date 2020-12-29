@@ -12,6 +12,7 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from core.currencies import CURRENCY_CHOICES
 from household.models import (
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -27,6 +28,9 @@ from household.models import (
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
+    BLANK,
+    REGISTRATION_METHOD_CHOICES,
+    YES_NO_CHOICE,
 )
 from utils.models import TimeStampedUUIDModel
 
@@ -42,6 +46,7 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
 )
 
 
+# TODO: REMOVE ME
 class ImportedHouseholdIdentity(models.Model):
     agency = models.ForeignKey(
         "ImportedAgency",
@@ -59,53 +64,61 @@ class ImportedHouseholdIdentity(models.Model):
 
 class ImportedHousehold(TimeStampedUUIDModel):
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.BooleanField(default=True)
-    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES)
+    consent = models.BooleanField(default=None, null=True)
+    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
     size = models.PositiveIntegerField()
-    address = models.CharField(max_length=255, blank=True, default="")
-    country = CountryField(blank=True, default="")
-    admin1 = models.CharField(max_length=255, blank=True, default="")
-    admin2 = models.CharField(max_length=255, blank=True, default="")
+    address = models.CharField(max_length=255, blank=True, default=BLANK)
+    country = CountryField()
+    admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin2 = models.CharField(max_length=255, blank=True, default=BLANK)
     geopoint = PointField(null=True, default=None)
-    female_age_group_0_5_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=0)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=0)
-    female_adults_count = models.PositiveIntegerField(default=0)
-    pregnant_count = models.PositiveIntegerField(default=0)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=0)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=0)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=0)
-    male_adults_count = models.PositiveIntegerField(default=0)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
-    female_adults_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
-    male_adults_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
+    pregnant_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
     head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
-    fchild_hoh = models.BooleanField(default=False)
-    child_hoh = models.BooleanField(default=False)
+    fchild_hoh = models.BooleanField(default=None, null=True)
+    child_hoh = models.BooleanField(default=None, null=True)
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="households",
         on_delete=models.CASCADE,
     )
-    first_registration_date = models.DateField()
-    last_registration_date = models.DateField()
-    returnee = models.BooleanField(default=False)
+    first_registration_date = models.DateTimeField()
+    last_registration_date = models.DateTimeField()
+    returnee = models.BooleanField(default=None, null=True)
     flex_fields = JSONField(default=dict)
-
     start = models.DateTimeField(blank=True, null=True)
-    end = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True)
-    name_enumerator = models.CharField(max_length=250)
-    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES)
-    org_name_enumerator = models.CharField(max_length=250)
-    village = models.CharField(max_length=250, blank=True)
+    name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
+    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES, blank=True, default=BLANK)
+    org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
+    village = models.CharField(max_length=250, blank=True, default=BLANK)
+    registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
+    unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
+    kobo_submission_uuid = models.UUIDField(null=True, default=None)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
 
     @property
     def business_area(self):
@@ -301,7 +314,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class ImportedDocumentType(TimeStampedUUIDModel):
-    country = CountryField(blank=True)
+    country = CountryField()
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -337,6 +350,10 @@ class ImportedAgency(models.Model):
     label = models.CharField(
         max_length=100,
     )
+    country = CountryField()
+
+    class Meta:
+        unique_together = ("country", "type")
 
     def __str__(self):
         return f"{self.label}"
@@ -355,3 +372,9 @@ class ImportedIndividualIdentity(models.Model):
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
+
+
+class KoboImportedSubmission(models.Model):
+    kobo_submission_uuid = models.UUIDField()
+    kobo_asset_id = models.CharField(max_length=150)
+    submission_time = models.DateTimeField()
