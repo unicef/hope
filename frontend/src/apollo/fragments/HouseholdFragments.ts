@@ -49,24 +49,27 @@ export const householdDetailed = gql`
     femaleAgeGroup05Count
     femaleAgeGroup611Count
     femaleAgeGroup1217Count
-    femaleAdultsCount
+    femaleAgeGroup1859Count
+    femaleAgeGroup60Count
     pregnantCount
     maleAgeGroup05Count
     maleAgeGroup611Count
     maleAgeGroup1217Count
-    maleAdultsCount
+    maleAgeGroup1859Count
+    maleAgeGroup60Count
     femaleAgeGroup05DisabledCount
     femaleAgeGroup611DisabledCount
     femaleAgeGroup1217DisabledCount
-    femaleAdultsDisabledCount
+    femaleAgeGroup1859DisabledCount
+    femaleAgeGroup60DisabledCount
     maleAgeGroup05DisabledCount
     maleAgeGroup611DisabledCount
     maleAgeGroup1217DisabledCount
-    maleAdultsDisabledCount
+    maleAgeGroup1859DisabledCount
+    maleAgeGroup60DisabledCount
     fchildHoh
     childHoh
     start
-    end
     deviceid
     orgNameEnumerator
     returnee

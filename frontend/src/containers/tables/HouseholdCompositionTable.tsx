@@ -10,6 +10,7 @@ import {
 import styled from 'styled-components';
 import React, { ReactElement } from 'react';
 import { HouseholdDetailedFragment } from '../../__generated__/graphql';
+import { Missing } from '../../components/Missing';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -100,22 +101,41 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>18+</TableCell>
+            <TableCell align='left'>12-&lt;59</TableCell>
             <GreyTableCell align='left'>
-              {household.femaleAdultsCount}
+              {household.femaleAgeGroup1859Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.femaleAdultsDisabledCount}
+              {household.femaleAgeGroup1859DisabledCount}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.pregnantCount}
+              <Missing />
             </GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
-              {household.maleAdultsCount}
+              {household.maleAgeGroup1859Count}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              {household.maleAdultsDisabledCount}
+              {household.maleAgeGroup1859DisabledCount}
+            </GreyTableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell align='left'>60+</TableCell>
+            <GreyTableCell align='left'>
+              {household.femaleAgeGroup60Count}
+            </GreyTableCell>
+            <GreyTableCell align='left'>
+              {household.femaleAgeGroup60DisabledCount}
+            </GreyTableCell>
+            <GreyTableCell align='left'>
+              <Missing />
+            </GreyTableCell>
+            <TableCell align='left' />
+            <GreyTableCell align='left'>
+              {household.maleAgeGroup60Count}
+            </GreyTableCell>
+            <GreyTableCell align='left'>
+              {household.maleAgeGroup60DisabledCount}
             </GreyTableCell>
           </TableRow>
         </TableBody>
