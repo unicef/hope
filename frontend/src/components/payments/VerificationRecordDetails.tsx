@@ -158,7 +158,7 @@ export function VerificationRecordDetails({
               label='ALT. PHONE NUMBER'
               value={
                 paymentVerification.paymentRecord.household.headOfHousehold
-                  .phoneNoAlternative || '-'
+                  .phoneNoAlternative
               }
             />
           </Grid>
