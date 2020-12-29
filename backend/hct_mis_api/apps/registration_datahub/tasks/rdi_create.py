@@ -32,11 +32,10 @@ from registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
-    ImportedHouseholdIdentity,
+    RegistrationDataImportDatahub, KoboImportedSubmission,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
-from registration_datahub.tasks.utils import collectors_str_ids_to_list
+from registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 
 class RdiBaseCreateTask:
@@ -660,13 +659,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
         for household in self.reduced_submissions:
+            submission_meta_data = get_submission_metadata(household)
+            submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+            if submission_exists is True:
+                continue
             collectors_count = 0
-            household_obj = ImportedHousehold()
+            household_obj = ImportedHousehold(**submission_meta_data)
             self.attachments = household.get("_attachments", [])
             registration_date = None
             current_individuals = []
             for hh_field, hh_value in household.items():
-                self._cast_and_assign(hh_value, hh_field, household_obj)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
                         current_individual_docs_and_identities = defaultdict(dict)
@@ -689,6 +691,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 collectors_count += 1
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
+                            elif i_field.endswith("_h_c"):
+                                self._cast_and_assign(i_value, i_field, household_obj)
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
                         if individual_obj.relationship == HEAD and only_collector_flag is False:
@@ -720,6 +724,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         current_individuals.append(individual_obj.get_hash_key)
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
+                else:
+                    self._cast_and_assign(hh_value, hh_field, household_obj)
 
             household_obj.size = household_obj.size - collectors_count
             household_obj.first_registration_date = registration_date

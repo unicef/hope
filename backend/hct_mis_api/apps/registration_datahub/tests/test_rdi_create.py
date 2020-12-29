@@ -443,7 +443,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         first_household = households.get(size=3)
-        second_household = households.get(size=1)
+        second_household = households.get(size=2)
 
         first_household_collectors = first_household.individuals_and_roles.values_list("individual__full_name", "role")
         self.assertEqual(
