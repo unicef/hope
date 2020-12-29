@@ -130,6 +130,35 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                 ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Reduced Coping Strategy Index (rCSI) Score',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Reduced Coping Strategy Index (rCSI) Score',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'RCSI_h_f',
+                'required': False,
+                'type': 'DECIMAL'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
                 'hint': '{\'English(EN)\': "Put \'-1\', if no women is present 1 complete set = 0.5 up ( eg Blouse/t-shirt)and 0.5 down (loincloths/skirts).The clothes of the mother or main woman in the household AND those of the oldest school aged girls in the house should be counted"}',
                 'isFlexField': True,
                 'labelEn': "Number of complete women's clothes.",
@@ -2227,7 +2256,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Bought food on credit or borrowed money to purchase food',
+                        'labelEn': '1p. No',
                         'labels': [
                             {
                                 'label': '',
@@ -2238,7 +2267,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Bought food on credit or borrowed money to purchase food',
+                                'label': '1p. No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -2246,10 +2275,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': 'borrowed_money'
+                        'value': '1'
                     },
                     {
-                        'labelEn': 'Changed accommodation location or type in order to reduce rental expenditure',
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -2260,7 +2289,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Changed accommodation location or type in order to reduce rental expenditure',
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -2268,10 +2297,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': 'changed_location'
+                        'value': '2'
                     },
                     {
-                        'labelEn': 'Child marriage',
+                        'labelEn': '3p. Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -2282,7 +2311,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Child marriage',
+                                'label': '3p. Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -2290,10 +2319,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': 'child_marriage'
+                        'value': '3'
                     },
                     {
-                        'labelEn': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                        'labelEn': '4p. Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -2304,7 +2333,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                                'label': '4p. Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -2312,188 +2341,12 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': 'illegal_jobs'
-                    },
-                    {
-                        'labelEn': 'Other',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Other',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'other'
-                    },
-                    {
-                        'labelEn': 'Reduced essential non food expenditure such as education/health',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Reduced essential non food expenditure such as education/health',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'reduced_essential'
-                    },
-                    {
-                        'labelEn': 'Sell productive assets or means of transport (sewing machine, car, wheel barrow, bicycle, motorbike, etc)',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Sell productive assets or means of transport (sewing machine, car, wheel barrow, bicycle, motorbike, etc)',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'sell_assets'
-                    },
-                    {
-                        'labelEn': 'Sell household goods (jewelry, phone, furniture, electro domestics, etc)',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Sell household goods (jewelry, phone, furniture, electro domestics, etc)',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'sell_hh_goods'
-                    },
-                    {
-                        'labelEn': 'Sent adult family members to beg',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Sent adult family members to beg',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'sent_adult_beg'
-                    },
-                    {
-                        'labelEn': 'Sent children (under 18) family members to beg',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Sent children (under 18) family members to beg',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'sent_child_beg'
-                    },
-                    {
-                        'labelEn': 'Spent savings',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Spent savings',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'spent_savings'
-                    },
-                    {
-                        'labelEn': 'Withdrawn children from school',
-                        'labels': [
-                            {
-                                'label': '',
-                                'language': 'Arabic(AR)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'French(FR)'
-                            },
-                            {
-                                'label': 'Withdrawn children from school',
-                                'language': 'English(EN)'
-                            },
-                            {
-                                'label': '',
-                                'language': 'Spanish(ES)'
-                            }
-                        ],
-                        'value': 'withdrawn_child'
+                        'value': '4'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'In the past 30 days, has your family applied any of the below strategies to meet food and basic needs?',
+                'labelEn': '1.13 Sent adult family members to beg',
                 'labels': [
                     {
                         'label': '',
@@ -2504,7 +2357,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'In the past 30 days, has your family applied any of the below strategies to meet food and basic needs?',
+                        'label': '1.13 Sent adult family members to beg',
                         'language': 'English(EN)'
                     },
                     {
@@ -2512,9 +2365,1676 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'Spanish(ES)'
                     }
                 ],
-                'name': 'coping_strategies_h_f',
+                'name': 'coping_strategy_adult_beg_h_f',
                 'required': False,
-                'type': 'SELECT_MANY'
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.5 Borrowed Money',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.5 Borrowed Money',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_borrow_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.2 Purchased food on credit or borrowed food',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.2 Purchased food on credit or borrowed food',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_buy_food_credit_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_change_housing_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.12 Sent children (under 18) family members to beg',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.12 Sent children (under 18) family members to beg',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_child_beg_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.15 Married Child for financial purposes',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.15 Married Child for financial purposes',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_child_marriage_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_consume_seed_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_neg_job_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'For what reasons (i.e. to meet which essential needs) did you (or other members in your household) adopt such coping strategy(ies)?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'For what reasons (i.e. to meet which essential needs) did you (or other members in your household) adopt such coping strategy(ies)?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_reason_h_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.3 Reduced essential non food expenditure such as education/health',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.3 Reduced essential non food expenditure such as education/health',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_red_exp_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.8 Withdrew children from school',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.8 Withdrew children from school',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_school_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_sell_assets_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.14 Sold last female animals',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.14 Sold last female animals',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_sell_fem_animals_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.9 Sold house or land',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.9 Sold house or land',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_sell_house_land_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_sell_prod_assets_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': '1p. No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '1p. No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': '3p. Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '3p. Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': '4p. Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': '4p. Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1.4 Spent Savings',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1.4 Spent Savings',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_spent_savings_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Household',
@@ -2733,6 +4253,35 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'days_out_of_school_i_f',
                 'required': False,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "What is the main reason for your household's choice to assume debt?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "What is the main reason for your household's choice to assume debt?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'debt_reason_h_f',
+                'required': False,
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -8907,6 +10456,79 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'type': 'SELECT_ONE'
             },
             {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Can you meet the basic needs of your household according to your priorities?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Can you meet the basic needs of your household according to your priorities?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'meet_household_needs_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
                 'associatedWith': 'Individual',
                 'choices': [
                 ],
@@ -9655,35 +11277,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Specify other coping strategies',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'Arabic(AR)'
-                    },
-                    {
-                        'label': '',
-                        'language': 'French(FR)'
-                    },
-                    {
-                        'label': 'Specify other coping strategies',
-                        'language': 'English(EN)'
-                    },
-                    {
-                        'label': '',
-                        'language': 'Spanish(ES)'
-                    }
-                ],
-                'name': 'other_coping_strategy_h_f',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': "{'English(EN)': ''}",
-                'isFlexField': True,
                 'labelEn': 'Other expenses',
                 'labels': [
                     {
@@ -10297,6 +11890,151 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'recent_illness_child_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '2. Borrow food or rely on help from friends or relatives',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '2. Borrow food or rely on help from friends or relatives',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'red_coping_strategy_borrow_food_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '5. Reduce number of meals eaten in a day',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '5. Reduce number of meals eaten in a day',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'red_coping_strategy_few_meals_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '1. Rely on less preferred and less expensive foods',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '1. Rely on less preferred and less expensive foods',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'red_coping_strategy_food_change_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '3. Limit portion size at mealtime',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '3. Limit portion size at mealtime',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'red_coping_strategy_portion_h_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': '4. Restrict consumption by adults in order for small children to eat',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': '4. Restrict consumption by adults in order for small children to eat',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'red_coping_strategy_restrict_adult_h_f',
+                'required': False,
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Individual',
