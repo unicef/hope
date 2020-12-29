@@ -117,6 +117,8 @@ class ImportedHousehold(TimeStampedUUIDModel):
     collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
+    kobo_submission_uuid = models.UUIDField(null=True, default=None)
+    kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
 
     @property
     def business_area(self):
@@ -370,3 +372,9 @@ class ImportedIndividualIdentity(models.Model):
 
     def __str__(self):
         return f"{self.agency} {self.individual} {self.document_number}"
+
+
+class KoboImportedSubmission(models.Model):
+    kobo_submission_uuid = models.UUIDField()
+    kobo_asset_id = models.CharField(max_length=150)
+    submission_time = models.DateTimeField()
