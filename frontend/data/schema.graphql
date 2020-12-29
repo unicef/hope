@@ -613,6 +613,177 @@ type GroupAttributeNode {
   labelEn: String
 }
 
+enum HouseholdCollectIndividualData {
+  A_
+  YES
+  NO
+}
+
+enum HouseholdCurrency {
+  A_
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BOV
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
+  EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HRK
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLL
+  SOS
+  SRD
+  SSP
+  STN
+  SVC
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
+  USD
+  UYU
+  UYW
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XAG
+  XAU
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
+}
+
 type HouseholdDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -640,41 +811,48 @@ type HouseholdNode implements Node {
   adminArea: AdminAreaNode
   representatives(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   geopoint: GeoJSON
-  femaleAgeGroup05Count: Int!
-  femaleAgeGroup611Count: Int!
-  femaleAgeGroup1217Count: Int!
-  femaleAdultsCount: Int!
-  pregnantCount: Int!
-  maleAgeGroup05Count: Int!
-  maleAgeGroup611Count: Int!
-  maleAgeGroup1217Count: Int!
-  maleAdultsCount: Int!
-  femaleAgeGroup05DisabledCount: Int!
-  femaleAgeGroup611DisabledCount: Int!
-  femaleAgeGroup1217DisabledCount: Int!
-  femaleAdultsDisabledCount: Int!
-  maleAgeGroup05DisabledCount: Int!
-  maleAgeGroup611DisabledCount: Int!
-  maleAgeGroup1217DisabledCount: Int!
-  maleAdultsDisabledCount: Int!
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
   registrationDataImport: RegistrationDataImportNode!
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   returnee: Boolean!
   flexFields: FlexFieldsScalar
-  firstRegistrationDate: Date!
-  lastRegistrationDate: Date!
+  firstRegistrationDate: DateTime!
+  lastRegistrationDate: DateTime!
   headOfHousehold: IndividualNode!
   fchildHoh: Boolean!
   childHoh: Boolean!
   unicefId: String!
   businessArea: UserBusinessAreaNode!
   start: DateTime
-  end: DateTime
   deviceid: String!
   nameEnumerator: String!
   orgEnumerator: HouseholdOrgEnumerator!
   orgNameEnumerator: String!
   village: String!
+  registrationMethod: HouseholdRegistrationMethod!
+  collectIndividualData: HouseholdCollectIndividualData!
+  currency: HouseholdCurrency!
+  unhcrId: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -704,11 +882,19 @@ type HouseholdNodeEdge {
 }
 
 enum HouseholdOrgEnumerator {
+  A_
   UNICEF
   PARTNER
 }
 
+enum HouseholdRegistrationMethod {
+  A_
+  HH_REGISTRATION
+  COMMUNITY
+}
+
 enum HouseholdResidenceStatus {
+  A_
   IDP
   REFUGEE
   OTHERS_OF_CONCERN
@@ -743,20 +929,16 @@ input HouseholdUpdateDataObjectType {
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
   femaleAgeGroup1217Count: Int
-  femaleAdultsCount: Int
   pregnantCount: Int
   maleAgeGroup05Count: Int
   maleAgeGroup611Count: Int
   maleAgeGroup1217Count: Int
-  maleAdultsCount: Int
   femaleAgeGroup05DisabledCount: Int
   femaleAgeGroup611DisabledCount: Int
   femaleAgeGroup1217DisabledCount: Int
-  femaleAdultsDisabledCount: Int
   maleAgeGroup05DisabledCount: Int
   maleAgeGroup611DisabledCount: Int
   maleAgeGroup1217DisabledCount: Int
-  maleAdultsDisabledCount: Int
   returnee: Boolean
   fchildHoh: Boolean
   childHoh: Boolean
@@ -1068,7 +1250,7 @@ type ImportedDocumentTypeNode {
   id: UUID!
   createdAt: DateTime!
   updatedAt: DateTime!
-  country: ImportedDocumentTypeCountry
+  country: ImportedDocumentTypeCountry!
   label: String!
   type: ImportedDocumentTypeType!
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
@@ -1083,11 +1265,183 @@ enum ImportedDocumentTypeType {
   OTHER
 }
 
+enum ImportedHouseholdCollectIndividualData {
+  A_
+  YES
+  NO
+}
+
 enum ImportedHouseholdConsentSharing {
+  A_
   UNICEF
   HUMANITARIAN_PARTNER
   PRIVATE_PARTNER
   GOVERNMENT_PARTNER
+}
+
+enum ImportedHouseholdCurrency {
+  A_
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BOV
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
+  EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HRK
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLL
+  SOS
+  SRD
+  SSP
+  STN
+  SVC
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
+  USD
+  UYU
+  UYW
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XAG
+  XAU
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
 }
 
 type ImportedHouseholdNode implements Node {
@@ -1105,38 +1459,45 @@ type ImportedHouseholdNode implements Node {
   admin1: String!
   admin2: String!
   geopoint: GeoJSON
-  femaleAgeGroup05Count: Int!
-  femaleAgeGroup611Count: Int!
-  femaleAgeGroup1217Count: Int!
-  femaleAdultsCount: Int!
-  pregnantCount: Int!
-  maleAgeGroup05Count: Int!
-  maleAgeGroup611Count: Int!
-  maleAgeGroup1217Count: Int!
-  maleAdultsCount: Int!
-  femaleAgeGroup05DisabledCount: Int!
-  femaleAgeGroup611DisabledCount: Int!
-  femaleAgeGroup1217DisabledCount: Int!
-  femaleAdultsDisabledCount: Int!
-  maleAgeGroup05DisabledCount: Int!
-  maleAgeGroup611DisabledCount: Int!
-  maleAgeGroup1217DisabledCount: Int!
-  maleAdultsDisabledCount: Int!
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
   headOfHousehold: ImportedIndividualNode
   fchildHoh: Boolean!
   childHoh: Boolean!
   registrationDataImport: RegistrationDataImportDatahubNode!
-  firstRegistrationDate: Date!
-  lastRegistrationDate: Date!
+  firstRegistrationDate: DateTime!
+  lastRegistrationDate: DateTime!
   returnee: Boolean!
   flexFields: JSONString!
   start: DateTime
-  end: DateTime
   deviceid: String!
   nameEnumerator: String!
-  orgEnumerator: ImportedHouseholdOrgEnumerator!
+  orgEnumerator: ImportedHouseholdOrgEnumerator
   orgNameEnumerator: String!
   village: String!
+  registrationMethod: ImportedHouseholdRegistrationMethod!
+  collectIndividualData: ImportedHouseholdCollectIndividualData!
+  currency: ImportedHouseholdCurrency!
+  unhcrId: String!
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
 }
@@ -1154,11 +1515,19 @@ type ImportedHouseholdNodeEdge {
 }
 
 enum ImportedHouseholdOrgEnumerator {
+  A_
   UNICEF
   PARTNER
 }
 
+enum ImportedHouseholdRegistrationMethod {
+  A_
+  HH_REGISTRATION
+  COMMUNITY
+}
+
 enum ImportedHouseholdResidenceStatus {
+  A_
   IDP
   REFUGEE
   OTHERS_OF_CONCERN
@@ -1202,6 +1571,7 @@ type ImportedIndividualIdentityNode {
 }
 
 enum ImportedIndividualMaritalStatus {
+  A_
   SINGLE
   MARRIED
   WIDOWED
@@ -1369,6 +1739,7 @@ type IndividualIdentityNode {
 }
 
 enum IndividualMaritalStatus {
+  A_
   SINGLE
   MARRIED
   WIDOWED
@@ -2240,7 +2611,6 @@ type SanctionListIndividualNode implements Node {
   addressNote: String!
   countryOfBirth: String
   active: Boolean!
-  ticketsystemflaggingdetailsSet(before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
   documents(before: String, after: String, first: Int, last: Int): SanctionListIndividualDocumentNodeConnection!
   nationalities(before: String, after: String, first: Int, last: Int): SanctionListIndividualNationalitiesNodeConnection!
   countries(before: String, after: String, first: Int, last: Int): SanctionListIndividualCountriesNodeConnection!
