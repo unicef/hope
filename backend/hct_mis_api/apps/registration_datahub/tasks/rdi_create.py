@@ -60,7 +60,13 @@ class RdiBaseCreateTask:
             choices = [x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]]
 
             if value_type == TYPE_SELECT_MANY:
-                values = value.strip().split(",")
+                values = value.strip()
+                if "," in value:
+                    values = values.split(",")
+                elif ";" in value:
+                    values = values.split(";")
+                else:
+                    values = values.split(" ")
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):

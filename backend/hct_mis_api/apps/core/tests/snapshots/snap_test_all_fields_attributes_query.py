@@ -178,7 +178,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': '1p. Some of the time',
@@ -200,7 +200,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     },
                     {
                         'labelEn': '2p. Less than half of the time',
@@ -222,7 +222,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '2.0'
+                        'value': '2'
                     },
                     {
                         'labelEn': '3p More than half of the time',
@@ -244,7 +244,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '3.0'
+                        'value': '3'
                     },
                     {
                         'labelEn': '4p. Most of the time',
@@ -266,7 +266,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '4.0'
+                        'value': '4'
                     },
                     {
                         'labelEn': '5p. All of the time',
@@ -288,7 +288,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '5.0'
+                        'value': '5'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -339,7 +339,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -361,7 +361,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -1326,7 +1326,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -1348,7 +1348,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -1428,7 +1428,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -1450,7 +1450,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -1530,7 +1530,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': '1p. Some of the time',
@@ -1552,7 +1552,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     },
                     {
                         'labelEn': '2p. Less than half of the time',
@@ -1574,7 +1574,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '2.0'
+                        'value': '2'
                     },
                     {
                         'labelEn': '3p More than half of the time',
@@ -1596,7 +1596,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '3.0'
+                        'value': '3'
                     },
                     {
                         'labelEn': '4p. Most of the time',
@@ -1618,7 +1618,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '4.0'
+                        'value': '4'
                     },
                     {
                         'labelEn': '5p. All of the time',
@@ -1640,7 +1640,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '5.0'
+                        'value': '5'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -1691,7 +1691,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -1713,7 +1713,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -2626,7 +2626,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -2648,7 +2648,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -3174,7 +3174,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -3196,7 +3196,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -3305,7 +3305,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -3327,7 +3327,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -3846,7 +3846,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -3868,7 +3868,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -3919,7 +3919,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -3941,7 +3941,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -3992,7 +3992,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -4014,7 +4014,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -4065,7 +4065,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': '1p. Some of the time',
@@ -4087,7 +4087,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     },
                     {
                         'labelEn': '2p. Less than half of the time',
@@ -4109,7 +4109,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '2.0'
+                        'value': '2'
                     },
                     {
                         'labelEn': '3p More than half of the time',
@@ -4131,7 +4131,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '3.0'
+                        'value': '3'
                     },
                     {
                         'labelEn': '4p. Most of the time',
@@ -4153,7 +4153,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '4.0'
+                        'value': '4'
                     },
                     {
                         'labelEn': '5p. All of the time',
@@ -4175,7 +4175,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '5.0'
+                        'value': '5'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -4255,7 +4255,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -4277,7 +4277,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -7709,7 +7709,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': '1p. Some of the time',
@@ -7731,7 +7731,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     },
                     {
                         'labelEn': '2p. Less than half of the time',
@@ -7753,7 +7753,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '2.0'
+                        'value': '2'
                     },
                     {
                         'labelEn': '3p More than half of the time',
@@ -7775,7 +7775,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '3.0'
+                        'value': '3'
                     },
                     {
                         'labelEn': '4p. Most of the time',
@@ -7797,7 +7797,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '4.0'
+                        'value': '4'
                     },
                     {
                         'labelEn': '5p. All of the time',
@@ -7819,7 +7819,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '5.0'
+                        'value': '5'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -8717,7 +8717,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -8739,7 +8739,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -9190,7 +9190,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -9212,7 +9212,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -9292,7 +9292,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -9314,7 +9314,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -9788,7 +9788,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -9810,7 +9810,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -9919,7 +9919,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -9941,7 +9941,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10175,7 +10175,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -10197,7 +10197,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10248,7 +10248,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -10270,7 +10270,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10321,7 +10321,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': '1p. Some of the time',
@@ -10343,7 +10343,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     },
                     {
                         'labelEn': '2p. Less than half of the time',
@@ -10365,7 +10365,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '2.0'
+                        'value': '2'
                     },
                     {
                         'labelEn': '3p More than half of the time',
@@ -10387,7 +10387,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '3.0'
+                        'value': '3'
                     },
                     {
                         'labelEn': '4p. Most of the time',
@@ -10409,7 +10409,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '4.0'
+                        'value': '4'
                     },
                     {
                         'labelEn': '5p. All of the time',
@@ -10431,7 +10431,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '5.0'
+                        'value': '5'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10679,7 +10679,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -10701,7 +10701,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10752,7 +10752,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -10774,7 +10774,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -10825,7 +10825,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -10847,7 +10847,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -11044,7 +11044,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -11066,7 +11066,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -11475,7 +11475,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -11497,7 +11497,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -11672,7 +11672,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -11694,7 +11694,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -12131,7 +12131,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -12153,7 +12153,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -12262,7 +12262,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -12284,7 +12284,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -12335,7 +12335,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -12357,7 +12357,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -12437,7 +12437,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': ''
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -12459,7 +12459,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'Spanish(ES)'
                             }
                         ],
-                        'value': '1.0'
+                        'value': '1'
                     }
                 ],
                 'hint': "{'English(EN)': ''}",
@@ -18615,7 +18615,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'NO'
+                        'value': '0'
                     },
                     {
                         'labelEn': 'Yes',
@@ -18625,7 +18625,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'YES'
+                        'value': '1'
                     }
                 ],
                 'hint': '',
@@ -40472,7 +40472,17 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'NO'
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': '1'
                     },
                     {
                         'labelEn': 'Not provided',
@@ -40483,16 +40493,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'NOT_PROVIDED'
-                    },
-                    {
-                        'labelEn': 'Yes',
-                        'labels': [
-                            {
-                                'label': 'Yes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'YES'
                     }
                 ],
                 'hint': '',
