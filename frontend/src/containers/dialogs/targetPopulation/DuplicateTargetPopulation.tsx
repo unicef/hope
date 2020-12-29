@@ -70,21 +70,20 @@ export function DuplicateTargetPopulation({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={(values) => {
-          mutate({
-            variables: { input: { targetPopulationData: { ...values } } },
-          }).then(
-            (res) => {
+        onSubmit={async (values) => {
+          try {
+            await mutate({
+              variables: { input: { targetPopulationData: { ...values } } },
+            }).then((res) => {
               setOpen(false);
               return showMessage('Target Population Duplicated', {
                 pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
                 historyMethod: 'push',
               });
-            },
-            () => {
-              return showMessage('Name already exists');
-            },
-          );
+            });
+          } catch (e) {
+            e.graphQLErrors.map((x) => showMessage(x.message));
+          }
         }}
       >
         {({ submitForm }) => (
