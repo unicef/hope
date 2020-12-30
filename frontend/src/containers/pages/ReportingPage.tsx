@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { Button } from '@material-ui/core';
-import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+// import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { ReportingFilters } from '../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../tables/ReportingTable/ReportingTable';
+import { NewReportForm } from '../../components/Reporting/NewReportForm';
 
-export const ReportingPage = () => {
-  const businessArea = useBusinessArea();
+export const ReportingPage = (): React.ReactElement => {
+  // const businessArea = useBusinessArea();
 
   const [filter, setFilter] = useState({
     type: '',
@@ -21,13 +20,14 @@ export const ReportingPage = () => {
     <>
       <PageHeader title='Reporting'>
         <>
-          <Button variant='contained' color='primary' onClick={() => null}>
-            NEW REPORT
-          </Button>
+          <NewReportForm />
         </>
       </PageHeader>
       <ReportingFilters filter={debouncedFilter} onFilterChange={setFilter} />
-      <ReportingTable filter={debouncedFilter} businessArea={businessArea} />
+      <ReportingTable
+      //  filter={debouncedFilter}
+      // businessArea={businessArea}
+      />
     </>
   );
 };
