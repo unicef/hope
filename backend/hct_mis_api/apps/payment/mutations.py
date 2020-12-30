@@ -19,7 +19,7 @@ from payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
-from payment.models import CashPlanPaymentVerification, PaymentVerification
+from payment.models import CashPlanPaymentVerification, PaymentVerification, PaymentRecord
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
 from payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
@@ -137,7 +137,9 @@ class CreatePaymentVerificationMutation(PermissionMutation):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -302,7 +304,9 @@ class EditPaymentVerificationMutation(PermissionMutation):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
