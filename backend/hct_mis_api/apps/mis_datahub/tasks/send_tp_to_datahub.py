@@ -288,8 +288,4 @@ class SendTPToDatahubTask:
         return None
 
     def get_unhcr_household_id(self, household):
-        identity = household.identities.filter(agency__type="UNHCR").first()
-        household_unhcr_id = None
-        if identity is not None:
-            household_unhcr_id = identity.document_number
-        return household_unhcr_id
+        return household.unhcr_id
