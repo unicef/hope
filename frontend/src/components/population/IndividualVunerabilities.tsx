@@ -32,7 +32,7 @@ export function IndividualVulnerabilities({
       <LabelizedField
         key={flexFieldKey}
         label={flexFieldKey}
-        value={individual.flexFields[flexFieldKey] || '-'}
+        value={individual.flexFields[flexFieldKey]}
       />,
     );
   }
