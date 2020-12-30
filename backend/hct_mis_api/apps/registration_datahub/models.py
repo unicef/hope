@@ -46,25 +46,9 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
 )
 
 
-# TODO: REMOVE ME
-class ImportedHouseholdIdentity(models.Model):
-    agency = models.ForeignKey(
-        "ImportedAgency",
-        related_name="households_identities",
-        on_delete=models.CASCADE,
-    )
-    household = models.ForeignKey("ImportedHousehold", related_name="identities", on_delete=models.CASCADE)
-    document_number = models.CharField(
-        max_length=255,
-    )
-
-    def __str__(self):
-        return f"{self.agency} {self.household} {self.document_number}"
-
-
 class ImportedHousehold(TimeStampedUUIDModel):
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.BooleanField(default=None, null=True)
+    consent = models.NullBooleanField()
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField()
@@ -96,8 +80,8 @@ class ImportedHousehold(TimeStampedUUIDModel):
     male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
     male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
     head_of_household = models.OneToOneField("ImportedIndividual", on_delete=models.CASCADE, null=True)
-    fchild_hoh = models.BooleanField(default=None, null=True)
-    child_hoh = models.BooleanField(default=None, null=True)
+    fchild_hoh = models.NullBooleanField()
+    child_hoh = models.NullBooleanField()
     registration_data_import = models.ForeignKey(
         "RegistrationDataImportDatahub",
         related_name="households",
@@ -105,7 +89,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     )
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
-    returnee = models.BooleanField(default=None, null=True)
+    returnee = models.NullBooleanField()
     flex_fields = JSONField(default=dict)
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True)
@@ -135,14 +119,14 @@ class ImportedIndividual(TimeStampedUUIDModel):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    given_name = models.CharField(max_length=85, blank=True, default="")
-    middle_name = models.CharField(max_length=85, blank=True, default="")
-    family_name = models.CharField(max_length=85, blank=True, default="")
+    given_name = models.CharField(max_length=85, blank=True, default=BLANK)
+    middle_name = models.CharField(max_length=85, blank=True, default=BLANK)
+    family_name = models.CharField(max_length=85, blank=True, default=BLANK)
     relationship = models.CharField(
         max_length=255,
         blank=True,
         choices=RELATIONSHIP_CHOICE,
-        default="",
+        default=BLANK,
     )
     sex = models.CharField(
         max_length=255,
@@ -154,8 +138,8 @@ class ImportedIndividual(TimeStampedUUIDModel):
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
     )
-    phone_no = PhoneNumberField(blank=True, default="")
-    phone_no_alternative = PhoneNumberField(blank=True, default="")
+    phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
@@ -191,7 +175,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_batch_results = JSONField(default=dict)
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
-    pregnant = models.BooleanField(default=False)
+    pregnant = models.NullBooleanField()
     observed_disability = MultiSelectField(choices=DISABILITY_CHOICE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
