@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import get from 'lodash/get';
+import { Field, Form, Formik } from 'formik';
 import {
   Button,
   DialogContent,
@@ -12,8 +13,7 @@ import styled from 'styled-components';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { Field, Form, Formik } from 'formik';
+// import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { useAllProgramsQuery } from '../../__generated__/graphql';
@@ -32,9 +32,9 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-export const NewReportForm = () => {
+export const NewReportForm = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { showMessage } = useSnackbar();
+  // const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const {
     data: allProgramsData,
@@ -83,9 +83,7 @@ export const NewReportForm = () => {
       >
         <Formik
           initialValues={initialValue}
-          onSubmit={(values) => {
-            console.log(values);
-          }}
+          onSubmit={() => null}
           // validationSchema={validationSchema}
         >
           {({ submitForm, values }) => (
