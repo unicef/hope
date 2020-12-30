@@ -10,6 +10,7 @@ import openpyxl
 import phonenumbers
 import pycountry
 from dateutil import parser
+from django.core import validators as django_core_validators
 from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 
@@ -263,7 +264,12 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         elif choice_type == TYPE_SELECT_MANY:
             if isinstance(value, str):
-                selected_choices = value.split(",")
+                if "," in value:
+                    selected_choices = value.split(",")
+                elif ";" in value:
+                    selected_choices = value.split(";")
+                else:
+                    selected_choices = value.split(" ")
             else:
                 selected_choices = value
             for choice in selected_choices:
@@ -686,79 +692,10 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
     @classmethod
     def image_validator(cls, value: str, field: str, attachments: List[dict], *args, **kwargs) -> Union[str, None]:
-        allowed_extensions = (
-            "bmp",
-            "dib",
-            "gif",
-            "tif",
-            "tiff",
-            "jfif",
-            "jpe",
-            "jpg",
-            "jpeg",
-            "pbm",
-            "pgm",
-            "ppm",
-            "pnm",
-            "png",
-            "apng",
-            "blp",
-            "bufr",
-            "cur",
-            "pcx",
-            "dcx",
-            "dds",
-            "ps",
-            "eps",
-            "fit",
-            "fits",
-            "fli",
-            "flc",
-            "fpx",
-            "ftc",
-            "ftu",
-            "gbr",
-            "grib",
-            "h5",
-            "hdf",
-            "icns",
-            "ico",
-            "im",
-            "iim",
-            "jp2",
-            "j2k",
-            "jpc",
-            "jpf",
-            "jpx",
-            "j2c",
-            "mic",
-            "mpg",
-            "mpeg",
-            "mpo",
-            "msp",
-            "palm",
-            "pcd",
-            "pdf",
-            "pxr",
-            "psd",
-            "bw",
-            "rgb",
-            "rgba",
-            "sgi",
-            "ras",
-            "tga",
-            "icb",
-            "vda",
-            "vst",
-            "webp",
-            "wmf",
-            "emf",
-            "xbm",
-            "xpm",
-        )
+        allowed_extensions = django_core_validators.get_available_image_extensions()
         file_extension = value.split(".")[-1]
 
-        if file_extension not in allowed_extensions:
+        if file_extension.lower() not in allowed_extensions:
             message = f"Specified image {value} for " f"field {field} is not a valid image file"
             return message
 
@@ -828,7 +765,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
         choice_type = field["type"]
 
-        if choice_type == "SELECT_ONE":
+        if choice_type == TYPE_SELECT_ONE:
             if custom_validate_choices_method is not None:
                 return None if custom_validate_choices_method(value) is True else message
 
@@ -839,17 +776,23 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 is_in_choices = uppercase_value in choices
             return None if is_in_choices else message
 
-        elif choice_type == "SELECT_MANY":
-            selected_choices = value.split(",")
+        elif choice_type == TYPE_SELECT_MANY:
+            str_value = str(value)
+            if "," in str_value:
+                selected_choices = str_value.split(",")
+            elif ";" in str_value:
+                selected_choices = str_value.split(";")
+            else:
+                selected_choices = str_value.split(" ")
 
             if custom_validate_choices_method is not None:
-                return None if custom_validate_choices_method(value) is True else message
+                return None if custom_validate_choices_method(str_value) is True else message
 
             for choice in selected_choices:
                 choice = choice.strip()
                 if choice not in choices:
                     # try uppercase version
-                    uppercase_value = value.upper()
+                    uppercase_value = choice.upper()
                     return None if uppercase_value in choices else message
             return None
 
