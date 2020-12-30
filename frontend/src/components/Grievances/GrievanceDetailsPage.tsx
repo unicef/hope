@@ -201,12 +201,12 @@ export function GrievanceDetailsPage(): React.ReactElement {
     },
     {
       label: 'ADMINISTRATIVE LEVEL 2',
-      value: <span>{ticket.admin || '-'}</span>,
+      value: <span>{ticket.admin}</span>,
       size: 3,
     },
     {
       label: 'AREA / VILLAGE / PAY POINT',
-      value: <span>{ticket.area || '-'}</span>,
+      value: <span>{ticket.area}</span>,
       size: 3,
     },
     {
