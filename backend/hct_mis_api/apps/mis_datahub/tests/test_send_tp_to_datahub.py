@@ -15,7 +15,6 @@ from household.models import (
     Document,
     DocumentType,
     Agency,
-    HouseholdIdentity,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
@@ -112,12 +111,6 @@ class TestSendTpToDatahub(TestCase):
         cls.household_second.head_of_household = cls.second_household_head
         cls.household_second.save()
 
-        HouseholdIdentity.objects.create(
-            agency=unhcr_agency,
-            household=cls.household_second,
-            document_number="45745745745",
-        )
-
         cls.individual_primary = IndividualFactory(
             household=cls.household,
             relationship="HEAD",
@@ -177,12 +170,6 @@ class TestSendTpToDatahub(TestCase):
 
         cls.household.head_of_household = cls.individual_primary
         cls.household.save()
-
-        HouseholdIdentity.objects.create(
-            agency=test_agency,
-            household=cls.household,
-            document_number="123123123",
-        )
 
         cls.target_population_first = cls._create_target_population(
             sent_to_datahub=False,
