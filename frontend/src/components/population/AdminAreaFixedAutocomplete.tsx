@@ -14,7 +14,6 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
   .MuiFormControl-marginDense {
     margin-top: 4px;
   }
