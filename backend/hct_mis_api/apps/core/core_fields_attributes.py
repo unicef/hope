@@ -722,7 +722,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
-        "xlsx_field": "other_id_type_i_c",
+        "xlsx_field": "other_id_photo_i_c",
     },
     {
         "id": "b886d636-36cd-4beb-b2f9-6ddb204532d5",

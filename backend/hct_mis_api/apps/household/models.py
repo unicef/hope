@@ -107,8 +107,8 @@ RELATIONSHIP_CHOICE = (
     (NEPHEW_NIECE, "Nephew / Niece"),
     (COUSIN, "Cousin"),
 )
-YES = "YES"
-NO = "NO"
+YES = "1"
+NO = "0"
 YES_NO_CHOICE = (
     (BLANK, _("None")),
     (YES, _("Yes")),
