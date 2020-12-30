@@ -6,6 +6,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDebounce } from '../../hooks/useDebounce';
 import { ReportingFilters } from '../tables/ReportingTable/ReportingFilters';
 import { ReportingTable } from '../tables/ReportingTable/ReportingTable';
+import { NewReportForm } from '../../components/Reporting/NewReportForm';
 
 export const ReportingPage = () => {
   const businessArea = useBusinessArea();
@@ -21,9 +22,7 @@ export const ReportingPage = () => {
     <>
       <PageHeader title='Reporting'>
         <>
-          <Button variant='contained' color='primary' onClick={() => null}>
-            NEW REPORT
-          </Button>
+          <NewReportForm />
         </>
       </PageHeader>
       <ReportingFilters filter={debouncedFilter} onFilterChange={setFilter} />
