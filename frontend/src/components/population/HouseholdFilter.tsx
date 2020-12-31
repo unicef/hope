@@ -64,6 +64,7 @@ export function HouseholdFilters({
           <SearchTextField
             label='Search'
             variant='outlined'
+            value={filter.text || ''}
             margin='dense'
             onChange={(e) => handleFilterChange(e, 'text')}
             InputProps={{

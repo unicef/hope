@@ -123,8 +123,7 @@ export function PaymentFilters({
               onChange={(e) => handleFilterChange(e, 'deliveryType')}
               variant='outlined'
               label='Modality'
-              multiple
-              value={filter.deliveryType || []}
+              value={filter.deliveryType || ''}
               InputProps={{
                 startAdornment: (
                   <StartInputAdornment position='start'>
@@ -136,11 +135,13 @@ export function PaymentFilters({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {statusChoicesData.paymentRecordDeliveryTypeChoices.map((item) => (
-                <MenuItem key={item.name} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
+              {statusChoicesData.paymentRecordDeliveryTypeChoices.map(
+                (item) => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
             </Select>
           </StyledFormControl>
         </Grid>
