@@ -189,10 +189,14 @@ export function GrievanceDetailsPage(): React.ReactElement {
       value: <UniversalMoment>{ticket.updatedAt}</UniversalMoment>,
       size: 3,
     },
-    { label: 'DESCRIPTION', value: <span>{ticket.description}</span>, size: 6 },
+    {
+      label: 'DESCRIPTION',
+      value: <span>{ticket.description || '-'}</span>,
+      size: 6,
+    },
     {
       label: 'ASSIGNED TO',
-      value: <span>{renderUserName(ticket.assignedTo)}</span>,
+      value: <span>{renderUserName(ticket.assignedTo) || '-'}</span>,
       size: 6,
     },
     {
@@ -207,7 +211,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     },
     {
       label: 'LANGUAGES SPOKEN',
-      value: <span>{ticket.language}</span>,
+      value: <span>{ticket.language || '-'}</span>,
       size: 3,
     },
   ];
