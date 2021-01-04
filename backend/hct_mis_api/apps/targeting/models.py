@@ -454,10 +454,20 @@ class TargetingCriteriaFilterMixin:
             "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER"]},
-        "NOT_IN_RANGE": {"arguments": 2, "lookup": "__range", "negative": True, "supported_types": ["INTEGER"]},
-        "GREATER_THAN": {"arguments": 1, "lookup": "__gt", "negative": False, "supported_types": ["INTEGER"]},
-        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER"]},
+        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "NOT_IN_RANGE": {
+            "arguments": 2,
+            "lookup": "__range",
+            "negative": True,
+            "supported_types": ["INTEGER", "DECIMAL"],
+        },
+        "GREATER_THAN": {
+            "arguments": 1,
+            "lookup": "__gt",
+            "negative": False,
+            "supported_types": ["INTEGER", "DECIMAL"],
+        },
+        "LESS_THAN": {"arguments": 1, "lookup": "__lt", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
     }
 
     COMPARISON_CHOICES = Choices(
