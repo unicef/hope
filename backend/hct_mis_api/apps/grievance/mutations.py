@@ -663,15 +663,29 @@ class SimpleApproveMutation(PermissionMutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        cls.has_creator_or_owner_permission(
-            info,
-            grievance_ticket.business_area,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
-            grievance_ticket.created_by == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
-            grievance_ticket.assigned_to == info.context.user,
-            Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
-        )
+        if grievance_ticket.category in [
+            GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
+            GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+        ]:
+            cls.has_creator_or_owner_permission(
+                info,
+                grievance_ticket.business_area,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+                grievance_ticket.created_by == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+                grievance_ticket.assigned_to == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+            )
+        else:
+            cls.has_creator_or_owner_permission(
+                info,
+                grievance_ticket.business_area,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE,
+                grievance_ticket.created_by == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+                grievance_ticket.assigned_to == info.context.user,
+                Permissions.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+            )
         ticket_details = grievance_ticket.ticket_details
         ticket_details.approve_status = approve_status
         ticket_details.save()
@@ -752,7 +766,7 @@ class ReassignRoleMutation(graphene.Mutation):
         return cls(household=household, individual=individual)
 
 
-class NeedsAdjudicationApproveMutation(graphene.Mutation):
+class NeedsAdjudicationApproveMutation(PermissionMutation):
     grievance_ticket = graphene.Field(GrievanceTicketNode)
 
     class Arguments:
@@ -765,6 +779,15 @@ class NeedsAdjudicationApproveMutation(graphene.Mutation):
     def mutate(cls, root, info, grievance_ticket_id, selected_individual_id, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        cls.has_creator_or_owner_permission(
+            info,
+            grievance_ticket.business_area,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+            grievance_ticket.created_by == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+            grievance_ticket.assigned_to == info.context.user,
+            Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+        )
         decoded_selected_individual_id = decode_id_string(selected_individual_id)
         selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
         ticket_details = grievance_ticket.ticket_details
