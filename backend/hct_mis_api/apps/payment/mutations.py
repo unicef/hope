@@ -13,12 +13,13 @@ from account.permissions import PermissionMutation, Permissions
 from core.filters import filter_age
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
+from grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from household.models import Individual
 from payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
-from payment.models import CashPlanPaymentVerification, PaymentVerification
+from payment.models import CashPlanPaymentVerification, PaymentVerification, PaymentRecord
 from payment.rapid_pro.api import RapidProAPI
 from payment.schema import PaymentVerificationNode
 from payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
@@ -136,7 +137,9 @@ class CreatePaymentVerificationMutation(PermissionMutation):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -301,7 +304,9 @@ class EditPaymentVerificationMutation(PermissionMutation):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -408,6 +413,30 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         cash_plan_verification_id = graphene.ID(required=True)
 
     @classmethod
+    def create_grievance_ticket_for_status(cls, cashplan_payment_verification, status):
+        verifications = cashplan_payment_verification.payment_record_verifications.filter(status=status)
+        if verifications.count() == 0:
+            return
+        grievance_ticket = GrievanceTicket.objects.create(
+            category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
+            business_area=cashplan_payment_verification.cash_plan.business_area,
+        )
+        details = TicketPaymentVerificationDetails(
+            ticket=grievance_ticket,
+            payment_verification_status=status,
+        )
+        details.payment_verifications.set(verifications)
+        details.save()
+
+    @classmethod
+    def create_grievance_tickets(cls, cashplan_payment_verification):
+        cls.create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_PENDING)
+        cls.create_grievance_ticket_for_status(cashplan_payment_verification, PaymentVerification.STATUS_NOT_RECEIVED)
+        cls.create_grievance_ticket_for_status(
+            cashplan_payment_verification, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+        )
+
+    @classmethod
     @is_authenticated
     @transaction.atomic
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
@@ -420,6 +449,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_FINISHED
         cashplan_payment_verification.completion_date = timezone.now()
         cashplan_payment_verification.save()
+        cls.create_grievance_tickets(cashplan_payment_verification)
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
 

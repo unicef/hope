@@ -29,28 +29,37 @@ class IndividualDocument(Document):
             "female_age_group_0_5_count": fields.IntegerField(),
             "female_age_group_6_11_count": fields.IntegerField(),
             "female_age_group_12_17_count": fields.IntegerField(),
-            "female_adults_count": fields.IntegerField(),
+            "female_age_group_18_59_count": fields.IntegerField(),
+            "female_age_group_60_count": fields.IntegerField(),
             "pregnant_count": fields.IntegerField(),
             "male_age_group_0_5_count": fields.IntegerField(),
             "male_age_group_6_11_count": fields.IntegerField(),
             "male_age_group_12_17_count": fields.IntegerField(),
-            "male_adults_count": fields.IntegerField(),
+            "male_age_group_18_59_count": fields.IntegerField(),
+            "male_age_group_60_count": fields.IntegerField(),
             "female_age_group_0_5_disabled_count": fields.IntegerField(),
             "female_age_group_6_11_disabled_count": fields.IntegerField(),
             "female_age_group_12_17_disabled_count": fields.IntegerField(),
-            "female_adults_disabled_count": fields.IntegerField(),
+            "female_age_group_18_59_disabled_count": fields.IntegerField(),
+            "female_age_group_60_disabled_count": fields.IntegerField(),
             "male_age_group_0_5_disabled_count": fields.IntegerField(),
             "male_age_group_6_11_disabled_count": fields.IntegerField(),
             "male_age_group_12_17_disabled_count": fields.IntegerField(),
-            "male_adults_disabled_count": fields.IntegerField(),
+            "male_age_group_18_59_disabled_count": fields.IntegerField(),
+            "male_age_group_60_disabled_count": fields.IntegerField(),
             "head_of_household": fields.KeywordField(attr="head_of_household.id", similarity="boolean"),
             "returnee": fields.BooleanField(),
+            "registration_method": fields.KeywordField(similarity="boolean"),
+            "collect_individual_data": fields.KeywordField(similarity="boolean"),
+            "currency": fields.KeywordField(similarity="boolean"),
+            "unhcr_id": fields.KeywordField(similarity="boolean"),
         }
     )
     documents = fields.ObjectField(
         properties={
             "number": fields.KeywordField(attr="document_number", similarity="boolean"),
             "type": fields.KeywordField(attr="type.type", similarity="boolean"),
+            "country": fields.KeywordField(attr="type.country.alpha3", similarity="boolean"),
         }
     )
     identities = fields.ObjectField(
@@ -88,7 +97,7 @@ class IndividualDocument(Document):
         return instance.get_hash_key
 
     def prepare_business_area(self, instance):
-        return instance.registration_data_import.business_area.slug
+        return instance.business_area.slug
 
     class Index:
         name = "individuals"

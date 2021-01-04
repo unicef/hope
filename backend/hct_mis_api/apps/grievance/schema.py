@@ -16,12 +16,19 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 
 from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, _HOUSEHOLD, KOBO_COLLECTOR_FIELD
+from core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    _INDIVIDUAL,
+    _HOUSEHOLD,
+    FIELDS_EXCLUDED_FROM_RDI,
+    XLSX_ONLY_FIELDS,
+    KOBO_ONLY_INDIVIDUAL_FIELDS,
+)
 from core.extended_connection import ExtendedConnection
 from core.filters import DateTimeRangeFilter
 from core.models import AdminArea, FlexibleAttribute
 from core.schema import ChoiceObject, FieldAttributeNode
-from core.utils import to_choice_object, choices_to_dict
+from core.utils import to_choice_object, choices_to_dict, nested_getattr
 from grievance.models import (
     GrievanceTicket,
     TicketNote,
@@ -31,6 +38,9 @@ from grievance.models import (
     TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketNeedsAdjudicationDetails,
+    TicketSystemFlaggingDetails,
+    TicketPaymentVerificationDetails,
 )
 from household.models import Household, Individual
 from household.schema import HouseholdNode, IndividualNode
@@ -53,6 +63,8 @@ class GrievanceTicketFilter(FilterSet):
             "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
         },
         "add_individual_ticket_details": {"household": ("id",)},
+        "system_flagging_ticket_details": {"golden_records_individual": ("id",)},
+        "needs_adjudication_ticket_details": {"golden_records_individual": ("id",)},
     }
     TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
 
@@ -98,6 +110,8 @@ class GrievanceTicketFilter(FilterSet):
                 "add_individual_ticket_details__household__unicef_id",
                 "household_data_update_ticket_details__household__unicef_id",
                 "delete_individual_ticket_details__individual__household__unicef_id",
+                "system_flagging_ticket_details__golden_records_individual__household__unicef_id",
+                "needs_adjudication_ticket_details__golden_records_individual__household__unicef_id",
             )
         )
 
@@ -210,8 +224,19 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
         for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
-            extras_field = getattr(grievance_ticket_obj, field, {})
-            obj = getattr(extras_field, lookup_name, None)
+            # print(grievance_ticket_obj.status, lookup_name)
+            extras_field = getattr(grievance_ticket_obj, field, None)
+            if extras_field is None:
+                continue
+            # print(extras_field)
+            real_lookup = lookup_name
+            for lookup in lookups:
+                if isinstance(lookup, dict):
+                    tmp_lookup = lookup.get(lookup_name)
+                    if tmp_lookup is not None:
+                        real_lookup = tmp_lookup
+                        break
+            obj = nested_getattr(extras_field, real_lookup, None)
             if obj is not None:
                 return obj
 
@@ -221,7 +246,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
-    def resolve_household(grievance_ticket, info):
+    def resolve_related_tickets(grievance_ticket, info):
         return grievance_ticket.related_tickets
 
     def resolve_household(grievance_ticket, info):
@@ -298,6 +323,30 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketNeedsAdjudicationDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketSystemFlaggingDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketSystemFlaggingDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketPaymentVerificationDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketPaymentVerificationDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
 class IssueTypesObject(graphene.ObjectType):
     category = graphene.String()
     label = graphene.String()
@@ -353,6 +402,9 @@ class Query(graphene.ObjectType):
             if value in GrievanceTicket.MANUAL_CATEGORIES
         ]
 
+    def resolve_grievance_ticket_all_category_choices(self, info, **kwargs):
+        return [{"name": name, "value": value} for value, name in GrievanceTicket.CATEGORY_CHOICES]
+
     def resolve_grievance_ticket_issue_type_choices(self, info, **kwargs):
         categories = choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)
         return [
@@ -387,6 +439,7 @@ class Query(graphene.ObjectType):
             "comms_disability",
             "who_answers_phone",
             "who_answers_alt_phone",
+            "business_area",
         ]
 
         yield from [
@@ -394,7 +447,9 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
-        yield KOBO_COLLECTOR_FIELD.get("role_i_c")
+        yield from KOBO_ONLY_INDIVIDUAL_FIELDS
+        yield FIELDS_EXCLUDED_FROM_RDI.get("business_area")
+        yield XLSX_ONLY_FIELDS
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         ).order_by("name")
@@ -412,20 +467,24 @@ class Query(graphene.ObjectType):
             "female_age_group_0_5_count",
             "female_age_group_6_11_count",
             "female_age_group_12_17_count",
-            "female_adults_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
             "pregnant_count",
             "male_age_group_0_5_count",
             "male_age_group_6_11_count",
             "male_age_group_12_17_count",
-            "male_adults_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_disabled_count",
             "female_age_group_12_17_disabled_count",
-            "female_adults_disabled_count",
+            "female_age_group_18_59_disabled_count",
+            "female_age_group_60_disabled_count",
             "male_age_group_0_5_disabled_count",
             "male_age_group_6_11_disabled_count",
             "male_age_group_12_17_disabled_count",
-            "male_adults_disabled_count",
+            "male_age_group_18_59_disabled_count",
+            "male_age_group_60_disabled_count",
             "returnee",
             "fchild_hoh",
             "child_hoh",
@@ -435,6 +494,10 @@ class Query(graphene.ObjectType):
             "org_enumerator",
             "org_name_enumerator",
             "village",
+            "registration_method",
+            "collect_individual_data",
+            "currency",
+            "unhcr_id",
         ]
 
         # yield from FlexibleAttribute.objects.order_by("name").all()

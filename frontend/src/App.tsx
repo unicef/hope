@@ -15,6 +15,7 @@ import { LoginPage } from './containers/pages/LoginPage';
 import { DefaultRoute } from './containers/DefaultRoute';
 import { SanctionList } from './containers/pages/SanctionList';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AutoLogout } from './components/AutoLogout';
 
 export const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
         <StyledThemeProvider theme={theme}>
           <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils}>
             <CssBaseline />
+            <AutoLogout />
             <Router>
               <Switch>
                 <Route path='/login'>
