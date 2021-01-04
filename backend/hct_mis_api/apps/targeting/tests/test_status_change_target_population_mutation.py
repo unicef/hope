@@ -361,7 +361,13 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
     )
     def test_finalize_target_population(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        graphql_request = self.client.execute(
+            self.FINALIZE_TARGET_MUTATION,
+            {"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulationNode")},
+            variables={"id": self.id_to_base64(self.target_population_approved.id, "TargetPopulationNode")},
+            context=self.generate_context(**{"user": self.user}),
+        )
+        print(graphql_request)
         self.snapshot_graphql_request(
             request_string=self.FINALIZE_TARGET_MUTATION,
             context={"user": self.user},
