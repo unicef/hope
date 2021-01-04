@@ -50,9 +50,6 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    # FIXME: I know that links are deprecated
-    links:
-      - airflow_webserver
     command: "dev"
     depends_on:
       - db
@@ -61,6 +58,7 @@ services:
       - registration_datahub_db
       - elasticsearch
       - elasticsearch_test
+      - airflow_webserver
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
