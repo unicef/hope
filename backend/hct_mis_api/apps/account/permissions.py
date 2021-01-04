@@ -124,14 +124,13 @@ class Permissions(Enum):
     GRIEVANCES_CLOSE_TICKET_FEEDBACK = auto()
     GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR = auto()
     GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER = auto()
-    # TODO: undo approved data change and approve flag and dedupe still need to be added to code
-    # wasn't sure where exactly those actions happen
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_CREATOR = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_OWNER = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER = auto()
+    # TODO: I think undo can be removed and use same permission as approve_data_change
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE = auto()
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_CREATOR = auto()
+    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_OWNER = auto()
 
     # Django Admin
     # ...
