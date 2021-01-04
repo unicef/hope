@@ -294,14 +294,15 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
 
-    @classmethod
-    def get_node(cls, info, id):
-        # This will skip permission check from BaseNodePermissionMixin, check if okay
-        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-        try:
-            return queryset.get(pk=id)
-        except cls._meta.model.DoesNotExist:
-            return None
+    # I don't think this is needed because it would skip check_node_permission call
+    # @classmethod
+    # def get_node(cls, info, id):
+    #     # This will skip permission check from BaseNodePermissionMixin, check if okay
+    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+    #     try:
+    #         return queryset.get(pk=id)
+    #     except cls._meta.model.DoesNotExist:
+    #         return None
 
     class Meta:
         model = Household
@@ -367,14 +368,14 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
             )
 
-    @classmethod
-    def get_node(cls, info, id):
-        # This will skip permission check from BaseNodePermissionMixin, check if okay
-        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
-        try:
-            return queryset.get(pk=id)
-        except cls._meta.model.DoesNotExist:
-            return None
+    # I don't think this is needed because it would skip check_node_permission call
+    # @classmethod
+    # def get_node(cls, info, id):
+    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+    #     try:
+    #         return queryset.get(pk=id)
+    #     except cls._meta.model.DoesNotExist:
+    #         return None
 
     class Meta:
         model = Individual
