@@ -98,7 +98,7 @@ export function DeleteIndividualGrievanceDetails({
           <Grid key={key} item xs={6}>
             <LabelizedField
               label={snakeKey.replace(/_/g, ' ')}
-              value={textValue || '-'}
+              value={textValue}
             />
           </Grid>
         );
