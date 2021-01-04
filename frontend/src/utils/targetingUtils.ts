@@ -118,6 +118,18 @@ export function formatCriteriaFilters(filters) {
         comparisionMethod = 'CONTAINS';
         values = [each.value];
         break;
+      case 'DECIMAL':
+        if (each.value.from && each.value.to) {
+          comparisionMethod = 'RANGE';
+          values = [each.value.from, each.value.to];
+        } else if (each.value.from && !each.value.to) {
+          comparisionMethod = 'GREATER_THAN';
+          values = [each.value.from];
+        } else {
+          comparisionMethod = 'LESS_THAN';
+          values = [each.value.to];
+        }
+        break;
       case 'INTEGER':
         if (each.value.from && each.value.to) {
           comparisionMethod = 'RANGE';

@@ -46,12 +46,12 @@ export function RegistrationDetails({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Source'>
-            <div>{registrationDataImport.dataSource}</div>
+            {registrationDataImport.dataSource}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Title'>
-            <div>{registrationDataImport.name}</div>
+            {registrationDataImport.name}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
@@ -67,30 +67,22 @@ export function RegistrationDetails({
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label='Start time'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='End time'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Device ID'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='User name'>
-                <div>
-                  <Missing />
-                </div>
+                <Missing />
               </LabelizedField>
             </Grid>
           </Grid>

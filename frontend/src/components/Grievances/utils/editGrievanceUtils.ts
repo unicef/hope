@@ -140,7 +140,7 @@ export function prepareInitialValues(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
     description: ticket.description || '',
-    assignedTo: ticket.assignedTo?.id || '',
+    assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
     language: ticket.language || '',
     admin: ticket.admin || '',
