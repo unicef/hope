@@ -22,12 +22,14 @@ interface GrievancesTableRowProps {
   ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'];
   statusChoices: { [id: number]: string };
   categoryChoices: { [id: number]: string };
+  canViewDetails: boolean;
 }
 
 export function GrievancesTableRow({
   ticket,
   statusChoices,
   categoryChoices,
+  canViewDetails,
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -39,7 +41,7 @@ export function GrievancesTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={ticket.id}
     >

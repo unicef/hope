@@ -1,4 +1,5 @@
 from datetime import datetime
+from parameterized import parameterized
 
 from django.core.management import call_command
 from django_countries.fields import Country
@@ -9,10 +10,12 @@ from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketSystemFlaggingDetailsFactory, TicketNeedsAdjudicationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
+    TicketNeedsAdjudicationDetailsFactory,
 )
-from grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
+from account.permissions import Permissions
 from program.fixtures import ProgramFactory
 from sanction_list.models import SanctionListIndividual
 
@@ -154,7 +157,18 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             selected_individual=None,
         )
 
-    def test_approve_system_flagging(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_system_flagging(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_SYSTEM_FLAGGING_MUTATION,
             context={"user": self.user},
@@ -164,7 +178,18 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             },
         )
 
-    def test_approve_needs_adjudication(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_needs_adjudication(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
             context={"user": self.user},

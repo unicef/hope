@@ -38,8 +38,10 @@ const Title = styled.div`
 
 export function FlagDetails({
   ticket,
+  canApproveFlag,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApproveFlag: boolean;
 }): React.ReactElement {
   const useStyles = makeStyles(() => ({
     table: {
@@ -69,30 +71,32 @@ export function FlagDetails({
             <ViewSanctionList
               referenceNumber={details.sanctionListIndividual.referenceNumber}
             />
-            <ConfirmationDialog
-              title='Confirmation'
-              content={isFlagConfirmed ? removalText : confirmationText}
-            >
-              {(confirm) => (
-                <Button
-                  disabled={
-                    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                  }
-                  onClick={confirm(() =>
-                    approve({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !details.approveStatus,
-                      },
-                    }),
-                  )}
-                  variant='outlined'
-                  color='primary'
-                >
-                  {isFlagConfirmed ? 'REMOVE FLAG' : 'CONFIRM FLAG'}
-                </Button>
-              )}
-            </ConfirmationDialog>
+            {canApproveFlag && (
+              <ConfirmationDialog
+                title='Confirmation'
+                content={isFlagConfirmed ? removalText : confirmationText}
+              >
+                {(confirm) => (
+                  <Button
+                    disabled={
+                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                    }
+                    onClick={confirm(() =>
+                      approve({
+                        variables: {
+                          grievanceTicketId: ticket.id,
+                          approveStatus: !details.approveStatus,
+                        },
+                      }),
+                    )}
+                    variant='outlined'
+                    color='primary'
+                  >
+                    {isFlagConfirmed ? 'REMOVE FLAG' : 'CONFIRM FLAG'}
+                  </Button>
+                )}
+              </ConfirmationDialog>
+            )}
           </Box>
         </Box>
       </Title>

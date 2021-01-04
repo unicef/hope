@@ -9,6 +9,7 @@ import { OverviewContainer } from '../OverviewContainer';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
+  isPermissionDeniedError,
   reduceChoices,
   renderUserName,
 } from '../../utils/utils';
@@ -16,6 +17,7 @@ import { LoadingComponent } from '../LoadingComponent';
 import {
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
+  useMeQuery,
 } from '../../__generated__/graphql';
 import {
   GRIEVANCE_CATEGORIES,
@@ -25,6 +27,12 @@ import {
 import { ContentLink } from '../ContentLink';
 import { StatusBox } from '../StatusBox';
 import { UniversalMoment } from '../UniversalMoment';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
+import { PermissionDenied } from '../PermissionDenied';
 import { Notes } from './Notes';
 import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
 import { PaymentIds } from './PaymentIds';
@@ -52,26 +60,26 @@ const StatusContainer = styled.div`
 
 export function GrievanceDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = useGrievanceTicketQuery({
+  const permissions = usePermissions();
+  const {
+    data: currentUserData,
+    loading: currentUserDataLoading,
+  } = useMeQuery();
+  const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
-
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
 
-  if (choicesLoading) {
-    return null;
-  }
-  if (loading || choicesLoading) {
+  if (choicesLoading || loading || currentUserDataLoading)
     return <LoadingComponent />;
-  }
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData) {
+  if (!data || !choicesData || !currentUserData || permissions === null)
     return null;
-  }
 
   const statusChoices: {
     [id: number]: string;
@@ -82,6 +90,122 @@ export function GrievanceDetailsPage(): React.ReactElement {
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
 
   const ticket = data.grievanceTicket;
+  const currentUserId = currentUserData.me.id;
+  const isCreator = currentUserId === ticket.createdBy?.id;
+  const isOwner = currentUserId === ticket.assignedTo?.id;
+
+  const canViewHouseholdDetails = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER,
+    permissions,
+  );
+
+  const canViewIndividualDetails = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER,
+    permissions,
+  );
+
+  const canEdit = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_UPDATE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_UPDATE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_UPDATE_AS_OWNER,
+    permissions,
+  );
+
+  const canAddNote = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_ADD_NOTE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_ADD_NOTE_AS_OWNER,
+    permissions,
+  );
+
+  const canSetInProgress = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SET_IN_PROGRESS_AS_OWNER,
+    permissions,
+  );
+
+  const canSetOnHold = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SET_ON_HOLD_AS_OWNER,
+    permissions,
+  );
+
+  const canSendForApproval = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SEND_FOR_APPROVAL_AS_OWNER,
+    permissions,
+  );
+  const canSendBack = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_SEND_BACK,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_SEND_BACK_AS_OWNER,
+    permissions,
+  );
+  const isFeedbackType = [
+    GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK,
+    GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK,
+    GRIEVANCE_CATEGORIES.REFERRAL,
+  ].includes(ticket.category.toString());
+  const canClose =
+    (isFeedbackType &&
+      hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK,
+        isCreator,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_CREATOR,
+        isOwner,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_FEEDBACK_AS_OWNER,
+        permissions,
+      )) ||
+    (!isFeedbackType &&
+      hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK,
+        isCreator,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_CREATOR,
+        isOwner,
+        PERMISSIONS.GRIEVANCES_CLOSE_TICKET_EXCLUDING_FEEDBACK_AS_OWNER,
+        permissions,
+      ));
+
+  const canApproveDataChange = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_APPROVE_DATA_CHANGE_AS_OWNER,
+    permissions,
+  );
+
+  const canApproveFlagAndAdjudication = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+    permissions,
+  );
 
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
@@ -124,7 +248,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
         <span>
           {ticket.household?.id ? (
             <ContentLink
-              href={`/${businessArea}/population/household/${ticket.household.id}`}
+              href={
+                canViewHouseholdDetails
+                  ? `/${businessArea}/population/household/${ticket.household.id}`
+                  : undefined
+              }
             >
               {ticket.household.unicefId}
             </ContentLink>
@@ -141,7 +269,11 @@ export function GrievanceDetailsPage(): React.ReactElement {
         <span>
           {ticket.individual?.id ? (
             <ContentLink
-              href={`/${businessArea}/population/individuals/${ticket.individual.id}`}
+              href={
+                canViewIndividualDetails
+                  ? `/${businessArea}/population/individuals/${ticket.individual.id}`
+                  : undefined
+              }
             >
               {ticket.individual.unicefId}
             </ContentLink>
@@ -310,7 +442,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
 
   return (
     <div>
-      <GrievanceDetailsToolbar ticket={ticket} />
+      <GrievanceDetailsToolbar
+        ticket={ticket}
+        canEdit={canEdit}
+        canSetInProgress={canSetInProgress}
+        canSetOnHold={canSetOnHold}
+        canSendForApproval={canSendForApproval}
+        canSendBack={canSendBack}
+        canClose={canClose}
+      />
       <Grid container>
         <Grid item xs={12}>
           <ContainerColumnWithBorder>
@@ -332,41 +472,59 @@ export function GrievanceDetailsPage(): React.ReactElement {
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
             <PaddingContainer>
-              <FlagDetails ticket={ticket} />
+              <FlagDetails
+                ticket={ticket}
+                canApproveFlag={canApproveFlagAndAdjudication}
+              />
             </PaddingContainer>
           )}
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.DEDUPLICATION && (
             <PaddingContainer>
-              <NeedsAdjudicationDetails ticket={ticket} />
+              <NeedsAdjudicationDetails
+                ticket={ticket}
+                canApprove={canApproveFlagAndAdjudication}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL && (
             <PaddingContainer>
-              <AddIndividualGrievanceDetails ticket={ticket} />
+              <AddIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL && (
             <PaddingContainer>
-              <DeleteIndividualGrievanceDetails ticket={ticket} />
+              <DeleteIndividualGrievanceDetails
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL && (
             <PaddingContainer>
-              <RequestedIndividualDataChange ticket={ticket} />
+              <RequestedIndividualDataChange
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
             GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD && (
             <PaddingContainer>
-              <RequestedHouseholdDataChange ticket={ticket} />
+              <RequestedHouseholdDataChange
+                ticket={ticket}
+                canApproveDataChange={canApproveDataChange}
+              />
             </PaddingContainer>
           )}
           <PaddingContainer>
-            <Notes notes={ticket.ticketNotes} />
+            <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
           </PaddingContainer>
         </Grid>
         <Grid item xs={5}>
