@@ -44,7 +44,7 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
       args:
-        APP_ENV: ${ENV}
+        APP_ENV: DEV
     ports:
       - "8080:8000"
     volumes:
