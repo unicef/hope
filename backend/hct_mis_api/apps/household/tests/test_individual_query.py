@@ -93,6 +93,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
+                "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
             },
             {
                 "full_name": "Robin Ford",
@@ -100,6 +101,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+                "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
             },
             {
                 "full_name": "Timothy Perry",
@@ -107,6 +109,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Perry",
                 "phone_no": "(548)313-1700-902",
                 "birth_date": "1983-12-21",
+                "id": "badd2d2d-7ea0-46f1-bb7a-69f385bacdcd",
             },
             {
                 "full_name": "Eric Torres",
@@ -114,6 +117,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Torres",
                 "phone_no": "(228)231-5473",
                 "birth_date": "1973-03-23",
+                "id": "2c1a26a3-2827-4a99-9000-a88091bf017c",
             },
             {
                 "full_name": "Jenna Franklin",
@@ -121,6 +125,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Franklin",
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
+                "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
             },
         ]
 
