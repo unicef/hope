@@ -7,7 +7,65 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change 1'] = {
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individual_data_change_0_with_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': None,
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 15,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individual_data_change_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {
             'grievanceTickets': [
@@ -48,60 +106,27 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
     }
 }
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change 1'] = {
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_household_data_change_1_without_permission 1'] = {
     'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'addIndividualTicketDetails': {
-                        'household': {
-                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
-                        },
-                        'individualData': {
-                            'birth_date': '1980-02-01',
-                            'estimated_birth_date': False,
-                            'family_name': 'Romaniak',
-                            'flex_fields': {
-                            },
-                            'full_name': 'Test Test',
-                            'given_name': 'Test',
-                            'marital_status': 'SINGLE',
-                            'relationship': 'UNKNOWN',
-                            'role': 'NO_ROLE',
-                            'sex': 'MALE'
-                        }
-                    },
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 16,
-                    'sensitiveTicketDetails': None
+                    'column': 7,
+                    'line': 3
                 }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
             ]
         }
-    }
+    ]
 }
 
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_delete_individual_data_change 1'] = {
-    'data': {
-        'createGrievanceTicket': {
-            'grievanceTickets': [
-                {
-                    'addIndividualTicketDetails': None,
-                    'category': 2,
-                    'description': 'Test',
-                    'householdDataUpdateTicketDetails': None,
-                    'individualDataUpdateTicketDetails': None,
-                    'issueType': 15,
-                    'sensitiveTicketDetails': None
-                }
-            ]
-        }
-    }
-}
-
-snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change 1'] = {
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change_0_with_permission 1'] = {
     'data': {
         'createGrievanceTicket': {
             'grievanceTickets': [
@@ -151,6 +176,61 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                         }
                     },
                     'issueType': 14,
+                    'sensitiveTicketDetails': None
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individual_data_change_1_without_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createGrievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individual_data_change_0_with_permission 1'] = {
+    'data': {
+        'createGrievanceTicket': {
+            'grievanceTickets': [
+                {
+                    'addIndividualTicketDetails': {
+                        'household': {
+                            'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
+                        },
+                        'individualData': {
+                            'birth_date': '1980-02-01',
+                            'estimated_birth_date': False,
+                            'family_name': 'Romaniak',
+                            'flex_fields': {
+                            },
+                            'full_name': 'Test Test',
+                            'given_name': 'Test',
+                            'marital_status': 'SINGLE',
+                            'relationship': 'UNKNOWN',
+                            'role': 'NO_ROLE',
+                            'sex': 'MALE'
+                        }
+                    },
+                    'category': 2,
+                    'description': 'Test',
+                    'householdDataUpdateTicketDetails': None,
+                    'individualDataUpdateTicketDetails': None,
+                    'issueType': 16,
                     'sensitiveTicketDetails': None
                 }
             ]

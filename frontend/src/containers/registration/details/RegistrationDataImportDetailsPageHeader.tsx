@@ -14,6 +14,7 @@ export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
   canMerge: boolean;
   canRerunDedupe: boolean;
+  canViewList: boolean;
 }
 
 const MergeButtonContainer = styled.span`
@@ -24,6 +25,7 @@ export function RegistrationDataImportDetailsPageHeader({
   registration,
   canMerge,
   canRerunDedupe,
+  canViewList,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons = null;
   // eslint-disable-next-line default-case
@@ -60,7 +62,10 @@ export function RegistrationDataImportDetailsPageHeader({
     },
   ];
   return (
-    <PageHeader title={registration.name} breadCrumbs={breadCrumbsItems}>
+    <PageHeader
+      title={registration.name}
+      breadCrumbs={canViewList ? breadCrumbsItems : null}
+    >
       {buttons}
     </PageHeader>
   );

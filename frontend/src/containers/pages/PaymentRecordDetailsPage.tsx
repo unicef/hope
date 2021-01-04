@@ -41,7 +41,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Managment',
+      title: 'Programme Management',
       to: `/${businessArea}/programs/`,
     },
     {

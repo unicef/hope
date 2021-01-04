@@ -1,8 +1,10 @@
 from datetime import datetime
+from parameterized import parameterized
 
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -101,7 +103,11 @@ class TestGrievanceQuery(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area,)
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
 
@@ -159,12 +165,32 @@ class TestGrievanceQuery(APITestCase):
             gt.created_at = date
             gt.save()
 
-    def test_grievance_query_all(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_all(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_GRIEVANCE_QUERY, context={"user": self.user},
+            request_string=self.ALL_GRIEVANCE_QUERY,
+            context={"user": self.user},
         )
 
-    def test_grievance_query_single(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR]),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         gt_id = GrievanceTicket.objects.get(status=GrievanceTicket.STATUS_IN_PROGRESS).id
         self.snapshot_graphql_request(
             request_string=self.GRIEVANCE_QUERY,
@@ -173,6 +199,12 @@ class TestGrievanceQuery(APITestCase):
         )
 
     def test_grievance_list_filtered_by_admin2(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_ADMIN_AREA,
             context={"user": self.user},
@@ -180,13 +212,25 @@ class TestGrievanceQuery(APITestCase):
         )
 
     def test_grievance_list_filtered_by_created_at(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_CREATED_AT,
             context={"user": self.user},
-            variables={"createdAtRange": "{\"min\": \"2020-07-12\", \"max\": \"2020-09-12\"}"},
+            variables={"createdAtRange": '{"min": "2020-07-12", "max": "2020-09-12"}'},
         )
 
     def test_grievance_list_filtered_by_status(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
         self.snapshot_graphql_request(
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
