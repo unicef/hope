@@ -181,12 +181,20 @@ snapshots['TestIndividualQuery::test_individual_query_single_0_with_permission 1
 
 snapshots['TestIndividualQuery::test_individual_query_single_1_without_permission 1'] = {
     'data': {
-        'individual': {
-            'birthDate': '1943-07-30',
-            'familyName': 'Butler',
-            'fullName': 'Benjamin Butler',
-            'givenName': 'Benjamin',
-            'phoneNo': '(953)682-4596'
+        'individual': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'individual'
+            ]
         }
-    }
+    ]
 }
