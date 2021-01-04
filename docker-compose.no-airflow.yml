@@ -41,6 +41,8 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
+      args:
+        APP_ENV: ${ENV}
     ports:
       - "8080:8000"
     volumes:
