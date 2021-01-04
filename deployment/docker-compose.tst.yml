@@ -32,6 +32,8 @@ services:
       - ./backend:/code/
       - backend-data:/data
     command: "dev"
+    links:
+      - airflow_webserver
     depends_on:
       - db
       - redis
