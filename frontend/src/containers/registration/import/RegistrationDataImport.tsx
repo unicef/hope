@@ -52,6 +52,10 @@ const ComboBox = styled(Select)`
     min-width: 200px;
   }
 `;
+
+const StyledInputLabel = styled(InputLabel)`
+  background-color: #fff;
+`;
 const DropzoneContainer = styled.div`
   width: 100%;
   height: 100px;
@@ -204,7 +208,7 @@ export function RegistrationDataImport(): React.ReactElement {
     importTypeSpecificContent = (
       <div>
         <FormControl variant='outlined' margin='dense'>
-          <InputLabel>Import from</InputLabel>
+          <StyledInputLabel>Import from</StyledInputLabel>
           <ComboBox
             value={koboProject}
             variant='outlined'
@@ -295,7 +299,7 @@ export function RegistrationDataImport(): React.ReactElement {
               </DialogTitleWrapper>
               <DialogContent>
                 <FormControl variant='outlined' margin='dense'>
-                  <InputLabel>Import from</InputLabel>
+                  <StyledInputLabel>Import from</StyledInputLabel>
                   <ComboBox
                     value={importType}
                     variant='outlined'
