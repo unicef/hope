@@ -198,6 +198,15 @@ export function GrievanceDetailsPage(): React.ReactElement {
     permissions,
   );
 
+  const canApproveFlagAndAdjudication = hasCreatorOrOwnerPermissions(
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE,
+    isCreator,
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR,
+    isOwner,
+    PERMISSIONS.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
+    permissions,
+  );
+
   const issueType = ticket.issueType
     ? choicesData.grievanceTicketIssueTypeChoices
         .filter((el) => el.category === ticket.category.toString())[0]
@@ -463,13 +472,19 @@ export function GrievanceDetailsPage(): React.ReactElement {
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
             <PaddingContainer>
-              <FlagDetails ticket={ticket} />
+              <FlagDetails
+                ticket={ticket}
+                canApproveFlag={canApproveFlagAndAdjudication}
+              />
             </PaddingContainer>
           )}
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.DEDUPLICATION && (
             <PaddingContainer>
-              <NeedsAdjudicationDetails ticket={ticket} />
+              <NeedsAdjudicationDetails
+                ticket={ticket}
+                canApprove={canApproveFlagAndAdjudication}
+              />
             </PaddingContainer>
           )}
           {ticket?.issueType?.toString() ===
