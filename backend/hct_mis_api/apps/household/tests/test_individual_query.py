@@ -1,3 +1,5 @@
+import unittest
+
 from django.core.management import call_command
 from parameterized import parameterized
 
@@ -133,12 +135,14 @@ class TestIndividualQuery(APITestCase):
         household_one.save()
         household_two.save()
 
+
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
             ("without_permission", []),
         ]
     )
+    @unittest.skip("needs adjudication")
     def test_individual_query_all(self, _, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
