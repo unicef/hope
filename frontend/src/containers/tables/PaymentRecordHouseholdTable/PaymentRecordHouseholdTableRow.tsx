@@ -20,11 +20,13 @@ const StatusContainer = styled.div`
 interface PaymentRecordTableRowProps {
   paymentRecord: PaymentRecordNode;
   openInNewTab: boolean;
+  canViewDetails: boolean;
 }
 
 export function PaymentRecordHouseholdTableRow({
   paymentRecord,
   openInNewTab,
+  canViewDetails,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
@@ -39,7 +41,7 @@ export function PaymentRecordHouseholdTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={paymentRecord.id}
     >

@@ -226,20 +226,43 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
 
 snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population_with_final_criteria 1'] = {
     'data': {
-        'finalizeTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 15,
-                    'line': 3
-                }
-            ],
-            'message': "'NoneType' object has no attribute 'status'",
-            'path': [
-                'finalizeTargetPopulation'
-            ]
+        'finalizeTargetPopulation': {
+            'targetPopulation': {
+                'finalList': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ]
+                },
+                'households': {
+                    'edges': [
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 1
+                            }
+                        },
+                        {
+                            'node': {
+                                'residenceStatus': 'HOST',
+                                'size': 2
+                            }
+                        }
+                    ],
+                    'totalCount': 2
+                },
+                'status': 'FINALIZED'
+            }
         }
-    ]
+    }
 }
