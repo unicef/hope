@@ -45,4 +45,4 @@ django-cors-headers==3.2.0
 gunicorn==20.0.4
 gevent==20.9.0
 
-freezegun=0.3.14
+freezegun==0.3.14
