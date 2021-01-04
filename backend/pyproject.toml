@@ -86,6 +86,7 @@ django-cors-headers = "3.2.0"
 gunicorn = "20.0.4"
 gevent = "20.9.0"
 PyJWT = "1.7.1"
+freezegun = "0.3.14"
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"
