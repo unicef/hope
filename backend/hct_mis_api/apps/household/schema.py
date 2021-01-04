@@ -10,7 +10,6 @@ from django_filters import (
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphql import GraphQLError
 
 from targeting.models import HouseholdSelection
 from account.permissions import (
@@ -228,6 +227,7 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
+# FIXME: This need to be changed to HouseholdSelectionNode
 class HouseholdSelection(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
@@ -294,6 +294,15 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
                 Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
             )
 
+    @classmethod
+    def get_node(cls, info, id):
+        # This will skip permission check from BaseNodePermissionMixin, check if okay
+        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+        try:
+            return queryset.get(pk=id)
+        except cls._meta.model.DoesNotExist:
+            return None
+
     class Meta:
         model = Household
         filter_fields = []
@@ -357,6 +366,15 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
                 Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
             )
+
+    @classmethod
+    def get_node(cls, info, id):
+        # This will skip permission check from BaseNodePermissionMixin, check if okay
+        queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+        try:
+            return queryset.get(pk=id)
+        except cls._meta.model.DoesNotExist:
+            return None
 
     class Meta:
         model = Individual

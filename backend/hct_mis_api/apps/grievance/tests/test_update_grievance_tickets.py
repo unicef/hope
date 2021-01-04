@@ -26,6 +26,7 @@ from household.models import (
     MALE,
     DIVORCED,
     FEMALE,
+    RELATIONSHIP_UNKNOWN,
 )
 from program.fixtures import ProgramFactory
 
@@ -141,6 +142,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "full_name": "Test Example",
                 "family_name": "Example",
                 "sex": "MALE",
+                "relationship": RELATIONSHIP_UNKNOWN,
+                "estimated_birth_date": False,
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
@@ -164,6 +167,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "given_name": {"value": "Test", "approve_status": True},
                 "full_name": {"value": "Test Example", "approve_status": True},
                 "family_name": {"value": "Example", "approve_status": True},
+                "relationship": RELATIONSHIP_UNKNOWN,
+                "estimated_birth_date": False,
                 "sex": {"value": "MALE", "approve_status": False},
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
@@ -195,6 +200,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             household_data={
                 "village": {"value": "Test Village", "approve_status": True},
                 "size": {"value": 19, "approve_status": True},
+                "country": "AFG",
             },
         )
 
@@ -239,6 +245,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "givenName": "John",
                             "fullName": "John Example",
                             "familyName": "Example",
+                            "relationship": RELATIONSHIP_UNKNOWN,
+                            "estimatedBirthDate": False,
                             "sex": "MALE",
                             "birthDate": date(year=1981, month=2, day=2).isoformat(),
                             "maritalStatus": SINGLE,
@@ -268,8 +276,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": "1981-02-02",
                 "given_name": "John",
                 "family_name": "Example",
-                "marital_status": "SINGLE",
                 "flex_fields": {},
+                "relationship": "UNKNOWN",
+                "marital_status": "SINGLE",
+                "estimated_birth_date": False,
             }
             self.assertFalse(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
 
@@ -283,6 +293,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "marital_status": "SINGLE",
                 "role": "PRIMARY",
                 "documents": [{"type": "NATIONAL_ID", "country": "POL", "number": "123-123-UX-321"}],
+                "relationship": "UNKNOWN",
+                "estimated_birth_date": False,
             }
             self.assertTrue(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
 
@@ -356,10 +368,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
                 "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
+                "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
                 "previous_documents": {},
                 "documents_to_remove": [],
-                "flex_fields": {},
             }
 
         else:
@@ -381,6 +393,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                     {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
                     {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
                 ],
+                "estimated_birth_date": False,
+                "relationship": "UNKNOWN",
             }
         self.assertEqual(result, expected_result)
         self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
@@ -414,6 +428,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                         "householdData": {
                             "village": "Test Town",
                             "size": 3,
+                            "country": "AFG",
                         }
                     }
                 },
@@ -430,14 +445,20 @@ class TestUpdateGrievanceTickets(APITestCase):
 
         if name == "with_permission":
             expected_result = {
-                "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
                 "size": {"value": 3, "approve_status": False, "previous_value": 2},
+                "country": {
+                    "value": "AFG",
+                    "approve_status": False,
+                    "previous_value": self.household_one.country.alpha3,
+                },
+                "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
                 "flex_fields": {},
             }
         else:
             expected_result = {
                 "village": {"value": "Test Village", "approve_status": True},
                 "size": {"value": 19, "approve_status": True},
+                "country": "AFG",
             }
         self.assertEqual(result, expected_result)
         if name in ["with_permission", "with_partial_permission"]:

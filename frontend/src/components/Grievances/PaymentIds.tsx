@@ -1,15 +1,12 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Paper, Typography } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContentLink } from '../ContentLink';
+import { GrievanceTicketQuery } from '../../__generated__/graphql';
+import { decodeIdString } from '../../utils/utils';
 
-const StyledBox = styled.div`
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-radius: 3px;
-  background-color: #fff;
+const StyledBox = styled(Paper)`
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -19,14 +16,20 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export const PaymentIds = ({ ids }: { ids: string[] }): React.ReactElement => {
+export const PaymentIds = ({
+  verifications,
+}: {
+  verifications: GrievanceTicketQuery['grievanceTicket']['paymentVerificationTicketDetails']['paymentVerifications']['edges'];
+}): React.ReactElement => {
   const businessArea = useBusinessArea();
 
-  const mappedIds = ids.map(
-    (id): React.ReactElement => (
+  const mappedIds = verifications.map(
+    (verification): React.ReactElement => (
       <Box mb={1}>
-        <ContentLink href={`/${businessArea}/payment-records/${id}`}>
-          {id}
+        <ContentLink
+          href={`/${businessArea}/verification-records/${verification.node.id}`}
+        >
+          {decodeIdString(verification.node.id)}
         </ContentLink>
       </Box>
     ),

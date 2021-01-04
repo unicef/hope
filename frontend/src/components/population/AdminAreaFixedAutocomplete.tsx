@@ -14,7 +14,6 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
   .MuiFormControl-marginDense {
     margin-top: 4px;
   }
@@ -68,7 +67,7 @@ export function AdminAreaFixedAutocomplete({
         setOpen(false);
       }}
       getOptionSelected={(option, selectedValue) => {
-        return selectedValue && selectedValue.node.id === option.node.id;
+        return selectedValue?.node?.id === option.node.id;
       }}
       getOptionLabel={(option) => {
         if (!option.node) {

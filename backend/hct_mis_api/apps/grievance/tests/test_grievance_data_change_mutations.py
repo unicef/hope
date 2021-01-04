@@ -10,7 +10,7 @@ from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE, FEMALE, WIDOWED
+from household.models import SINGLE, FEMALE, WIDOWED, RELATIONSHIP_UNKNOWN, ROLE_NO_ROLE
 from program.fixtures import ProgramFactory
 
 
@@ -69,7 +69,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG")
         household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
@@ -87,6 +87,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1943-07-30",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Robin Ford",
@@ -96,6 +98,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1946-02-15",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Timothy Perry",
@@ -105,6 +109,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1983-12-21",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Eric Torres",
@@ -114,6 +120,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1973-03-23",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -123,6 +131,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1969-11-29",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
         ]
 
@@ -168,6 +178,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "estimatedBirthDate": False,
+                                "relationship": RELATIONSHIP_UNKNOWN,
+                                "role": ROLE_NO_ROLE,
                             },
                         }
                     }
@@ -286,6 +299,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                             "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
                             "householdData": {
                                 "femaleAgeGroup611Count": 14,
+                                "country": "AFG",
+                                "size": 4,
                             },
                         }
                     }
