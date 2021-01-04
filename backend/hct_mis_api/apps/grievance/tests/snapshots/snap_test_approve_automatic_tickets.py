@@ -7,20 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging 1'] = {
-    'data': {
-        'approveSystemFlagging': {
-            'grievanceTicket': {
-                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo0M2M1OWVkYS02NjY0LTQxZDYtOTMzOS0wNWVmY2IxMWRhODI=',
-                'systemFlaggingTicketDetails': {
-                    'approveStatus': False
-                }
-            }
-        }
-    }
-}
-
-snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication 1'] = {
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_0_with_permission 1'] = {
     'data': {
         'approveNeedsAdjudication': {
             'grievanceTicket': {
@@ -33,4 +20,57 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudicatio
             }
         }
     }
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_1_without_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging_0_with_permission 1'] = {
+    'data': {
+        'approveSystemFlagging': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZTo0M2M1OWVkYS02NjY0LTQxZDYtOTMzOS0wNWVmY2IxMWRhODI=',
+                'systemFlaggingTicketDetails': {
+                    'approveStatus': False
+                }
+            }
+        }
+    }
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging_1_without_permission 1'] = {
+    'data': {
+        'approveSystemFlagging': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'approveSystemFlagging'
+            ]
+        }
+    ]
 }
