@@ -101,7 +101,10 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
 }
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Title is required'),
+  name: Yup.string()
+    .required('Title is required')
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
 });
 
 export function RegistrationDataImport(): React.ReactElement {
