@@ -160,10 +160,7 @@ export function PaymentRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='ALT. PHONE NUMBER'
-              value={
-                paymentRecord.household.headOfHousehold.phoneNoAlternative ||
-                '-'
-              }
+              value={paymentRecord.household.headOfHousehold.phoneNoAlternative}
             />
           </Grid>
         </Grid>

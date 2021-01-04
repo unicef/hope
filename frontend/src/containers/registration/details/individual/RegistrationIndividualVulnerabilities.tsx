@@ -35,72 +35,52 @@ export function RegistrationIndividualVulnerabilities({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Disability'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Working'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Serious Illness'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Martial Status'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Age first Marriage'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Enrolled in School'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='School Attendance'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='School Type'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Years in School'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Minutes to School'>
-            <div>
-              <Missing />
-            </div>
+            <Missing />
           </LabelizedField>
         </Grid>
       </Grid>

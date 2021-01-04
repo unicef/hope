@@ -20,12 +20,22 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_househol
                             'id': 'SG91c2Vob2xkTm9kZTowN2E5MDFlZC1kMmE1LTQyMmEtYjk2Mi0zNTcwZGExZDVkMDc='
                         },
                         'householdData': {
+                            'country': {
+                                'approve_status': False,
+                                'previous_value': 'AFG',
+                                'value': 'AFG'
+                            },
                             'female_age_group_6_11_count': {
                                 'approve_status': False,
-                                'previous_value': 0,
+                                'previous_value': None,
                                 'value': 14
                             },
                             'flex_fields': {
+                            },
+                            'size': {
+                                'approve_status': False,
+                                'previous_value': 3,
+                                'value': 4
                             }
                         }
                     },
@@ -49,12 +59,15 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_create_individu
                         },
                         'individualData': {
                             'birth_date': '1980-02-01',
+                            'estimated_birth_date': False,
                             'family_name': 'Romaniak',
                             'flex_fields': {
                             },
                             'full_name': 'Test Test',
                             'given_name': 'Test',
                             'marital_status': 'SINGLE',
+                            'relationship': 'UNKNOWN',
+                            'role': 'NO_ROLE',
                             'sex': 'MALE'
                         }
                     },

@@ -82,6 +82,110 @@ export const GrievanceTicket = gql`
         roleReassignData
         approveStatus
       }
+      systemFlaggingTicketDetails {
+        id
+        approveStatus
+        roleReassignData
+        goldenRecordsIndividual {
+          id
+          fullName
+          birthDate
+          documents{
+            edges{
+              node{
+                documentNumber
+              }
+            }
+          }
+        }
+        sanctionListIndividual {
+          fullName
+          referenceNumber
+          
+          datesOfBirth {
+            edges {
+              node {
+                id
+                date
+              }
+            }
+          }
+          documents {
+            edges {
+              node {
+                id
+                documentNumber
+                typeOfDocument
+              }
+            }
+          }
+        }
+      }
+      paymentVerificationTicketDetails {
+        paymentVerificationStatus
+        paymentVerifications {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+      }
+      needsAdjudicationTicketDetails{
+        id
+        
+        goldenRecordsIndividual{
+          id
+          unicefId
+          household{
+            id
+            unicefId
+          }
+          fullName
+          birthDate
+          sex
+          deduplicationGoldenRecordResults{
+            hitId
+            proximityToScore
+            score
+          }
+        }
+        possibleDuplicate{
+          id
+          unicefId
+          household{
+            unicefId
+            id
+          }
+          fullName
+          birthDate
+          sex
+          deduplicationGoldenRecordResults{
+            hitId
+            proximityToScore
+            score
+          }
+        }
+        selectedIndividual{
+          ...individualDetailed
+          household{
+            ...householdDetailed
+          }
+          householdsAndRoles {
+            individual {
+              id
+              unicefId
+            }
+            household {
+              id
+              unicefId
+            }
+            id
+            role
+          }
+        }
+        roleReassignData
+      }
       issueType
       ticketNotes {
         edges {
