@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Yup from 'yup';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import { Button } from '@material-ui/core';
@@ -76,11 +77,17 @@ export function EditTargetPopulation({
     }
     return errors;
   };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
+  });
 
   return (
     <Formik
       initialValues={initialValues}
       validate={handleValidate}
+      validationSchema={validationSchema}
       onSubmit={async (values) => {
         await mutate({
           variables: {
