@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -96,3 +97,37 @@ class Role(TimeStampedUUIDModel):
 @receiver(pre_save, sender=get_user_model())
 def pre_save_user(sender, instance, *args, **kwargs):
     instance.available_for_export = True
+
+
+class IncompatibleRoles(TimeStampedUUIDModel):
+    """
+    Keeps track of what roles are incompatible: user cannot be assigned both of the roles in the same business area at the same time
+    """
+
+    role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
+    role_two = models.ForeignKey("account.Role", related_name="incompatible_roles_two", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.role_one.name} and {self.role_two.name}"
+
+    class Meta:
+        verbose_name = "incompatible roles"
+        verbose_name_plural = "incompatible roles"
+        unique_together = ("role_one", "role_two")
+
+    def clean(self):
+        super().clean()
+
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+        # unique_together will take care of unique couples only if order is the same
+        # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
+        if self.role_one == self.role_two:
+            raise ValidationError({"role_two": _("Choose two different roles.")})
+        if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
+            raise ValidationError(
+                {
+                    "role_one": _("This combination of roles already exists."),
+                    "role_two": _("This combination of roles already exists."),
+                }
+            )
