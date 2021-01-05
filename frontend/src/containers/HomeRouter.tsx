@@ -81,7 +81,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/population/household/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/population/household/:id")
+                  scope.setTag("location", "/population/household/:id")
               }}
             >
               <PopulationHouseholdDetailsPage />
@@ -90,7 +90,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/population/individuals/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/population/individuals/:id")
+                  scope.setTag("location", "/population/individuals/:id")
               }}
             >
               <PopulationIndividualsDetailsPage />
@@ -99,7 +99,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/cashplans/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/cashplans/:id")
+                  scope.setTag("location", "/cashplans/:id")
               }}
             >
               <CashPlanDetailsPage />
@@ -108,7 +108,7 @@ export function HomeRouter(): React.ReactElement {
           <Route exact path='/:businessArea/target-population'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/target-population")
+                  scope.setTag("location", "/target-population")
               }}
             >
               <TargetPopulationPage />
@@ -117,7 +117,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/target-population/create'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/target-population/create")
+                  scope.setTag("location", "/target-population/create")
               }}
             >
               <CreateTargetPopulation />
@@ -126,7 +126,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/target-population/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/target-population/:id")
+                  scope.setTag("location", "/target-population/:id")
               }}
             >
               <TargetPopulationDetailsPage />
@@ -135,7 +135,7 @@ export function HomeRouter(): React.ReactElement {
           <Route exact path='/:businessArea/payment-verification'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/payment-verification")
+                  scope.setTag("location", "/payment-verification")
               }}
             >
               <PaymentVerificationPage />
@@ -144,7 +144,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/verification-records/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/verification-records/:id")
+                  scope.setTag("location", "/verification-records/:id")
                 }}
               >
               <VerificationRecordDetailsPage />
@@ -153,7 +153,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/payment-verification/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/payment-verification/:id")
+                  scope.setTag("location", "/payment-verification/:id")
               }}
             >
               <PaymentVerificationDetailsPage />
@@ -162,7 +162,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/grievance-and-feedback/new-ticket'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/grievance-and-feedback/new-ticket")
+                  scope.setTag("location", "/grievance-and-feedback/new-ticket")
                 }}
               >
               <CreateGrievancePage />
@@ -171,7 +171,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/grievance-and-feedback/edit-ticket/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/grievance-and-feedback/edit-ticket/:id")
+                  scope.setTag("location", "/grievance-and-feedback/edit-ticket/:id")
                 }}
               >
               <EditGrievancePage />
@@ -180,7 +180,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/grievance-and-feedback/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/grievance-and-feedback/:id")
+                  scope.setTag("location", "/grievance-and-feedback/:id")
                 }}
               >
               <GrievanceDetailsPage />
@@ -198,7 +198,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/population/household'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/population/household")
+                  scope.setTag("location", "/population/household")
                 }}
               >
               <PopulationHouseholdPage />
@@ -207,7 +207,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/population/individuals'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/population/individuals")
+                  scope.setTag("location", "/population/individuals")
                 }}
               >
               <PopulationIndividualsPage />
@@ -216,7 +216,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/programs/:id")
+                  scope.setTag("location", "/programs/:id")
                 }}
               >
               <ProgramDetailsPage />
@@ -225,7 +225,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/payment-records/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/payment-records/:id")
+                  scope.setTag("location", "/payment-records/:id")
                 }}
               >
               <PaymentRecordDetailsPage />
@@ -234,7 +234,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/programs'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/programs")
+                  scope.setTag("location", "/programs")
                 }}
               >
               <ProgramsPage />
@@ -243,7 +243,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import/household/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/registration-data-import/household/:id")
+                  scope.setTag("location", "/registration-data-import/household/:id")
                 }}
               >
               <RegistrationHouseholdDetailsPage />
@@ -252,7 +252,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import/individual/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/registration-data-import/individual/:id")
+                  scope.setTag("location", "/registration-data-import/individual/:id")
                 }}
               >
               <RegistrationIndividualDetailsPage />
@@ -261,7 +261,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/registration-data-import/:id")
+                  scope.setTag("location", "/registration-data-import/:id")
                 }}
               >
               <RegistrationDataImportDetailsPage />
@@ -270,7 +270,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/registration-data-import'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/registration-data-import")
+                  scope.setTag("location", "/registration-data-import")
                 }}
               >
               <RegistrationDataImportPage />
@@ -285,7 +285,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/users-list'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
-                  scope.setTag("location", "/:businessArea/users-list")
+                  scope.setTag("location", "/users-list")
                 }}
               >
               <UsersList />
