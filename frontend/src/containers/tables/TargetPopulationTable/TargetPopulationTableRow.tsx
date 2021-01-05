@@ -63,8 +63,8 @@ export function TargetPopulationTableRow({
         <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.createdBy.firstName}{' '}
-        {targetPopulation.createdBy.lastName}
+        {targetPopulation.createdBy?.firstName}{' '}
+        {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>
   );
