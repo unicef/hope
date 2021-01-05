@@ -11,7 +11,7 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.airflow.filePath: "**/airflow/local.Dockerfile"
+  Docker.airflow.filePath: "**/airflow/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.airflow.repository: "hope-airflow"
@@ -43,7 +43,7 @@ stages:
               dockerfile: $(Docker.airflow.filePath)
               repository: $(Docker.airflow.repository)
               containerRegistry: $(Docker.registry)
-              buildContext: "./airflow"
+              buildContext: "$(Build.SourcesDirectory)"
               tags: |
                 $(Build.BuildId)
                 dev-latest
