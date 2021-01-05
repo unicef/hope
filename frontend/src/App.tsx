@@ -28,30 +28,31 @@ export const App: React.FC = () => {
             <AutoLogout />
             <Router>
               <Switch>
-                <Route path='/login'>                    
+                <Route path='/login'>
                   <Sentry.ErrorBoundary
                     beforeCapture={(scope) => {
-                      scope.setTag("location", "/login")
+                      scope.setTag('location', '/login');
                     }}
                   >
                     <LoginPage />
                   </Sentry.ErrorBoundary>
                 </Route>
-                <Sentry.ErrorBoundary
+                {/* TODO: fix this */}
+                {/* <Sentry.ErrorBoundary
                   beforeCapture={(scope) => {
                     scope.setTag("location", "/sanction-list")
                   }}
-                >
-                  <ProtectedRoute
-                    path='/sanction-list'
-                    component={SanctionList}
-                    location={window.location}
-                  />
-                </Sentry.ErrorBoundary>
+                > */}
+                <ProtectedRoute
+                  path='/sanction-list'
+                  component={SanctionList}
+                  location={window.location}
+                />
+                {/* </Sentry.ErrorBoundary> */}
                 <Route path='/accounts/profile/'>
                   <Sentry.ErrorBoundary
                     beforeCapture={(scope) => {
-                      scope.setTag("location", "/accounts/profile/")
+                      scope.setTag('location', '/accounts/profile/');
                     }}
                   >
                     <ProfilePage />
