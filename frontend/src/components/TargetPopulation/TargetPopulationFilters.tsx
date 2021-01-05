@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import {
-  TextField,
   InputAdornment,
   MenuItem,
   FormControl,
@@ -11,6 +10,7 @@ import {
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import { Person, Search, Group } from '@material-ui/icons';
 import Select from '../../shared/Select';
+import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import { TARGETING_STATES } from '../../utils/constants';
 import { ContainerWithBorder } from '../ContainerWithBorder';
@@ -18,44 +18,18 @@ import { FieldLabel } from '../FieldLabel';
 import { ProgramNode } from '../../__generated__/graphql';
 
 const TextContainer = styled(TextField)`
-  .MuiFilledInput-root {
-    border-radius: 4px;
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
   }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+`;
+const SearchTextField = styled(TextField)`
+  flex: 1;
   && {
-    width: 232px;
-    color: #5f6368;
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline:hover {
-    border-bottom: 0;
-    border-radius: 4px;
-  }
-  .MuiFilledInput-underline:hover::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::before {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after {
-    border-bottom: 0;
-  }
-  .MuiFilledInput-underline::after:hover {
-    border-bottom: 0;
-  }
-  .MuiSvgIcon-root {
-    color: #5f6368;
-  }
-  .MuiFilledInput-input {
-    padding: 10px 15px 10px;
-  }
-  .MuiInputAdornment-filled.MuiInputAdornment-positionStart:not(.MuiInputAdornment-hiddenLabel) {
-    margin: 0px;
+    min-width: 150px;
   }
 `;
 
@@ -87,9 +61,10 @@ export function TargetPopulationFilters({
     <ContainerWithBorder>
       <Grid container alignItems='flex-end' spacing={3}>
         <Grid item>
-          <TextContainer
-            placeholder='Search'
+          <SearchTextField
+            label='Search'
             variant='outlined'
+            value={filter.name || ''}
             margin='dense'
             onChange={(e) => handleFilterChange(e, 'name')}
             InputProps={{
@@ -99,6 +74,7 @@ export function TargetPopulationFilters({
                 </InputAdornment>
               ),
             }}
+            data-cy='filters-search'
           />
         </Grid>
         <Grid item>
