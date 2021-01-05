@@ -24,13 +24,16 @@ const Title = styled.div`
 
 export function RequestedHouseholdDataChange({
   ticket,
+  canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApproveDataChange: boolean;
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
-    return `You approved ${values.selected.length +
-      values.selectedFlexFields.length || 0} change${
+    return `You approved ${
+      values.selected.length + values.selectedFlexFields.length || 0
+    } change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
@@ -109,23 +112,25 @@ export function RequestedHouseholdDataChange({
                   EDIT
                 </Button>
               ) : (
-                <ConfirmationDialog
-                  title='Warning'
-                  content={getConfirmationText(values)}
-                >
-                  {(confirm) => (
-                    <Button
-                      onClick={confirm(() => submitForm())}
-                      variant='contained'
-                      color='primary'
-                      disabled={
-                        ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                      }
-                    >
-                      Approve
-                    </Button>
-                  )}
-                </ConfirmationDialog>
+                canApproveDataChange && (
+                  <ConfirmationDialog
+                    title='Warning'
+                    content={getConfirmationText(values)}
+                  >
+                    {(confirm) => (
+                      <Button
+                        onClick={confirm(() => submitForm())}
+                        variant='contained'
+                        color='primary'
+                        disabled={
+                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                        }
+                      >
+                        Approve
+                      </Button>
+                    )}
+                  </ConfirmationDialog>
+                )
               )}
             </Box>
           </Title>

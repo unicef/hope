@@ -45,8 +45,10 @@ const StyledBox = styled(Paper)`
 
 export function Notes({
   notes,
+  canAddNote,
 }: {
   notes: GrievanceTicketQuery['grievanceTicket']['ticketNotes'];
+  canAddNote: boolean;
 }): React.ReactElement {
   const { data: meData, loading: meLoading } = useMeQuery({
     fetchPolicy: 'cache-and-network',
@@ -63,8 +65,9 @@ export function Notes({
     name: string,
     date: string,
     description: string,
+    noteId: string,
   ): React.ReactElement => (
-    <Grid container>
+    <Grid container key={noteId}>
       <Grid item xs={2}>
         <Avatar alt={`${name} picture`} src='/static/images/avatar/1.jpg' />
       </Grid>
@@ -91,6 +94,7 @@ export function Notes({
       renderUserName(el.node.createdBy),
       el.node.createdAt,
       el.node.description,
+      el.node.id,
     ),
   );
 
@@ -125,44 +129,46 @@ export function Notes({
           </Title>
           <OverviewContainerColumn>
             {mappedNotes}
-            <Grid container>
-              <Grid item xs={2}>
-                <Avatar
-                  src={`${meData.me.firstName || meData.me.email}`}
-                  alt={`${meData.me.firstName || meData.me.email} picture`}
-                />
-              </Grid>
-              <Grid item xs={10}>
-                <Grid item xs={12}>
-                  <Box display='flex' justifyContent='space-between'>
-                    <Name>{renderUserName(meData.me)}</Name>
-                  </Box>
+            {canAddNote && (
+              <Grid container>
+                <Grid item xs={2}>
+                  <Avatar
+                    src={`${meData.me.firstName || meData.me.email}`}
+                    alt={`${meData.me.firstName || meData.me.email} picture`}
+                  />
                 </Grid>
-                <Grid item xs={12}>
-                  <DescMargin>
-                    <Form>
-                      <Field
-                        name='newNote'
-                        multiline
-                        fullWidth
-                        variant='filled'
-                        label='Add a note ...'
-                        component={FormikTextField}
-                      />
-                      <Box mt={2} display='flex' justifyContent='flex-end'>
-                        <Button
-                          color='primary'
-                          variant='contained'
-                          onClick={submitForm}
-                        >
-                          Add New Note
-                        </Button>
-                      </Box>
-                    </Form>
-                  </DescMargin>
+                <Grid item xs={10}>
+                  <Grid item xs={12}>
+                    <Box display='flex' justifyContent='space-between'>
+                      <Name>{renderUserName(meData.me)}</Name>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <DescMargin>
+                      <Form>
+                        <Field
+                          name='newNote'
+                          multiline
+                          fullWidth
+                          variant='filled'
+                          label='Add a note ...'
+                          component={FormikTextField}
+                        />
+                        <Box mt={2} display='flex' justifyContent='flex-end'>
+                          <Button
+                            color='primary'
+                            variant='contained'
+                            onClick={submitForm}
+                          >
+                            Add New Note
+                          </Button>
+                        </Box>
+                      </Form>
+                    </DescMargin>
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
+            )}
           </OverviewContainerColumn>
         </StyledBox>
       )}

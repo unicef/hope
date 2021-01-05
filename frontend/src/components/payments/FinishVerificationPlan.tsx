@@ -118,15 +118,14 @@ export function FinishVerificationPlan({
             <Box p={5}>
               {beneficiariesPercent() && (
                 <div>
-                  Only
-                  {beneficiariesPercent()} % of the beneficiaries have responded
-                  to this payment verification.
+                  Only {beneficiariesPercent()}% of the beneficiaries have
+                  responded to this payment verification.
                 </div>
               )}
               <div>Are you sure that you want to finish?</div>
               {grievanceTickets() && (
                 <div>
-                  Closing this verification will generate {grievanceTickets()}
+                  Closing this verification will generate {grievanceTickets()}{' '}
                   grievance tickets.
                 </div>
               )}

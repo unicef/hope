@@ -115,7 +115,11 @@ export function CreateTargetPopulation(): React.ReactElement {
                 component={FormikTextField}
               />
             }
-            breadCrumbs={breadCrumbsItems}
+            breadCrumbs={
+              hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)
+                ? breadCrumbsItems
+                : null
+            }
             hasInputComponent
           >
             <>

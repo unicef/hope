@@ -1,13 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
+import {
+  hasCreatorOrOwnerPermissions,
+  PERMISSIONS,
+} from '../../../config/permissions';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
 import { decodeIdString, reduceChoices } from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
+  useMeQuery,
 } from '../../../__generated__/graphql';
+import { LoadingComponent } from '../../LoadingComponent';
 import { headCells } from './GrievancesTableHeadCells';
 import { GrievancesTableRow } from './GrievancesTableRow';
 
@@ -37,9 +45,14 @@ export const GrievancesTable = ({
     data: choicesData,
     loading: choicesLoading,
   } = useGrievancesChoiceDataQuery();
-  if (choicesLoading) {
-    return null;
-  }
+  const {
+    data: currentUserData,
+    loading: currentUserDataLoading,
+  } = useMeQuery();
+  const permissions = usePermissions();
+  if (choicesLoading || currentUserDataLoading) return <LoadingComponent />;
+  if (!choicesData || !currentUserData || permissions === null) return null;
+
   const statusChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketStatusChoices);
@@ -47,6 +60,35 @@ export const GrievancesTable = ({
   const categoryChoices: {
     [id: number]: string;
   } = reduceChoices(choicesData.grievanceTicketCategoryChoices);
+
+  const currentUserId = currentUserData.me.id;
+
+  const getCanViewDetailsOfTicket = (
+    ticket: AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node'],
+  ): boolean => {
+    const isTicketCreator = currentUserId === ticket.createdBy?.id;
+    const isTicketOwner = currentUserId === ticket.assignedTo?.id;
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE
+    ) {
+      return hasCreatorOrOwnerPermissions(
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+        isTicketCreator,
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+        isTicketOwner,
+        PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+        permissions,
+      );
+    }
+    return hasCreatorOrOwnerPermissions(
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+      isTicketCreator,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+      isTicketOwner,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+      permissions,
+    );
+  };
 
   return (
     <TableWrapper>
@@ -66,6 +108,7 @@ export const GrievancesTable = ({
             ticket={row}
             statusChoices={statusChoices}
             categoryChoices={categoryChoices}
+            canViewDetails={getCanViewDetailsOfTicket(row)}
           />
         )}
       />
