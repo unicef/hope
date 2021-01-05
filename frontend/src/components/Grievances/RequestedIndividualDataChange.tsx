@@ -26,8 +26,10 @@ const Title = styled.div`
 
 export function RequestedIndividualDataChange({
   ticket,
+  canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApproveDataChange: boolean;
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const individualData = {
@@ -157,23 +159,26 @@ export function RequestedIndividualDataChange({
                     EDIT
                   </Button>
                 ) : (
-                  <ConfirmationDialog
-                    title='Warning'
-                    content={getConfirmationText(allChangesLength)}
-                  >
-                    {(confirm) => (
-                      <Button
-                        onClick={confirm(() => submitForm())}
-                        variant='contained'
-                        color='primary'
-                        disabled={
-                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                        }
-                      >
-                        Approve
-                      </Button>
-                    )}
-                  </ConfirmationDialog>
+                  canApproveDataChange && (
+                    <ConfirmationDialog
+                      title='Warning'
+                      content={getConfirmationText(allChangesLength)}
+                    >
+                      {(confirm) => (
+                        <Button
+                          onClick={confirm(() => submitForm())}
+                          variant='contained'
+                          color='primary'
+                          disabled={
+                            ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          }
+                        >
+                          Approve
+                        </Button>
+                      )}
+                    </ConfirmationDialog>
+                  )
                 )}
               </Box>
             </Title>

@@ -33,6 +33,8 @@ import { PaymentVerificationPage } from './pages/PaymentVerificationPage';
 import { PaymentVerificationDetailsPage } from './pages/PaymentVerificationDetailsPage';
 import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetailsPage';
 import { UsersList } from './pages/UsersList';
+import { ReportingPage } from './pages/ReportingPage';
+import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
 
 const Root = styled.div`
   display: flex;
@@ -273,6 +275,12 @@ export function HomeRouter(): React.ReactElement {
               >
               <RegistrationDataImportPage />
             </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/reporting/:id'>
+            <ReportingDetailsPage />
+          </Route>
+          <Route path='/:businessArea/reporting'>
+            <ReportingPage />
           </Route>
           <Route path='/:businessArea/users-list'>
             <Sentry.ErrorBoundary

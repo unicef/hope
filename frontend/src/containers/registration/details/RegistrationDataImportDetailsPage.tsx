@@ -12,6 +12,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../../config/permissions';
 import { PermissionDenied } from '../../../components/PermissionDenied';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { isPermissionDeniedError } from '../../../utils/utils';
 import { RegistrationDetails } from './RegistrationDetails';
 import { RegistrationDataImportDetailsPageHeader } from './RegistrationDataImportDetailsPageHeader';
 
@@ -59,17 +60,15 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  const { data, loading } = useRegistrationDataImportQuery({
+  const { data, loading, error } = useRegistrationDataImportQuery({
     variables: { id },
   });
   const [selectedTab, setSelectedTab] = useState(0);
 
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions))
-    return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data) return null;
+  if (!data || permissions === null) return null;
 
   return (
     <div>
@@ -80,6 +79,7 @@ export function RegistrationDataImportDetailsPage(): React.ReactElement {
           PERMISSIONS.RDI_RERUN_DEDUPE,
           permissions,
         )}
+        canViewList={hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)}
       />
       <Container>
         <RegistrationDetails registration={data.registrationDataImport} />
