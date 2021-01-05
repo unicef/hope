@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
 
 from account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
-from account.models import User, UserRole, Role
+from account.models import User, UserRole, Role, IncompatibleRoles
 from core.models import BusinessArea
 from core.utils import build_arg_dict_from_dict
 
@@ -136,3 +136,8 @@ class RoleAdmin(admin.ModelAdmin):
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ("user", "role", "business_area")
+
+
+@admin.register(IncompatibleRoles)
+class IncompatibleRolesAdmin(admin.ModelAdmin):
+    pass
