@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import * as Sentry from "@sentry/react";
 import setupInternalization from './i18n';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 
 setupInternalization();
+if (process.env.NODE_ENV === 'production')
+    Sentry.init({ dsn: process.env.REACT_APP_SENTRY_FRONTEND_DSN });
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
