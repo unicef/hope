@@ -9,7 +9,6 @@ import {
   SnackbarContent,
   Snackbar,
 } from '@material-ui/core';
-import * as Sentry from '@sentry/react';
 import { useCheckAgainstSanctionListUploadMutation } from '../../__generated__/graphql';
 import { DropzoneField } from '../../components/DropzoneField';
 import { PageHeader } from '../../components/PageHeader';
@@ -51,11 +50,6 @@ export function SanctionList(): React.ReactElement {
   let importFile = null;
   importFile = (
     <>
-      <Sentry.ErrorBoundary
-        beforeCapture={(scope) => {
-          scope.setTag("location", "/sanction-list")
-        }}
-      >
         <DropzoneField
           loading={fileLoading}
           dontShowFilename={!fileToImport}
@@ -74,7 +68,6 @@ export function SanctionList(): React.ReactElement {
             setFileToImport(file);
           }}
         />
-      </Sentry.ErrorBoundary>
     </>
   );
 
