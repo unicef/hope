@@ -28,8 +28,10 @@ const Title = styled.div`
 
 export function DeleteIndividualGrievanceDetails({
   ticket,
+  canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApproveDataChange: boolean;
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
 
@@ -121,48 +123,50 @@ export function DeleteIndividualGrievanceDetails({
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Individual to be deleted</Typography>
-          <ConfirmationDialog title='Warning' content='Are you sure?'>
-            {(confirm) => (
-              <Button
-                onClick={confirm(async () => {
-                  try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.deleteIndividualTicketDetails
-                          ?.approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
+          {canApproveDataChange && (
+            <ConfirmationDialog title='Warning' content='Are you sure?'>
+              {(confirm) => (
+                <Button
+                  onClick={confirm(async () => {
+                    try {
+                      await mutate({
+                        variables: {
+                          grievanceTicketId: ticket.id,
+                          approveStatus: !ticket.deleteIndividualTicketDetails
+                            ?.approveStatus,
                         },
-                      ],
-                    });
-                    if (ticket.deleteIndividualTicketDetails.approveStatus) {
-                      showMessage('Changes Disapproved');
+                        refetchQueries: () => [
+                          {
+                            query: GrievanceTicketDocument,
+                            variables: { id: ticket.id },
+                          },
+                        ],
+                      });
+                      if (ticket.deleteIndividualTicketDetails.approveStatus) {
+                        showMessage('Changes Disapproved');
+                      }
+                      if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+                        showMessage('Changes Approved');
+                      }
+                    } catch (e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
                     }
-                    if (!ticket.deleteIndividualTicketDetails.approveStatus) {
-                      showMessage('Changes Approved');
-                    }
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  })}
+                  variant={
+                    ticket.deleteIndividualTicketDetails?.approveStatus
+                      ? 'outlined'
+                      : 'contained'
                   }
-                })}
-                variant={
-                  ticket.deleteIndividualTicketDetails?.approveStatus
-                    ? 'outlined'
-                    : 'contained'
-                }
-                color='primary'
-                disabled={!approveEnabled}
-              >
-                {ticket.deleteIndividualTicketDetails?.approveStatus
-                  ? 'Disapprove'
-                  : 'Approve'}
-              </Button>
-            )}
-          </ConfirmationDialog>
+                  color='primary'
+                  disabled={!approveEnabled}
+                >
+                  {ticket.deleteIndividualTicketDetails?.approveStatus
+                    ? 'Disapprove'
+                    : 'Approve'}
+                </Button>
+              )}
+            </ConfirmationDialog>
+          )}
         </Box>
       </Title>
       <Grid container spacing={6}>

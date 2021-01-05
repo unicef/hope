@@ -153,7 +153,9 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentVerificationNode(DjangoObjectType):
+class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
+
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)
@@ -205,7 +207,10 @@ class Query(graphene.ObjectType):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
+        payment_record_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -233,7 +238,7 @@ class Query(graphene.ObjectType):
                 margin_of_error,
             )
         return {
-            "payment_record_count": cash_plan.payment_records.count(),
+            "payment_record_count": payment_record_count,
             "sample_size": payment_records_sample_count,
         }
 

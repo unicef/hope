@@ -8,7 +8,10 @@ import {
 } from '../../../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
+import {
+  decodeIdString,
+  isPermissionDeniedError,
+} from '../../../../utils/utils';
 import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
@@ -30,7 +33,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
-  const { data, loading } = useImportedHouseholdQuery({
+  const { data, loading, error } = useImportedHouseholdQuery({
     variables: { id },
   });
   const {
@@ -39,17 +42,20 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (permissions === null) return null;
-  if (!hasPermissions(PERMISSIONS.RDI_VIEW_DETAILS, permissions))
-    return <PermissionDenied />;
-  if (!data) return null;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || !choicesData || permissions === null) return null;
 
   const { importedHousehold } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Registration Data import',
-      to: `/${businessArea}/registration-data-import/`,
-    },
+    ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
+      ? [
+          {
+            title: 'Registration Data import',
+            to: `/${businessArea}/registration-data-import/`,
+          },
+        ]
+      : []),
     {
       title: importedHousehold.registrationDataImport.name,
       to: `/${businessArea}/registration-data-import/${btoa(
