@@ -40,26 +40,30 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     consent_sharing = graphene.List(graphene.String)
     residence_status = graphene.String()
     country_origin = graphene.String()
-    country = graphene.String()
-    size = graphene.Int()
+    country = graphene.String(required=True)
+    size = graphene.Int(required=True)
     address = graphene.String()
     female_age_group_0_5_count = graphene.Int()
     female_age_group_6_11_count = graphene.Int()
     female_age_group_12_17_count = graphene.Int()
-    female_adults_count = graphene.Int()
+    female_age_group_18_59_count = graphene.Int(),
+    female_age_group_60_count = graphene.Int(),
     pregnant_count = graphene.Int()
     male_age_group_0_5_count = graphene.Int()
     male_age_group_6_11_count = graphene.Int()
     male_age_group_12_17_count = graphene.Int()
-    male_adults_count = graphene.Int()
+    male_age_group_18_59_count = graphene.Int(),
+    male_age_group_60_count = graphene.Int(),
     female_age_group_0_5_disabled_count = graphene.Int()
     female_age_group_6_11_disabled_count = graphene.Int()
     female_age_group_12_17_disabled_count = graphene.Int()
-    female_adults_disabled_count = graphene.Int()
+    female_age_group_18_59_disabled_count = graphene.Int(),
+    female_age_group_60_disabled_count = graphene.Int(),
     male_age_group_0_5_disabled_count = graphene.Int()
     male_age_group_6_11_disabled_count = graphene.Int()
     male_age_group_12_17_disabled_count = graphene.Int()
-    male_adults_disabled_count = graphene.Int()
+    male_age_group_18_59_disabled_count = graphene.Int(),
+    male_age_group_60_disabled_count = graphene.Int(),
     returnee = graphene.Boolean()
     fchild_hoh = graphene.Boolean()
     child_hoh = graphene.Boolean()
@@ -69,6 +73,10 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String()
     org_name_enumerator = graphene.String()
     village = graphene.String()
+    registration_method = graphene.String(),
+    collect_individual_data = graphene.String(),
+    currency = graphene.String(),
+    unhcr_id = graphene.String(),
     flex_fields = Arg()
 
 
@@ -118,11 +126,11 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     family_name = graphene.String()
     sex = graphene.String(required=True)
     birth_date = graphene.Date(required=True)
-    estimated_birth_date = graphene.Boolean()
-    marital_status = graphene.String(required=True)
+    estimated_birth_date = graphene.Boolean(required=True)
+    marital_status = graphene.String()
     phone_no = graphene.String()
     phone_no_alternative = graphene.String()
-    relationship = graphene.String()
+    relationship = graphene.String(required=True)
     disability = graphene.Boolean()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
@@ -137,7 +145,7 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     comms_disability = graphene.String()
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
-    role = graphene.String()
+    role = graphene.String(required=True)
     documents = graphene.List(IndividualDocumentObjectType)
     business_area = graphene.String()
     flex_fields = Arg()

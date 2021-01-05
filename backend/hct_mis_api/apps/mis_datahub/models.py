@@ -57,7 +57,7 @@ class Individual(SessionModel):
     unhcr_id = models.CharField(max_length=255, null=True)
     unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True,)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
@@ -66,9 +66,9 @@ class Individual(SessionModel):
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
     relationship = models.CharField(max_length=255, null=True, choices=RELATIONSHIP_CHOICE,)
-    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE,)
+    marital_status = models.CharField(max_length=255, null=True, choices=MARITAL_STATUS_CHOICE,)
     phone_number = models.CharField(max_length=60, null=True)
-    pregnant = models.BooleanField(default=False)
+    pregnant = models.NullBooleanField()
 
     class Meta:
         unique_together = ("session", "mis_id")

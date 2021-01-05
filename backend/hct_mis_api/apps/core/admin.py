@@ -190,8 +190,11 @@ class FlexibleAttributeImporter:
                 continue
 
             for cell, header_name in zip(row, choices_headers_map):
+                cell_value = cell.value
+                if isinstance(cell_value, float) and cell_value.is_integer():
+                    cell_value = str(int(cell_value))
                 self._assign_field_values(
-                    cell.value,
+                    cell_value,
                     header_name,
                     "choice",
                     row,

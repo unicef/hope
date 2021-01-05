@@ -1,6 +1,7 @@
 import { Button, Grid, Typography } from '@material-ui/core';
 import EmailIcon from '@material-ui/icons/Email';
 import CheckIcon from '@material-ui/icons/Check';
+import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -10,10 +11,7 @@ import { LabelizedField } from '../../components/LabelizedField';
 import { Missing } from '../../components/Missing';
 import { OverviewContainer } from '../../components/OverviewContainer';
 import { PageHeader } from '../../components/PageHeader';
-import { StatusBox } from '../../components/StatusBox';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { decodeIdString } from '../../utils/utils';
-import { GetApp } from '@material-ui/icons';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -41,7 +39,7 @@ const IconsContainer = styled.div`
   align-items: center;
   font-size: 50px;
 `;
-export const ReportingDetailsPage = () => {
+export const ReportingDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
@@ -111,7 +109,7 @@ export const ReportingDetailsPage = () => {
             color='primary'
             variant='contained'
             startIcon={<GetApp />}
-            onClick={() => console.log('REPORT DOWNLOADED')}
+            onClick={() => null}
           >
             DOWNLOAD
           </Button>

@@ -1,13 +1,12 @@
 import re
 from datetime import date
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
 from django.contrib.postgres.fields import JSONField
-from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
+from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
-from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.managers import SoftDeletableManager
@@ -16,14 +15,22 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from core.currencies import CURRENCY_CHOICES
 from utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
 
+BLANK = ""
+IDP = "IDP"
+REFUGEE = "REFUGEE"
+OTHERS_OF_CONCERN = "OTHERS_OF_CONCERN"
+HOST = "HOST"
+NON_HOST = "NON_HOST"
 RESIDENCE_STATUS_CHOICE = (
-    ("IDP", _("Displaced  |  Internally Displaced People")),
-    ("REFUGEE", _("Displaced  |  Refugee / Asylum Seeker")),
-    ("OTHERS_OF_CONCERN", _("Displaced  |  Others of Concern")),
-    ("HOST", _("Non-displaced  |   Host")),
-    ("NON_HOST", _("Non-displaced  |   Non-host")),
+    (BLANK, _("None")),
+    (IDP, _("Displaced  |  Internally Displaced People")),
+    (REFUGEE, _("Displaced  |  Refugee / Asylum Seeker")),
+    (OTHERS_OF_CONCERN, _("Displaced  |  Others of Concern")),
+    (HOST, _("Non-displaced  |   Host")),
+    (NON_HOST, _("Non-displaced  |   Non-host")),
 )
 # INDIVIDUALS
 MALE = "MALE"
@@ -38,6 +45,7 @@ WIDOWED = "WIDOWED"
 DIVORCED = "DIVORCED"
 SEPARATED = "SEPARATED"
 MARITAL_STATUS_CHOICE = (
+    (BLANK, _("None")),
     (SINGLE, _("Single")),
     (MARRIED, _("Married")),
     (WIDOWED, _("Widowed")),
@@ -99,9 +107,10 @@ RELATIONSHIP_CHOICE = (
     (NEPHEW_NIECE, "Nephew / Niece"),
     (COUSIN, "Cousin"),
 )
-YES = "YES"
-NO = "NO"
+YES = "1"
+NO = "0"
 YES_NO_CHOICE = (
+    (BLANK, _("None")),
     (YES, _("Yes")),
     (NO, _("No")),
 )
@@ -168,7 +177,7 @@ SOME_DIFFICULTY = "SOME_DIFFICULTY"
 LOT_DIFFICULTY = "LOT_DIFFICULTY"
 CANNOT_DO = "CANNOT_DO"
 SEVERITY_OF_DISABILITY_CHOICES = (
-    ("", "NONE"),
+    (BLANK, _("None")),
     (SOME_DIFFICULTY, "Some difficulty"),
     (LOT_DIFFICULTY, "A lot of difficulty"),
     (CANNOT_DO, "Cannot do at all"),
@@ -176,6 +185,7 @@ SEVERITY_OF_DISABILITY_CHOICES = (
 UNICEF = "UNICEF"
 PARTNER = "PARTNER"
 ORG_ENUMERATOR_CHOICES = (
+    (BLANK, _("None")),
     (UNICEF, "UNICEF"),
     (PARTNER, "Partner"),
 )
@@ -183,21 +193,29 @@ HUMANITARIAN_PARTNER = "HUMANITARIAN_PARTNER"
 PRIVATE_PARTNER = "PRIVATE_PARTNER"
 GOVERNMENT_PARTNER = "GOVERNMENT_PARTNER"
 DATA_SHARING_CHOICES = (
+    (BLANK, _("None")),
     (UNICEF, "UNICEF"),
     (HUMANITARIAN_PARTNER, "Humanitarian partners"),
     (PRIVATE_PARTNER, "Private partners"),
     (GOVERNMENT_PARTNER, "Government partners"),
+)
+HH_REGISTRATION = "HH_REGISTRATION"
+COMMUNITY = "COMMUNITY"
+REGISTRATION_METHOD_CHOICES = (
+    (BLANK, _("None")),
+    (HH_REGISTRATION, "Household Registration"),
+    (COMMUNITY, "Community-level Registration"),
 )
 
 
 class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.BooleanField(default=True)
-    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES)
+    consent = models.NullBooleanField()
+    consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True)
-    country = CountryField(blank=True)
+    country = CountryField()
     size = models.PositiveIntegerField()
     address = models.CharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
@@ -211,23 +229,27 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         related_name="represented_households",
     )
     geopoint = PointField(blank=True, null=True)
-    female_age_group_0_5_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_count = models.PositiveIntegerField(default=0)
-    female_age_group_12_17_count = models.PositiveIntegerField(default=0)
-    female_adults_count = models.PositiveIntegerField(default=0)
-    pregnant_count = models.PositiveIntegerField(default=0)
-    male_age_group_0_5_count = models.PositiveIntegerField(default=0)
-    male_age_group_6_11_count = models.PositiveIntegerField(default=0)
-    male_age_group_12_17_count = models.PositiveIntegerField(default=0)
-    male_adults_count = models.PositiveIntegerField(default=0)
-    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
-    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
-    female_adults_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=0)
-    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=0)
-    male_adults_disabled_count = models.PositiveIntegerField(default=0)
+    female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
+    pregnant_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_12_17_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_18_59_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_60_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    female_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_0_5_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_6_11_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_12_17_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_18_59_disabled_count = models.PositiveIntegerField(default=None, null=True)
+    male_age_group_60_disabled_count = models.PositiveIntegerField(default=None, null=True)
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport",
         related_name="households",
@@ -238,22 +260,25 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         related_name="households",
         blank=True,
     )
-    returnee = models.BooleanField(default=False, null=True)
+    returnee = models.NullBooleanField()
     flex_fields = JSONField(default=dict)
-    first_registration_date = models.DateField()
-    last_registration_date = models.DateField()
+    first_registration_date = models.DateTimeField()
+    last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
-    fchild_hoh = models.BooleanField(default=False)
-    child_hoh = models.BooleanField(default=False)
-    unicef_id = models.CharField(max_length=250, blank=True)
+    fchild_hoh = models.NullBooleanField()
+    child_hoh = models.NullBooleanField()
+    unicef_id = models.CharField(max_length=250, blank=True, default=BLANK)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
-    end = models.DateTimeField(blank=True, null=True)
-    deviceid = models.CharField(max_length=250, blank=True)
-    name_enumerator = models.CharField(max_length=250)
-    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES)
-    org_name_enumerator = models.CharField(max_length=250)
-    village = models.CharField(max_length=250, blank=True)
+    deviceid = models.CharField(max_length=250, blank=True, default=BLANK)
+    name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
+    org_enumerator = models.CharField(max_length=250, choices=ORG_ENUMERATOR_CHOICES, default=BLANK)
+    org_name_enumerator = models.CharField(max_length=250, blank=True, default=BLANK)
+    village = models.CharField(max_length=250, blank=True, default=BLANK)
+    registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
+    collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
+    currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
+    unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
 
     @property
     def sanction_list_possible_match(self):
@@ -273,7 +298,7 @@ class DocumentValidator(TimeStampedUUIDModel):
 
 
 class DocumentType(TimeStampedUUIDModel):
-    country = CountryField(blank=True)
+    country = CountryField()
     label = models.CharField(max_length=100)
     type = models.CharField(max_length=50, choices=IDENTIFICATION_TYPE_CHOICE)
 
@@ -313,20 +338,10 @@ class Agency(models.Model):
     label = models.CharField(
         max_length=100,
     )
+    country = CountryField()
 
     def __str__(self):
         return self.label
-
-
-class HouseholdIdentity(models.Model):
-    agency = models.ForeignKey("Agency", related_name="households_identities", on_delete=models.CASCADE)
-    household = models.ForeignKey("Household", related_name="identities", on_delete=models.CASCADE)
-    document_number = models.CharField(
-        max_length=255,
-    )
-
-    def __str__(self):
-        return f"{self.agency} {self.household} {self.document_number}"
 
 
 class IndividualIdentity(models.Model):
@@ -365,12 +380,12 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
+    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
         max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
+        validators=[MinLengthValidator(2)],
     )
     given_name = models.CharField(
         max_length=85,
@@ -393,6 +408,7 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     marital_status = models.CharField(
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
+        default=BLANK,
     )
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
@@ -430,8 +446,8 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict)
-    enrolled_in_nutrition_programme = models.BooleanField(default=False)
-    administration_of_rutf = models.BooleanField(default=False)
+    enrolled_in_nutrition_programme = models.NullBooleanField()
+    administration_of_rutf = models.NullBooleanField()
     unicef_id = models.CharField(max_length=250, blank=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
@@ -448,7 +464,7 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
-    pregnant = models.BooleanField(default=False)
+    pregnant = models.NullBooleanField()
     observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)

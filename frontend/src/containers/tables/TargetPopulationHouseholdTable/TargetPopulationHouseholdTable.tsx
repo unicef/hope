@@ -13,6 +13,7 @@ interface TargetPopulationHouseholdProps {
   query?;
   queryObjectName?;
   variables?;
+  canViewDetails?: boolean;
 }
 
 export const TargetPopulationHouseholdTable = ({
@@ -20,10 +21,11 @@ export const TargetPopulationHouseholdTable = ({
   query,
   queryObjectName,
   variables,
+  canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
-    ...variables
+    ...variables,
   };
   return (
     <TableWrapper>
@@ -35,7 +37,11 @@ export const TargetPopulationHouseholdTable = ({
         queriedObjectName={queryObjectName}
         initialVariables={initialVariables}
         renderRow={(row) => (
-          <TargetPopulationHouseholdTableRow household={row} />
+          <TargetPopulationHouseholdTableRow
+            key={row.id}
+            household={row}
+            canViewDetails={canViewDetails}
+          />
         )}
       />
     </TableWrapper>

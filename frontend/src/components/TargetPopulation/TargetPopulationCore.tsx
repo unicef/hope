@@ -23,6 +23,7 @@ export function TargetPopulationCore({
   id,
   status,
   targetPopulation,
+  canViewHouseholdDetails,
 }): React.ReactElement {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
@@ -40,7 +41,11 @@ export function TargetPopulationCore({
         totalNumOfIndividuals={totalNumOfIndividuals}
       />
       {candidateListRules.length ? (
-        <TargetingHouseholds id={id} status={status} />
+        <TargetingHouseholds
+          id={id}
+          status={status}
+          canViewDetails={canViewHouseholdDetails}
+        />
       ) : (
         <PaperContainer>
           <Typography variant='h6'>

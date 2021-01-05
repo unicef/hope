@@ -25,8 +25,10 @@ const Title = styled.div`
 
 export function AddIndividualGrievanceDetails({
   ticket,
+  canApproveDataChange,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApproveDataChange: boolean;
 }): React.ReactElement {
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveAddIndividualDataChangeMutation();
@@ -98,50 +100,52 @@ export function AddIndividualGrievanceDetails({
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Individual Data</Typography>
-          <ConfirmationDialog title='Warning' content='Are you sure?'>
-            {(confirm) => (
-              <Button
-                onClick={confirm(async () => {
-                  try {
-                    await mutate({
-                      variables: {
-                        grievanceTicketId: ticket.id,
-                        approveStatus: !ticket.addIndividualTicketDetails
-                          .approveStatus,
-                      },
-                      refetchQueries: () => [
-                        {
-                          query: GrievanceTicketDocument,
-                          variables: { id: ticket.id },
+          {canApproveDataChange && (
+            <ConfirmationDialog title='Warning' content='Are you sure?'>
+              {(confirm) => (
+                <Button
+                  onClick={confirm(async () => {
+                    try {
+                      await mutate({
+                        variables: {
+                          grievanceTicketId: ticket.id,
+                          approveStatus: !ticket.addIndividualTicketDetails
+                            .approveStatus,
                         },
-                      ],
-                    });
-                    if (ticket.addIndividualTicketDetails.approveStatus) {
-                      showMessage('Changes Disapproved');
+                        refetchQueries: () => [
+                          {
+                            query: GrievanceTicketDocument,
+                            variables: { id: ticket.id },
+                          },
+                        ],
+                      });
+                      if (ticket.addIndividualTicketDetails.approveStatus) {
+                        showMessage('Changes Disapproved');
+                      }
+                      if (!ticket.addIndividualTicketDetails.approveStatus) {
+                        showMessage('Changes Approved');
+                      }
+                    } catch (e) {
+                      e.graphQLErrors.map((x) => showMessage(x.message));
                     }
-                    if (!ticket.addIndividualTicketDetails.approveStatus) {
-                      showMessage('Changes Approved');
-                    }
-                  } catch (e) {
-                    e.graphQLErrors.map((x) => showMessage(x.message));
+                  })}
+                  variant={
+                    ticket.addIndividualTicketDetails?.approveStatus
+                      ? 'outlined'
+                      : 'contained'
                   }
-                })}
-                variant={
-                  ticket.addIndividualTicketDetails?.approveStatus
-                    ? 'outlined'
-                    : 'contained'
-                }
-                color='primary'
-                disabled={
-                  ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                }
-              >
-                {ticket.addIndividualTicketDetails.approveStatus
-                  ? 'Disapprove'
-                  : 'Approve'}
-              </Button>
-            )}
-          </ConfirmationDialog>
+                  color='primary'
+                  disabled={
+                    ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                  }
+                >
+                  {ticket.addIndividualTicketDetails.approveStatus
+                    ? 'Disapprove'
+                    : 'Approve'}
+                </Button>
+              )}
+            </ConfirmationDialog>
+          )}
         </Box>
       </Title>
       <Grid container spacing={6}>

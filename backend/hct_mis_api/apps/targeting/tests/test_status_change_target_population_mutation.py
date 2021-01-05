@@ -311,6 +311,8 @@ class TestFinalizeTargetPopulationMutation(APITestCase):
         tp.final_list_targeting_criteria = cls.get_targeting_criteria_for_rule(
             {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
         )
+        program = ProgramFactory(business_area=cls.business_area, status=Program.ACTIVE)
+        tp.program = program
         tp.save()
         tp.households.set(cls.households)
         cls.target_population_approved_with_final_rule = tp

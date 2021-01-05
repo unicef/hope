@@ -12,6 +12,7 @@ interface TargetPopulationHouseholdTableRowProps {
 
 export function TargetPopulationHouseholdTableRow({
   household,
+  canViewDetails,
 }): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
@@ -23,7 +24,7 @@ export function TargetPopulationHouseholdTableRow({
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.id}
     >
