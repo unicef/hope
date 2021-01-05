@@ -58,8 +58,14 @@ const FullWidth = styled.div`
 `;
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Programme name is required'),
-  scope: Yup.string().required('CashAssist Scope is required'),
+  name: Yup.string()
+    .required('Programme name is required')
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  scope: Yup.string()
+    .required('CashAssist Scope is required')
+    .min(2, 'Too short')
+    .max(50, 'Too long'),
   startDate: Yup.date().required(),
   endDate: Yup.date()
     .when(
@@ -75,8 +81,18 @@ const validationSchema = Yup.object().shape({
       '',
     )
     .required(),
-  sector: Yup.string().required('Sector is required'),
+  sector: Yup.string()
+    .required('Sector is required')
+    .min(2, 'Too short')
+    .max(50, 'Too long'),
   budget: Yup.number().min(0),
+  administrativeAreasOfImplementation: Yup.string()
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  description: Yup.string()
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  populationGoal: Yup.number().min(0),
 });
 
 interface ProgramFormPropTypes {
