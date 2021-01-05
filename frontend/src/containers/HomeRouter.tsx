@@ -152,7 +152,7 @@ export function HomeRouter(): React.ReactElement {
           <Route path='/:businessArea/users-list'>
             <UsersList />
           </Route>
-          <Route path='/'>
+          <Route path='/:businessArea'>
             <DashboardPage />
           </Route>
         </Switch>

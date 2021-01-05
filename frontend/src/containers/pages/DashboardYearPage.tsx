@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Tabs, Tab, Button } from '@material-ui/core';
-import { PageHeader } from '../../components/PageHeader';
+import React from 'react';
 import { TabPanel } from '../../components/TabPanel';
+import { DashboardCard } from '../../components/Dashboard/DashboardCard';
 
 interface DashboardYearPageProps {
   year: string;
@@ -14,6 +13,7 @@ export function DashboardYearPage({
   return (
     <TabPanel value={selectedTab} index={selectedTab}>
       Year content {year}
+      <DashboardCard color='red' />
     </TabPanel>
   );
 }
