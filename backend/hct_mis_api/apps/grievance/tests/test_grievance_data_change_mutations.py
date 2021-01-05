@@ -1,14 +1,16 @@
 from datetime import date
+from parameterized import parameterized
 
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
 from grievance.models import GrievanceTicket
 from household.fixtures import HouseholdFactory, IndividualFactory
-from household.models import SINGLE, FEMALE, WIDOWED
+from household.models import SINGLE, FEMALE, WIDOWED, RELATIONSHIP_UNKNOWN, ROLE_NO_ROLE
 from program.fixtures import ProgramFactory
 
 
@@ -67,7 +69,7 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             business_area=BusinessArea.objects.first(),
         )
 
-        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07")
+        household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=3, country="AFG")
         household_two = HouseholdFactory.build(id="ac540aa1-5c7a-47d0-a013-32054e2af454")
         household_one.registration_data_import.imported_by.save()
         household_one.registration_data_import.save()
@@ -85,6 +87,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1943-07-30",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Robin Ford",
@@ -94,6 +98,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1946-02-15",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Timothy Perry",
@@ -103,6 +109,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1983-12-21",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Eric Torres",
@@ -112,6 +120,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1973-03-23",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
             {
                 "full_name": "Jenna Franklin",
@@ -121,6 +131,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                 "birth_date": "1969-11-29",
                 "sex": FEMALE,
                 "marital_status": WIDOWED,
+                "estimated_birth_date": False,
+                "relationship": RELATIONSHIP_UNKNOWN,
             },
         ]
 
@@ -134,7 +146,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
         household_two.save()
         self.household_one = household_one
 
-    def test_grievance_create_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_create_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -155,6 +178,9 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                                 "sex": "MALE",
                                 "birthDate": date(year=1980, month=2, day=1).isoformat(),
                                 "maritalStatus": SINGLE,
+                                "estimatedBirthDate": False,
+                                "relationship": RELATIONSHIP_UNKNOWN,
+                                "role": ROLE_NO_ROLE,
                             },
                         }
                     }
@@ -167,7 +193,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_update_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_update_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -199,7 +236,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_delete_individual_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_delete_individual_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -224,7 +272,18 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             variables=variables,
         )
 
-    def test_grievance_update_household_data_change(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_grievance_update_household_data_change(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         variables = {
             "input": {
                 "description": "Test",
@@ -240,6 +299,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
                             "household": self.id_to_base64(self.household_one.id, "HouseholdNode"),
                             "householdData": {
                                 "femaleAgeGroup611Count": 14,
+                                "country": "AFG",
+                                "size": 4,
                             },
                         }
                     }

@@ -36,6 +36,14 @@ class User(AbstractUser, UUIDModel):
     def all_permissions(self):
         return
 
+    def permissions_in_business_area(self, business_area_slug):
+        all_roles_permissions_list = list(
+            Role.objects.filter(user_roles__user=self, user_roles__business_area__slug=business_area_slug).values_list(
+                "permissions", flat=True
+            )
+        )
+        return [permission for roles_permissions in all_roles_permissions_list for permission in roles_permissions]
+
     def has_permissions(self, permissions, business_area, write=False):
         query = Role.objects.filter(
             permissions__contains=permissions, user_roles__user=self, user_roles__business_area=business_area
@@ -63,6 +71,9 @@ class UserRole(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", related_name="user_roles", on_delete=models.CASCADE)
     user = models.ForeignKey("account.User", related_name="user_roles", on_delete=models.CASCADE)
     role = models.ForeignKey("account.Role", related_name="user_roles", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("business_area", "user", "role")
 
     def __str__(self):
         return f"{self.user} {self.role} in {self.business_area}"
