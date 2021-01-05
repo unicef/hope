@@ -20,10 +20,11 @@ import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
 import { UniversalMoment } from '../../components/UniversalMoment';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { isPermissionDeniedError } from '../../utils/utils';
 import { HouseholdCompositionTable } from '../tables/HouseholdCompositionTable';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   padding: 20px;
@@ -62,7 +63,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data, loading } = useHouseholdQuery({
+  const { data, loading, error } = useHouseholdQuery({
     variables: { id },
   });
   const {
@@ -71,15 +72,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (permissions === null) return null;
 
-  if (
-    permissions &&
-    !hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS, permissions)
-  )
-    return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data || !choicesData) return null;
+  if (!data || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -94,7 +90,14 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
     <div>
       <PageHeader
         title={`Household ID: ${household.unicefId}`}
-        breadCrumbs={breadCrumbsItems}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
         withFlag={household.sanctionListPossibleMatch}
         withTriangle={household.hasDuplicates}
       />
@@ -110,10 +113,20 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
           choicesData={choicesData}
           household={household as HouseholdNode}
         />
-        <PaymentRecordHouseholdTable
-          openInNewTab
-          household={household as HouseholdNode}
-        />
+        {hasPermissions(
+          PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+          permissions,
+        ) && (
+          <PaymentRecordHouseholdTable
+            openInNewTab
+            household={household as HouseholdNode}
+            businessArea={businessArea}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
+        )}
         <HouseholdVulnerabilities
           household={household as HouseholdDetailedFragment}
         />
@@ -162,7 +175,7 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='User name'>
-                <div> {household.registrationDataImport.importedBy.email}</div>
+                {household.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
           </Grid>

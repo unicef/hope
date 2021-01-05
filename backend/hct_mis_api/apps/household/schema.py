@@ -10,8 +10,8 @@ from django_filters import (
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
-from targeting.models import HouseholdSelection
 
+from targeting.models import HouseholdSelection
 from account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -29,6 +29,7 @@ from core.utils import (
     encode_ids,
     to_choice_object,
 )
+from grievance.models import GrievanceTicket
 from household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
@@ -226,13 +227,19 @@ class ExtendedHouseHoldConnection(graphene.Connection):
         return root.iterable.aggregate(sum=Sum("size")).get("sum")
 
 
+# FIXME: This need to be changed to HouseholdSelectionNode
 class HouseholdSelection(DjangoObjectType):
     class Meta:
         model = HouseholdSelection
 
 
 class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),)
+    permission_classes = (
+        hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER),
+    )
 
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
@@ -267,6 +274,36 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
+    @classmethod
+    def check_node_permission(cls, info, object_instance):
+        super().check_node_permission(info, object_instance)
+        user = info.context.user
+
+        # if user doesn't have permission to view all households, we check based on their grievance tickets
+        if not user.has_permission(Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS.value, object_instance.business_area):
+            grievance_tickets = GrievanceTicket.objects.filter(
+                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+            )
+            cls.check_creator_or_owner_permission(
+                info,
+                object_instance,
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS.value,
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_CREATOR.value,
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_HOUSEHOLD_DETAILS_AS_OWNER.value,
+            )
+
+    # I don't think this is needed because it would skip check_node_permission call
+    # @classmethod
+    # def get_node(cls, info, id):
+    #     # This will skip permission check from BaseNodePermissionMixin, check if okay
+    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+    #     try:
+    #         return queryset.get(pk=id)
+    #     except cls._meta.model.DoesNotExist:
+    #         return None
+
     class Meta:
         model = Household
         filter_fields = []
@@ -280,7 +317,12 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
 
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
-    permission_classes = (hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),)
+    permission_classes = (
+        hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
+        hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER),
+    )
 
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
@@ -304,6 +346,36 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
+
+    @classmethod
+    def check_node_permission(cls, info, object_instance):
+        super().check_node_permission(info, object_instance)
+        user = info.context.user
+        # if user can't simply view all individuals, we check if they can do it because of grievance
+        if not user.has_permission(
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+        ):
+            grievance_tickets = GrievanceTicket.objects.filter(
+                complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
+            )
+            cls.check_creator_or_owner_permission(
+                info,
+                object_instance,
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS.value,
+                any(user_ticket in user.created_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR.value,
+                any(user_ticket in user.assigned_tickets.all() for user_ticket in grievance_tickets),
+                Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER.value,
+            )
+
+    # I don't think this is needed because it would skip check_node_permission call
+    # @classmethod
+    # def get_node(cls, info, id):
+    #     queryset = cls.get_queryset(cls._meta.model.all_objects, info)
+    #     try:
+    #         return queryset.get(pk=id)
+    #     except cls._meta.model.DoesNotExist:
+    #         return None
 
     class Meta:
         model = Individual

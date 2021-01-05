@@ -342,9 +342,12 @@ export function reduceChoices(choices): { [id: number]: string } {
 }
 
 export function renderUserName(user): string {
+  if (!user) {
+    return '-';
+  }
   return user?.firstName
-    ? `${user.firstName} ${user.lastName}`
-    : `${user.email}`;
+    ? `${user?.firstName} ${user?.lastName}`
+    : `${user?.email}`;
 }
 
 const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
@@ -394,3 +397,6 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
         .join(' ')
     : inputStr;
 };
+
+export const isPermissionDeniedError = (error): boolean =>
+  error?.message.includes('Permission Denied');
