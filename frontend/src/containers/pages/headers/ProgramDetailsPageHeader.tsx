@@ -54,7 +54,7 @@ export function ProgramDetailsPageHeader({
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Managment',
+      title: 'Programme Management',
       to: `/${businessArea}/programs/`,
     },
   ];

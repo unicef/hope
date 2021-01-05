@@ -120,14 +120,26 @@ class DeduplicateTask:
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
+                queries_list = [
+                    {"match": {f"{prefix}.number": {"query": doc_number}}},
+                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
+                ]
+                if prefix == "documents":
+                    country = item.get("country", "")
+                    queries_list.append(
+                        {
+                            "match": {
+                                f"{prefix}.country": {
+                                    "query": country.alpha3 if isinstance(country, Country) else country
+                                }
+                            }
+                        },
+                    )
                 queries.extend(
                     [
                         {
                             "bool": {
-                                "must": [
-                                    {"match": {f"{prefix}.number": {"query": doc_number}}},
-                                    {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
-                                ],
+                                "must": queries_list,
                                 "boost": 2,
                             },
                         }
@@ -293,22 +305,30 @@ class DeduplicateTask:
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",
                 "female_age_group_12_17_count",
-                "female_adults_count",
+                "female_age_group_18_59_count",
+                "female_age_group_60_count",
                 "pregnant_count",
                 "male_age_group_0_5_count",
                 "male_age_group_6_11_count",
                 "male_age_group_12_17_count",
-                "male_adults_count",
+                "male_age_group_18_59_count",
+                "male_age_group_60_count",
                 "female_age_group_0_5_disabled_count",
                 "female_age_group_6_11_disabled_count",
                 "female_age_group_12_17_disabled_count",
-                "female_adults_disabled_count",
+                "female_age_group_18_59_disabled_count",
+                "female_age_group_60_disabled_count",
                 "male_age_group_0_5_disabled_count",
                 "male_age_group_6_11_disabled_count",
                 "male_age_group_12_17_disabled_count",
-                "male_adults_disabled_count",
+                "male_age_group_18_59_disabled_count",
+                "male_age_group_60_disabled_count",
                 "head_of_household.id",
                 "returnee",
+                "registration_method",
+                "collect_individual_data",
+                "currency",
+                "unhcr_id",
             ),
             "households_and_roles": ("role", "individual.id"),
         }
@@ -355,24 +375,32 @@ class DeduplicateTask:
                 "female_age_group_0_5_count",
                 "female_age_group_6_11_count",
                 "female_age_group_12_17_count",
-                "female_adults_count",
+                "female_age_group_18_59_count",
+                "female_age_group_60_count",
                 "pregnant_count",
                 "male_age_group_0_5_count",
                 "male_age_group_6_11_count",
                 "male_age_group_12_17_count",
-                "male_adults_count",
+                "male_age_group_18_59_count",
+                "male_age_group_60_count",
                 "female_age_group_0_5_disabled_count",
                 "female_age_group_6_11_disabled_count",
                 "female_age_group_12_17_disabled_count",
-                "female_adults_disabled_count",
+                "female_age_group_18_59_disabled_count",
+                "female_age_group_60_disabled_count",
                 "male_age_group_0_5_disabled_count",
                 "male_age_group_6_11_disabled_count",
                 "male_age_group_12_17_disabled_count",
-                "male_adults_disabled_count",
+                "male_age_group_18_59_disabled_count",
+                "male_age_group_60_disabled_count",
                 "head_of_household.id",
                 "first_registration_date",
                 "last_registration_date",
                 "returnee",
+                "registration_method",
+                "collect_individual_data",
+                "currency",
+                "unhcr_id",
             ),
             "households_and_roles": ("role", "individual.id"),
         }

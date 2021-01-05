@@ -11,23 +11,22 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { isPermissionDeniedError } from '../../utils/utils';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const permissions = usePermissions();
-  const { data, loading } = useTargetPopulationQuery({
+  const { data, loading, error } = useTargetPopulationQuery({
     variables: { id },
   });
   const [isEdit, setEditState] = useState(false);
 
   if (loading) return <LoadingComponent />;
-  if (permissions === null) return null;
 
-  if (!hasPermissions(PERMISSIONS.TARGETING_VIEW_DETAILS, permissions))
-    return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
 
-  if (!data) return null;
+  if (!data || permissions === null) return null;
 
   const targetPopulation = data.targetPopulation as TargetPopulationNode;
   const { status } = targetPopulation;
@@ -71,6 +70,10 @@ export function TargetPopulationDetailsPage(): React.ReactElement {
             status={status}
             candidateList={targetPopulation.candidateListTargetingCriteria}
             targetPopulation={targetPopulation}
+            canViewHouseholdDetails={hasPermissions(
+              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+              permissions,
+            )}
           />
         </>
       )}
