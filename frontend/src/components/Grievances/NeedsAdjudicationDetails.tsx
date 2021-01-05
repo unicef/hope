@@ -39,8 +39,10 @@ const Title = styled.div`
 
 export function NeedsAdjudicationDetails({
   ticket,
+  canApprove,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canApprove: boolean;
 }): React.ReactElement {
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
@@ -78,7 +80,7 @@ export function NeedsAdjudicationDetails({
               </Button>
             )}
 
-            {isEditable && (
+            {isEditable && canApprove && (
               <ConfirmationDialog
                 title='Confirmation'
                 content={confirmationText}

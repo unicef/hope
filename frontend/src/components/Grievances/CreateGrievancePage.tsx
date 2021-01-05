@@ -36,6 +36,13 @@ import {
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
+import { usePermissions } from '../../hooks/usePermissions';
+import {
+  hasPermissionInModule,
+  hasPermissions,
+  PERMISSIONS,
+} from '../../config/permissions';
+import { PermissionDenied } from '../PermissionDenied';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
@@ -79,23 +86,18 @@ export const dataChangeComponentDict = {
 const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string()
-    .required('Category is required')
-    .nullable(),
+  category: Yup.string().required('Category is required').nullable(),
   admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-  selectedRelatedTickets: Yup.array()
-    .of(Yup.string())
-    .nullable(),
+  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
 });
 
 export function CreateGrievancePage(): React.ReactElement {
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
   const { showMessage } = useSnackbar();
 
   const initialValues = {
@@ -127,20 +129,21 @@ export function CreateGrievancePage(): React.ReactElement {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
+
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
     'category',
     '*',
   );
-  if (
-    userDataLoading ||
-    choicesLoading ||
-    allAddIndividualFieldsDataLoading ||
-    !issueTypeDict
-  ) {
+
+  if (userDataLoading || choicesLoading || allAddIndividualFieldsDataLoading)
     return <LoadingComponent />;
-  }
-  if (!choicesData || !userData) return null;
+  if (permissions === null) return null;
+
+  if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
+    return <PermissionDenied />;
+
+  if (!choicesData || !userData || !allAddIndividualFieldsData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -203,7 +206,14 @@ export function CreateGrievancePage(): React.ReactElement {
         );
         return (
           <>
-            <PageHeader title='New Ticket' breadCrumbs={breadCrumbsItems} />
+            <PageHeader
+              title='New Ticket'
+              breadCrumbs={
+                hasPermissionInModule('GRIEVANCES_VIEW_LIST', permissions)
+                  ? breadCrumbsItems
+                  : null
+              }
+            />
             <Grid container spacing={3}>
               <Grid item xs={8}>
                 <NewTicket>

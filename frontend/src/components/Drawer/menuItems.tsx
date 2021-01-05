@@ -74,7 +74,7 @@ export const menuItems = [
   {
     name: 'Payment Verification',
     href: '/payment-verification',
-    selectedRegexp: /^\/payment-verification*$/,
+    selectedRegexp: /^\/payment-verification.*$/,
     icon: <AttachMoney />,
     permissions: [
       PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
@@ -85,8 +85,22 @@ export const menuItems = [
   {
     name: 'Grievance and Feedback',
     href: '/grievance-and-feedback',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/grievance-and-feedback.*$/,
     icon: <Feedback />,
+    permissions: [
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+    ],
   },
   {
     name: 'Reporting',
@@ -97,7 +111,7 @@ export const menuItems = [
   {
     name: 'User Management',
     href: '/users-list',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,
     permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
   },

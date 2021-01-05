@@ -47,6 +47,9 @@ export const AllGrievanceTicket = gql`
             lastName
             email
           }
+          createdBy {
+            id
+          }
           category
           createdAt
           userModified

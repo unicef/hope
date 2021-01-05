@@ -212,6 +212,14 @@ class GrievanceTicket(TimeStampedUUIDModel):
         yield from self.linked_tickets_related.all()
 
     @property
+    def is_feedback(self):
+        return self.category in (
+            self.CATEGORY_NEGATIVE_FEEDBACK,
+            self.CATEGORY_POSITIVE_FEEDBACK,
+            self.CATEGORY_REFERRAL,
+        )
+
+    @property
     def ticket_details(self):
         nested_dict_or_value = self.TICKET_DETAILS_NAME_MAPPING.get(self.category)
         if isinstance(nested_dict_or_value, dict):
