@@ -117,17 +117,27 @@ class IncompatibleRoles(TimeStampedUUIDModel):
 
     def clean(self):
         super().clean()
+        if self.role_one == self.role_two:
+            raise ValidationError({"role_two": _("Choose two different roles.")})
+        failing_users = set()
+
+        for role_pair in [(self.role_one, self.role_two), (self.role_two, self.role_one)]:
+            for userrole in UserRole.objects.filter(role=role_pair[0]):
+                if UserRole.objects.filter(
+                    user=userrole.user, business_area=userrole.business_area, role=role_pair[1]
+                ).exists():
+                    failing_users.add(userrole.user)
+
+        if failing_users:
+            raise ValidationError(
+                _(
+                    f"Users: [{', '.join([user.email for user in failing_users])}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair."
+                )
+            )
 
     def validate_unique(self, *args, **kwargs):
         super().validate_unique(*args, **kwargs)
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
-        if self.role_one == self.role_two:
-            raise ValidationError({"role_two": _("Choose two different roles.")})
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
-            raise ValidationError(
-                {
-                    "role_one": _("This combination of roles already exists."),
-                    "role_two": _("This combination of roles already exists."),
-                }
-            )
+            raise ValidationError(_("This combination of roles already exists as incompatible pair."))
