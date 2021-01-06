@@ -32,7 +32,9 @@ class User(AbstractUser, UUIDModel):
     )
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        if self.first_name or self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.email or self.username
 
     def all_permissions(self):
         return
