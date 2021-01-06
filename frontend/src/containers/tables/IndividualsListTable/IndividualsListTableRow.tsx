@@ -61,9 +61,7 @@ export function IndividualsListTableRow({
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
-      <AnonTableCell anonymize align='left'>
-        {individual.fullName}
-      </AnonTableCell>
+      <AnonTableCell align='left'>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>

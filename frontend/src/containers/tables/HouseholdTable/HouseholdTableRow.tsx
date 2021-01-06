@@ -45,7 +45,7 @@ export function HouseHoldTableRow({
         {household.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <AnonTableCell anonymize align='left'>
+      <AnonTableCell align='left'>
         {household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
