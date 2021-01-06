@@ -118,7 +118,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
     def clean(self):
         super().clean()
         if self.role_one == self.role_two:
-            raise ValidationError({"role_two": _("Choose two different roles.")})
+            raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
         for role_pair in [(self.role_one, self.role_two), (self.role_two, self.role_one)]:
