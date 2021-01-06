@@ -128,6 +128,9 @@ class Permissions(Enum):
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER = auto()
 
+    # All
+    ALL_VIEW_PII_DATA_ON_LISTS = auto()
+
     # Django Admin
     # ...
 
