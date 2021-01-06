@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Tabs, Tab, Button } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
-import { DashboardYearPage } from './DashboardYearPage';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
+import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -49,7 +49,10 @@ export function DashboardPage(): React.ReactElement {
         </Button>
       </PageHeader>
       <DashboardFilters filter={filter} onFilterChange={setFilter} />
-      <DashboardYearPage selectedTab={selectedTab} year={years[selectedTab]} />
+      <DashboardYearPage
+        selectedTab={selectedTab}
+        //    year={years[selectedTab]}
+      />
     </>
   );
 }
