@@ -1,5 +1,4 @@
 import React from 'react';
-import get from 'lodash/get';
 import {
   Paper,
   Grid,
@@ -12,7 +11,7 @@ import styled from 'styled-components';
 import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
+import { useAllProgramsQuery } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 
@@ -44,7 +43,6 @@ export const DashboardFilters = ({
   filter,
 }: DashboardFiltersProps): React.ReactElement => {
   const businessArea = useBusinessArea();
-  console.log('business', businessArea);
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
   });
@@ -52,7 +50,6 @@ export const DashboardFilters = ({
 
   const allPrograms = data?.allPrograms?.edges || [];
   const programs = allPrograms.map((edge) => edge.node);
-  console.log('programs', programs);
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
   return (
