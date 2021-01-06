@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.forms.models import BaseInlineFormSet
+from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404
 from django.shortcuts import redirect
@@ -161,9 +161,34 @@ class RoleAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
+class UserRoleAdminForm(ModelForm):
+    def clean(self):
+        super().clean()
+        role = self.cleaned_data["role"]
+        incompatible_roles = list(
+            IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
+        ) + list(IncompatibleRoles.objects.filter(role_two=role).values_list("role_one", flat=True))
+        incompatible_userroles = UserRole.objects.filter(
+            business_area=self.cleaned_data["business_area"],
+            role__id__in=incompatible_roles,
+            user=self.cleaned_data["user"],
+        )
+        if self.instance.id:
+            incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
+        if incompatible_userroles.exists():
+            raise ValidationError(
+                {
+                    "role": _(
+                        f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+                    )
+                }
+            )
+
+
 @admin.register(UserRole)
 class UserRoleAdmin(admin.ModelAdmin):
     list_display = ("user", "role", "business_area")
+    form = UserRoleAdminForm
 
 
 @admin.register(IncompatibleRoles)
