@@ -47,9 +47,7 @@ export function ImportedIndividualsTableRow({
       <TableCell onClick={handleClick} align='left'>
         <Pointer>{decodeIdString(individual.id)}</Pointer>
       </TableCell>
-      <AnonTableCell anonymize align='left'>
-        {individual.fullName}
-      </AnonTableCell>
+      <AnonTableCell align='left'>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align='left'>
         {relationshipChoicesDict[individual.relationship]}

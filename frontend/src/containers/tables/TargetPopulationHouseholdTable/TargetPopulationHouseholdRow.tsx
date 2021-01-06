@@ -30,10 +30,7 @@ export function TargetPopulationHouseholdTableRow({
       key={household.id}
     >
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <AnonTableCell
-        anonymize
-        align='left'
-      >{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
+      <AnonTableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
