@@ -54,7 +54,7 @@ export function VerificationRecordsTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <AnonTableCell anonymize align='left'>
+      <AnonTableCell align='left'>
         {record.paymentRecord.household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>

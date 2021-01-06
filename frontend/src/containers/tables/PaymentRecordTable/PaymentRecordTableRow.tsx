@@ -54,9 +54,7 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <AnonTableCell anonymize align='left'>
-        {paymentRecord.fullName}
-      </AnonTableCell>
+      <AnonTableCell align='left'>{paymentRecord.fullName}</AnonTableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>
