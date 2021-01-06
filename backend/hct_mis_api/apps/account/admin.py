@@ -26,6 +26,8 @@ class UserRoleAdminForm(ModelForm):
 
     def clean(self):
         super().clean()
+        if not self.is_valid():
+            return
         role = self.cleaned_data["role"]
         incompatible_roles = list(
             IncompatibleRoles.objects.filter(role_one=role).values_list("role_two", flat=True)
