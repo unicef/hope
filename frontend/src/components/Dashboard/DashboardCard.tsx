@@ -2,14 +2,17 @@ import { Paper } from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
 
-interface DashboardCardPageProps {
+interface DashboardCardProps {
   color: string;
+  children;
 }
 const StyledPaper = styled(Paper)`
-  border-left: 3px solid ${({ color }) => color};
+  border-left: 4px solid ${({ color }) => color};
+  padding: 20px 24px;
 `;
 export const DashboardCard = ({
   color,
-}: DashboardCardPageProps): React.ReactElement => {
-  return <StyledPaper color={color}>Card</StyledPaper>;
+  children,
+}: DashboardCardProps): React.ReactElement => {
+  return <StyledPaper color={color}>{children}</StyledPaper>;
 };
