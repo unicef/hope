@@ -50,24 +50,24 @@ export function SanctionList(): React.ReactElement {
   let importFile = null;
   importFile = (
     <>
-      <DropzoneField
-        loading={fileLoading}
-        dontShowFilename={!fileToImport}
-        onChange={(files) => {
-          if (files.length === 0) {
-            return;
-          }
-          const file = files[0];
-          const fileSizeMB = file.size / (1024 * 1024);
-          if (fileSizeMB > 200) {
-            showMessage(
-              `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
-            );
-            return;
-          }
-          setFileToImport(file);
-        }}
-      />
+        <DropzoneField
+          loading={fileLoading}
+          dontShowFilename={!fileToImport}
+          onChange={(files) => {
+            if (files.length === 0) {
+              return;
+            }
+            const file = files[0];
+            const fileSizeMB = file.size / (1024 * 1024);
+            if (fileSizeMB > 200) {
+              showMessage(
+                `File size is too big. It should be under 200MB, File size is ${fileSizeMB}MB`,
+              );
+              return;
+            }
+            setFileToImport(file);
+          }}
+        />
     </>
   );
 
