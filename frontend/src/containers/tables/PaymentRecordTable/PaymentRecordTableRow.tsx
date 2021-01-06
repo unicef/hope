@@ -12,7 +12,7 @@ import {
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
-import { AnonTableCell } from '../../../components/AnonTableCell';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -54,7 +54,7 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <AnonTableCell align='left'>{paymentRecord.fullName}</AnonTableCell>
+      <AnonTableCell>{paymentRecord.fullName}</AnonTableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>
