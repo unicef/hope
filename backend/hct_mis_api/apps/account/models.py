@@ -126,12 +126,12 @@ class IncompatibleRoles(TimeStampedUUIDModel):
                 if UserRole.objects.filter(
                     user=userrole.user, business_area=userrole.business_area, role=role_pair[1]
                 ).exists():
-                    failing_users.add(userrole.user)
+                    failing_users.add(userrole.user.email)
 
         if failing_users:
             raise ValidationError(
                 _(
-                    f"Users: [{', '.join([user.email for user in failing_users])}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair."
+                    f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair."
                 )
             )
 
