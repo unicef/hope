@@ -1,8 +1,8 @@
 import { TableCell } from '@material-ui/core';
 import React from 'react';
-import { hasPermissions, PERMISSIONS } from '../config/permissions';
-import { usePermissions } from '../hooks/usePermissions';
-import { anon } from '../utils/utils';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
+import { anon } from '../../utils/utils';
 
 export const AnonTableCell = ({ children, ...props }): React.ReactElement => {
   const permissions = usePermissions();
@@ -12,5 +12,9 @@ export const AnonTableCell = ({ children, ...props }): React.ReactElement => {
     PERMISSIONS.ALL_VIEW_PII_DATA_ON_LISTS,
     permissions,
   );
-  return <TableCell {...props}>{anon(children, shouldAnonymize)}</TableCell>;
+  return (
+    <TableCell align='left' {...props}>
+      {anon(children, shouldAnonymize)}
+    </TableCell>
+  );
 };

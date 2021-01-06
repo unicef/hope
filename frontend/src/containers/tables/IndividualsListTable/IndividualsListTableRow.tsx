@@ -15,7 +15,7 @@ import {
 } from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { AnonTableCell } from '../../../components/AnonTableCell';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -61,7 +61,7 @@ export function IndividualsListTableRow({
         {individual.sanctionListPossibleMatch && <Flag />}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
-      <AnonTableCell align='left'>{individual.fullName}</AnonTableCell>
+      <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
