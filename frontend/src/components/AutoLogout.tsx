@@ -1,16 +1,19 @@
-import React, {useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import IdleTimer from 'react-idle-timer';
 import { AUTO_LOGOUT_MILLIS } from '../config';
 
 export const AutoLogout = (): React.ReactElement => {
   const idleTimer = useRef(null);
-  const [bc, setBc] = useState(() => new BroadcastChannel('auto-logout-channel'));
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [bc, setBc] = useState(
+    () => new BroadcastChannel('auto-logout-channel'),
+  );
   useEffect(() => {
     if (!bc) {
       return;
     }
-    bc.onmessage = (ev) => idleTimer.current.reset();
-  }, [bc])
+    bc.onmessage = () => idleTimer.current.reset();
+  }, [bc]);
   const onIdle = (): void => {
     if (!localStorage.getItem('AUTHENTICATED')) {
       return;
@@ -18,10 +21,16 @@ export const AutoLogout = (): React.ReactElement => {
     window.location.assign('/api/logout');
     localStorage.removeItem('AUTHENTICATED');
   };
-  const onAction = () => {
-    bc.postMessage("active")
-  }
+  const onAction = (): void => {
+    bc.postMessage('active');
+  };
   return (
-    <IdleTimer ref={idleTimer} onAction={onAction} onIdle={onIdle} debounce={500} timeout={AUTO_LOGOUT_MILLIS} />
+    <IdleTimer
+      ref={idleTimer}
+      onAction={onAction}
+      onIdle={onIdle}
+      debounce={500}
+      timeout={AUTO_LOGOUT_MILLIS}
+    />
   );
-}
+};
