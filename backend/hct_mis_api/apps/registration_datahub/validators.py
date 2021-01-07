@@ -129,7 +129,7 @@ class ImportDataValidator(BaseValidator):
                     if value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": "Issuing country for other_id_no_i_c is required, "
+                            "message": f"Issuing country for {key} is required, "
                             "when any document data are provided",
                         }
                         if is_xlsx is True:
