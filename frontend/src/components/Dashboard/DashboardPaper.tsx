@@ -9,6 +9,8 @@ interface DashboardPaperProps {
 const StyledPaper = styled(Paper)`
   padding: 20px 24px;
   margin-top: 20px;
+  font-size: 18px;
+  font-weight: normal;
 `;
 export const DashboardPaper = ({
   title,
@@ -16,9 +18,7 @@ export const DashboardPaper = ({
 }: DashboardPaperProps): React.ReactElement => {
   return (
     <StyledPaper>
-      <Box mb={2}>
-        <Typography variant='h6'>{title}</Typography>
-      </Box>
+      <Box mb={2}>{title}</Box>
       {children}
     </StyledPaper>
   );

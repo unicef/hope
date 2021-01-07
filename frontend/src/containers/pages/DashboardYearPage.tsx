@@ -8,6 +8,13 @@ import ChildCareIcon from '@material-ui/icons/ChildCare';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardCard } from '../../components/Dashboard/DashboardCard';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
+import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
+import { PlannedBudget } from '../../components/Dashboard/charts/PlannedBudget';
+import { Missing } from '../../components/Missing';
+import { PaymentVerificationChart } from '../../components/Dashboard/charts/PaymentVerificationChart';
+import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
+import { GrievancesChart } from '../../components/Dashboard/charts/GrievancesChart';
+import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -82,16 +89,16 @@ export function DashboardYearPage({
               </Grid>
             </DashboardCard>
             <DashboardPaper title='Number of Programmes by Sector'>
-              <div>chart</div>
+              <ProgrammesBySector />
             </DashboardPaper>
             <DashboardPaper title='Planned Budget and Total Transferred to Date'>
-              <div>chart</div>
+              <PlannedBudget />
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
-              <div>chart</div>
+              <Missing />
             </DashboardPaper>
             <DashboardPaper title='Payment Verification'>
-              <div>chart</div>
+              <PaymentVerificationChart />
             </DashboardPaper>
           </Grid>
           <Grid item xs={4}>
@@ -142,13 +149,14 @@ export function DashboardYearPage({
                     </Grid>
                   </DashboardCard>
                   <DashboardPaper title='Volume by Delivery Mechanism'>
-                    <div>chart</div>
+                    <CardTextLight>IN USD</CardTextLight>
+                    <VolumeByDeliveryMechanism />
                   </DashboardPaper>
                   <DashboardPaper title='Grievances'>
-                    <div>chart</div>
+                    <GrievancesChart />
                   </DashboardPaper>
                   <DashboardPaper title='Payments'>
-                    <div>chart</div>
+                    <PaymentsChart />
                   </DashboardPaper>
                 </Grid>
               </Grid>
