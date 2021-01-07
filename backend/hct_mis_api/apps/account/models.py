@@ -46,7 +46,7 @@ class User(AbstractUser, UUIDModel):
 
     def has_permission(self, permission, business_area, write=False):
         query = Role.objects.filter(
-            permissions=permission, user_roles__user=self, user_roles__business_area=business_area
+            permissions__contains=[permission], user_roles__user=self, user_roles__business_area=business_area
         )
         return query.count() > 0
 
