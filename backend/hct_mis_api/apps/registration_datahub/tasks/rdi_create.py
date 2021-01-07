@@ -32,7 +32,8 @@ from registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub, KoboImportedSubmission,
+    RegistrationDataImportDatahub,
+    KoboImportedSubmission,
 )
 from registration_datahub.tasks.deduplicate import DeduplicateTask
 from registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
@@ -335,21 +336,29 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "individuals": {
                 "birth_certificate_no_i_c": self._handle_document_fields,
                 "birth_certificate_photo_i_c": self._handle_document_photo_fields,
+                "birth_certificate_issuer_i_c": self._handle_document_issuing_country_fields,
                 "drivers_license_no_i_c": self._handle_document_fields,
                 "drivers_license_photo_i_c": self._handle_document_photo_fields,
+                "drivers_license_issuer_i_c": self._handle_document_issuing_country_fields,
                 "electoral_card_no_i_c": self._handle_document_fields,
                 "electoral_card_photo_i_c": self._handle_document_photo_fields,
+                "electoral_card_issuer_i_c": self._handle_document_issuing_country_fields,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
                 "unhcr_id_photo_i_c": self._handle_identity_photo,
+                "unhcr_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "national_id_no_i_c": self._handle_document_fields,
                 "national_id_photo_i_c": self._handle_document_photo_fields,
+                "national_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "national_passport_i_c": self._handle_document_fields,
                 "national_passport_photo_i_c": self._handle_document_photo_fields,
+                "national_passport_issuer_i_c": self._handle_document_issuing_country_fields,
                 "scope_id_no_i_c": self._handle_identity_fields,
                 "scope_id_photo_i_c": self._handle_identity_photo,
+                "scope_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "other_id_type_i_c": self._handle_document_fields,
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
+                "other_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
@@ -527,21 +536,29 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     DOCS_AND_IDENTITIES_FIELDS = {
         "birth_certificate_no_i_c",
         "birth_certificate_photo_i_c",
+        "birth_certificate_issuer_i_c",
         "drivers_license_no_i_c",
         "drivers_license_photo_i_c",
+        "drivers_license_issuer_i_c",
         "electoral_card_no_i_c",
         "electoral_card_photo_i_c",
+        "electoral_card_issuer_i_c",
         "unhcr_id_no_i_c",
         "unhcr_id_photo_i_c",
+        "unhcr_id_issuer_i_c",
         "national_id_no_i_c",
         "national_id_photo_i_c",
+        "national_id_issuer_i_c",
         "national_passport_i_c",
         "national_passport_photo_i_c",
+        "national_passport_issuer_i_c",
         "scope_id_no_i_c",
         "scope_id_photo_i_c",
+        "scope_id_issuer_i_c",
         "other_id_type_i_c",
         "other_id_no_i_c",
         "other_id_photo_i_c",
+        "other_id_issuer_i_c",
     }
 
     reduced_submissions = None
@@ -603,7 +620,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 is_identity = document_name in identity_fields
 
                 if is_identity:
-                    agency = ImportedAgency.objects.get(type="WFP" if document_name == "scope_id" else "UNHCR")
+                    agency = ImportedAgency.objects.get(
+                        type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
+                    )
                     identities.append(
                         ImportedIndividualIdentity(
                             agency=agency,
@@ -614,10 +633,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 else:
                     type_name = document_name.upper()
                     label = IDENTIFICATION_TYPE_DICT.get(type_name)
+                    country = Country(data["issuing_country"])
                     if label is None:
                         label = data["name"]
                     (document_type, is_created,) = ImportedDocumentType.objects.get_or_create(
-                        country=Country(COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())),
+                        country=country,
                         label=label,
                         type=type_name,
                     )
@@ -683,11 +703,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         role = None
                         for i_field, i_value in individual.items():
                             if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
-                                key = i_field.replace("_photo_i_c", "").replace("_no_i_c", "")
+                                key = (
+                                    i_field.replace("_photo_i_c", "").replace("_no_i_c", "").replace("_issuer_i_c", "")
+                                )
                                 if i_field.endswith("_type_i_c"):
                                     value_key = "name"
                                 elif i_field.endswith("_photo_i_c"):
                                     value_key = "photo"
+                                elif i_field.endswith("_issuer_i_c"):
+                                    value_key = "issuing_country"
                                 else:
                                     value_key = "number"
                                 current_individual_docs_and_identities[key][value_key] = i_value
