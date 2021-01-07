@@ -68,6 +68,17 @@ class XLSXValidator(BaseValidator):
 class ImportDataValidator(BaseValidator):
     BUSINESS_AREA_SLUG = None
     BUSINESS_AREA_CODE = None
+    DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
+        "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
+        "drivers_license_issuer_i_c": "drivers_license_no_i_c",
+        "electoral_card_issuer_i_c": "electoral_card_no_i_c",
+        "national_id_issuer_i_c": "national_id_no_i_c",
+        "national_passport_issuer_i_c": "national_passport_i_c",
+        "other_id_issuer_i_c": "other_id_type_i_c",
+        # identities
+        "scope_id_issuer_i_c": "scope_id_no_i_c",
+        "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
+    }
 
     @classmethod
     def validate(cls, *args, **kwargs):
@@ -129,8 +140,7 @@ class ImportDataValidator(BaseValidator):
                     if value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country for {key} is required, "
-                            "when any document data are provided",
+                            "message": f"Issuing country for {key} is required, " "when any document data are provided",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -395,17 +405,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             },
             "other_id_no_i_c": None,
         }
-        documents_issuing_countries_mapping = {
-            "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
-            "drivers_license_issuer_i_c": "drivers_license_no_i_c",
-            "electoral_card_issuer_i_c": "electoral_card_no_i_c",
-            "national_id_issuer_i_c": "national_id_no_i_c",
-            "national_passport_issuer_i_c": "national_passport_i_c",
-            "other_id_issuer_i_c": "other_id_type_i_c",
-            # identities
-            "scope_id_issuer_i_c": "scope_id_no_i_c",
-            "unhcr_id_issuer_i_c": "unhcr_id_no_i_c",
-        }
         for row in sheet.iter_rows(min_row=3):
             # openpyxl keeps iterating on empty rows so need to omit empty rows
             if not any([cell.value for cell in row]):
@@ -452,8 +451,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                         )
                         documents_numbers[header.value]["numbers"].append(str(value))
 
-                if header.value in documents_issuing_countries_mapping.keys():
-                    document_key = documents_issuing_countries_mapping.get(header.value)
+                if header.value in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                    document_key = cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header.value)
                     documents_dict = documents_numbers
                     if document_key in identities_numbers.keys():
                         documents_dict = identities_numbers
@@ -843,12 +842,43 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": []},
         }
         documents_numbers = {
-            "birth_certificate_no_i_c": {"type": "BIRTH_CERTIFICATE", "validation_data": [], "numbers": []},
-            "drivers_license_no_i_c": {"type": "DRIVERS_LICENSE", "validation_data": [], "numbers": []},
-            "electoral_card_no_i_c": {"type": "ELECTORAL_CARD", "validation_data": [], "numbers": []},
-            "national_id_no_i_c": {"type": "NATIONAL_ID", "validation_data": [], "numbers": []},
-            "national_passport_i_c": {"type": "NATIONAL_PASSPORT", "validation_data": [], "numbers": []},
-            "other_id_type_i_c": {"type": "OTHER", "names": [], "validation_data": [], "numbers": []},
+            "birth_certificate_no_i_c": {
+                "type": "BIRTH_CERTIFICATE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "drivers_license_no_i_c": {
+                "type": "DRIVERS_LICENSE",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "electoral_card_no_i_c": {
+                "type": "ELECTORAL_CARD",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_id_no_i_c": {
+                "type": "NATIONAL_ID",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "national_passport_i_c": {
+                "type": "NATIONAL_PASSPORT",
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
+            "other_id_type_i_c": {
+                "type": "OTHER",
+                "names": [],
+                "validation_data": [],
+                "numbers": [],
+                "issuing_countries": [],
+            },
             "other_id_no_i_c": None,
         }
 
@@ -881,6 +911,12 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                 else:
                                     documents_numbers[i_field]["validation_data"].append({"value": i_value})
                                     documents_numbers[i_field]["numbers"].append(i_value)
+                            if i_field in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                                document_key = cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(i_field)
+                                documents_dict = documents_numbers
+                                if document_key in identities_numbers.keys():
+                                    documents_dict = identities_numbers
+                                documents_dict[document_key]["issuing_countries"].append(i_value)
 
                             if i_field in identities_numbers:
                                 identities_numbers[i_field]["numbers"].append(i_value)
