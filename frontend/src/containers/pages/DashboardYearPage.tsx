@@ -7,6 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import ChildCareIcon from '@material-ui/icons/ChildCare';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardCard } from '../../components/Dashboard/DashboardCard';
+import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -80,6 +81,18 @@ export function DashboardYearPage({
                 </Grid>
               </Grid>
             </DashboardCard>
+            <DashboardPaper title='Number of Programmes by Sector'>
+              <div>chart</div>
+            </DashboardPaper>
+            <DashboardPaper title='Planned Budget and Total Transferred to Date'>
+              <div>chart</div>
+            </DashboardPaper>
+            <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
+              <div>chart</div>
+            </DashboardPaper>
+            <DashboardPaper title='Payment Verification'>
+              <div>chart</div>
+            </DashboardPaper>
           </Grid>
           <Grid item xs={4}>
             <PadddingLeftContainer>
@@ -128,6 +141,15 @@ export function DashboardYearPage({
                       </Grid>
                     </Grid>
                   </DashboardCard>
+                  <DashboardPaper title='Volume by Delivery Mechanism'>
+                    <div>chart</div>
+                  </DashboardPaper>
+                  <DashboardPaper title='Grievances'>
+                    <div>chart</div>
+                  </DashboardPaper>
+                  <DashboardPaper title='Payments'>
+                    <div>chart</div>
+                  </DashboardPaper>
                 </Grid>
               </Grid>
             </PadddingLeftContainer>

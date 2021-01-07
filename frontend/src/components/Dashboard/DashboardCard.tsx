@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 interface DashboardCardProps {
   color: string;
-  children;
+  children: React.ReactNode;
 }
 const StyledPaper = styled(Paper)`
   border-left: 4px solid ${({ color }) => color};
