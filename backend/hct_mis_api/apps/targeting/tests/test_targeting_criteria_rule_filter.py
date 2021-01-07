@@ -9,6 +9,7 @@ from household.fixtures import create_household, create_household_and_individual
 from household.models import Household, Individual
 from freezegun import freeze_time
 
+
 class TargetingCriteriaRuleFilterTestCase(TestCase):
     def setUp(self):
         households = []
@@ -78,7 +79,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             self.assertTrue(False)
         except ValidationError:
             self.assertTrue(True)
-
+    
     @freeze_time("2020-10-10")
     def test_rule_filter_age_equal(self):
         rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="EQUALS", field_name="age", arguments=[50])
@@ -94,7 +95,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         queryset = Individual.objects.filter(query)
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
-
+    
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_49(self):
         rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="RANGE", field_name="age", arguments=[1, 49])
@@ -102,7 +103,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
-
+    
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_50(self):
         rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="RANGE", field_name="age", arguments=[1, 50])
@@ -110,7 +111,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 4)
         self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
-
+    
     @freeze_time("2020-10-10")
     def test_rule_filter_age_gt_40(self):
         rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="GREATER_THAN", field_name="age", arguments=[40])
