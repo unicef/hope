@@ -203,6 +203,7 @@ PROJECT_APPS = [
     "erp_datahub",
     "sanction_list",
     "steficon",
+    "reporting",
 ]
 
 DJANGO_APPS = [
