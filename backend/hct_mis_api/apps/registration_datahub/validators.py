@@ -292,11 +292,10 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         if cls.ALL_FIELDS[header]["required"] is False and (value is None or value == ""):
             return True
-
-        value = value.capitalize()
-        if value in ("True", "False"):
-            return True
-
+        if type(value) is str:
+            value = value.capitalize()
+            if value in ("True", "False"):
+                return True
         return False
 
     @classmethod
