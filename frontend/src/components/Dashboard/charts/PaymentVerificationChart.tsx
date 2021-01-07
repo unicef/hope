@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bar, HorizontalBar } from 'react-chartjs-2';
+import { HorizontalBar } from 'react-chartjs-2';
 
 export const PaymentVerificationChart = (): React.ReactElement => {
   const data = {
