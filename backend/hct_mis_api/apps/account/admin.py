@@ -50,8 +50,12 @@ class UserRoleAdminForm(ModelForm):
 
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
+    model = UserRole
+
     def clean(self):
         super().clean()
+        if not self.is_valid():
+            return
         for form in self.forms:
             if not form.is_valid():
                 return
@@ -64,7 +68,8 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                 error_forms = [
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
-                    if not form_two.cleaned_data.get("DELETE")
+                    if form_two.cleaned_data
+                    and not form_two.cleaned_data.get("DELETE")
                     and form_two.cleaned_data["business_area"] == business_area
                     and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
