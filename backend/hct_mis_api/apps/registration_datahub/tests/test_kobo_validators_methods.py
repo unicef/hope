@@ -588,11 +588,13 @@ class TestKoboSaveValidatorsMethods(TestCase):
             {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for other_id_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is "
+                           "required, when any document data are provided",
             },
             {
                 "header": "birth_certificate_no_i_c",
-                "message": "Issuing country for other_id_no_i_c is required, when any document data are provided",
+                "message": "Issuing country for birth_certificate_no_i_c is "
+                           "required, when any document data are provided",
             },
             {"header": "role_i_c", "message": "Only one person can be a primary collector"},
             {"header": "size_h_c", "message": "Missing household required field size_h_c"},
