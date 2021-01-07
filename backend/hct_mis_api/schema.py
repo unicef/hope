@@ -19,6 +19,7 @@ import registration_data.schema
 import registration_datahub.schema
 import registration_datahub.mutations
 import registration_datahub.schema
+import reporting.schema
 import sanction_list.mutations
 import targeting.mutations
 import targeting.schema
@@ -38,6 +39,7 @@ class Query(
     steficon.schema.Query,
     grievance.schema.Query,
     sanction_list.schema.Query,
+    reporting.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
