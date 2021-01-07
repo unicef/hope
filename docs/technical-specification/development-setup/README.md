@@ -4,7 +4,7 @@
 
 1. Install [Docker](https://docs.docker.com/engine/installation/) for your OS.
 2. Receive .env file from your team member. There are AD secrets there.
-3. Run 
+3. Run
 
 Frontend in Docker
 
@@ -28,9 +28,9 @@ docker-compose -f docker-compose.yml run backend ./manage.py init
 docker-compose -f docker-compose.yml up
 ```
 
-Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login) 
+Access the frontend in your browser at [`localhost:8082/login`](http://localhost:8082/login)
 
-Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/) 
+Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://localhost:8082/api/admin/)
 
 ### **Commands**
 
@@ -40,20 +40,22 @@ Backend can be accessed at `/api/` i.e. [`localhost:8082/api/admin/`](http://loc
 ./manage.py loadbusinessareas
 ```
 
- or **generatefixtures** will ask if you want to load business areas.
+or **generatefixtures** will ask if you want to load business areas.
 
 accepts the arguments:
 
-* **--program** - Create provided amount of programs, default is 10
-* **--cash-plan** - Create provided amount of cash plans for one program, default is 10
-* **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
-* **--noinput** - Suppresses all user prompts
+- **--program** - Create provided amount of programs, default is 10
+- **--cash-plan** - Create provided amount of cash plans for one program, default is 10
+- **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
+- **--noinput** - Suppresses all user prompts
 
-**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList\_XML.xml
+**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList_XML.xml
 
 **migratealldb** - our custom command to migrate all databases specified in settings
 
-**init** - resets all databases, run migrations on all databases, load business areas and fake data with default values
+**generateroles** - creates all default roles with correct permission sets
+
+**init** - resets all databases, run migrations on all databases, load business areas and fake data with default values, creates a set of default roles
 
 ### Writing and running tests:
 
@@ -63,7 +65,7 @@ for backend we are using _Django's TestCase_ and snapshottest.
 
 For snapshottest we are using our custom class **APITestCase**, use it if your test should use snapshots. Check existing tests to see how we are using it.
 
-We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for each test case.
+We are keeping tests in &lt;app_name&gt;/tests/ and creating separate files for each test case.
 
 to run all tests use:
 
@@ -103,12 +105,11 @@ Below represents approximately strategy we hope to follow. We may or may not use
 
 The following are the code branches and their CI / CD usage.
 
-| Branch | Auto-deployed? | Cloud environment | Airflow UI |
-| :--- | :--- | :--- | :--- |
-| develop | yes | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) | [https://dev-af.unitst.org](%20%20%20https://dev-af.unitst.org) |
-| staging | yes | https://staging-hct.unitst.org/ | [https://stg-af.unitst.org](https://stg-af.unitst.org) |
-| master | no | ? |  |
-| feature/\* or bug/\* | no | n/a |  |
+| Branch               | Auto-deployed? | Cloud environment                                                      | Airflow UI                                                      |
+| :------------------- | :------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| develop              | yes            | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) | [https://dev-af.unitst.org](%20%20%20https://dev-af.unitst.org) |
+| staging              | yes            | https://staging-hct.unitst.org/                                        | [https://stg-af.unitst.org](https://stg-af.unitst.org)          |
+| master               | no             | ?                                                                      |                                                                 |
+| feature/\* or bug/\* | no             | n/a                                                                    |                                                                 |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
-

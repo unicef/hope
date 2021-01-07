@@ -64,11 +64,10 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     user.set_unusable_password()
     user.save()
     if business_area_code:
-        guest_user_role = UserRole()
-        # TODO: maybe switch to use one of the default roles, like Basic or Authorizer with minimal permissions
-        guest_user_role.role = Role.objects.filter(name="Guest").first()
-        guest_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
-        guest_user_role.user = user
-        guest_user_role.save()
+        basic_user_role = UserRole()
+        basic_user_role.role = Role.objects.filter(name="Basic").first()
+        basic_user_role.business_area = BusinessArea.objects.get(code=business_area_code)
+        basic_user_role.user = user
+        basic_user_role.save()
 
     return {"is_new": True, "user": user}
