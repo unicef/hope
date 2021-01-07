@@ -23,11 +23,13 @@ const StyledFormControl = styled(FormControl)`
 interface ReportingFiltersProps {
   onFilterChange;
   filter;
+  choicesData;
 }
 
 export const ReportingFilters = ({
   onFilterChange,
   filter,
+  choicesData,
 }: ReportingFiltersProps): React.ReactElement => {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -49,7 +51,7 @@ export const ReportingFilters = ({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {[].map((item) => {
+              {choicesData.reportTypesChoices.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}
@@ -72,15 +74,10 @@ export const ReportingFilters = ({
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  createdAtRange: {
-                    ...filter.createdAtRange,
-                    min: moment(date)
-                      .set({ hour: 0, minute: 0 })
-                      .toISOString(),
-                  },
+                  createdFrom: date ? moment(date).format('YYYY-MM-DD') : null,
                 })
               }
-              value={filter.createdAtRange.min || null}
+              value={filter.createdFrom || null}
               format='YYYY-MM-DD'
               InputAdornmentProps={{ position: 'end' }}
             />
@@ -97,15 +94,10 @@ export const ReportingFilters = ({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                createdAtRange: {
-                  ...filter.createdAtRange,
-                  max: moment(date)
-                    .set({ hour: 23, minute: 59 })
-                    .toISOString(),
-                },
+                createdTo: date ? moment(date).format('YYYY-MM-DD') : null,
               })
             }
-            value={filter.createdAtRange.max || null}
+            value={filter.createdTo || null}
             format='YYYY-MM-DD'
             InputAdornmentProps={{ position: 'end' }}
           />
@@ -124,7 +116,7 @@ export const ReportingFilters = ({
               <MenuItem value=''>
                 <em>None</em>
               </MenuItem>
-              {[].map((item) => {
+              {choicesData.reportStatusChoices.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>
                     {item.name}

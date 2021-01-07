@@ -6565,6 +6565,42 @@ export type AllRapidProFlowsQuery = (
   )>>> }
 );
 
+export type AllReportsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  createdFrom?: Maybe<Scalars['Date']>,
+  createdTo?: Maybe<Scalars['Date']>,
+  reportType?: Maybe<Array<Maybe<Scalars['String']>>>
+};
+
+
+export type AllReportsQuery = (
+  { __typename?: 'Query' }
+  & { allReports: Maybe<(
+    { __typename?: 'ReportNodeConnection' }
+    & Pick<ReportNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ReportNodeEdge' }
+      & Pick<ReportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ReportNode' }
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt'>
+        & { createdBy: (
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
 export type AllSanctionListIndividualsQueryVariables = {
   referenceNumber: Scalars['String'],
   first?: Maybe<Scalars['Int']>,
@@ -7247,6 +7283,20 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type ReportChoiceDataQueryVariables = {};
+
+
+export type ReportChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { reportStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, reportTypesChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -11239,6 +11289,86 @@ export function useAllRapidProFlowsLazyQuery(baseOptions?: ApolloReactHooks.Lazy
 export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
+export const AllReportsDocument = gql`
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String]) {
+  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        reportType
+        dateFrom
+        dateTo
+        status
+        createdAt
+        createdBy {
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllReportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllReportsQuery, AllReportsQueryVariables>, 'query'> & ({ variables: AllReportsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllReportsComponent = (props: AllReportsComponentProps) => (
+      <ApolloReactComponents.Query<AllReportsQuery, AllReportsQueryVariables> query={AllReportsDocument} {...props} />
+    );
+    
+export type AllReportsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllReportsQuery, AllReportsQueryVariables> & TChildProps;
+export function withAllReports<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllReportsQuery,
+  AllReportsQueryVariables,
+  AllReportsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllReportsQuery, AllReportsQueryVariables, AllReportsProps<TChildProps>>(AllReportsDocument, {
+      alias: 'allReports',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllReportsQuery__
+ *
+ * To run a query within a React component, call `useAllReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllReportsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      businessArea: // value for 'businessArea'
+ *      createdFrom: // value for 'createdFrom'
+ *      createdTo: // value for 'createdTo'
+ *      reportType: // value for 'reportType'
+ *   },
+ * });
+ */
+export function useAllReportsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, baseOptions);
+      }
+export function useAllReportsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, baseOptions);
+        }
+export type AllReportsQueryHookResult = ReturnType<typeof useAllReportsQuery>;
+export type AllReportsLazyQueryHookResult = ReturnType<typeof useAllReportsLazyQuery>;
+export type AllReportsQueryResult = ApolloReactCommon.QueryResult<AllReportsQuery, AllReportsQueryVariables>;
 export const AllSanctionListIndividualsDocument = gql`
     query AllSanctionListIndividuals($referenceNumber: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $fullNameContains: String) {
   allSanctionListIndividuals(fullName_Icontains: $fullNameContains, referenceNumber: $referenceNumber, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
@@ -12767,6 +12897,60 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const ReportChoiceDataDocument = gql`
+    query ReportChoiceData {
+  reportStatusChoices {
+    name
+    value
+  }
+  reportTypesChoices {
+    name
+    value
+  }
+}
+    `;
+export type ReportChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>, 'query'>;
+
+    export const ReportChoiceDataComponent = (props: ReportChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<ReportChoiceDataQuery, ReportChoiceDataQueryVariables> query={ReportChoiceDataDocument} {...props} />
+    );
+    
+export type ReportChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ReportChoiceDataQuery, ReportChoiceDataQueryVariables> & TChildProps;
+export function withReportChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReportChoiceDataQuery,
+  ReportChoiceDataQueryVariables,
+  ReportChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ReportChoiceDataQuery, ReportChoiceDataQueryVariables, ReportChoiceDataProps<TChildProps>>(ReportChoiceDataDocument, {
+      alias: 'reportChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReportChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useReportChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReportChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReportChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useReportChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, baseOptions);
+      }
+export function useReportChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, baseOptions);
+        }
+export type ReportChoiceDataQueryHookResult = ReturnType<typeof useReportChoiceDataQuery>;
+export type ReportChoiceDataLazyQueryHookResult = ReturnType<typeof useReportChoiceDataLazyQuery>;
+export type ReportChoiceDataQueryResult = ApolloReactCommon.QueryResult<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>;
 export const SampleSizeDocument = gql`
     query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
   sampleSize(input: $input) {
