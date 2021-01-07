@@ -48,3 +48,6 @@ class Report(TimeStampedUUIDModel):
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"
+
+    class Meta:
+        ordering = ["-created_at", "report_type", "status", "created_by"]
