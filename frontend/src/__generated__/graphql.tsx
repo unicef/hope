@@ -6574,7 +6574,8 @@ export type AllReportsQueryVariables = {
   businessArea: Scalars['String'],
   createdFrom?: Maybe<Scalars['Date']>,
   createdTo?: Maybe<Scalars['Date']>,
-  reportType?: Maybe<Array<Maybe<Scalars['String']>>>
+  reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  createdBy?: Maybe<Scalars['ID']>
 };
 
 
@@ -11290,8 +11291,8 @@ export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFl
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
 export const AllReportsDocument = gql`
-    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String]) {
-  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType) {
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String], $createdBy: ID) {
+  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11357,6 +11358,7 @@ export function withAllReports<TProps, TChildProps = {}>(operationOptions?: Apol
  *      createdFrom: // value for 'createdFrom'
  *      createdTo: // value for 'createdTo'
  *      reportType: // value for 'reportType'
+ *      createdBy: // value for 'createdBy'
  *   },
  * });
  */

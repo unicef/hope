@@ -5,6 +5,7 @@ import {
   ReportNode,
   AllReportsQueryVariables,
   useAllReportsQuery,
+  useMeQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
 import { headCells } from './ReportingHeadCells';
@@ -23,17 +24,21 @@ export const ReportingTable = ({
   filter,
   choicesData,
 }: ReportingTableProps): React.ReactElement => {
+  const { data: meData, loading: meLoading } = useMeQuery({
+    fetchPolicy: 'cache-first',
+  });
+  if (meLoading) return null;
   const initialVariables = {
     businessArea,
     createdFrom: filter.createdFrom,
     createdTo: filter.createdTo,
     reportType: filter.type,
     status: filter.status,
+    createdBy: filter.onlyMy ? meData.me.id : null,
   };
   return (
     <TableWrapper>
       <UniversalTable<ReportNode, AllReportsQueryVariables>
-        // title='Repor'
         headCells={headCells}
         query={useAllReportsQuery}
         queriedObjectName='allReports'
