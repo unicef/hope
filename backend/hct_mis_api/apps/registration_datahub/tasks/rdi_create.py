@@ -4,14 +4,13 @@ from datetime import date, datetime
 from io import BytesIO
 from typing import Union
 
+import openpyxl
+from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
-
-import openpyxl
-from dateutil.parser import parse
 from django_countries.fields import Country
 from openpyxl_image_loader import SheetImageLoader
 
@@ -20,8 +19,7 @@ from core.kobo.api import KoboAPI
 from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from core.models import BusinessArea
 from core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
-from household.const import COUNTRIES_NAME_ALPHA2
-from household.models import HEAD, IDENTIFICATION_TYPE_DICT, NON_BENEFICIARY, ROLE_ALTERNATE, ROLE_PRIMARY, YES
+from household.models import HEAD, IDENTIFICATION_TYPE_DICT, NON_BENEFICIARY, ROLE_ALTERNATE, ROLE_PRIMARY
 from registration_data.models import RegistrationDataImport
 from registration_datahub.models import (
     ImportData,
@@ -716,7 +714,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     value_key = "number"
                                 current_individual_docs_and_identities[key][value_key] = i_value
                                 current_individual_docs_and_identities[key]["individual"] = individual_obj
-                            elif i_field == "relationship_i_c" and i_value == NON_BENEFICIARY:
+                            elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
                                 only_collector_flag = True
                                 collectors_count += 1
                             elif i_field == "role_i_c":
@@ -732,14 +730,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         individual_obj.registration_data_import = registration_data_import
 
                         duplicated_object = individuals_to_create.get(individual_obj.get_hash_key)
-                        has_documents = len(current_individual_docs_and_identities) > 0
-                        if duplicated_object is None or has_documents or only_collector_flag is False:
+                        if only_collector_flag is False:
                             individuals_to_create[individual_obj.get_hash_key] = individual_obj
 
-                        if only_collector_flag is True:
-                            individual_obj.household = None
-                        else:
-                            individual_obj.household = household_obj
+                        individual_obj.household = household_obj if only_collector_flag is False else None
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
@@ -749,11 +743,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             )
                             collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
-                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                        if only_collector_flag is False:
+                            documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                            current_individuals.append(individual_obj.get_hash_key)
 
-                        current_individuals.append(individual_obj.get_hash_key)
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
+                elif hh_field == "_submission_time":
+                    household_obj.kobo_submission_time = parse(hh_value)
                 else:
                     self._cast_and_assign(hh_value, hh_field, household_obj)
 
