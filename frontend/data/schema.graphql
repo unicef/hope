@@ -1502,6 +1502,7 @@ type ImportedHouseholdNode implements Node {
   unhcrId: String!
   koboSubmissionUuid: UUID
   koboAssetId: String!
+  koboSubmissionTime: DateTime
   individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
   hasDuplicates: Boolean
 }

@@ -1889,6 +1889,7 @@ export type ImportedHouseholdNode = Node & {
   unhcrId: Scalars['String'],
   koboSubmissionUuid?: Maybe<Scalars['UUID']>,
   koboAssetId: Scalars['String'],
+  koboSubmissionTime?: Maybe<Scalars['DateTime']>,
   individuals: ImportedIndividualNodeConnection,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
 };
@@ -7020,6 +7021,29 @@ export type ProgrammeChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type ReportQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ReportQuery = (
+  { __typename?: 'Query' }
+  & { report: Maybe<(
+    { __typename?: 'ReportNode' }
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo'>
+    & { createdBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'firstName' | 'lastName'>
+    ), adminArea: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'title'>
+    )>, program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'name'>
+    )> }
+  )> }
 );
 
 export type ReportChoiceDataQueryVariables = {};
@@ -12633,6 +12657,71 @@ export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.L
 export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
 export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
 export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const ReportDocument = gql`
+    query Report($id: ID!) {
+  report(id: $id) {
+    id
+    status
+    reportType
+    createdAt
+    dateFrom
+    dateTo
+    createdBy {
+      firstName
+      lastName
+    }
+    adminArea {
+      title
+    }
+    program {
+      name
+    }
+  }
+}
+    `;
+export type ReportComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ReportQuery, ReportQueryVariables>, 'query'> & ({ variables: ReportQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ReportComponent = (props: ReportComponentProps) => (
+      <ApolloReactComponents.Query<ReportQuery, ReportQueryVariables> query={ReportDocument} {...props} />
+    );
+    
+export type ReportProps<TChildProps = {}> = ApolloReactHoc.DataProps<ReportQuery, ReportQueryVariables> & TChildProps;
+export function withReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReportQuery,
+  ReportQueryVariables,
+  ReportProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ReportQuery, ReportQueryVariables, ReportProps<TChildProps>>(ReportDocument, {
+      alias: 'report',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReportQuery__
+ *
+ * To run a query within a React component, call `useReportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReportQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReportQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useReportQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ReportQuery, ReportQueryVariables>) {
+        return ApolloReactHooks.useQuery<ReportQuery, ReportQueryVariables>(ReportDocument, baseOptions);
+      }
+export function useReportLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ReportQuery, ReportQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ReportQuery, ReportQueryVariables>(ReportDocument, baseOptions);
+        }
+export type ReportQueryHookResult = ReturnType<typeof useReportQuery>;
+export type ReportLazyQueryHookResult = ReturnType<typeof useReportLazyQuery>;
+export type ReportQueryResult = ApolloReactCommon.QueryResult<ReportQuery, ReportQueryVariables>;
 export const ReportChoiceDataDocument = gql`
     query ReportChoiceData {
   reportStatusChoices {
@@ -15356,6 +15445,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };

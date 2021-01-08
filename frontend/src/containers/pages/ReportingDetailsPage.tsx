@@ -5,6 +5,11 @@ import { GetApp } from '@material-ui/icons';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import {
+  ReportNode,
+  useReportChoiceDataQuery,
+  useReportQuery,
+} from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../components/ContainerColumnWithBorder';
 import { LabelizedField } from '../../components/LabelizedField';
@@ -12,6 +17,10 @@ import { Missing } from '../../components/Missing';
 import { OverviewContainer } from '../../components/OverviewContainer';
 import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { StatusBox } from '../../components/StatusBox';
+import { reduceChoices, reportStatusToColor } from '../../utils/utils';
+import { UniversalMoment } from '../../components/UniversalMoment';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -42,12 +51,33 @@ const IconsContainer = styled.div`
 export const ReportingDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const { data, loading } = useReportQuery({
+    variables: { id },
+  });
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useReportChoiceDataQuery();
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (!data || !choicesData) return null;
+
+  const report = data.report as ReportNode;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Reporting',
       to: `/${businessArea}/reporting/`,
     },
   ];
+
+  const statusChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.reportStatusChoices);
+
+  const typeChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.reportTypesChoices);
 
   const FieldsArray: {
     label: string;
@@ -58,50 +88,67 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       label: 'STATUS',
       value: (
         <StatusContainer>
-          {/* <StatusBox
-            status={''}
-            statusToColor={}
-          /> */}
-          <Missing />
+          <StatusBox
+            status={statusChoices[report.status]}
+            statusToColor={reportStatusToColor}
+          />
         </StatusContainer>
       ),
       size: 3,
     },
     {
       label: 'Report Type',
-      value: <span>fkofko</span>,
+      value: <span>{typeChoices[report.reportType]}</span>,
       size: 3,
     },
     {
       label: 'Timeframe',
-      value: null,
+      value: (
+        <span>
+          <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
+          <UniversalMoment>{report.dateTo}</UniversalMoment>
+        </span>
+      ),
       size: 3,
     },
     {
       label: 'Administrative Level 2',
-      value: null,
+      value: <span>{report.adminArea?.title || '-'}</span>,
       size: 3,
     },
     {
       label: 'Programme',
-      value: null,
+      value: <span>{report.program?.name || '-'}</span>,
       size: 3,
     },
     {
       label: 'Created By',
-      value: null,
+      value: (
+        <span>
+          {report.createdBy.firstName} {report.createdBy.lastName}
+        </span>
+      ),
       size: 3,
     },
     {
       label: 'Creation Date',
-      value: null,
+      value: (
+        <span>
+          <UniversalMoment>{report.createdAt}</UniversalMoment>
+        </span>
+      ),
       size: 3,
     },
   ];
   return (
     <>
       <PageHeader
-        title={`Report title and date ${id}`}
+        title={
+          <span>
+            {typeChoices[report.reportType]}{' '}
+            <UniversalMoment>{report.createdAt}</UniversalMoment>
+          </span>
+        }
         breadCrumbs={breadCrumbsItems}
       >
         <>
@@ -111,7 +158,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
             startIcon={<GetApp />}
             onClick={() => null}
           >
-            DOWNLOAD
+            DOWNLOAD REPORT
           </Button>
         </>
       </PageHeader>
@@ -129,18 +176,22 @@ export const ReportingDetailsPage = (): React.ReactElement => {
           </Grid>
         </OverviewContainer>
       </ContainerColumnWithBorder>
-      <IconsContainer>
-        <IconContainer>
-          <EmailIcon fontSize='inherit' />
-        </IconContainer>
-        <IconContainer>
-          <CheckIcon fontSize='inherit' />
-        </IconContainer>
-      </IconsContainer>
-      <GreyText>
-        Report was successfully generated and sent to email address of the
-        creator.
-      </GreyText>
+      {report.status === 2 && (
+        <>
+          <IconsContainer>
+            <IconContainer>
+              <EmailIcon fontSize='inherit' />
+            </IconContainer>
+            <IconContainer>
+              <CheckIcon fontSize='inherit' />
+            </IconContainer>
+          </IconsContainer>
+          <GreyText>
+            Report was successfully generated and sent to email address of the
+            creator.
+          </GreyText>
+        </>
+      )}
     </>
   );
 };
