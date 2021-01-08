@@ -17,7 +17,6 @@ export const GrievancesChart = (): React.ReactElement => {
     ],
   };
   const options = {
-    maintainAspectRatio: false,
     cutoutPercentage: 65,
     legend: {
       position: 'bottom',

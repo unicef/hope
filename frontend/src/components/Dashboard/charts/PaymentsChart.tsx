@@ -12,7 +12,6 @@ export const PaymentsChart = (): React.ReactElement => {
     ],
   };
   const options = {
-    maintainAspectRatio: false,
     cutoutPercentage: 65,
     legend: {
       position: 'bottom',
