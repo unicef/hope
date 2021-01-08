@@ -30,6 +30,7 @@ class ReportNode(DjangoObjectType):
         model = Report
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = False
 
 
 class Query(graphene.ObjectType):

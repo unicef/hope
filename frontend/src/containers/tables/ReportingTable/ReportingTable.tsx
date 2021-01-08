@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { reduceChoices } from '../../../utils/utils';
 import {
   ReportChoiceDataQuery,
   ReportNode,
@@ -36,6 +37,13 @@ export const ReportingTable = ({
     status: filter.status,
     createdBy: filter.onlyMy ? meData.me.id : null,
   };
+  const typeChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.reportTypesChoices);
+  const statusChoices: {
+    [id: number]: string;
+  } = reduceChoices(choicesData.reportStatusChoices);
+
   return (
     <TableWrapper>
       <UniversalTable<ReportNode, AllReportsQueryVariables>
@@ -47,7 +55,8 @@ export const ReportingTable = ({
           <ReportingTableRow
             key={row.id}
             report={row}
-            // choicesData={choicesData}
+            typeChoices={typeChoices}
+            statusChoices={statusChoices}
           />
         )}
       />
