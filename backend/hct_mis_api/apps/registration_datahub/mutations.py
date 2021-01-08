@@ -162,12 +162,13 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
-        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask
-        task = RdiKoboCreateTask()
-        task.execute(
-            registration_data_import_id=str(created_obj_datahub.id),
-            import_data_id=str(import_data_obj.id),
-            business_area_id=str(business_area.id),
+        AirflowApi.start_dag(
+            dag_id="CreateRegistrationDataImportKobo",
+            context={
+                "registration_data_import_id": str(created_obj_datahub.id),
+                "import_data_id": str(import_data_obj.id),
+                "business_area": str(business_area.id),
+            },
         )
 
         return RegistrationXlsxImportMutation(created_obj_hct)
