@@ -1,15 +1,17 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import ExpandLess from '@material-ui/icons/ExpandLessRounded';
-import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
 import { Paper } from '@material-ui/core';
 import TablePagination from '@material-ui/core/TablePagination';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import {AllLogEntriesQuery, LogEntryObject} from '../../../__generated__/graphql';
+import {
+  AllLogEntriesQuery,
+  LogEntryObject,
+} from '../../../__generated__/graphql';
+import {
+  ButtonPlaceHolder,
+  Row,
+} from '../../../components/ActivityLogTable/TableStyledComponents';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
-import { ButtonPlaceHolder, Row } from '../../../components/ActivityLogTable/TableStyledComponents';
 import { headCells } from './MainActivityLogTableHeadCells';
 
 const Table = styled.div`
@@ -34,12 +36,6 @@ const PaperContainer = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(5)}px 0;
   margin-bottom: ${({ theme }) => theme.spacing(5)}px;
 `;
-const Toolbar = styled.div`
-  margin: 0 ${({ theme }) => theme.spacing(6)}px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
 
 interface MainActivityLogTableProps {
   logEntries: LogEntryObject[];
@@ -50,27 +46,17 @@ interface MainActivityLogTableProps {
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 export function MainActivityLogTable({
-                                   logEntries,
-                                   totalCount,
-                                   rowsPerPage,
-                                   page,
-                                   onChangePage,
-                                   onChangeRowsPerPage,
-                                 }: MainActivityLogTableProps): ReactElement {
+  logEntries,
+  totalCount,
+  rowsPerPage,
+  page,
+  onChangePage,
+  onChangeRowsPerPage,
+}: MainActivityLogTableProps): ReactElement {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
   return (
     <PaperContainer>
-      <Toolbar>
-        <Typography variant='h6'>Activity Log</Typography>
-        <Button
-          variant='outlined'
-          color='primary'
-          endIcon={expanded ? <ExpandLess /> : <ExpandMore />}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? 'HIDE' : 'SHOW'}
-        </Button>
-      </Toolbar>
       <Collapse in={expanded}>
         <Table>
           <Row>
@@ -84,7 +70,12 @@ export function MainActivityLogTable({
             <ButtonPlaceHolder />
           </Row>
           {logEntries.map((value) => (
-            <MainActivityLogTableRow key={value.id} logEntry={value as  AllLogEntriesQuery['allLogEntries']['edges'][number]['node']} />
+            <MainActivityLogTableRow
+              key={value.id}
+              logEntry={
+                value as AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
+              }
+            />
           ))}
         </Table>
         <TablePagination

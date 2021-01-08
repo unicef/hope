@@ -1,7 +1,9 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import {AllLogEntriesQuery, UserNode} from '../../../__generated__/graphql';
+import { AllLogEntriesQuery } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<AllLogEntriesQuery['allLogEntries']['edges'][number]['node']>[] = [
+export const headCells: HeadCell<
+  AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Date',
@@ -56,6 +58,6 @@ export const headCells: HeadCell<AllLogEntriesQuery['allLogEntries']['edges'][nu
     label: 'Change To',
     id: 'changeTo',
     numeric: false,
-    weight: 1
+    weight: 1,
   },
 ];

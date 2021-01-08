@@ -5,7 +5,7 @@ import { IconButton, makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import {AllLogEntriesQuery, LogEntryObject} from '../../../__generated__/graphql';
+import { AllLogEntriesQuery } from '../../../__generated__/graphql';
 import { MiśTheme } from '../../../theme';
 import {
   ButtonPlaceHolder,
@@ -37,16 +37,18 @@ interface LogRowProps {
   logEntry: AllLogEntriesQuery['allLogEntries']['edges'][number]['node'];
 }
 
-export function MainActivityLogTableRow({ logEntry }: LogRowProps): ReactElement {
+export function MainActivityLogTableRow({
+  logEntry,
+}: LogRowProps): ReactElement {
   const changes = JSON.parse(logEntry.changesDisplayDict);
   const [expanded, setExpanded] = useState(false);
   const classes = useStyles({});
   const keys = Object.keys(changes);
   const actions = {
-    "A_0":'Created',
-    "A_1": 'Updated',
-    "A_2":'Removed'
-  }
+    A_0: 'Created',
+    A_1: 'Updated',
+    A_2: 'Removed',
+  };
   const { length } = keys;
   if (length === 1) {
     return (
@@ -65,7 +67,7 @@ export function MainActivityLogTableRow({ logEntry }: LogRowProps): ReactElement
         <Cell weight={headCells[5].weight}>{keys[0]}</Cell>
         <Cell weight={headCells[6].weight}>{changes[keys[0]][0]}</Cell>
         <Cell weight={headCells[7].weight}>{changes[keys[0]][1]}</Cell>
-        <ButtonPlaceHolder  />
+        <ButtonPlaceHolder />
       </Row>
     );
   }
@@ -84,9 +86,9 @@ export function MainActivityLogTableRow({ logEntry }: LogRowProps): ReactElement
         <Cell weight={headCells[3].weight}>{logEntry.objectRepr}</Cell>
         <Cell weight={headCells[4].weight}>{actions[logEntry.action]}</Cell>
         <Cell weight={headCells[5].weight}>Multiple</Cell>
-        <Cell/>
         <Cell />
-        <ButtonContainer  >
+        <Cell />
+        <ButtonContainer>
           <IconButton
             className={clsx(classes.expandIcon, {
               [classes.expanded]: expanded,
