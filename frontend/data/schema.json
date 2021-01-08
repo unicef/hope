@@ -29039,6 +29039,18 @@
             "deprecationReason": null
           },
           {
+            "name": "koboSubmissionTime",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "DateTime",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "individuals",
             "description": null,
             "args": [
