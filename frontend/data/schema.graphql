@@ -288,6 +288,12 @@ type ChoiceObject {
   value: String
 }
 
+type ContentTypeObjectType {
+  id: ID!
+  appLabel: String!
+  model: String!
+}
+
 input CopyTargetPopulationInput {
   id: ID
   name: String
@@ -1991,6 +1997,7 @@ enum LogEntryAction {
 
 type LogEntryObject {
   id: ID!
+  contentType: ContentTypeObjectType!
   objectPk: String!
   objectId: Int
   objectRepr: String!
@@ -2000,6 +2007,7 @@ type LogEntryObject {
   remoteAddr: String
   timestamp: DateTime
   changesDisplayDict: JSONLazyString
+  changesDisplayObject: Arg
 }
 
 type LogEntryObjectConnection {
@@ -2306,7 +2314,7 @@ type Query {
   countriesChoices: [ChoiceObject]
   me: UserNode
   allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
-  allLogEntries(objectId: String!, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
+  allLogEntries(objectId: String, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   userRolesChoices: [ChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
