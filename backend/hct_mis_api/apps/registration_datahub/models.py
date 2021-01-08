@@ -204,8 +204,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "given_name",
             "middle_name",
             "family_name",
+            "full_name",
             "sex",
             "birth_date",
+            "estimated_birth_date",
             "phone_no",
             "phone_no_alternative",
         )
