@@ -41,7 +41,7 @@ spec:
             - secretRef:
                 name: { { include "hope.fullname" . } }-frontend
             - configMapRef:
-            name: { { include "hope.fullname" . } }-frontend
+                name: { { include "hope.fullname" . } }-frontend
           readinessProbe:
             httpGet:
               path: /api/_health
