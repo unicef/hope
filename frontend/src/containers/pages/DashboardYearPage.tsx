@@ -15,6 +15,7 @@ import { PaymentVerificationChart } from '../../components/Dashboard/charts/Paym
 import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
 import { GrievancesChart } from '../../components/Dashboard/charts/GrievancesChart';
 import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
+import { ExampleChart } from '../../components/Dashboard/charts/ExampleChart';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -95,7 +96,7 @@ export function DashboardYearPage({
               <PlannedBudget />
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
-              <Missing />
+              <ExampleChart />
             </DashboardPaper>
             <DashboardPaper title='Payment Verification'>
               <PaymentVerificationChart />
