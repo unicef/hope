@@ -37,6 +37,11 @@ spec:
             - name: http
               containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
+          envFrom:
+          - secretRef:
+              name: { { include "hope.fullname" . } }-frontend
+          - configMapRef:
+              name: { { include "hope.fullname" . } }-frontend
           readinessProbe:
             httpGet:
               path: /api/_health
