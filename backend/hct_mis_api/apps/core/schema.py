@@ -2,10 +2,8 @@ from collections import Iterable
 from operator import itemgetter
 
 import graphene
-from auditlog.models import LogEntry
 from constance import config
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
@@ -36,7 +34,7 @@ from core.models import (
     FlexibleAttributeGroup,
     AdminAreaType,
 )
-from core.utils import decode_id_string, LazyEvalMethodsDict
+from core.utils import LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
@@ -304,10 +302,6 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_assist_url_prefix(self):
         return config.CASH_ASSIST_URL_PREFIX
-
-    def resolve_all_log_entries(self, info, object_id, **kwargs):
-        id = decode_id_string(object_id)
-        return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):
         return get_fields_attr_generators(flex_field)

@@ -492,6 +492,13 @@ export type ChoiceObject = {
   value?: Maybe<Scalars['String']>,
 };
 
+export type ContentTypeObjectType = {
+   __typename?: 'ContentTypeObjectType',
+  id: Scalars['ID'],
+  appLabel: Scalars['String'],
+  model: Scalars['String'],
+};
+
 export type CopyTargetPopulationInput = {
   id?: Maybe<Scalars['ID']>,
   name?: Maybe<Scalars['String']>,
@@ -2457,6 +2464,7 @@ export enum LogEntryAction {
 export type LogEntryObject = {
    __typename?: 'LogEntryObject',
   id: Scalars['ID'],
+  contentType: ContentTypeObjectType,
   objectPk: Scalars['String'],
   objectId?: Maybe<Scalars['Int']>,
   objectRepr: Scalars['String'],
@@ -2466,6 +2474,7 @@ export type LogEntryObject = {
   remoteAddr?: Maybe<Scalars['String']>,
   timestamp?: Maybe<Scalars['DateTime']>,
   changesDisplayDict?: Maybe<Scalars['JSONLazyString']>,
+  changesDisplayObject?: Maybe<Scalars['Arg']>,
 };
 
 export type LogEntryObjectConnection = {
@@ -3472,7 +3481,7 @@ export type QueryAllUsersArgs = {
 
 
 export type QueryAllLogEntriesArgs = {
-  objectId: Scalars['String'],
+  objectId?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -6031,7 +6040,7 @@ export type AllIndividualsQuery = (
 );
 
 export type AllLogEntriesQueryVariables = {
-  objectId: Scalars['String'],
+  objectId?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -6052,8 +6061,11 @@ export type AllLogEntriesQuery = (
       & Pick<LogEntryObjectEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'LogEntryObject' }
-        & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'timestamp'>
-        & { actor: Maybe<(
+        & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'objectRepr' | 'timestamp'>
+        & { contentType: (
+          { __typename?: 'ContentTypeObjectType' }
+          & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model'>
+        ), actor: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
         )> }
@@ -10483,7 +10495,7 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($objectId: String!, $after: String, $before: String, $first: Int, $last: Int) {
+    query AllLogEntries($objectId: String, $after: String, $before: String, $first: Int, $last: Int) {
   allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId) {
     pageInfo {
       hasNextPage
@@ -10498,7 +10510,13 @@ export const AllLogEntriesDocument = gql`
         id
         action
         changesDisplayDict
+        objectRepr
         timestamp
+        contentType {
+          id
+          appLabel
+          model
+        }
         actor {
           id
           firstName
@@ -10509,7 +10527,7 @@ export const AllLogEntriesDocument = gql`
   }
 }
     `;
-export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'> & ({ variables: AllLogEntriesQueryVariables; skip?: boolean; } | { skip: boolean; });
+export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'>;
 
     export const AllLogEntriesComponent = (props: AllLogEntriesComponentProps) => (
       <ApolloReactComponents.Query<AllLogEntriesQuery, AllLogEntriesQueryVariables> query={AllLogEntriesDocument} {...props} />
@@ -13900,6 +13918,7 @@ export type ResolversTypes = {
   LogEntryObjectConnection: ResolverTypeWrapper<LogEntryObjectConnection>,
   LogEntryObjectEdge: ResolverTypeWrapper<LogEntryObjectEdge>,
   LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
+  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
   LogEntryAction: LogEntryAction,
   JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
   CashPlanDeliveryType: CashPlanDeliveryType,
@@ -14219,6 +14238,7 @@ export type ResolversParentTypes = {
   LogEntryObjectConnection: LogEntryObjectConnection,
   LogEntryObjectEdge: LogEntryObjectEdge,
   LogEntryObject: LogEntryObject,
+  ContentTypeObjectType: ContentTypeObjectType,
   LogEntryAction: LogEntryAction,
   JSONLazyString: Scalars['JSONLazyString'],
   CashPlanDeliveryType: CashPlanDeliveryType,
@@ -14631,6 +14651,12 @@ export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentT
 export type ChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObject'] = ResolversParentTypes['ChoiceObject']> = {
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
 export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
@@ -15287,6 +15313,7 @@ export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversPa
 
 export type LogEntryObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObject'] = ResolversParentTypes['LogEntryObject']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  contentType?: Resolver<ResolversTypes['ContentTypeObjectType'], ParentType, ContextType>,
   objectPk?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   objectId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -15296,6 +15323,7 @@ export type LogEntryObjectResolvers<ContextType = any, ParentType extends Resolv
   remoteAddr?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   changesDisplayDict?: Resolver<Maybe<ResolversTypes['JSONLazyString']>, ParentType, ContextType>,
+  changesDisplayObject?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
 };
 
 export type LogEntryObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObjectConnection'] = ResolversParentTypes['LogEntryObjectConnection']> = {
@@ -15546,7 +15574,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
-  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'objectId'>>,
+  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, QueryAllLogEntriesArgs>,
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -16343,6 +16371,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
   CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
