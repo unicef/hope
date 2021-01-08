@@ -34,6 +34,7 @@ export const PaymentVerificationChart = (): React.ReactElement => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     legend: {
       position: 'bottom',
     },
