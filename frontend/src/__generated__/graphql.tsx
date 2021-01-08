@@ -3818,6 +3818,7 @@ export type ReportNode = Node & {
   country?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
   adminArea?: Maybe<AdminAreaNode>,
+  fileUrl?: Maybe<Scalars['String']>,
 };
 
 export type ReportNodeConnection = {
@@ -6326,7 +6327,7 @@ export type AllReportsQuery = (
       & Pick<ReportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ReportNode' }
-        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt'>
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -7032,7 +7033,7 @@ export type ReportQuery = (
   { __typename?: 'Query' }
   & { report: Maybe<(
     { __typename?: 'ReportNode' }
-    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo'>
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -11071,6 +11072,7 @@ export const AllReportsDocument = gql`
           firstName
           lastName
         }
+        fileUrl
       }
     }
   }
@@ -12666,6 +12668,7 @@ export const ReportDocument = gql`
     createdAt
     dateFrom
     dateTo
+    fileUrl
     createdBy {
       firstName
       lastName
@@ -16077,6 +16080,7 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {

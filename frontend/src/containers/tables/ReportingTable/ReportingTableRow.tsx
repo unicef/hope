@@ -5,9 +5,9 @@ import React from 'react';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
-import { Missing } from '../../../components/Missing';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { reportStatusToColor } from '../../../utils/utils';
+import { GetApp } from '@material-ui/icons';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -15,6 +15,12 @@ const StatusContainer = styled.div`
 `;
 const UnderlinedTableCell = styled(TableCell)`
   text-decoration: underline;
+`;
+const DownloadTableCell = styled(TableCell)`
+  span {
+    display: flex;
+    justify-content: center;
+  }
 `;
 export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
   const businessArea = useBusinessArea();
@@ -52,9 +58,17 @@ export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
       <TableCell align='left'>
         {report.createdBy.firstName} {report.createdBy.lastName}
       </TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <DownloadTableCell
+        align='left'
+        onClick={report.fileUrl ? () => window.open(report.fileUrl) : undefined}
+      >
+        {report.fileUrl && (
+          <span>
+            <GetApp />
+            DOWNLOAD
+          </span>
+        )}
+      </DownloadTableCell>
     </ClickableTableRow>
   );
 };

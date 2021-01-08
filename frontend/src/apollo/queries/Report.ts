@@ -9,6 +9,7 @@ export const REPORT_QUERY = gql`
       createdAt
       dateFrom
       dateTo
+      fileUrl
       createdBy {
         firstName
         lastName

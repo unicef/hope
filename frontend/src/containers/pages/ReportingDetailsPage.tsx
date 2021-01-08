@@ -13,7 +13,6 @@ import {
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { ContainerColumnWithBorder } from '../../components/ContainerColumnWithBorder';
 import { LabelizedField } from '../../components/LabelizedField';
-import { Missing } from '../../components/Missing';
 import { OverviewContainer } from '../../components/OverviewContainer';
 import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -151,16 +150,16 @@ export const ReportingDetailsPage = (): React.ReactElement => {
         }
         breadCrumbs={breadCrumbsItems}
       >
-        <>
+        {report.fileUrl ? (
           <Button
             color='primary'
             variant='contained'
             startIcon={<GetApp />}
-            onClick={() => null}
+            onClick={() => window.open(report.fileUrl)}
           >
             DOWNLOAD REPORT
           </Button>
-        </>
+        ) : null}
       </PageHeader>
       <ContainerColumnWithBorder>
         <Title>

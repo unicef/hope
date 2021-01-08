@@ -48,6 +48,7 @@ export const ALL_REPORTS_QUERY = gql`
             firstName
             lastName
           }
+          fileUrl
         }
       }
     }
