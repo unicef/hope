@@ -32,6 +32,11 @@ class ReportNode(DjangoObjectType):
         connection_class = ExtendedConnection
         convert_choices_to_enum = False
 
+    file_url = graphene.String()
+
+    def resolve_file_url(self, info, **kwargs):
+        return self.file.url if self.file else ""
+
 
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)

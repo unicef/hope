@@ -2498,6 +2498,7 @@ type ReportNode implements Node {
   country: String
   program: ProgramNode
   adminArea: AdminAreaNode
+  fileUrl: String
 }
 
 type ReportNodeConnection {
