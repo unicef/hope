@@ -2247,7 +2247,7 @@ enum ProgramStatus {
 
 type Query {
   report(id: ID!): ReportNode
-  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date): ReportNodeConnection
+  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode

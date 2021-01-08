@@ -12,6 +12,7 @@ export const ALL_REPORTS_QUERY = gql`
     $createdTo: Date
     $reportType: [String]
     $createdBy: ID
+    $orderBy: String
   ) {
     allReports(
       before: $before
@@ -24,6 +25,7 @@ export const ALL_REPORTS_QUERY = gql`
       createdTo: $createdTo
       reportType: $reportType
       createdBy: $createdBy
+      orderBy: $orderBy
     ) {
       pageInfo {
         hasNextPage
