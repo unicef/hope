@@ -45,8 +45,8 @@ export const ReportingFilters = ({
               // @ts-ignore
               onChange={(e) => handleFilterChange(e, 'type')}
               variant='outlined'
-              label='Status'
-              value={filter.status || ''}
+              label='Type'
+              value={filter.type || ''}
             >
               <MenuItem value=''>
                 <em>None</em>
