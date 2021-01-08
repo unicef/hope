@@ -3,12 +3,7 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from django_filters import (
-    CharFilter,
-    DateFilter,
-    FilterSet,
-    MultipleChoiceFilter,
-)
+from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, OrderingFilter
 
 from core.extended_connection import ExtendedConnection
 from core.schema import ChoiceObject
@@ -26,6 +21,8 @@ class ReportFilter(FilterSet):
     class Meta:
         fields = ("created_by", "report_type", "status", "business_area")
         model = Report
+
+    order_by = OrderingFilter(fields=("report_type", "status", "created_at", "created_by__first_name", "date_from"))
 
 
 class ReportNode(DjangoObjectType):

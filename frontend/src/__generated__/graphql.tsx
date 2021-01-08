@@ -3156,7 +3156,8 @@ export type QueryAllReportsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
   createdFrom?: Maybe<Scalars['Date']>,
-  createdTo?: Maybe<Scalars['Date']>
+  createdTo?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -6575,7 +6576,8 @@ export type AllReportsQueryVariables = {
   createdFrom?: Maybe<Scalars['Date']>,
   createdTo?: Maybe<Scalars['Date']>,
   reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
-  createdBy?: Maybe<Scalars['ID']>
+  createdBy?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -11291,8 +11293,8 @@ export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFl
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
 export const AllReportsDocument = gql`
-    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String], $createdBy: ID) {
-  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy) {
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String], $createdBy: ID, $orderBy: String) {
+  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11359,6 +11361,7 @@ export function withAllReports<TProps, TChildProps = {}>(operationOptions?: Apol
  *      createdTo: // value for 'createdTo'
  *      reportType: // value for 'reportType'
  *      createdBy: // value for 'createdBy'
+ *      orderBy: // value for 'orderBy'
  *   },
  * });
  */
