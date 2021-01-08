@@ -754,6 +754,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         current_individuals.append(individual_obj.get_hash_key)
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
+                elif hh_field == "_submission_time":
+                    household_obj.kobo_submission_time = parse(hh_value)
                 else:
                     self._cast_and_assign(hh_value, hh_field, household_obj)
 
