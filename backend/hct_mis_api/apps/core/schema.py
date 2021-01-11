@@ -123,8 +123,6 @@ class LabelNode(graphene.ObjectType):
 
 def resolve_label(parent):
     labels = []
-    if not parent:
-        return labels
     for k, v in parent.items():
         labels.append({"language": k, "label": v})
     return labels
@@ -177,10 +175,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(parent["choices"], key=itemgetter("value"))
-        resolved = _custom_dict_or_attr_resolver("choices", None, parent, info)
-        if resolved:
-            return resolved.order_by("name").all()
-        return resolved
+        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
@@ -191,9 +186,7 @@ class FieldAttributeNode(graphene.ObjectType):
         return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info):
-        resolved = _custom_dict_or_attr_resolver("label", None, parent, info)
-        if resolved:
-            return resolved["English(EN)"]
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)

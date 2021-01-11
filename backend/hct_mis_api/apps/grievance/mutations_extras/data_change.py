@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
 
+from core.airflow_api import AirflowApi
 from core.utils import decode_id_string
 from core.utils import to_snake_case
 from grievance.models import (
@@ -46,24 +47,24 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     female_age_group_0_5_count = graphene.Int()
     female_age_group_6_11_count = graphene.Int()
     female_age_group_12_17_count = graphene.Int()
-    female_age_group_18_59_count = graphene.Int(),
-    female_age_group_60_count = graphene.Int(),
+    female_age_group_18_59_count = (graphene.Int(),)
+    female_age_group_60_count = (graphene.Int(),)
     pregnant_count = graphene.Int()
     male_age_group_0_5_count = graphene.Int()
     male_age_group_6_11_count = graphene.Int()
     male_age_group_12_17_count = graphene.Int()
-    male_age_group_18_59_count = graphene.Int(),
-    male_age_group_60_count = graphene.Int(),
+    male_age_group_18_59_count = (graphene.Int(),)
+    male_age_group_60_count = (graphene.Int(),)
     female_age_group_0_5_disabled_count = graphene.Int()
     female_age_group_6_11_disabled_count = graphene.Int()
     female_age_group_12_17_disabled_count = graphene.Int()
-    female_age_group_18_59_disabled_count = graphene.Int(),
-    female_age_group_60_disabled_count = graphene.Int(),
+    female_age_group_18_59_disabled_count = (graphene.Int(),)
+    female_age_group_60_disabled_count = (graphene.Int(),)
     male_age_group_0_5_disabled_count = graphene.Int()
     male_age_group_6_11_disabled_count = graphene.Int()
     male_age_group_12_17_disabled_count = graphene.Int()
-    male_age_group_18_59_disabled_count = graphene.Int(),
-    male_age_group_60_disabled_count = graphene.Int(),
+    male_age_group_18_59_disabled_count = (graphene.Int(),)
+    male_age_group_60_disabled_count = (graphene.Int(),)
     returnee = graphene.Boolean()
     fchild_hoh = graphene.Boolean()
     child_hoh = graphene.Boolean()
@@ -73,10 +74,10 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String()
     org_name_enumerator = graphene.String()
     village = graphene.String()
-    registration_method = graphene.String(),
-    collect_individual_data = graphene.String(),
-    currency = graphene.String(),
-    unhcr_id = graphene.String(),
+    registration_method = (graphene.String(),)
+    collect_individual_data = (graphene.String(),)
+    currency = (graphene.String(),)
+    unhcr_id = (graphene.String(),)
     flex_fields = Arg()
 
 
@@ -483,6 +484,15 @@ def close_add_individual_grievance_ticket(grievance_ticket):
 
     Document.objects.bulk_create(documents_to_create)
 
+    AirflowApi.start_dag(
+        dag_id="DeduplicateAndCheckAgainstSanctionsList",
+        context={
+            "should_populate_index": True,
+            "registration_data_import_id": None,
+            "individuals_ids": [str(individual.id)],
+        },
+    )
+
 
 def close_update_individual_grievance_ticket(grievance_ticket):
     ticket_details = grievance_ticket.individual_data_update_ticket_details
@@ -531,6 +541,15 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     ]
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
+
+    AirflowApi.start_dag(
+        dag_id="DeduplicateAndCheckAgainstSanctionsList",
+        context={
+            "should_populate_index": True,
+            "registration_data_import_id": None,
+            "individuals_ids": [str(individual.id)],
+        },
+    )
 
 
 def close_update_household_grievance_ticket(grievance_ticket):
