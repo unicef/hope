@@ -6,6 +6,7 @@ import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPop
 export function TargetingHouseholds({
   status,
   id,
+  canViewDetails,
 }): React.ReactElement {
   let table;
   switch (status) {
@@ -15,6 +16,7 @@ export function TargetingHouseholds({
           id={id}
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
           queryObjectName='candidateHouseholdsListByTargetingCriteria'
+          canViewDetails={canViewDetails}
         />
       );
       break;
@@ -22,6 +24,7 @@ export function TargetingHouseholds({
       table = (
         <ApprovedTargetPopulationTable
           id={id}
+          canViewDetails={canViewDetails}
         />
       );
       break;
@@ -31,6 +34,7 @@ export function TargetingHouseholds({
           id={id}
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
           queryObjectName='candidateHouseholdsListByTargetingCriteria'
+          canViewDetails={canViewDetails}
         />
       );
       break;

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from payment.models import PaymentRecord, CashPlanPaymentVerification
+from payment.models import PaymentRecord, CashPlanPaymentVerification, PaymentVerification
 
 
 @admin.register(PaymentRecord)
@@ -10,4 +10,9 @@ class PaymentRecordAdmin(admin.ModelAdmin):
 
 @admin.register(CashPlanPaymentVerification)
 class CashPlanPaymentVerificationAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(PaymentVerification)
+class PaymentVerificationAdmin(admin.ModelAdmin):
     pass

@@ -5,8 +5,13 @@ from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
+from account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+    BaseNodePermissionMixin,
+)
 from core.extended_connection import ExtendedConnection
 from core.filters import filter_age
 from core.schema import ChoiceObject
@@ -21,6 +26,7 @@ from program.models import CashPlan
 
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
+    business_area = CharFilter(field_name="business_area__slug")
 
     class Meta:
         fields = (
@@ -53,6 +59,7 @@ class PaymentRecordFilter(FilterSet):
 
 class PaymentVerificationFilter(FilterSet):
     search = CharFilter(method="search_filter")
+    business_area = CharFilter(field_name="payment_record__business_area__slug")
 
     class Meta:
         fields = ("cash_plan_payment_verification", "status")
@@ -113,7 +120,9 @@ class RapidProFlow(graphene.ObjectType):
         return parent["uuid"]
 
 
-class PaymentRecordNode(DjangoObjectType):
+class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS),)
+
     class Meta:
         model = PaymentRecord
         filter_fields = ["cash_plan", "household"]
@@ -144,7 +153,9 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class PaymentVerificationNode(DjangoObjectType):
+class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
+
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)
@@ -159,9 +170,15 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
-    all_payment_records = DjangoFilterConnectionField(PaymentRecordNode, filterset_class=PaymentRecordFilter,)
-    all_payment_verifications = DjangoFilterConnectionField(
-        PaymentVerificationNode, filterset_class=PaymentVerificationFilter,
+    all_payment_records = DjangoPermissionFilterConnectionField(
+        PaymentRecordNode,
+        filterset_class=PaymentRecordFilter,
+        permission_classes=(hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),),
+    )
+    all_payment_verifications = DjangoPermissionFilterConnectionField(
+        PaymentVerificationNode,
+        filterset_class=PaymentVerificationFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
@@ -171,9 +188,13 @@ class Query(graphene.ObjectType):
     cash_plan_verification_verification_method_choices = graphene.List(ChoiceObject)
     payment_verification_status_choices = graphene.List(ChoiceObject)
 
-    all_rapid_pro_flows = graphene.List(RapidProFlow, business_area_slug=graphene.String(required=True),)
+    all_rapid_pro_flows = graphene.List(
+        RapidProFlow,
+        business_area_slug=graphene.String(required=True),
+    )
     sample_size = graphene.Field(
-        GetCashplanVerificationSampleSizeObject, input=GetCashplanVerificationSampleSizeInput(),
+        GetCashplanVerificationSampleSizeObject,
+        input=GetCashplanVerificationSampleSizeInput(),
     )
 
     def resolve_sample_size(self, info, input, **kwargs):
@@ -186,7 +207,10 @@ class Query(graphene.ObjectType):
         age = None
         confidence_interval = None
         margin_of_error = None
-        payment_records = cash_plan.payment_records
+        payment_records = cash_plan.payment_records.filter(
+            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+        )
+        payment_record_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
         elif sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
@@ -201,15 +225,20 @@ class Query(graphene.ObjectType):
             payment_records = payment_records.filter(household__head_of_household__sex=sex)
         if age is not None:
             payment_records = filter_age(
-                "household__head_of_household__birth_date", payment_records, age.get(min), age.get("max"),
+                "household__head_of_household__birth_date",
+                payment_records,
+                age.get(min),
+                age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_RANDOM:
             payment_records_sample_count = get_number_of_samples(
-                payment_records_sample_count, confidence_interval, margin_of_error,
+                payment_records_sample_count,
+                confidence_interval,
+                margin_of_error,
             )
         return {
-            "payment_record_count": cash_plan.payment_records.count(),
+            "payment_record_count": payment_record_count,
             "sample_size": payment_records_sample_count,
         }
 

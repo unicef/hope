@@ -10,9 +10,13 @@ from django_filters import (
 )
 from graphene import ConnectionField, relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
-from account.permissions import BaseNodePermissionMixin, DjangoPermissionFilterConnectionField
+from account.permissions import (
+    BaseNodePermissionMixin,
+    DjangoPermissionFilterConnectionField,
+    hopePermissionClass,
+    Permissions,
+)
 from account.schema import LogEntryObjectConnection
 from core.extended_connection import ExtendedConnection
 from core.filters import DecimalRangeFilter, IntegerRangeFilter
@@ -58,8 +62,12 @@ class ProgramFilter(FilterSet):
 
 
 class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
-    # TODO Enable permissions below
-    # permission_classes = (hopePermissionClass(f"{PERMISSION_PROGRAM}.{PERMISSION_READ}"),)
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+
     budget = graphene.Decimal()
     total_entitled_quantity = graphene.Decimal()
     total_delivered_quantity = graphene.Decimal()
@@ -89,6 +97,9 @@ class CashPlanFilter(FilterSet):
     verification_status = MultipleChoiceFilter(
         field_name="verification_status", choices=CashPlanPaymentVerification.STATUS_CHOICES
     )
+    business_area = CharFilter(
+        field_name="business_area__slug",
+    )
 
     class Meta:
         fields = {
@@ -96,6 +107,7 @@ class CashPlanFilter(FilterSet):
             "assistance_through": ["exact", "icontains"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
+            "business_area": ["exact"],
         }
         model = CashPlan
 
@@ -125,7 +137,12 @@ class CashPlanFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class CashPlanNode(DjangoObjectType):
+class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),
+        hopePermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS),
+    )
+
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
 
@@ -140,11 +157,23 @@ class Query(graphene.ObjectType):
     all_programs = DjangoPermissionFilterConnectionField(
         ProgramNode,
         filterset_class=ProgramFilter,
-        # TODO Enable permissions below
-        # permission_classes=(hopePermissionClass("PERMISSION_PROGRAM.LIST"),)
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            ),
+        ),
     )
     cash_plan = relay.Node.Field(CashPlanNode)
-    all_cash_plans = DjangoFilterConnectionField(CashPlanNode, filterset_class=CashPlanFilter)
+    all_cash_plans = DjangoPermissionFilterConnectionField(
+        CashPlanNode,
+        filterset_class=CashPlanFilter,
+        permission_classes=(
+            hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_LIST),
+            hopePermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            ),
+        ),
+    )
     program_status_choices = graphene.List(ChoiceObject)
     program_frequency_of_payments_choices = graphene.List(ChoiceObject)
     program_sector_choices = graphene.List(ChoiceObject)

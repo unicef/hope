@@ -17,12 +17,14 @@ interface TargetPopulationHouseholdProps {
   queryObjectName?;
   variables?;
   selectedTab: number;
+  canViewDetails?: boolean;
 }
 
 export const SentTargetPopulationTable = ({
   id,
   variables,
   selectedTab,
+  canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
@@ -41,9 +43,17 @@ export const SentTargetPopulationTable = ({
         initialVariables={initialVariables}
         renderRow={(row) => {
           return selectedTab === 0 ? (
-            <ProgrammeTableRow key={row.name} household={row} />
+            <ProgrammeTableRow
+              key={row.name}
+              household={row}
+              canViewDetails={canViewDetails}
+            />
           ) : (
-            <TargetPopulationHouseholdTableRow key={row.name} household={row} />
+            <TargetPopulationHouseholdTableRow
+              key={row.name}
+              household={row}
+              canViewDetails={canViewDetails}
+            />
           );
         }}
       />

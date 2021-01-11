@@ -37,6 +37,7 @@ export const AddIndividualDataChangeField = ({
     case 'DECIMAL':
       fieldProps = {
         component: FormikTextField,
+        type: 'number',
       };
       break;
     case 'INTEGER':
@@ -78,6 +79,7 @@ export const AddIndividualDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
+        initValue: field.required ? false : null,
         component: FormikCheckboxField,
       };
       break;

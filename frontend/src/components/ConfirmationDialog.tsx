@@ -87,6 +87,8 @@ export class ConfirmationDialog extends React.Component<
       <>
         {children(this.show)}
         <Dialog
+          fullWidth
+          minWidth='md'
           open={open}
           onClose={() => this.hide()}
           scroll='paper'
