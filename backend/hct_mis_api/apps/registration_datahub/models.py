@@ -103,6 +103,7 @@ class ImportedHousehold(TimeStampedUUIDModel):
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
     kobo_submission_uuid = models.UUIDField(null=True, default=None)
     kobo_asset_id = models.CharField(max_length=150, blank=True, default=BLANK)
+    kobo_submission_time = models.DateTimeField(max_length=150, blank=True, null=True)
 
     @property
     def business_area(self):
@@ -203,8 +204,10 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "given_name",
             "middle_name",
             "family_name",
+            "full_name",
             "sex",
             "birth_date",
+            "estimated_birth_date",
             "phone_no",
             "phone_no_alternative",
         )
@@ -361,4 +364,4 @@ class ImportedIndividualIdentity(models.Model):
 class KoboImportedSubmission(models.Model):
     kobo_submission_uuid = models.UUIDField()
     kobo_asset_id = models.CharField(max_length=150)
-    submission_time = models.DateTimeField()
+    kobo_submission_time = models.DateTimeField()
