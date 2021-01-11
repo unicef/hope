@@ -11,7 +11,7 @@ import {
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
-import { AnonTableCell } from '../../../components/AnonTableCell';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -54,7 +54,7 @@ export function VerificationRecordsTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <AnonTableCell anonymize align='left'>
+      <AnonTableCell>
         {record.paymentRecord.household.headOfHousehold.fullName}
       </AnonTableCell>
       <TableCell align='left'>

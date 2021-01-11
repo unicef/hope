@@ -122,6 +122,7 @@ export const AddIndividualDataChange = ({
   const coreFields = data.allAddIndividualsFieldsAttributes.filter(
     (item) => !item.isFlexField,
   );
+  console.log('coreFields',coreFields)
   return (
     <>
       <Title>
