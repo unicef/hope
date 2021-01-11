@@ -2,10 +2,8 @@ from collections import Iterable
 from operator import itemgetter
 
 import graphene
-from auditlog.models import LogEntry
 from constance import config
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
@@ -36,7 +34,7 @@ from core.models import (
     FlexibleAttributeGroup,
     AdminAreaType,
 )
-from core.utils import decode_id_string, LazyEvalMethodsDict
+from core.utils import LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
@@ -123,8 +121,6 @@ class LabelNode(graphene.ObjectType):
 
 def resolve_label(parent):
     labels = []
-    if not parent:
-        return labels
     for k, v in parent.items():
         labels.append({"language": k, "label": v})
     return labels
@@ -177,10 +173,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(parent["choices"], key=itemgetter("value"))
-        resolved = _custom_dict_or_attr_resolver("choices", None, parent, info)
-        if resolved:
-            return resolved.order_by("name").all()
-        return resolved
+        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
@@ -191,9 +184,7 @@ class FieldAttributeNode(graphene.ObjectType):
         return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info):
-        resolved = _custom_dict_or_attr_resolver("label", None, parent, info)
-        if resolved:
-            return resolved["English(EN)"]
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
         resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
@@ -304,10 +295,6 @@ class Query(graphene.ObjectType):
 
     def resolve_cash_assist_url_prefix(self):
         return config.CASH_ASSIST_URL_PREFIX
-
-    def resolve_all_log_entries(self, info, object_id, **kwargs):
-        id = decode_id_string(object_id)
-        return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):
         return get_fields_attr_generators(flex_field)
