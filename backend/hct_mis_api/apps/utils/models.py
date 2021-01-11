@@ -4,6 +4,7 @@ from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+from concurrency.fields import IntegerVersionField
 
 
 class TimeStampedUUIDModel(UUIDModel):
@@ -115,3 +116,10 @@ class SoftDeletableDefaultManagerModel(models.Model):
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
+
+
+class ConcurrencyModel(models.Model):
+    version = IntegerVersionField()
+
+    class Meta:
+        abstract = True

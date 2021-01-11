@@ -20,7 +20,7 @@ from psycopg2.extras import NumericRange
 from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, TYPE_SELECT_MANY, _HOUSEHOLD
 from core.models import FlexibleAttribute
 from household.models import Individual, Household, MALE, FEMALE
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -42,7 +42,7 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
+class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
     """Model for target populations.
 
     Has N:N association with households.

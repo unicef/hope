@@ -20,6 +20,7 @@ export type Scalars = {
   UUID: any,
   FlexFieldsScalar: any,
   Decimal: any,
+  BigInt: any,
   Arg: any,
   JSONLazyString: any,
   JSONString: any,
@@ -176,6 +177,7 @@ export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
+
 
 
 export type BusinessAreaNode = Node & {
@@ -809,6 +811,7 @@ export type GrievanceTicketNode = Node & {
   consent: Scalars['Boolean'],
   businessArea: UserBusinessAreaNode,
   linkedTickets: GrievanceTicketNodeConnection,
+  version: Scalars['BigInt'],
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -2689,7 +2692,8 @@ export type MutationsCreateProgramArgs = {
 
 
 export type MutationsUpdateProgramArgs = {
-  programData?: Maybe<UpdateProgramInput>
+  programData?: Maybe<UpdateProgramInput>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2921,6 +2925,7 @@ export type ProgramNode = Node & {
   populationGoal: Scalars['Int'],
   administrativeAreasOfImplementation: Scalars['String'],
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  version: Scalars['BigInt'],
   households: HouseholdNodeConnection,
   cashPlans: CashPlanNodeConnection,
   targetpopulationSet: TargetPopulationNodeConnection,
@@ -5705,7 +5710,8 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
 );
 
 export type UpdateProgramMutationVariables = {
-  programData: UpdateProgramInput
+  programData: UpdateProgramInput,
+  version: Scalars['BigInt']
 };
 
 
@@ -6443,7 +6449,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType'>
+    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType' | 'version'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -6860,7 +6866,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
   )> }
 );
 
@@ -9604,8 +9610,8 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult =
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
 export const UpdateProgramDocument = gql`
-    mutation UpdateProgram($programData: UpdateProgramInput!) {
-  updateProgram(programData: $programData) {
+    mutation UpdateProgram($programData: UpdateProgramInput!, $version: BigInt!) {
+  updateProgram(programData: $programData, version: $version) {
     program {
       id
       name
@@ -9660,6 +9666,7 @@ export function withUpdateProgram<TProps, TChildProps = {}>(operationOptions?: A
  * const [updateProgramMutation, { data, loading, error }] = useUpdateProgramMutation({
  *   variables: {
  *      programData: // value for 'programData'
+ *      version: // value for 'version'
  *   },
  * });
  */
@@ -11577,6 +11584,7 @@ export const GrievanceTicketDocument = gql`
         }
       }
     }
+    version
   }
 }
     ${IndividualDetailedFragmentDoc}
@@ -12291,6 +12299,7 @@ export const ProgramDocument = gql`
     totalNumberOfHouseholds
     administrativeAreasOfImplementation
     individualDataNeeded
+    version
   }
 }
     `;
@@ -13874,6 +13883,7 @@ export type ResolversTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
   CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
   CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
   TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
@@ -14193,6 +14203,7 @@ export type ResolversParentTypes = {
   ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
   ProgramSector: ProgramSector,
   ProgramScope: ProgramScope,
+  BigInt: Scalars['BigInt'],
   CashPlanNodeConnection: CashPlanNodeConnection,
   CashPlanNodeEdge: CashPlanNodeEdge,
   TargetPopulationNodeConnection: TargetPopulationNodeConnection,
@@ -14495,6 +14506,10 @@ export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentTy
 
 export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
   name: 'Arg'
+}
+
+export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
+  name: 'BigInt'
 }
 
 export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
@@ -14822,6 +14837,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -15460,6 +15476,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
   cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
@@ -16332,6 +16349,7 @@ export type Resolvers<ContextType = any> = {
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
+  BigInt?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
   BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,

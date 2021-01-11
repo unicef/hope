@@ -9,10 +9,10 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
-class PaymentRecord(TimeStampedUUIDModel):
+class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_SUCCESS = "SUCCESS"
     STATUS_PENDING = "PENDING"
     STATUS_ERROR = "ERROR"
