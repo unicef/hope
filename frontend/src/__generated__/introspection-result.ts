@@ -18,28 +18,7 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "SanctionListIndividualNode"
-          },
-          {
-            "name": "SanctionListIndividualDocumentNode"
-          },
-          {
-            "name": "SanctionListIndividualNationalitiesNode"
-          },
-          {
-            "name": "SanctionListIndividualCountriesNode"
-          },
-          {
-            "name": "SanctionListIndividualAliasNameNode"
-          },
-          {
-            "name": "SanctionListIndividualDateOfBirthNode"
-          },
-          {
-            "name": "GrievanceTicketNode"
-          },
-          {
-            "name": "UserNode"
+            "name": "ReportNode"
           },
           {
             "name": "UserBusinessAreaNode"
@@ -58,6 +37,15 @@
           },
           {
             "name": "RegistrationDataImportNode"
+          },
+          {
+            "name": "UserNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "TicketNoteNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
@@ -93,7 +81,13 @@
             "name": "TicketSensitiveDetailsNode"
           },
           {
+            "name": "TicketHouseholdDataUpdateDetailsNode"
+          },
+          {
             "name": "TicketIndividualDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketAddIndividualDetailsNode"
           },
           {
             "name": "TicketDeleteIndividualDetailsNode"
@@ -102,19 +96,28 @@
             "name": "TicketSystemFlaggingDetailsNode"
           },
           {
-            "name": "DocumentNode"
+            "name": "SanctionListIndividualNode"
           },
           {
-            "name": "TicketHouseholdDataUpdateDetailsNode"
+            "name": "SanctionListIndividualDocumentNode"
           },
           {
-            "name": "TicketAddIndividualDetailsNode"
+            "name": "SanctionListIndividualNationalitiesNode"
           },
           {
-            "name": "TicketNoteNode"
+            "name": "SanctionListIndividualCountriesNode"
+          },
+          {
+            "name": "SanctionListIndividualAliasNameNode"
+          },
+          {
+            "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
             "name": "TicketNeedsAdjudicationDetailsNode"
+          },
+          {
+            "name": "DocumentNode"
           },
           {
             "name": "BusinessAreaNode"

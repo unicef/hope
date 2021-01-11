@@ -5,31 +5,31 @@ export const headCells = [
   {
     disablePadding: false,
     label: 'Report Type',
-    id: '',
+    id: 'report_type',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Timeframe',
-    id: '',
+    id: 'date_from',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Status',
-    id: '',
+    id: 'status',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Creation Date',
-    id: '',
+    id: 'created_at',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Created By',
-    id: '',
+    id: 'created_by__first_name',
     numeric: false,
   },
   {
