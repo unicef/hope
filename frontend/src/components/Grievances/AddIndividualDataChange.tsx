@@ -79,6 +79,7 @@ export const AddIndividualDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
+        initValue: field.required ? false : null,
         component: FormikCheckboxField,
       };
       break;
@@ -122,7 +123,6 @@ export const AddIndividualDataChange = ({
   const coreFields = data.allAddIndividualsFieldsAttributes.filter(
     (item) => !item.isFlexField,
   );
-  console.log('coreFields',coreFields)
   return (
     <>
       <Title>
