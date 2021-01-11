@@ -42880,10 +42880,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Who answers this phone?',
+                'labelEn': 'Who answers this alternative phone?',
                 'labels': [
                     {
-                        'label': 'Who answers this phone?',
+                        'label': 'Who answers this alternative phone?',
                         'language': 'English(EN)'
                     }
                 ],
