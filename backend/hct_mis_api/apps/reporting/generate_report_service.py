@@ -34,13 +34,14 @@ class GenerateReportService:
             "role_in_household",  # PRIMARY
         )
     }
+    FILTERS = ("business_area", "admin_area", "country")
     PAYMENT_RECORD_ID_COLUMN_INDEX = 0
     PAYMENT_RECORD_ID_LETTER = "A"
     RECEIVED_COLUMN_INDEX = 2
     RECEIVED_COLUMN_LETTER = "C"
     RECEIVED_AMOUNT_COLUMN_INDEX = 7
     RECEIVED_AMOUNT_COLUMN_LETTER = "H"
-    META_SHEET = "Meta"
+    FILTERS_SHEET = "Filters"
     VERSION_CELL_NAME_COORDINATES = "A1"
     VERSION_CELL_COORDINATES = "B1"
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
@@ -62,7 +63,24 @@ class GenerateReportService:
         ws_report.title = f"{self._report_type_to_str()} Report"
         self.wb = wb
         self.ws_report = ws_report
+        self.ws_filters = wb.create_sheet(GenerateReportService.FILTERS_SHEET)
         return wb
+
+    def _add_filters_info(self):
+        filter_rows = [
+            ("timeframe", f"{str(self.report.date_from)} - {str(self.report.date_to)}"),
+            ("business_area", self.business_area.slug),
+        ]
+
+        if self.report.country:
+            filter_rows.append(("country", str(self.report.country)))
+        if self.report.admin_area:
+            filter_rows.append(("admin_area", self.report.admin_area.title))
+        if self.report.program:
+            filter_rows.append(("program", self.program.name))
+
+        for filter_row in filter_rows:
+            self.ws_filters.append(filter_row)
 
     def _add_headers(self):
         headers_row = GenerateReportService.HEADERS[self.report_type]
@@ -131,10 +149,11 @@ class GenerateReportService:
 
     def generate_workbook(self):
         self._create_workbook()
-        # self._add_version()
+        self._add_filters_info()
         self._add_headers()
         self._add_rows()
-        self._adjust_column_width_from_col()
+        self._adjust_column_width_from_col(self.ws_filters, 1, 2, 1)
+        self._adjust_column_width_from_col(self.ws_report, 1, len(GenerateReportService.HEADERS[self.report_type]), 0)
         return self.wb
 
     def generate_file(self):
@@ -144,14 +163,11 @@ class GenerateReportService:
             tmp.seek(0)
             self.report.file.save(f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp))
 
-    def _adjust_column_width_from_col(self):
-        min_col = 1
-        max_col = len(GenerateReportService.HEADERS[self.report_type])
-        min_row = 0
+    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
 
         column_widths = []
 
-        for i, col in enumerate(self.ws_report.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
+        for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
 
             for cell in col:
                 value = cell.value
@@ -169,4 +185,4 @@ class GenerateReportService:
             col_name = get_column_letter(min_col + i)
             value = column_widths[i] + 2
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value
-            self.ws_report.column_dimensions[col_name].width = value
+            ws.column_dimensions[col_name].width = value
