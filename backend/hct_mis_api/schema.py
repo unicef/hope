@@ -20,6 +20,7 @@ import registration_datahub.schema
 import registration_datahub.mutations
 import registration_datahub.schema
 import reporting.schema
+import reporting.mutations
 import sanction_list.mutations
 import targeting.mutations
 import targeting.schema
@@ -52,6 +53,7 @@ class Mutations(
     targeting.mutations.Mutations,
     payment.mutations.Mutations,
     grievance.mutations.Mutations,
+    reporting.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass
