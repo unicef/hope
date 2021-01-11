@@ -265,6 +265,19 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "adult_female": adult_female,
         }
 
+    @property
+    def allowed_steficon_rule(self):
+        if not self.program:
+            return None
+        tp = (
+            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False)
+            .order_by("-created_at")
+            .first()
+        )
+        if tp is None:
+            return None
+        return tp.steficon_rule
+
     class Meta:
         unique_together = ("name", "business_area")
 

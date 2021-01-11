@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from graphql import GraphQLError
 
 from account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
 from core import utils
@@ -310,6 +311,8 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             status=TargetPopulation.STATUS_DRAFT,
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,
+            steficon_rule=target_population.steficon_rule,
+            program=target_population.program
         )
         target_population_copy.save()
         if target_population.candidate_list_targeting_criteria:
@@ -378,6 +381,11 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         encoded_steficon_rule_id = kwargs["steficon_rule_id"]
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
+            if (
+                target_population.allowed_steficon_rule is not None
+                and steficon_rule_id != target_population.allowed_steficon_rule.id
+            ):
+                raise GraphQLError("You can't change steficon rule for this Target Population")
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             target_population.steficon_rule = steficon_rule
             target_population.save()
@@ -387,12 +395,12 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                 selection.vulnerability_score = value
                 selection.save(update_fields=["vulnerability_score"])
         else:
+            target_population.steficon_rule = None
+            target_population.vulnerability_score_min = None
+            target_population.vulnerability_score_max = None
+            target_population.save()
             for selection in HouseholdSelection.objects.filter(target_population=target_population):
-                target_population.steficon_rule = None
                 selection.vulnerability_score = None
-                target_population.vulnerability_score_min = None
-                target_population.vulnerability_score_max = None
-                target_population.save()
                 selection.save(update_fields=["vulnerability_score"])
         return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
 
