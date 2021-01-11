@@ -131,6 +131,13 @@ class Permissions(Enum):
     # All
     ALL_VIEW_PII_DATA_ON_LISTS = auto()
 
+    # Reporting
+    REPORTING_EXPORT = auto()
+
+    # Activity Log
+    ACTIVITY_LOG_VIEW = auto()
+    ACTIVITY_LOG_DOWNLOAD = auto()
+
     # Django Admin
     # ...
 
