@@ -148,11 +148,18 @@ class GenerateReportService:
         return self.wb
 
     def generate_file(self):
-        self.generate_workbook()
-        with NamedTemporaryFile() as tmp:
-            self.wb.save(tmp.name)
-            tmp.seek(0)
-            self.report.file.save(f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp))
+        try:
+            self.generate_workbook()
+            with NamedTemporaryFile() as tmp:
+                self.wb.save(tmp.name)
+                tmp.seek(0)
+                self.report.file.save(
+                    f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp)
+                )
+                self.report.status = Report.COMPLETED
+        except Exception:
+            self.report.status = Report.FAILED
+        self.report.save()
 
     def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
 

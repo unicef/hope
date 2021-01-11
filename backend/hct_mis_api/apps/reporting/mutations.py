@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from core.models import BusinessArea, AdminArea
 from core.permissions import is_authenticated
 from core.utils import decode_id_string
+from core.airflow_api import AirflowApi
 
 from account.permissions import Permissions, PermissionMutation
 from reporting.schema import ReportNode
@@ -56,10 +57,10 @@ class CreateReportMutation(PermissionMutation):
 
         report = Report.objects.create(**report_vars)
 
-        # AirflowApi.start_dag(
-        #     dag_id="RegistrationDataImportDeduplication",
-        #     context={"registration_data_import_id": str(registration_data_import_datahub_id)},
-        # )
+        AirflowApi.start_dag(
+            dag_id="ReportExport",
+            context={"report_id": str(report.id)},
+        )
 
         return cls(report=report)
 
