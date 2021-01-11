@@ -568,9 +568,9 @@ class Query(graphene.ObjectType):
             for x in CORE_FIELDS_ATTRIBUTES
             if x.get("associated_with") == _INDIVIDUAL and x.get("name") in ACCEPTABLE_FIELDS
         ]
-        yield from KOBO_ONLY_INDIVIDUAL_FIELDS
+        yield from KOBO_ONLY_INDIVIDUAL_FIELDS.values()
         yield FIELDS_EXCLUDED_FROM_RDI.get("business_area")
-        yield XLSX_ONLY_FIELDS
+        yield from XLSX_ONLY_FIELDS
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
         ).order_by("name")

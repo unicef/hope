@@ -44,6 +44,7 @@ backend:
     AIRFLOW_HOST: "hope-airflow"
     EMAIL_HOST: ""
     POSTGRES_SSL: ""
+    KOBO_API_URL: ""
 
   secret:
     SECRET_KEY: ""
@@ -73,6 +74,8 @@ frontend:
   tolerations: []
 
   affinity: {}
+  resources: {}
+  nodeSelector: {}
 
   service:
     type: ClusterIP
