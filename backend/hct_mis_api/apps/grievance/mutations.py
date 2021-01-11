@@ -452,8 +452,8 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        if grievance_ticket.status == status:
-            return cls(grievance_ticket)
+        # if grievance_ticket.status == status:
+        #     return cls(grievance_ticket)
 
         if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
             permissions_to_use = None

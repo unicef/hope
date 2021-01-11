@@ -15,7 +15,7 @@ from core.kobo.api import KoboAPI
 from core.kobo.common import count_population
 from core.models import BusinessArea
 from core.permissions import is_authenticated
-from core.utils import decode_id_string
+from core.utils import decode_id_string, check_concurrency_version_in_mutation
 from core.validators import BaseValidator
 from registration_data.models import RegistrationDataImport
 from registration_data.schema import RegistrationDataImportNode
@@ -32,6 +32,7 @@ from registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,
 )
+from core.scalars import BigInt
 
 
 def create_registration_data_import_objects(registration_data_import_data, user, data_source):
@@ -179,6 +180,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def validate_object_status(cls, *args, **kwargs):
@@ -188,11 +190,12 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, id):
+    def mutate(cls, root, info, id, version):
         decode_id = decode_id_string(id)
         obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
         )
+        check_concurrency_version_in_mutation(version, obj_hct)
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 

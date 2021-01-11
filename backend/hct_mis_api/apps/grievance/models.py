@@ -4,11 +4,11 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from payment.models import PaymentVerification
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, ConcurrencyModel
 from django.utils.translation import ugettext_lazy as _
 
 
-class GrievanceTicket(TimeStampedUUIDModel):
+class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_NEW = 1
     STATUS_ASSIGNED = 2
     STATUS_IN_PROGRESS = 3

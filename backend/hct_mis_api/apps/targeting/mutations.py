@@ -10,7 +10,7 @@ from core import utils
 from core.airflow_api import AirflowApi
 from core.models import BusinessArea
 from core.permissions import is_authenticated
-from core.utils import decode_id_string
+from core.utils import decode_id_string, check_concurrency_version_in_mutation
 from household.models import Household
 from program.models import Program
 from steficon.interpreters import mapping
@@ -33,6 +33,7 @@ from targeting.validators import (
     UnapproveTargetPopulationValidator,
     TargetingCriteriaInputValidator,
 )
+from core.scalars import BigInt
 
 
 class CopyTargetPopulationInput(graphene.InputObjectType):
@@ -55,6 +56,7 @@ class ValidatedMutation(PermissionMutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
+        check_concurrency_version_in_mutation(kwargs.get('version'), model_object)
         if cls.permissions:
             cls.has_permission(info, cls.permissions, model_object.business_area)
         return cls.validated_mutate(root, info, model_object=model_object, **kwargs)
@@ -144,6 +146,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
 
     class Arguments:
         input = UpdateTargetPopulationInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -152,6 +155,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
+        check_concurrency_version_in_mutation(input.get('version'), target_population)
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
@@ -211,6 +215,7 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @transaction.atomic
@@ -234,6 +239,7 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def validated_mutate(cls, root, info, **kwargs):
@@ -251,6 +257,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @transaction.atomic
@@ -358,6 +365,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             required=False,
             node=SteficonRuleNode,
         )
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated

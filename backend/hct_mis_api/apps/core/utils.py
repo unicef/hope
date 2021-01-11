@@ -474,3 +474,17 @@ def to_snake_case(camel_case_string):
 
     snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
     return snake_case[0] + snake_case[1:].lower()
+
+
+# def check_concurrency_version(version, target):
+#     from concurrency.exceptions import RecordModifiedError
+
+#     if version != target.version:
+#         raise RecordModifiedError("yes yes")
+
+def check_concurrency_version_in_mutation(version, target):
+    if version is None:
+        return
+    from graphql import GraphQLError
+    if version != target.version:
+        raise GraphQLError("Someone has modified this record")

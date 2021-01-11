@@ -4,10 +4,10 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from registration_datahub.models import ImportedIndividual
-from utils.models import TimeStampedUUIDModel
+from utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
-class RegistrationDataImport(TimeStampedUUIDModel):
+class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     IMPORTING = "IMPORTING"
     IN_REVIEW = "IN_REVIEW"
     MERGING = "MERGING"
