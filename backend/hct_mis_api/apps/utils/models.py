@@ -58,8 +58,12 @@ class AbstractSession(models.Model):
     STATUS_PROCESSING = "PROCESSING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_FAILED = "FAILED"
+    STATUS_EMPTY = "EMPTY"
 
-    source = models.CharField(max_length=3, choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),)
+    source = models.CharField(
+        max_length=3,
+        choices=((SOURCE_MIS, "HCT-MIS"), (SOURCE_CA, "Cash Assist")),
+    )
     status = models.CharField(
         max_length=11,
         choices=(
@@ -68,6 +72,7 @@ class AbstractSession(models.Model):
             (STATUS_PROCESSING, "Processing"),
             (STATUS_COMPLETED, "Completed"),
             (STATUS_FAILED, "Failed"),
+            (STATUS_EMPTY, "Empty"),
         ),
     )
     last_modified_date = models.DateTimeField(auto_now=True)
@@ -98,6 +103,7 @@ class SoftDeletableDefaultManagerModel(models.Model):
     kept in db for any reason.
     Default manager returns only not-removed entries.
     """
+
     is_removed = models.BooleanField(default=False)
 
     class Meta:

@@ -13,6 +13,7 @@ def get_submission_metadata(household_data_dict):
     meta_fields_mapping = {
         "_uuid": "kobo_submission_uuid",
         "_xform_id_string": "kobo_asset_id",
+        "_submission_time": "kobo_submission_time",
     }
     submission_meta_data = {}
     for meta_field, model_field_name in meta_fields_mapping.items():
