@@ -43,14 +43,15 @@ class FundsCommitment(models.Model):
     vision_approval = models.CharField(max_length=1, null=True)
     document_reference = models.CharField(max_length=16, null=True)
     fc_status = models.CharField(max_length=1, null=True)
-    create_date = models.DateTimeField(null=True)
-    created_by = models.CharField(max_length=50, null=True)
+    create_date = models.DateTimeField(null=True, auto_now_add=True)
+    created_by = models.CharField(max_length=20, default=settings.DATABASES["cash_assist_datahub_erp"]["USER"])
     update_date = models.DateTimeField(null=True)
-    updated_by = models.CharField(max_length=50, null=True)
-    mis_sync_flag = models.BooleanField(null=True)
+    updated_by = models.CharField(max_length=20, default=settings.DATABASES["cash_assist_datahub_erp"]["USER"])
+    mis_sync_flag = models.BooleanField(default=False)
     mis_sync_date = models.DateTimeField(null=True)
-    ca_sync_flag = models.BooleanField(null=True)
+    ca_sync_flag = models.BooleanField(default=False)
     ca_sync_date = models.DateTimeField(null=True)
+
 
 
 class DownPayment(models.Model):
