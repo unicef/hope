@@ -53,6 +53,7 @@ class GenerateReportService:
         self.report = report
         self.report_type = report.report_type
         self.business_area = report.business_area
+        self.filter_vars = {"created_at__gte": report.date_from, "created_at__lte": report.date_to}
 
     def _report_type_to_str(self):
         return [name for value, name in Report.REPORT_TYPES if value == self.report_type][0]
@@ -131,12 +132,12 @@ class GenerateReportService:
         self.ws_report.append(individual_row)
 
     def _add_individuals(self):
-        filter_vars = {"business_area": self.business_area}
+        self.filter_vars["business_area"] = self.business_area
         if self.report.country:
-            filter_vars["household__country"] = self.report.country
+            self.filter_vars["household__country"] = self.report.country
         if self.report.admin_area:
-            filter_vars["household__admin_area"] = self.report.admin_area
-        individuals = Individual.objects.filter(**filter_vars)
+            self.filter_vars["household__admin_area"] = self.report.admin_area
+        individuals = Individual.objects.filter(**self.filter_vars)
 
         for individual in individuals:
             self._add_individual_row(individual)
