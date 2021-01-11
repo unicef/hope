@@ -381,6 +381,20 @@ input CreateProgramInput {
   individualDataNeeded: Boolean
 }
 
+type CreateReportMutation {
+  newReport: ReportNode
+}
+
+input CreateReportMutationInput {
+  reportType: Int!
+  businessAreaSlug: String!
+  dateFrom: Date!
+  dateTo: Date!
+  adminArea: ID
+  program: ID
+  country: String
+}
+
 input CreateTargetPopulationInput {
   name: String!
   targetingCriteria: TargetingCriteriaObjectType!
@@ -2029,6 +2043,7 @@ type MergeRegistrationDataImportMutation {
 }
 
 type Mutations {
+  createReport(createReportData: CreateReportMutationInput!): CreateReportMutation
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
