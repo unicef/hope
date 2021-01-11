@@ -3,7 +3,6 @@ from django.core.files import File
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 from tempfile import NamedTemporaryFile
-from payment.models import PaymentVerification
 from reporting.models import Report
 from household.models import Individual
 
@@ -11,11 +10,28 @@ from household.models import Individual
 class GenerateReportService:
     HEADERS = {
         Report.INDIVIDUALS: (
-            "household_id",
-            "country_origin",
-            "birth_date",
+            "document_id",  # 8e8ea94a-2ca5-4b76-b055-e098bc24eee8
+            "household_country_origin",  # TM
+            "birth_date",  # 2000-06-24
             "comms_disability",
-            "deduplication_batch_results",
+            "deduplication_batch_results",  # {"duplicates": [], "possible_duplicates": []}
+            "deduplication_golden_record_results",  # {"duplicates": [], "possible_duplicates": []}
+            "deduplication_golden_record_status",  # UNIQUE_IN_BATCH
+            "disability",
+            "estimated_birth_date",
+            "hearing_disability",
+            "marital_status",  # MARRIED
+            "memory_disability",
+            "observed_disability",  # NONE
+            "physical_disability",
+            "pregnant",
+            "relationship",
+            "sanction_list_possible_match",
+            "seeing_disability",
+            "selfcare_disability",
+            "sex",  # MALE
+            "work_status",  # NOT_PROVIDED
+            "role_in_household",  # PRIMARY
         )
     }
     PAYMENT_RECORD_ID_COLUMN_INDEX = 0
@@ -24,29 +40,37 @@ class GenerateReportService:
     RECEIVED_COLUMN_LETTER = "C"
     RECEIVED_AMOUNT_COLUMN_INDEX = 7
     RECEIVED_AMOUNT_COLUMN_LETTER = "H"
-    VERIFICATION_SHEET = "Payment Verifications"
     META_SHEET = "Meta"
     VERSION_CELL_NAME_COORDINATES = "A1"
     VERSION_CELL_COORDINATES = "B1"
     VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
     VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
+    MAX_COL_WIDTH = 50
 
     def __init__(self, report):
         self.report = report
-        self.individuals = Individual.objects.filter(business_area=report.business_area)
+        self.report_type = report.report_type
+        self.business_area = report.business_area
+
+    def _report_type_to_str(self):
+        return [name for value, name in Report.REPORT_TYPES if value == self.report_type][0]
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_report = wb.active
-        ws_report.title = "Individuals report"
+        ws_report.title = f"{self._report_type_to_str()} Report"
         self.wb = wb
         self.ws_report = ws_report
         return wb
 
     def _add_headers(self):
-        headers_row = GenerateReportService.HEADERS[self.report.report_type]
+        headers_row = GenerateReportService.HEADERS[self.report_type]
         self.ws_report.append(headers_row)
+
+    def _add_rows(self):
+        all_type_methods = {Report.INDIVIDUALS: self._add_individuals}
+        all_type_methods[self.report_type]()
 
     # def _to_received_column(self, payment_record_verification):
     #     status = payment_record_verification.status
@@ -56,25 +80,47 @@ class GenerateReportService:
     #         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
     #     return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
+    def _to_values_list(self, instances, field_name):
+        values_list = list(instances.values_list(field_name, flat=True))
+        return ", ".join([str(value) for value in values_list])
+
     def _add_individual_row(self, individual):
 
         individual_row = (
-            str(individual.household.id if individual.household else "No ID"),
-            str(individual.household.country_origin if individual.household else "NO COUNTRY"),
+            self._to_values_list(individual.documents.all(), "id"),
+            str(individual.household.country_origin if individual.household else ""),
             str(individual.birth_date),
             str(individual.comms_disability),
-            str(individual.deduplication_batch_results)
-            # self._to_received_column(payment_record_verification),
-            # str(payment_record_verification.payment_record.household.head_of_household.full_name),
-            # str(payment_record_verification.payment_record.household_id),
-            # str(payment_record_verification.payment_record.household.unicef_id),
-            # payment_record_verification.payment_record.delivered_quantity,
-            # payment_record_verification.received_amount,
+            str(individual.deduplication_batch_results),
+            str(individual.deduplication_golden_record_results),
+            str(individual.deduplication_golden_record_status),
+            str(individual.disability),
+            str(individual.estimated_birth_date),
+            str(individual.hearing_disability),
+            str(individual.marital_status),
+            str(individual.memory_disability),
+            str(individual.observed_disability),
+            str(individual.physical_disability),
+            str(individual.pregnant),
+            str(individual.relationship),
+            str(individual.sanction_list_possible_match),
+            str(individual.seeing_disability),
+            str(individual.selfcare_disability),
+            str(individual.sex),
+            str(individual.work_status),
+            self._to_values_list(individual.households_and_roles.all(), "role"),
         )
         self.ws_report.append(individual_row)
 
     def _add_individuals(self):
-        for individual in self.individuals:
+        filter_vars = {"business_area": self.business_area}
+        if self.report.country:
+            filter_vars["household__country"] = self.report.country
+        if self.report.admin_area:
+            filter_vars["household__admin_area"] = self.report.admin_area
+        individuals = Individual.objects.filter(**filter_vars)
+
+        for individual in individuals:
             self._add_individual_row(individual)
 
     # def _add_data_validation(self):
@@ -87,40 +133,40 @@ class GenerateReportService:
         self._create_workbook()
         # self._add_version()
         self._add_headers()
-        self._add_individuals()
-        # self._add_data_validation()
-        # self._adjust_column_width_from_col(self.ws_verifications, 0, 1, 5)
+        self._add_rows()
+        self._adjust_column_width_from_col()
         return self.wb
 
     def generate_file(self):
         self.generate_workbook()
-        # self.wb.save(filename=f"{str(self.report.report_type)}_{str(self.report.id)}.xlsx")
         with NamedTemporaryFile() as tmp:
             self.wb.save(tmp.name)
             tmp.seek(0)
-            self.report.file.save("SAMLPE REPORT.xlsx", File(tmp))
+            self.report.file.save(f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp))
 
-        # self.report.save()
+    def _adjust_column_width_from_col(self):
+        min_col = 1
+        max_col = len(GenerateReportService.HEADERS[self.report_type])
+        min_row = 0
 
-    # def _adjust_column_width_from_col(self, ws, min_row, min_col, max_col):
+        column_widths = []
 
-    #     column_widths = []
+        for i, col in enumerate(self.ws_report.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
 
-    #     for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
+            for cell in col:
+                value = cell.value
+                if value is not None:
 
-    #         for cell in col:
-    #             value = cell.value
-    #             if value is not None:
+                    if isinstance(value, str) is False:
+                        value = str(value)
 
-    #                 if isinstance(value, str) is False:
-    #                     value = str(value)
+                    try:
+                        column_widths[i] = max(column_widths[i], len(value))
+                    except IndexError:
+                        column_widths.append(len(value))
 
-    #                 try:
-    #                     column_widths[i] = max(column_widths[i], len(value))
-    #                 except IndexError:
-    #                     column_widths.append(len(value))
-
-    #     for i, width in enumerate(column_widths):
-    #         col_name = get_column_letter(min_col + i)
-    #         value = column_widths[i] + 2
-    #         ws.column_dimensions[col_name].width = value
+        for i, width in enumerate(column_widths):
+            col_name = get_column_letter(min_col + i)
+            value = column_widths[i] + 2
+            value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value
+            self.ws_report.column_dimensions[col_name].width = value
