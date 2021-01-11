@@ -287,9 +287,12 @@ class RdiMergeTask:
         for imported_household in imported_households:
             kobo_submission_uuid = imported_household.kobo_submission_uuid
             kobo_asset_id = imported_household.kobo_asset_id
-            if kobo_submission_uuid and kobo_asset_id:
+            kobo_submission_time = imported_household.kobo_submission_time
+            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                 submission = KoboImportedSubmission(
-                    kobo_submission_uuid=kobo_submission_uuid, kobo_asset_id=kobo_asset_id
+                    kobo_submission_uuid=kobo_submission_uuid,
+                    kobo_asset_id=kobo_asset_id,
+                    kobo_submission_time=kobo_submission_time,
                 )
                 kobo_submissions.append(submission)
         if kobo_submissions:
