@@ -1224,7 +1224,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "who_answers_alt_phone",
         "lookup": "who_answers_alt_phone",
         "required": False,
-        "label": {"English(EN)": "Who answers this phone?"},
+        "label": {"English(EN)": "Who answers this alternative phone?"},
         "hint": "",
         "choices": [],
         "associated_with": _INDIVIDUAL,
@@ -1324,8 +1324,10 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "xlsx_field": "end_h_c",
     },
 }
+
 KOBO_ONLY_INDIVIDUAL_FIELDS = {
     "role_i_c": {
+        "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
         "type": TYPE_SELECT_ONE,
         "name": "role",
         "lookup": "role",

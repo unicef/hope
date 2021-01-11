@@ -1,9 +1,9 @@
 from django.db import transaction
-from django.db.models import Q
 from django.forms import model_to_dict
 
 from core.models import AdminArea
-from grievance.models import TicketNeedsAdjudicationDetails, GrievanceTicket
+from grievance.common import create_needs_adjudication_tickets
+from grievance.models import TicketNeedsAdjudicationDetails
 from household.documents import IndividualDocument
 from household.elasticsearch_utils import populate_index
 from household.models import (
@@ -107,46 +107,46 @@ class RdiMergeTask:
         "who_answers_alt_phone",
     )
 
-    def create_grievance_ticket_with_details(self, main_individual, possible_duplicate, business_area):
-        details_already_exists = TicketNeedsAdjudicationDetails.objects.filter(
-            golden_records_individual__in=(main_individual, possible_duplicate),
-            possible_duplicate__in=(main_individual, possible_duplicate),
-        ).exists()
-
-        if details_already_exists is True:
-            return None, None
-
-        ticket = GrievanceTicket.objects.create(
-            category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-            business_area=business_area,
-        )
-        ticket_details = TicketNeedsAdjudicationDetails(
-            ticket=ticket,
-            golden_records_individual=main_individual,
-            possible_duplicate=possible_duplicate,
-            selected_individual=None,
-        )
-        return ticket, ticket_details
-
-    def create_needs_adjudication_tickets(self, individuals_queryset, results_key, business_area):
-        ticket_details_to_create = []
-        for possible_duplicate in individuals_queryset:
-            linked_tickets = []
-            for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
-                print(individual)
-                ticket, ticket_details = self.create_grievance_ticket_with_details(
-                    main_individual=Individual.objects.get(id=individual.get("hit_id")),
-                    possible_duplicate=possible_duplicate,
-                    business_area=business_area,
-                )
-                if ticket is not None and ticket_details is not None:
-                    linked_tickets.append(ticket)
-                    ticket_details_to_create.append(ticket_details)
-
-            for ticket in linked_tickets:
-                ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
-
-        return ticket_details_to_create
+    # def create_grievance_ticket_with_details(self, main_individual, possible_duplicate, business_area):
+    #     details_already_exists = TicketNeedsAdjudicationDetails.objects.filter(
+    #         golden_records_individual__in=(main_individual, possible_duplicate),
+    #         possible_duplicate__in=(main_individual, possible_duplicate),
+    #     ).exists()
+    #
+    #     if details_already_exists is True:
+    #         return None, None
+    #
+    #     ticket = GrievanceTicket.objects.create(
+    #         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
+    #         business_area=business_area,
+    #     )
+    #     ticket_details = TicketNeedsAdjudicationDetails(
+    #         ticket=ticket,
+    #         golden_records_individual=main_individual,
+    #         possible_duplicate=possible_duplicate,
+    #         selected_individual=None,
+    #     )
+    #     return ticket, ticket_details
+    #
+    # def create_needs_adjudication_tickets(self, individuals_queryset, results_key, business_area):
+    #     ticket_details_to_create = []
+    #     for possible_duplicate in individuals_queryset:
+    #         linked_tickets = []
+    #         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
+    #             print(individual)
+    #             ticket, ticket_details = self.create_grievance_ticket_with_details(
+    #                 main_individual=Individual.objects.get(id=individual.get("hit_id")),
+    #                 possible_duplicate=possible_duplicate,
+    #                 business_area=business_area,
+    #             )
+    #             if ticket is not None and ticket_details is not None:
+    #                 linked_tickets.append(ticket)
+    #                 ticket_details_to_create.append(ticket_details)
+    #
+    #         for ticket in linked_tickets:
+    #             ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
+    #
+    #     return ticket_details_to_create
 
     def merge_admin_area(
         self,
@@ -287,9 +287,12 @@ class RdiMergeTask:
         for imported_household in imported_households:
             kobo_submission_uuid = imported_household.kobo_submission_uuid
             kobo_asset_id = imported_household.kobo_asset_id
-            if kobo_submission_uuid and kobo_asset_id:
+            kobo_submission_time = imported_household.kobo_submission_time
+            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
                 submission = KoboImportedSubmission(
-                    kobo_submission_uuid=kobo_submission_uuid, kobo_asset_id=kobo_asset_id
+                    kobo_submission_uuid=kobo_submission_uuid,
+                    kobo_asset_id=kobo_asset_id,
+                    kobo_submission_time=kobo_submission_time,
                 )
                 kobo_submissions.append(submission)
         if kobo_submissions:
@@ -306,7 +309,7 @@ class RdiMergeTask:
             registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
         )
 
-        ticket_details = self.create_needs_adjudication_tickets(
+        ticket_details = create_needs_adjudication_tickets(
             golden_record_duplicates, "duplicates", obj_hct.business_area
         )
         ticket_details_to_create.extend(ticket_details)
@@ -315,7 +318,7 @@ class RdiMergeTask:
             registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
 
-        ticket_details = self.create_needs_adjudication_tickets(
+        ticket_details = create_needs_adjudication_tickets(
             needs_adjudication, "possible_duplicates", obj_hct.business_area
         )
         ticket_details_to_create.extend(ticket_details)
