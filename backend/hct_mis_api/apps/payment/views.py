@@ -16,7 +16,7 @@ def download_cash_plan_payment_verification(request, verification_id):
         CashPlanPaymentVerification, id=decode_id_string(verification_id)
     )
     if not request.user.has_permission(
-        Permissions.PAYMENT_VERIFICATION_EXPORT, cash_plan_payment_verification.business_area
+        Permissions.PAYMENT_VERIFICATION_EXPORT.value, cash_plan_payment_verification.business_area
     ):
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
