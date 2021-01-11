@@ -543,6 +543,7 @@ class TestRdiKoboCreateTask(TestCase):
                     "number": "123123123",
                     "individual": individual,
                     "photo": "signature-14_59_24.png",
+                    "issuing_country": Country("AFG"),
                 }
             },
             {
@@ -550,6 +551,7 @@ class TestRdiKoboCreateTask(TestCase):
                     "number": "444111123",
                     "individual": individual,
                     "photo": "signature-14_59_24.png",
+                    "issuing_country": Country("AFG"),
                 }
             },
         ]
