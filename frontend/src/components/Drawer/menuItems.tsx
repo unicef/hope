@@ -10,6 +10,7 @@ import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import SettingsRounded from '@material-ui/icons/SettingsRounded';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import React from 'react';
 import { PERMISSIONS } from '../../config/permissions';
 
@@ -120,5 +121,11 @@ export const menuItems = [
     href: '/#',
     selectedRegexp: /^\/test.*$/,
     icon: <SettingsRounded />,
+  },
+  {
+    name: 'Activity Log',
+    href: '/activity-log',
+    selectedRegexp: /^\/test.*$/,
+    icon: <TrackChangesIcon />,
   },
 ];
