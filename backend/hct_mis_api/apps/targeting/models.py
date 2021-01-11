@@ -467,7 +467,7 @@ class TargetingCriteriaFilterMixin:
             "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER", "DECIMAL"]},
+        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER", "DECIMAL","DATE"]},
         "NOT_IN_RANGE": {
             "arguments": 2,
             "lookup": "__range",
