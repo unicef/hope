@@ -40,6 +40,7 @@ export const EditHouseholdDataChangeField = ({
     case 'DECIMAL':
       fieldProps = {
         component: FormikTextField,
+        type: 'number',
       };
       break;
     case 'STRING':
@@ -131,7 +132,7 @@ export function CurrentValue({
   }
   return (
     <Grid item xs={3}>
-      <LabelizedField label='Current Value' value={displayValue || '-'} />
+      <LabelizedField label='Current Value' value={displayValue} />
     </Grid>
   );
 }

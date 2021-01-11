@@ -27,7 +27,7 @@ export function UsersListTableRow({
   const [open, setOpen] = useState(false);
 
   const mappedRoles = user?.userRoles?.map((el) => (
-    <p>
+    <p key={el.role.name}>
       {el.businessArea.name} / {el.role.name}
     </p>
   ));
@@ -52,11 +52,7 @@ export function UsersListTableRow({
         <TableCell align='left'>{user.partner}</TableCell>
         <TableCell align='left'>{user.email}</TableCell>
         <TableCell align='left'>
-          {user.lastLogin ? (
-            <UniversalMoment>{user.lastLogin}</UniversalMoment>
-          ) : (
-            '-'
-          )}
+          <UniversalMoment>{user.lastLogin}</UniversalMoment>
         </TableCell>
       </TableRow>
       <TableRow>

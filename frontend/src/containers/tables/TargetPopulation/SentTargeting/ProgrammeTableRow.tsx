@@ -7,9 +7,13 @@ import { ClickableTableRow } from '../../../../components/table/ClickableTableRo
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
+  canViewDetails?: boolean;
 }
 
-export function ProgrammeTableRow({ household }): React.ReactElement {
+export function ProgrammeTableRow({
+  household,
+  canViewDetails = true,
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -20,7 +24,7 @@ export function ProgrammeTableRow({ household }): React.ReactElement {
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.id}
     >

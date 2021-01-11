@@ -10,16 +10,20 @@ const ButtonContainer = styled.span`
 `;
 export interface FinishedProgramDetailsPageHeaderPropTypes {
   program: ProgramNode;
+  canActivate: boolean;
 }
 
 export function FinishedProgramDetailsPageHeaderButtons({
   program,
+  canActivate,
 }: FinishedProgramDetailsPageHeaderPropTypes): React.ReactElement {
   return (
     <div>
-      <ButtonContainer>
-        <ReactivateProgram program={program} />
-      </ButtonContainer>
+      {canActivate && (
+        <ButtonContainer>
+          <ReactivateProgram program={program} />
+        </ButtonContainer>
+      )}
       <ButtonContainer>
         <Button
           variant='contained'

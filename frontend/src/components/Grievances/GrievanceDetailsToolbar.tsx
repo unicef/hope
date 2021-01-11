@@ -11,6 +11,7 @@ import {
 } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
 import {
+  GrievanceTicketDocument,
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
@@ -28,8 +29,20 @@ const Separator = styled.div`
 
 export const GrievanceDetailsToolbar = ({
   ticket,
+  canEdit,
+  canSetInProgress,
+  canSetOnHold,
+  canSendForApproval,
+  canSendBack,
+  canClose,
 }: {
   ticket: GrievanceTicketQuery['grievanceTicket'];
+  canEdit: boolean;
+  canSetInProgress: boolean;
+  canSetOnHold: boolean;
+  canSendForApproval: boolean;
+  canSendBack: boolean;
+  canClose: boolean;
 }): React.ReactElement => {
   const { id } = useParams();
   const businessArea = useBusinessArea();
@@ -63,6 +76,12 @@ export const GrievanceDetailsToolbar = ({
         grievanceTicketId: ticket.id,
         status,
       },
+      refetchQueries: () => [
+        {
+          query: GrievanceTicketDocument,
+          variables: { id: ticket.id },
+        },
+      ],
     });
   };
   return (
@@ -71,7 +90,7 @@ export const GrievanceDetailsToolbar = ({
       breadCrumbs={breadCrumbsItems}
     >
       <Box display='flex' alignItems='center'>
-        {isEditable && (
+        {isEditable && canEdit && (
           <>
             <Button
               color='primary'
@@ -85,7 +104,7 @@ export const GrievanceDetailsToolbar = ({
             <Separator />
           </>
         )}
-        {isNew && (
+        {isNew && canEdit && (
           <>
             <Button
               color='primary'
@@ -96,7 +115,7 @@ export const GrievanceDetailsToolbar = ({
             </Button>
           </>
         )}
-        {isAssigned && (
+        {isAssigned && canSetInProgress && (
           <Button
             color='primary'
             variant='contained'
@@ -107,27 +126,31 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isInProgress && (
           <>
-            <Box mr={3}>
-              <Button
-                color='primary'
-                variant='outlined'
-                onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
-              >
-                Set On Hold
-              </Button>
-            </Box>
-            <Box mr={3}>
-              <Button
-                color='primary'
-                variant='contained'
-                onClick={() =>
-                  changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
-                }
-              >
-                Send For Approval
-              </Button>
-            </Box>
-            {isFeedbackType && (
+            {canSetOnHold && (
+              <Box mr={3}>
+                <Button
+                  color='primary'
+                  variant='outlined'
+                  onClick={() => changeState(GRIEVANCE_TICKET_STATES.ON_HOLD)}
+                >
+                  Set On Hold
+                </Button>
+              </Box>
+            )}
+            {canSendForApproval && (
+              <Box mr={3}>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={() =>
+                    changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
+                  }
+                >
+                  Send For Approval
+                </Button>
+              </Box>
+            )}
+            {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
                 content={closingConfirmationText}
@@ -150,27 +173,33 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isOnHold && (
           <>
-            <Box mr={3}>
-              <Button
-                color='primary'
-                variant='contained'
-                onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
-              >
-                Set to in progress
-              </Button>
-            </Box>
-            <Box mr={3}>
-              <Button
-                color='primary'
-                variant='contained'
-                onClick={() =>
-                  changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
-                }
-              >
-                Send For Approval
-              </Button>
-            </Box>
-            {isFeedbackType && (
+            {canSetInProgress && (
+              <Box mr={3}>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={() =>
+                    changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
+                  }
+                >
+                  Set to in progress
+                </Button>
+              </Box>
+            )}
+            {canSendForApproval && (
+              <Box mr={3}>
+                <Button
+                  color='primary'
+                  variant='contained'
+                  onClick={() =>
+                    changeState(GRIEVANCE_TICKET_STATES.FOR_APPROVAL)
+                  }
+                >
+                  Send For Approval
+                </Button>
+              </Box>
+            )}
+            {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
                 content={closingConfirmationText}
@@ -193,32 +222,38 @@ export const GrievanceDetailsToolbar = ({
         )}
         {isForApproval && (
           <>
-            <Box mr={3}>
-              <Button
-                color='primary'
-                variant='contained'
-                onClick={() => changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)}
-              >
-                Send Back
-              </Button>
-            </Box>
-            <ConfirmationDialog
-              title='Confirmation'
-              content={closingConfirmationText}
-              continueText='close ticket'
-            >
-              {(confirm) => (
+            {canSendBack && (
+              <Box mr={3}>
                 <Button
                   color='primary'
                   variant='contained'
-                  onClick={confirm(() =>
-                    changeState(GRIEVANCE_TICKET_STATES.CLOSED),
-                  )}
+                  onClick={() =>
+                    changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS)
+                  }
                 >
-                  Close Ticket
+                  Send Back
                 </Button>
-              )}
-            </ConfirmationDialog>
+              </Box>
+            )}
+            {canClose && (
+              <ConfirmationDialog
+                title='Confirmation'
+                content={closingConfirmationText}
+                continueText='close ticket'
+              >
+                {(confirm) => (
+                  <Button
+                    color='primary'
+                    variant='contained'
+                    onClick={confirm(() =>
+                      changeState(GRIEVANCE_TICKET_STATES.CLOSED),
+                    )}
+                  >
+                    Close Ticket
+                  </Button>
+                )}
+              </ConfirmationDialog>
+            )}
           </>
         )}
       </Box>

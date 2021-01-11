@@ -1,6 +1,8 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -34,7 +36,18 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
         )
         self.admin_area = AdminAreaFactory(title="City Test", admin_area_type=area_type)
 
-    def test_create_positive_feedback_ticket(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_CREATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_create_positive_feedback_ticket(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
             "input": {
                 "description": "Test Feedback",

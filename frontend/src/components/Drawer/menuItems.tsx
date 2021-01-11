@@ -10,7 +10,9 @@ import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import SettingsRounded from '@material-ui/icons/SettingsRounded';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import React from 'react';
+import { PERMISSIONS } from '../../config/permissions';
 
 export const menuItems = [
   {
@@ -24,7 +26,7 @@ export const menuItems = [
     href: '/registration-data-import',
     selectedRegexp: /^\/registration-data-import.*$/,
     icon: <AutorenewIcon />,
-    permissionModule: 'RDI',
+    permissions: [PERMISSIONS.RDI_VIEW_DETAILS, PERMISSIONS.RDI_VIEW_LIST],
   },
   {
     name: 'Population',
@@ -55,41 +57,75 @@ export const menuItems = [
     href: '/programs',
     selectedRegexp: /^\/programs.*$/,
     icon: <FlashOnRounded />,
+    permissions: [
+      PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+      PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
   },
   {
     name: 'Targeting',
     href: '/target-population',
     selectedRegexp: /^\/target-population.*$/,
     icon: <ListAltRounded />,
+    permissions: [
+      PERMISSIONS.TARGETING_VIEW_LIST,
+      PERMISSIONS.TARGETING_VIEW_DETAILS,
+    ],
   },
   {
     name: 'Payment Verification',
     href: '/payment-verification',
-    selectedRegexp: /^\/payment-verification*$/,
+    selectedRegexp: /^\/payment-verification.*$/,
     icon: <AttachMoney />,
+    permissions: [
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST,
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+    ],
   },
   {
     name: 'Grievance and Feedback',
     href: '/grievance-and-feedback',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/grievance-and-feedback.*$/,
     icon: <Feedback />,
+    permissions: [
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_LIST_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR,
+      PERMISSIONS.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER,
+    ],
   },
   {
     name: 'Reporting',
-    href: '/#',
+    href: '/reporting',
     selectedRegexp: /^\/test.*$/,
     icon: <TrendingUpRounded />,
   },
   {
     name: 'User Management',
     href: '/users-list',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,
+    permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
   },
   {
     name: 'Settings',
     href: '/#',
     selectedRegexp: /^\/test.*$/,
     icon: <SettingsRounded />,
+  },
+  {
+    name: 'Activity Log',
+    href: '/activity-log',
+    selectedRegexp: /^\/test.*$/,
+    icon: <TrackChangesIcon />,
   },
 ];

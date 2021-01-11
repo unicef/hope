@@ -56,6 +56,13 @@ class BusinessArea(TimeStampedUUIDModel):
     def can_import_ocha_response_plans(self):
         return any([c.details for c in self.countries.all()])
 
+    @classmethod
+    def get_business_areas_as_choices(cls):
+        return [
+            {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
+            for business_area in cls.objects.all()
+        ]
+
 
 class AdminAreaType(TimeStampedUUIDModel):
     """
@@ -208,6 +215,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
-auditlog.register(FlexibleAttributeChoice)
-auditlog.register(FlexibleAttributeGroup)
-auditlog.register(FlexibleAttribute)
+# auditlog.register(FlexibleAttributeChoice)
+# auditlog.register(FlexibleAttributeGroup)
+# auditlog.register(FlexibleAttribute)
