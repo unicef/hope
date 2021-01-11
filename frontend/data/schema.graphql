@@ -111,6 +111,8 @@ type ApproveTargetPopulationMutation {
 
 scalar Arg
 
+scalar BigInt
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -576,6 +578,7 @@ type GrievanceTicketNode implements Node {
   consent: Boolean!
   businessArea: UserBusinessAreaNode!
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  version: BigInt!
   linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2046,7 +2049,7 @@ type Mutations {
   finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
   setSteficonRuleOnTargetPopulation(input: SetSteficonRuleOnTargetPopulationMutationInput!): SetSteficonRuleOnTargetPopulationMutationPayload
   createProgram(programData: CreateProgramInput!): CreateProgram
-  updateProgram(programData: UpdateProgramInput): UpdateProgram
+  updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
@@ -2199,6 +2202,7 @@ type ProgramNode implements Node {
   populationGoal: Int!
   administrativeAreasOfImplementation: String!
   individualDataNeeded: Boolean
+  version: BigInt!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!

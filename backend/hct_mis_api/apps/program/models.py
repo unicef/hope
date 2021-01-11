@@ -11,10 +11,10 @@ from auditlog.registry import auditlog
 
 from cash_assist_datahub.models import PaymentRecord
 from payment.models import CashPlanPaymentVerification
-from utils.models import AbstractSyncable, TimeStampedUUIDModel
+from utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 
-class Program(TimeStampedUUIDModel, AbstractSyncable):
+class Program(TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
     FINISHED = "FINISHED"

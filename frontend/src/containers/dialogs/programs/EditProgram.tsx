@@ -41,25 +41,37 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
   const businessArea = useBusinessArea();
 
   const submitFormHandler = async (values): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          ...values,
-          startDate: values.startDate,
-          endDate: values.endDate,
-          budget: parseFloat(values.budget).toFixed(2),
+    console.log('Clicked!')
+    try {
+      const response = await mutate({
+        variables: {
+          programData: {
+            id: program.id,
+            ...values,
+            startDate: values.startDate,
+            endDate: values.endDate,
+            budget: parseFloat(values.budget).toFixed(2),
+          },
+          version: program.version,
         },
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
+      });
       showMessage('Programme edited.', {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
-    } else {
-      showMessage('Programme edit action failed.');
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
+    // console.log("Hello from there")
+    // console.log(response.errors)
+    // if (!response.errors && response.data.updateProgram) {
+    //   showMessage('Programme edited.', {
+    //     pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
+    //   });
+    //   setOpen(false);
+    // } else {
+    //   showMessage('Programme edit action failed.');
+    // }
   };
 
   const renderSubmit = (submit): ReactElement => {

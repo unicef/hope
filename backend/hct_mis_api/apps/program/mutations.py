@@ -4,7 +4,7 @@ from django.db import transaction
 from account.permissions import PermissionMutation, Permissions
 from core.models import BusinessArea
 from core.permissions import is_authenticated
-from core.utils import decode_id_string
+from core.utils import decode_id_string, check_concurrency_version_in_mutation
 from core.validators import CommonValidator
 from program.models import Program
 from program.schema import ProgramNode
@@ -12,6 +12,7 @@ from program.validators import (
     ProgramValidator,
     ProgramDeletionValidator,
 )
+from core.scalars import BigInt
 
 
 class CreateProgramInput(graphene.InputObjectType):
@@ -80,14 +81,16 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
 
     class Arguments:
         program_data = UpdateProgramInput()
+        version = BigInt(required=False)
 
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def mutate(cls, root, info, program_data):
+    def mutate(cls, root, info, program_data, version):
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
+        check_concurrency_version_in_mutation(version, program)
         business_area = program.business_area
 
         # status update permissions if status is passed
