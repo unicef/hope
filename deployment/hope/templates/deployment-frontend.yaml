@@ -40,8 +40,6 @@ spec:
           envFrom:
           - secretRef:
               name: {{ include "hope.fullname" . }}-frontend
-          - configMapRef:
-              name: {{ include "hope.fullname" . }}-frontend
           readinessProbe:
             httpGet:
               path: /api/_health
