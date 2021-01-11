@@ -215,6 +215,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
-auditlog.register(FlexibleAttributeChoice)
-auditlog.register(FlexibleAttributeGroup)
-auditlog.register(FlexibleAttribute)
+# auditlog.register(FlexibleAttributeChoice)
+# auditlog.register(FlexibleAttributeGroup)
+# auditlog.register(FlexibleAttribute)
