@@ -74,6 +74,8 @@ frontend:
   tolerations: []
 
   affinity: {}
+  resources: {}
+  nodeSelector: {}
 
   service:
     type: ClusterIP
