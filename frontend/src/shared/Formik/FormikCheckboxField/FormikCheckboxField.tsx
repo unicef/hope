@@ -11,6 +11,7 @@ export const Check = ({
   field,
   form,
   label,
+  initValue,
   ...otherProps
 }): React.ReactElement => {
   const handleChange = (): void => {
@@ -19,6 +20,12 @@ export const Check = ({
   const isInvalid =
     get(form.errors, field.name) &&
     (get(form.touched, field.name) || form.submitCount > 0);
+  useEffect(() => {
+    if (initValue !== null && initValue !== undefined) {
+      form.setFieldValue(field.name, initValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initValue]);
   let checked = field.value;
   if (typeof checked === 'string') {
     checked = false;
@@ -42,7 +49,7 @@ export const Check = ({
         }
         label={label}
       />
-      {isInvalid && form.errors[field.name] && (
+      {isInvalid && get(form.errors, field.name) && (
         <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
       )}
     </Box>
