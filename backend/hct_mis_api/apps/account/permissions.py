@@ -127,10 +127,9 @@ class Permissions(Enum):
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_CREATOR = auto()
     GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER = auto()
-    # TODO: I think undo can be removed and use same permission as approve_data_change
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_CREATOR = auto()
-    GRIEVANCES_UNDO_APPROVED_DATA_CHANGE_AS_OWNER = auto()
+
+    # All
+    ALL_VIEW_PII_DATA_ON_LISTS = auto()
 
     # Django Admin
     # ...

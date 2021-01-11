@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Yup from 'yup';
 import styled from 'styled-components';
 import { Button, Paper, Typography } from '@material-ui/core';
 import { Field, FieldArray, Form, Formik } from 'formik';
@@ -68,10 +69,16 @@ export function CreateTargetPopulation(): React.ReactElement {
       to: `/${businessArea}/target-population/`,
     },
   ];
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
+  });
 
   return (
     <Formik
       initialValues={initialValues}
+      validationSchema={validationSchema}
       onSubmit={(values) => {
         mutate({
           variables: {
