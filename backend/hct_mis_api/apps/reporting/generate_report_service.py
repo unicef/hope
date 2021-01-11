@@ -1,7 +1,8 @@
 import openpyxl
 from django.core.files import File
 from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.datavalidation import DataValidation
+
+# from openpyxl.worksheet.datavalidation import DataValidation
 from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual
@@ -34,18 +35,7 @@ class GenerateReportService:
             "role_in_household",  # PRIMARY
         )
     }
-    FILTERS = ("business_area", "admin_area", "country")
-    PAYMENT_RECORD_ID_COLUMN_INDEX = 0
-    PAYMENT_RECORD_ID_LETTER = "A"
-    RECEIVED_COLUMN_INDEX = 2
-    RECEIVED_COLUMN_LETTER = "C"
-    RECEIVED_AMOUNT_COLUMN_INDEX = 7
-    RECEIVED_AMOUNT_COLUMN_LETTER = "H"
     FILTERS_SHEET = "Filters"
-    VERSION_CELL_NAME_COORDINATES = "A1"
-    VERSION_CELL_COORDINATES = "B1"
-    VERSION_CELL_NAME = "FILE_TEMPLATE_VERSION"
-    VERSION = "1.2"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
     MAX_COL_WIDTH = 50
 
