@@ -14,6 +14,7 @@ import { TotalNumberOfChildrenReachedSection } from '../../components/Dashboard/
 import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
 import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
 import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
+import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -42,6 +43,7 @@ export function DashboardYearPage({
         <Grid container>
           <Grid item xs={8}>
             <TotalAmountTransferredSection />
+            <TotalAmountPlannedAndTransferredSection />
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector />
             </DashboardPaper>

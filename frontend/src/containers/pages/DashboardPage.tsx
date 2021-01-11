@@ -3,6 +3,7 @@ import { Tabs, Tab, Button } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { DashboardYearPage } from './DashboardYearPage';
+import { ExportModal } from '../../components/Dashboard/ExportModal';
 
 export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -44,9 +45,7 @@ export function DashboardPage(): React.ReactElement {
   return (
     <>
       <PageHeader tabs={tabs} title='Dashboard'>
-        <Button color='primary' variant='contained' onClick={() => null}>
-          Export
-        </Button>
+        <ExportModal />
       </PageHeader>
       <DashboardFilters filter={filter} onFilterChange={setFilter} />
       <DashboardYearPage
