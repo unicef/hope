@@ -1,9 +1,11 @@
 from datetime import date
+from parameterized import parameterized
 
 from django.core.management import call_command
 from django_countries.fields import Country
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
 from core.models import BusinessArea
@@ -24,6 +26,7 @@ from household.models import (
     MALE,
     DIVORCED,
     FEMALE,
+    RELATIONSHIP_UNKNOWN,
 )
 from program.fixtures import ProgramFactory
 
@@ -66,10 +69,17 @@ class TestUpdateGrievanceTickets(APITestCase):
         self.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         self.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area, )
+        area_type = AdminAreaTypeFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
         self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
-        program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first(), )
+        program_one = ProgramFactory(
+            name="Test program ONE",
+            business_area=BusinessArea.objects.first(),
+        )
 
         household_one = HouseholdFactory.build(id="07a901ed-d2a5-422a-b962-3570da1d5d07", size=2, village="Example")
         household_one.registration_data_import.imported_by.save()
@@ -132,6 +142,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "full_name": "Test Example",
                 "family_name": "Example",
                 "sex": "MALE",
+                "relationship": RELATIONSHIP_UNKNOWN,
+                "estimated_birth_date": False,
                 "birth_date": date(year=1980, month=2, day=1).isoformat(),
                 "marital_status": SINGLE,
                 "role": ROLE_PRIMARY,
@@ -155,6 +167,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "given_name": {"value": "Test", "approve_status": True},
                 "full_name": {"value": "Test Example", "approve_status": True},
                 "family_name": {"value": "Example", "approve_status": True},
+                "relationship": RELATIONSHIP_UNKNOWN,
+                "estimated_birth_date": False,
                 "sex": {"value": "MALE", "approve_status": False},
                 "birth_date": {"value": date(year=1980, month=2, day=1).isoformat(), "approve_status": False},
                 "marital_status": {"value": SINGLE, "approve_status": True},
@@ -186,6 +200,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             household_data={
                 "village": {"value": "Test Village", "approve_status": True},
                 "size": {"value": 19, "approve_status": True},
+                "country": "AFG",
             },
         )
 
@@ -200,7 +215,22 @@ class TestUpdateGrievanceTickets(APITestCase):
             language="Spanish",
         )
 
-    def test_update_add_individual(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            ),
+            (
+                "with_partial_permission",
+                [Permissions.GRIEVANCES_UPDATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_update_add_individual(self, name, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
             "input": {
                 "description": self.add_individual_grievance_ticket.description,
@@ -215,6 +245,8 @@ class TestUpdateGrievanceTickets(APITestCase):
                             "givenName": "John",
                             "fullName": "John Example",
                             "familyName": "Example",
+                            "relationship": RELATIONSHIP_UNKNOWN,
+                            "estimatedBirthDate": False,
                             "sex": "MALE",
                             "birthDate": date(year=1981, month=2, day=2).isoformat(),
                             "maritalStatus": SINGLE,
@@ -228,26 +260,63 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
         }
         self.graphql_request(
-            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION, context={"user": self.user}, variables=input_data,
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
         )
         self.add_individual_grievance_ticket.refresh_from_db()
         result = self.add_individual_grievance_ticket.add_individual_ticket_details.individual_data
-        expected_result = {
-            "sex": "MALE",
-            "role": "PRIMARY",
-            "documents": [{"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA"}],
-            "full_name": "John Example",
-            "birth_date": "1981-02-02",
-            "given_name": "John",
-            "family_name": "Example",
-            "marital_status": "SINGLE",
-            "flex_fields": {},
-        }
+        expected_result = None
+        if name == "with_permission":
+            expected_result = {
+                "sex": "MALE",
+                "role": "PRIMARY",
+                "documents": [{"type": "NATIONAL_ID", "number": "321-321-UX-321", "country": "USA"}],
+                "full_name": "John Example",
+                "birth_date": "1981-02-02",
+                "given_name": "John",
+                "family_name": "Example",
+                "flex_fields": {},
+                "relationship": "UNKNOWN",
+                "marital_status": "SINGLE",
+                "estimated_birth_date": False,
+            }
+            self.assertFalse(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
+
+        else:
+            expected_result = {
+                "given_name": "Test",
+                "full_name": "Test Example",
+                "family_name": "Example",
+                "sex": "MALE",
+                "birth_date": "1980-02-01",
+                "marital_status": "SINGLE",
+                "role": "PRIMARY",
+                "documents": [{"type": "NATIONAL_ID", "country": "POL", "number": "123-123-UX-321"}],
+                "relationship": "UNKNOWN",
+                "estimated_birth_date": False,
+            }
+            self.assertTrue(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
+
         self.assertEqual(result, expected_result)
         self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
-        self.assertFalse(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
 
-    def test_update_change_individual(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            ),
+            (
+                "with_partial_permission",
+                [Permissions.GRIEVANCES_UPDATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_update_change_individual(self, name, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
             "input": {
                 "description": self.individual_data_change_grievance_ticket.description,
@@ -278,29 +347,74 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
         }
         self.graphql_request(
-            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION, context={"user": self.user}, variables=input_data,
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
         result = self.individual_data_change_grievance_ticket.individual_data_update_ticket_details.individual_data
-        expected_result = {
-            "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
-            "role": {"value": "PRIMARY", "approve_status": False, "previous_value": None},
-            "documents": [
-                {"value": {"type": "NATIONAL_ID", "number": "111-222-777", "country": "POL"}, "approve_status": False}
-            ],
-            "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
-            "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
-            "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
-            "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
-            "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
-            "previous_documents": {},
-            "documents_to_remove": [],
-            "flex_fields": {},
-        }
+        expected_result = None
+        if name == "with_permission":
+            expected_result = {
+                "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
+                "role": {"value": "PRIMARY", "approve_status": False, "previous_value": None},
+                "documents": [
+                    {
+                        "value": {"type": "NATIONAL_ID", "number": "111-222-777", "country": "POL"},
+                        "approve_status": False,
+                    }
+                ],
+                "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
+                "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
+                "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
+                "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
+                "flex_fields": {},
+                "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
+                "previous_documents": {},
+                "documents_to_remove": [],
+            }
+
+        else:
+            expected_result = {
+                "given_name": {"value": "Test", "approve_status": True},
+                "full_name": {"value": "Test Example", "approve_status": True},
+                "family_name": {"value": "Example", "approve_status": True},
+                "sex": {"value": "MALE", "approve_status": False},
+                "birth_date": {"value": "1980-02-01", "approve_status": False},
+                "marital_status": {"value": "SINGLE", "approve_status": True},
+                "role": {"value": "PRIMARY", "approve_status": True},
+                "documents": [
+                    {
+                        "value": {"country": "POL", "type": "NATIONAL_ID", "number": "999-888-777"},
+                        "approve_status": True,
+                    },
+                ],
+                "documents_to_remove": [
+                    {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
+                    {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
+                ],
+                "estimated_birth_date": False,
+                "relationship": "UNKNOWN",
+            }
         self.assertEqual(result, expected_result)
         self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
 
-    def test_update_change_household(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE, Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE],
+            ),
+            (
+                "with_partial_permission",
+                [Permissions.GRIEVANCES_UPDATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_update_change_household(self, name, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
             "input": {
                 "description": "this is new description",
@@ -310,26 +424,64 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "area": self.household_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
                 "extras": {
-                    "householdDataUpdateIssueTypeExtras": {"householdData": {"village": "Test Town", "size": 3, }}
+                    "householdDataUpdateIssueTypeExtras": {
+                        "householdData": {
+                            "village": "Test Town",
+                            "size": 3,
+                            "country": "AFG",
+                        }
+                    }
                 },
             }
         }
         self.graphql_request(
-            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION, context={"user": self.user}, variables=input_data,
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
         )
         self.household_data_change_grievance_ticket.refresh_from_db()
         result = self.household_data_change_grievance_ticket.household_data_update_ticket_details.household_data
-        expected_result = {
-            "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
-            "size": {"value": 3, "approve_status": False, "previous_value": 2},
-            "flex_fields": {},
-        }
-        self.assertEqual(result, expected_result)
-        self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
-        self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        expected_result = None
 
-    def test_update_feedback_ticket(self):
+        if name == "with_permission":
+            expected_result = {
+                "size": {"value": 3, "approve_status": False, "previous_value": 2},
+                "country": {
+                    "value": "AFG",
+                    "approve_status": False,
+                    "previous_value": self.household_one.country.alpha3,
+                },
+                "village": {"value": "Test Town", "approve_status": False, "previous_value": "Example"},
+                "flex_fields": {},
+            }
+        else:
+            expected_result = {
+                "village": {"value": "Test Village", "approve_status": True},
+                "size": {"value": 19, "approve_status": True},
+                "country": "AFG",
+            }
+        self.assertEqual(result, expected_result)
+        if name in ["with_permission", "with_partial_permission"]:
+            self.assertEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
+            self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
+            self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
+        else:
+            self.assertNotEqual(str(self.household_data_change_grievance_ticket.assigned_to.id), self.user_two.id)
+            self.assertNotEqual(self.household_data_change_grievance_ticket.description, "this is new description")
+            self.assertEqual(self.household_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_UPDATE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_update_feedback_ticket(self, name, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         input_data = {
             "input": {
                 "description": "New Description",
@@ -341,12 +493,21 @@ class TestUpdateGrievanceTickets(APITestCase):
             }
         }
         self.graphql_request(
-            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION, context={"user": self.user}, variables=input_data,
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=input_data,
         )
         self.positive_feedback_grievance_ticket.refresh_from_db()
 
-        self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
-        self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-        self.assertEqual(self.positive_feedback_grievance_ticket.admin, self.admin_area_1.title)
-        self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
-        self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
+        if name == "with_permission":
+            self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
+            self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin, self.admin_area_1.title)
+            self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
+            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
+        else:
+            self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
+            self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin, "")
+            self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
+            self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")

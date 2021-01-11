@@ -1,8 +1,9 @@
-import base64
+from parameterized import parameterized
 
 from django.core.management import call_command
 
 from account.fixtures import UserFactory
+from account.permissions import Permissions
 from core.base_test_case import APITestCase
 from core.models import BusinessArea, AdminArea
 from household.fixtures import (
@@ -22,6 +23,16 @@ from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 class TestDiscardVerificationMutation(APITestCase):
 
+    DISCARD_MUTATION = """
+        mutation DiscardVerification($cashPlanVerificationId: ID!){
+          discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
+            cashPlan{
+                name
+            }
+          }
+        }
+        """
+
     # verification = None
 
     @classmethod
@@ -29,19 +40,21 @@ class TestDiscardVerificationMutation(APITestCase):
         cls.user = UserFactory.create()
         call_command("loadbusinessareas")
         payment_record_amount = 10
+        cls.business_area = BusinessArea.objects.get(slug="afghanistan")
 
-        user = UserFactory()
-
-        program = ProgramFactory(business_area=BusinessArea.objects.first())
+        program = ProgramFactory(business_area=cls.business_area)
         program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
 
         target_population = TargetPopulationFactory(
-            created_by=user,
+            created_by=cls.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            business_area=BusinessArea.objects.first(),
+            business_area=cls.business_area,
         )
-        cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+        cash_plan = CashPlanFactory.build(
+            program=program,
+            business_area=cls.business_area,
+        )
         cash_plan.name = "TEST"
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(cash_plan=cash_plan)
@@ -49,7 +62,7 @@ class TestDiscardVerificationMutation(APITestCase):
         cash_plan_payment_verification.save()
         for _ in range(payment_record_amount):
             registration_data_import = RegistrationDataImportFactory(
-                imported_by=user, business_area=BusinessArea.objects.first()
+                imported_by=cls.user, business_area=cls.business_area
             )
             household, individuals = create_household(
                 {
@@ -62,7 +75,9 @@ class TestDiscardVerificationMutation(APITestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan, household=household, target_population=target_population,
+                cash_plan=cash_plan,
+                household=household,
+                target_population=target_population,
             )
 
             PaymentVerificationFactory(
@@ -74,20 +89,19 @@ class TestDiscardVerificationMutation(APITestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.verifications.first()
 
-    def test_discard_active(self):
-        encoded_id = base64.b64encode(f"CashPlanPaymentVerificationNode:{self.verification.id}".encode("ascii")).decode(
-            "ascii"
-        )
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.PAYMENT_VERIFICATION_DISCARD]),
+            ("without_permission", []),
+        ]
+    )
+    def test_discard_active(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-        DISCARD_MUTATION_GQL = f"""
-        mutation DiscardVerification{{
-          discardCashPlanPaymentVerification(cashPlanVerificationId:"{encoded_id}") {{
-            cashPlan{{
-                name
-            }}
-          }}
-        }}
-        """
         self.snapshot_graphql_request(
-            request_string=DISCARD_MUTATION_GQL, context={"user": self.user},
+            request_string=self.DISCARD_MUTATION,
+            context={"user": self.user},
+            variables={
+                "cashPlanVerificationId": [self.id_to_base64(self.verification.id, "CashPlanPaymentVerificationNode")]
+            },
         )

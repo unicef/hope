@@ -4,10 +4,10 @@ import graphene
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
-from core.utils import to_snake_case
-from graphql import GraphQLError
 
+from core.airflow_api import AirflowApi
 from core.utils import decode_id_string
+from core.utils import to_snake_case
 from grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
@@ -20,6 +20,7 @@ from grievance.mutations_extras.utils import (
     handle_role,
     prepare_previous_documents,
     verify_flex_fields,
+    remove_individual_and_reassign_roles,
 )
 from household.models import (
     Individual,
@@ -27,9 +28,8 @@ from household.models import (
     HEAD,
     Document,
     ROLE_NO_ROLE,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    IndividualRoleInHousehold, NON_BENEFICIARY, RELATIONSHIP_UNKNOWN,
+    NON_BENEFICIARY,
+    RELATIONSHIP_UNKNOWN,
 )
 from household.schema import HouseholdNode, IndividualNode
 from utils.schema import Arg
@@ -41,26 +41,30 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     consent_sharing = graphene.List(graphene.String)
     residence_status = graphene.String()
     country_origin = graphene.String()
-    country = graphene.String()
-    size = graphene.Int()
+    country = graphene.String(required=True)
+    size = graphene.Int(required=True)
     address = graphene.String()
     female_age_group_0_5_count = graphene.Int()
     female_age_group_6_11_count = graphene.Int()
     female_age_group_12_17_count = graphene.Int()
-    female_adults_count = graphene.Int()
+    female_age_group_18_59_count = (graphene.Int(),)
+    female_age_group_60_count = (graphene.Int(),)
     pregnant_count = graphene.Int()
     male_age_group_0_5_count = graphene.Int()
     male_age_group_6_11_count = graphene.Int()
     male_age_group_12_17_count = graphene.Int()
-    male_adults_count = graphene.Int()
+    male_age_group_18_59_count = (graphene.Int(),)
+    male_age_group_60_count = (graphene.Int(),)
     female_age_group_0_5_disabled_count = graphene.Int()
     female_age_group_6_11_disabled_count = graphene.Int()
     female_age_group_12_17_disabled_count = graphene.Int()
-    female_adults_disabled_count = graphene.Int()
+    female_age_group_18_59_disabled_count = (graphene.Int(),)
+    female_age_group_60_disabled_count = (graphene.Int(),)
     male_age_group_0_5_disabled_count = graphene.Int()
     male_age_group_6_11_disabled_count = graphene.Int()
     male_age_group_12_17_disabled_count = graphene.Int()
-    male_adults_disabled_count = graphene.Int()
+    male_age_group_18_59_disabled_count = (graphene.Int(),)
+    male_age_group_60_disabled_count = (graphene.Int(),)
     returnee = graphene.Boolean()
     fchild_hoh = graphene.Boolean()
     child_hoh = graphene.Boolean()
@@ -70,6 +74,10 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     org_enumerator = graphene.String()
     org_name_enumerator = graphene.String()
     village = graphene.String()
+    registration_method = (graphene.String(),)
+    collect_individual_data = (graphene.String(),)
+    currency = (graphene.String(),)
+    unhcr_id = (graphene.String(),)
     flex_fields = Arg()
 
 
@@ -119,11 +127,11 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     family_name = graphene.String()
     sex = graphene.String(required=True)
     birth_date = graphene.Date(required=True)
-    estimated_birth_date = graphene.Boolean()
-    marital_status = graphene.String(required=True)
+    estimated_birth_date = graphene.Boolean(required=True)
+    marital_status = graphene.String()
     phone_no = graphene.String()
     phone_no_alternative = graphene.String()
-    relationship = graphene.String()
+    relationship = graphene.String(required=True)
     disability = graphene.Boolean()
     work_status = graphene.String()
     enrolled_in_nutrition_programme = graphene.Boolean()
@@ -138,8 +146,9 @@ class AddIndividualDataObjectType(graphene.InputObjectType):
     comms_disability = graphene.String()
     who_answers_phone = graphene.String()
     who_answers_alt_phone = graphene.String()
-    role = graphene.String()
+    role = graphene.String(required=True)
     documents = graphene.List(IndividualDocumentObjectType)
+    business_area = graphene.String()
     flex_fields = Arg()
 
 
@@ -452,6 +461,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
         household=household,
         first_registration_date=first_registration_date,
         last_registration_date=first_registration_date,
+        business_area=grievance_ticket.business_area,
         **individual_data,
     )
 
@@ -473,6 +483,15 @@ def close_add_individual_grievance_ticket(grievance_ticket):
     handle_role(role, household, individual)
 
     Document.objects.bulk_create(documents_to_create)
+
+    AirflowApi.start_dag(
+        dag_id="DeduplicateAndCheckAgainstSanctionsList",
+        context={
+            "should_populate_index": True,
+            "registration_data_import_id": None,
+            "individuals_ids": [str(individual.id)],
+        },
+    )
 
 
 def close_update_individual_grievance_ticket(grievance_ticket):
@@ -523,6 +542,15 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
 
+    AirflowApi.start_dag(
+        dag_id="DeduplicateAndCheckAgainstSanctionsList",
+        context={
+            "should_populate_index": True,
+            "registration_data_import_id": None,
+            "individuals_ids": [str(individual.id)],
+        },
+    )
+
 
 def close_update_household_grievance_ticket(grievance_ticket):
     ticket_details = grievance_ticket.household_data_update_ticket_details
@@ -553,58 +581,10 @@ def close_update_household_grievance_ticket(grievance_ticket):
 
 
 def close_delete_individual_ticket(grievance_ticket):
-    ticket_details = grievance_ticket.delete_individual_ticket_details
+    ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
 
     individual_to_remove = ticket_details.individual
 
-    roles_to_bulk_update = []
-    for role_data in ticket_details.role_reassign_data.values():
-        role_name = role_data.get("role")
-        individual_id = decode_id_string(role_data.get("individual"))
-        household_id = decode_id_string(role_data.get("household"))
-        new_individual = get_object_or_404(Individual, id=individual_id)
-        household = get_object_or_404(Household, id=household_id)
-
-        if role_name == HEAD:
-            household.head_of_household = new_individual
-            # can be directly saved, because there is always only one head of household to update
-            household.save()
-            household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
-            new_individual.relationship = HEAD
-            new_individual.save()
-        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
-            role = get_object_or_404(
-                IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
-            )
-            role.individual = new_individual
-            roles_to_bulk_update.append(role)
-
-    if len(roles_to_bulk_update) != individual_to_remove.households_and_roles.exclude(role=ROLE_NO_ROLE).count():
-        raise GraphQLError("Ticket cannot be closed not all roles has been reassigned")
-
-    if roles_to_bulk_update:
-        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
-
-    removed_individual_household = individual_to_remove.household
-
-    if removed_individual_household:
-        removed_individual_is_head = removed_individual_household.head_of_household.id == individual_to_remove.id
-    else:
-        removed_individual_is_head = False
-
-    if (
-        not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-        and removed_individual_is_head
-    ):
-        raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
-
-    individual_to_remove.delete()
-
-    if removed_individual_household:
-        if removed_individual_household.individuals.count() == 0:
-            removed_individual_household.delete()
-        else:
-            removed_individual_household.size -= 1
-            removed_individual_household.save()
+    remove_individual_and_reassign_roles(ticket_details, individual_to_remove)

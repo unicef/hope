@@ -10,6 +10,9 @@ import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDet
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;
@@ -22,17 +25,23 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
   });
+  const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  if (loading) {
-    return <LoadingComponent />;
-  }
+  if (loading) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (
+    !hasPermissions(
+      PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+      permissions,
+    )
+  )
+    return <PermissionDenied />;
 
-  if (!data) {
-    return null;
-  }
+  if (!data) return null;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
-      title: 'Programme Managment',
+      title: 'Programme Management',
       to: `/${businessArea}/programs/`,
     },
     {

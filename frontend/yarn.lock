@@ -2293,6 +2293,70 @@
   dependencies:
     any-observable "^0.3.0"
 
+"@sentry/browser@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-5.29.2.tgz#51adb4005511b1a4a70e4571880fc6653d651f91"
+  integrity sha512-uxZ7y7rp85tJll+RZtXRhXPbnFnOaxZqJEv05vJlXBtBNLQtlczV5iCtU9mZRLVHDtmZ5VVKUV8IKXntEqqDpQ==
+  dependencies:
+    "@sentry/core" "5.29.2"
+    "@sentry/types" "5.29.2"
+    "@sentry/utils" "5.29.2"
+    tslib "^1.9.3"
+
+"@sentry/core@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-5.29.2.tgz#9e05fe197234161d57aabaf52fab336a7c520d81"
+  integrity sha512-7WYkoxB5IdlNEbwOwqSU64erUKH4laavPsM0/yQ+jojM76ErxlgEF0u//p5WaLPRzh3iDSt6BH+9TL45oNZeZw==
+  dependencies:
+    "@sentry/hub" "5.29.2"
+    "@sentry/minimal" "5.29.2"
+    "@sentry/types" "5.29.2"
+    "@sentry/utils" "5.29.2"
+    tslib "^1.9.3"
+
+"@sentry/hub@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/hub/-/hub-5.29.2.tgz#208f10fe6674695575ad74182a1151f71d6df00a"
+  integrity sha512-LaAIo2hwUk9ykeh9RF0cwLy6IRw+DjEee8l1HfEaDFUM6TPGlNNGObMJNXb9/95jzWp7jWwOpQjoIE3jepdQJQ==
+  dependencies:
+    "@sentry/types" "5.29.2"
+    "@sentry/utils" "5.29.2"
+    tslib "^1.9.3"
+
+"@sentry/minimal@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/minimal/-/minimal-5.29.2.tgz#420bebac8d03d30980fdb05c72d7b253d8aa541b"
+  integrity sha512-0aINSm8fGA1KyM7PavOBe1GDZDxrvnKt+oFnU0L+bTcw8Lr+of+v6Kwd97rkLRNOLw621xP076dL/7LSIzMuhw==
+  dependencies:
+    "@sentry/hub" "5.29.2"
+    "@sentry/types" "5.29.2"
+    tslib "^1.9.3"
+
+"@sentry/react@^5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/react/-/react-5.29.2.tgz#e0e2055db6f9c7a3957630e726b23d6a0f2d12f2"
+  integrity sha512-Fvh4l6/wrnO3FWqte7lPUsuWE5o6t3FHwZqVINgCIabpwPMorvOVzm/gwG7uzhuCoyNTP28svR670sl4BnRuTg==
+  dependencies:
+    "@sentry/browser" "5.29.2"
+    "@sentry/minimal" "5.29.2"
+    "@sentry/types" "5.29.2"
+    "@sentry/utils" "5.29.2"
+    hoist-non-react-statics "^3.3.2"
+    tslib "^1.9.3"
+
+"@sentry/types@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-5.29.2.tgz#ac87383df1222c2d9b9f8f9ed7a6b86ea41a098a"
+  integrity sha512-dM9wgt8wy4WRty75QkqQgrw9FV9F+BOMfmc0iaX13Qos7i6Qs2Q0dxtJ83SoR4YGtW8URaHzlDtWlGs5egBiMA==
+
+"@sentry/utils@5.29.2":
+  version "5.29.2"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-5.29.2.tgz#99a5cdda2ea19d34a41932f138d470adcb3ee673"
+  integrity sha512-nEwQIDjtFkeE4k6yIk4Ka5XjGRklNLThWLs2xfXlL7uwrYOH2B9UBBOOIRUraBm/g/Xrra3xsam/kRxuiwtXZQ==
+  dependencies:
+    "@sentry/types" "5.29.2"
+    tslib "^1.9.3"
+
 "@sheerun/mutationobserver-shim@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@sheerun/mutationobserver-shim/-/mutationobserver-shim-0.3.3.tgz#5405ee8e444ed212db44e79351f0c70a582aae25"
@@ -14352,6 +14416,11 @@ react-i18next@^11.3.1:
   dependencies:
     "@babel/runtime" "^7.3.1"
     html-parse-stringify2 "2.0.1"
+
+react-idle-timer@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/react-idle-timer/-/react-idle-timer-4.5.0.tgz#7fd1d63763839e8b534c81755631ebc3c3bc5d07"
+  integrity sha512-R6V3eErt+eCDjEkgh5s4bPEMKIEcYsppmfyjhhKrs3D8qxGMkv38zrJHlvkSU9ndtQFBh6eyGkDa45NMBv8Lnw==
 
 react-inspector@^5.0.1:
   version "5.0.1"

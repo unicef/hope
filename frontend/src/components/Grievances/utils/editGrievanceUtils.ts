@@ -140,7 +140,7 @@ export function prepareInitialValues(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let initialValues: EditValuesTypes = {
     description: ticket.description || '',
-    assignedTo: ticket.assignedTo.id || '',
+    assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
     language: ticket.language || '',
     admin: ticket.admin || '',
@@ -169,19 +169,13 @@ export function prepareInitialValues(
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string()
-    .required('Category is required')
-    .nullable(),
+  category: Yup.string().required('Category is required').nullable(),
   admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-  selectedRelatedTickets: Yup.array()
-    .of(Yup.string())
-    .nullable(),
+  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
 });
 export const EmptyComponent = (): React.ReactElement => null;
 export const dataChangeComponentDict = {
@@ -361,6 +355,7 @@ const grievanceTypeIssueTypeDict = {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values, ticket) {
   const requiredVariables = {
+    businessArea,
     ticketId: ticket.id,
     description: values.description,
     assignedTo: values.assignedTo,

@@ -3,6 +3,7 @@ import json
 import graphene
 from auditlog.models import LogEntry
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
@@ -14,10 +15,12 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
+from account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
 from core.extended_connection import ExtendedConnection
 from core.models import BusinessArea
 from core.schema import ChoiceObject, BusinessAreaNode
-from core.utils import to_choice_object, CustomOrderingFilter
+from core.utils import to_choice_object, CustomOrderingFilter, decode_id_string
+from utils.schema import Arg
 
 
 def permissions_resolver(user_roles):
@@ -44,7 +47,9 @@ class UsersFilter(FilterSet):
             "roles": ["exact"],
         }
 
-    order_by = CustomOrderingFilter(fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email"))
+    order_by = CustomOrderingFilter(
+        fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email")
+    )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -145,15 +150,22 @@ class JSONLazyString(graphene.Scalar):
     def parse_value(value):
         return json.loads(value)
 
+class ContentTypeObjectType(DjangoObjectType):
+    class Meta:
+        model = ContentType
 
 class LogEntryObject(DjangoObjectType):
     timestamp = graphene.DateTime()
     changes_display_dict = JSONLazyString()
+    changes_display_object = Arg()
     actor = UserObjectType()
 
     class Meta:
         model = LogEntry
         exclude_fields = ("additional_data",)
+
+    def resolve_changes_display_object(self, info):
+        return self.changes_display_dict
 
 
 class LogEntryObjectConnection(graphene.Connection):
@@ -167,13 +179,26 @@ class LogEntryObjectConnection(graphene.Connection):
 
 
 class Query(graphene.ObjectType):
-    me = graphene.Field(UserObjectType)
-    all_users = DjangoFilterConnectionField(UserNode, filterset_class=UsersFilter)
-    all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=True))
+    me = graphene.Field(UserNode)
+    all_users = DjangoPermissionFilterConnectionField(
+        UserNode,
+        filterset_class=UsersFilter,
+        permission_classes=(hopePermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST),),
+    )
+    all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
+
+    def resolve_all_log_entries(self, info, **kwargs):
+        object_id = kwargs.get('object_id')
+        queryset = LogEntry.objects
+        if object_id:
+            id = decode_id_string(object_id)
+            queryset = queryset.filter(~Q(action=0))
+            queryset = queryset.filter(object_pk=id)
+        return queryset.all()
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all().distinct()

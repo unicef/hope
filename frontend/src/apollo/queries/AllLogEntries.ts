@@ -2,7 +2,7 @@ import { gql } from 'apollo-boost';
 
 export const ALL_LOG_ENTRIES_QUERY = gql`
   query AllLogEntries(
-    $objectId: String!
+    $objectId: String
     $after: String
     $before: String
     $first: Int
@@ -28,7 +28,13 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
           id
           action
           changesDisplayDict
+          objectRepr
           timestamp
+          contentType{
+            id
+            appLabel
+            model
+          }
           actor {
             id
             firstName
