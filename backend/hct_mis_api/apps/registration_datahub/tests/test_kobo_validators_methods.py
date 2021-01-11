@@ -97,7 +97,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_submitted_by": None,
             "individual_questions_count": "1",
             "end": "2020-05-28T17:34:22.979+02:00",
-            "household_questions/f_pregnant_h_c": "0",
+            "household_questions/pregnant_h_c": "0",
             "household_questions/m_6_11_disability_h_c": "0",
             "household_questions/m_0_5_disability_h_c": "0",
             "formhub/uuid": "b83407aca1d647a5bf65a3383ee761d4",
