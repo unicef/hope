@@ -17,7 +17,13 @@ from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES, _INDIVIDUAL, TYPE_SELECT_MANY, _HOUSEHOLD
+from core.core_fields_attributes import (
+    CORE_FIELDS_ATTRIBUTES,
+    _INDIVIDUAL,
+    TYPE_SELECT_MANY,
+    _HOUSEHOLD,
+    XLSX_ONLY_FIELDS,
+)
 from core.models import FlexibleAttribute
 from household.models import Individual, Household, MALE, FEMALE
 from utils.models import TimeStampedUUIDModel
@@ -467,7 +473,12 @@ class TargetingCriteriaFilterMixin:
             "supported_types": ["SELECT_MANY", "STRING"],
         },
         "NOT_CONTAINS": {"arguments": 1, "lookup": "__icontains", "negative": True, "supported_types": ["STRING"]},
-        "RANGE": {"arguments": 2, "lookup": "__range", "negative": False, "supported_types": ["INTEGER", "DECIMAL","DATE"]},
+        "RANGE": {
+            "arguments": 2,
+            "lookup": "__range",
+            "negative": False,
+            "supported_types": ["INTEGER", "DECIMAL", "DATE"],
+        },
         "NOT_IN_RANGE": {
             "arguments": 2,
             "lookup": "__range",
@@ -529,7 +540,8 @@ class TargetingCriteriaFilterMixin:
         return query
 
     def get_query_for_core_field(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES
+        core_fields = self.get_core_fields()
+        print([x.get("name") for x in core_fields])
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
             raise ValidationError(
@@ -555,7 +567,7 @@ class TargetingCriteriaFilterMixin:
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
             raise ValidationError(
-                f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
+                f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
         lookup_prefix = self.get_lookup_prefix(_INDIVIDUAL if flex_field_attr.associated_with == 1 else _HOUSEHOLD)
         lookup = f"{lookup_prefix}flex_fields__{flex_field_attr.name}"
@@ -582,6 +594,10 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
         :Residential Status != Refugee
     """
 
+    def get_core_fields(self):
+        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        return [c for c in core_fields if c.get("associated_with") == _HOUSEHOLD]
+
     comparision_method = models.CharField(
         max_length=20,
         choices=TargetingCriteriaFilterMixin.COMPARISON_CHOICES,
@@ -607,6 +623,10 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
         :Residential Status = Refugee
         :Residential Status != Refugee
     """
+
+    def get_core_fields(self):
+        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        return [c for c in core_fields if c.get("associated_with") == _INDIVIDUAL]
 
     comparision_method = models.CharField(
         max_length=20,
