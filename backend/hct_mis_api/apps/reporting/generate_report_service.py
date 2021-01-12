@@ -7,7 +7,7 @@ from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual, Household
 from program.models import CashPlanPaymentVerification
-from payment.models import PaymentRecord
+from payment.models import PaymentRecord, PaymentVerification
 
 
 class GenerateReportService:
@@ -106,6 +106,7 @@ class GenerateReportService:
         ),
         Report.PAYMENT_VERIFICATION: (
             "business_area_id",
+            "program_name",
             "cash_plan_payment_verification_id",
             "payment_record_id",
             "received_amount",
@@ -250,6 +251,7 @@ class GenerateReportService:
             Report.HOUSEHOLD_DEMOGRAPHICS: (self._get_households, self._format_household_row),
             Report.CASH_PLAN_VERIFICATION: (self._get_cash_plan_verifications, self._format_cash_plan_verification_row),
             Report.PAYMENTS: (self._get_payments, self._format_payment_row),
+            Report.PAYMENT_VERIFICATION: (self._get_payment_verifications, self._format_payment_verification_row),
         }
         type_methods = report_rows_methods[self.report_type]
         all_instances = type_methods[0]()
@@ -395,6 +397,23 @@ class GenerateReportService:
             payment.status,
             payment.target_population_cash_assist_id,
             payment.cash_plan.id if payment.cash_plan else "",
+        )
+
+    def _get_payment_verifications(self):
+        self.filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = self.business_area
+        if self.report.program:
+            self.filter_vars["cash_plan_payment_verification__cash_plan__program"] = self.report.program
+        return PaymentVerification.objects.filter(**self.filter_vars)
+
+    def _format_payment_verification_row(self, payment_verification: PaymentVerification):
+        return (
+            payment_verification.cash_plan_payment_verification.cash_plan.business_area.id,
+            payment_verification.cash_plan_payment_verification.cash_plan.program.name,
+            payment_verification.cash_plan_payment_verification.id,
+            payment_verification.payment_record.id,
+            payment_verification.received_amount,
+            payment_verification.status,
+            payment_verification.status_date,
         )
 
     # def _add_data_validation(self):
