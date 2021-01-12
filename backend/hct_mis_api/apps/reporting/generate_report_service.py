@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual, Household
 from program.models import CashPlanPaymentVerification
+from payment.models import PaymentRecord
 
 
 class GenerateReportService:
@@ -89,6 +90,7 @@ class GenerateReportService:
         ),
         Report.PAYMENTS: (
             "business_area_id",
+            "admin_area_id",
             "ca_hash_id",
             "ca_id",
             "currency",
@@ -99,7 +101,6 @@ class GenerateReportService:
             "entitlement_quantity",
             "status",
             "target_population_cash_assist_id",
-            "admin_area",
             "cash_plan_id",
             "cash_or_voucher",
         ),
@@ -248,6 +249,7 @@ class GenerateReportService:
             Report.INDIVIDUALS: (self._get_individuals, self._format_individual_row),
             Report.HOUSEHOLD_DEMOGRAPHICS: (self._get_households, self._format_household_row),
             Report.CASH_PLAN_VERIFICATION: (self._get_cash_plan_verifications, self._format_cash_plan_verification_row),
+            Report.PAYMENTS: (self._get_payments, self._format_payment_row),
         }
         type_methods = report_rows_methods[self.report_type]
         all_instances = type_methods[0]()
@@ -370,6 +372,29 @@ class GenerateReportService:
             verification.sex_filter,
             verification.status,
             verification.verification_method,
+        )
+
+    def _get_payments(self):
+        self.filter_vars["business_area"] = self.business_area
+        if self.report.admin_area:
+            self.filter_vars["household__admin_area"] = self.report.admin_area
+        return PaymentRecord.objects.filter(**self.filter_vars)
+
+    def _format_payment_row(self, payment: PaymentRecord):
+        return (
+            payment.business_area.id,
+            payment.household.admin_area.id if payment.household.admin_area else "",
+            payment.ca_hash_id,
+            payment.ca_id,
+            payment.currency,
+            payment.delivered_quantity,
+            payment.delivery_date,
+            payment.delivery_type,
+            payment.distribution_modality,
+            payment.entitlement_quantity,
+            payment.status,
+            payment.target_population_cash_assist_id,
+            payment.cash_plan.id if payment.cash_plan else "",
         )
 
     # def _add_data_validation(self):
