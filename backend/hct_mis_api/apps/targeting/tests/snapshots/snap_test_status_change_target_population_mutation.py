@@ -7,26 +7,6 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestApproveTargetPopulationMutation::test_approve_fail_target_population 1'] = {
-    'data': {
-        'approveTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 15,
-                    'line': 3
-                }
-            ],
-            'message': "['Only Target Population with status DRAFT can be approved']",
-            'path': [
-                'approveTargetPopulation'
-            ]
-        }
-    ]
-}
-
 snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_fail_target_population 1'] = {
     'data': {
         'unapproveTargetPopulation': None
@@ -62,53 +42,6 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_fail_target_popul
             'message': "['Only Target Population with status APPROVED can be finalized']",
             'path': [
                 'finalizeTargetPopulation'
-            ]
-        }
-    ]
-}
-
-snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_0_with_permission 1'] = {
-    'data': {
-        'approveTargetPopulation': {
-            'targetPopulation': {
-                'households': {
-                    'edges': [
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 1
-                            }
-                        },
-                        {
-                            'node': {
-                                'residenceStatus': 'HOST',
-                                'size': 2
-                            }
-                        }
-                    ],
-                    'totalCount': 2
-                },
-                'status': 'APPROVED'
-            }
-        }
-    }
-}
-
-snapshots['TestApproveTargetPopulationMutation::test_approve_target_population_1_without_permission 1'] = {
-    'data': {
-        'approveTargetPopulation': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 15,
-                    'line': 3
-                }
-            ],
-            'message': 'Permission Denied: User does not have correct permission.',
-            'path': [
-                'approveTargetPopulation'
             ]
         }
     ]
