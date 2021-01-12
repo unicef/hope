@@ -622,7 +622,7 @@ class TestRdiKoboCreateTask(TestCase):
             "_xform_id_string": "ayp9jVNe5crcGerVjCjGj4",
             "_bamboo_dataset_id": "",
             "_tags": [],
-            "household_questions/group_qo2zo48/f_pregnant_h_c": "0",
+            "household_questions/group_qo2zo48/pregnant_h_c": "0",
             "health_questions/pregnant_member_h_c": "0",
             "enumerator/name_enumerator": "Test",
             "monthly_expenditures_questions/total_expense_h_f": "0",
