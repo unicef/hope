@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual, Household
-from program.models import CashPlanPaymentVerification, CashPlan
+from program.models import CashPlanPaymentVerification, CashPlan, Program
 from payment.models import PaymentRecord, PaymentVerification
 
 
@@ -254,6 +254,7 @@ class GenerateReportService:
             Report.PAYMENTS: (self._get_payments, self._format_payment_row),
             Report.PAYMENT_VERIFICATION: (self._get_payment_verifications, self._format_payment_verification_row),
             Report.CASH_PLAN: (self._get_cash_plans, self._format_cash_plan_row),
+            Report.PROGRAM: (self._get_programs, self._format_program_row),
         }
         type_methods = report_rows_methods[self.report_type]
         all_instances = type_methods[0]()
@@ -450,6 +451,29 @@ class GenerateReportService:
             cash_plan.validation_alerts_count,
             cash_plan.verification_status,
             cash_plan.vision_id,
+        )
+
+    def _get_programs(self):
+        self.filter_vars["business_area"] = self.business_area
+        return Program.objects.filter(**self.filter_vars)
+
+    def _format_program_row(self, program: Program):
+        return (
+            program.business_area.id,
+            program.administrative_areas_of_implementation,
+            program.budget,
+            program.cash_plus,
+            program.description,
+            program.end_date,
+            program.frequency_of_payments,
+            program.id,
+            program.name,
+            program.population_goal,
+            program.scope,
+            program.sector,
+            program.start_date,
+            program.status,
+            program.total_number_of_households,
         )
 
     # def _add_data_validation(self):
