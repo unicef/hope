@@ -19,7 +19,7 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = (): React.ReactElemen
       {
         backgroundColor: [
           '#5F02CF',
-          '#9F67E2',
+          '#9F66E2',
           '#BF99EB',
           '#DFCCF5',
           '#EFE4F9',
