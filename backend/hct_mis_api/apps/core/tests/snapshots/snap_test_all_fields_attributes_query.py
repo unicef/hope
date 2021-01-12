@@ -20177,6 +20177,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Birth date',
+                'labels': [
+                    {
+                        'label': 'Birth date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'birth_date',
+                'required': True,
+                'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                     {
                         'labelEn': 'None',
                         'labels': [
@@ -42890,6 +42907,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'who_answers_alt_phone',
                 'required': False,
                 'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'First individual registration date',
+                'labels': [
+                    {
+                        'label': 'First individual registration date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'first_registration_date',
+                'required': True,
+                'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'First household registration date',
+                'labels': [
+                    {
+                        'label': 'First household registration date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'first_registration_date',
+                'required': True,
+                'type': 'DATE'
             }
         ]
     }

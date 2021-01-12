@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Field } from 'formik';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
+import {FormikDateField} from "../../shared/Formik/FormikDateField";
+import CalendarTodayRoundedIcon from "@material-ui/icons/CalendarTodayRounded";
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -35,6 +37,29 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               variant='outlined'
               fullWidth
               component={FormikTextField}
+            />
+          </InlineField>
+        </FlexWrapper>
+      );
+    case 'DATE':
+      return (
+        <FlexWrapper>
+          <InlineField>
+            <Field
+              name={`${baseName}.value.from`}
+              label={`${field.fieldAttribute.labelEn} from`}
+              fullWidth
+              component={FormikDateField}
+              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
+            />
+          </InlineField>
+          <InlineField>
+            <Field
+              name={`${baseName}.value.to`}
+              label={`${field.fieldAttribute.labelEn} to`}
+              fullWidth
+              component={FormikDateField}
+              decoratorEnd={<CalendarTodayRoundedIcon color='disabled' />}
             />
           </InlineField>
         </FlexWrapper>
