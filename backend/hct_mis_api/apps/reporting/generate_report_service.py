@@ -5,7 +5,7 @@ from openpyxl.utils import get_column_letter
 # from openpyxl.worksheet.datavalidation import DataValidation
 from tempfile import NamedTemporaryFile
 from reporting.models import Report
-from household.models import Individual
+from household.models import Individual, Household
 
 
 class GenerateReportService:
@@ -197,6 +197,22 @@ class GenerateReportService:
     def _report_type_to_str(self):
         return [name for value, name in Report.REPORT_TYPES if value == self.report_type][0]
 
+    def _to_values_list(self, instances, field_name):
+        values_list = list(instances.values_list(field_name, flat=True))
+        return ", ".join([str(value) for value in values_list])
+
+    def _sum_values(self, *values):
+        total = 0
+        for value in values:
+            total = total + value if value else total
+        return total
+
+    def _stringify_all_values(self, row):
+        str_row = ()
+        for value in row:
+            str_row.append(str(value))
+        return str_row
+
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
         ws_report = wb.active
@@ -227,8 +243,16 @@ class GenerateReportService:
         self.ws_report.append(headers_row)
 
     def _add_rows(self):
-        all_type_methods = {Report.INDIVIDUALS: self._add_individuals}
-        all_type_methods[self.report_type]()
+        report_rows_methods = {
+            Report.INDIVIDUALS: (self._get_individuals, self._format_individual_row),
+            Report.HOUSEHOLD_DEMOGRAPHICS: (self._get_households, self._format_household_row),
+        }
+        type_methods = report_rows_methods[self.report_type]
+        all_instances = type_methods[0]()
+        for instance in all_instances:
+            row = type_methods[1](instance)
+            str_row = self._stringify_all_values(row)
+            self.ws_report.append(str_row)
 
     # def _to_received_column(self, payment_record_verification):
     #     status = payment_record_verification.status
@@ -238,51 +262,90 @@ class GenerateReportService:
     #         return XlsxVerificationExportService.TRUE_FALSE_MAPPING[False]
     #     return XlsxVerificationExportService.TRUE_FALSE_MAPPING[True]
 
-    def _to_values_list(self, instances, field_name):
-        values_list = list(instances.values_list(field_name, flat=True))
-        return ", ".join([str(value) for value in values_list])
-
-    def _add_individual_row(self, individual):
-
-        individual_row = (
-            str(individual.admin_area.id if individual.household else ""),
-            str(individual.business_area.id),
-            str(individual.household.country if individual.household else ""),
-            self._to_values_list(individual.documents.all(), "id"),
-            str(individual.household.country_origin if individual.household else ""),
-            str(individual.birth_date),
-            str(individual.comms_disability),
-            str(individual.deduplication_batch_results),
-            str(individual.deduplication_golden_record_results),
-            str(individual.deduplication_golden_record_status),
-            str(individual.disability),
-            str(individual.estimated_birth_date),
-            str(individual.hearing_disability),
-            str(individual.marital_status),
-            str(individual.memory_disability),
-            str(individual.observed_disability),
-            str(individual.physical_disability),
-            str(individual.pregnant),
-            str(individual.relationship),
-            str(individual.sanction_list_possible_match),
-            str(individual.seeing_disability),
-            str(individual.selfcare_disability),
-            str(individual.sex),
-            str(individual.work_status),
-            self._to_values_list(individual.households_and_roles.all(), "role"),
-        )
-        self.ws_report.append(individual_row)
-
-    def _add_individuals(self):
+    def _get_individuals(self):
         self.filter_vars["business_area"] = self.business_area
         if self.report.country:
             self.filter_vars["household__country"] = self.report.country
         if self.report.admin_area:
             self.filter_vars["household__admin_area"] = self.report.admin_area
-        individuals = Individual.objects.filter(**self.filter_vars)
+        return Individual.objects.filter(**self.filter_vars)
 
-        for individual in individuals:
-            self._add_individual_row(individual)
+    def _format_individual_row(self, individual):
+
+        return (
+            individual.household.admin_area.id if individual.household and individual.household.admin_area else "",
+            individual.business_area.id,
+            individual.household.country if individual.household else "",
+            self._to_values_list(individual.documents.all(), "id"),
+            individual.household.country_origin if individual.household else "",
+            individual.birth_date,
+            individual.comms_disability,
+            individual.deduplication_batch_results,
+            individual.deduplication_golden_record_results,
+            individual.deduplication_golden_record_status,
+            individual.disability,
+            individual.estimated_birth_date,
+            individual.hearing_disability,
+            individual.marital_status,
+            individual.memory_disability,
+            individual.observed_disability,
+            individual.physical_disability,
+            individual.pregnant if individual.pregnant is not None else "",
+            individual.relationship,
+            individual.sanction_list_possible_match,
+            individual.seeing_disability,
+            individual.selfcare_disability,
+            individual.sex,
+            individual.work_status,
+            self._to_values_list(individual.households_and_roles.all(), "role"),
+        )
+
+    def _get_households(self):
+        self.filter_vars["business_area"] = self.business_area
+        if self.report.country:
+            self.filter_vars["country"] = self.report.country
+        if self.report.admin_area:
+            self.filter_vars["admin_area"] = self.report.admin_area
+        return Household.objects.filter(**self.filter_vars)
+
+    def _format_household_row(self, household):
+        return (
+            household.admin_area.id if household.admin_area else "",
+            household.business_area.id,
+            household.country,
+            household.unicef_id,
+            household.country_origin,
+            # TODO: check if adults_count should be a sum of these two fields
+            self._sum_values(household.female_age_group_18_59_count, household.female_age_group_60_count),
+            self._sum_values(
+                household.female_age_group_18_59_disabled_count, household.female_age_group_18_59_disabled_count
+            ),
+            household.female_age_group_0_5_count,
+            household.female_age_group_0_5_disabled_count,
+            household.female_age_group_12_17_count,
+            household.female_age_group_12_17_disabled_count,
+            household.female_age_group_6_11_count,
+            household.female_age_group_6_11_disabled_count,
+            household.first_registration_date,
+            household.geopoint,
+            household.last_registration_date,
+            self._sum_values(household.male_age_group_18_59_count, household.male_age_group_60_count),
+            self._sum_values(household.male_age_group_18_59_disabled_count, household.male_age_group_60_disabled_count),
+            household.male_age_group_0_5_count,
+            household.male_age_group_0_5_disabled_count,
+            household.male_age_group_12_17_count,
+            household.male_age_group_12_17_disabled_count,
+            household.male_age_group_6_11_count,
+            household.male_age_group_6_11_disabled_count,
+            household.org_name_enumerator,
+            household.pregnant_count,
+            household.residence_status,
+            household.returnee if household.returnee is not None else "",
+            household.size,
+            household.status,
+            household.village,
+            self._to_values_list(household.programs.all(), "id"),
+        )
 
     # def _add_data_validation(self):
     #     self.dv_received = DataValidation(type="list", formula1=f'"YES,NO"', allow_blank=False)
@@ -309,7 +372,8 @@ class GenerateReportService:
                     f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp)
                 )
                 self.report.status = Report.COMPLETED
-        except Exception:
+        except Exception as e:
+            print("FAILED", e)
             self.report.status = Report.FAILED
         self.report.save()
 
