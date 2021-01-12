@@ -6,7 +6,7 @@ from openpyxl.utils import get_column_letter
 from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual, Household
-from program.models import CashPlanPaymentVerification
+from program.models import CashPlanPaymentVerification, CashPlan
 from payment.models import PaymentRecord, PaymentVerification
 
 
@@ -114,6 +114,7 @@ class GenerateReportService:
             "status_date",
         ),
         Report.CASH_PLAN: (
+            "program_name",
             "assistance_measurement",
             "assistance_through",
             "business_area_id",
@@ -252,6 +253,7 @@ class GenerateReportService:
             Report.CASH_PLAN_VERIFICATION: (self._get_cash_plan_verifications, self._format_cash_plan_verification_row),
             Report.PAYMENTS: (self._get_payments, self._format_payment_row),
             Report.PAYMENT_VERIFICATION: (self._get_payment_verifications, self._format_payment_verification_row),
+            Report.CASH_PLAN: (self._get_cash_plans, self._format_cash_plan_row),
         }
         type_methods = report_rows_methods[self.report_type]
         all_instances = type_methods[0]()
@@ -414,6 +416,40 @@ class GenerateReportService:
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
+        )
+
+    def _get_cash_plans(self):
+        self.filter_vars["business_area"] = self.business_area
+        if self.report.program:
+            self.filter_vars["cash_plan__program"] = self.report.program
+        return CashPlan.objects.filter(**self.filter_vars)
+
+    def _format_cash_plan_row(self, cash_plan: CashPlan):
+        return (
+            cash_plan.program.name,
+            cash_plan.assistance_measurement,
+            cash_plan.assistance_through,
+            cash_plan.business_area.id,
+            cash_plan.ca_hash_id,
+            cash_plan.delivery_type,
+            cash_plan.dispersion_date,
+            cash_plan.down_payment,
+            cash_plan.end_date,
+            cash_plan.funds_commitment,
+            cash_plan.name,
+            cash_plan.program.id,
+            cash_plan.start_date,
+            cash_plan.status,
+            cash_plan.status_date,
+            cash_plan.total_delivered_quantity,
+            cash_plan.total_entitled_quantity,
+            cash_plan.total_entitled_quantity_revised,
+            cash_plan.total_persons_covered,
+            cash_plan.total_persons_covered_revised,
+            cash_plan.total_undelivered_quantity,
+            cash_plan.validation_alerts_count,
+            cash_plan.verification_status,
+            cash_plan.vision_id,
         )
 
     # def _add_data_validation(self):
