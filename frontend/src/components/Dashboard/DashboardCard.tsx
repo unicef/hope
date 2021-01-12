@@ -39,6 +39,14 @@ export const CardAmountSmaller = styled.div`
   font-weight: 600;
   font-size: 20px;
 `;
+export const CardAmountLink = styled.div`
+  text-transform: capitalize;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #033f91;
+  font-weight: 600;
+  font-size: 20px;
+`;
 const StyledPaper = styled(Paper)`
   border-left: 4px solid ${({ color }) => color};
   padding: 20px 24px;
