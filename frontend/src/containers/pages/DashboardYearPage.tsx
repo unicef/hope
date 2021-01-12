@@ -5,7 +5,6 @@ import { TabPanel } from '../../components/TabPanel';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
 import { PlannedBudget } from '../../components/Dashboard/charts/PlannedBudget';
-import { Missing } from '../../components/Missing';
 import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
 import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
 import { GrievancesSection } from '../../components/Dashboard/sections/GrievancesSection';
@@ -15,6 +14,7 @@ import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboar
 import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
 import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
 import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
+import { TotalCashTransferredByAdministrativeAreaTable } from '../../components/Dashboard/TotalCashTransferredByAdministrativeAreaTable';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -51,7 +51,7 @@ export function DashboardYearPage({
               <PlannedBudget />
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
-              <Missing />
+              <TotalCashTransferredByAdministrativeAreaTable />
             </DashboardPaper>
             <PaymentVerificationSection />
           </Grid>
