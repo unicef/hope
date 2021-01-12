@@ -113,7 +113,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255)
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
@@ -174,7 +174,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     instance.cash_plan.save()
 
 
-class PaymentVerification(TimeStampedUUIDModel):
+class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_PENDING = "PENDING"
     STATUS_RECEIVED = "RECEIVED"
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"

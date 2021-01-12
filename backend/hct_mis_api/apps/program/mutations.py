@@ -86,7 +86,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def mutate(cls, root, info, program_data, version):
+    def mutate(cls, root, info, program_data, version, **kwargs):
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)

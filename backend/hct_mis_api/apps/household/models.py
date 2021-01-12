@@ -16,7 +16,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from core.currencies import CURRENCY_CHOICES
-from utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
+from utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 BLANK = ""
 IDP = "IDP"
@@ -208,7 +208,7 @@ REGISTRATION_METHOD_CHOICES = (
 )
 
 
-class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
@@ -379,7 +379,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)

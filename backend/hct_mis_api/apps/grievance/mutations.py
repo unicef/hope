@@ -10,7 +10,7 @@ from account.permissions import PermissionMutation, Permissions
 from core.models import BusinessArea
 from core.permissions import is_authenticated
 from core.schema import BusinessAreaNode
-from core.utils import decode_id_string, to_snake_case
+from core.utils import decode_id_string, to_snake_case, check_concurrency_version_in_mutation
 from grievance.models import GrievanceTicket, TicketNote
 from grievance.mutations_extras.data_change import (
     save_data_change_extras,
@@ -35,6 +35,7 @@ from grievance.schema import GrievanceTicketNode, TicketNoteNode
 from grievance.validators import DataChangeValidator
 from household.models import Household, Individual, HEAD, ROLE_ALTERNATE, ROLE_PRIMARY, IndividualRoleInHousehold
 from household.schema import HouseholdNode, IndividualNode
+from core.scalars import BigInt
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -258,6 +259,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
     class Arguments:
         input = UpdateGrievanceTicketInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -265,6 +267,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
     def mutate(cls, root, info, input, **kwargs):
         arg = lambda name, default=None: input.get(name, default)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
+        check_concurrency_version_in_mutation(kwargs.get('version'), grievance_ticket)
         business_area = grievance_ticket.business_area
         cls.has_creator_or_owner_permission(
             info,
@@ -438,6 +441,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID)
         status = graphene.Int()
+        version = BigInt(required=False)
 
     @classmethod
     def get_close_function(cls, category, issue_type):
@@ -452,8 +456,9 @@ class GrievanceStatusChangeMutation(PermissionMutation):
     def mutate(cls, root, info, grievance_ticket_id, status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
-        # if grievance_ticket.status == status:
-        #     return cls(grievance_ticket)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
+        if grievance_ticket.status == status:
+            return cls(grievance_ticket)
 
         if cls.MOVE_TO_STATUS_PERMISSION_MAPPING.get(status):
             permissions_to_use = None
@@ -498,6 +503,7 @@ class CreateTicketNoteMutation(PermissionMutation):
 
     class Arguments:
         note_input = CreateTicketNoteInput(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -505,6 +511,7 @@ class CreateTicketNoteMutation(PermissionMutation):
     def mutate(cls, root, info, note_input, **kwargs):
         grievance_ticket_id = decode_id_string(note_input["ticket"])
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,
@@ -536,6 +543,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         approved_documents_to_create = graphene.List(graphene.Int)
         approved_documents_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -553,6 +561,7 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
     ):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,
@@ -608,6 +617,7 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
         """
         household_approve_data = graphene.JSONString()
         flex_fields_approve_data = graphene.JSONString()
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -615,6 +625,7 @@ class HouseholdDataChangeApproveMutation(DataChangeValidator, PermissionMutation
     def mutate(cls, root, info, grievance_ticket_id, household_approve_data, flex_fields_approve_data, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,
@@ -656,6 +667,7 @@ class SimpleApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         approve_status = graphene.Boolean(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -663,6 +675,7 @@ class SimpleApproveMutation(PermissionMutation):
     def mutate(cls, root, info, grievance_ticket_id, approve_status, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         if grievance_ticket.category in [
             GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
@@ -701,8 +714,11 @@ class ReassignRoleMutation(graphene.Mutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         household_id = graphene.Argument(graphene.ID, required=True)
+        household_version = BigInt(required=False)
         individual_id = graphene.Argument(graphene.ID, required=True)
+        individual_version = BigInt(required=False)
         role = graphene.String(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def verify_role_choices(cls, role):
@@ -736,8 +752,11 @@ class ReassignRoleMutation(graphene.Mutation):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
 
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         household = get_object_or_404(Household, id=decoded_household_id)
+        check_concurrency_version_in_mutation(kwargs.get("household_version"), household)
         individual = get_object_or_404(Individual, id=decoded_individual_id)
+        check_concurrency_version_in_mutation(kwargs.get("individual_version"), individual)
 
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
@@ -772,6 +791,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
         selected_individual_id = graphene.Argument(graphene.ID, required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -779,6 +799,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
     def mutate(cls, root, info, grievance_ticket_id, selected_individual_id, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         cls.has_creator_or_owner_permission(
             info,
             grievance_ticket.business_area,

@@ -156,7 +156,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
-        check_concurrency_version_in_mutation(input.get('version'), target_population)
+        check_concurrency_version_in_mutation(kwargs.get('version'), target_population)
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
@@ -291,6 +291,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
 
     class Input:
         target_population_data = CopyTargetPopulationInput()
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -301,6 +302,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         name = target_population_data.pop("name")
         target_id = utils.decode_id_string(target_population_data.pop("id"))
         target_population = TargetPopulation.objects.get(id=target_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
 
         cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
 
@@ -375,7 +377,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
-
+        check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
         cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
         encoded_steficon_rule_id = kwargs["steficon_rule_id"]
