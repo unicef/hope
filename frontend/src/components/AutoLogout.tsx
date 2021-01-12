@@ -4,7 +4,7 @@ import { AUTO_LOGOUT_MILLIS } from '../config';
 
 export const AutoLogout = (): React.ReactElement => {
   const idleTimer = useRef(null);
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [bc, setBc] = useState(
     () => new BroadcastChannel('auto-logout-channel'),
   );

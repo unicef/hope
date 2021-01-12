@@ -421,8 +421,9 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def _get_duplicated_individuals(cls, registration_data_import):
-        individuals = Individual.objects.filter(registration_data_import=registration_data_import)
+    def _get_duplicated_individuals(cls, registration_data_import, individuals):
+        if individuals is None:
+            individuals = Individual.objects.filter(registration_data_import=registration_data_import)
         all_duplicates = []
         all_possible_duplicates = []
         all_original_individuals_ids_duplicates = []
@@ -454,15 +455,18 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_individuals(cls, registration_data_import):
-        cls.business_area = registration_data_import.business_area.slug
+    def deduplicate_individuals(cls, registration_data_import, individuals=None):
+        if not registration_data_import:
+            cls.business_area = individuals[0].business_area.slug
+        else:
+            cls.business_area = registration_data_import.business_area.slug
         (
             all_duplicates,
             all_possible_duplicates,
             all_original_individuals_ids_duplicates,
             all_original_individuals_ids_possible_duplicates,
             to_bulk_update_results,
-        ) = cls._get_duplicated_individuals(registration_data_import)
+        ) = cls._get_duplicated_individuals(registration_data_import, individuals)
         cls._mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results)
 
     @staticmethod
