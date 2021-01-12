@@ -19,21 +19,156 @@ class GenerateReportService:
             "deduplication_golden_record_results",  # {"duplicates": [], "possible_duplicates": []}
             "deduplication_golden_record_status",  # UNIQUE_IN_BATCH
             "disability",
-            "estimated_birth_date",
+            "estimated_birth_date",  # False
             "hearing_disability",
             "marital_status",  # MARRIED
             "memory_disability",
             "observed_disability",  # NONE
             "physical_disability",
-            "pregnant",
+            "pregnant",  # False
             "relationship",
-            "sanction_list_possible_match",
+            "sanction_list_possible_match",  # False
             "seeing_disability",
             "selfcare_disability",
             "sex",  # MALE
             "work_status",  # NOT_PROVIDED
             "role_in_household",  # PRIMARY
-        )
+        ),
+        Report.HOUSEHOLD_DEMOGRAPHICS: (
+            "unicef_id",  # HH-20-0000.0368
+            "country_origin",  # TM
+            "female_adults_count",  # 0
+            "female_adults_disabled_count",  # 0
+            "female_age_group_0_5_count",  # 0
+            "female_age_group_0_5_disabled_count",  # 0
+            "female_age_group_12_17_count",  # 0
+            "female_age_group_12_17_disabled_count",  # 0
+            "female_age_group_6_11_count",  # 0
+            "female_age_group_6_11_disabled_count",  # 0
+            "first_registration_date",  # 2020-08-25
+            "geopoint",
+            "last_registration_date",  # 2020-08-25
+            "male_adults_count",  # 0
+            "male_adults_disabled_count",  # 0
+            "male_age_group_0_5_count",  # 0
+            "male_age_group_0_5_disabled_count",  # 0
+            "male_age_group_12_17_count",  # 0
+            "male_age_group_12_17_disabled_count",  # 0
+            "male_age_group_6_11_count",  # 0
+            "male_age_group_6_11_disabed_count",  # 0
+            "org_name_enumerator",
+            "pregnant_count",
+            "residence_status",  # HOST
+            "returnee",  # False
+            "size",  # 4
+            "status",  # ACTIVE
+            "village",
+            "program_id",
+        ),
+        Report.CASH_PLAN_VERIFICATION: (
+            "activation_date",
+            "cash_plan_id",
+            "completion_date",
+            "not_received_count",
+            "received_count",
+            "received_with_problems_count",
+            "responded_count",
+            "sample_size",
+            "sampling",
+            "sex_filter",
+            "status",
+            "verification_method",
+        ),
+        Report.PAYMENTS: (
+            "ca_hash_id",
+            "ca_id",
+            "currency",
+            "delivered_quantity",
+            "delivery_date",
+            "delivery_type",
+            "distribution_modality",
+            "entitlement_quantity",
+            "status",
+            "target_population_cash_assist_id",
+            "admin_area",
+            "cash_plan_id",
+            "cash_or_voucher",
+        ),
+        Report.PAYMENT_VERIFICATION: (
+            "cash_plan_payment_verification_id",
+            "payment_record_id",
+            "received_amount",
+            "status",
+            "status_date",
+        ),
+        Report.CASH_PLAN: (
+            "assistance_measurement",
+            "assistance_through",
+            "business_area_id",
+            "ca_hash_id",
+            "delivery_type",
+            "dispersion_date",
+            "down_payment",
+            "end_date",
+            "funds_commitment",
+            "name",
+            "program_id",
+            "start_date",
+            "status",
+            "status_date",
+            "total_delivered_quantity",
+            "total_entitled_quantity",
+            "total_entitled_quantity_revised",
+            "total_persons_covered",
+            "total_persons_covered_revised",
+            "total_undelivered_quantity",
+            "validation_alerts_count",
+            "verification_status",
+            "vision_id",  # 54
+        ),
+        Report.PROGRAM: (
+            "administrative_areas_of_implementation",  # Test
+            "budget",  # 10000.00
+            "cash_plus",  # False
+            "description",  # Description goes here
+            "end_date",  # 2020-11-17
+            "frequency_of_payments",  # REGULAR
+            "id",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
+            "name",  # Programme 13/10/2020 04:43:28
+            "population_goal",  # 50
+            "scope",  # UNICEF
+            "sector",  # EDUCATION
+            "start_date",  # 2020-10-13
+            "status",  # ACTIVE
+            "total_number_of_households",  # Payment records with delivered amount  > 0 to distinct households
+        ),
+        Report.INDIVIDUALS_AND_PAYMENT: (
+            "household_unicef_id",  # HH-20-0000.0368
+            "household_country_origin",  # TM
+            "birth_date",  # 2000-06-24
+            "comms_disability",
+            "deduplication_batch_results",  # {"duplicates": [], "possible_duplicates": []}
+            "deduplication_golden_record_results",  # {"duplicates": [], "possible_duplicates": []}
+            "deduplication_golden_record_status",  # UNIQUE
+            "disability",
+            "estimated_birth_date",  # False
+            "hearing_disability",
+            "marital_status",
+            "memory_disability",
+            "observed_disability",  # NONE
+            "physical_disability",
+            "pregnant",  # False
+            "relationship",  # NON_BENEFICIARY
+            "sanction_list_possible_match",  # False
+            "seeing_disability",
+            "selfcare_disability",
+            "sex",  # Retrieving data. Wait a few seconds and try to cut or copy again.
+            "work_status",  # NOT_PROVIDED
+            "role",  # PRIMARY
+            "currency",
+            "delivered_quantity",  # Sum
+            "delivered_quantity_usd",
+        ),
     }
     FILTERS_SHEET = "Filters"
     TRUE_FALSE_MAPPING = {True: "YES", False: "NO"}
