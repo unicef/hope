@@ -652,13 +652,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors_dict, individuals_dict):
-        collectors_to_bulk_create = []
-        for hash_key, collectors_list in collectors_dict.items():
-            for collector in collectors_list:
-                collector.individual = individuals_dict.get(hash_key)
-                collectors_to_bulk_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
+    def _handle_collectors(collectors):
+        for collector in collectors:
+            print(collector.individual)
+            print(ImportedIndividual.objects.filter(id=collector.individual.id).exists())
+            print("LINE END")
+        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
@@ -681,7 +680,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create = []
         individuals_to_create = {}
         documents_and_identities_to_create = []
-        collectors_to_create = defaultdict(list)
+        collectors_to_create = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
@@ -723,29 +722,30 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
-                        if individual_obj.relationship == HEAD and only_collector_flag is False:
-                            head_of_households_mapping[household_obj] = individual_obj
-
-                        individual_obj.last_registration_date = individual_obj.first_registration_date
-                        individual_obj.registration_data_import = registration_data_import
 
                         duplicated_object = individuals_to_create.get(individual_obj.get_hash_key)
-                        if only_collector_flag is False:
-                            individuals_to_create[individual_obj.get_hash_key] = individual_obj
 
-                        individual_obj.household = household_obj if only_collector_flag is False else None
+                        if duplicated_object is not None and only_collector_flag is True:
+                            individual_obj = duplicated_object
+                        else:
+                            if individual_obj.relationship == HEAD and only_collector_flag is False:
+                                head_of_households_mapping[household_obj] = individual_obj
+
+                            individual_obj.last_registration_date = individual_obj.first_registration_date
+                            individual_obj.registration_data_import = registration_data_import
+                            individual_obj.household = household_obj if only_collector_flag is False else None
+
+                            individuals_to_create[individual_obj.get_hash_key] = individual_obj
+                            documents_and_identities_to_create.append(current_individual_docs_and_identities)
+                            current_individuals.append(individual_obj.get_hash_key)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
-                                individual=duplicated_object or individual_obj,
+                                individual=individual_obj,
                                 household_id=household_obj.pk,
                                 role=role,
                             )
-                            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
-
-                        if only_collector_flag is False:
-                            documents_and_identities_to_create.append(current_individual_docs_and_identities)
-                            current_individuals.append(individual_obj.get_hash_key)
+                            collectors_to_create.append(role_obj)
 
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
@@ -767,7 +767,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
-        self._handle_collectors(collectors_to_create, individuals_to_create)
+        self._handle_collectors(collectors_to_create)
         self._handle_documents_and_identities(
             documents_and_identities_to_create,
             individuals_to_create,
