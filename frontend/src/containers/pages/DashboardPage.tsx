@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Tabs, Tab, Button } from '@material-ui/core';
+import { Tabs, Tab } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
-import { DashboardYearPage } from './DashboardYearPage';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
+import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);

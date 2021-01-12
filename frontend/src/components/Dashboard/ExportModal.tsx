@@ -80,10 +80,9 @@ export const ExportModal = (): React.ReactElement => {
 
     setSelected(newSelected);
   };
-  const renderRows = () => {
+  const renderRows = (): Array<React.ReactElement> => {
     return data.map((el) => {
       const isItemSelected = isSelected(el.id);
-
       return (
         <TableRow key={el.id}>
           <TableCell align='left'>
