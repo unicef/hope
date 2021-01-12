@@ -20177,6 +20177,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Birth Date',
+                'labels': [
+                    {
+                        'label': 'Birth Date',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'birth_date',
+                'required': True,
+                'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                     {
                         'labelEn': 'None',
                         'labels': [
