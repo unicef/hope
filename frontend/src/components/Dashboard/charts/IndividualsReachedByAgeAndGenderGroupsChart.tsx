@@ -34,7 +34,7 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = (): React.ReactElemen
     ],
   };
   const options = {
-    cutoutPercentage: 65,
+    cutoutPercentage: 80,
     legend: {
       position: 'bottom',
     },
