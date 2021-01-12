@@ -24,7 +24,7 @@ export const VolumeByDeliveryMechanism = (): React.ReactElement => {
     ],
   };
   const options = {
-    cutoutPercentage: 65,
+    cutoutPercentage: 80,
     legend: {
       position: 'bottom',
     },
