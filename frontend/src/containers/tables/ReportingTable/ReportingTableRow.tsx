@@ -5,19 +5,31 @@ import React from 'react';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
-import { Missing } from '../../../components/Missing';
+import { UniversalMoment } from '../../../components/UniversalMoment';
+import { reportStatusToColor } from '../../../utils/utils';
+import { GetApp } from '@material-ui/icons';
 
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
-export const ReportingTableRow = ({ report }) => {
+const UnderlinedTableCell = styled(TableCell)`
+  text-decoration: underline;
+`;
+const DownloadTableCell = styled(TableCell)`
+  span {
+    display: flex;
+    justify-content: center;
+  }
+`;
+export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
     const path = `/${businessArea}/reporting/${report.id}`;
     history.push(path);
   };
+
   return (
     <ClickableTableRow
       hover
@@ -25,30 +37,38 @@ export const ReportingTableRow = ({ report }) => {
       role='checkbox'
       key={report.id}
     >
+      <UnderlinedTableCell align='left'>
+        {typeChoices[report.reportType]}
+      </UnderlinedTableCell>
       <TableCell align='left'>
-        <Missing />
+        <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
+        <UniversalMoment>{report.dateTo}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <Missing />
-      </TableCell>
-      <TableCell align='left'>
-        <Missing />
-        {/* <StatusContainer>
+        <StatusContainer>
           <StatusBox
-            status={paymentRecord.status}
-            statusToColor={paymentRecordStatusToColor}
+            status={statusChoices[report.status]}
+            statusToColor={reportStatusToColor}
           />
-        </StatusContainer> */}
+        </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        <Missing />
+        <UniversalMoment>{report.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <Missing />
+        {report.createdBy.firstName} {report.createdBy.lastName}
       </TableCell>
-      <TableCell align='left'>
-        <Missing />
-      </TableCell>
+      <DownloadTableCell
+        align='left'
+        onClick={report.fileUrl ? () => window.open(report.fileUrl) : undefined}
+      >
+        {report.fileUrl && (
+          <span>
+            <GetApp />
+            DOWNLOAD
+          </span>
+        )}
+      </DownloadTableCell>
     </ClickableTableRow>
   );
 };

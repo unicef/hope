@@ -35,6 +35,7 @@ import { VerificationRecordDetailsPage } from './pages/VerificationRecordDetails
 import { UsersList } from './pages/UsersList';
 import { ReportingPage } from './pages/ReportingPage';
 import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
+import { ActivityLogPage } from './pages/MainActivityLogPage';
 
 const Root = styled.div`
   display: flex;
@@ -302,6 +303,9 @@ export function HomeRouter(): React.ReactElement {
             >
               <UsersList />
             </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/activity-log'>
+            <ActivityLogPage />
           </Route>
           <Route path='/:businessArea'>
             <Sentry.ErrorBoundary
