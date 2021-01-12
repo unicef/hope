@@ -6,6 +6,7 @@ from openpyxl.utils import get_column_letter
 from tempfile import NamedTemporaryFile
 from reporting.models import Report
 from household.models import Individual, Household
+from program.models import CashPlanPaymentVerification
 
 
 class GenerateReportService:
@@ -208,10 +209,10 @@ class GenerateReportService:
         return total
 
     def _stringify_all_values(self, row):
-        str_row = ()
+        str_row = []
         for value in row:
-            str_row.append(str(value))
-        return str_row
+            str_row.append(str(value if value is not None else ""))
+        return tuple(str_row)
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -246,6 +247,7 @@ class GenerateReportService:
         report_rows_methods = {
             Report.INDIVIDUALS: (self._get_individuals, self._format_individual_row),
             Report.HOUSEHOLD_DEMOGRAPHICS: (self._get_households, self._format_household_row),
+            Report.CASH_PLAN_VERIFICATION: (self._get_cash_plan_verifications, self._format_cash_plan_verification_row),
         }
         type_methods = report_rows_methods[self.report_type]
         all_instances = type_methods[0]()
@@ -270,7 +272,7 @@ class GenerateReportService:
             self.filter_vars["household__admin_area"] = self.report.admin_area
         return Individual.objects.filter(**self.filter_vars)
 
-    def _format_individual_row(self, individual):
+    def _format_individual_row(self, individual: Individual):
 
         return (
             individual.household.admin_area.id if individual.household and individual.household.admin_area else "",
@@ -290,7 +292,7 @@ class GenerateReportService:
             individual.memory_disability,
             individual.observed_disability,
             individual.physical_disability,
-            individual.pregnant if individual.pregnant is not None else "",
+            individual.pregnant,
             individual.relationship,
             individual.sanction_list_possible_match,
             individual.seeing_disability,
@@ -308,7 +310,7 @@ class GenerateReportService:
             self.filter_vars["admin_area"] = self.report.admin_area
         return Household.objects.filter(**self.filter_vars)
 
-    def _format_household_row(self, household):
+    def _format_household_row(self, household: Household):
         return (
             household.admin_area.id if household.admin_area else "",
             household.business_area.id,
@@ -340,11 +342,34 @@ class GenerateReportService:
             household.org_name_enumerator,
             household.pregnant_count,
             household.residence_status,
-            household.returnee if household.returnee is not None else "",
+            household.returnee,
             household.size,
             household.status,
             household.village,
             self._to_values_list(household.programs.all(), "id"),
+        )
+
+    def _get_cash_plan_verifications(self):
+        self.filter_vars["cash_plan__business_area"] = self.business_area
+        if self.report.program:
+            self.filter_vars["cash_plan__program"] = self.report.program
+        return CashPlanPaymentVerification.objects.filter(**self.filter_vars)
+
+    def _format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification):
+        return (
+            verification.cash_plan.program.name,
+            verification.activation_date,
+            verification.cash_plan.id,
+            verification.completion_date,
+            verification.not_received_count,
+            verification.received_count,
+            verification.received_with_problems_count,
+            verification.responded_count,
+            verification.sample_size,
+            verification.sampling,
+            verification.sex_filter,
+            verification.status,
+            verification.verification_method,
         )
 
     # def _add_data_validation(self):
@@ -373,7 +398,7 @@ class GenerateReportService:
                 )
                 self.report.status = Report.COMPLETED
         except Exception as e:
-            print("FAILED", e)
+            print("ERROR", e)
             self.report.status = Report.FAILED
         self.report.save()
 
