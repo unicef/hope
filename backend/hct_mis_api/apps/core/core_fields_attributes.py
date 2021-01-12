@@ -52,12 +52,7 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 
-FILTERABLE_TYPES = [
-    TYPE_INTEGER,
-    TYPE_STRING,
-    TYPE_SELECT_ONE,
-    TYPE_SELECT_MANY,
-]
+FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE]
 
 
 def country_generic_query(comparision_method, args, lookup):
@@ -1396,6 +1391,6 @@ def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
 
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
 
-CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES, {})
+CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()

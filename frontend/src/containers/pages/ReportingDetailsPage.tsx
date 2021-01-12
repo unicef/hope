@@ -61,7 +61,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   if (loading || choicesLoading) return <LoadingComponent />;
   if (!data || !choicesData) return null;
 
-  const report = data.report as ReportNode;
+  const { report } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

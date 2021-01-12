@@ -22,7 +22,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
+from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
 from core.extended_connection import ExtendedConnection
 from core.kobo.api import KoboAPI
 from core.kobo.common import reduce_assets_list, reduce_asset
@@ -242,6 +242,7 @@ def get_fields_attr_generators(flex_field):
         yield from FlexibleAttribute.objects.order_by("name").all()
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
+        yield from XLSX_ONLY_FIELDS
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
