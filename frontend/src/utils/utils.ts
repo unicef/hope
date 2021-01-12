@@ -214,6 +214,20 @@ export function grievanceTicketStatusToColor(
   }
 }
 
+export function reportStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Generated':
+      return theme.hctPalette.green;
+    case 'Processing':
+      return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('AUTHENTICATED'));
 }
