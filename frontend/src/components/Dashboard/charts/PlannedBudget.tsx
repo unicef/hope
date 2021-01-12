@@ -101,20 +101,20 @@ export const PlannedBudget = (): React.ReactElement => {
         },
       ],
     },
-    annotation: {
-      annotations: [
-        {
-          drawTime: 'afterDatasetsDraw',
-          id: 'hline',
-          type: 'line',
-          mode: 'horizontal',
-          scaleID: 'y-axis-0',
-          value: 900000,
-          borderColor: '#5A5A5A',
-          borderWidth: 4,
-        },
-      ],
-    },
+    // annotation: {
+    //   annotations: [
+    //     {
+    //       drawTime: 'afterDatasetsDraw',
+    //       id: 'hline',
+    //       type: 'line',
+    //       mode: 'horizontal',
+    //       scaleID: 'y-axis-0',
+    //       value: 1500000,
+    //       borderColor: '#5A5A5A',
+    //       borderWidth: 4,
+    //     },
+    //   ],
+    // },
   };
 
   return <Bar data={data} options={options} plugins={ChartAnnotation} />;
