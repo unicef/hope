@@ -474,3 +474,65 @@ def to_snake_case(camel_case_string):
 
     snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
     return snake_case[0] + snake_case[1:].lower()
+
+
+def update_labels_mapping(csv_file):
+    """
+    WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
+
+    IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
+
+    csv_file: path to csv file, 2 columns needed (field name, english label)
+    """
+    import csv
+    import re
+    import json
+    from django.conf import settings
+    from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+
+    with open(csv_file, newline="") as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader, None)
+        fields_mapping = dict(reader)
+
+    labels_mapping = {
+        core_field_data["xlsx_field"]: {
+            "old": core_field_data["label"],
+            "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
+        }
+        for core_field_data in CORE_FIELDS_ATTRIBUTES
+        if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
+    }
+
+    file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
+    with open(file_path, "r") as f:
+        content = f.read()
+        new_content = content
+        for core_field, labels in labels_mapping.items():
+            old_label = (
+                json.dumps(labels["old"])
+                .replace("\\", r"\\")
+                .replace('"', r"\"")
+                .replace("(", r"\(")
+                .replace(")", r"\)")
+                .replace("[", r"\[")
+                .replace("]", r"\]")
+                .replace("?", r"\?")
+                .replace("*", r"\*")
+                .replace("$", r"\$")
+                .replace("^", r"\^")
+                .replace(".", r"\.")
+            )
+            new_label = json.dumps(labels["new"])
+            new_content = re.sub(
+                rf"(\"label\": )({old_label}),([\S\s]*?)(\"xlsx_field\": \"{core_field}\",)",
+                rf"\1{new_label},\3\4",
+                new_content,
+                flags=re.M,
+            )
+
+    with open(file_path, "r+") as f:
+        f.truncate(0)
+
+    with open(file_path, "w") as f:
+        print(new_content, file=f, end="")
