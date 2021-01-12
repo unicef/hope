@@ -17349,10 +17349,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': 'country origin',
                 'isFlexField': False,
-                'labelEn': 'Country origin',
+                'labelEn': 'Country of Origin',
                 'labels': [
                     {
-                        'label': 'Country origin',
+                        'label': 'Country of Origin',
                         'language': 'English(EN)'
                     }
                 ],
@@ -19806,10 +19806,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Country',
+                'labelEn': 'Country of registration',
                 'labels': [
                     {
-                        'label': 'Country',
+                        'label': 'Country of registration',
                         'language': 'English(EN)'
                     }
                 ],
@@ -19840,10 +19840,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Household resides in (Select administrative level 1)',
+                'labelEn': 'Household resides in which ${admin1_h_c}?',
                 'labels': [
                     {
-                        'label': 'Household resides in (Select administrative level 1)',
+                        'label': 'Household resides in which ${admin1_h_c}?',
                         'language': 'English(EN)'
                     }
                 ],
@@ -19857,10 +19857,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Household resides in (Select administrative level 2)',
+                'labelEn': 'Household resides in which ${admin2_h_c}?',
                 'labels': [
                     {
-                        'label': 'Household resides in (Select administrative level 2)',
+                        'label': 'Household resides in which ${admin2_h_c}?',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20058,10 +20058,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Relationship to Head of Household',
+                'labelEn': 'Relationship to head of household',
                 'labels': [
                     {
-                        'label': 'Relationship to Head of Household',
+                        'label': 'Relationship to head of household',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20075,10 +20075,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Full Name',
+                'labelEn': 'Full name',
                 'labels': [
                     {
-                        'label': 'Full Name',
+                        'label': 'Full name',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20092,10 +20092,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Given Name',
+                'labelEn': 'Given name',
                 'labels': [
                     {
-                        'label': 'Given Name',
+                        'label': 'Given name',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20109,10 +20109,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Middle Names',
+                'labelEn': 'Middle name(s)',
                 'labels': [
                     {
-                        'label': 'Middle Names',
+                        'label': 'Middle name(s)',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20126,10 +20126,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Family Name',
+                'labelEn': 'Family name',
                 'labels': [
                     {
-                        'label': 'Family Name',
+                        'label': 'Family name',
                         'language': 'English(EN)'
                     }
                 ],
@@ -20257,10 +20257,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Marital Status',
+                'labelEn': 'Marital status',
                 'labels': [
                     {
-                        'label': 'Marital Status',
+                        'label': 'Marital status',
                         'language': 'English(EN)'
                     }
                 ],
@@ -24496,10 +24496,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing country of birth certificate',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing country of birth certificate',
                         'language': 'English(EN)'
                     }
                 ],
@@ -26970,10 +26970,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': "Issuing country of driver's license",
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': "Issuing country of driver's license",
                         'language': 'English(EN)'
                     }
                 ],
@@ -29444,10 +29444,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing country of electoral card',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing country of electoral card',
                         'language': 'English(EN)'
                     }
                 ],
@@ -31918,10 +31918,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing entity of UNHCR ID',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing entity of UNHCR ID',
                         'language': 'English(EN)'
                     }
                 ],
@@ -34392,10 +34392,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing country of national passport',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing country of national passport',
                         'language': 'English(EN)'
                     }
                 ],
@@ -36866,10 +36866,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing country of national ID',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing country of national ID',
                         'language': 'English(EN)'
                     }
                 ],
@@ -39340,10 +39340,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing entity of SCOPE ID',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing entity of SCOPE ID',
                         'language': 'English(EN)'
                     }
                 ],
@@ -39374,10 +39374,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'ID number',
+                'labelEn': 'Other ID number',
                 'labels': [
                     {
-                        'label': 'ID number',
+                        'label': 'Other ID number',
                         'language': 'English(EN)'
                     }
                 ],
@@ -41831,10 +41831,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Issuing country',
+                'labelEn': 'Issuing country of other ID',
                 'labels': [
                     {
-                        'label': 'Issuing country',
+                        'label': 'Issuing country of other ID',
                         'language': 'English(EN)'
                     }
                 ],
@@ -41848,10 +41848,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'How many pregnant women are there in the Household?',
+                'labelEn': '',
                 'labels': [
                     {
-                        'label': 'How many pregnant women are there in the Household?',
+                        'label': '',
                         'language': 'English(EN)'
                     }
                 ],
@@ -41950,10 +41950,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Pregnant females',
+                'labelEn': '',
                 'labels': [
                     {
-                        'label': 'Pregnant females',
+                        'label': '',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42052,10 +42052,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Female members with Disability age 0-5',
+                'labelEn': 'Females age 0-5 with disability',
                 'labels': [
                     {
-                        'label': 'Female members with Disability age 0-5',
+                        'label': 'Females age 0-5 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42069,10 +42069,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Female members with Disability age 6-11',
+                'labelEn': 'Females age 6-11 with disability',
                 'labels': [
                     {
-                        'label': 'Female members with Disability age 6-11',
+                        'label': 'Females age 6-11 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42086,10 +42086,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Female members with Disability age 12-17',
+                'labelEn': 'Females age 12-17 with disability',
                 'labels': [
                     {
-                        'label': 'Female members with Disability age 12-17',
+                        'label': 'Females age 12-17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42103,10 +42103,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Female members with Disability age 18-59',
+                'labelEn': 'Females Age 18-59 with disability',
                 'labels': [
                     {
-                        'label': 'Female members with Disability age 18-59',
+                        'label': 'Females Age 18-59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42137,10 +42137,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Male members with Disability age 0-5',
+                'labelEn': 'Males age 0-5 with disability',
                 'labels': [
                     {
-                        'label': 'Male members with Disability age 0-5',
+                        'label': 'Males age 0-5 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42154,10 +42154,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Male members with Disability age 6-11',
+                'labelEn': 'Males age 6-11 with disability',
                 'labels': [
                     {
-                        'label': 'Male members with Disability age 6-11',
+                        'label': 'Males age 6-11 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42171,10 +42171,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Male members with Disability age 12-17',
+                'labelEn': 'Males age 12-17 with disability',
                 'labels': [
                     {
-                        'label': 'Male members with Disability age 12-17',
+                        'label': 'Males age 12-17 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42188,10 +42188,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Male members with Disability age 18-59',
+                'labelEn': 'Males Age 18-59 with disability',
                 'labels': [
                     {
-                        'label': 'Male members with Disability age 18-59',
+                        'label': 'Males Age 18-59 with disability',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42252,10 +42252,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Does the individual work?',
+                'labelEn': 'Does the individual have paid employment in the curent month?',
                 'labels': [
                     {
-                        'label': 'Does the individual work?',
+                        'label': 'Does the individual have paid employment in the curent month?',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42897,10 +42897,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': 'Who answers this alternative phone?',
+                'labelEn': 'Who answers this phone?',
                 'labels': [
                     {
-                        'label': 'Who answers this alternative phone?',
+                        'label': 'Who answers this phone?',
                         'language': 'English(EN)'
                     }
                 ],
