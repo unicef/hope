@@ -117,6 +117,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         registration_data_import_datahub_id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def validate_object_status(cls, rdi_obj, *args, **kwargs):
@@ -127,9 +128,9 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, registration_data_import_datahub_id):
+    def mutate(cls, root, info, registration_data_import_datahub_id, **kwargs):
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
-
+        check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
         cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
 
         cls.validate(rdi_obj=rdi_obj)
@@ -190,12 +191,12 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, id, version):
+    def mutate(cls, root, info, id, **kwargs):
         decode_id = decode_id_string(id)
         obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
         )
-        check_concurrency_version_in_mutation(version, obj_hct)
+        check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 
