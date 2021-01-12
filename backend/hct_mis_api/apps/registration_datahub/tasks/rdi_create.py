@@ -605,7 +605,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities, individual_dict):
+    def _handle_documents_and_identities(self, documents_and_identities):
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -615,6 +615,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
+                if ImportedIndividual.objects.filter(id=data["individual"].id).exists() is False:
+                    continue
+
                 is_identity = document_name in identity_fields
 
                 if is_identity:
@@ -624,7 +627,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     identities.append(
                         ImportedIndividualIdentity(
                             agency=agency,
-                            individual=individual_dict.get(data["individual"].get_hash_key),
+                            individual=data["individual"],
                             document_number=data["number"],
                         )
                     )
@@ -634,7 +637,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     country = Country(data["issuing_country"])
                     if label is None:
                         label = data["name"]
-                    (document_type, is_created,) = ImportedDocumentType.objects.get_or_create(
+                    document_type = ImportedDocumentType.objects.get(
                         country=country,
                         label=label,
                         type=type_name,
@@ -652,12 +655,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedIndividualIdentity.objects.bulk_create(identities)
 
     @staticmethod
-    def _handle_collectors(collectors):
-        for collector in collectors:
-            print(collector.individual)
-            print(ImportedIndividual.objects.filter(id=collector.individual.id).exists())
-            print("LINE END")
-        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors)
+    def _handle_collectors(collectors_dict, individuals_dict):
+        collectors_to_bulk_create = []
+        for hash_key, collectors_list in collectors_dict.items():
+            for collector in collectors_list:
+                collector.individual = individuals_dict.get(hash_key)
+                collectors_to_bulk_create.append(collector)
+        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
@@ -680,7 +684,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         households_to_create = []
         individuals_to_create = {}
         documents_and_identities_to_create = []
-        collectors_to_create = []
+        collectors_to_create = defaultdict(list)
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
@@ -736,8 +740,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             individual_obj.household = household_obj if only_collector_flag is False else None
 
                             individuals_to_create[individual_obj.get_hash_key] = individual_obj
-                            documents_and_identities_to_create.append(current_individual_docs_and_identities)
                             current_individuals.append(individual_obj.get_hash_key)
+                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
@@ -745,7 +749,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 household_id=household_obj.pk,
                                 role=role,
                             )
-                            collectors_to_create.append(role_obj)
+                            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
@@ -767,11 +771,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
-        self._handle_collectors(collectors_to_create)
-        self._handle_documents_and_identities(
-            documents_and_identities_to_create,
-            individuals_to_create,
-        )
+        self._handle_collectors(collectors_to_create, individuals_to_create)
+        self._handle_documents_and_identities(documents_and_identities_to_create)
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
