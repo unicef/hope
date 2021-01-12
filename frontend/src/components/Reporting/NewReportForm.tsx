@@ -13,13 +13,18 @@ import styled from 'styled-components';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-// import { useSnackbar } from '../../hooks/useSnackBar';
+import { useSnackbar } from '../../hooks/useSnackBar';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { useAllProgramsQuery } from '../../__generated__/graphql';
+import {
+  useAllProgramsQuery,
+  useCreateReportMutation,
+  useReportChoiceDataQuery,
+} from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -34,7 +39,7 @@ const DialogFooter = styled.div`
 
 export const NewReportForm = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  // const { showMessage } = useSnackbar();
+  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const {
     data: allProgramsData,
@@ -42,7 +47,13 @@ export const NewReportForm = (): React.ReactElement => {
   } = useAllProgramsQuery({
     variables: { businessArea, status: ['ACTIVE'] },
   });
-  if (loadingPrograms) return <LoadingComponent />;
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useReportChoiceDataQuery();
+  const [mutate] = useCreateReportMutation();
+
+  if (loadingPrograms || choicesLoading) return <LoadingComponent />;
   const allProgramsEdges = get(allProgramsData, 'allPrograms.edges', []);
   const mappedPrograms = allProgramsEdges.map((edge) => ({
     name: edge.node.name,
@@ -52,10 +63,35 @@ export const NewReportForm = (): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const initialValue: { [key: string]: any } = {
     reportType: '',
-    startDate: '',
-    endDate: '',
-    admin2: '',
-    programme: '',
+    dateFrom: '',
+    dateTo: '',
+    adminArea: '',
+    program: '',
+    country: '',
+  };
+
+  const submitFormHandler = async (values): Promise<void> => {
+    console.log(values);
+    const response = await mutate({
+      variables: {
+        reportData: {
+          ...values,
+          businessAreaSlug: businessArea,
+        },
+      },
+      refetchQueries: () => [
+        { query: ALL_REPORTS_QUERY, variables: { businessArea } },
+      ],
+    });
+    console.log(response);
+    if (!response.errors && response.data.createReport) {
+      showMessage('Report created.', {
+        pathname: `/${businessArea}/reporting/${response.data.createReport.report.id}`,
+        historyMethod: 'push',
+      });
+    } else {
+      showMessage('Report create action failed.');
+    }
   };
   return (
     <>
@@ -76,14 +112,14 @@ export const NewReportForm = (): React.ReactElement => {
               ...props,
               ref,
             }}
-            data-cy='dialog-setup-new-programme'
+            data-cy='dialog-setup-new-report'
           />
         ))}
         aria-labelledby='form-dialog-title'
       >
         <Formik
           initialValues={initialValue}
-          onSubmit={() => null}
+          onSubmit={submitFormHandler}
           // validationSchema={validationSchema}
         >
           {({ submitForm, values }) => (
@@ -103,7 +139,7 @@ export const NewReportForm = (): React.ReactElement => {
                         fullWidth
                         variant='outlined'
                         required
-                        choices={[]}
+                        choices={choicesData.reportTypesChoices}
                         component={FormikSelectField}
                       />
                     </Grid>
@@ -111,7 +147,7 @@ export const NewReportForm = (): React.ReactElement => {
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
                           <Field
-                            name='startDate'
+                            name='dateFrom'
                             label='Start Date'
                             component={FormikDateField}
                             required
@@ -123,30 +159,30 @@ export const NewReportForm = (): React.ReactElement => {
                         </Grid>
                         <Grid item xs={6}>
                           <Field
-                            name='endDate'
+                            name='dateTo'
                             label='End Date'
                             component={FormikDateField}
                             required
-                            disabled={!values.startDate}
-                            initialFocusedDate={values.startDate}
+                            disabled={!values.dateFrom}
+                            initialFocusedDate={values.dateFrom}
                             fullWidth
                             decoratorEnd={
                               <CalendarTodayRoundedIcon color='disabled' />
                             }
-                            minDate={values.startDate}
+                            minDate={values.dateFrom}
                           />
                         </Grid>
                       </Grid>
                     </Grid>
                     <Grid item xs={12}>
                       <Field
-                        name='admin2'
+                        name='adminArea'
                         label='Administrative Level 2'
                         variant='outlined'
                         component={FormikAdminAreaAutocomplete}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    {/* <Grid item xs={12}>
                       <Field
                         name='program'
                         label='Programme'
@@ -155,6 +191,16 @@ export const NewReportForm = (): React.ReactElement => {
                         required
                         choices={mappedPrograms}
                         component={FormikSelectField}
+                      />
+                    </Grid> */}
+                    <Grid item xs={12}>
+                      <Field
+                        name='country'
+                        fullWidth
+                        variant='outlined'
+                        label='Country'
+                        component={FormikSelectField}
+                        choices={choicesData.countriesChoices}
                       />
                     </Grid>
                   </Grid>

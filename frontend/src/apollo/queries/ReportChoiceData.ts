@@ -10,5 +10,9 @@ export const ReportChoiceData = gql`
       name
       value
     }
+    countriesChoices {
+      name
+      value
+    }
   }
 `;

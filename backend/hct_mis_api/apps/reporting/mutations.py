@@ -12,7 +12,7 @@ from reporting.models import Report
 from program.models import Program
 
 
-class CreateReportMutationInput(graphene.InputObjectType):
+class CreateReportInput(graphene.InputObjectType):
     report_type = graphene.Int(required=True)
     business_area_slug = graphene.String(required=True)
     date_from = graphene.Date(required=True)
@@ -22,48 +22,48 @@ class CreateReportMutationInput(graphene.InputObjectType):
     country = graphene.String()
 
 
-class CreateReportMutation(PermissionMutation):
-    new_report = graphene.Field(ReportNode)
+class CreateReport(PermissionMutation):
+    report = graphene.Field(ReportNode)
 
     class Arguments:
-        create_report_data = CreateReportMutationInput(required=True)
+        report_data = CreateReportInput(required=True)
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, create_report_data):
+    def mutate(cls, root, info, report_data):
         # do some basic validation for timeframe and report_type matching filter args
-        business_area = BusinessArea.objects.get(slug=create_report_data.pop("business_area_slug"))
-
+        business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
+        print("IN MUTATION")
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
 
         report_vars = {
             "business_area": business_area,
             "created_by": info.context.user,
             "status": Report.IN_PROGRESS,
-            "report_type": create_report_data["report_type"],
-            "date_from": create_report_data["date_from"],
-            "date_to": create_report_data["date_to"],
+            "report_type": report_data["report_type"],
+            "date_from": report_data["date_from"],
+            "date_to": report_data["date_to"],
         }
-        if create_report_data.get("admin_area"):
-            admin_area_id = decode_id_string(create_report_data["admin_area"])
+        if report_data.get("admin_area"):
+            admin_area_id = decode_id_string(report_data["admin_area"])
             admin_area = get_object_or_404(AdminArea, id=admin_area_id)
             report_vars["admin_area"] = admin_area
-        if create_report_data.get("program"):
-            program_id = decode_id_string(create_report_data["program"])
+        if report_data.get("program"):
+            program_id = decode_id_string(report_data["program"])
             program = get_object_or_404(Program, id=program_id)
             report_vars["program"] = program
-        if create_report_data.get("country"):
-            report_vars["country"] = create_report_data["country"]
+        if report_data.get("country"):
+            report_vars["country"] = report_data["country"]
 
         report = Report.objects.create(**report_vars)
-
+        print("REPORT", report)
         AirflowApi.start_dag(
             dag_id="ReportExport",
             context={"report_id": str(report.id)},
         )
 
-        return cls(report=report)
+        return CreateReport(report)
 
 
 class Mutations(graphene.ObjectType):
-    create_report = CreateReportMutation.Field()
+    create_report = CreateReport.Field()

@@ -34546,14 +34546,14 @@
             "description": null,
             "args": [
               {
-                "name": "createReportData",
+                "name": "reportData",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "CreateReportMutationInput",
+                    "name": "CreateReportInput",
                     "ofType": null
                   }
                 },
@@ -34562,7 +34562,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "CreateReportMutation",
+              "name": "CreateReport",
               "ofType": null
             },
             "isDeprecated": false,
@@ -35864,7 +35864,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "CreateReportMutationInput",
+        "name": "CreateReportInput",
         "description": null,
         "fields": null,
         "inputFields": [
@@ -35961,11 +35961,11 @@
       },
       {
         "kind": "OBJECT",
-        "name": "CreateReportMutation",
+        "name": "CreateReport",
         "description": null,
         "fields": [
           {
-            "name": "newReport",
+            "name": "report",
             "description": null,
             "args": [],
             "type": {

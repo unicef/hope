@@ -608,12 +608,12 @@ export type CreateProgramInput = {
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
 };
 
-export type CreateReportMutation = {
-   __typename?: 'CreateReportMutation',
-  newReport?: Maybe<ReportNode>,
+export type CreateReport = {
+   __typename?: 'CreateReport',
+  report?: Maybe<ReportNode>,
 };
 
-export type CreateReportMutationInput = {
+export type CreateReportInput = {
   reportType: Scalars['Int'],
   businessAreaSlug: Scalars['String'],
   dateFrom: Scalars['Date'],
@@ -2531,7 +2531,7 @@ export type MergeRegistrationDataImportMutation = {
 
 export type Mutations = {
    __typename?: 'Mutations',
-  createReport?: Maybe<CreateReportMutation>,
+  createReport?: Maybe<CreateReport>,
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
@@ -2574,7 +2574,7 @@ export type Mutations = {
 
 
 export type MutationsCreateReportArgs = {
-  createReportData: CreateReportMutationInput
+  reportData: CreateReportInput
 };
 
 
@@ -5553,6 +5553,32 @@ export type CreateProgramMutation = (
   )> }
 );
 
+export type CreateReportMutationVariables = {
+  reportData: CreateReportInput
+};
+
+
+export type CreateReportMutation = (
+  { __typename?: 'Mutations' }
+  & { createReport: Maybe<(
+    { __typename?: 'CreateReport' }
+    & { report: Maybe<(
+      { __typename?: 'ReportNode' }
+      & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
+      & { createdBy: (
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      ), adminArea: Maybe<(
+        { __typename?: 'AdminAreaNode' }
+        & Pick<AdminAreaNode, 'title'>
+      )>, program: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'name'>
+      )> }
+    )> }
+  )> }
+);
+
 export type CreateTpMutationVariables = {
   input: CreateTargetPopulationInput
 };
@@ -7089,6 +7115,9 @@ export type ReportChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, reportTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -8909,6 +8938,73 @@ export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.Mutation
 export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
 export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
 export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const CreateReportDocument = gql`
+    mutation CreateReport($reportData: CreateReportInput!) {
+  createReport(reportData: $reportData) {
+    report {
+      id
+      status
+      reportType
+      createdAt
+      dateFrom
+      dateTo
+      fileUrl
+      createdBy {
+        firstName
+        lastName
+      }
+      adminArea {
+        title
+      }
+      program {
+        name
+      }
+    }
+  }
+}
+    `;
+export type CreateReportMutationFn = ApolloReactCommon.MutationFunction<CreateReportMutation, CreateReportMutationVariables>;
+export type CreateReportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateReportMutation, CreateReportMutationVariables>, 'mutation'>;
+
+    export const CreateReportComponent = (props: CreateReportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateReportMutation, CreateReportMutationVariables> mutation={CreateReportDocument} {...props} />
+    );
+    
+export type CreateReportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateReportMutation, CreateReportMutationVariables> & TChildProps;
+export function withCreateReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateReportMutation,
+  CreateReportMutationVariables,
+  CreateReportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateReportMutation, CreateReportMutationVariables, CreateReportProps<TChildProps>>(CreateReportDocument, {
+      alias: 'createReport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateReportMutation__
+ *
+ * To run a mutation, you first call `useCreateReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createReportMutation, { data, loading, error }] = useCreateReportMutation({
+ *   variables: {
+ *      reportData: // value for 'reportData'
+ *   },
+ * });
+ */
+export function useCreateReportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateReportMutation, CreateReportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateReportMutation, CreateReportMutationVariables>(CreateReportDocument, baseOptions);
+      }
+export type CreateReportMutationHookResult = ReturnType<typeof useCreateReportMutation>;
+export type CreateReportMutationResult = ApolloReactCommon.MutationResult<CreateReportMutation>;
+export type CreateReportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateReportMutation, CreateReportMutationVariables>;
 export const CreateTpDocument = gql`
     mutation CreateTP($input: CreateTargetPopulationInput!) {
   createTargetPopulation(input: $input) {
@@ -12774,6 +12870,10 @@ export const ReportChoiceDataDocument = gql`
     name
     value
   }
+  countriesChoices {
+    name
+    value
+  }
 }
     `;
 export type ReportChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>, 'query'>;
@@ -14457,8 +14557,8 @@ export type ResolversTypes = {
   DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
   DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
   Mutations: ResolverTypeWrapper<{}>,
-  CreateReportMutationInput: CreateReportMutationInput,
-  CreateReportMutation: ResolverTypeWrapper<CreateReportMutation>,
+  CreateReportInput: CreateReportInput,
+  CreateReport: ResolverTypeWrapper<CreateReport>,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
   CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
   CategoryExtrasInput: CategoryExtrasInput,
@@ -14782,8 +14882,8 @@ export type ResolversParentTypes = {
   DjangoDebug: DjangoDebug,
   DjangoDebugSQL: DjangoDebugSql,
   Mutations: {},
-  CreateReportMutationInput: CreateReportMutationInput,
-  CreateReportMutation: CreateReportMutation,
+  CreateReportInput: CreateReportInput,
+  CreateReport: CreateReport,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
   CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
   CategoryExtrasInput: CategoryExtrasInput,
@@ -15102,8 +15202,8 @@ export type CreateProgramResolvers<ContextType = any, ParentType extends Resolve
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
-export type CreateReportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReportMutation'] = ResolversParentTypes['CreateReportMutation']> = {
-  newReport?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
+export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
+  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
 };
 
 export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
@@ -15760,7 +15860,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 };
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
-  createReport?: Resolver<Maybe<ResolversTypes['CreateReportMutation']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'createReportData'>>,
+  createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
@@ -16833,7 +16933,7 @@ export type Resolvers<ContextType = any> = {
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,
-  CreateReportMutation?: CreateReportMutationResolvers<ContextType>,
+  CreateReport?: CreateReportResolvers<ContextType>,
   CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
   CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>,
   Date?: GraphQLScalarType,
