@@ -11,6 +11,9 @@ from household.models import Individual
 class GenerateReportService:
     HEADERS = {
         Report.INDIVIDUALS: (
+            "admin_area_id",
+            "business_area_id",
+            "country",
             "document_id",  # 8e8ea94a-2ca5-4b76-b055-e098bc24eee8
             "household_country_origin",  # TM
             "birth_date",  # 2000-06-24
@@ -35,6 +38,9 @@ class GenerateReportService:
             "role_in_household",  # PRIMARY
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
+            "admin_area_id",
+            "business_area_id",
+            "country",
             "unicef_id",  # HH-20-0000.0368
             "country_origin",  # TM
             "female_adults_count",  # 0
@@ -66,6 +72,7 @@ class GenerateReportService:
             "program_id",
         ),
         Report.CASH_PLAN_VERIFICATION: (
+            "program_name",  # ?
             "activation_date",
             "cash_plan_id",
             "completion_date",
@@ -80,6 +87,7 @@ class GenerateReportService:
             "verification_method",
         ),
         Report.PAYMENTS: (
+            "business_area_id",
             "ca_hash_id",
             "ca_id",
             "currency",
@@ -95,6 +103,7 @@ class GenerateReportService:
             "cash_or_voucher",
         ),
         Report.PAYMENT_VERIFICATION: (
+            "business_area_id",
             "cash_plan_payment_verification_id",
             "payment_record_id",
             "received_amount",
@@ -127,6 +136,7 @@ class GenerateReportService:
             "vision_id",  # 54
         ),
         Report.PROGRAM: (
+            "business_area_id",
             "administrative_areas_of_implementation",  # Test
             "budget",  # 10000.00
             "cash_plus",  # False
@@ -143,6 +153,10 @@ class GenerateReportService:
             "total_number_of_households",  # Payment records with delivered amount  > 0 to distinct households
         ),
         Report.INDIVIDUALS_AND_PAYMENT: (
+            "admin_area_id",
+            "business_area_id",
+            "country",
+            "program_name",
             "household_unicef_id",  # HH-20-0000.0368
             "household_country_origin",  # TM
             "birth_date",  # 2000-06-24
@@ -231,6 +245,9 @@ class GenerateReportService:
     def _add_individual_row(self, individual):
 
         individual_row = (
+            str(individual.admin_area.id if individual.household else ""),
+            str(individual.business_area.id),
+            str(individual.household.country if individual.household else ""),
             self._to_values_list(individual.documents.all(), "id"),
             str(individual.household.country_origin if individual.household else ""),
             str(individual.birth_date),
