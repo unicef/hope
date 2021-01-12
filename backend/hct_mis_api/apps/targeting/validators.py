@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
+from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY, XLSX_ONLY_FIELDS
 from core.models import FlexibleAttribute
 from core.utils import get_attr_value
 from core.validators import BaseValidator
