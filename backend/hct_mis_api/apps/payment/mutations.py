@@ -12,7 +12,7 @@ from graphql import GraphQLError
 from account.permissions import PermissionMutation, Permissions
 from core.filters import filter_age
 from core.permissions import is_authenticated
-from core.utils import decode_id_string
+from core.utils import decode_id_string, check_concurrency_version_in_mutation
 from grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
 from household.models import Individual
 from payment.inputs import (
@@ -26,6 +26,7 @@ from payment.utils import get_number_of_samples, from_received_to_status, calcul
 from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
 from program.models import CashPlan
 from program.schema import CashPlanNode
+from core.scalars import BigInt
 
 
 class CreatePaymentVerificationMutation(PermissionMutation):
@@ -201,6 +202,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
 
     class Arguments:
         input = EditCashPlanPaymentVerificationInput(required=True)
+        version = BigInt(required=False)
 
     @staticmethod
     def verify_required_arguments(input, field_name, options):
@@ -254,6 +256,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cash_plan_payment_verification_id = decode_id_string(arg("cash_plan_payment_verification_id"))
 
         cash_plan_verification = get_object_or_404(CashPlanPaymentVerification, id=cash_plan_payment_verification_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cash_plan_verification)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_UPDATE, cash_plan_verification.business_area)
 
@@ -369,6 +372,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
 
     class Arguments:
         cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -376,6 +380,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cashplan_payment_verification.business_area)
 
@@ -411,6 +416,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
 
     class Arguments:
         cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def create_grievance_ticket_for_status(cls, cashplan_payment_verification, status):
@@ -442,6 +448,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
@@ -459,6 +466,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
 
     class Arguments:
         cash_plan_verification_id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -466,6 +474,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
 
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cashplan_payment_verification.business_area)
 
@@ -522,6 +531,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
                 [(x[0], x[0]) for x in PaymentVerification.STATUS_CHOICES],
             )
         )
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -536,6 +546,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         **kwargs,
     ):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         if (
             payment_verification.cash_plan_payment_verification.verification_method
             != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
@@ -586,6 +597,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         payment_verification_id = graphene.ID(required=True)
         received_amount = graphene.Decimal(required=True)
         received = graphene.Boolean(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
@@ -602,7 +614,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if math.isnan(received_amount):
             received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
-
+        check_concurrency_version_in_mutation(kwargs.get("version"), payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.cash_plan_payment_verification.verification_method
