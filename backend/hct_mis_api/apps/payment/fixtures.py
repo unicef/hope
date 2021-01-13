@@ -2,17 +2,17 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from core.models import BusinessArea
-from household.fixtures import HouseholdFactory
-from payment.models import (
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.payment.models import (
     PaymentRecord,
     ServiceProvider,
     CashPlanPaymentVerification,
     PaymentVerification,
 )
-from program.fixtures import CashPlanFactory
-from program.models import CashPlan
-from targeting.fixtures import TargetPopulationFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
+from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.targeting.fixtures import TargetPopulationFactory
 
 
 class ServiceProviderFactory(factory.DjangoModelFactory):

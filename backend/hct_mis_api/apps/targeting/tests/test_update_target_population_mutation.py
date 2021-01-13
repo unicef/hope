@@ -3,13 +3,13 @@ from parameterized import parameterized
 
 from django.core.management import call_command
 
-from targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
-from account.fixtures import UserFactory
-from account.permissions import Permissions
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from household.fixtures import create_household
-from household.models import Household
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.household.models import Household
 
 
 MUTATION_QUERY = """

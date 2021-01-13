@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 
 
 def set_business_areas(apps, schema_editor):

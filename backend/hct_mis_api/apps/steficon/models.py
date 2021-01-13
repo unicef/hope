@@ -2,8 +2,8 @@ from django.db import models
 
 
 # Create your models here.
-from steficon.interpreters import interpreters
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.steficon.interpreters import interpreters
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class Rule(TimeStampedUUIDModel):
