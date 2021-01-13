@@ -541,7 +541,6 @@ class TargetingCriteriaFilterMixin:
 
     def get_query_for_core_field(self):
         core_fields = self.get_core_fields()
-        print([x.get("name") for x in core_fields])
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
             raise ValidationError(
