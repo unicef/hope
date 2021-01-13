@@ -1,15 +1,15 @@
 import graphene
 from django.shortcuts import get_object_or_404
 
-from core.models import BusinessArea, AdminArea
-from core.permissions import is_authenticated
-from core.utils import decode_id_string
-from core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.airflow_api import AirflowApi
 
-from account.permissions import Permissions, PermissionMutation
-from reporting.schema import ReportNode
-from reporting.models import Report
-from program.models import Program
+from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.reporting.schema import ReportNode
+from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.program.models import Program
 
 
 class CreateReportInput(graphene.InputObjectType):
