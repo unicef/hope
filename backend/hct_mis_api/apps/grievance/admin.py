@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from grievance.models import (
+from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
     TicketComplaintDetails,

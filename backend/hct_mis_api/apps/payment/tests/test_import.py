@@ -6,25 +6,25 @@ from django.core.management import call_command
 from graphql import GraphQLError
 from openpyxl.writer.excel import save_virtual_workbook
 
-from account.fixtures import UserFactory
-from account.permissions import Permissions
-from core.models import BusinessArea, AdminArea
-from core.base_test_case import APITestCase
-from household.fixtures import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.household.fixtures import (
     create_household,
     EntitlementCardFactory,
 )
-from payment.fixtures import (
+from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
     PaymentVerificationFactory,
 )
-from payment.models import PaymentVerification
-from payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
-from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
-from program.fixtures import ProgramFactory, CashPlanFactory
-from registration_data.fixtures import RegistrationDataImportFactory
-from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
+from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
 class TestXlsxVerificationImport(APITestCase):

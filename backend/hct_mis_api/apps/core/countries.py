@@ -1,4 +1,4 @@
-from core.utils import CaseInsensitiveTuple
+from hct_mis_api.apps.core.utils import CaseInsensitiveTuple
 
 
 class Countries:

@@ -2,14 +2,14 @@ from django.db import transaction
 from django.db.models import Q, F, Prefetch
 from django.utils import timezone
 
-from core.utils import nested_getattr
-from household.models import (
+from hct_mis_api.apps.core.utils import nested_getattr
+from hct_mis_api.apps.household.models import (
     Individual,
     IndividualRoleInHousehold,
     Household,
 )
 from mis_datahub import models as dh_mis_models
-from targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
 
 
 class SendTPToDatahubTask:

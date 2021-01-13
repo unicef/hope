@@ -4,23 +4,23 @@ from unittest.mock import MagicMock, patch
 from django.core.management import call_command
 from django.test import TestCase
 
-from account.fixtures import UserFactory
-from core.models import BusinessArea, AdminArea
-from household.fixtures import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.household.fixtures import (
     create_household,
     EntitlementCardFactory,
 )
-from payment.fixtures import (
+from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
     PaymentVerificationFactory,
 )
-from payment.models import PaymentVerification, CashPlanPaymentVerification
-from payment.rapid_pro.api import RapidProAPI
-from payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
-from program.fixtures import ProgramFactory, CashPlanFactory
-from registration_data.fixtures import RegistrationDataImportFactory
-from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
+from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
 class TestRapidProVerificationTask(TestCase):
