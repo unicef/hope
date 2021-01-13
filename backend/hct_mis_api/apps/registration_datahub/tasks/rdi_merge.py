@@ -1,12 +1,12 @@
 from django.db import transaction
 from django.forms import model_to_dict
 
-from core.models import AdminArea
-from grievance.common import create_needs_adjudication_tickets
-from grievance.models import TicketNeedsAdjudicationDetails
-from household.documents import IndividualDocument
-from household.elasticsearch_utils import populate_index
-from household.models import (
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.elasticsearch_utils import populate_index
+from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     HEAD,
@@ -16,18 +16,18 @@ from household.models import (
     DUPLICATE,
     NEEDS_ADJUDICATION,
 )
-from household.models import Household
-from household.models import Individual
-from registration_data.models import RegistrationDataImport
-from registration_datahub.models import (
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
     KoboImportedSubmission,
 )
-from registration_datahub.tasks.deduplicate import DeduplicateTask
-from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
 
 
 class RdiMergeTask:

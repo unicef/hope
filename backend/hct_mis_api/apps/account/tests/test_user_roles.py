@@ -2,10 +2,10 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.forms.models import inlineformset_factory
 
-from account.models import IncompatibleRoles, Role, UserRole, User
-from account.admin import UserRoleAdminForm, UserRoleInlineFormSet
-from core.models import BusinessArea
-from account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole, User
+from hct_mis_api.apps.account.admin import UserRoleAdminForm, UserRoleInlineFormSet
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.account.fixtures import UserFactory
 
 
 class UserRolesTest(TestCase):

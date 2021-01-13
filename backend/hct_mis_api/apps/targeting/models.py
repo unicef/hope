@@ -17,16 +17,16 @@ from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 
-from core.core_fields_attributes import (
+from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     TYPE_SELECT_MANY,
     _HOUSEHOLD,
     XLSX_ONLY_FIELDS,
 )
-from core.models import FlexibleAttribute
-from household.models import Individual, Household, MALE, FEMALE
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1

@@ -5,37 +5,37 @@ from django.core.management import BaseCommand, call_command
 from django.db import transaction
 from django.db.models import Q
 
-from account.fixtures import UserFactory
+from hct_mis_api.apps.account.fixtures import UserFactory
 from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
-from cash_assist_datahub.models import Session, Programme
-from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
-from core.models import BusinessArea, AdminArea
-from grievance.fixtures import (
+from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     SensitiveGrievanceTicketWithoutExtrasFactory,
     GrievanceComplaintTicketWithoutExtrasFactory,
 )
-from household.elasticsearch_utils import rebuild_search_index
-from household.fixtures import (
+from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
     DocumentFactory,
     create_household_for_fixtures,
 )
-from household.models import DocumentType
-from payment.fixtures import (
+from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
     PaymentVerificationFactory,
 )
-from program.fixtures import CashPlanFactory, ProgramFactory
-from program.models import Program
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_data.models import RegistrationDataImport
-from registration_datahub.fixtures import (
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household,
 )
-from targeting.fixtures import (
+from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,

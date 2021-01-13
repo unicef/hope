@@ -5,9 +5,9 @@ from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from jinja2 import Environment
 
-from household.models import Household
-from steficon.score import Score
-from steficon.templatetags import engine
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.steficon.score import Score
+from hct_mis_api.apps.steficon.templatetags import engine
 
 
 class Interpreter:

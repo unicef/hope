@@ -3,7 +3,7 @@ from io import BytesIO
 
 import requests
 
-from core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class TokenNotProvided(Exception):
