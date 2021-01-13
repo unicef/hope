@@ -9,7 +9,7 @@ class RegistrationKoboImportOperator(DjangoOperator):
     """
 
     def execute(self, context):
-        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask
 
         dag_run = context["dag_run"]
         config_vars = dag_run.conf

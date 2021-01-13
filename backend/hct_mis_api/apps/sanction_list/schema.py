@@ -4,10 +4,10 @@ from django_filters import FilterSet
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from account.permissions import DjangoPermissionFilterConnectionField
-from core.extended_connection import ExtendedConnection
-from core.utils import CustomOrderingFilter
-from sanction_list.models import (
+from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.utils import CustomOrderingFilter
+from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,

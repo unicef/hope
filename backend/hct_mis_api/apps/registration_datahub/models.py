@@ -12,8 +12,8 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from core.currencies import CURRENCY_CHOICES
-from household.models import (
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DISABILITY_CHOICE,
@@ -32,7 +32,7 @@ from household.models import (
     REGISTRATION_METHOD_CHOICES,
     YES_NO_CHOICE,
 )
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 SIMILAR_IN_BATCH = "SIMILAR_IN_BATCH"
 DUPLICATE_IN_BATCH = "DUPLICATE_IN_BATCH"

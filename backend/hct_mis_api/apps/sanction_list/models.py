@@ -3,7 +3,7 @@ from auditlog.registry import auditlog
 from django.db import models
 from django_countries.fields import CountryField
 
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class SanctionListIndividualQuerySet(models.QuerySet):

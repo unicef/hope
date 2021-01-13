@@ -10,8 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import UUIDModel
 
-from account.permissions import Permissions
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 INVITED = "INVITED"
 ACTIVE = "ACTIVE"

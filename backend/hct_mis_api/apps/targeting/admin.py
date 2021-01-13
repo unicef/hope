@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
 
 
 @admin.register(TargetPopulation)

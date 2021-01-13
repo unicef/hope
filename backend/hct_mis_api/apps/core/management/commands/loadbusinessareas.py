@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 
 from django.core.management import BaseCommand
 
-from core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger(__name__)
 

@@ -14,7 +14,7 @@ from django.core import validators as django_core_validators
 from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
 
-from core.core_fields_attributes import (
+from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
     TYPE_SELECT_MANY,
@@ -23,13 +23,13 @@ from core.core_fields_attributes import (
     KOBO_ONLY_INDIVIDUAL_FIELDS,
     KOBO_ONLY_HOUSEHOLD_FIELDS,
 )
-from core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
-from core.models import BusinessArea
-from core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
-from core.validators import BaseValidator
-from household.models import ROLE_ALTERNATE, ROLE_PRIMARY
-from registration_datahub.models import KoboImportedSubmission
-from registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
+from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
+from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
+from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 
 class XLSXValidator(BaseValidator):

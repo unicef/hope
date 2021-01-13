@@ -5,9 +5,9 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from core.models import BusinessArea
-from account.fixtures import UserFactory
-from reporting.models import Report
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.reporting.models import Report
 
 
 class ReportFactory(factory.DjangoModelFactory):

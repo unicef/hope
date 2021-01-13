@@ -11,7 +11,7 @@ class TestXLSXValidatorsMethods(TestCase):
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
     def setUp(self) -> None:
-        from registration_datahub.validators import UploadXLSXValidator
+        from hct_mis_api.apps.registration_datahub.validators import UploadXLSXValidator
 
         self.UploadXLSXValidator = UploadXLSXValidator
 
@@ -306,19 +306,19 @@ class TestXLSXValidatorsMethods(TestCase):
 
     def test_required_validator(self):
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
+            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="tak", header="test")
             self.assertTrue(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
+            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": True}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="", header="test")
             self.assertFalse(result)
 
         with mock.patch.dict(
-            "registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": False}}, clear=True,
+            "hct_mis_api.apps.registration_datahub.validators.UploadXLSXValidator.ALL_FIELDS", {"test": {"required": False}}, clear=True,
         ):
             result = self.UploadXLSXValidator.required_validator(value="", header="test")
             self.assertTrue(result)
