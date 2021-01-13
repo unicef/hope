@@ -71,7 +71,6 @@ export const NewReportForm = (): React.ReactElement => {
   };
 
   const submitFormHandler = async (values): Promise<void> => {
-    console.log(values);
     const response = await mutate({
       variables: {
         reportData: {
@@ -84,7 +83,6 @@ export const NewReportForm = (): React.ReactElement => {
         { query: ALL_REPORTS_QUERY, variables: { businessArea } },
       ],
     });
-    console.log(response);
     if (!response.errors && response.data.createReport) {
       showMessage('Report created.', {
         pathname: `/${businessArea}/reporting/${response.data.createReport.report.id}`,

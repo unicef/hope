@@ -6,7 +6,6 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
-  ReportNode,
   useReportChoiceDataQuery,
   useReportQuery,
 } from '../../__generated__/graphql';
