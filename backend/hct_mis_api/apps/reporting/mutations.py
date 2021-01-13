@@ -9,6 +9,7 @@ from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.validators import ReportValidator
 from hct_mis_api.apps.program.models import Program
 
 
@@ -21,7 +22,7 @@ class CreateReportInput(graphene.InputObjectType):
     program = graphene.ID()
 
 
-class CreateReport(PermissionMutation):
+class CreateReport(ReportValidator, PermissionMutation):
     report = graphene.Field(ReportNode)
 
     class Arguments:
@@ -30,9 +31,12 @@ class CreateReport(PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, report_data):
-        # do some basic validation for timeframe and report_type matching filter args
         business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
         cls.has_permission(info, Permissions.REPORTING_EXPORT, business_area)
+
+        cls.validate(
+            start_date=report_data.get("date_from"), end_date=report_data.get("date_to"), report_data=report_data
+        )
 
         report_vars = {
             "business_area": business_area,
@@ -44,14 +48,18 @@ class CreateReport(PermissionMutation):
         }
         admin_areas = None
 
-        if report_data.get("program"):
-            program_id = decode_id_string(report_data["program"])
-            program = get_object_or_404(Program, id=program_id)
+        program_id = report_data.pop("program", None)
+        admin_area_ids = report_data.pop("admin_area", None)
+        if program_id:
+            program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
             report_vars["program"] = program
-        if report_data.get("admin_area"):
+
+        if admin_area_ids:
             admin_areas = [
-                get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
-                for admin_area_id in report_data["admin_area"]
+                get_object_or_404(
+                    AdminArea, id=decode_id_string(admin_area_id), admin_area_type__business_area=business_area
+                )
+                for admin_area_id in admin_area_ids
             ]
 
         report = Report.objects.create(**report_vars)
