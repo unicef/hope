@@ -37,6 +37,20 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
+// TODO: implement conditional form fields based on selected report type:
+// Report type and from date and to date are required fields always in the form
+// Based on selected report type, optional fields should appear:
+// (Admin area should be multi select field, others simple select)
+// 1: Individuals - admin area
+// 2: Households - admin area, country
+// 3: Cash Plan Verification - program
+// 4: Payments - admin area
+// 5: Payment Verification - program
+// 6: Cash Plan - program
+// 7: Programme - no extra fields
+// 8: Individuals & Payment - admin area, country, program
+// Be sure to only include a correct set of fields to mutation input
+
 export const NewReportForm = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
