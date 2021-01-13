@@ -5,9 +5,9 @@ from factory import fuzzy
 from faker import Faker
 from pytz import utc
 
-from account.fixtures import UserFactory
-from core.models import BusinessArea
-from registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 faker = Faker()
 

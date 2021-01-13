@@ -3,7 +3,7 @@ from datetime import datetime
 from django.http import HttpResponse
 from openpyxl.writer.excel import save_virtual_workbook
 
-from account.export_users_xlsx import ExportUsersXlsx
+from hct_mis_api.apps.account.export_users_xlsx import ExportUsersXlsx
 
 
 def download_exported_users(request, business_area_slug):

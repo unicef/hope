@@ -2,8 +2,8 @@ import requests
 from constance import config
 from django.conf import settings
 
-from core.models import BusinessArea
-from household.models import Individual
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.models import Individual
 
 
 class TokenNotProvided(Exception):

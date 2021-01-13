@@ -19,11 +19,11 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
-from core.models import AdminArea, AdminAreaType, BusinessArea
-from household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
-from registration_datahub.models import (
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaType, BusinessArea
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
+from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
     ImportedDocumentType,
@@ -54,7 +54,7 @@ class TestRdiCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -334,7 +334,7 @@ class TestRdiKoboCreateTask(TestCase):
     @classmethod
     def setUpTestData(cls):
         call_command("loadbusinessareas")
-        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask, RdiXlsxCreateTask
 
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
@@ -580,7 +580,7 @@ class TestRdiKoboCreateTask(TestCase):
     )
     @unittest.skip("Remove this and run manually only!")
     def test_performance(self):
-        from registration_datahub.validators import KoboProjectImportDataValidator
+        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
 
         self._generate_huge_file()
         content = Path(

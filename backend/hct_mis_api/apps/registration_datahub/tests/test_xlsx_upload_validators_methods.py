@@ -11,7 +11,7 @@ class TestXLSXValidatorsMethods(TestCase):
     FILES_DIR_PATH = f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file"
 
     def setUp(self) -> None:
-        from registration_datahub.validators import UploadXLSXValidator
+        from hct_mis_api.apps.registration_datahub.validators import UploadXLSXValidator
 
         self.UploadXLSXValidator = UploadXLSXValidator
 
