@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { TableCell } from '@material-ui/core';
+import { GetApp } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -7,7 +8,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { reportStatusToColor } from '../../../utils/utils';
-import { GetApp } from '@material-ui/icons';
+import { ReportNode } from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -22,7 +23,16 @@ const DownloadTableCell = styled(TableCell)`
     justify-content: center;
   }
 `;
-export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
+interface ReportingTableRowProps {
+  report: ReportNode;
+  statusChoices: { [id: number]: string };
+  typeChoices: { [id: number]: string };
+}
+export const ReportingTableRow = ({
+  report,
+  typeChoices,
+  statusChoices,
+}: ReportingTableRowProps): React.ReactElement => {
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
