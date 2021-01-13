@@ -207,4 +207,4 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
 
 auditlog.register(PaymentVerification)
 auditlog.register(CashPlanPaymentVerification)
-auditlog.register(PaymentRecord)
+# auditlog.register(PaymentRecord)

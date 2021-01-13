@@ -37,18 +37,26 @@ export const App: React.FC = () => {
                     <LoginPage />
                   </Sentry.ErrorBoundary>
                 </Route>
-                {/* TODO: fix this */}
-                {/* <Sentry.ErrorBoundary
+                <Route path='/sentry-check'>
+                  <Sentry.ErrorBoundary
+                    beforeCapture={(scope) => {
+                      scope.setTag('location', '/sentry-check/');
+                    }}
+                  >
+                    <button type="button" onClick={() => { throw new Error('Am I working?')}}>Throw new error</button>
+                  </Sentry.ErrorBoundary>
+                </Route>
+                <Sentry.ErrorBoundary
                   beforeCapture={(scope) => {
                     scope.setTag("location", "/sanction-list")
                   }}
-                > */}
+                >
                 <ProtectedRoute
                   path='/sanction-list'
                   component={SanctionList}
                   location={window.location}
                 />
-                {/* </Sentry.ErrorBoundary> */}
+                </Sentry.ErrorBoundary>
                 <Route path='/accounts/profile/'>
                   <Sentry.ErrorBoundary
                     beforeCapture={(scope) => {

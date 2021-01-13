@@ -92,6 +92,9 @@ class Program(TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     class Meta:
         unique_together = ("name", "business_area")
 
+    def __str__(self):
+        return self.name
+
 
 class CashPlan(TimeStampedUUIDModel):
     DISTRIBUTION_COMPLETED = "Distribution Completed"
@@ -161,4 +164,4 @@ class CashPlan(TimeStampedUUIDModel):
 
 auditlog.register(Program)
 
-auditlog.register(CashPlan)
+# auditlog.register(CashPlan)
