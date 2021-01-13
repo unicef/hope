@@ -1,5 +1,5 @@
-from grievance.mutations_extras.utils import remove_individual_and_reassign_roles
-from household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
+from hct_mis_api.apps.grievance.mutations_extras.utils import remove_individual_and_reassign_roles
+from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
 
 
 def close_system_flagging_ticket(grievance_ticket):

@@ -1,8 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from steficon.interpreters import mapping
-from steficon.models import Rule
+from hct_mis_api.apps.steficon.interpreters import mapping
+from hct_mis_api.apps.steficon.models import Rule
 
 
 class RuleForm(forms.ModelForm):

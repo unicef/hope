@@ -7,18 +7,18 @@ from graphene import relay
 from graphene_django import DjangoObjectType, DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
-import targeting.models as target_models
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
-from core.filters import IntegerFilter
-from core.models import FlexibleAttribute
-from core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
-from core.utils import decode_id_string, CustomOrderingFilter
-from household.models import Household
-from household.schema import HouseholdNode
-from program.models import Program
-from targeting.validators import TargetingCriteriaInputValidator
-from utils.schema import Arg
-from account.permissions import (
+import hct_mis_api.apps.targeting.models as target_models
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
+from hct_mis_api.apps.core.filters import IntegerFilter
+from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
+from hct_mis_api.apps.core.utils import decode_id_string, CustomOrderingFilter
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.schema import HouseholdNode
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
+from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     hopePermissionClass,
     Permissions,

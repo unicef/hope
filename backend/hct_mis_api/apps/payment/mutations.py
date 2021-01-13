@@ -9,23 +9,23 @@ from django.utils import timezone
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
-from account.permissions import PermissionMutation, Permissions
-from core.filters import filter_age
-from core.permissions import is_authenticated
-from core.utils import decode_id_string
-from grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
-from household.models import Individual
-from payment.inputs import (
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.core.filters import filter_age
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
+from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
     EditCashPlanPaymentVerificationInput,
 )
-from payment.models import CashPlanPaymentVerification, PaymentVerification, PaymentRecord
-from payment.rapid_pro.api import RapidProAPI
-from payment.schema import PaymentVerificationNode
-from payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
-from payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
-from program.models import CashPlan
-from program.schema import CashPlanNode
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.schema import PaymentVerificationNode
+from hct_mis_api.apps.payment.utils import get_number_of_samples, from_received_to_status, calculate_counts
+from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
+from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.program.schema import CashPlanNode
 
 
 class CreatePaymentVerificationMutation(PermissionMutation):

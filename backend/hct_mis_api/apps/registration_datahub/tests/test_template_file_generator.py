@@ -1,6 +1,6 @@
 from unittest import TestCase, mock
 
-from registration_datahub.template_generator import TemplateFileGenerator
+from hct_mis_api.apps.registration_datahub.template_generator import TemplateFileGenerator
 
 
 class TestTemplateFileGenerator(TestCase):
@@ -31,7 +31,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     @mock.patch(
-        "registration_datahub.template_generator.serialize_flex_attributes",
+        "hct_mis_api.apps.registration_datahub.template_generator.serialize_flex_attributes",
         new=lambda: {
             "households": {
                 "test_h_f": {
@@ -52,7 +52,7 @@ class TestTemplateFileGenerator(TestCase):
         },
     )
     @mock.patch.dict(
-        "core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
+        "hct_mis_api.apps.core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
         {
             "households": {
                 "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []}

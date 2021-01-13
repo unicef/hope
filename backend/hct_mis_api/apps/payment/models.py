@@ -9,7 +9,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class PaymentRecord(TimeStampedUUIDModel):

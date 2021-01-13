@@ -1,15 +1,15 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-import mis_datahub.models as dh_models
-from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
-from core.models import BusinessArea
-from household.fixtures import (
+import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
     create_household,
 )
-from household.models import (
+from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     ROLE_ALTERNATE,
     Document,
@@ -18,10 +18,10 @@ from household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
-from program.fixtures import ProgramFactory
-from registration_data.fixtures import RegistrationDataImportFactory
-from targeting.models import TargetPopulation
+from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestSendTpToDatahub(TestCase):

@@ -11,7 +11,7 @@ from django.utils.html import strip_tags
 import xlrd
 from xlrd import XLRDError
 
-from core.models import BusinessArea, FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
+from hct_mis_api.apps.core.models import BusinessArea, FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class XLSImportForm(forms.Form):

@@ -10,12 +10,12 @@ from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.utils.module_loading import import_string
 
-from steficon.forms import RuleForm
-from steficon.interpreters import mapping
-from steficon.models import Rule
-from steficon.score import Score
-from household.models import Household
-from targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.steficon.forms import RuleForm
+from hct_mis_api.apps.steficon.interpreters import mapping
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.score import Score
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
 
 
 @register(Rule)
