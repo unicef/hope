@@ -17,13 +17,13 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 
-from account.permissions import (
+from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
-from core.core_fields_attributes import (
+from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     _HOUSEHOLD,
@@ -31,12 +31,12 @@ from core.core_fields_attributes import (
     XLSX_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
-from core.extended_connection import ExtendedConnection
-from core.filters import DateTimeRangeFilter
-from core.models import AdminArea, FlexibleAttribute
-from core.schema import ChoiceObject, FieldAttributeNode
-from core.utils import to_choice_object, choices_to_dict, nested_getattr
-from grievance.models import (
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import DateTimeRangeFilter
+from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
+from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr
+from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
     TicketSensitiveDetails,
@@ -49,11 +49,11 @@ from grievance.models import (
     TicketSystemFlaggingDetails,
     TicketPaymentVerificationDetails,
 )
-from household.models import Household, Individual
-from household.schema import HouseholdNode, IndividualNode
-from payment.models import ServiceProvider, PaymentRecord
-from payment.schema import PaymentRecordNode
-from utils.schema import Arg
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
+from hct_mis_api.apps.payment.schema import PaymentRecordNode
+from hct_mis_api.apps.utils.schema import Arg
 
 
 class GrievanceTicketFilter(FilterSet):

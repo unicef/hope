@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from faker import Faker
 from openpyxl.drawing.image import Image
 
-from core.core_fields_attributes import (
+from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
     TYPE_BOOL,
     TYPE_DATE,
@@ -17,9 +17,9 @@ from core.core_fields_attributes import (
     TYPE_SELECT_ONE,
     TYPE_STRING,
 )
-from core.utils import get_combined_attributes
-from household.models import HEAD
-from registration_datahub.template_generator import TemplateFileGenerator
+from hct_mis_api.apps.core.utils import get_combined_attributes
+from hct_mis_api.apps.household.models import HEAD
+from hct_mis_api.apps.registration_datahub.template_generator import TemplateFileGenerator
 
 
 class Command(BaseCommand):

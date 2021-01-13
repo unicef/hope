@@ -5,14 +5,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
 
-from account.schema import UserNode
-from account.permissions import PermissionMutation, Permissions
-from core.models import BusinessArea
-from core.permissions import is_authenticated
-from core.schema import BusinessAreaNode
-from core.utils import decode_id_string, to_snake_case
-from grievance.models import GrievanceTicket, TicketNote
-from grievance.mutations_extras.data_change import (
+from hct_mis_api.apps.account.schema import UserNode
+from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.schema import BusinessAreaNode
+from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case
+from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
+from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     save_data_change_extras,
     close_add_individual_grievance_ticket,
     close_update_individual_grievance_ticket,
@@ -20,21 +20,21 @@ from grievance.mutations_extras.data_change import (
     close_delete_individual_ticket,
     update_data_change_extras,
 )
-from grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
-from grievance.mutations_extras.main import (
+from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
+from hct_mis_api.apps.grievance.mutations_extras.main import (
     CreateGrievanceTicketExtrasInput,
     UpdateGrievanceTicketExtrasInput,
     _not_implemented_close_method,
     _no_operation_close_method,
 )
-from grievance.mutations_extras.payment_verification import save_payment_verification_extras
-from grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
-from grievance.mutations_extras.system_tickets import close_needs_adjudication_ticket, close_system_flagging_ticket
-from grievance.mutations_extras.utils import verify_required_arguments, remove_parsed_data_fields
-from grievance.schema import GrievanceTicketNode, TicketNoteNode
-from grievance.validators import DataChangeValidator
-from household.models import Household, Individual, HEAD, ROLE_ALTERNATE, ROLE_PRIMARY, IndividualRoleInHousehold
-from household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.grievance.mutations_extras.payment_verification import save_payment_verification_extras
+from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
+from hct_mis_api.apps.grievance.mutations_extras.system_tickets import close_needs_adjudication_ticket, close_system_flagging_ticket
+from hct_mis_api.apps.grievance.mutations_extras.utils import verify_required_arguments, remove_parsed_data_fields
+from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
+from hct_mis_api.apps.grievance.validators import DataChangeValidator
+from hct_mis_api.apps.household.models import Household, Individual, HEAD, ROLE_ALTERNATE, ROLE_PRIMARY, IndividualRoleInHousehold
+from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):

@@ -13,10 +13,10 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
 
-from account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
-from account.models import User, UserRole, Role, IncompatibleRoles
-from core.models import BusinessArea
-from core.utils import build_arg_dict_from_dict
+from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
+from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRoles
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 
 
 class UserRoleAdminForm(ModelForm):
@@ -111,7 +111,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
     @link()
     def load_ad_users(self, request):
-        from account.forms import LoadUsersForm
+        from hct_mis_api.apps.account.forms import LoadUsersForm
 
         opts = self.model._meta
         ctx = {

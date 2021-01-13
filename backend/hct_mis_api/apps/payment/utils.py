@@ -4,7 +4,7 @@ from math import ceil
 from django.db.models import Q
 from scipy.special import ndtri
 
-from payment.models import PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerification
 
 
 def get_number_of_samples(payment_records_sample_count, confidence_interval, margin_of_error):

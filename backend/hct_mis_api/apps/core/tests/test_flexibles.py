@@ -4,8 +4,8 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 
-from core.admin import FlexibleAttributeAdmin
-from core.models import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
+from hct_mis_api.apps.core.admin import FlexibleAttributeAdmin
+from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class MockSuperUser:

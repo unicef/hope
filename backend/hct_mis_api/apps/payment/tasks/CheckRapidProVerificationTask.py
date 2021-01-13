@@ -1,8 +1,8 @@
 import traceback
 
-from payment.models import CashPlanPaymentVerification, PaymentVerification
-from payment.rapid_pro.api import RapidProAPI
-from payment.utils import from_received_to_status, calculate_counts
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentVerification
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.utils import from_received_to_status, calculate_counts
 
 
 class CheckRapidProVerificationTask:

@@ -1,5 +1,5 @@
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestProgramChoices(APITestCase):

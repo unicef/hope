@@ -22,11 +22,11 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
-from core.extended_connection import ExtendedConnection
-from core.kobo.api import KoboAPI
-from core.kobo.common import reduce_assets_list, reduce_asset
-from core.models import (
+from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.common import reduce_assets_list, reduce_asset
+from hct_mis_api.apps.core.models import (
     AdminArea,
     BusinessArea,
     FlexibleAttribute,
@@ -34,7 +34,7 @@ from core.models import (
     FlexibleAttributeGroup,
     AdminAreaType,
 )
-from core.utils import LazyEvalMethodsDict
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
