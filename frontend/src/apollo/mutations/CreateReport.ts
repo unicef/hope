@@ -16,7 +16,11 @@ export const CREATE_REPORT_MUTATION = gql`
           lastName
         }
         adminArea {
-          title
+          edges {
+            node {
+              title
+            }
+          }
         }
         program {
           name

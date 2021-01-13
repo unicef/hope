@@ -618,7 +618,7 @@ export type CreateReportInput = {
   businessAreaSlug: Scalars['String'],
   dateFrom: Scalars['Date'],
   dateTo: Scalars['Date'],
-  adminArea?: Maybe<Scalars['ID']>,
+  adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
   program?: Maybe<Scalars['ID']>,
   country?: Maybe<Scalars['String']>,
 };
@@ -3847,8 +3847,17 @@ export type ReportNode = Node & {
   dateTo: Scalars['Date'],
   country?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
-  adminArea?: Maybe<AdminAreaNode>,
+  adminArea: AdminAreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
+};
+
+
+export type ReportNodeAdminAreaArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>
 };
 
 export type ReportNodeConnection = {
@@ -5568,10 +5577,16 @@ export type CreateReportMutation = (
       & { createdBy: (
         { __typename?: 'UserNode' }
         & Pick<UserNode, 'firstName' | 'lastName'>
-      ), adminArea: Maybe<(
-        { __typename?: 'AdminAreaNode' }
-        & Pick<AdminAreaNode, 'title'>
-      )>, program: Maybe<(
+      ), adminArea: (
+        { __typename?: 'AdminAreaNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'AdminAreaNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'title'>
+          )> }
+        )>> }
+      ), program: Maybe<(
         { __typename?: 'ProgramNode' }
         & Pick<ProgramNode, 'name'>
       )> }
@@ -7096,10 +7111,16 @@ export type ReportQuery = (
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
-    ), adminArea: Maybe<(
-      { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'title'>
-    )>, program: Maybe<(
+    ), adminArea: (
+      { __typename?: 'AdminAreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'AdminAreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'title'>
+        )> }
+      )>> }
+    ), program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'name'>
     )> }
@@ -8954,7 +8975,11 @@ export const CreateReportDocument = gql`
         lastName
       }
       adminArea {
-        title
+        edges {
+          node {
+            title
+          }
+        }
       }
       program {
         name
@@ -12809,7 +12834,11 @@ export const ReportDocument = gql`
       lastName
     }
     adminArea {
-      title
+      edges {
+        node {
+          title
+        }
+      }
     }
     program {
       name
@@ -16237,7 +16266,7 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
-  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  adminArea?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
