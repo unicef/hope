@@ -20,9 +20,16 @@ from django_countries.fields import Country
 from PIL import Image
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaType, BusinessArea
-from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from hct_mis_api.apps.household.models import (
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    DocumentType,
+    IDENTIFICATION_TYPE_CHOICE,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
+from hct_mis_api.apps.registration_datahub.fixtures import (
+    ImportedIndividualFactory,
+    RegistrationDataImportDatahubFactory,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedDocument,
@@ -201,11 +208,11 @@ class TestRdiCreateTask(TestCase):
         self.assertEqual(task.documents, expected)
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.SheetImageLoader",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.SheetImageLoader",
         ImageLoaderMock,
     )
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.timezone.now",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.timezone.now",
         lambda: "2020-06-22 12:00",
     )
     def test_handle_document_photo_fields(self):
@@ -387,7 +394,7 @@ class TestRdiKoboCreateTask(TestCase):
         cls.registration_data_import.save()
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute(self):
@@ -426,7 +433,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(household_obj_data, expected)
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_execute_multiple_collectors(self):
@@ -465,7 +472,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_image_field(self):
@@ -513,7 +520,7 @@ class TestRdiKoboCreateTask(TestCase):
         pass
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     def test_handle_documents_and_identities(self):
@@ -581,7 +588,7 @@ class TestRdiKoboCreateTask(TestCase):
         self.assertEqual(national_passport, "NATIONAL_PASSPORT")
 
     @mock.patch(
-        "registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
+        "hct_mis_api.apps.registration_datahub.tasks.rdi_create.KoboAPI.get_attached_file",
         _return_test_image,
     )
     @unittest.skip("Remove this and run manually only!")
