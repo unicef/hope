@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import Count
 
-from cash_assist_datahub import models as ca_models
+from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import nested_getattr

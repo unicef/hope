@@ -8,7 +8,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
     Household,
 )
-from mis_datahub import models as dh_mis_models
+from hct_mis_api.apps.mis_datahub import models as dh_mis_models
 from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
 
 
