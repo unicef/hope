@@ -13,8 +13,8 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 )
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Household
-from payment import models as payment_models
-from program import models as program_models
+from hct_mis_api.apps.payment import models as payment_models
+from hct_mis_api.apps.program import models as program_models
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
+from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
 from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
