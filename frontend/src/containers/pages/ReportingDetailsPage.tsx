@@ -20,6 +20,9 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { StatusBox } from '../../components/StatusBox';
 import { reduceChoices, reportStatusToColor } from '../../utils/utils';
 import { UniversalMoment } from '../../components/UniversalMoment';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -50,6 +53,8 @@ const IconsContainer = styled.div`
 export const ReportingDetailsPage = (): React.ReactElement => {
   const { id } = useParams();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const { data, loading } = useReportQuery({
     variables: { id },
   });
@@ -59,8 +64,11 @@ export const ReportingDetailsPage = (): React.ReactElement => {
   } = useReportChoiceDataQuery();
 
   if (loading || choicesLoading) return <LoadingComponent />;
-  if (!data || !choicesData) return null;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
+    return <PermissionDenied />;
 
+  if (!data || !choicesData) return null;
   const { report } = data;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
