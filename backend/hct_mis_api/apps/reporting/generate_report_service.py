@@ -12,16 +12,16 @@ from payment.models import PaymentRecord, PaymentVerification
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def _get_individuals(report, filter_vars):
+    def _get_individuals(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
         if report.country:
             filter_vars["household__country"] = report.country
-        if report.admin_area:
-            filter_vars["household__admin_area"] = report.admin_area
+        if report.admin_area.all().exists():
+            filter_vars["household__admin_area__in"] = report.admin_area.all()
         return Individual.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_individual_row(self, individual: Individual):
+    def _format_individual_row(self, individual: Individual) -> tuple:
 
         return (
             individual.household.admin_area.id if individual.household and individual.household.admin_area else "",
@@ -52,16 +52,16 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_households(report, filter_vars):
+    def _get_households(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
         if report.country:
             filter_vars["country"] = report.country
-        if report.admin_area:
-            filter_vars["admin_area"] = report.admin_area
+        if report.admin_area.all().exists():
+            filter_vars["admin_area__in"] = report.admin_area.all()
         return Household.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_household_row(self, household: Household):
+    def _format_household_row(self, household: Household) -> tuple:
         return (
             household.admin_area.id if household.admin_area else "",
             household.business_area.id,
@@ -101,14 +101,14 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_cash_plan_verifications(report, filter_vars):
+    def _get_cash_plan_verifications(report: Report, filter_vars: dict):
         filter_vars["cash_plan__business_area"] = report.business_area
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlanPaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification):
+    def _format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
         return (
             verification.cash_plan.program.name,
             verification.activation_date,
@@ -126,14 +126,14 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payments(report, filter_vars):
+    def _get_payments(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
-        if report.admin_area:
-            filter_vars["household__admin_area"] = report.admin_area
+        if report.admin_area.all().exists():
+            filter_vars["household__admin_area__in"] = report.admin_area.all()
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_payment_row(self, payment: PaymentRecord):
+    def _format_payment_row(self, payment: PaymentRecord) -> tuple:
         return (
             payment.business_area.id,
             payment.household.admin_area.id if payment.household.admin_area else "",
@@ -151,14 +151,14 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payment_verifications(report, filter_vars):
+    def _get_payment_verifications(report: Report, filter_vars: dict):
         filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = report.business_area
         if report.program:
             filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_payment_verification_row(self, payment_verification: PaymentVerification):
+    def _format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.cash_plan_payment_verification.cash_plan.business_area.id,
             payment_verification.cash_plan_payment_verification.cash_plan.program.name,
@@ -170,14 +170,14 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_cash_plans(report, filter_vars):
+    def _get_cash_plans(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_cash_plan_row(self, cash_plan: CashPlan):
+    def _format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
         return (
             cash_plan.program.name,
             cash_plan.assistance_measurement,
@@ -206,12 +206,12 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_programs(report, filter_vars):
+    def _get_programs(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
         return Program.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_program_row(self, program: Program):
+    def _format_program_row(self, program: Program) -> tuple:
         return (
             program.business_area.id,
             program.administrative_areas_of_implementation,
@@ -231,7 +231,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _to_values_list(instances, field_name):
+    def _to_values_list(instances, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
 
@@ -448,7 +448,7 @@ class GenerateReportService:
     FILTERS_SHEET = "Filters"
     MAX_COL_WIDTH = 50
 
-    def __init__(self, report):
+    def __init__(self, report: Report):
         self.report = report
         self.report_type = report.report_type
         self.business_area = report.business_area
@@ -471,8 +471,10 @@ class GenerateReportService:
 
         if self.report.country:
             filter_rows.append(("country", str(self.report.country)))
-        if self.report.admin_area:
-            filter_rows.append(("admin_area", self.report.admin_area.title))
+        if self.report.admin_area.all().exists():
+            filter_rows.append(
+                ("admin_area", GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"))
+            )
         if self.report.program:
             filter_rows.append(("program", self.program.name))
 
@@ -491,7 +493,7 @@ class GenerateReportService:
             str_row = self._stringify_all_values(row)
             self.ws_report.append(str_row)
 
-    def generate_workbook(self):
+    def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._add_filters_info()
         self._add_headers()
@@ -539,10 +541,10 @@ class GenerateReportService:
             value = GenerateReportService.MAX_COL_WIDTH if value > GenerateReportService.MAX_COL_WIDTH else value
             ws.column_dimensions[col_name].width = value
 
-    def _report_type_to_str(self):
+    def _report_type_to_str(self) -> str:
         return [name for value, name in Report.REPORT_TYPES if value == self.report_type][0]
 
-    def _stringify_all_values(self, row):
+    def _stringify_all_values(self, row: tuple) -> tuple:
         str_row = []
         for value in row:
             str_row.append(str(value if value is not None else ""))
