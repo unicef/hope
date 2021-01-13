@@ -214,6 +214,7 @@ type CashPlanPaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -305,6 +306,7 @@ input CopyTargetPopulationInput {
 
 input CopyTargetPopulationMutationInput {
   targetPopulationData: CopyTargetPopulationInput
+  version: BigInt
   clientMutationId: String
 }
 
@@ -810,6 +812,7 @@ type HouseholdNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: HouseholdStatus!
   consentSign: String!
   consent: Boolean
@@ -1774,6 +1777,7 @@ type IndividualNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: IndividualStatus!
   individualId: String!
   photo: String!
@@ -2068,7 +2072,7 @@ type Mutations {
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
-  rerunDedupe(registrationDataImportDatahubId: ID!): RegistrationDeduplicationMutation
+  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
