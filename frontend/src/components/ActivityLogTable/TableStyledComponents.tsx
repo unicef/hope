@@ -24,4 +24,18 @@ export const Cell = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
   letter-spacing: 0.01071em;
   vertical-align: inherit;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+  
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
 `;

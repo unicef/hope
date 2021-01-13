@@ -8,6 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from unittest import mock
 
+from PIL import Image
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -15,12 +16,10 @@ from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
-
 from django_countries.fields import Country
-from PIL import Image
 
 from core.models import AdminArea, AdminAreaType, BusinessArea
-from household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE
+from household.models import IDENTIFICATION_TYPE_BIRTH_CERTIFICATE, DocumentType, IDENTIFICATION_TYPE_CHOICE
 from registration_data.fixtures import RegistrationDataImportFactory
 from registration_datahub.fixtures import ImportedIndividualFactory, RegistrationDataImportDatahubFactory
 from registration_datahub.models import (
@@ -339,6 +338,12 @@ class TestRdiKoboCreateTask(TestCase):
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
+        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
+        document_types = []
+        for doc_type, label in identification_type_choice:
+            document_types.append(DocumentType(country=Country("AFG"), label=label, type=doc_type))
+        ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
+
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()
@@ -555,7 +560,7 @@ class TestRdiKoboCreateTask(TestCase):
                 }
             },
         ]
-        task._handle_documents_and_identities(documents_and_identities, individuals_dict)
+        task._handle_documents_and_identities(documents_and_identities)
 
         result = list(ImportedDocument.objects.values("document_number", "individual_id"))
         expected = [
@@ -622,7 +627,7 @@ class TestRdiKoboCreateTask(TestCase):
             "_xform_id_string": "ayp9jVNe5crcGerVjCjGj4",
             "_bamboo_dataset_id": "",
             "_tags": [],
-            "household_questions/group_qo2zo48/f_pregnant_h_c": "0",
+            "household_questions/group_qo2zo48/pregnant_h_c": "0",
             "health_questions/pregnant_member_h_c": "0",
             "enumerator/name_enumerator": "Test",
             "monthly_expenditures_questions/total_expense_h_f": "0",
