@@ -4,11 +4,11 @@ import random
 import factory
 from factory import fuzzy
 
-from account.fixtures import UserFactory
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
-from household.fixtures import HouseholdFactory
-from household.models import RESIDENCE_STATUS_CHOICE
-from targeting.models import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
+from hct_mis_api.apps.household.models import RESIDENCE_STATUS_CHOICE
+from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
     TargetingCriteriaRuleFilter,
     TargetingCriteriaRule,

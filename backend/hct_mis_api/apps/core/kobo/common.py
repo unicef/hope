@@ -2,7 +2,7 @@ from typing import Tuple
 
 from dateutil.parser import parse
 
-from household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.household.models import NON_BENEFICIARY, RELATIONSHIP_UNKNOWN
 
 KOBO_FORM_INDIVIDUALS_COLUMN_NAME = "individual_questions"
 
@@ -67,9 +67,9 @@ def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> l
 
 def count_population(results: list) -> Tuple[int, int]:
     from hashlib import sha256
-    from core.utils import rename_dict_keys
-    from registration_datahub.tasks.utils import get_submission_metadata
-    from registration_datahub.models import KoboImportedSubmission
+    from hct_mis_api.apps.core.utils import rename_dict_keys
+    from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
+    from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 
     total_households_count = 0
     total_individuals_count = 0

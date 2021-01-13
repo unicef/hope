@@ -5,9 +5,9 @@ from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
-from account.microsoft_graph import MicrosoftGraphAPI
-from account.models import UserRole, Role, ACTIVE
-from core.models import BusinessArea
+from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
+from hct_mis_api.apps.account.models import UserRole, Role, ACTIVE
+from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger("console")
 

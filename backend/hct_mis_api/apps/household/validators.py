@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 
-from core.validators import BaseValidator
+from hct_mis_api.apps.core.validators import BaseValidator
 
 
 class HouseholdValidator(BaseValidator):

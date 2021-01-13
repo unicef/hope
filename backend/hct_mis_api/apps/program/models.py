@@ -9,9 +9,9 @@ from django.utils.translation import ugettext_lazy as _
 from auditlog.models import AuditlogHistoryField
 from auditlog.registry import auditlog
 
-from cash_assist_datahub.models import PaymentRecord
-from payment.models import CashPlanPaymentVerification
-from utils.models import AbstractSyncable, TimeStampedUUIDModel
+from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel
 
 
 class Program(TimeStampedUUIDModel, AbstractSyncable):
