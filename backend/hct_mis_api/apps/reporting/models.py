@@ -2,7 +2,7 @@ from django.db import models
 from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
 
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class Report(TimeStampedUUIDModel):

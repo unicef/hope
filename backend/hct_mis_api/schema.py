@@ -1,59 +1,58 @@
 import graphene
 
 # DO NOT DELETE THIS IMPORT
-import core.converters
+import hct_mis_api.apps.core.converters
 
 from graphene_django.debug import DjangoDebug
 
-import account.schema
-import core.schema
+import hct_mis_api.apps.account.schema
+import hct_mis_api.apps.core.schema
 
-import grievance.schema
-import grievance.mutations
-import household.schema
-import payment.mutations
-import payment.schema
-import program.mutations
-import program.schema
-import registration_data.schema
-import registration_datahub.schema
-import registration_datahub.mutations
-import registration_datahub.schema
-import reporting.schema
-import reporting.mutations
-import sanction_list.mutations
-import targeting.mutations
-import targeting.schema
-import steficon.schema
-import sanction_list.schema
+import hct_mis_api.apps.grievance.schema
+import hct_mis_api.apps.grievance.mutations
+import hct_mis_api.apps.household.schema
+import hct_mis_api.apps.payment.mutations
+import hct_mis_api.apps.payment.schema
+import hct_mis_api.apps.program.mutations
+import hct_mis_api.apps.program.schema
+import hct_mis_api.apps.registration_data.schema
+import hct_mis_api.apps.registration_datahub.schema
+import hct_mis_api.apps.registration_datahub.mutations
+import hct_mis_api.apps.reporting.schema
+import hct_mis_api.apps.reporting.mutations
+import hct_mis_api.apps.sanction_list.mutations
+import hct_mis_api.apps.targeting.mutations
+import hct_mis_api.apps.targeting.schema
+import hct_mis_api.apps.steficon.schema
+import hct_mis_api.apps.sanction_list.schema
 
 
 class Query(
-    registration_data.schema.Query,
-    registration_datahub.schema.Query,
-    account.schema.Query,
-    household.schema.Query,
-    targeting.schema.Query,
-    program.schema.Query,
-    core.schema.Query,
-    payment.schema.Query,
-    steficon.schema.Query,
-    grievance.schema.Query,
-    sanction_list.schema.Query,
-    reporting.schema.Query,
+    hct_mis_api.apps.registration_data.schema.Query,
+    hct_mis_api.apps.registration_datahub.schema.Query,
+    hct_mis_api.apps.account.schema.Query,
+    hct_mis_api.apps.household.schema.Query,
+    hct_mis_api.apps.targeting.schema.Query,
+    hct_mis_api.apps.program.schema.Query,
+    hct_mis_api.apps.core.schema.Query,
+    hct_mis_api.apps.payment.schema.Query,
+    hct_mis_api.apps.steficon.schema.Query,
+    hct_mis_api.apps.grievance.schema.Query,
+    hct_mis_api.apps.sanction_list.schema.Query,
+    hct_mis_api.apps.reporting.schema.Query,
     graphene.ObjectType,
 ):
     debug = graphene.Field(DjangoDebug, name="_debug")
 
 
 class Mutations(
-    sanction_list.mutations.Mutations,
-    registration_datahub.mutations.Mutations,
-    program.mutations.Mutations,
-    targeting.mutations.Mutations,
-    payment.mutations.Mutations,
-    grievance.mutations.Mutations,
-    reporting.mutations.Mutations,
+    hct_mis_api.apps.sanction_list.mutations.Mutations,
+    hct_mis_api.apps.registration_datahub.mutations.Mutations,
+    hct_mis_api.apps.program.mutations.Mutations,
+    hct_mis_api.apps.targeting.mutations.Mutations,
+    hct_mis_api.apps.payment.mutations.Mutations,
+    hct_mis_api.apps.grievance.mutations.Mutations,
+    hct_mis_api.apps.reporting.mutations.Mutations,
     graphene.ObjectType,
 ):
     pass

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from registration_datahub.models import (
+from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedIndividual,
     ImportedHousehold,

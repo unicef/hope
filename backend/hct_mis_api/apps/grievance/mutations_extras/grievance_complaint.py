@@ -1,10 +1,10 @@
 import graphene
 
-from core.utils import decode_and_get_object
-from grievance.models import TicketComplaintDetails
-from household.models import Household, Individual
-from household.schema import HouseholdNode, IndividualNode
-from payment.models import PaymentRecord
+from hct_mis_api.apps.core.utils import decode_and_get_object
+from hct_mis_api.apps.grievance.models import TicketComplaintDetails
+from hct_mis_api.apps.household.models import Household, Individual
+from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 class GrievanceComplaintTicketExtras(graphene.InputObjectType):

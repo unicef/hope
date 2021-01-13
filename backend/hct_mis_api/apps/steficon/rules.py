@@ -1,8 +1,8 @@
 from collections import namedtuple
 from typing import NamedTuple
 
-from steficon.score import Score
-from household.models import Household
+from hct_mis_api.apps.steficon.score import Score
+from hct_mis_api.apps.household.models import Household
 
 
 def hajati(hh: Household):

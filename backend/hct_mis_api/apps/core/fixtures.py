@@ -1,7 +1,7 @@
 import factory
 from faker import Faker
 
-from core.models import AdminArea, AdminAreaType
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaType
 
 faker = Faker()
 

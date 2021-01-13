@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
-from core.es_analyzers import phonetic_analyzer
+from hct_mis_api.apps.core.es_analyzers import phonetic_analyzer
 from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Individual
 

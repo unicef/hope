@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import Http404
 from django.contrib.auth import get_user_model
 
-from core.utils import nested_getattr
+from hct_mis_api.apps.core.utils import nested_getattr
 
 logger = logging.getLogger(__name__)
 
