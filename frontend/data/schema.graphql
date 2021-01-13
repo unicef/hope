@@ -390,7 +390,7 @@ input CreateReportInput {
   businessAreaSlug: String!
   dateFrom: Date!
   dateTo: Date!
-  adminArea: ID
+  adminArea: [ID]
   program: ID
   country: String
 }
@@ -2520,7 +2520,7 @@ type ReportNode implements Node {
   dateTo: Date!
   country: String
   program: ProgramNode
-  adminArea: AdminAreaNode
+  adminArea(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   fileUrl: String
 }
 
