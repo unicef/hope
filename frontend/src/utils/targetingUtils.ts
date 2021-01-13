@@ -13,6 +13,9 @@ export const chooseFieldType = (value, arrayHelpers, index): void => {
     case 'INTEGER':
       values.value = { from: '', to: '' };
       break;
+    case 'DATE':
+      values.value = { from: undefined, to: undefined };
+      break;
     case 'SELECT_ONE':
       values.fieldAttribute.choices = value.choices;
       break;
@@ -141,6 +144,10 @@ export function formatCriteriaFilters(filters) {
           comparisionMethod = 'LESS_THAN';
           values = [each.value.to];
         }
+        break;
+      case 'DATE':
+        values = [each.value.from, each.value.to];
+        comparisionMethod = 'RANGE';
         break;
       default:
         comparisionMethod = 'CONTAINS';
