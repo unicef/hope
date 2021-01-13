@@ -225,6 +225,16 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
+    def _get_payments_for_individuals(report: Report, filter_vars: dict):
+        # TODO fix this
+        return PaymentRecord.objects.none()
+
+    @staticmethod
+    def _format_payments_for_individuals_row(self, payment_record: PaymentRecord) -> tuple:
+        # TODO: fix this
+        return ()
+
+    @staticmethod
     def _to_values_list(instances, field_name: str) -> str:
         values_list = list(instances.values_list(field_name, flat=True))
         return ", ".join([str(value) for value in values_list])
@@ -435,6 +445,10 @@ class GenerateReportService:
             GenerateReportContentHelpers._format_cash_plan_row,
         ),
         Report.PROGRAM: (GenerateReportContentHelpers._get_programs, GenerateReportContentHelpers._format_program_row),
+        Report.INDIVIDUALS_AND_PAYMENT: (
+            GenerateReportContentHelpers._get_payments_for_individuals,
+            GenerateReportContentHelpers._format_payments_for_individuals_row,
+        ),
     }
     FILTERS_SHEET = "Filters"
     MAX_COL_WIDTH = 50
