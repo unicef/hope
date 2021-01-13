@@ -76,6 +76,7 @@ export const NewReportForm = (): React.ReactElement => {
       variables: {
         reportData: {
           ...values,
+          adminArea: [values.adminArea.node.id],
           businessAreaSlug: businessArea,
         },
       },
