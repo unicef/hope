@@ -620,7 +620,6 @@ export type CreateReportInput = {
   dateTo: Scalars['Date'],
   adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
   program?: Maybe<Scalars['ID']>,
-  country?: Maybe<Scalars['String']>,
 };
 
 export type CreateTargetPopulationInput = {
@@ -7138,9 +7137,6 @@ export type ReportChoiceDataQuery = (
   )>>>, reportTypesChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
-  )>>>, countriesChoices: Maybe<Array<Maybe<(
-    { __typename?: 'ChoiceObject' }
-    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -12896,10 +12892,6 @@ export const ReportChoiceDataDocument = gql`
     value
   }
   reportTypesChoices {
-    name
-    value
-  }
-  countriesChoices {
     name
     value
   }

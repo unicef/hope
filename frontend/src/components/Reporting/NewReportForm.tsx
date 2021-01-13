@@ -40,15 +40,15 @@ const DialogFooter = styled.div`
 // TODO: implement conditional form fields based on selected report type:
 // Report type and from date and to date are required fields always in the form
 // Based on selected report type, optional fields should appear:
-// (Admin area should be multi select field, others simple select)
+// (Admin area should be multi select field, program - simple select)
 // 1: Individuals - admin area
-// 2: Households - admin area, country
+// 2: Households - admin area
 // 3: Cash Plan Verification - program
 // 4: Payments - admin area
 // 5: Payment Verification - program
 // 6: Cash Plan - program
 // 7: Programme - no extra fields
-// 8: Individuals & Payment - admin area, country, program
+// 8: Individuals & Payment - admin area, program
 // Be sure to only include a correct set of fields to mutation input
 
 export const NewReportForm = (): React.ReactElement => {
@@ -81,7 +81,6 @@ export const NewReportForm = (): React.ReactElement => {
     dateTo: '',
     adminArea: '',
     program: '',
-    country: '',
   };
 
   const submitFormHandler = async (values): Promise<void> => {
@@ -89,7 +88,7 @@ export const NewReportForm = (): React.ReactElement => {
       variables: {
         reportData: {
           ...values,
-          adminArea: [values.adminArea.node.id],
+          adminArea: values.adminArea?.node ? [values.adminArea.node.id] : null,
           businessAreaSlug: businessArea,
         },
       },
@@ -206,16 +205,6 @@ export const NewReportForm = (): React.ReactElement => {
                         component={FormikSelectField}
                       />
                     </Grid> */}
-                    <Grid item xs={12}>
-                      <Field
-                        name='country'
-                        fullWidth
-                        variant='outlined'
-                        label='Country'
-                        component={FormikSelectField}
-                        choices={choicesData.countriesChoices}
-                      />
-                    </Grid>
                   </Grid>
                 </Form>
               </DialogContent>

@@ -392,7 +392,6 @@ input CreateReportInput {
   dateTo: Date!
   adminArea: [ID]
   program: ID
-  country: String
 }
 
 input CreateTargetPopulationInput {

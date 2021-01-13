@@ -14,8 +14,6 @@ class GenerateReportContentHelpers:
     @staticmethod
     def _get_individuals(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
-        if report.country:
-            filter_vars["household__country"] = report.country
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         return Individual.objects.filter(**filter_vars)
@@ -26,7 +24,6 @@ class GenerateReportContentHelpers:
         return (
             individual.household.admin_area.id if individual.household and individual.household.admin_area else "",
             individual.business_area.id,
-            individual.household.country if individual.household else "",
             self._to_values_list(individual.documents.all(), "id"),
             individual.household.country_origin if individual.household else "",
             individual.birth_date,
@@ -54,8 +51,6 @@ class GenerateReportContentHelpers:
     @staticmethod
     def _get_households(report: Report, filter_vars: dict):
         filter_vars["business_area"] = report.business_area
-        if report.country:
-            filter_vars["country"] = report.country
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
         return Household.objects.filter(**filter_vars)
@@ -65,7 +60,6 @@ class GenerateReportContentHelpers:
         return (
             household.admin_area.id if household.admin_area else "",
             household.business_area.id,
-            household.country,
             household.unicef_id,
             household.country_origin,
             # TODO: check if adults_count should be a sum of these two fields
@@ -248,7 +242,6 @@ class GenerateReportService:
         Report.INDIVIDUALS: (
             "admin_area_id",
             "business_area_id",
-            "country",
             "document_id",  # 8e8ea94a-2ca5-4b76-b055-e098bc24eee8
             "household_country_origin",  # TM
             "birth_date",  # 2000-06-24
@@ -275,7 +268,6 @@ class GenerateReportService:
         Report.HOUSEHOLD_DEMOGRAPHICS: (
             "admin_area_id",
             "business_area_id",
-            "country",
             "unicef_id",  # HH-20-0000.0368
             "country_origin",  # TM
             "female_adults_count",  # 0
@@ -392,7 +384,6 @@ class GenerateReportService:
         Report.INDIVIDUALS_AND_PAYMENT: (
             "admin_area_id",
             "business_area_id",
-            "country",
             "program_name",
             "household_unicef_id",  # HH-20-0000.0368
             "household_country_origin",  # TM
@@ -469,8 +460,6 @@ class GenerateReportService:
             ("business_area", self.business_area.slug),
         ]
 
-        if self.report.country:
-            filter_rows.append(("country", str(self.report.country)))
         if self.report.admin_area.all().exists():
             filter_rows.append(
                 ("admin_area", GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"))
