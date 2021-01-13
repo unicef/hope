@@ -4,10 +4,10 @@ from openpyxl.utils import get_column_letter
 
 # from openpyxl.worksheet.datavalidation import DataValidation
 from tempfile import NamedTemporaryFile
-from reporting.models import Report
-from household.models import Individual, Household
-from program.models import CashPlanPaymentVerification, CashPlan, Program
-from payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.household.models import Individual, Household
+from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 
 class GenerateReportContentHelpers:
