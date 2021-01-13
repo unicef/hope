@@ -66,20 +66,41 @@ def reduce_assets_list(assets: list, deployed: bool = True, *args, **kwarg) -> l
 
 
 def count_population(results: list) -> Tuple[int, int]:
+    from hashlib import sha256
     from hct_mis_api.apps.core.utils import rename_dict_keys
     from hct_mis_api.apps.registration_datahub.tasks.utils import get_submission_metadata
     from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 
     total_households_count = 0
     total_individuals_count = 0
+    seen_hash_keys = []
     for result in results:
         submission_meta_data = get_submission_metadata(result)
         submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
         if submission_exists is False:
             total_households_count += 1
             for individual_data in result[KOBO_FORM_INDIVIDUALS_COLUMN_NAME]:
+                fields = {
+                    "given_name_i_c": None,
+                    "middle_name_i_c": None,
+                    "family_name_i_c": None,
+                    "full_name_i_c": None,
+                    "gender_i_c": None,
+                    "birth_date_i_c": None,
+                    "estimated_birth_date_i_c": None,
+                    "phone_no_i_c": None,
+                    "phone_no_alternative_i_c": None,
+                }
                 reduced_submission = rename_dict_keys(individual_data, get_field_name)
-                if reduced_submission.get("relationship_i_c", RELATIONSHIP_UNKNOWN).upper() != NON_BENEFICIARY:
-                    total_individuals_count += 1
+                for field_name in fields:
+                    fields[field_name] = str(reduced_submission.get(field_name))
+                hash_key = sha256(";".join(fields.values()).encode()).hexdigest()
+                seen_hash_keys.append(hash_key)
+                total_individuals_count += 1
+                if (
+                        reduced_submission.get("relationship_i_c", RELATIONSHIP_UNKNOWN).upper() == NON_BENEFICIARY
+                        and seen_hash_keys.count(hash_key) > 1
+                ):
+                    total_individuals_count -= 1
 
     return total_households_count, total_individuals_count

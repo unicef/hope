@@ -605,7 +605,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(self, documents_and_identities, individual_dict):
+    def _handle_documents_and_identities(self, documents_and_identities):
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -615,6 +615,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
+                if ImportedIndividual.objects.filter(id=data["individual"].id).exists() is False:
+                    continue
+
                 is_identity = document_name in identity_fields
 
                 if is_identity:
@@ -624,7 +627,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     identities.append(
                         ImportedIndividualIdentity(
                             agency=agency,
-                            individual=individual_dict.get(data["individual"].get_hash_key),
+                            individual=data["individual"],
                             document_number=data["number"],
                         )
                     )
@@ -634,7 +637,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     country = Country(data["issuing_country"])
                     if label is None:
                         label = data["name"]
-                    (document_type, is_created,) = ImportedDocumentType.objects.get_or_create(
+                    document_type = ImportedDocumentType.objects.get(
                         country=country,
                         label=label,
                         type=type_name,
@@ -723,29 +726,30 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
-                        if individual_obj.relationship == HEAD and only_collector_flag is False:
-                            head_of_households_mapping[household_obj] = individual_obj
-
-                        individual_obj.last_registration_date = individual_obj.first_registration_date
-                        individual_obj.registration_data_import = registration_data_import
 
                         duplicated_object = individuals_to_create.get(individual_obj.get_hash_key)
-                        if only_collector_flag is False:
-                            individuals_to_create[individual_obj.get_hash_key] = individual_obj
 
-                        individual_obj.household = household_obj if only_collector_flag is False else None
+                        if duplicated_object is not None and only_collector_flag is True:
+                            individual_obj = duplicated_object
+                        else:
+                            if individual_obj.relationship == HEAD and only_collector_flag is False:
+                                head_of_households_mapping[household_obj] = individual_obj
+
+                            individual_obj.last_registration_date = individual_obj.first_registration_date
+                            individual_obj.registration_data_import = registration_data_import
+                            individual_obj.household = household_obj if only_collector_flag is False else None
+
+                            individuals_to_create[individual_obj.get_hash_key] = individual_obj
+                            current_individuals.append(individual_obj.get_hash_key)
+                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
-                                individual=duplicated_object or individual_obj,
+                                individual=individual_obj,
                                 household_id=household_obj.pk,
                                 role=role,
                             )
                             collectors_to_create[individual_obj.get_hash_key].append(role_obj)
-
-                        if only_collector_flag is False:
-                            documents_and_identities_to_create.append(current_individual_docs_and_identities)
-                            current_individuals.append(individual_obj.get_hash_key)
 
                 elif hh_field == "end_h_c":
                     registration_date = parse(hh_value)
@@ -768,10 +772,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
         self._handle_collectors(collectors_to_create, individuals_to_create)
-        self._handle_documents_and_identities(
-            documents_and_identities_to_create,
-            individuals_to_create,
-        )
+        self._handle_documents_and_identities(documents_and_identities_to_create)
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():

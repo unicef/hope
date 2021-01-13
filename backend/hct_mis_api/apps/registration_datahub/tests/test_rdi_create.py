@@ -339,6 +339,12 @@ class TestRdiKoboCreateTask(TestCase):
         cls.RdiXlsxCreateTask = RdiXlsxCreateTask
         cls.RdiKoboCreateTask = RdiKoboCreateTask
 
+        identification_type_choice = tuple((doc_type, label) for doc_type, label in IDENTIFICATION_TYPE_CHOICE)
+        document_types = []
+        for doc_type, label in identification_type_choice:
+            document_types.append(DocumentType(country=Country("AFG"), label=label, type=doc_type))
+        ImportedDocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
+
         content = Path(
             f"{settings.PROJECT_ROOT}/apps/registration_datahub/tests/test_file/kobo_submissions.json"
         ).read_bytes()
@@ -555,7 +561,7 @@ class TestRdiKoboCreateTask(TestCase):
                 }
             },
         ]
-        task._handle_documents_and_identities(documents_and_identities, individuals_dict)
+        task._handle_documents_and_identities(documents_and_identities)
 
         result = list(ImportedDocument.objects.values("document_number", "individual_id"))
         expected = [
