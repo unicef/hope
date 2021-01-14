@@ -1,8 +1,8 @@
-from household.models import RELATIONSHIP_UNKNOWN
+from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
 
 
 def handle_role(role, household, individual):
-    from household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
+    from hct_mis_api.apps.household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
@@ -16,7 +16,7 @@ def handle_role(role, household, individual):
 def handle_add_document(document, individual):
     from django_countries.fields import Country
     from graphql import GraphQLError
-    from household.models import DocumentType, Document
+    from hct_mis_api.apps.household.models import DocumentType, Document
 
     type_name = document.get("type")
     country_code = document.get("country")
@@ -33,8 +33,8 @@ def handle_add_document(document, individual):
 
 def prepare_previous_documents(documents_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
-    from core.utils import decode_id_string, encode_id_base64
-    from household.models import Document
+    from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
+    from hct_mis_api.apps.household.models import Document
 
     previous_documents = {}
     for document_data in documents_to_remove_with_approve_status:
@@ -54,7 +54,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
 
 def verify_required_arguments(input_data, field_name, options):
     from graphql import GraphQLError
-    from core.utils import nested_dict_get
+    from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
         if key != input_data.get(field_name):
@@ -74,8 +74,8 @@ def remove_parsed_data_fields(data_dict, fields_list):
 
 def verify_flex_fields(flex_fields_to_verify, associated_with):
     import re
-    from core.core_fields_attributes import FIELD_TYPES_TO_INTERNAL_TYPE, TYPE_SELECT_ONE, TYPE_SELECT_MANY
-    from core.utils import serialize_flex_attributes
+    from hct_mis_api.apps.core.core_fields_attributes import FIELD_TYPES_TO_INTERNAL_TYPE, TYPE_SELECT_ONE, TYPE_SELECT_MANY
+    from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
@@ -103,9 +103,9 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
 
 def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
     from django.shortcuts import get_object_or_404
-    from core.utils import decode_id_string
+    from hct_mis_api.apps.core.utils import decode_id_string
     from graphql import GraphQLError
-    from household.models import (
+    from hct_mis_api.apps.household.models import (
         Household,
         Individual,
         IndividualRoleInHousehold,

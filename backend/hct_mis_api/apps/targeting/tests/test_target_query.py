@@ -3,18 +3,18 @@ import unittest
 from django.core.management import call_command
 from parameterized import parameterized
 
-from targeting.models import (
+from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingCriteriaRuleFilter,
     TargetPopulation,
 )
-from account.fixtures import UserFactory
-from account.permissions import Permissions
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from household.fixtures import create_household
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 @unittest.skip("fix ordering")

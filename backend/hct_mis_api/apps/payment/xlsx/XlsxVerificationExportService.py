@@ -2,7 +2,7 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from payment.models import PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentVerification
 
 
 class XlsxVerificationExportService:

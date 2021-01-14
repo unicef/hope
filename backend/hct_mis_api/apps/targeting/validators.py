@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 
-from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY, XLSX_ONLY_FIELDS
-from core.models import FlexibleAttribute
-from core.utils import get_attr_value
-from core.validators import BaseValidator
-from targeting.models import TargetingCriteriaRuleFilter
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.models import FlexibleAttribute
+from hct_mis_api.apps.core.utils import get_attr_value
+from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter
 
 
 class TargetValidator(BaseValidator):

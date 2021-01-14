@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 
-from cash_assist_datahub.models import (
+from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
     Session,
     TargetPopulation,
