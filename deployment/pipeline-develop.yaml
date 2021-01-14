@@ -72,15 +72,15 @@ stages:
                 $(Build.BuildId)
                 dev-latest
           - task: Docker@2
-              displayName: Push
-              inputs:
-                command: push
-                dockerfile: $(Docker.frontend.filePath)
-                repository: $(Docker.frontend.repository)
-                containerRegistry: $(Docker.registry)
-                tags: |
-                  $(Build.BuildId)
-                  dev-latest
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
 
 
   - stage: test
