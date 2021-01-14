@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import * as Yup from 'yup';
 import get from 'lodash/get';
 import { Field, Form, Formik } from 'formik';
 import {
@@ -25,6 +26,8 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
+import { UniversalMoment } from '../UniversalMoment';
+import { REPORT_TYPES } from '../../utils/constants';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -37,20 +40,24 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-// TODO: implement conditional form fields based on selected report type:
-// Report type and from date and to date are required fields always in the form
-// Based on selected report type, optional fields should appear:
-// (Admin area should be multi select field, program - simple select)
-// 1: Individuals - admin area
-// 2: Households - admin area
-// 3: Cash Plan Verification - program
-// 4: Payments - admin area
-// 5: Payment Verification - program
-// 6: Cash Plan - program
-// 7: Programme - no extra fields
-// 8: Individuals & Payment - admin area, program
-// Be sure to only include a correct set of fields to mutation input
-
+const validationSchema = Yup.object().shape({
+  reportType: Yup.string().required('Report type is required'),
+  dateFrom: Yup.date().required('Date From is required'),
+  dateTo: Yup.date()
+    .when(
+      'dateFrom',
+      (dateFrom, schema) =>
+        dateFrom &&
+        schema.min(
+          dateFrom,
+          `End date have to be greater than ${(
+            <UniversalMoment>{dateFrom}</UniversalMoment>
+          )}`,
+        ),
+      '',
+    )
+    .required('Date To is required'),
+});
 export const NewReportForm = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -83,14 +90,56 @@ export const NewReportForm = (): React.ReactElement => {
     program: '',
   };
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const prepareVariables = (values) => {
+    const shouldSendAdminAreaField =
+      values.reportType === REPORT_TYPES.INDIVIDUALS ||
+      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
+      values.reportType === REPORT_TYPES.PAYMENTS;
+
+    const shouldSendProgramField =
+      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
+      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
+      values.reportType === REPORT_TYPES.CASH_PLAN;
+
+    const shouldSendBothFields =
+      values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
+
+    let variables = null;
+
+    const basicVariables = {
+      businessAreaSlug: businessArea,
+      reportType: values.reportType,
+      dateFrom: values.dateFrom,
+      dateTo: values.dateTo,
+    };
+
+    if (shouldSendAdminAreaField) {
+      variables = {
+        ...basicVariables,
+        adminArea: values.adminArea.map((el) => el.node.id),
+      };
+    }
+    if (shouldSendProgramField) {
+      variables = {
+        ...basicVariables,
+        program: values.program,
+      };
+    }
+    if (shouldSendBothFields) {
+      variables = {
+        ...basicVariables,
+        program: values.program,
+        adminArea: values.adminArea.map((el) => el.node.id),
+      };
+    }
+    return variables;
+  };
+
   const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
       variables: {
-        reportData: {
-          ...values,
-          adminArea: values.adminArea.map((el) => el.node.id),
-          businessAreaSlug: businessArea,
-        },
+        reportData: prepareVariables(values),
       },
       refetchQueries: () => [
         { query: ALL_REPORTS_QUERY, variables: { businessArea } },
@@ -104,6 +153,61 @@ export const NewReportForm = (): React.ReactElement => {
     } else {
       showMessage('Report create action failed.');
     }
+  };
+  const renderConditionalFields = (values) => {
+    const adminAreaField = (
+      <Grid item xs={12}>
+        <Field
+          name='adminArea'
+          label='Administrative Level 2'
+          variant='outlined'
+          component={FormikAdminAreaAutocompleteMultiple}
+        />
+      </Grid>
+    );
+    const programField = (
+      <Grid item xs={12}>
+        <Field
+          name='program'
+          label='Programme'
+          fullWidth
+          variant='outlined'
+          required
+          choices={mappedPrograms}
+          component={FormikSelectField}
+        />
+      </Grid>
+    );
+    const showOnlyAdminAreaField =
+      values.reportType === REPORT_TYPES.INDIVIDUALS ||
+      values.reportType === REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS ||
+      values.reportType === REPORT_TYPES.PAYMENTS;
+
+    const showOnlyProgramField =
+      values.reportType === REPORT_TYPES.CASH_PLAN_VERIFICATION ||
+      values.reportType === REPORT_TYPES.PAYMENT_VERIFICATION ||
+      values.reportType === REPORT_TYPES.CASH_PLAN;
+
+    const showBothFields =
+      values.reportType === REPORT_TYPES.INDIVIDUALS_AND_PAYMENT;
+
+    let fields = null;
+
+    if (showOnlyAdminAreaField) {
+      fields = adminAreaField;
+    }
+    if (showOnlyProgramField) {
+      fields = programField;
+    }
+    if (showBothFields) {
+      fields = (
+        <>
+          {adminAreaField}
+          {programField}
+        </>
+      );
+    }
+    return fields;
   };
   return (
     <>
@@ -132,7 +236,7 @@ export const NewReportForm = (): React.ReactElement => {
         <Formik
           initialValues={initialValue}
           onSubmit={submitFormHandler}
-          // validationSchema={validationSchema}
+          validationSchema={validationSchema}
         >
           {({ submitForm, values }) => (
             <>
@@ -186,25 +290,7 @@ export const NewReportForm = (): React.ReactElement => {
                         </Grid>
                       </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Field
-                        name='adminArea'
-                        label='Administrative Level 2'
-                        variant='outlined'
-                        component={FormikAdminAreaAutocompleteMultiple}
-                      />
-                    </Grid>
-                    {/* <Grid item xs={12}>
-                      <Field
-                        name='program'
-                        label='Programme'
-                        fullWidth
-                        variant='outlined'
-                        required
-                        choices={mappedPrograms}
-                        component={FormikSelectField}
-                      />
-                    </Grid> */}
+                    {renderConditionalFields(values)}
                   </Grid>
                 </Form>
               </DialogContent>
