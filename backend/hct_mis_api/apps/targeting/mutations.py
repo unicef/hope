@@ -6,18 +6,19 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
 
-from account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
+from hct_mis_api.apps.account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
 from core import utils
-from core.airflow_api import AirflowApi
-from core.models import BusinessArea
-from core.permissions import is_authenticated
-from core.utils import decode_id_string, check_concurrency_version_in_mutation
-from household.models import Household
-from program.models import Program
-from steficon.interpreters import mapping
-from steficon.models import Rule
-from steficon.schema import SteficonRuleNode
-from targeting.models import (
+from hct_mis_api.apps.core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.steficon.interpreters import mapping
+from hct_mis_api.apps.steficon.models import Rule
+from hct_mis_api.apps.steficon.schema import SteficonRuleNode
+from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
     HouseholdSelection,
     TargetingCriteria,
@@ -26,15 +27,14 @@ from targeting.models import (
     TargetingIndividualRuleFilterBlock,
     TargetingIndividualBlockRuleFilter,
 )
-from targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
-from targeting.validators import (
+from hct_mis_api.apps.targeting.schema import TargetPopulationNode, TargetingCriteriaObjectType
+from hct_mis_api.apps.targeting.validators import (
     TargetValidator,
     ApproveTargetPopulationValidator,
     FinalizeTargetPopulationValidator,
     UnapproveTargetPopulationValidator,
     TargetingCriteriaInputValidator,
 )
-from core.scalars import BigInt
 
 
 class CopyTargetPopulationInput(graphene.InputObjectType):

@@ -339,7 +339,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     def setUp(self) -> None:
-        from registration_datahub.validators import KoboProjectImportDataValidator
+        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
 
         self.KoboProjectImportDataValidator = KoboProjectImportDataValidator
 

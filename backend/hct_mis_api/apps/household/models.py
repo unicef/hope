@@ -15,8 +15,8 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
-from core.currencies import CURRENCY_CHOICES
-from utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 BLANK = ""
 IDP = "IDP"

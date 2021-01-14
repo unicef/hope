@@ -2,9 +2,9 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
-from account.fixtures import UserFactory
-from core.models import BusinessArea
-from grievance.models import GrievanceTicket
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 class TestGrievanceModelValidation(TestCase):
