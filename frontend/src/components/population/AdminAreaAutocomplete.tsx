@@ -46,7 +46,6 @@ export function AdminAreasAutocomplete({
     setNewValue(value);
     onInputTextChange('');
   }, [data, value]);
-
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
@@ -73,11 +72,28 @@ export function AdminAreasAutocomplete({
       loading={loading}
       renderInput={(params) => (
         <TextField
+          {...params}
           label='Administrative Level 2'
           variant='outlined'
           margin='dense'
           value={inputValue}
           onChange={(e) => onInputTextChange(e.target.value)}
+          InputProps={{
+            ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position='start'>
+                <RoomRoundedIcon style={{ color: '#5f6368' }} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <>
+                {loading ? (
+                  <CircularProgress color='inherit' size={20} />
+                ) : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
         />
       )}
     />
