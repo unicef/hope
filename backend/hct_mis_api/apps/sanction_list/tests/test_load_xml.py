@@ -3,8 +3,8 @@ from datetime import datetime
 from django.conf import settings
 from django.test import TestCase
 
-from sanction_list.models import SanctionListIndividual
-from sanction_list.tasks.load_xml import LoadSanctionListXMLTask
+from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
+from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 
 
 class TestLoadXML(TestCase):

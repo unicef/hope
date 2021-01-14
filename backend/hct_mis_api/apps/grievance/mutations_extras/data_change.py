@@ -5,24 +5,24 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
 
-from core.airflow_api import AirflowApi
-from core.utils import decode_id_string
-from core.utils import to_snake_case
-from grievance.models import (
+from hct_mis_api.apps.core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import to_snake_case
+from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
     TicketAddIndividualDetails,
     TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
 )
-from grievance.mutations_extras.utils import (
+from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
     handle_role,
     prepare_previous_documents,
     verify_flex_fields,
     remove_individual_and_reassign_roles,
 )
-from household.models import (
+from hct_mis_api.apps.household.models import (
     Individual,
     Household,
     HEAD,
@@ -31,8 +31,8 @@ from household.models import (
     NON_BENEFICIARY,
     RELATIONSHIP_UNKNOWN,
 )
-from household.schema import HouseholdNode, IndividualNode
-from utils.schema import Arg
+from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+from hct_mis_api.apps.utils.schema import Arg
 
 
 class HouseholdUpdateDataObjectType(graphene.InputObjectType):

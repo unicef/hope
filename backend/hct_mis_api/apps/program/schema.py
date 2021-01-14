@@ -11,19 +11,19 @@ from django_filters import (
 from graphene import ConnectionField, relay
 from graphene_django import DjangoObjectType
 
-from account.permissions import (
+from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     hopePermissionClass,
     Permissions,
 )
-from account.schema import LogEntryObjectConnection
-from core.extended_connection import ExtendedConnection
-from core.filters import DecimalRangeFilter, IntegerRangeFilter
-from core.schema import ChoiceObject
-from core.utils import to_choice_object, CustomOrderingFilter
-from payment.models import CashPlanPaymentVerification, PaymentRecord
-from program.models import CashPlan, Program
+from hct_mis_api.apps.account.schema import LogEntryObjectConnection
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.program.models import CashPlan, Program
 
 
 class ProgramFilter(FilterSet):

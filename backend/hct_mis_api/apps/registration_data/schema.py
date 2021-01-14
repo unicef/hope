@@ -3,18 +3,18 @@ from django.db.models.functions import Lower
 from django_filters import FilterSet, DateFilter, CharFilter
 from graphene_django import DjangoObjectType
 
-from account.permissions import (
+from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     hopePermissionClass,
     Permissions,
     BaseNodePermissionMixin,
 )
-from core.extended_connection import ExtendedConnection
-from core.schema import ChoiceObject
-from core.utils import get_count_and_percentage, CustomOrderingFilter
-from household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, DUPLICATE_IN_BATCH
-from registration_data.models import RegistrationDataImport
-from registration_datahub.models import UNIQUE_IN_BATCH
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import get_count_and_percentage, CustomOrderingFilter
+from hct_mis_api.apps.household.models import DUPLICATE, NEEDS_ADJUDICATION, UNIQUE, DUPLICATE_IN_BATCH
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import UNIQUE_IN_BATCH
 
 
 class RegistrationDataImportFilter(FilterSet):

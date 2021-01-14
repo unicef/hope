@@ -11,8 +11,8 @@ from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
-from core.countries import Countries
-from sanction_list.models import (
+from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
     SanctionListIndividualNationalities,
@@ -20,7 +20,7 @@ from sanction_list.models import (
     SanctionListIndividualAliasName,
     SanctionListIndividualDateOfBirth,
 )
-from sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
 
 
 class LoadSanctionListXMLTask:

@@ -4,23 +4,23 @@ from unittest.mock import MagicMock, patch
 from django.core.management import call_command
 from django.test import TestCase
 
-from account.fixtures import UserFactory
-from core.models import BusinessArea, AdminArea
-from household.fixtures import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.household.fixtures import (
     create_household,
     EntitlementCardFactory,
 )
-from payment.fixtures import (
+from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
     PaymentVerificationFactory,
 )
-from payment.models import PaymentVerification, CashPlanPaymentVerification
-from payment.rapid_pro.api import RapidProAPI
-from payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
-from program.fixtures import ProgramFactory, CashPlanFactory
-from registration_data.fixtures import RegistrationDataImportFactory
-from targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
+from hct_mis_api.apps.payment.models import PaymentVerification, CashPlanPaymentVerification
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
+from hct_mis_api.apps.program.fixtures import ProgramFactory, CashPlanFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.fixtures import TargetingCriteriaFactory, TargetPopulationFactory
 
 
 class TestRapidProVerificationTask(TestCase):
@@ -119,7 +119,7 @@ class TestRapidProVerificationTask(TestCase):
         cls.cash_plan = cash_plan
         cls.verification = cash_plan.verifications.first()
 
-    @patch("payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
     def test_filtering_by_start_id(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
@@ -130,14 +130,14 @@ class TestRapidProVerificationTask(TestCase):
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.household.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs(uuid.uuid4())
             self.assertEqual(
                 mapped_dict, [],
             )
 
-    @patch("payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
     def test_mapping(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification_obj = TestRapidProVerificationTask.verification.payment_record_verifications
@@ -148,7 +148,7 @@ class TestRapidProVerificationTask(TestCase):
             "urn"
         ] = f"tel:{payment_record_verification.payment_record.household.head_of_household.phone_no}"
         mock = MagicMock(return_value=TestRapidProVerificationTask.ORIGINAL_RAPIDPRO_RUNS_RESPONSE)
-        with patch("payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_flow_runs", mock):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs(TestRapidProVerificationTask.START_UUID)
             self.assertEqual(
@@ -164,7 +164,7 @@ class TestRapidProVerificationTask(TestCase):
                 ],
             )
 
-    @patch("payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
     def test_not_received(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -184,7 +184,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -193,7 +193,7 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.status, PaymentVerification.STATUS_NOT_RECEIVED,
             )
 
-    @patch("payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
     def test_received_with_issues(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -214,7 +214,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()
@@ -227,7 +227,7 @@ class TestRapidProVerificationTask(TestCase):
                 payment_record_verification.payment_record.delivered_quantity - 1,
             )
 
-    @patch("payment.rapid_pro.api.RapidProAPI.__init__")
+    @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
     def test_received(self, mock_parent_init):
         mock_parent_init.return_value = None
         payment_record_verification = (
@@ -248,7 +248,7 @@ class TestRapidProVerificationTask(TestCase):
             }
         ]
         mock = MagicMock(return_value=fake_data_to_return_from_rapid_pro_api)
-        with patch("payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
+        with patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.get_mapped_flow_runs", mock):
             task = CheckRapidProVerificationTask()
             task.execute()
             mock.assert_called()

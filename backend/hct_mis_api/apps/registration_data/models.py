@@ -3,8 +3,8 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from registration_datahub.models import ImportedIndividual
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class RegistrationDataImport(TimeStampedUUIDModel):

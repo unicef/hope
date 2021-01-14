@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from payment.models import PaymentRecord, CashPlanPaymentVerification, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, CashPlanPaymentVerification, PaymentVerification
 
 
 @admin.register(PaymentRecord)
