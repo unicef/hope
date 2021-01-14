@@ -266,7 +266,10 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session2.save()
         copy_session_mock = MagicMock()
-        with patch("hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+        with patch(
+            "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
+            copy_session_mock,
+        ):
             task = PullFromDatahubTask()
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 2)
@@ -279,25 +282,14 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
         session2.save()
         copy_session_mock = MagicMock()
-        with patch("hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+        with patch(
+            "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
+            copy_session_mock,
+        ):
             task = PullFromDatahubTask()
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 0)
             self.assertEqual(copy_session_mock.call_args_list, [])
-        session1.delete()
-        session2.delete()
-
-    # TODO Janek lami
-    def test_multiple_sessions_same_ba_fail(self):
-        session1 = Session(status=Session.STATUS_FAILED, business_area=BusinessArea.objects.first().code)
-        session1.save()
-        session2 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
-        session2.save()
-        copy_session_mock = MagicMock()
-        with patch("hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
-            task = PullFromDatahubTask()
-            task.execute()
-            self.assertEqual(copy_session_mock.call_count, 0)
         session1.delete()
         session2.delete()
 
@@ -309,7 +301,10 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session3 = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.all()[3].code)
         session3.save()
         copy_session_mock = MagicMock()
-        with patch("hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session", copy_session_mock):
+        with patch(
+            "hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub.PullFromDatahubTask.copy_session",
+            copy_session_mock,
+        ):
             task = PullFromDatahubTask()
             task.execute()
             self.assertEqual(copy_session_mock.call_count, 1)
