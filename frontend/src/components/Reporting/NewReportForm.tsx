@@ -160,7 +160,7 @@ export const NewReportForm = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='dateFrom'
-                            label='Start Date'
+                            label='From Date'
                             component={FormikDateField}
                             required
                             fullWidth
@@ -172,7 +172,7 @@ export const NewReportForm = (): React.ReactElement => {
                         <Grid item xs={6}>
                           <Field
                             name='dateTo'
-                            label='End Date'
+                            label='To Date'
                             component={FormikDateField}
                             required
                             disabled={!values.dateFrom}
