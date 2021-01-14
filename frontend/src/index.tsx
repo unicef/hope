@@ -6,7 +6,8 @@ import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 
 setupInternalization();
-if (process.env.NODE_ENV !== 'development')
+console.log('process.env',process.env)
+// if (process.env.NODE_ENV !== 'development')
     Sentry.init({ dsn: process.env.SENTRY_FRONTEND_DSN });
 
 ReactDOM.render(<App />, document.getElementById('root'));
