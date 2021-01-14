@@ -7,7 +7,7 @@ from graphene_django.converter import convert_django_field
 from graphene_django.forms.converter import convert_form_field
 from concurrency.fields import IntegerVersionField
 
-from core.scalars import BigInt
+from hct_mis_api.apps.core.scalars import BigInt
 
 
 class GeoJSON(graphene.Scalar):
