@@ -5,7 +5,7 @@ from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
-from from hct_mis_api.apps.scalars import BigInt
+from hct_mis_api.apps.scalars import BigInt
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
