@@ -23,8 +23,8 @@ import {
 } from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
+import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -79,7 +79,7 @@ export const NewReportForm = (): React.ReactElement => {
     reportType: '',
     dateFrom: '',
     dateTo: '',
-    adminArea: '',
+    adminArea: [],
     program: '',
   };
 
@@ -88,7 +88,7 @@ export const NewReportForm = (): React.ReactElement => {
       variables: {
         reportData: {
           ...values,
-          adminArea: values.adminArea?.node ? [values.adminArea.node.id] : null,
+          adminArea: values.adminArea.map((el) => el.node.id),
           businessAreaSlug: businessArea,
         },
       },
@@ -191,7 +191,7 @@ export const NewReportForm = (): React.ReactElement => {
                         name='adminArea'
                         label='Administrative Level 2'
                         variant='outlined'
-                        component={FormikAdminAreaAutocomplete}
+                        component={FormikAdminAreaAutocompleteMultiple}
                       />
                     </Grid>
                     {/* <Grid item xs={12}>
