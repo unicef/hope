@@ -1,11 +1,11 @@
 from django.core.management import call_command
 from parameterized import parameterized
 
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from reporting.fixtures import ReportFactory
-from reporting.models import Report
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.reporting.fixtures import ReportFactory
+from hct_mis_api.apps.reporting.models import Report
 
 ALL_REPORTS_QUERY = """
       query AllReports{

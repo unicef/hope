@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
 
 @admin.register(RegistrationDataImport)

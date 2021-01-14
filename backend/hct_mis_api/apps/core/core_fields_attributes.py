@@ -4,11 +4,11 @@ from functools import reduce
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from core.countries import Countries
-from core.currencies import CURRENCY_CHOICES
-from core.models import AdminArea, BusinessArea
-from core.utils import LazyEvalMethodsDict, age_to_birth_date_query
-from household.models import (
+from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query
+from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICE,
     MARITAL_STATUS_CHOICE,

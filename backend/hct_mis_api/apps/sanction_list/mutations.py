@@ -1,11 +1,11 @@
 import graphene
 from graphene_file_upload.scalars import Upload
 
-from core.airflow_api import AirflowApi
-from core.permissions import is_authenticated
-from registration_datahub.schema import XlsxRowErrorNode
-from registration_datahub.validators import XLSXValidator
-from sanction_list.models import UploadedXLSXFile
+from hct_mis_api.apps.core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.registration_datahub.schema import XlsxRowErrorNode
+from hct_mis_api.apps.registration_datahub.validators import XLSXValidator
+from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile
 
 
 class CheckAgainstSanctionListMutation(

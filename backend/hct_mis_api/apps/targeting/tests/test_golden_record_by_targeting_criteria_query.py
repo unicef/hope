@@ -1,8 +1,8 @@
 from django.core.management import call_command
 
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from household.fixtures import create_household
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):

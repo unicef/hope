@@ -10,7 +10,7 @@ from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.writer.excel import save_virtual_workbook
 
-from sanction_list.models import UploadedXLSXFile, SanctionListIndividual
+from hct_mis_api.apps.sanction_list.models import UploadedXLSXFile, SanctionListIndividual
 
 
 class CheckAgainstSanctionListTask:

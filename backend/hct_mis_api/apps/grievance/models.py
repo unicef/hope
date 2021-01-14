@@ -3,8 +3,8 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from payment.models import PaymentVerification
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.payment.models import PaymentVerification
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from django.utils.translation import ugettext_lazy as _
 
 

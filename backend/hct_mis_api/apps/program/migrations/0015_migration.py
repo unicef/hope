@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 
 
 def delivery_type_labels_to_valid_choices(apps, schema_editor):
