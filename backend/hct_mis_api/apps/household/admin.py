@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from household.models import (
+from hct_mis_api.apps.household.models import (
     Household,
     Individual,
     DocumentType,

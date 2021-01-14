@@ -6,16 +6,16 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from core.extended_connection import ExtendedConnection
-from core.filters import filter_age
-from core.schema import ChoiceObject
-from core.utils import decode_id_string, to_choice_object
-from payment.inputs import GetCashplanVerificationSampleSizeInput
-from payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
-from payment.rapid_pro.api import RapidProAPI
-from payment.utils import get_number_of_samples
-from program.models import CashPlan
-from steficon.models import Rule
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import filter_age
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object
+from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.utils import get_number_of_samples
+from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.steficon.models import Rule
 
 
 class SteficonRuleFilter(FilterSet):

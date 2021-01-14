@@ -3,7 +3,7 @@ from .base import DjangoOperator
 
 class CheckAgainstSanctionListOperator(DjangoOperator):
     def execute(self, context):
-        from sanction_list.tasks.check_against_sanction_list import (
+        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,
         )
 

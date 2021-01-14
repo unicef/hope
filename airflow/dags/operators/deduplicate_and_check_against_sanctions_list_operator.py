@@ -3,7 +3,7 @@ from .base import DjangoOperator
 
 class DeduplicateAndCheckAgainstSanctionsListOperator(DjangoOperator):
     def execute(self, context):
-        from grievance.tasks.deduplicate_and_check_sanctions import (
+        from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
         )
 
