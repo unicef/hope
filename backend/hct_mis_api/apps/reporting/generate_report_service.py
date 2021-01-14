@@ -14,7 +14,7 @@ class GenerateReportContentHelpers:
     @staticmethod
     def _get_individuals(report: Report):
         filter_vars = {
-            "business_area": report.business_area,
+            "household__business_area": report.business_area,
             "status": "ACTIVE",
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
@@ -27,30 +27,34 @@ class GenerateReportContentHelpers:
     def _format_individual_row(self, individual: Individual) -> tuple:
 
         return (
-            individual.household.admin_area.id if individual.household and individual.household.admin_area else "",
-            individual.business_area.id,
-            self._to_values_list(individual.documents.all(), "id"),
-            individual.household.country_origin if individual.household else "",
+            individual.household.id,
+            individual.household.country_origin.name if individual.household.country_origin else "",
+            individual.household.admin_area.title if individual.household.admin_area else "",
             individual.birth_date,
-            individual.comms_disability,
-            individual.deduplication_batch_results,
-            individual.deduplication_golden_record_results,
-            individual.deduplication_golden_record_status,
-            individual.disability,
             individual.estimated_birth_date,
-            individual.hearing_disability,
+            individual.sex,
             individual.marital_status,
-            individual.memory_disability,
+            individual.disability,
             individual.observed_disability,
+            individual.comms_disability,
+            individual.hearing_disability,
+            individual.memory_disability,
             individual.physical_disability,
-            individual.pregnant,
-            individual.relationship,
-            individual.sanction_list_possible_match,
             individual.seeing_disability,
             individual.selfcare_disability,
-            individual.sex,
-            individual.work_status,
+            individual.pregnant,
+            individual.relationship,
             self._to_values_list(individual.households_and_roles.all(), "role"),
+            individual.work_status,
+            individual.sanction_list_possible_match,
+            individual.deduplication_batch_status,
+            individual.deduplication_golden_record_status,
+            individual.deduplication_golden_record_results.get("duplicates", "")
+            if individual.deduplication_golden_record_results
+            else "",
+            individual.deduplication_golden_record_results.get("possible_duplicates", "")
+            if individual.deduplication_golden_record_results
+            else "",
         )
 
     @staticmethod
@@ -255,30 +259,30 @@ class GenerateReportContentHelpers:
 class GenerateReportService:
     HEADERS = {
         Report.INDIVIDUALS: (
-            "admin_area_id",
-            "business_area_id",
-            "document_id",  # 8e8ea94a-2ca5-4b76-b055-e098bc24eee8
-            "household_country_origin",  # TM
-            "birth_date",  # 2000-06-24
-            "comms_disability",
-            "deduplication_batch_results",  # {"duplicates": [], "possible_duplicates": []}
-            "deduplication_golden_record_results",  # {"duplicates": [], "possible_duplicates": []}
-            "deduplication_golden_record_status",  # UNIQUE_IN_BATCH
-            "disability",
-            "estimated_birth_date",  # False
-            "hearing_disability",
-            "marital_status",  # MARRIED
-            "memory_disability",
-            "observed_disability",  # NONE
-            "physical_disability",
-            "pregnant",  # False
-            "relationship",
-            "sanction_list_possible_match",  # False
-            "seeing_disability",
-            "selfcare_disability",
-            "sex",  # MALE
-            "work_status",  # NOT_PROVIDED
-            "role_in_household",  # PRIMARY
+            "household id",  # 8e8ea94a-2ca5-4b76-b055-e098bc24eee8
+            "country of origin",  # South Sudan
+            "administrative area 2",  # Juba
+            "birth date",  # 2000-06-24
+            "estimated birth date",  # TRUE
+            "gender",  # FEMALE,
+            "marital status",  # MARRIED
+            "disability",  # TRUE
+            "observed disability",
+            "communication disability",
+            "hearing disability",  # LOT_DIFFICULTY
+            "remembering disability",
+            "physical disability",
+            "seeing disability",
+            "self-care disability",
+            "pregnant",  # TRUE
+            "relationship to hoh",  # WIFE
+            "role",  # PRIMARY
+            "work status",  # NOT_PROVIDED
+            "sanction list possible match",  # FALSE
+            "dedupe in batch status",  # UNIQUE_IN_BATCH
+            "dedupe in Pop. status",  # DUPLICATE
+            "dedupe in Pop.duplicates",
+            "dedupe in Pop. possible duplicates",
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
             "admin_area_id",
@@ -419,7 +423,7 @@ class GenerateReportService:
             "sanction_list_possible_match",  # False
             "seeing_disability",
             "selfcare_disability",
-            "sex",  # Retrieving data. Wait a few seconds and try to cut or copy again.
+            "sex",  # FEMALE
             "work_status",  # NOT_PROVIDED
             "role",  # PRIMARY
             "currency",
@@ -474,16 +478,21 @@ class GenerateReportService:
 
     def _add_filters_info(self):
         filter_rows = [
-            ("timeframe", f"{str(self.report.date_from)} - {str(self.report.date_to)}"),
-            ("business_area", self.business_area.slug),
+            ("Report type", str(self._report_type_to_str())),
+            ("Business area", self.business_area.name),
+            ("From date", str(self.report.date_from)),
+            ("To date", str(self.report.date_to)),
         ]
 
         if self.report.admin_area.all().exists():
             filter_rows.append(
-                ("admin_area", GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"))
+                (
+                    "Administrative area 2",
+                    GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"),
+                )
             )
         if self.report.program:
-            filter_rows.append(("program", self.report.program.name))
+            filter_rows.append(("Program", self.report.program.name))
 
         for filter_row in filter_rows:
             self.ws_filters.append(filter_row)
