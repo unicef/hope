@@ -27,9 +27,15 @@ def social_details(backend, details, response, *args, **kwargs):
 
 def user_details(strategy, details, backend, user=None, *args, **kwargs):
     logger.debug(f"user_details for user {user} details:\n{details}")
+    # social_core_user.user_details use details dict to override some fields on User instance
+    # in order to prevent it setting first and last name fields to empty values (which seems we always get from api)
+    # we set them to current user values
     if user:
-        user.first_name = details.get("first_name")
-        user.last_name = details.get("last_name")
+        # Prevents setting name back to empty but also gives an option to update the name if it had changed
+        if not details.get("first_name"):
+            details["first_name"] = user.first_name
+        if not details.get("last_name"):
+            details["last_name"] = user.last_name
         user.username = details["email"]
         user.status = ACTIVE
         user.save()
