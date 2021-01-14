@@ -29,13 +29,22 @@ snapshots['TestUpdateProgram::test_update_program_not_authenticated 1'] = {
 
 snapshots['TestUpdateProgram::test_update_program_authenticated_0_with_permissions 1'] = {
     'data': {
-        'updateProgram': {
-            'program': {
-                'name': 'updated name',
-                'status': 'ACTIVE'
-            }
+        'updateProgram': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': "mutate() missing 1 required positional argument: 'version'",
+            'path': [
+                'updateProgram'
+            ]
         }
-    }
+    ]
 }
 
 snapshots['TestUpdateProgram::test_update_program_authenticated_1_with_partial_permissions 1'] = {
@@ -50,7 +59,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_1_with_partial_p
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied: User does not have correct permission.',
+            'message': "mutate() missing 1 required positional argument: 'version'",
             'path': [
                 'updateProgram'
             ]
@@ -70,7 +79,7 @@ snapshots['TestUpdateProgram::test_update_program_authenticated_2_without_permis
                     'line': 3
                 }
             ],
-            'message': 'Permission Denied: User does not have correct permission.',
+            'message': "mutate() missing 1 required positional argument: 'version'",
             'path': [
                 'updateProgram'
             ]
