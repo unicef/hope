@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from household.models import (
+from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
@@ -9,7 +9,7 @@ from household.models import (
     RESIDENCE_STATUS_CHOICE,
     IDENTIFICATION_TYPE_CHOICE,
 )
-from utils.models import AbstractSession
+from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):

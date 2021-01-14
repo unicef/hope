@@ -66,6 +66,7 @@ stages:
               command: buildAndPush
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
+              arguments: SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)

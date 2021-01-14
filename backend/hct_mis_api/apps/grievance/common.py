@@ -1,5 +1,5 @@
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area):
-    from grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+    from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 
     details_already_exists = TicketNeedsAdjudicationDetails.objects.filter(
         golden_records_individual__in=(main_individual, possible_duplicate),
@@ -23,7 +23,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
 
 
 def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area):
-    from household.models import Individual
+    from hct_mis_api.apps.household.models import Individual
 
     ticket_details_to_create = []
     for possible_duplicate in individuals_queryset:

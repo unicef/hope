@@ -5,10 +5,10 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, OrderingFilter
 
-from core.extended_connection import ExtendedConnection
-from core.schema import ChoiceObject
-from core.utils import to_choice_object
-from reporting.models import Report
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import to_choice_object
+from hct_mis_api.apps.reporting.models import Report
 
 
 class ReportFilter(FilterSet):

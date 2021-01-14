@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from utils.models import AbstractSession
+from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class FundsCommitment(models.Model):
