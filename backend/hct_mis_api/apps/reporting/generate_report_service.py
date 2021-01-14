@@ -483,7 +483,7 @@ class GenerateReportService:
                 ("admin_area", GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"))
             )
         if self.report.program:
-            filter_rows.append(("program", self.program.name))
+            filter_rows.append(("program", self.report.program.name))
 
         for filter_row in filter_rows:
             self.ws_filters.append(filter_row)
