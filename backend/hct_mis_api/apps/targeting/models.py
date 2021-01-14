@@ -1,5 +1,6 @@
 import datetime
 
+from auditlog.registry import auditlog
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -646,3 +647,5 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with):
         return ""
+
+auditlog.register(TargetPopulation)
