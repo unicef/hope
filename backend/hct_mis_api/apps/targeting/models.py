@@ -277,13 +277,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         if not self.program:
             return None
         tp = (
-            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False)
+            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED)
             .order_by("-created_at")
             .first()
         )
         if tp is None:
             return None
         return tp.steficon_rule
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         unique_together = ("name", "business_area")
