@@ -2,8 +2,8 @@ from django.db.models import Sum, Count
 from django.db.models.signals import post_save, pre_save, m2m_changed
 from django.dispatch import receiver
 
-from household.models import Household
-from targeting.models import (
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaRuleFilter,
     TargetingCriteriaRule,
     TargetPopulation,

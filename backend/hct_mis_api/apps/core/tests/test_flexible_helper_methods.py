@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from xlrd.sheet import Cell
 
-from core.admin import FlexibleAttributeAdmin
-from core.models import FlexibleAttribute
+from hct_mis_api.apps.core.admin import FlexibleAttributeAdmin
+from hct_mis_api.apps.core.models import FlexibleAttribute
 
 
 class TestFlexibleHelperMethods(TestCase):

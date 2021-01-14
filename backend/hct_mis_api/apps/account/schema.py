@@ -14,13 +14,13 @@ from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoice
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
-from account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
-from core.extended_connection import ExtendedConnection
-from core.models import BusinessArea
-from core.schema import ChoiceObject, BusinessAreaNode
-from core.utils import to_choice_object, CustomOrderingFilter, decode_id_string
-from utils.schema import Arg
+from hct_mis_api.apps.account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
+from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.schema import ChoiceObject, BusinessAreaNode
+from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, decode_id_string
+from hct_mis_api.apps.utils.schema import Arg
 
 
 def permissions_resolver(user_roles):

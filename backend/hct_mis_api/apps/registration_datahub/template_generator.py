@@ -2,9 +2,9 @@ from typing import List, Tuple, Dict
 
 import openpyxl
 
-from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY, COLLECTORS_FIELDS
-from core.models import AdminArea
-from core.utils import serialize_flex_attributes
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY, COLLECTORS_FIELDS
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
 
 class TemplateFileGenerator:

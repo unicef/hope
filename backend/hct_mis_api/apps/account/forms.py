@@ -1,7 +1,7 @@
 from django.forms import Form, CharField, ChoiceField, Textarea
 
-from account.models import Role
-from core.models import BusinessArea
+from hct_mis_api.apps.account.models import Role
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class LoadUsersForm(Form):

@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from utils.models import AbstractSession
+from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):

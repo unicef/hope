@@ -3,9 +3,9 @@ from django.db import transaction
 
 from django_countries.data import COUNTRIES
 
-from household.models import IDENTIFICATION_TYPE_CHOICE, Agency, DocumentType
-from registration_datahub.models import ImportedAgency
-from registration_datahub.models import ImportedDocumentType as RDHDocumentType
+from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, Agency, DocumentType
+from hct_mis_api.apps.registration_datahub.models import ImportedAgency
+from hct_mis_api.apps.registration_datahub.models import ImportedDocumentType as RDHDocumentType
 
 
 class Command(BaseCommand):

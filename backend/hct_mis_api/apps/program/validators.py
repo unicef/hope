@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 
-from core.validators import BaseValidator
-from program.models import Program
+from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.program.models import Program
 
 
 class ProgramValidator(BaseValidator):
