@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from mis_datahub.models import (
+from hct_mis_api.apps.mis_datahub.models import (
     Household,
     Individual,
     Session,

@@ -11,26 +11,26 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from targeting.models import HouseholdSelection
-from account.permissions import (
+from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
 )
-from core.countries import Countries
-from core.extended_connection import ExtendedConnection
-from core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
-from core.models import AdminArea
-from core.schema import ChoiceObject
-from core.utils import (
+from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
     encode_ids,
     to_choice_object,
 )
-from grievance.models import GrievanceTicket
-from household.models import (
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
@@ -48,8 +48,8 @@ from household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from program.models import Program
-from registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 
 
 class HouseholdFilter(FilterSet):

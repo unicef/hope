@@ -4,10 +4,10 @@ from constance import config
 from django.db.models import Q
 from django_countries.fields import Country
 
-from core.utils import to_dict
-from household.documents import IndividualDocument
-from household.elasticsearch_utils import populate_index
-from household.models import (
+from hct_mis_api.apps.core.utils import to_dict
+from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.elasticsearch_utils import populate_index
+from hct_mis_api.apps.household.models import (
     Individual,
     DUPLICATE,
     NEEDS_ADJUDICATION,
@@ -16,9 +16,9 @@ from household.models import (
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
 )
-from registration_data.models import RegistrationDataImport
-from registration_datahub.documents import ImportedIndividualDocument
-from registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
+from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
 
 log = logging.getLogger(__name__)
 

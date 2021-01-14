@@ -11,8 +11,8 @@ from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
-from core.utils import unique_slugify
-from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
+from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
 class BusinessArea(TimeStampedUUIDModel):

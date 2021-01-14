@@ -4,9 +4,9 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from account.fixtures import UserFactory
-from core.models import BusinessArea, AdminAreaType
-from grievance.models import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.models import BusinessArea, AdminAreaType
+from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSensitiveDetails,
     TicketComplaintDetails,
@@ -14,8 +14,8 @@ from grievance.models import (
     TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketHouseholdDataUpdateDetails,
     TicketDeleteIndividualDetails, TicketSystemFlaggingDetails, TicketNeedsAdjudicationDetails,
 )
-from household.fixtures import create_household
-from payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 
 
 class GrievanceTicketFactory(factory.DjangoModelFactory):

@@ -14,16 +14,16 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
-from account.permissions import (
+from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
     BaseNodePermissionMixin,
 )
-from core.extended_connection import ExtendedConnection
-from core.schema import ChoiceObject
-from core.utils import decode_id_string, to_choice_object, encode_ids
-from household.models import (
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids
+from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
     DUPLICATE,
@@ -31,7 +31,7 @@ from household.models import (
     DUPLICATE_IN_BATCH,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
 )
-from registration_datahub.models import (
+from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
     RegistrationDataImportDatahub,

@@ -10,7 +10,7 @@ from graphene_django.filter.utils import get_filtering_args_from_filterset, get_
 from graphql import GraphQLError
 from collections import OrderedDict
 
-from core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 @unique

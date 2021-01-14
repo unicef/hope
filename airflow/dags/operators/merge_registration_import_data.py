@@ -3,7 +3,7 @@ from .base import DjangoOperator
 
 class MergeRegistrationImportDataOperator(DjangoOperator):
     def execute(self, context, **kwargs):
-        from registration_datahub.tasks.rdi_merge import RdiMergeTask
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_merge import RdiMergeTask
 
         dag_run = context["dag_run"]
         config_vars = dag_run.conf

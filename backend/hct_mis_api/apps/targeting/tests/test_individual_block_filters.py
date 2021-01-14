@@ -1,10 +1,10 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from core.models import BusinessArea
-from household.fixtures import create_household_and_individuals
-from household.models import Household, MALE, FEMALE
-from targeting.models import (
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import Household, MALE, FEMALE
+from hct_mis_api.apps.targeting.models import (
     TargetingCriteria,
     TargetingCriteriaRule,
     TargetingIndividualBlockRuleFilter,
