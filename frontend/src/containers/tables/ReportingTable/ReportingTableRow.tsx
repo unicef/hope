@@ -1,14 +1,14 @@
 import styled from 'styled-components';
-import { TableCell } from '@material-ui/core';
+import { TableCell, TableRow } from '@material-ui/core';
 import { GetApp } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { reportStatusToColor } from '../../../utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
+import { Pointer } from '../../../components/Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -43,14 +43,9 @@ export const ReportingTableRow = ({
   };
 
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={report.id}
-    >
-      <UnderlinedTableCell align='left'>
-        {typeChoices[report.reportType]}
+    <TableRow hover role='checkbox' key={report.id}>
+      <UnderlinedTableCell onClick={handleClick} align='left'>
+        <Pointer>{typeChoices[report.reportType]}</Pointer>
       </UnderlinedTableCell>
       <TableCell align='left'>
         <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
@@ -75,12 +70,12 @@ export const ReportingTableRow = ({
         onClick={report.fileUrl ? () => window.open(report.fileUrl) : undefined}
       >
         {report.fileUrl && (
-          <span>
+          <Pointer>
             <GetApp />
             DOWNLOAD
-          </span>
+          </Pointer>
         )}
       </DownloadTableCell>
-    </ClickableTableRow>
+    </TableRow>
   );
 };
