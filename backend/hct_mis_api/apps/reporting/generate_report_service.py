@@ -12,7 +12,7 @@ from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def _get_individuals(report: Report, filters: dict):
+    def _get_individuals(report: Report):
         filter_vars = {
             "business_area": report.business_area,
             "status": "ACTIVE",
@@ -54,8 +54,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_households(report: Report, filter_vars: dict):
-        filter_vars["business_area"] = report.business_area
+    def _get_households(report: Report):
+        filter_vars = {"business_area": report.business_area}
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
         return Household.objects.filter(**filter_vars)
@@ -100,8 +100,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_cash_plan_verifications(report: Report, filter_vars: dict):
-        filter_vars["cash_plan__business_area"] = report.business_area
+    def _get_cash_plan_verifications(report: Report):
+        filter_vars = {"cash_plan__business_area": report.business_area}
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlanPaymentVerification.objects.filter(**filter_vars)
@@ -125,8 +125,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payments(report: Report, filter_vars: dict):
-        filter_vars["business_area"] = report.business_area
+    def _get_payments(report: Report):
+        filter_vars = {"business_area": report.business_area}
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         return PaymentRecord.objects.filter(**filter_vars)
@@ -150,8 +150,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payment_verifications(report: Report, filter_vars: dict):
-        filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = report.business_area
+    def _get_payment_verifications(report: Report):
+        filter_vars = {"cash_plan_payment_verification__cash_plan__business_area": report.business_area}
         if report.program:
             filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
         return PaymentVerification.objects.filter(**filter_vars)
@@ -169,8 +169,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_cash_plans(report: Report, filter_vars: dict):
-        filter_vars["business_area"] = report.business_area
+    def _get_cash_plans(report: Report):
+        filter_vars = {"business_area": report.business_area}
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlan.objects.filter(**filter_vars)
@@ -205,8 +205,8 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_programs(report: Report, filter_vars: dict):
-        filter_vars["business_area"] = report.business_area
+    def _get_programs(report: Report):
+        filter_vars = {"business_area": report.business_area}
         return Program.objects.filter(**filter_vars)
 
     @classmethod
@@ -230,7 +230,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payments_for_individuals(report: Report, filter_vars: dict):
+    def _get_payments_for_individuals(report: Report):
         # TODO fix this
         return PaymentRecord.objects.none()
 
@@ -462,7 +462,6 @@ class GenerateReportService:
         self.report = report
         self.report_type = report.report_type
         self.business_area = report.business_area
-        self.filter_vars = {"created_at__gte": report.date_from, "created_at__lte": report.date_to}
 
     def _create_workbook(self) -> openpyxl.Workbook:
         wb = openpyxl.Workbook()
@@ -495,7 +494,7 @@ class GenerateReportService:
 
     def _add_rows(self):
         get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
-        all_instances = get_row_methods[0](self.report, self.filter_vars)
+        all_instances = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance)
             str_row = self._stringify_all_values(row)
