@@ -12,8 +12,13 @@ from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def _get_individuals(report: Report, filter_vars: dict):
-        filter_vars["business_area"] = report.business_area
+    def _get_individuals(report: Report, filters: dict):
+        filter_vars = {
+            "business_area": report.business_area,
+            "status": "ACTIVE",
+            "last_registration_date__gte": report.date_from,
+            "last_registration_date__lte": report.date_to,
+        }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         return Individual.objects.filter(**filter_vars)
