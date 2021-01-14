@@ -2,8 +2,8 @@ from django.apps import AppConfig
 
 
 class TargetingConfig(AppConfig):
-    name = "targeting"
+    name = "hct_mis_api.apps.targeting"
 
     # noinspection PyUnresolvedReferences
     def ready(self):
-        import targeting.signals
+        import hct_mis_api.apps.targeting.signals

@@ -171,7 +171,7 @@ def serialize_flex_attributes():
             },
         }
     """
-    from core.models import FlexibleAttribute
+    from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.all()
 
@@ -200,7 +200,7 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -496,7 +496,7 @@ def update_labels_mapping(csv_file):
     import re
     import json
     from django.conf import settings
-    from core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 
     with open(csv_file, newline="") as csv_file:
         reader = csv.reader(csv_file)

@@ -4,21 +4,21 @@ from parameterized import parameterized
 from django.core.management import call_command
 from django_countries.fields import Country
 
-from account.fixtures import UserFactory
-from account.permissions import Permissions
-from core.base_test_case import APITestCase
-from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
-from core.models import BusinessArea
-from grievance.fixtures import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
     TicketAddIndividualDetailsFactory,
     TicketIndividualDataUpdateDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
     TicketDeleteIndividualDetailsFactory,
 )
-from grievance.models import GrievanceTicket
-from household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
-from household.models import (
+from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from hct_mis_api.apps.household.models import (
     SINGLE,
     Individual,
     ROLE_PRIMARY,
@@ -29,7 +29,7 @@ from household.models import (
     IndividualRoleInHousehold,
     HEAD,
 )
-from program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestCloseDataChangeTickets(APITestCase):

@@ -4,7 +4,7 @@ import factory
 from factory import fuzzy
 from pytz import utc
 
-from household.models import (
+from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
     ORG_ENUMERATOR_CHOICES,
@@ -21,7 +21,7 @@ from household.models import (
     Individual,
     IndividualRoleInHousehold,
 )
-from registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 
 
 def flex_field_households(o):

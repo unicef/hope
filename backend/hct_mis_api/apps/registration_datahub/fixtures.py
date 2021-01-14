@@ -6,8 +6,8 @@ import factory.fuzzy
 from faker import Faker
 from pytz import utc
 
-from household.const import NATIONALITIES
-from household.models import (
+from hct_mis_api.apps.household.const import NATIONALITIES
+from hct_mis_api.apps.household.models import (
     HUMANITARIAN_PARTNER,
     MARITAL_STATUS_CHOICE,
     ORG_ENUMERATOR_CHOICES,
@@ -15,7 +15,7 @@ from household.models import (
     SEX_CHOICE,
     UNICEF,
 )
-from registration_datahub.models import ImportedHousehold, ImportedIndividual, RegistrationDataImportDatahub
+from hct_mis_api.apps.registration_datahub.models import ImportedHousehold, ImportedIndividual, RegistrationDataImportDatahub
 
 faker = Faker()
 

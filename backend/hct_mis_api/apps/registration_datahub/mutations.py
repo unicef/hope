@@ -9,30 +9,30 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from graphene_file_upload.scalars import Upload
 
-from account.permissions import Permissions, PermissionMutation
-from core.airflow_api import AirflowApi
-from core.kobo.api import KoboAPI
-from core.kobo.common import count_population
-from core.models import BusinessArea
-from core.permissions import is_authenticated
-from core.utils import decode_id_string, check_concurrency_version_in_mutation
-from core.validators import BaseValidator
-from registration_data.models import RegistrationDataImport
-from registration_data.schema import RegistrationDataImportNode
-from registration_datahub.models import (
+from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.common import count_population
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.core.validators import BaseValidator
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
+from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     RegistrationDataImportDatahub,
 )
-from registration_datahub.schema import (
+from hct_mis_api.apps.registration_datahub.schema import (
     ImportDataNode,
     XlsxRowErrorNode,
     KoboErrorNode,
 )
-from registration_datahub.validators import (
+from hct_mis_api.apps.registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,
 )
-from core.scalars import BigInt
 
 
 def create_registration_data_import_objects(registration_data_import_data, user, data_source):

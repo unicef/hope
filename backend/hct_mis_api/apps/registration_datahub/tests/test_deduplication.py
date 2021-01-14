@@ -1,9 +1,9 @@
 from constance.test import override_config
 
-from core.base_test_case import BaseElasticSearchTestCase
-from core.models import BusinessArea
-from household.fixtures import create_household_and_individuals
-from household.models import (
+from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
+from hct_mis_api.apps.household.models import (
     DUPLICATE,
     FEMALE,
     HEAD,
@@ -14,13 +14,13 @@ from household.models import (
     WIFE_HUSBAND,
     Individual,
 )
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_datahub.fixtures import (
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household_and_individuals,
 )
-from registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, ImportData, ImportedIndividual
-from registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, ImportData, ImportedIndividual
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 @override_config(

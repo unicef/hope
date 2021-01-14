@@ -6,22 +6,22 @@ from django_filters import CharFilter, FilterSet, OrderingFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from account.permissions import (
+from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
     BaseNodePermissionMixin,
 )
-from core.extended_connection import ExtendedConnection
-from core.filters import filter_age
-from core.schema import ChoiceObject
-from core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter
-from household.models import ROLE_NO_ROLE
-from payment.inputs import GetCashplanVerificationSampleSizeInput
-from payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
-from payment.rapid_pro.api import RapidProAPI
-from payment.utils import get_number_of_samples
-from program.models import CashPlan
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import filter_age
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter
+from hct_mis_api.apps.household.models import ROLE_NO_ROLE
+from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from hct_mis_api.apps.payment.utils import get_number_of_samples
+from hct_mis_api.apps.program.models import CashPlan
 
 
 class PaymentRecordFilter(FilterSet):

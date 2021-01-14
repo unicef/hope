@@ -2,7 +2,7 @@ import logging
 
 from django.core.management import BaseCommand
 
-from core.admin import FlexibleAttributeImporter
+from hct_mis_api.apps.core.admin import FlexibleAttributeImporter
 
 logger = logging.getLogger(__name__)
 
