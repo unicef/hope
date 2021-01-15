@@ -154,7 +154,7 @@ export const NewReportForm = (): React.ReactElement => {
       showMessage('Report create action failed.');
     }
   };
-  const renderConditionalFields = (values) => {
+  const renderConditionalFields = (values): React.ReactElement => {
     const adminAreaField = (
       <Grid item xs={12}>
         <Field
