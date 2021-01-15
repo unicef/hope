@@ -1,6 +1,7 @@
 import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When
+from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
 from django.db.models.functions import Coalesce, Lower
+from django.shortcuts import get_object_or_404
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -20,6 +21,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.schema import LogEntryObjectConnection
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
@@ -175,7 +177,7 @@ class ChartProgramFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class ChartProgramNode(DjangoObjectType):
+class ChartNode(graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(
             Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
@@ -183,41 +185,6 @@ class ChartProgramNode(DjangoObjectType):
     )
     labels = graphene.List(graphene.String)
     data = graphene.List(graphene.Int)
-
-    class Meta:
-        model = Program
-        filter_fields = [
-            "name",
-        ]
-        interfaces = (relay.Node,)
-        connection_class = ExtendedConnection
-
-    def resolve_labels(self, info, **kwargs):
-        return [
-            'Child Protection',
-            'Education',
-            'Gender',
-            'Health',
-            'HIV/AIDS',
-            'Multi Purpose',
-            'Nutrition',
-            'Social Policy',
-            'WASH',
-            'Name'
-        ]
-
-    def resolve_data(self, info, **kwargs):
-        # import ipdb;ipdb.set_trace()
-        return self
-
-    # def resolve_total_number_of_households(self, info, **kwargs):
-    #     return self.total_number_of_households
-    #
-    # def resolve_test(self, info, **kwargs):
-    #     print('xx')
-    #     for t in kwargs:
-    #         print(t)
-    #     return 12
 
 
 class Query(graphene.ObjectType):
@@ -231,15 +198,7 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
-    chart_program = DjangoPermissionFilterConnectionField(
-        ChartProgramNode,
-        filterset_class=ChartProgramFilter,
-        permission_classes=(
-            hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-            ),
-        ),
-    )
+    chart_program = graphene.Field(ChartNode, business_area_slug=graphene.String(required=True))
     # chart_program = relay.Node.Field(ChartProgramNode)
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
@@ -257,12 +216,6 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
-
-    def resolve_chart_program(self, info, **kwargs):
-        return Program.objects.all()
-    #
-    # def resolve_test_chart(self, info, **kwargs):
-    #     return 12
 
     def resolve_all_programs(self, info, **kwargs):
         return (
@@ -302,3 +255,11 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
+
+    def resolve_chart_program(self, info, business_area_slug, **kwargs):
+        sector_choices = Program.SECTOR_CHOICE
+        sector_choice_mapping = dict(sector_choices)
+        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
+        programs = Program.objects.filter(business_area=business_area)
+        dataset = [programs.filter(sector=sector).count() for sector in sector_choice_mapping.keys()]
+        return {"labels": sector_choice_mapping.values(), "data": dataset}
