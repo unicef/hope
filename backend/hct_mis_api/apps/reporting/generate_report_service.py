@@ -5,7 +5,7 @@ from openpyxl.utils import get_column_letter
 # from openpyxl.worksheet.datavalidation import DataValidation
 from tempfile import NamedTemporaryFile
 from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.models import Individual, Household
+from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 
@@ -15,7 +15,7 @@ class GenerateReportContentHelpers:
     def _get_individuals(report: Report):
         filter_vars = {
             "household__business_area": report.business_area,
-            "status": "ACTIVE",
+            "status": ACTIVE,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }
@@ -61,6 +61,7 @@ class GenerateReportContentHelpers:
     def _get_households(report: Report):
         filter_vars = {
             "business_area": report.business_area,
+            "status": ACTIVE,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }
@@ -70,42 +71,46 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def _format_household_row(self, household: Household) -> tuple:
-        return (
-            household.admin_area.id if household.admin_area else "",
-            household.business_area.id,
-            household.unicef_id,
-            household.country_origin,
-            # TODO: check if adults_count should be a sum of these two fields
-            self._sum_values(household.female_age_group_18_59_count, household.female_age_group_60_count),
-            self._sum_values(
-                household.female_age_group_18_59_disabled_count, household.female_age_group_18_59_disabled_count
-            ),
-            household.female_age_group_0_5_count,
-            household.female_age_group_0_5_disabled_count,
-            household.female_age_group_12_17_count,
-            household.female_age_group_12_17_disabled_count,
-            household.female_age_group_6_11_count,
-            household.female_age_group_6_11_disabled_count,
-            household.first_registration_date,
-            household.geopoint,
-            household.last_registration_date,
-            self._sum_values(household.male_age_group_18_59_count, household.male_age_group_60_count),
-            self._sum_values(household.male_age_group_18_59_disabled_count, household.male_age_group_60_disabled_count),
-            household.male_age_group_0_5_count,
-            household.male_age_group_0_5_disabled_count,
-            household.male_age_group_12_17_count,
-            household.male_age_group_12_17_disabled_count,
-            household.male_age_group_6_11_count,
-            household.male_age_group_6_11_disabled_count,
-            household.org_name_enumerator,
-            household.pregnant_count,
+        row = [
+            household.id,
+            household.country_origin.name if household.country_origin else "",
+            household.admin_area.title if household.admin_area else "",
+            household.size,
+            household.geopoint[0] if household.geopoint else "",
+            household.geopoint[1] if household.geopoint else "",
             household.residence_status,
             household.returnee,
-            household.size,
             household.status,
             household.village,
-            self._to_values_list(household.programs.all(), "id"),
-        )
+            household.female_age_group_0_5_count,
+            household.female_age_group_0_5_disabled_count,
+            household.female_age_group_6_11_count,
+            household.female_age_group_6_11_disabled_count,
+            household.female_age_group_12_17_count,
+            household.female_age_group_12_17_disabled_count,
+            household.female_age_group_18_59_count,
+            household.female_age_group_18_59_disabled_count,
+            household.female_age_group_60_count,
+            household.female_age_group_60_disabled_count,
+            household.pregnant_count,
+            household.male_age_group_0_5_count,
+            household.male_age_group_0_5_disabled_count,
+            household.male_age_group_6_11_count,
+            household.male_age_group_6_11_disabled_count,
+            household.male_age_group_12_17_count,
+            household.male_age_group_12_17_disabled_count,
+            household.male_age_group_18_59_count,
+            household.male_age_group_18_59_disabled_count,
+            household.male_age_group_60_count,
+            household.male_age_group_60_disabled_count,
+            household.first_registration_date,
+            household.last_registration_date,
+            household.org_name_enumerator,
+            # self._to_values_list(household.programs.all(), "id"),
+        ]
+        for program in household.programs.all():
+            row.append(program.name)
+        return tuple(row)
 
     @staticmethod
     def _get_cash_plan_verifications(report: Report):
@@ -312,37 +317,40 @@ class GenerateReportService:
             "dedupe in Pop. possible duplicates",
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
-            "admin_area_id",
-            "business_area_id",
-            "unicef_id",  # HH-20-0000.0368
-            "country_origin",  # TM
-            "female_adults_count",  # 0
-            "female_adults_disabled_count",  # 0
-            "female_age_group_0_5_count",  # 0
-            "female_age_group_0_5_disabled_count",  # 0
-            "female_age_group_12_17_count",  # 0
-            "female_age_group_12_17_disabled_count",  # 0
-            "female_age_group_6_11_count",  # 0
-            "female_age_group_6_11_disabled_count",  # 0
-            "first_registration_date",  # 2020-08-25
-            "geopoint",
-            "last_registration_date",  # 2020-08-25
-            "male_adults_count",  # 0
-            "male_adults_disabled_count",  # 0
-            "male_age_group_0_5_count",  # 0
-            "male_age_group_0_5_disabled_count",  # 0
-            "male_age_group_12_17_count",  # 0
-            "male_age_group_12_17_disabled_count",  # 0
-            "male_age_group_6_11_count",  # 0
-            "male_age_group_6_11_disabed_count",  # 0
-            "org_name_enumerator",
-            "pregnant_count",
-            "residence_status",  # HOST
-            "returnee",  # False
-            "size",  # 4
+            "household id",
+            "country of origin",  # South Sudan
+            "administrative area 2",  # Juba
+            "household size",  # 4
+            "latitude",  # 54,367759
+            "longitude",  # 60,964675
+            "residence status",  # HOST
+            "returnee",  # FALSE
             "status",  # ACTIVE
-            "village",
-            "program_id",
+            "village",  # Mendika
+            "females 0-5",  # 0
+            "females 0-5 w/ disability",  # 0
+            "females 6-11",  # 1
+            "females 6-11 w/ disability",  # 1
+            "females 12-17",  # 1
+            "females 12-17 w/ disability",  # 0
+            "females 18-59",  # 1
+            "females 18-59 w/ disability",  # 0
+            "females 60+",  # 0
+            "females 60+ w/ disability",  # 0
+            "pregnant females",  # 0
+            "males 0-5",  # 0
+            "males 0-5 w/ disability",  # 0
+            "males 6-11",  # 1
+            "males 6-11 w/ disability",  # 1
+            "males 12-17",  # 1
+            "males 12-17 w/ disability",  # 0
+            "males 18-59",  # 1
+            "males 18-59 w/ disability",  # 0
+            "males 60+",  # 0
+            "males 60+ w/ disability",  # 0
+            "first registration date",  # 2020-08-25
+            "last registration date",  # 2020-08-25
+            "organization name enumerator",
         ),
         Report.CASH_PLAN_VERIFICATION: (
             "program_name",  # ?
@@ -458,6 +466,7 @@ class GenerateReportService:
             "delivered_quantity_usd",
         ),
     }
+    OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
     ROW_CONTENT_METHODS = {
         Report.INDIVIDUALS: (
             GenerateReportContentHelpers._get_individuals,
@@ -531,18 +540,31 @@ class GenerateReportService:
     def _add_rows(self):
         get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
         all_instances = get_row_methods[0](self.report)
+        number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
+        col_instances_len = 0
         for instance in all_instances:
             row = get_row_methods[1](instance)
             str_row = self._stringify_all_values(row)
+            if len(str_row) > col_instances_len:
+                col_instances_len = len(str_row)
             self.ws_report.append(str_row)
+        if col_instances_len > number_of_columns_based_on_set_headers:
+            # to cover bases when we create extra columns for reverse foreign key instances
+            self._add_missing_headers(
+                self.ws_report,
+                number_of_columns_based_on_set_headers + 1,
+                col_instances_len,
+                GenerateReportService.OPTIONAL_HEADERS.get(self.report_type, ""),
+            )
+        return col_instances_len
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._add_filters_info()
         self._add_headers()
-        self._add_rows()
+        number_of_columns = self._add_rows()
         self._adjust_column_width_from_col(self.ws_filters, 1, 2, 1)
-        self._adjust_column_width_from_col(self.ws_report, 1, len(GenerateReportService.HEADERS[self.report_type]), 0)
+        self._adjust_column_width_from_col(self.ws_report, 1, number_of_columns, 0)
         return self.wb
 
     def generate_file(self):
@@ -559,6 +581,11 @@ class GenerateReportService:
             print("ERROR", e)
             self.report.status = Report.FAILED
         self.report.save()
+
+    def _add_missing_headers(self, ws, column_to_start, column_to_finish, label):
+        for x in range(column_to_start, column_to_finish + 1):
+            col_letter = get_column_letter(x)
+            ws[f"{col_letter}1"] = label
 
     def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
 
