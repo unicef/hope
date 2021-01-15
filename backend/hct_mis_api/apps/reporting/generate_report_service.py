@@ -6,10 +6,12 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
 
+from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.core.utils import decode_id_string
 
 
 class GenerateReportContentHelpers:
@@ -108,7 +110,6 @@ class GenerateReportContentHelpers:
             household.first_registration_date,
             household.last_registration_date,
             household.org_name_enumerator,
-            # self._to_values_list(household.programs.all(), "id"),
         ]
         for program in household.programs.all():
             row.append(program.name)
@@ -126,22 +127,37 @@ class GenerateReportContentHelpers:
             filter_vars["cash_plan__program"] = report.program
         return CashPlanPaymentVerification.objects.filter(**filter_vars)
 
+    @staticmethod
+    def _map_admin_area_names_from_ids(admin_areas_ids: list) -> str:
+        if not admin_areas_ids:
+            return ""
+        result = []
+        for admin_area_id in admin_areas_ids:
+            admin_area_id = decode_id_string(admin_area_id)
+            admin_area = AdminArea.objects.filter(id=admin_area_id).first()
+            if admin_area:
+                result.append(admin_area.title)
+        return ", ".join(result)
+
     @classmethod
     def _format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
         return (
+            verification.cash_plan.ca_id,
+            verification.id,
             verification.cash_plan.program.name,
             verification.activation_date,
-            verification.cash_plan.id,
-            verification.completion_date,
-            verification.not_received_count,
-            verification.received_count,
-            verification.received_with_problems_count,
-            verification.responded_count,
-            verification.sample_size,
-            verification.sampling,
-            verification.sex_filter,
             verification.status,
             verification.verification_method,
+            verification.completion_date,
+            verification.sample_size,
+            verification.responded_count,
+            verification.received_count,
+            verification.received_with_problems_count,
+            verification.not_received_count,
+            verification.sampling,
+            verification.sex_filter,
+            self._map_admin_area_names_from_ids(verification.excluded_admin_areas_filter),
+            verification.age_filter,
         )
 
     @staticmethod
@@ -355,19 +371,22 @@ class GenerateReportService:
             "organization name enumerator",
         ),
         Report.CASH_PLAN_VERIFICATION: (
-            "program_name",  # ?
-            "activation_date",
-            "cash_plan_id",
-            "completion_date",
-            "not_received_count",
-            "received_count",
-            "received_with_problems_count",
-            "responded_count",
-            "sample_size",
-            "sampling",
-            "sex_filter",
+            "cash plan ID",  # ANT-21-CSH-00001
+            "id",
+            "programme",  # Winterization 2020
+            "activation date",
             "status",
-            "verification_method",
+            "verification method",
+            "completion date",
+            "sample size",  # 500
+            "responded",  # 340
+            "received",  # 320
+            "received with issues",  # 12
+            "not received",  # 8
+            "sampling",  # FULL_LIST or RANDOM
+            "gender filter",  # FEMALE
+            "excluded admin areas",  # Juba
+            "age filter",  # {'max': 100, 'min': 0}
         ),
         Report.PAYMENTS: (
             "business_area_id",
@@ -585,7 +604,7 @@ class GenerateReportService:
         self.report.save()
 
         if self.report.file:
-            self._send_email(self)
+            self._send_email()
 
     def _send_email(self):
         # TODO update context when email content is known
