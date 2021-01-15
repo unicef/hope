@@ -59,7 +59,11 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_households(report: Report):
-        filter_vars = {"business_area": report.business_area}
+        filter_vars = {
+            "business_area": report.business_area,
+            "last_registration_date__gte": report.date_from,
+            "last_registration_date__lte": report.date_to,
+        }
         if report.admin_area.all().exists():
             filter_vars["admin_area__in"] = report.admin_area.all()
         return Household.objects.filter(**filter_vars)
@@ -105,7 +109,12 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_cash_plan_verifications(report: Report):
-        filter_vars = {"cash_plan__business_area": report.business_area}
+        filter_vars = {
+            "cash_plan__business_area": report.business_area,
+            "completion_date__isnull": False,
+            "completion_date__gte": report.date_from,
+            "completion_date__lte": report.date_to,
+        }
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlanPaymentVerification.objects.filter(**filter_vars)
@@ -130,7 +139,11 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_payments(report: Report):
-        filter_vars = {"business_area": report.business_area}
+        filter_vars = {
+            "business_area": report.business_area,
+            "delivery_date__gte": report.date_from,
+            "delivery_date__lte": report.date_to,
+        }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         return PaymentRecord.objects.filter(**filter_vars)
@@ -155,7 +168,12 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_payment_verifications(report: Report):
-        filter_vars = {"cash_plan_payment_verification__cash_plan__business_area": report.business_area}
+        filter_vars = {
+            "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
+            "cash_plan_payment_verification__completion_date__isnull": False,
+            "cash_plan_payment_verification__completion_date__gte": report.date_from,
+            "cash_plan_payment_verification__completion_date__lte": report.date_to,
+        }
         if report.program:
             filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
         return PaymentVerification.objects.filter(**filter_vars)
@@ -174,7 +192,11 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_cash_plans(report: Report):
-        filter_vars = {"business_area": report.business_area}
+        filter_vars = {
+            "business_area": report.business_area,
+            "end_date__gte": report.date_from,
+            "end_date__lte": report.date_to,
+        }
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         return CashPlan.objects.filter(**filter_vars)
@@ -210,7 +232,11 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def _get_programs(report: Report):
-        filter_vars = {"business_area": report.business_area}
+        filter_vars = {
+            "business_area": report.business_area,
+            "end_date__gte": report.date_from,
+            "end_date__lte": report.date_to,
+        }
         return Program.objects.filter(**filter_vars)
 
     @classmethod
@@ -236,6 +262,7 @@ class GenerateReportContentHelpers:
     @staticmethod
     def _get_payments_for_individuals(report: Report):
         # TODO fix this
+        # delivery date for timeframe
         return PaymentRecord.objects.none()
 
     @staticmethod
