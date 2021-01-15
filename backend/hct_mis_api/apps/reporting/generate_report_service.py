@@ -173,20 +173,32 @@ class GenerateReportContentHelpers:
 
     @classmethod
     def _format_payment_row(self, payment: PaymentRecord) -> tuple:
+        cash_or_voucher = ""
+        if payment.delivery_type:
+            if payment.delivery_type in [
+                PaymentRecord.DELIVERY_TYPE_CASH,
+                PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+                PaymentRecord.DELIVERY_TYPE_TRANSFER,
+            ]:
+                cash_or_voucher = "cash"
+            else:
+                # TODO: check if this is even an option, I don't see the delivery_type being anything else but above three options
+                # but following the spreadsheet here
+                cash_or_voucher = "voucher"
+
         return (
-            payment.business_area.id,
-            payment.household.admin_area.id if payment.household.admin_area else "",
-            payment.ca_hash_id,
+            payment.cash_plan.ca_id if payment.cash_plan else "",
             payment.ca_id,
+            payment.status,
             payment.currency,
             payment.delivered_quantity,
             payment.delivery_date,
             payment.delivery_type,
             payment.distribution_modality,
             payment.entitlement_quantity,
-            payment.status,
-            payment.target_population_cash_assist_id,
-            payment.cash_plan.id if payment.cash_plan else "",
+            payment.target_population.id,
+            payment.target_population.name,
+            cash_or_voucher,
         )
 
     @staticmethod
@@ -204,10 +216,10 @@ class GenerateReportContentHelpers:
     @classmethod
     def _format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
-            payment_verification.cash_plan_payment_verification.cash_plan.business_area.id,
-            payment_verification.cash_plan_payment_verification.cash_plan.program.name,
+            payment_verification.payment_record.ca_id,
+            payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
             payment_verification.cash_plan_payment_verification.id,
-            payment_verification.payment_record.id,
+            payment_verification.cash_plan_payment_verification.completion_date,
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -389,29 +401,27 @@ class GenerateReportService:
             "age filter",  # {'max': 100, 'min': 0}
         ),
         Report.PAYMENTS: (
-            "business_area_id",
-            "admin_area_id",
-            "ca_hash_id",
-            "ca_id",
+            "cash plan ID",  # ANT-21-CSH-00001
+            "payment record ID",  # ANT-21-CSH-00001-0000002
+            "status",  # Transaction successful
             "currency",
-            "delivered_quantity",
-            "delivery_date",
-            "delivery_type",
-            "distribution_modality",
-            "entitlement_quantity",
-            "status",
-            "target_population_cash_assist_id",
-            "cash_plan_id",
-            "cash_or_voucher",
+            "delivered quantity",  # 999,00
+            "delivery date",  # 2020-11-02 07:50:18+00
+            "delivery type",  # deposit to card
+            "distribution modality",  # 10K AFN per hh
+            "entitlement quantity",  # 1000,00
+            "TP ID",
+            "TP name",
+            "cash or voucher",  # if voucher or e-voucher -> voucher, else -> cash
         ),
         Report.PAYMENT_VERIFICATION: (
-            "business_area_id",
-            "program_name",
-            "cash_plan_payment_verification_id",
-            "payment_record_id",
-            "received_amount",
-            "status",
-            "status_date",
+            "payment record ID",  # ANT-21-CSH-00001-0000002
+            "cash plan ID",  # ANT-21-CSH-00001
+            "cash plan verification id",
+            "completion date",
+            "received amount",  # 30,00
+            "status",  # RECEIVED_WITH_ISSUES
+            "status date",
         ),
         Report.CASH_PLAN: (
             "program_name",
