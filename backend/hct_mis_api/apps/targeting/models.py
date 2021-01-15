@@ -1,5 +1,6 @@
 import datetime
 
+from auditlog.registry import auditlog
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -276,13 +277,16 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if not self.program:
             return None
         tp = (
-            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False)
+            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED)
             .order_by("-created_at")
             .first()
         )
         if tp is None:
             return None
         return tp.steficon_rule
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         unique_together = ("name", "business_area")
@@ -646,3 +650,5 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with):
         return ""
+
+auditlog.register(TargetPopulation)
