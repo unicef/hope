@@ -152,6 +152,74 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+from graphene_django.filter import DjangoFilterConnectionField
+
+
+class ChartProgramFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+
+    class Meta:
+        fields = (
+            "business_area",
+        )
+        model = Program
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(first_name__icontains=value)
+            q_obj |= Q(last_name__icontains=value)
+            q_obj |= Q(email__icontains=value)
+        print("search_filter")
+        return qs.filter(q_obj)
+
+
+class ChartProgramNode(DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+    labels = graphene.List(graphene.String)
+    data = graphene.List(graphene.Int)
+
+    class Meta:
+        model = Program
+        filter_fields = [
+            "name",
+        ]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+    def resolve_labels(self, info, **kwargs):
+        return [
+            'Child Protection',
+            'Education',
+            'Gender',
+            'Health',
+            'HIV/AIDS',
+            'Multi Purpose',
+            'Nutrition',
+            'Social Policy',
+            'WASH',
+            'Name'
+        ]
+
+    def resolve_data(self, info, **kwargs):
+        # import ipdb;ipdb.set_trace()
+        return self
+
+    # def resolve_total_number_of_households(self, info, **kwargs):
+    #     return self.total_number_of_households
+    #
+    # def resolve_test(self, info, **kwargs):
+    #     print('xx')
+    #     for t in kwargs:
+    #         print(t)
+    #     return 12
+
+
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
@@ -163,6 +231,16 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
+    chart_program = DjangoPermissionFilterConnectionField(
+        ChartProgramNode,
+        filterset_class=ChartProgramFilter,
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+            ),
+        ),
+    )
+    # chart_program = relay.Node.Field(ChartProgramNode)
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
@@ -179,6 +257,12 @@ class Query(graphene.ObjectType):
     program_sector_choices = graphene.List(ChoiceObject)
     program_scope_choices = graphene.List(ChoiceObject)
     cash_plan_status_choices = graphene.List(ChoiceObject)
+
+    def resolve_chart_program(self, info, **kwargs):
+        return Program.objects.all()
+    #
+    # def resolve_test_chart(self, info, **kwargs):
+    #     return 12
 
     def resolve_all_programs(self, info, **kwargs):
         return (
