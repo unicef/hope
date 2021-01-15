@@ -172,7 +172,6 @@ export const NewReportForm = (): React.ReactElement => {
           label='Programme'
           fullWidth
           variant='outlined'
-          required
           choices={mappedPrograms}
           component={FormikSelectField}
         />
