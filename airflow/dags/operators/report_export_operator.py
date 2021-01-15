@@ -14,4 +14,4 @@ class ReportExportOperator(DjangoOperator):
         report_id = config_vars.get("report_id")
         report_obj = Report.objects.get(id=report_id)
         service = GenerateReportService(report=report_obj)
-        service.generate_file()
+        service.generate_report()

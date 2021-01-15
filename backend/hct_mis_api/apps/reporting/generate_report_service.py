@@ -1,9 +1,11 @@
 import openpyxl
 from django.core.files import File
 from openpyxl.utils import get_column_letter
-
-# from openpyxl.worksheet.datavalidation import DataValidation
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
+
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
@@ -537,7 +539,7 @@ class GenerateReportService:
         headers_row = GenerateReportService.HEADERS[self.report_type]
         self.ws_report.append(headers_row)
 
-    def _add_rows(self):
+    def _add_rows(self) -> int:
         get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
         all_instances = get_row_methods[0](self.report)
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
@@ -549,7 +551,7 @@ class GenerateReportService:
                 col_instances_len = len(str_row)
             self.ws_report.append(str_row)
         if col_instances_len > number_of_columns_based_on_set_headers:
-            # to cover bases when we create extra columns for reverse foreign key instances
+            # to cover bases when we create extra columns for reverse foreign key instances and we don't know in advance how many columns there will be
             self._add_missing_headers(
                 self.ws_report,
                 number_of_columns_based_on_set_headers + 1,
@@ -567,20 +569,42 @@ class GenerateReportService:
         self._adjust_column_width_from_col(self.ws_report, 1, number_of_columns, 0)
         return self.wb
 
-    def generate_file(self):
+    def generate_report(self):
         try:
             self.generate_workbook()
             with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
                 self.report.file.save(
-                    f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp)
+                    f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp), save=False
                 )
                 self.report.status = Report.COMPLETED
         except Exception as e:
             print("ERROR", e)
             self.report.status = Report.FAILED
         self.report.save()
+
+        if self.report.file:
+            self._send_email(self)
+
+    def _send_email(self):
+        # TODO update context when email content is known
+        text_body = render_to_string("report.txt", {})
+        html_body = render_to_string("report.html", {})
+        msg = EmailMultiAlternatives(
+            subject="Your report",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[self.report.created_by.email],
+            # cc=[settings.SANCTION_LIST_CC_MAIL],
+            body=text_body,
+        )
+        msg.attach(
+            self.report.file.name,
+            self.report.file.read(),
+            "application/vnd.ms-excel",
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send()
 
     def _add_missing_headers(self, ws, column_to_start, column_to_finish, label):
         for x in range(column_to_start, column_to_finish + 1):
