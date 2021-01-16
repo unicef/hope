@@ -239,30 +239,28 @@ class GenerateReportContentHelpers:
     @classmethod
     def _format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
         return (
+            cash_plan.ca_id,
+            cash_plan.name,
+            cash_plan.start_date,
+            cash_plan.end_date,
             cash_plan.program.name,
+            cash_plan.funds_commitment,
             cash_plan.assistance_measurement,
             cash_plan.assistance_through,
-            cash_plan.business_area.id,
-            cash_plan.ca_hash_id,
             cash_plan.delivery_type,
             cash_plan.dispersion_date,
             cash_plan.down_payment,
-            cash_plan.end_date,
-            cash_plan.funds_commitment,
-            cash_plan.name,
-            cash_plan.program.id,
-            cash_plan.start_date,
-            cash_plan.status,
-            cash_plan.status_date,
             cash_plan.total_delivered_quantity,
+            cash_plan.total_undelivered_quantity,
             cash_plan.total_entitled_quantity,
             cash_plan.total_entitled_quantity_revised,
             cash_plan.total_persons_covered,
             cash_plan.total_persons_covered_revised,
-            cash_plan.total_undelivered_quantity,
+            cash_plan.status,
+            cash_plan.status_date,
+            cash_plan.vision_id,
             cash_plan.validation_alerts_count,
             cash_plan.verification_status,
-            cash_plan.vision_id,
         )
 
     @staticmethod
@@ -277,20 +275,19 @@ class GenerateReportContentHelpers:
     @classmethod
     def _format_program_row(self, program: Program) -> tuple:
         return (
-            program.business_area.id,
-            program.administrative_areas_of_implementation,
-            program.budget,
-            program.cash_plus,
-            program.description,
-            program.end_date,
-            program.frequency_of_payments,
             program.id,
             program.name,
-            program.population_goal,
             program.scope,
             program.sector,
-            program.start_date,
             program.status,
+            program.start_date,
+            program.end_date,
+            program.cash_plus,
+            program.description,
+            program.budget,
+            program.frequency_of_payments,
+            program.administrative_areas_of_implementation,
+            program.population_goal,
             program.total_number_of_households,
         )
 
@@ -424,48 +421,46 @@ class GenerateReportService:
             "status date",
         ),
         Report.CASH_PLAN: (
-            "program_name",
-            "assistance_measurement",
-            "assistance_through",
-            "business_area_id",
-            "ca_hash_id",
-            "delivery_type",
-            "dispersion_date",
-            "down_payment",
-            "end_date",
-            "funds_commitment",
-            "name",
-            "program_id",
-            "start_date",
-            "status",
-            "status_date",
-            "total_delivered_quantity",
-            "total_entitled_quantity",
-            "total_entitled_quantity_revised",
-            "total_persons_covered",
-            "total_persons_covered_revised",
-            "total_undelivered_quantity",
-            "validation_alerts_count",
-            "verification_status",
-            "vision_id",  # 54
+            "cash plan ID",  # ANT-21-CSH-00001
+            "cash plan name",
+            "start date",
+            "end date",
+            "programme",
+            "funds commitment",  # 234567
+            "assistance measurement",  # Euro
+            "assistance through",  # Cairo Amman Bank
+            "delivery type",  # DEPOSIT_TO_CARD
+            "dispersion date",
+            "down payment",
+            "total delivered quantity",  # 220,00
+            "total undelivered quantity",  # 10,00
+            "total entitled quantity",  # 230,00
+            "total entitled quantity revised",  # 230,00
+            "total persons covered",  # 12
+            "total persons covered revised",  # 12
+            "status",  # DISTRIBUTION_COMPLETED_WITH_ERRORS
+            "status date",
+            "VISION ID",  # 2345253423
+            "validation alerts count",  # 2
+            "cash plan verification status",  # FINISHED
         ),
         Report.PROGRAM: (
-            "business_area_id",
-            "administrative_areas_of_implementation",  # Test
-            "budget",  # 10000.00
-            "cash_plus",  # False
-            "description",  # Description goes here
-            "end_date",  # 2020-11-17
-            "frequency_of_payments",  # REGULAR
-            "id",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
-            "name",  # Programme 13/10/2020 04:43:28
-            "population_goal",  # 50
+            "programme ID",  # e46064c4-d5e2-4990-bb9b-f5cc2dde96f9
+            "name",  # Winterization 2020
             "scope",  # UNICEF
             "sector",  # EDUCATION
-            "start_date",  # 2020-10-13
             "status",  # ACTIVE
-            "total_number_of_households",  # Payment records with delivered amount  > 0 to distinct households
+            "start date",  # 2020-10-13
+            "end date",  # 2020-11-17
+            "cash plus",  # False
+            "description",  # Description goes here
+            "budget in USD",  # 10000.00
+            "frequency of payments",  # REGULAR
+            "administrative areas of implementation",  # Juba, Morobo, Xyz
+            "idividual population goal",  # 50
+            "total number of households",  # 4356
         ),
+        # TODO: still needs work after requirements are more established
         Report.INDIVIDUALS_AND_PAYMENT: (
             "admin_area_id",
             "business_area_id",
