@@ -133,7 +133,7 @@ export const NewReportForm = (): React.ReactElement => {
         adminArea: values.adminArea.map((el) => el.node.id),
       };
     }
-    return variables;
+    return variables || basicVariables;
   };
 
   const submitFormHandler = async (values): Promise<void> => {
