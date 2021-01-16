@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.utils import decode_id_string
 
 class GenerateReportContentHelpers:
     @staticmethod
-    def _get_individuals(report: Report):
+    def get_individuals(report: Report):
         filter_vars = {
             "household__business_area": report.business_area,
             "status": ACTIVE,
@@ -28,7 +28,7 @@ class GenerateReportContentHelpers:
         return Individual.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_individual_row(self, individual: Individual) -> tuple:
+    def format_individual_row(self, individual: Individual) -> tuple:
 
         return (
             individual.household.id,
@@ -62,7 +62,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_households(report: Report):
+    def get_households(report: Report):
         filter_vars = {
             "business_area": report.business_area,
             "status": ACTIVE,
@@ -74,7 +74,7 @@ class GenerateReportContentHelpers:
         return Household.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_household_row(self, household: Household) -> tuple:
+    def format_household_row(self, household: Household) -> tuple:
         row = [
             household.id,
             household.country_origin.name if household.country_origin else "",
@@ -116,7 +116,7 @@ class GenerateReportContentHelpers:
         return tuple(row)
 
     @staticmethod
-    def _get_cash_plan_verifications(report: Report):
+    def get_cash_plan_verifications(report: Report):
         filter_vars = {
             "cash_plan__business_area": report.business_area,
             "completion_date__isnull": False,
@@ -140,7 +140,7 @@ class GenerateReportContentHelpers:
         return ", ".join(result)
 
     @classmethod
-    def _format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
+    def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
         return (
             verification.cash_plan.ca_id,
             verification.id,
@@ -161,7 +161,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payments(report: Report):
+    def get_payments(report: Report):
         filter_vars = {
             "business_area": report.business_area,
             "delivery_date__gte": report.date_from,
@@ -172,7 +172,7 @@ class GenerateReportContentHelpers:
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_payment_row(self, payment: PaymentRecord) -> tuple:
+    def format_payment_row(self, payment: PaymentRecord) -> tuple:
         cash_or_voucher = ""
         if payment.delivery_type:
             if payment.delivery_type in [
@@ -202,7 +202,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payment_verifications(report: Report):
+    def get_payment_verifications(report: Report):
         filter_vars = {
             "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
             "cash_plan_payment_verification__completion_date__isnull": False,
@@ -214,7 +214,7 @@ class GenerateReportContentHelpers:
         return PaymentVerification.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
+    def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
             payment_verification.payment_record.ca_id,
             payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
@@ -226,7 +226,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_cash_plans(report: Report):
+    def get_cash_plans(report: Report):
         filter_vars = {
             "business_area": report.business_area,
             "end_date__gte": report.date_from,
@@ -237,7 +237,7 @@ class GenerateReportContentHelpers:
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
+    def format_cash_plan_row(self, cash_plan: CashPlan) -> tuple:
         return (
             cash_plan.ca_id,
             cash_plan.name,
@@ -264,7 +264,7 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_programs(report: Report):
+    def get_programs(report: Report):
         filter_vars = {
             "business_area": report.business_area,
             "end_date__gte": report.date_from,
@@ -273,7 +273,7 @@ class GenerateReportContentHelpers:
         return Program.objects.filter(**filter_vars)
 
     @classmethod
-    def _format_program_row(self, program: Program) -> tuple:
+    def format_program_row(self, program: Program) -> tuple:
         return (
             program.id,
             program.name,
@@ -292,13 +292,13 @@ class GenerateReportContentHelpers:
         )
 
     @staticmethod
-    def _get_payments_for_individuals(report: Report):
+    def get_payments_for_individuals(report: Report):
         # TODO fix this
         # delivery date for timeframe
         return PaymentRecord.objects.none()
 
     @staticmethod
-    def _format_payments_for_individuals_row(self, payment_record: PaymentRecord) -> tuple:
+    def format_payments_for_individuals_row(self, payment_record: PaymentRecord) -> tuple:
         # TODO: fix this
         return ()
 
@@ -495,30 +495,30 @@ class GenerateReportService:
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
     ROW_CONTENT_METHODS = {
         Report.INDIVIDUALS: (
-            GenerateReportContentHelpers._get_individuals,
-            GenerateReportContentHelpers._format_individual_row,
+            GenerateReportContentHelpers.get_individuals,
+            GenerateReportContentHelpers.format_individual_row,
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
-            GenerateReportContentHelpers._get_households,
-            GenerateReportContentHelpers._format_household_row,
+            GenerateReportContentHelpers.get_households,
+            GenerateReportContentHelpers.format_household_row,
         ),
         Report.CASH_PLAN_VERIFICATION: (
-            GenerateReportContentHelpers._get_cash_plan_verifications,
-            GenerateReportContentHelpers._format_cash_plan_verification_row,
+            GenerateReportContentHelpers.get_cash_plan_verifications,
+            GenerateReportContentHelpers.format_cash_plan_verification_row,
         ),
-        Report.PAYMENTS: (GenerateReportContentHelpers._get_payments, GenerateReportContentHelpers._format_payment_row),
+        Report.PAYMENTS: (GenerateReportContentHelpers.get_payments, GenerateReportContentHelpers.format_payment_row),
         Report.PAYMENT_VERIFICATION: (
-            GenerateReportContentHelpers._get_payment_verifications,
-            GenerateReportContentHelpers._format_payment_verification_row,
+            GenerateReportContentHelpers.get_payment_verifications,
+            GenerateReportContentHelpers.format_payment_verification_row,
         ),
         Report.CASH_PLAN: (
-            GenerateReportContentHelpers._get_cash_plans,
-            GenerateReportContentHelpers._format_cash_plan_row,
+            GenerateReportContentHelpers.get_cash_plans,
+            GenerateReportContentHelpers.format_cash_plan_row,
         ),
-        Report.PROGRAM: (GenerateReportContentHelpers._get_programs, GenerateReportContentHelpers._format_program_row),
+        Report.PROGRAM: (GenerateReportContentHelpers.get_programs, GenerateReportContentHelpers.format_program_row),
         Report.INDIVIDUALS_AND_PAYMENT: (
-            GenerateReportContentHelpers._get_payments_for_individuals,
-            GenerateReportContentHelpers._format_payments_for_individuals_row,
+            GenerateReportContentHelpers.get_payments_for_individuals,
+            GenerateReportContentHelpers.format_payments_for_individuals_row,
         ),
     }
     FILTERS_SHEET = "Filters"
