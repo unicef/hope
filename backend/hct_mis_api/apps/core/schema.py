@@ -318,13 +318,3 @@ class Query(graphene.ObjectType):
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
-
-
-class ChartNode(graphene.ObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-        ),
-    )
-    labels = graphene.List(graphene.String)
-    data = graphene.List(graphene.Int)
