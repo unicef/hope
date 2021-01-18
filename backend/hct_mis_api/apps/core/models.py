@@ -1,6 +1,6 @@
 import mptt
 from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
+from django.conf import settings
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -13,6 +13,14 @@ from mptt.models import MPTTModel
 
 from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
+
+
+SUCCESSFUL = "SUCCESSFUL"
+UNSUCCESSFUL = "UNSUCCESSFUL"
+KOBO_FORM_UPLOAD_STATUS_CHOICES = (
+    (SUCCESSFUL, _("Successful")),
+     (UNSUCCESSFUL, _("Unsuccessful")),
+)
 
 
 class BusinessArea(TimeStampedUUIDModel):
@@ -31,7 +39,9 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code = models.CharField(max_length=10,)
+    code = models.CharField(
+        max_length=10,
+    )
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
@@ -39,7 +49,11 @@ class BusinessArea(TimeStampedUUIDModel):
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True)
     rapid_pro_api_key = models.CharField(max_length=40, null=True)
-    slug = models.CharField(max_length=250, unique=True, db_index=True,)
+    slug = models.CharField(
+        max_length=250,
+        unique=True,
+        db_index=True,
+    )
     has_data_sharing_agreement = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -74,7 +88,10 @@ class AdminAreaType(TimeStampedUUIDModel):
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
 
     business_area = models.ForeignKey(
-        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_types", null=True,
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_types",
+        null=True,
     )
 
     class Meta:
@@ -168,7 +185,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True,
+        "core.FlexibleAttributeGroup",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+        null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
     history = AuditlogHistoryField(pk_indexable=False)
@@ -214,6 +234,28 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
 mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
+
+
+class XLSXKoboTemplateManager(models.Manager):
+    def latest_valid(self):
+        self.get_queryset().filter(kobo_form_upload_status=SUCCESSFUL).order_by("-created_at").first()
+
+
+class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
+    class Meta:
+        ordering = ("-created_at",)
+
+    objects = XLSXKoboTemplateManager()
+
+    file_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    file = models.FileField()
+    kobo_form_upload_status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+
 
 # auditlog.register(FlexibleAttributeChoice)
 # auditlog.register(FlexibleAttributeGroup)
