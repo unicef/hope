@@ -23,7 +23,6 @@ from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, Payment
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.core.schema import ChartNode
 
 
 class PaymentRecordFilter(FilterSet):
