@@ -35,6 +35,10 @@ from hct_mis_api.apps.core.models import (
     AdminAreaType,
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
+from hct_mis_api.apps.account.permissions import (
+    hopePermissionClass,
+    Permissions,
+)
 
 
 class AdminAreaFilter(FilterSet):
@@ -314,3 +318,13 @@ class Query(graphene.ObjectType):
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
         return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)
+
+
+class ChartNode(graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+    labels = graphene.List(graphene.String)
+    data = graphene.List(graphene.Int)
