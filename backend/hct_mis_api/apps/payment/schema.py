@@ -168,6 +168,11 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
     sample_size = graphene.Int()
 
 
+class ChartPaymentDataNode(graphene.ObjectType):
+    label = graphene.String()
+    data = graphene.List(graphene.Float)
+
+
 class ChartPaymentNode(graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(
@@ -175,7 +180,21 @@ class ChartPaymentNode(graphene.ObjectType):
         ),
     )
     labels = graphene.List(graphene.String)
-    data = graphene.List(graphene.Float)
+    datasets = graphene.List(ChartPaymentDataNode)
+
+
+class ChartPaymentVerificationDataNode(graphene.ObjectType):
+    data = graphene.List(graphene.Int)
+
+
+class ChartPaymentVerificationNode(graphene.ObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+        ),
+    )
+    labels = graphene.List(graphene.String)
+    datasets = graphene.List(ChartPaymentVerificationDataNode)
 
 
 class ChartPaymentRecordNode(graphene.ObjectType):
@@ -202,9 +221,21 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
 
-    chart_payment_verifications_status = graphene.Field(ChartPaymentNode, business_area_slug=graphene.String(required=True))
-    chart_payment_record_delivery_type = graphene.Field(ChartPaymentNode, business_area_slug=graphene.String(required=True))
-    chart_payment_record_status = graphene.Field(ChartPaymentNode, business_area_slug=graphene.String(required=True))
+    chart_payment_verifications_status = graphene.Field(
+        ChartPaymentNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
+    chart_payment_record_delivery_type = graphene.Field(
+        ChartPaymentVerificationNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
+    chart_payment_record_status = graphene.Field(
+        ChartPaymentVerificationNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
 
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
@@ -293,32 +324,53 @@ class Query(graphene.ObjectType):
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
-    def resolve_chart_payment_verifications_status(self, info, business_area_slug, **kwargs):
+    def resolve_chart_payment_verifications_status(self, info, business_area_slug, year, **kwargs):
         status_choices = PaymentVerification.STATUS_CHOICES
         status_choices_mapping = dict(status_choices)
         payment_verifications = PaymentVerification.objects.filter(
-            payment_record__business_area__slug=business_area_slug
+            payment_record__business_area__slug=business_area_slug,
+            created_at__year=year
         )
         dataset = [payment_verifications.filter(status=status).count() for status in status_choices_mapping.keys()]
         dataset_percentage = [data / sum(dataset) for data in dataset]
-        return {"labels": status_choices_mapping.values(), "data": dataset_percentage}
+        dataset_percentage_done = [
+            {
+                "label": status,
+                "data": [dataset_percentage_value]
+            }
+            for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
+        ]
+        return {"labels": ["Payment Verification"], "datasets": dataset_percentage_done}
 
-    def resolve_chart_payment_record_delivery_type(self, info, business_area_slug, **kwargs):
+    def resolve_chart_payment_record_delivery_type(self, info, business_area_slug, year, **kwargs):
         delivery_type_choices = PaymentRecord.DELIVERY_TYPE_CHOICE
         delivery_type_choices_mapping = dict(delivery_type_choices)
-        payment_records = PaymentRecord.objects.filter(business_area__slug=business_area_slug)
+        payment_records = PaymentRecord.objects.filter(
+            business_area__slug=business_area_slug,
+            created_at__year=year
+        )
         dataset = [
-            payment_records.filter(delivery_type=delivery_type).count()
-            for delivery_type in delivery_type_choices_mapping.keys()
+            {
+                "data": [
+                    payment_records.filter(delivery_type=delivery_type).count()
+                    for delivery_type in delivery_type_choices_mapping.keys()
+                ]
+            }
         ]
-        return {"labels": delivery_type_choices_mapping.values(), "data": dataset}
+        return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
 
-    def resolve_chart_payment_record_status(self, info, business_area_slug, **kwargs):
+    def resolve_chart_payment_record_status(self, info, business_area_slug, year, **kwargs):
         status_choices = PaymentRecord.STATUS_CHOICE
         status_choices_mapping = dict(status_choices)
-        payment_records = PaymentRecord.objects.filter(business_area__slug=business_area_slug)
+        payment_records = PaymentRecord.objects.filter(
+            business_area__slug=business_area_slug,
+            created_at__year=year
+        )
         dataset = [
-            payment_records.filter(delivery_type=delivery_type).count()
-            for delivery_type in status_choices_mapping.keys()
+            {
+                "data": [
+                    payment_records.filter(delivery_type=delivery_type).count()
+                    for delivery_type in status_choices_mapping.keys()]
+            }
         ]
-        return {"labels": status_choices_mapping.values(), "data": dataset}
+        return {"labels": status_choices_mapping.values(), "datasets": dataset}
