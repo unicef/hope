@@ -596,7 +596,7 @@ class GenerateReportService:
     def generate_report(self):
         try:
             self.generate_workbook()
-            with NamedTemporaryFile(dir=settings.MEDIA_ROOT, suffix=".xlsx") as tmp:
+            with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
                 self.report.file.save(
