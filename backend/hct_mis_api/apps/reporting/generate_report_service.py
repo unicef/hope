@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
 
 from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
@@ -613,20 +614,18 @@ class GenerateReportService:
             self._send_email()
 
     def _send_email(self):
-        # TODO update context when email content is known
-        text_body = render_to_string("report.txt", {})
-        html_body = render_to_string("report.html", {})
+        context = {
+            "report_type": self._report_type_to_str(),
+            "created_at": str(self.report.created_at),
+            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
+        }
+        text_body = render_to_string("report.txt", context=context)
+        html_body = render_to_string("report.html", context=context)
         msg = EmailMultiAlternatives(
-            subject="Your report",
+            subject="HOPE report generated",
             from_email=settings.EMAIL_HOST_USER,
             to=[self.report.created_by.email],
-            # cc=[settings.SANCTION_LIST_CC_MAIL],
             body=text_body,
-        )
-        msg.attach(
-            self.report.file.name,
-            self.report.file.read(),
-            "application/vnd.ms-excel",
         )
         msg.attach_alternative(html_body, "text/html")
         msg.send()
