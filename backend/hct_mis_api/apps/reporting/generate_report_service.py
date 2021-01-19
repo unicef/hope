@@ -234,7 +234,7 @@ class GenerateReportContentHelpers:
             "end_date__lte": report.date_to,
         }
         if report.program:
-            filter_vars["cash_plan__program"] = report.program
+            filter_vars["program"] = report.program
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
@@ -602,7 +602,9 @@ class GenerateReportService:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
                 self.report.file.save(
-                    f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp), save=False
+                    f"{self._report_type_to_str()}-{str(self.report.created_at.strftime('%y-%m-%d'))}.xlsx",
+                    File(tmp),
+                    save=False,
                 )
                 self.report.status = Report.COMPLETED
         except Exception as e:
@@ -616,7 +618,7 @@ class GenerateReportService:
     def _send_email(self):
         context = {
             "report_type": self._report_type_to_str(),
-            "created_at": str(self.report.created_at),
+            "created_at": str(self.report.created_at.strftime("%y-%m-%d")),
             "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
         }
         text_body = render_to_string("report.txt", context=context)
