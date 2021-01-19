@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
@@ -113,6 +114,28 @@ class ServiceProvider(TimeStampedUUIDModel):
 
 
 class CashPlanPaymentVerification(TimeStampedUUIDModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "cash_plan",
+            "sampling",
+            "verification_method",
+            "sample_size",
+            "responded_count",
+            "received_count",
+            "not_received_count",
+            "received_with_problems_count",
+            "confidence_interval",
+            "margin_of_error",
+            "rapid_pro_flow_id",
+            "rapid_pro_flow_start_uuid",
+            "age_filter",
+            "excluded_admin_areas_filter",
+            "sex_filter",
+            "activation_date",
+            "completion_date",
+        ]
+    )
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
@@ -202,4 +225,3 @@ class PaymentVerification(TimeStampedUUIDModel):
     @property
     def business_area(self):
         return self.cash_plan_payment_verification.cash_plan.business_area
-
