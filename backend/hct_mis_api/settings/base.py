@@ -159,7 +159,6 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "auditlog.middleware.AuditlogMiddleware",
 ]
 
 TEMPLATES = [
@@ -203,6 +202,7 @@ PROJECT_APPS = [
     "hct_mis_api.apps.sanction_list",
     "hct_mis_api.apps.steficon",
     "hct_mis_api.apps.reporting",
+    "hct_mis_api.apps.activity_log",
 ]
 
 DJANGO_APPS = [
@@ -227,7 +227,6 @@ OTHER_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "constance",
-    "auditlog",
     "admin_extra_urls",
     "multiselectfield",
     "mptt",

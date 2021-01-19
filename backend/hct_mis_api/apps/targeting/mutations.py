@@ -8,6 +8,8 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
 from core import utils
+
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
@@ -56,9 +58,10 @@ class ValidatedMutation(PermissionMutation):
         for validator in cls.arguments_validators:
             validator.validate(kwargs)
         model_object = cls.get_object(root, info, **kwargs)
+        old_model_object = cls.get_object(root, info, **kwargs)
         if cls.permissions:
             cls.has_permission(info, cls.permissions, model_object.business_area)
-        return cls.validated_mutate(root, info, model_object=model_object, **kwargs)
+        return cls.validated_mutate(root, info, model_object=model_object, old_model_object=old_model_object, **kwargs)
 
     @classmethod
     def get_object(cls, root, info, **kwargs):
@@ -137,6 +140,7 @@ class CreateTargetPopulationMutation(PermissionMutation):
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.program = program
         target_population.save()
+        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
         return cls(target_population=target_population)
 
 
@@ -153,6 +157,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
+        old_target_population = cls.get_object(id)
 
         cls.has_permission(info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
@@ -194,6 +199,13 @@ class UpdateTargetPopulationMutation(PermissionMutation):
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
         target_population.save()
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_target_population,
+            target_population,
+        )
         return cls(target_population=target_population)
 
     @classmethod
@@ -218,12 +230,20 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
+        old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_APPROVED
         target_population.approved_by = user
         target_population.approved_at = timezone.now()
         households = Household.objects.filter(target_population.candidate_list_targeting_criteria.get_query())
         target_population.households.set(households)
         target_population.save()
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_target_population,
+            target_population,
+        )
         return cls(target_population=target_population)
 
 
@@ -239,8 +259,16 @@ class UnapproveTargetPopulationMutation(ValidatedMutation):
     @classmethod
     def validated_mutate(cls, root, info, **kwargs):
         target_population = kwargs.get("model_object")
+        old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_DRAFT
         target_population.save()
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_target_population,
+            target_population,
+        )
         return cls(target_population=target_population)
 
 
@@ -258,6 +286,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
     def validated_mutate(cls, root, info, **kwargs):
         user = info.context.user
         target_population = kwargs.get("model_object")
+        old_target_population = kwargs.get("old_model_object")
         target_population.status = TargetPopulation.STATUS_FINALIZED
         target_population.finalized_by = user
         target_population.finalized_at = timezone.now()
@@ -275,6 +304,13 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
         target_population.save()
         AirflowApi.start_dag(
             dag_id="SendTargetPopulation",
+        )
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_target_population,
+            target_population,
         )
         return cls(target_population=target_population)
 
@@ -305,7 +341,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             candidate_list_total_households=target_population.candidate_list_total_households,
             candidate_list_total_individuals=target_population.candidate_list_total_individuals,
             steficon_rule=target_population.steficon_rule,
-            program=target_population.program
+            program=target_population.program,
         )
         target_population_copy.save()
         if target_population.candidate_list_targeting_criteria:
@@ -314,6 +350,7 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             )
         target_population_copy.save()
         target_population_copy.refresh_from_db()
+        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
         return CopyTargetPopulationMutation(target_population_copy)
 
     @classmethod
@@ -341,11 +378,19 @@ class DeleteTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
+        old_target_population = TargetPopulation.objects.get(id=target_id)
 
         cls.has_permission(_info, Permissions.TARGETING_REMOVE, target_population.business_area)
 
         cls.validate_is_finalized(target_population.status)
         target_population.delete()
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            _info.context.user,
+            old_target_population,
+            target_population,
+        )
         return DeleteTargetPopulationMutation(ok=True)
 
 
@@ -367,7 +412,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
     def mutate_and_get_payload(cls, _root, _info, **kwargs):
         target_id = utils.decode_id_string(kwargs["target_id"])
         target_population = TargetPopulation.objects.get(id=target_id)
-
+        old_target_population = TargetPopulation.objects.get(id=target_id)
         cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
         encoded_steficon_rule_id = kwargs["steficon_rule_id"]
@@ -394,6 +439,13 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             for selection in HouseholdSelection.objects.filter(target_population=target_population):
                 selection.vulnerability_score = None
                 selection.save(update_fields=["vulnerability_score"])
+        log_create(
+            TargetPopulation.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            _info.context.user,
+            old_target_population,
+            target_population,
+        )
         return SetSteficonRuleOnTargetPopulationMutation(target_population=target_population)
 
 
