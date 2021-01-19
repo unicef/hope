@@ -22,6 +22,12 @@ export const headCells: HeadCell<ReportNode>[] = [
   },
   {
     disablePadding: false,
+    label: '# of records',
+    id: 'numberOfRecords',
+    numeric: true,
+  },
+  {
+    disablePadding: false,
     label: 'Creation Date',
     id: 'created_at',
     numeric: false,
