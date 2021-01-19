@@ -6726,13 +6726,13 @@ export type GrievanceTicketQuery = (
             { __typename?: 'DocumentNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'DocumentNode' }
-              & Pick<DocumentNode, 'documentNumber'>
+              & Pick<DocumentNode, 'id' | 'documentNumber'>
             )> }
           )>> }
         ) }
       ), sanctionListIndividual: (
         { __typename?: 'SanctionListIndividualNode' }
-        & Pick<SanctionListIndividualNode, 'fullName' | 'referenceNumber'>
+        & Pick<SanctionListIndividualNode, 'id' | 'fullName' | 'referenceNumber'>
         & { datesOfBirth: (
           { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection' }
           & { edges: Array<Maybe<(
@@ -11885,12 +11885,14 @@ export const GrievanceTicketDocument = gql`
         documents {
           edges {
             node {
+              id
               documentNumber
             }
           }
         }
       }
       sanctionListIndividual {
+        id
         fullName
         referenceNumber
         datesOfBirth {
