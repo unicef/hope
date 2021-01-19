@@ -27,7 +27,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    CheckAgainstSanctionListPreMergeTask,
+)
 
 
 class RdiMergeTask:
@@ -215,7 +217,8 @@ class RdiMergeTask:
         identities_to_create = []
         for imported_individual in imported_individuals:
             values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
-            household = households_dict.get(imported_individual.household.id)
+            imported_individual_household = imported_individual.household
+            household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
             individual = Individual(
                 **values,
                 household=household,
