@@ -522,7 +522,7 @@ class GenerateReportService:
             GenerateReportContentHelpers.format_payments_for_individuals_row,
         ),
     }
-    FILTERS_SHEET = "Filters"
+    FILTERS_SHEET = "Meta"
     MAX_COL_WIDTH = 50
 
     def __init__(self, report: Report):
