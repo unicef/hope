@@ -6400,7 +6400,7 @@ export type AllReportsQuery = (
       & Pick<ReportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ReportNode' }
-        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl'>
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl' | 'numberOfRecords'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -7106,7 +7106,7 @@ export type ReportQuery = (
   { __typename?: 'Query' }
   & { report: Maybe<(
     { __typename?: 'ReportNode' }
-    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -11229,6 +11229,7 @@ export const AllReportsDocument = gql`
           lastName
         }
         fileUrl
+        numberOfRecords
       }
     }
   }
@@ -12827,6 +12828,7 @@ export const ReportDocument = gql`
     dateFrom
     dateTo
     fileUrl
+    numberOfRecords
     createdBy {
       firstName
       lastName
