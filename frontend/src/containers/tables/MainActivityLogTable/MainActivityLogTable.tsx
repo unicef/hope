@@ -5,7 +5,7 @@ import { Paper } from '@material-ui/core';
 import TablePagination from '@material-ui/core/TablePagination';
 import {
   AllLogEntriesQuery,
-  LogEntryObject,
+  LogEntryNode,
 } from '../../../__generated__/graphql';
 import {
   ButtonPlaceHolder,
@@ -13,6 +13,7 @@ import {
 } from '../../../components/ActivityLogTable/TableStyledComponents';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 
 const Table = styled.div`
   display: flex;
@@ -38,12 +39,13 @@ const PaperContainer = styled(Paper)`
 `;
 
 interface MainActivityLogTableProps {
-  logEntries: LogEntryObject[];
+  logEntries: LogEntryNode[];
   totalCount: number;
   rowsPerPage: number;
   page: number;
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
 }
 export function MainActivityLogTable({
   logEntries,
@@ -52,9 +54,11 @@ export function MainActivityLogTable({
   page,
   onChangePage,
   onChangeRowsPerPage,
+  actionChoices,
 }: MainActivityLogTableProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
+  const choicesDict = useArrayToDict(actionChoices, 'value', 'name');
   return (
     <PaperContainer>
       <Collapse in={expanded}>
@@ -72,6 +76,7 @@ export function MainActivityLogTable({
           {logEntries.map((value) => (
             <MainActivityLogTableRow
               key={value.id}
+              actionChoicesDict={choicesDict}
               logEntry={
                 value as AllLogEntriesQuery['allLogEntries']['edges'][number]['node']
               }

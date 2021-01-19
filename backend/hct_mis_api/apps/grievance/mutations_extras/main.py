@@ -35,11 +35,5 @@ class UpdateGrievanceTicketExtrasInput(graphene.InputObjectType):
     individual_data_update_issue_type_extras = UpdateIndividualDataUpdateIssueTypeExtras()
     add_individual_issue_type_extras = UpdateAddIndividualIssueTypeExtras()
 
-
-# TODO: Remove it when all methods for closing tickets are implemented
-def _not_implemented_close_method(*args, **kwargs):
-    raise NotImplementedError
-
-
 def _no_operation_close_method(*args, **kwargs):
     pass

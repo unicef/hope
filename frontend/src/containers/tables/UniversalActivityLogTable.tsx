@@ -1,9 +1,11 @@
 import React, { ReactElement, useState } from 'react';
 import {
-  LogEntryObject,
+  LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../__generated__/graphql';
 import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogTable';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { decodeIdString } from '../../utils/utils';
 
 interface ProgramActivityLogTableProps {
   objectId: string;
@@ -12,19 +14,22 @@ export function UniversalActivityLogTable({
   objectId,
 }: ProgramActivityLogTableProps): ReactElement {
   const [page, setPage] = useState(0);
+  const businessArea = useBusinessArea();
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const { data, refetch } = useAllLogEntriesQuery({
     variables: {
-      objectId,
+      businessArea,
+      objectId: decodeIdString(objectId),
       first: rowsPerPage,
     },
     fetchPolicy: 'network-only',
   });
+
   if (!data) {
     return null;
   }
   const { edges } = data.allLogEntries;
-  const logEntries = edges.map((edge) => edge.node as LogEntryObject);
+  const logEntries = edges.map((edge) => edge.node as LogEntryNode);
   return (
     <ActivityLogTable
       totalCount={data.allLogEntries.totalCount}
@@ -33,7 +38,8 @@ export function UniversalActivityLogTable({
       page={page}
       onChangePage={(event, newPage) => {
         const variables = {
-          objectId,
+          objectId: decodeIdString(objectId),
+          businessArea,
           first: undefined,
           last: undefined,
           after: undefined,
@@ -54,7 +60,8 @@ export function UniversalActivityLogTable({
         setRowsPerPage(value);
         setPage(0);
         const variables = {
-          objectId,
+          objectId: decodeIdString(objectId),
+          businessArea,
           first: rowsPerPage,
           after: undefined,
           last: undefined,

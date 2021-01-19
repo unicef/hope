@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from auditlog.registry import auditlog
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -204,7 +203,3 @@ class PaymentVerification(TimeStampedUUIDModel):
     def business_area(self):
         return self.cash_plan_payment_verification.cash_plan.business_area
 
-
-auditlog.register(PaymentVerification)
-auditlog.register(CashPlanPaymentVerification)
-# auditlog.register(PaymentRecord)

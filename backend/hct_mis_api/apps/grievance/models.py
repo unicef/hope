@@ -3,12 +3,39 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from django.utils.translation import ugettext_lazy as _
 
 
 class GrievanceTicket(TimeStampedUUIDModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "user_modified",
+            "created_by",
+            "assigned_to",
+            "description",
+            "admin",
+            "area",
+            "language",
+            "consent",
+        ],
+        {
+            "complaint_ticket_details.payment_record": "payment_record",
+            "complaint_ticket_details.household": "household",
+            "complaint_ticket_details.individual": "individual",
+            "sensitive_ticket_details.payment_record": "payment_record",
+            "sensitive_ticket_details.household": "household",
+            "sensitive_ticket_details.individual": "individual",
+            "household_data_update_ticket_details.household": "household",
+            "household_data_update_ticket_details.household_data": "household_data",
+            "status_log": "status",
+            "category_log": "category",
+            "issue_type_log": "issue_type",
+        },
+    )
     STATUS_NEW = 1
     STATUS_ASSIGNED = 2
     STATUS_IN_PROGRESS = 3
@@ -229,11 +256,27 @@ class GrievanceTicket(TimeStampedUUIDModel):
 
         return getattr(self, details_name, None)
 
+    @property
+    def status_log(self):
+        return choices_to_dict(GrievanceTicket.STATUS_CHOICES)[self.status]
+
+    @property
+    def category_log(self):
+        return choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.category]
+
+    @property
+    def issue_type_log(self):
+        issue_type_choices_dict = {}
+        for key,value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+            issue_type_choices_dict.update(value)
+        return issue_type_choices_dict[self.issue_type]
+
     class Meta:
         ordering = (
             "status",
             "created_at",
         )
+        verbose_name = "Grievance Ticket"
 
     def clean(self):
         issue_types = self.ISSUE_TYPES_CHOICES.get(self.category)
@@ -246,6 +289,11 @@ class GrievanceTicket(TimeStampedUUIDModel):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+    def __str__(self):
+        if len(self.description):
+            return self.description
+        return str(self.pk)
 
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):
