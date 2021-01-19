@@ -566,6 +566,7 @@ class GenerateReportService:
     def _add_rows(self) -> int:
         get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
         all_instances = get_row_methods[0](self.report)
+        self.report.number_of_records = all_instances.count()
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
         col_instances_len = 0
         for instance in all_instances:
