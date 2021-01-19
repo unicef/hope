@@ -369,8 +369,8 @@ class Query(graphene.ObjectType):
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivery_type=delivery_type).count()
-                    for delivery_type in status_choices_mapping.keys()]
+                    payment_records.filter(status=status).count()
+                    for status in status_choices_mapping.keys()]
             }
         ]
         return {"labels": status_choices_mapping.values(), "datasets": dataset}
