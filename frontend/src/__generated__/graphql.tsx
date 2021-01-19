@@ -15,14 +15,13 @@ export type Scalars = {
   Boolean: boolean,
   Int: number,
   Float: number,
+  UUID: any,
+  Arg: any,
   DateTime: any,
   Date: any,
-  UUID: any,
-  Decimal: any,
-  Arg: any,
-  JSONLazyString: any,
-  JSONString: any,
   FlexFieldsScalar: any,
+  Decimal: any,
+  JSONString: any,
   GeoJSON: any,
   Upload: any,
 };
@@ -214,6 +213,7 @@ export type BusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
+  logentrySet: LogEntryNodeConnection,
 };
 
 
@@ -318,6 +318,14 @@ export type BusinessAreaNodeRegistrationdataimportSetArgs = {
 
 
 export type BusinessAreaNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeLogentrySetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -515,6 +523,16 @@ export type ContentTypeObjectType = {
   id: Scalars['ID'],
   appLabel: Scalars['String'],
   model: Scalars['String'],
+  logEntries: LogEntryNodeConnection,
+  name?: Maybe<Scalars['String']>,
+};
+
+
+export type ContentTypeObjectTypeLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 export type CopyTargetPopulationInput = {
@@ -1310,8 +1328,8 @@ export type HouseholdUpdateDataObjectType = {
   consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
   residenceStatus?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
-  country: Scalars['String'],
-  size: Scalars['Int'],
+  country?: Maybe<Scalars['String']>,
+  size?: Maybe<Scalars['Int']>,
   address?: Maybe<Scalars['String']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -2435,7 +2453,6 @@ export type IssueTypesObject = {
 };
 
 
-
 export type KoboAssetObject = {
    __typename?: 'KoboAssetObject',
   id?: Maybe<Scalars['String']>,
@@ -2475,37 +2492,36 @@ export type LabelNode = {
 };
 
 export enum LogEntryAction {
-  A_0 = 'A_0',
-  A_1 = 'A_1',
-  A_2 = 'A_2'
+  Create = 'CREATE',
+  Update = 'UPDATE',
+  Delete = 'DELETE',
+  SoftDelete = 'SOFT_DELETE'
 }
 
-export type LogEntryObject = {
-   __typename?: 'LogEntryObject',
+export type LogEntryNode = Node & {
+   __typename?: 'LogEntryNode',
   id: Scalars['ID'],
-  contentType: ContentTypeObjectType,
-  objectPk: Scalars['String'],
-  objectId?: Maybe<Scalars['Int']>,
-  objectRepr: Scalars['String'],
+  contentType?: Maybe<ContentTypeObjectType>,
+  objectId?: Maybe<Scalars['UUID']>,
   action: LogEntryAction,
-  changes: Scalars['String'],
-  actor?: Maybe<UserNode>,
-  remoteAddr?: Maybe<Scalars['String']>,
+  objectRepr: Scalars['String'],
+  changes?: Maybe<Scalars['Arg']>,
+  user?: Maybe<UserNode>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
   timestamp?: Maybe<Scalars['DateTime']>,
-  changesDisplayDict?: Maybe<Scalars['JSONLazyString']>,
-  changesDisplayObject?: Maybe<Scalars['Arg']>,
 };
 
-export type LogEntryObjectConnection = {
-   __typename?: 'LogEntryObjectConnection',
+export type LogEntryNodeConnection = {
+   __typename?: 'LogEntryNodeConnection',
   pageInfo: PageInfo,
-  edges: Array<Maybe<LogEntryObjectEdge>>,
+  edges: Array<Maybe<LogEntryNodeEdge>>,
   totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
 };
 
-export type LogEntryObjectEdge = {
-   __typename?: 'LogEntryObjectEdge',
-  node?: Maybe<LogEntryObject>,
+export type LogEntryNodeEdge = {
+   __typename?: 'LogEntryNodeEdge',
+  node?: Maybe<LogEntryNode>,
   cursor: Scalars['String'],
 };
 
@@ -2931,6 +2947,7 @@ export type ProgramNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
   name: Scalars['String'],
   status: ProgramStatus,
@@ -2957,7 +2974,6 @@ export type ProgramNode = Node & {
   totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
-  history?: Maybe<LogEntryObjectConnection>,
 };
 
 
@@ -3018,14 +3034,6 @@ export type ProgramNodeReportsArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
-
-export type ProgramNodeHistoryArgs = {
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
-};
-
 export type ProgramNodeConnection = {
    __typename?: 'ProgramNodeConnection',
   pageInfo: PageInfo,
@@ -3063,6 +3071,8 @@ export enum ProgramStatus {
 
 export type Query = {
    __typename?: 'Query',
+  allLogEntries?: Maybe<LogEntryNodeConnection>,
+  logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   report?: Maybe<ReportNode>,
   allReports?: Maybe<ReportNodeConnection>,
   reportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3130,7 +3140,6 @@ export type Query = {
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   me?: Maybe<UserNode>,
   allUsers?: Maybe<UserNodeConnection>,
-  allLogEntries?: Maybe<LogEntryObjectConnection>,
   userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3148,6 +3157,16 @@ export type Query = {
   allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
   registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   _debug?: Maybe<DjangoDebug>,
+};
+
+
+export type QueryAllLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  objectId?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String']
 };
 
 
@@ -3529,15 +3548,6 @@ export type QueryAllUsersArgs = {
   roles?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryAllLogEntriesArgs = {
-  objectId?: Maybe<Scalars['String']>,
-  before?: Maybe<Scalars['String']>,
-  after?: Maybe<Scalars['String']>,
-  first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -4676,7 +4686,6 @@ export type UpdateProgramInput = {
   cashPlus?: Maybe<Scalars['Boolean']>,
   populationGoal?: Maybe<Scalars['Int']>,
   administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
-  businessAreaSlug?: Maybe<Scalars['String']>,
   individualDataNeeded?: Maybe<Scalars['Boolean']>,
 };
 
@@ -4728,6 +4737,7 @@ export type UserBusinessAreaNode = Node & {
   targetpopulationSet: TargetPopulationNodeConnection,
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
+  logentrySet: LogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
 };
 
@@ -4839,6 +4849,14 @@ export type UserBusinessAreaNodeReportsArgs = {
   last?: Maybe<Scalars['Int']>
 };
 
+
+export type UserBusinessAreaNodeLogentrySetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
 export type UserBusinessAreaNodeConnection = {
    __typename?: 'UserBusinessAreaNodeConnection',
   pageInfo: PageInfo,
@@ -4877,6 +4895,7 @@ export type UserNode = Node & {
   finalizedTargetPopulations: TargetPopulationNodeConnection,
   registrationDataImports: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
+  logs: LogEntryNodeConnection,
   businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
 };
 
@@ -4989,6 +5008,14 @@ export type UserNodeRegistrationDataImportsArgs = {
 
 
 export type UserNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeLogsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -6142,7 +6169,8 @@ export type AllIndividualsQuery = (
 );
 
 export type AllLogEntriesQueryVariables = {
-  objectId?: Maybe<Scalars['String']>,
+  businessArea: Scalars['String'],
+  objectId?: Maybe<Scalars['UUID']>,
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -6153,27 +6181,30 @@ export type AllLogEntriesQueryVariables = {
 export type AllLogEntriesQuery = (
   { __typename?: 'Query' }
   & { allLogEntries: Maybe<(
-    { __typename?: 'LogEntryObjectConnection' }
-    & Pick<LogEntryObjectConnection, 'totalCount'>
+    { __typename?: 'LogEntryNodeConnection' }
+    & Pick<LogEntryNodeConnection, 'totalCount'>
     & { pageInfo: (
       { __typename?: 'PageInfo' }
       & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
     ), edges: Array<Maybe<(
-      { __typename?: 'LogEntryObjectEdge' }
-      & Pick<LogEntryObjectEdge, 'cursor'>
+      { __typename?: 'LogEntryNodeEdge' }
+      & Pick<LogEntryNodeEdge, 'cursor'>
       & { node: Maybe<(
-        { __typename?: 'LogEntryObject' }
-        & Pick<LogEntryObject, 'id' | 'action' | 'changesDisplayDict' | 'objectRepr' | 'timestamp'>
-        & { contentType: (
+        { __typename?: 'LogEntryNode' }
+        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp'>
+        & { contentType: Maybe<(
           { __typename?: 'ContentTypeObjectType' }
-          & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model'>
-        ), actor: Maybe<(
+          & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model' | 'name'>
+        )>, user: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
         )> }
       )> }
     )>> }
-  )> }
+  )>, logEntryActionChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
 );
 
 export type AllPaymentRecordsQueryVariables = {
@@ -10672,8 +10703,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($objectId: String, $after: String, $before: String, $first: Int, $last: Int) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -10686,15 +10717,17 @@ export const AllLogEntriesDocument = gql`
       node {
         id
         action
-        changesDisplayDict
+        changes
         objectRepr
+        objectId
         timestamp
         contentType {
           id
           appLabel
           model
+          name
         }
-        actor {
+        user {
           id
           firstName
           lastName
@@ -10702,9 +10735,13 @@ export const AllLogEntriesDocument = gql`
       }
     }
   }
+  logEntryActionChoices {
+    name
+    value
+  }
 }
     `;
-export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'>;
+export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'> & ({ variables: AllLogEntriesQueryVariables; skip?: boolean; } | { skip: boolean; });
 
     export const AllLogEntriesComponent = (props: AllLogEntriesComponentProps) => (
       <ApolloReactComponents.Query<AllLogEntriesQuery, AllLogEntriesQueryVariables> query={AllLogEntriesDocument} {...props} />
@@ -10734,6 +10771,7 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  * @example
  * const { data, loading, error } = useAllLogEntriesQuery({
  *   variables: {
+ *      businessArea: // value for 'businessArea'
  *      objectId: // value for 'objectId'
  *      after: // value for 'after'
  *      before: // value for 'before'
@@ -14192,16 +14230,26 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>,
-  ID: ResolverTypeWrapper<Scalars['ID']>,
-  ReportNode: ResolverTypeWrapper<ReportNode>,
-  Node: ResolverTypeWrapper<Node>,
-  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
-  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
   String: ResolverTypeWrapper<Scalars['String']>,
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   Int: ResolverTypeWrapper<Scalars['Int']>,
-  AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
+  UUID: ResolverTypeWrapper<Scalars['UUID']>,
+  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
   PageInfo: ResolverTypeWrapper<PageInfo>,
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
+  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
+  LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
+  Node: ResolverTypeWrapper<Node>,
+  ID: ResolverTypeWrapper<Scalars['ID']>,
+  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
+  LogEntryAction: LogEntryAction,
+  Arg: ResolverTypeWrapper<Scalars['Arg']>,
+  UserNode: ResolverTypeWrapper<UserNode>,
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
+  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
+  AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
   AdminAreaTypeNodeEdge: ResolverTypeWrapper<AdminAreaTypeNodeEdge>,
   AdminAreaTypeNode: ResolverTypeWrapper<AdminAreaTypeNode>,
   AdminAreaNodeConnection: ResolverTypeWrapper<AdminAreaNodeConnection>,
@@ -14222,21 +14270,25 @@ export type ResolversTypes = {
   IndividualRelationship: IndividualRelationship,
   RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
-  UserNode: ResolverTypeWrapper<UserNode>,
-  UserStatus: UserStatus,
-  UserPartner: UserPartner,
-  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
-  RoleNode: ResolverTypeWrapper<RoleNode>,
-  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
-  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
-  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
-  TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
-  TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
-  TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
+  IndividualWorkStatus: IndividualWorkStatus,
+  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
+  IndividualSeeingDisability: IndividualSeeingDisability,
+  IndividualHearingDisability: IndividualHearingDisability,
+  IndividualPhysicalDisability: IndividualPhysicalDisability,
+  IndividualMemoryDisability: IndividualMemoryDisability,
+  IndividualSelfcareDisability: IndividualSelfcareDisability,
+  IndividualCommsDisability: IndividualCommsDisability,
+  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
+  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
   TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>,
   PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
   PaymentRecordStatus: PaymentRecordStatus,
-  UUID: ResolverTypeWrapper<Scalars['UUID']>,
   CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
   CashPlanStatus: CashPlanStatus,
   ProgramNode: ResolverTypeWrapper<ProgramNode>,
@@ -14256,7 +14308,6 @@ export type ResolversTypes = {
   TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
   TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>,
   TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
-  Arg: ResolverTypeWrapper<Scalars['Arg']>,
   FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
   LabelNode: ResolverTypeWrapper<LabelNode>,
   CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
@@ -14264,19 +14315,13 @@ export type ResolversTypes = {
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>,
   RuleLanguage: RuleLanguage,
-  Float: ResolverTypeWrapper<Scalars['Float']>,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
   StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
   ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
   ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
-  LogEntryObjectConnection: ResolverTypeWrapper<LogEntryObjectConnection>,
-  LogEntryObjectEdge: ResolverTypeWrapper<LogEntryObjectEdge>,
-  LogEntryObject: ResolverTypeWrapper<LogEntryObject>,
-  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
-  LogEntryAction: LogEntryAction,
-  JSONLazyString: ResolverTypeWrapper<Scalars['JSONLazyString']>,
+  ReportNode: ResolverTypeWrapper<ReportNode>,
   CashPlanDeliveryType: CashPlanDeliveryType,
   CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
@@ -14297,16 +14342,18 @@ export type ResolversTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
-  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
-  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
   TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<TicketSensitiveDetailsNodeConnection>,
   TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<TicketSensitiveDetailsNodeEdge>,
   TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
-  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
+  TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
+  TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
   TicketIndividualDataUpdateDetailsNode: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNode>,
-  TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
+  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
+  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
   TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
+  TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<TicketSystemFlaggingDetailsNode>,
   SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>,
   SanctionListIndividualDocumentNodeConnection: ResolverTypeWrapper<SanctionListIndividualDocumentNodeConnection>,
@@ -14324,30 +14371,6 @@ export type ResolversTypes = {
   SanctionListIndividualDateOfBirthNodeConnection: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeConnection>,
   SanctionListIndividualDateOfBirthNodeEdge: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeEdge>,
   SanctionListIndividualDateOfBirthNode: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNode>,
-  TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
-  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
-  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
-  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
-  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
-  IndividualWorkStatus: IndividualWorkStatus,
-  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
-  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
-  TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
-  TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
-  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
-  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
-  TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
-  TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
   DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
@@ -14365,10 +14388,24 @@ export type ResolversTypes = {
   HouseholdCurrency: HouseholdCurrency,
   TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeConnection>,
   TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeEdge>,
+  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
   TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>,
   TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>,
+  TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
   ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
   ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
+  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
+  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
+  TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
+  TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
+  TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
+  TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  RoleNode: ResolverTypeWrapper<RoleNode>,
+  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
+  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
@@ -14515,16 +14552,26 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Query: {},
-  ID: Scalars['ID'],
-  ReportNode: ReportNode,
-  Node: Node,
-  DateTime: Scalars['DateTime'],
-  UserBusinessAreaNode: UserBusinessAreaNode,
   String: Scalars['String'],
-  Boolean: Scalars['Boolean'],
   Int: Scalars['Int'],
-  AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
+  UUID: Scalars['UUID'],
+  LogEntryNodeConnection: LogEntryNodeConnection,
   PageInfo: PageInfo,
+  Boolean: Scalars['Boolean'],
+  LogEntryNodeEdge: LogEntryNodeEdge,
+  LogEntryNode: LogEntryNode,
+  Node: Node,
+  ID: Scalars['ID'],
+  ContentTypeObjectType: ContentTypeObjectType,
+  LogEntryAction: LogEntryAction,
+  Arg: Scalars['Arg'],
+  UserNode: UserNode,
+  DateTime: Scalars['DateTime'],
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: UserRoleNode,
+  UserBusinessAreaNode: UserBusinessAreaNode,
+  AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
   AdminAreaTypeNodeEdge: AdminAreaTypeNodeEdge,
   AdminAreaTypeNode: AdminAreaTypeNode,
   AdminAreaNodeConnection: AdminAreaNodeConnection,
@@ -14545,21 +14592,25 @@ export type ResolversParentTypes = {
   IndividualRelationship: IndividualRelationship,
   RegistrationDataImportNode: RegistrationDataImportNode,
   RegistrationDataImportStatus: RegistrationDataImportStatus,
-  UserNode: UserNode,
-  UserStatus: UserStatus,
-  UserPartner: UserPartner,
-  UserRoleNode: UserRoleNode,
-  RoleNode: RoleNode,
-  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
-  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
-  GrievanceTicketNode: GrievanceTicketNode,
-  TicketNoteNodeConnection: TicketNoteNodeConnection,
-  TicketNoteNodeEdge: TicketNoteNodeEdge,
-  TicketNoteNode: TicketNoteNode,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
+  Float: Scalars['Float'],
+  IndividualWorkStatus: IndividualWorkStatus,
+  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  DeduplicationResultNode: DeduplicationResultNode,
+  IndividualSeeingDisability: IndividualSeeingDisability,
+  IndividualHearingDisability: IndividualHearingDisability,
+  IndividualPhysicalDisability: IndividualPhysicalDisability,
+  IndividualMemoryDisability: IndividualMemoryDisability,
+  IndividualSelfcareDisability: IndividualSelfcareDisability,
+  IndividualCommsDisability: IndividualCommsDisability,
+  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
+  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
   TicketComplaintDetailsNode: TicketComplaintDetailsNode,
   PaymentRecordNode: PaymentRecordNode,
   PaymentRecordStatus: PaymentRecordStatus,
-  UUID: Scalars['UUID'],
   CashPlanNode: CashPlanNode,
   CashPlanStatus: CashPlanStatus,
   ProgramNode: ProgramNode,
@@ -14579,7 +14630,6 @@ export type ResolversParentTypes = {
   TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
   TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode,
   TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
-  Arg: Scalars['Arg'],
   FieldAttributeNode: FieldAttributeNode,
   LabelNode: LabelNode,
   CoreFieldChoiceObject: CoreFieldChoiceObject,
@@ -14587,19 +14637,13 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
   SteficonRuleNode: SteficonRuleNode,
   RuleLanguage: RuleLanguage,
-  Float: Scalars['Float'],
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   HouseholdSelection: HouseholdSelection,
   StatsObjectType: StatsObjectType,
   ReportNodeConnection: ReportNodeConnection,
   ReportNodeEdge: ReportNodeEdge,
-  LogEntryObjectConnection: LogEntryObjectConnection,
-  LogEntryObjectEdge: LogEntryObjectEdge,
-  LogEntryObject: LogEntryObject,
-  ContentTypeObjectType: ContentTypeObjectType,
-  LogEntryAction: LogEntryAction,
-  JSONLazyString: Scalars['JSONLazyString'],
+  ReportNode: ReportNode,
   CashPlanDeliveryType: CashPlanDeliveryType,
   CashPlanVerificationStatus: CashPlanVerificationStatus,
   CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
@@ -14620,16 +14664,18 @@ export type ResolversParentTypes = {
   PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
   PaymentRecordDeliveryType: PaymentRecordDeliveryType,
   ServiceProviderNode: ServiceProviderNode,
-  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
-  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
   TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection,
   TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge,
   TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
-  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
+  TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
+  TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
   TicketIndividualDataUpdateDetailsNode: TicketIndividualDataUpdateDetailsNode,
-  TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
+  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
+  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
   TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
   JSONString: Scalars['JSONString'],
+  TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
+  TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode,
   SanctionListIndividualNode: SanctionListIndividualNode,
   SanctionListIndividualDocumentNodeConnection: SanctionListIndividualDocumentNodeConnection,
@@ -14647,30 +14693,6 @@ export type ResolversParentTypes = {
   SanctionListIndividualDateOfBirthNodeConnection: SanctionListIndividualDateOfBirthNodeConnection,
   SanctionListIndividualDateOfBirthNodeEdge: SanctionListIndividualDateOfBirthNodeEdge,
   SanctionListIndividualDateOfBirthNode: SanctionListIndividualDateOfBirthNode,
-  TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
-  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
-  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
-  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
-  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
-  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
-  CountAndPercentageNode: CountAndPercentageNode,
-  IndividualWorkStatus: IndividualWorkStatus,
-  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
-  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
-  DeduplicationResultNode: DeduplicationResultNode,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
-  TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
-  TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
-  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
-  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
-  TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
-  TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   DocumentNodeConnection: DocumentNodeConnection,
   DocumentNodeEdge: DocumentNodeEdge,
   DocumentNode: DocumentNode,
@@ -14688,10 +14710,24 @@ export type ResolversParentTypes = {
   HouseholdCurrency: HouseholdCurrency,
   TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection,
   TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge,
+  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
   TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection,
   TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge,
+  TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
   ServiceProviderNodeConnection: ServiceProviderNodeConnection,
   ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
+  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
+  GrievanceTicketNode: GrievanceTicketNode,
+  TicketNoteNodeConnection: TicketNoteNodeConnection,
+  TicketNoteNodeEdge: TicketNoteNodeEdge,
+  TicketNoteNode: TicketNoteNode,
+  TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  RoleNode: RoleNode,
+  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
+  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   ChoiceObject: ChoiceObject,
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
@@ -14930,6 +14966,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
+  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
 };
 
 export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
@@ -15045,6 +15082,8 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  logEntries?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
@@ -15659,10 +15698,6 @@ export type IssueTypesObjectResolvers<ContextType = any, ParentType extends Reso
   subCategories?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
 };
 
-export interface JsonLazyStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONLazyString'], any> {
-  name: 'JSONLazyString'
-}
-
 export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
   name: 'JSONString'
 }
@@ -15700,29 +15735,27 @@ export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversPa
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
-export type LogEntryObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObject'] = ResolversParentTypes['LogEntryObject']> = {
+export type LogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNode'] = ResolversParentTypes['LogEntryNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  contentType?: Resolver<ResolversTypes['ContentTypeObjectType'], ParentType, ContextType>,
-  objectPk?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  objectId?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
-  changes?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  actor?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
-  remoteAddr?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
-  changesDisplayDict?: Resolver<Maybe<ResolversTypes['JSONLazyString']>, ParentType, ContextType>,
-  changesDisplayObject?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
 };
 
-export type LogEntryObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObjectConnection'] = ResolversParentTypes['LogEntryObjectConnection']> = {
+export type LogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']> = {
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
-  edges?: Resolver<Array<Maybe<ResolversTypes['LogEntryObjectEdge']>>, ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['LogEntryNodeEdge']>>, ParentType, ContextType>,
   totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
-export type LogEntryObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryObjectEdge'] = ResolversParentTypes['LogEntryObjectEdge']> = {
-  node?: Resolver<Maybe<ResolversTypes['LogEntryObject']>, ParentType, ContextType>,
+export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeEdge'] = ResolversParentTypes['LogEntryNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['LogEntryNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
 };
 
@@ -15776,7 +15809,7 @@ export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentT
 };
 
 export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
-  __resolveType: TypeResolveFn<'ReportNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'UserNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'TicketNeedsAdjudicationDetailsNode' | 'DocumentNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'ReportNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'ServiceProviderNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
 };
 
@@ -15859,6 +15892,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
@@ -15885,7 +15919,6 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  history?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, ProgramNodeHistoryArgs>,
 };
 
 export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
@@ -15901,6 +15934,8 @@ export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends Resol
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
+  logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>,
   allReports?: Resolver<Maybe<ResolversTypes['ReportNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllReportsArgs, 'businessArea'>>,
   reportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -15968,7 +16003,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
-  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryObjectConnection']>, ParentType, ContextType, QueryAllLogEntriesArgs>,
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -16698,6 +16732,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
   registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
+  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
   permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
 };
 
@@ -16736,6 +16771,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
   registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
   reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
+  logs?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
   businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
 };
 
@@ -16856,16 +16892,15 @@ export type Resolvers<ContextType = any> = {
   IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
   IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
   IssueTypesObject?: IssueTypesObjectResolvers<ContextType>,
-  JSONLazyString?: GraphQLScalarType,
   JSONString?: GraphQLScalarType,
   KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
   KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
   KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
   KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
   LabelNode?: LabelNodeResolvers<ContextType>,
-  LogEntryObject?: LogEntryObjectResolvers<ContextType>,
-  LogEntryObjectConnection?: LogEntryObjectConnectionResolvers<ContextType>,
-  LogEntryObjectEdge?: LogEntryObjectEdgeResolvers<ContextType>,
+  LogEntryNode?: LogEntryNodeResolvers<ContextType>,
+  LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
+  LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
   MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
   Mutations?: MutationsResolvers<ContextType>,
   NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,

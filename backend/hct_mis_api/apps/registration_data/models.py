@@ -1,4 +1,4 @@
-from auditlog.registry import auditlog
+
 from django.conf import settings
 from django.db import models
 from django.utils.functional import cached_property
@@ -50,5 +50,3 @@ class RegistrationDataImport(TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("name", "business_area")
-
-auditlog.register(RegistrationDataImport)
