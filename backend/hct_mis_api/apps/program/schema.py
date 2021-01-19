@@ -177,6 +177,11 @@ class ChartProgramFilter(FilterSet):
         return qs.filter(q_obj)
 
 
+class ChartDatasetNode(graphene.ObjectType):
+    label = graphene.String()
+    data = graphene.List(graphene.Int)
+
+
 class ChartNode(graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(
@@ -184,7 +189,8 @@ class ChartNode(graphene.ObjectType):
         ),
     )
     labels = graphene.List(graphene.String)
-    data = graphene.List(graphene.Int)
+    # dataset = graphene.List(graphene.Int)
+    datasets = graphene.List(ChartDatasetNode)
 
 
 class Query(graphene.ObjectType):
@@ -198,7 +204,11 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
-    chart_program = graphene.Field(ChartNode, business_area_slug=graphene.String(required=True))
+    chart_program = graphene.Field(
+        ChartNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
     # chart_program = relay.Node.Field(ChartProgramNode)
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
@@ -256,10 +266,24 @@ class Query(graphene.ObjectType):
             )
         ).order_by("-updated_at", "custom_order")
 
-    def resolve_chart_program(self, info, business_area_slug, **kwargs):
+    def resolve_chart_program(self, info, business_area_slug, year, **kwargs):
         sector_choices = Program.SECTOR_CHOICE
         sector_choice_mapping = dict(sector_choices)
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        programs = Program.objects.filter(business_area=business_area)
-        dataset = [programs.filter(sector=sector).count() for sector in sector_choice_mapping.keys()]
-        return {"labels": sector_choice_mapping.values(), "data": dataset}
+        programs = Program.objects.filter(
+            business_area=business_area,
+            created_at__year=year
+        )
+        datasets = [
+            {
+                "label": "Programmes",
+                "data": [programs.filter(sector=sector, cash_plus=False).count()
+                         for sector in sector_choice_mapping.keys()]
+            },
+            {
+                "label": "Programmes with Cash+",
+                "data": [programs.filter(sector=sector, cash_plus=True).count()
+                         for sector in sector_choice_mapping.keys()]
+            },
+        ]
+        return {"labels": sector_choice_mapping.values(), "datasets": datasets}
