@@ -93,12 +93,14 @@ export const GrievanceTicket = gql`
           documents{
             edges{
               node{
+                id
                 documentNumber
               }
             }
           }
         }
         sanctionListIndividual {
+          id
           fullName
           referenceNumber
           
