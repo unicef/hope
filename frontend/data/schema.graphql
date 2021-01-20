@@ -138,6 +138,7 @@ type BusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
 }
 
 type BusinessAreaNodeConnection {
@@ -294,6 +295,8 @@ type ContentTypeObjectType {
   id: ID!
   appLabel: String!
   model: String!
+  logEntries(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  name: String
 }
 
 input CopyTargetPopulationInput {
@@ -379,6 +382,19 @@ input CreateProgramInput {
   administrativeAreasOfImplementation: String
   businessAreaSlug: String
   individualDataNeeded: Boolean
+}
+
+type CreateReport {
+  report: ReportNode
+}
+
+input CreateReportInput {
+  reportType: Int!
+  businessAreaSlug: String!
+  dateFrom: Date!
+  dateTo: Date!
+  adminArea: [ID]
+  program: ID
 }
 
 input CreateTargetPopulationInput {
@@ -931,8 +947,8 @@ input HouseholdUpdateDataObjectType {
   consentSharing: [String]
   residenceStatus: String
   countryOrigin: String
-  country: String!
-  size: Int!
+  country: String
+  size: Int
   address: String
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
@@ -1955,8 +1971,6 @@ type IssueTypesObject {
   subCategories: [ChoiceObject]
 }
 
-scalar JSONLazyString
-
 scalar JSONString
 
 type KoboAssetObject {
@@ -1993,34 +2007,33 @@ type LabelNode {
 }
 
 enum LogEntryAction {
-  A_0
-  A_1
-  A_2
+  CREATE
+  UPDATE
+  DELETE
+  SOFT_DELETE
 }
 
-type LogEntryObject {
+type LogEntryNode implements Node {
   id: ID!
-  contentType: ContentTypeObjectType!
-  objectPk: String!
-  objectId: Int
-  objectRepr: String!
+  contentType: ContentTypeObjectType
+  objectId: UUID
   action: LogEntryAction!
-  changes: String!
-  actor: UserNode
-  remoteAddr: String
+  objectRepr: String!
+  changes: Arg
+  user: UserNode
+  businessArea: UserBusinessAreaNode
   timestamp: DateTime
-  changesDisplayDict: JSONLazyString
-  changesDisplayObject: Arg
 }
 
-type LogEntryObjectConnection {
+type LogEntryNodeConnection {
   pageInfo: PageInfo!
-  edges: [LogEntryObjectEdge]!
+  edges: [LogEntryNodeEdge]!
   totalCount: Int
+  edgeCount: Int
 }
 
-type LogEntryObjectEdge {
-  node: LogEntryObject
+type LogEntryNodeEdge {
+  node: LogEntryNode
   cursor: String!
 }
 
@@ -2029,6 +2042,7 @@ type MergeRegistrationDataImportMutation {
 }
 
 type Mutations {
+  createReport(reportData: CreateReportInput!): CreateReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
@@ -2192,6 +2206,7 @@ type ProgramNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  isRemoved: Boolean!
   lastSyncAt: DateTime
   name: String!
   status: ProgramStatus!
@@ -2218,7 +2233,6 @@ type ProgramNode implements Node {
   totalDeliveredQuantity: Decimal
   totalUndeliveredQuantity: Decimal
   totalNumberOfHouseholds: Int
-  history(before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
 }
 
 type ProgramNodeConnection {
@@ -2255,6 +2269,8 @@ enum ProgramStatus {
 }
 
 type Query {
+  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!): LogEntryNodeConnection
+  logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
   allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
   reportTypesChoices: [ChoiceObject]
@@ -2274,8 +2290,10 @@ type Query {
   allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
   paymentRecord(id: ID!): PaymentRecordNode
   paymentRecordVerification(id: ID!): PaymentVerificationNode
+  cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
   allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
   allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, status: String, search: String, businessArea: String, orderBy: String): PaymentVerificationNodeConnection
+  allCashPlanPaymentVerification(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
   paymentRecordDeliveryTypeChoices: [ChoiceObject]
@@ -2322,7 +2340,6 @@ type Query {
   countriesChoices: [ChoiceObject]
   me: UserNode
   allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
-  allLogEntries(objectId: String, before: String, after: String, first: Int, last: Int): LogEntryObjectConnection
   userRolesChoices: [ChoiceObject]
   userStatusChoices: [ChoiceObject]
   userPartnerChoices: [ChoiceObject]
@@ -2505,7 +2522,7 @@ type ReportNode implements Node {
   dateTo: Date!
   country: String
   program: ProgramNode
-  adminArea: AdminAreaNode
+  adminArea(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   fileUrl: String
 }
 
@@ -3176,7 +3193,6 @@ input UpdateProgramInput {
   cashPlus: Boolean
   populationGoal: Int
   administrativeAreasOfImplementation: String
-  businessAreaSlug: String
   individualDataNeeded: Boolean
 }
 
@@ -3226,6 +3242,7 @@ type UserBusinessAreaNode implements Node {
   targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
   permissions: [String]
 }
 
@@ -3264,6 +3281,7 @@ type UserNode implements Node {
   finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logs(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
   businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
 }
 

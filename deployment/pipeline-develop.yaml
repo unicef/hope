@@ -61,12 +61,22 @@ stages:
         displayName: "[FRONTEND]"
         steps:
           - task: Docker@2
-            displayName: Build&Push
+            displayName: Build
             inputs:
-              command: buildAndPush
+              command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              arguments: SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
+              arguments: --build-arg SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                dev-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
