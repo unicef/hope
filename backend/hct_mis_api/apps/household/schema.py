@@ -28,6 +28,7 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     encode_ids,
     to_choice_object,
+    chart_get_filtered_qs
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -49,7 +50,9 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode
 
 
 class HouseholdFilter(FilterSet):
@@ -384,6 +387,23 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class ChartAllHouseHoldsReached(ChartDatasetNode):
+    female_age_group_0_5_count = graphene.Int()
+    female_age_group_6_11_count = graphene.Int()
+    female_age_group_12_17_count = graphene.Int()
+    female_age_group_18_59_count = graphene.Int()
+    female_age_group_60_count = graphene.Int()
+    male_age_group_0_5_count = graphene.Int()
+    male_age_group_6_11_count = graphene.Int()
+    male_age_group_12_17_count = graphene.Int()
+    male_age_group_18_59_count = graphene.Int()
+    male_age_group_60_count = graphene.Int()
+
+
+class SectionTotalHouseholdsReachedNode(graphene.ObjectType):
+    total = graphene.Int()
+
+
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
     all_households = DjangoPermissionFilterConnectionField(
@@ -397,6 +417,17 @@ class Query(graphene.ObjectType):
         filterset_class=IndividualFilter,
         permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
+    chart_all_individuals_reached = graphene.Field(
+        ChartDatasetNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
+    section_households_reached = graphene.Field(
+        SectionTotalHouseholdsReachedNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
+
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
@@ -428,3 +459,17 @@ class Query(graphene.ObjectType):
 
     def resolve_countries_choices(self, info, **kwargs):
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])
+
+    # def resolve_chart_all_individuals_reached(self, info, business_area_slug, year, **kwargs):
+    #     households_qs = chart_get_filtered_qs(Household, business_area_slug, year)
+
+    def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
+        payment_verifications_qs = chart_get_filtered_qs(
+            PaymentVerification,
+            business_area_slug,
+            year,
+            additional_filters={"status": PaymentVerification.STATUS_RECEIVED}
+        )
+        print(payment_verifications_qs)
+        print(len(payment_verifications_qs))
+        return {"tatal": 12}
