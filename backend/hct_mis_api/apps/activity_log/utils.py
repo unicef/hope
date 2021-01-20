@@ -22,7 +22,7 @@ def create_diff(old_object, new_object, mapping):
             old_value = nested_getattr(old_object, field_name, None)
         if new_object:
             new_value = nested_getattr(new_object, field_name, None)
-        if old_value is None and str == type(new_value) and len(new_value) == 0:
+        if old_value is None and isinstance(new_value, str) and len(new_value) == 0:
             continue
         if str(old_value) == str(new_value):
             continue
