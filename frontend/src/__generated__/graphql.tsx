@@ -6201,6 +6201,52 @@ export type AllCashPlansQuery = (
   )> }
 );
 
+export type AllChartsQueryVariables = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type AllChartsQuery = (
+  { __typename?: 'Query' }
+  & { chartProgrammesBySector: Maybe<(
+    { __typename?: 'ChartXDNode' }
+    & Pick<ChartXdNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: 'XDChartDatasetNode' }
+      & Pick<XdChartDatasetNode, 'label' | 'data'>
+    )>>> }
+  )>, chartPaymentVerification: Maybe<(
+    { __typename?: 'ChartPaymentVerification' }
+    & Pick<ChartPaymentVerification, 'labels' | 'households'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'label' | 'data'>
+    )>>> }
+  )>, chartVolumeByDeliveryMechanism: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartPayment: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartGrievances: Maybe<(
+    { __typename?: 'ChartGrievanceTicketsNode' }
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalDataChange' | 'totalSensitive' | 'totalComplaint' | 'totalNegativeFeedback' | 'totalReferral' | 'totalPositiveFeedback'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )> }
+);
+
 export type AllEditHouseholdFieldsQueryVariables = {};
 
 
@@ -10662,6 +10708,94 @@ export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllChartsDocument = gql`
+    query AllCharts($businessAreaSlug: String!, $year: Int!) {
+  chartProgrammesBySector(businessAreaSlug: $businessAreaSlug, year: $year) {
+    labels
+    datasets {
+      label
+      data
+    }
+  }
+  chartPaymentVerification(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      label
+      data
+    }
+    labels
+    households
+  }
+  chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartPayment(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartGrievances(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+    }
+    labels
+    total
+    totalDataChange
+    totalSensitive
+    totalComplaint
+    totalNegativeFeedback
+    totalReferral
+    totalPositiveFeedback
+  }
+}
+    `;
+export type AllChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllChartsQuery, AllChartsQueryVariables>, 'query'> & ({ variables: AllChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllChartsComponent = (props: AllChartsComponentProps) => (
+      <ApolloReactComponents.Query<AllChartsQuery, AllChartsQueryVariables> query={AllChartsDocument} {...props} />
+    );
+    
+export type AllChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllChartsQuery, AllChartsQueryVariables> & TChildProps;
+export function withAllCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllChartsQuery,
+  AllChartsQueryVariables,
+  AllChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllChartsQuery, AllChartsQueryVariables, AllChartsProps<TChildProps>>(AllChartsDocument, {
+      alias: 'allCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllChartsQuery__
+ *
+ * To run a query within a React component, call `useAllChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      year: // value for 'year'
+ *   },
+ * });
+ */
+export function useAllChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, baseOptions);
+      }
+export function useAllChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, baseOptions);
+        }
+export type AllChartsQueryHookResult = ReturnType<typeof useAllChartsQuery>;
+export type AllChartsLazyQueryHookResult = ReturnType<typeof useAllChartsLazyQuery>;
+export type AllChartsQueryResult = ApolloReactCommon.QueryResult<AllChartsQuery, AllChartsQueryVariables>;
 export const AllEditHouseholdFieldsDocument = gql`
     query AllEditHouseholdFields {
   allEditHouseholdFieldsAttributes {
