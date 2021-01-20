@@ -1,6 +1,8 @@
 import openpyxl
 from django.core.files import File
 from openpyxl.utils import get_column_letter
+from django.db.models import Min, Max, Sum, Q, Count
+from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -196,7 +198,7 @@ class GenerateReportContentHelpers:
             payment.currency,
             payment.delivered_quantity,
             # TODO this will be delivered_quantity in usd
-            "",
+            "TBD: IN USD",
             self._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
@@ -300,20 +302,68 @@ class GenerateReportContentHelpers:
     @staticmethod
     def get_payments_for_individuals(report: Report):
         filter_vars = {
-            "business_area": report.business_area,
-            "delivery_date__gte": report.date_from,
-            "delivery_date__lte": report.date_to,
+            "household__payment_records__business_area": report.business_area,
+            "household__payment_records__delivery_date__gte": report.date_from,
+            "household__payment_records__delivery_date__lte": report.date_to,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
         if report.program:
-            filter_vars["cash_plan__program"] = report.program
-        return PaymentRecord.objects.filter(**filter_vars)
+            filter_vars["household__payment_records__cash_plan__program"] = report.program
 
-    @staticmethod
-    def format_payments_for_individuals_row(self, payment_record: PaymentRecord) -> tuple:
-        # TODO: fix this
-        return ()
+        return (
+            Individual.objects.filter(**filter_vars)
+            .annotate(first_delivery_date=Min("household__payment_records__delivery_date"))
+            .annotate(last_delivery_date=Max("household__payment_records__delivery_date"))
+            .annotate(
+                payments_made=Count(
+                    "household__payment_records",
+                    filter=Q(household__payment_records__delivered_quantity__gte=0),
+                )
+            )
+            .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
+            .annotate(total_delivered_quantity_local=Sum("household__payment_records__delivered_quantity"))
+            .order_by("household__id")
+        )
+
+    @classmethod
+    def format_payments_for_individuals_row(self, individual: Individual) -> tuple:
+        return (
+            individual.household.id,
+            individual.household.country_origin.name if individual.household.country_origin else "",
+            individual.household.admin_area.title if individual.household.admin_area else "",
+            self._format_date(individual.first_delivery_date),
+            self._format_date(individual.last_delivery_date),
+            individual.payments_made,
+            ", ".join(individual.payment_currency),
+            individual.total_delivered_quantity_local,
+            "TBD: IN USD",
+            individual.birth_date,
+            individual.estimated_birth_date,
+            individual.sex,
+            individual.marital_status,
+            individual.disability,
+            individual.observed_disability,
+            individual.comms_disability,
+            individual.hearing_disability,
+            individual.memory_disability,
+            individual.physical_disability,
+            individual.seeing_disability,
+            individual.selfcare_disability,
+            individual.pregnant,
+            individual.relationship,
+            self._to_values_list(individual.households_and_roles.all(), "role"),
+            individual.work_status,
+            individual.sanction_list_possible_match,
+            individual.deduplication_batch_status,
+            individual.deduplication_golden_record_status,
+            individual.deduplication_golden_record_results.get("duplicates", "")
+            if individual.deduplication_golden_record_results
+            else "",
+            individual.deduplication_golden_record_results.get("possible_duplicates", "")
+            if individual.deduplication_golden_record_results
+            else "",
+        )
 
     @staticmethod
     def _to_values_list(instances, field_name: str) -> str:
@@ -476,36 +526,37 @@ class GenerateReportService:
             "individual population goal",  # 50
             "total number of households",  # 4356
         ),
-        # TODO: still needs work after requirements are more established
         Report.INDIVIDUALS_AND_PAYMENT: (
-            "admin_area_id",
-            "business_area_id",
-            "program_name",
-            "household_unicef_id",  # HH-20-0000.0368
-            "household_country_origin",  # TM
-            "birth_date",  # 2000-06-24
-            "comms_disability",
-            "deduplication_batch_results",  # {"duplicates": [], "possible_duplicates": []}
-            "deduplication_golden_record_results",  # {"duplicates": [], "possible_duplicates": []}
-            "deduplication_golden_record_status",  # UNIQUE
-            "disability",
-            "estimated_birth_date",  # False
-            "hearing_disability",
-            "marital_status",
-            "memory_disability",
-            "observed_disability",  # NONE
-            "physical_disability",
-            "pregnant",  # False
-            "relationship",  # NON_BENEFICIARY
-            "sanction_list_possible_match",  # False
-            "seeing_disability",
-            "selfcare_disability",
-            "sex",  # FEMALE
-            "work_status",  # NOT_PROVIDED
-            "role",  # PRIMARY
+            "household id",
+            "country of origin",
+            "administrative area 2",
+            "first delivery date",
+            "last delivery date",
+            "payments made",
             "currency",
-            "delivered_quantity",  # Sum
-            "delivered_quantity_usd",
+            "total delivered quantity (local)",
+            "total delivered quantity (USD)",
+            "birth date",  # 2000-06-24
+            "estimated birth date",  # TRUE
+            "gender",  # FEMALE,
+            "marital status",  # MARRIED
+            "disability",  # TRUE
+            "observed disability",
+            "communication disability",
+            "hearing disability",  # LOT_DIFFICULTY
+            "remembering disability",
+            "physical disability",
+            "seeing disability",
+            "self-care disability",
+            "pregnant",  # TRUE
+            "relationship to hoh",  # WIFE
+            "role",  # PRIMARY
+            "work status",  # NOT_PROVIDED
+            "sanction list possible match",  # FALSE
+            "dedupe in batch status",  # UNIQUE_IN_BATCH
+            "dedupe in Pop. status",  # DUPLICATE
+            "dedupe in Pop.duplicates",
+            "dedupe in Pop. possible duplicates",
         ),
     }
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
