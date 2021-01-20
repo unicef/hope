@@ -515,7 +515,7 @@ class Query(graphene.ObjectType):
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
     )
-    chart_grievance = graphene.Field(
+    chart_grievances = graphene.Field(
         ChartGrievanceTicketsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
@@ -645,7 +645,7 @@ class Query(graphene.ObjectType):
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
         ).order_by("name")
 
-    def resolve_chart_grievance(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(GrievanceTicket, business_area_slug, year)
         grievance_status_labels = [
             "Resolved",
