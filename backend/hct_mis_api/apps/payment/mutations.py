@@ -687,16 +687,8 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         payment_verification.received_amount = received_amount
         payment_verification.save()
         cashplan_payment_verification = payment_verification.cash_plan_payment_verification
-        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.save()
-        # log_create(
-        #     CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
-        #     "business_area",
-        #     info.context.user,
-        #     old_cashplan_payment_verification,
-        #     cashplan_payment_verification,
-        # )
         log_create(
             PaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
