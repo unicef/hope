@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Grid, Typography } from '@material-ui/core';
-import { Missing } from '../../Missing';
 import { DashboardPaper } from '../DashboardPaper';
 import { GrievancesChart } from '../charts/GrievancesChart';
 import { AllChartsQuery } from '../../../__generated__/graphql';
