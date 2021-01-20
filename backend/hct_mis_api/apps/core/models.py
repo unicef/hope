@@ -1,5 +1,4 @@
 import mptt
-from auditlog.models import AuditlogHistoryField
 from django.conf import settings
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
@@ -191,7 +190,6 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
-    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
@@ -211,7 +209,6 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
-    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"name: {self.name}"
@@ -226,7 +223,6 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
-    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"list name: {self.list_name}, name: {self.name}"
