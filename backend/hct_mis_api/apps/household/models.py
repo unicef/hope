@@ -15,6 +15,7 @@ from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
 
@@ -209,6 +210,63 @@ REGISTRATION_METHOD_CHOICES = (
 
 
 class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "consent_sign",
+            "consent",
+            "consent_sharing",
+            "residence_status",
+            "country_origin",
+            "country",
+            "size",
+            "address",
+            "admin_area",
+            "representatives",
+            "geopoint",
+            "female_age_group_0_5_count",
+            "female_age_group_6_11_count",
+            "female_age_group_12_17_count",
+            "female_age_group_18_59_count",
+            "female_age_group_60_count",
+            "pregnant_count",
+            "male_age_group_0_5_count",
+            "male_age_group_6_11_count",
+            "male_age_group_12_17_count",
+            "male_age_group_18_59_count",
+            "male_age_group_60_count",
+            "female_age_group_0_5_disabled_count",
+            "female_age_group_6_11_disabled_count",
+            "female_age_group_12_17_disabled_count",
+            "female_age_group_18_59_disabled_count",
+            "female_age_group_60_disabled_count",
+            "male_age_group_0_5_disabled_count",
+            "male_age_group_6_11_disabled_count",
+            "male_age_group_12_17_disabled_count",
+            "male_age_group_18_59_disabled_count",
+            "male_age_group_60_disabled_count",
+            "registration_data_import",
+            "programs",
+            "returnee",
+            "flex_fields",
+            "first_registration_date",
+            "last_registration_date",
+            "head_of_household",
+            "fchild_hoh",
+            "child_hoh",
+            "unicef_id",
+            "start",
+            "deviceid",
+            "name_enumerator",
+            "org_enumerator",
+            "org_name_enumerator",
+            "village",
+            "registration_method",
+            "collect_individual_data",
+            "currency",
+            "unhcr_id",
+        ]
+    )
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
@@ -280,6 +338,9 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
     unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
 
+    class Meta:
+        verbose_name = "Household"
+
     @property
     def sanction_list_possible_match(self):
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
@@ -289,7 +350,7 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
     def __str__(self):
-        return f"Household ID: {self.id}"
+        return f"{self.unicef_id}"
 
 
 class DocumentValidator(TimeStampedUUIDModel):
@@ -380,6 +441,52 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
 
 
 class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "individual_id",
+            "photo",
+            "full_name",
+            "given_name",
+            "middle_name",
+            "family_name",
+            "sex",
+            "birth_date",
+            "estimated_birth_date",
+            "marital_status",
+            "phone_no",
+            "phone_no_alternative",
+            "relationship",
+            "household",
+            "registration_data_import",
+            "disability",
+            "work_status",
+            "first_registration_date",
+            "last_registration_date",
+            "flex_fields",
+            "enrolled_in_nutrition_programme",
+            "administration_of_rutf",
+            "unicef_id",
+            "deduplication_golden_record_status",
+            "deduplication_batch_status",
+            "deduplication_golden_record_results",
+            "deduplication_batch_results",
+            "imported_individual_id",
+            "sanction_list_possible_match",
+            "sanction_list_last_check",
+            "pregnant",
+            "observed_disability",
+            "seeing_disability",
+            "hearing_disability",
+            "physical_disability",
+            "memory_disability",
+            "selfcare_disability",
+            "comms_disability",
+            "who_answers_phone",
+            "who_answers_alt_phone",
+        ]
+    )
+
     status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
@@ -498,8 +605,10 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         return sha256(";".join(values).encode()).hexdigest()
 
     def __str__(self):
-        return self.full_name
+        return self.unicef_id
 
+    class Meta:
+        verbose_name="Individual"
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"

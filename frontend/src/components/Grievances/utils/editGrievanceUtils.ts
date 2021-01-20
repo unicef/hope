@@ -355,7 +355,6 @@ const grievanceTypeIssueTypeDict = {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function prepareVariables(businessArea, values, ticket) {
   const requiredVariables = {
-    businessArea,
     ticketId: ticket.id,
     description: values.description,
     assignedTo: values.assignedTo,

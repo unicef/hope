@@ -1,5 +1,3 @@
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
 from django.db import models
 from django_countries.fields import CountryField
 
@@ -55,7 +53,6 @@ class SanctionListIndividual(TimeStampedUUIDModel):
     address_note = models.CharField(max_length=255, blank=True, default="")
     country_of_birth = CountryField(blank=True, default="")
     active = models.BooleanField(default=True)
-    history = AuditlogHistoryField(pk_indexable=False)
 
     objects = ActiveIndividualsManager()
     all_objects = ActiveIndividualsManager(active_only=False)
@@ -95,4 +92,3 @@ class UploadedXLSXFile(TimeStampedUUIDModel):
     associated_email = models.EmailField()
 
 
-auditlog.register(SanctionListIndividual)
