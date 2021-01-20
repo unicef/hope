@@ -1,4 +1,5 @@
 import openpyxl
+import copy
 from django.core.files import File
 from openpyxl.utils import get_column_letter
 from django.db.models import Min, Max, Sum, Q, Count
@@ -589,7 +590,7 @@ class GenerateReportService:
         ),
     }
     FILTERS_SHEET = "Meta"
-    MAX_COL_WIDTH = 50
+    MAX_COL_WIDTH = 75
 
     def __init__(self, report: Report):
         self.report = report
@@ -711,10 +712,16 @@ class GenerateReportService:
 
             for cell in col:
                 value = cell.value
+
                 if value is not None:
 
                     if isinstance(value, str) is False:
                         value = str(value)
+
+                    if len(value) > GenerateReportService.MAX_COL_WIDTH:
+                        alignment = copy.copy(cell.alignment)
+                        alignment.wrapText = True
+                        cell.alignment = alignment
 
                     try:
                         column_widths[i] = max(column_widths[i], len(value))
