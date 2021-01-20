@@ -118,18 +118,12 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Administrative Level 2',
+      label: 'Creation Date',
       value: (
         <span>
-          {report.adminArea?.edges.map((edge) => edge.node.title).join(', ') ||
-            '-'}
+          <UniversalMoment>{report.createdAt}</UniversalMoment>
         </span>
       ),
-      size: 3,
-    },
-    {
-      label: 'Programme',
-      value: <span>{report.program?.name || '-'}</span>,
       size: 3,
     },
     {
@@ -142,10 +136,16 @@ export const ReportingDetailsPage = (): React.ReactElement => {
       size: 3,
     },
     {
-      label: 'Creation Date',
+      label: 'Programme',
+      value: <span>{report.program?.name || '-'}</span>,
+      size: 3,
+    },
+    {
+      label: 'Administrative Level 2',
       value: (
         <span>
-          <UniversalMoment>{report.createdAt}</UniversalMoment>
+          {report.adminArea?.edges.map((edge) => edge.node.title).join(', ') ||
+            '-'}
         </span>
       ),
       size: 3,
