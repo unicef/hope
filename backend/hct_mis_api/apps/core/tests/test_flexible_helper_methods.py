@@ -64,7 +64,6 @@ class TestFlexibleHelperMethods(TestCase):
                 "name",
                 "label",
                 "flex_attributes",
-                "history",
             ],
             None,
         )
