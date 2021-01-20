@@ -186,17 +186,17 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
 
-    chart_payment_verifications_status = graphene.Field(
+    chart_payment_verification = graphene.Field(
         ChartPaymentVerification,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
-    chart_payment_record_delivery_type = graphene.Field(
+    chart_volume_by_delivery_mechanism = graphene.Field(
         ChartDatasetNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
-    chart_payment_record_status = graphene.Field(
+    chart_payment = graphene.Field(
         ChartDatasetNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
@@ -289,7 +289,7 @@ class Query(graphene.ObjectType):
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
-    def resolve_chart_payment_verifications_status(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
         status_choices = PaymentVerification.STATUS_CHOICES
         status_choices_mapping = dict(status_choices)
         payment_verifications = PaymentVerification.objects.filter(
@@ -312,7 +312,7 @@ class Query(graphene.ObjectType):
             "households": payment_verifications.values('payment_record__household').count()
         }
 
-    def resolve_chart_payment_record_delivery_type(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
         delivery_type_choices = PaymentRecord.DELIVERY_TYPE_CHOICE
         delivery_type_choices_mapping = dict(delivery_type_choices)
         payment_records = PaymentRecord.objects.filter(
@@ -331,7 +331,7 @@ class Query(graphene.ObjectType):
         ]
         return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
 
-    def resolve_chart_payment_record_status(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
         payment_records = chart_get_filtered_qs(PaymentRecord, business_area_slug, year)
         dataset = [

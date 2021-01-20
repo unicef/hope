@@ -202,7 +202,7 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
-    chart_program = graphene.Field(
+    chart_programmes_by_sector = graphene.Field(
         ChartXDNode,
         # ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
@@ -265,7 +265,7 @@ class Query(graphene.ObjectType):
             )
         ).order_by("-updated_at", "custom_order")
 
-    def resolve_chart_program(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         programs = chart_get_filtered_qs(Program, business_area_slug, year)
         datasets = [
