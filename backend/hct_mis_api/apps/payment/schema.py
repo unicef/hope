@@ -19,7 +19,12 @@ from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDataset
 from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord, PaymentVerification, ServiceProvider
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentRecord,
+    PaymentVerification,
+    ServiceProvider,
+)
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import get_number_of_samples
 from hct_mis_api.apps.program.models import CashPlan
@@ -88,6 +93,12 @@ class PaymentVerificationFilter(FilterSet):
             q_obj |= Q(payment_record__id__icontains=value)
             q_obj |= Q(payment_record__household__head_of_household__full_name__icontains=value)
         return qs.filter(q_obj)
+
+
+class CashPlanPaymentVerificationFilter(FilterSet):
+    class Meta:
+        fields = tuple()
+        model = CashPlanPaymentVerification
 
 
 class RapidProFlowResult(graphene.ObjectType):
@@ -175,6 +186,7 @@ class ChartPaymentVerification(ChartDetailedDatasetsNode):
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
+    cash_plan_payment_verification = relay.Node.Field(CashPlanPaymentVerificationNode)
     all_payment_records = DjangoPermissionFilterConnectionField(
         PaymentRecordNode,
         filterset_class=PaymentRecordFilter,
@@ -183,6 +195,11 @@ class Query(graphene.ObjectType):
     all_payment_verifications = DjangoPermissionFilterConnectionField(
         PaymentVerificationNode,
         filterset_class=PaymentVerificationFilter,
+        permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
+    )
+    all_cash_plan_payment_verification = DjangoPermissionFilterConnectionField(
+        CashPlanPaymentVerificationNode,
+        filterset_class=CashPlanPaymentVerificationFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
 

@@ -1,14 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as Sentry from "@sentry/react";
+import * as Sentry from '@sentry/react';
 import setupInternalization from './i18n';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 
 setupInternalization();
-console.log('process.env',process.env)
 if (process.env.NODE_ENV !== 'development')
-    Sentry.init({ dsn: process.env.SENTRY_FRONTEND_DSN });
+  Sentry.init({
+    dsn: process.env.SENTRY_FRONTEND_DSN,
+    ignoreErrors: ['Permission Denied'],
+  });
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
