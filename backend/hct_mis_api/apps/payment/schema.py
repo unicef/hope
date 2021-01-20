@@ -244,7 +244,7 @@ class Query(graphene.ObjectType):
             payment_records = filter_age(
                 "household__head_of_household__birth_date",
                 payment_records,
-                age.get(min),
+                age.get("min"),
                 age.get("max"),
             )
         payment_records_sample_count = payment_records.count()

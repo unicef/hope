@@ -26654,13 +26654,9 @@
             "name": "cashPlanId",
             "description": null,
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
             },
             "defaultValue": null
           },
@@ -26675,6 +26671,16 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "verificationChannel",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "defaultValue": null
           },
@@ -26708,6 +26714,16 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "RandomSamplingArguments",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "rapidProArguments",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "RapidProArguments",
               "ofType": null
             },
             "defaultValue": null
@@ -26838,6 +26854,31 @@
               "kind": "SCALAR",
               "name": "Int",
               "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "RapidProArguments",
+        "description": null,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "flowId",
+            "description": null,
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "defaultValue": null
           }
@@ -38409,31 +38450,6 @@
               "kind": "INPUT_OBJECT",
               "name": "RapidProArguments",
               "ofType": null
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "RapidProArguments",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "flowId",
-            "description": null,
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
             },
             "defaultValue": null
           }
