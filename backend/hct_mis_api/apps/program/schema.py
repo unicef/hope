@@ -1,7 +1,6 @@
 import graphene
 from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
 from django.db.models.functions import Coalesce, Lower
-from django.shortcuts import get_object_or_404
 from django_filters import (
     CharFilter,
     DateFilter,
@@ -21,11 +20,11 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.account.schema import LogEntryObjectConnection
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
 class ProgramFilter(FilterSet):
@@ -173,16 +172,15 @@ class ChartProgramFilter(FilterSet):
             q_obj |= Q(first_name__icontains=value)
             q_obj |= Q(last_name__icontains=value)
             q_obj |= Q(email__icontains=value)
-        print("search_filter")
         return qs.filter(q_obj)
 
 
-class ChartDatasetNode(graphene.ObjectType):
+class XDChartDatasetNode(graphene.ObjectType):
     label = graphene.String()
     data = graphene.List(graphene.Int)
 
 
-class ChartNode(graphene.ObjectType):
+class ChartXDNode(graphene.ObjectType):
     permission_classes = (
         hopePermissionClass(
             Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
@@ -190,7 +188,7 @@ class ChartNode(graphene.ObjectType):
     )
     labels = graphene.List(graphene.String)
     # dataset = graphene.List(graphene.Int)
-    datasets = graphene.List(ChartDatasetNode)
+    datasets = graphene.List(XDChartDatasetNode)
 
 
 class Query(graphene.ObjectType):
@@ -205,7 +203,8 @@ class Query(graphene.ObjectType):
         ),
     )
     chart_program = graphene.Field(
-        ChartNode,
+        ChartXDNode,
+        # ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
@@ -267,13 +266,8 @@ class Query(graphene.ObjectType):
         ).order_by("-updated_at", "custom_order")
 
     def resolve_chart_program(self, info, business_area_slug, year, **kwargs):
-        sector_choices = Program.SECTOR_CHOICE
-        sector_choice_mapping = dict(sector_choices)
-        business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
-        programs = Program.objects.filter(
-            business_area=business_area,
-            created_at__year=year
-        )
+        sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
+        programs = chart_get_filtered_qs(Program, business_area_slug, year)
         datasets = [
             {
                 "label": "Programmes",

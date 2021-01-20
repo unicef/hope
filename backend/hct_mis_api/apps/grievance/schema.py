@@ -17,6 +17,8 @@ from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
 
+import datetime
+
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -35,7 +37,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
-from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr
+from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
@@ -53,7 +55,7 @@ from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
-from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -473,6 +475,16 @@ class AddIndividualFiledObjectType(graphene.ObjectType):
     flex_field = graphene.Boolean()
 
 
+class ChartGrievanceTicketsNode(ChartDatasetNode):
+    total = graphene.Int()
+    total_data_change = graphene.Int()
+    total_sensitive = graphene.Int()
+    total_complaint = graphene.Int()
+    total_negative_feedback = graphene.Int()
+    total_referral = graphene.Int()
+    total_positive_feedback = graphene.Int()
+
+
 class Query(graphene.ObjectType):
     grievance_ticket = relay.Node.Field(GrievanceTicketNode)
     all_grievance_ticket = DjangoPermissionFilterConnectionField(
@@ -502,6 +514,11 @@ class Query(graphene.ObjectType):
     all_ticket_notes = DjangoPermissionFilterConnectionField(
         TicketNoteNode,
         filterset_class=TicketNoteFilter,
+    )
+    chart_grievance = graphene.Field(
+        ChartGrievanceTicketsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
     )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
@@ -627,3 +644,48 @@ class Query(graphene.ObjectType):
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
         ).order_by("name")
+
+    def resolve_chart_grievance(self, info, business_area_slug, year, **kwargs):
+        grievance_tickets = chart_get_filtered_qs(GrievanceTicket, business_area_slug, year)
+        grievance_status_labels = [
+            "Resolved",
+            "Unresolved",
+            "Unresolved for longer than 30 days",
+            "Unresolved for longer than 60 days"
+        ]
+
+        days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
+        days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
+
+        datasets = [
+            {
+                "data": [
+                    grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED).count(),  # Resolved
+                    grievance_tickets.filter(~Q(status=GrievanceTicket.STATUS_CLOSED)).count(),  # Unresolved
+                    grievance_tickets.filter(
+                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
+                        created_at__lte=days_30_from_now,
+                        created_at__gt=days_60_from_now
+                    ).count(),  # Unresolved for longer than 30 daysxwxw
+                    grievance_tickets.filter(
+                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
+                        created_at__lte=days_60_from_now
+                    ).count()  # Unresolved for longer than 60 days
+                ]
+            },
+        ]
+        return {
+            "labels": grievance_status_labels,
+            "datasets": datasets,
+            "total": grievance_tickets.count(),
+            "total_data_change": grievance_tickets.filter(category=GrievanceTicket.CATEGORY_DATA_CHANGE).count(),
+            "total_sensitive": grievance_tickets.filter(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE).count(),
+            "total_complaint": grievance_tickets.filter(category=GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT).count(),
+            "total_negative_feedback": grievance_tickets.filter(
+                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK
+            ).count(),
+            "total_referral": grievance_tickets.filter(category=GrievanceTicket.CATEGORY_REFERRAL).count(),
+            "total_positive_feedback": grievance_tickets.filter(
+                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK
+            ).count(),
+        }
