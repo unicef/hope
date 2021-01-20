@@ -1,10 +1,4 @@
-import {
-  Grid,
-  DialogContent,
-  DialogTitle,
-  Button,
-  Box,
-} from '@material-ui/core';
+import { Grid, DialogContent, Button, Box } from '@material-ui/core';
 import styled from 'styled-components';
 import React, { useState } from 'react';
 import PersonIcon from '@material-ui/icons/Person';
@@ -16,7 +10,6 @@ import {
   DashboardCard,
   IconContainer,
 } from '../DashboardCard';
-import { DashboardPaper } from '../DashboardPaper';
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
 

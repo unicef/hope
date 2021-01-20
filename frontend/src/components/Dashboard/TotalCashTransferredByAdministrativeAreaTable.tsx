@@ -1,13 +1,10 @@
 import React from 'react';
 import {
-  Button,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Typography,
-  Box,
 } from '@material-ui/core';
 
 export const TotalCashTransferredByAdministrativeAreaTable = (): React.ReactElement => {
