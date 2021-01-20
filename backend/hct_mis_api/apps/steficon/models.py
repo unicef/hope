@@ -13,3 +13,6 @@ class Rule(TimeStampedUUIDModel):
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
     language = models.CharField(max_length=10, choices=LANGUAGES)
+
+    def __str__(self):
+        return self.name

@@ -1,7 +1,6 @@
 import json
 
 import graphene
-from auditlog.models import LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
@@ -150,32 +149,8 @@ class JSONLazyString(graphene.Scalar):
     def parse_value(value):
         return json.loads(value)
 
-class ContentTypeObjectType(DjangoObjectType):
-    class Meta:
-        model = ContentType
-
-class LogEntryObject(DjangoObjectType):
-    timestamp = graphene.DateTime()
-    changes_display_dict = JSONLazyString()
-    changes_display_object = Arg()
-    actor = UserObjectType()
-
-    class Meta:
-        model = LogEntry
-        exclude_fields = ("additional_data",)
-
-    def resolve_changes_display_object(self, info):
-        return self.changes_display_dict
 
 
-class LogEntryObjectConnection(graphene.Connection):
-    total_count = graphene.Int()
-
-    def resolve_total_count(self, info, **kwargs):
-        return self.iterable.count()
-
-    class Meta:
-        node = LogEntryObject
 
 
 class Query(graphene.ObjectType):
@@ -185,20 +160,20 @@ class Query(graphene.ObjectType):
         filterset_class=UsersFilter,
         permission_classes=(hopePermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST),),
     )
-    all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
+    # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)
     user_status_choices = graphene.List(ChoiceObject)
     user_partner_choices = graphene.List(ChoiceObject)
     has_available_users_to_export = graphene.Boolean(business_area_slug=graphene.String(required=True))
 
-    def resolve_all_log_entries(self, info, **kwargs):
-        object_id = kwargs.get('object_id')
-        queryset = LogEntry.objects
-        if object_id:
-            id = decode_id_string(object_id)
-            queryset = queryset.filter(~Q(action=0))
-            queryset = queryset.filter(object_pk=id)
-        return queryset.all()
+    # def resolve_all_log_entries(self, info, **kwargs):
+    #     object_id = kwargs.get('object_id')
+    #     queryset = LogEntry.objects
+    #     if object_id:
+    #         id = decode_id_string(object_id)
+    #         queryset = queryset.filter(~Q(action=0))
+    #         queryset = queryset.filter(object_pk=id)
+    #     return queryset.all()
 
     def resolve_all_users(self, info, **kwargs):
         return User.objects.all().distinct()
