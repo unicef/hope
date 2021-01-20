@@ -10,6 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
+import {decodeIdString} from "../../../utils/utils";
 
 interface EditProgramProps {
   program: ProgramNode;
@@ -18,13 +19,15 @@ interface EditProgramProps {
 export function EditProgram({ program }: EditProgramProps): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
         query: ALL_LOG_ENTRIES_QUERY,
         variables: {
-          objectId: program.id,
+          objectId: decodeIdString(program.id),
           count: 5,
+          businessArea,
         },
       },
     ],
@@ -38,8 +41,6 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
     },
   });
-  const businessArea = useBusinessArea();
-
   const submitFormHandler = async (values): Promise<void> => {
     const response = await mutate({
       variables: {

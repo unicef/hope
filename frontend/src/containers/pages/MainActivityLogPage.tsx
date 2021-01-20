@@ -3,10 +3,11 @@ import styled from 'styled-components';
 import { Paper } from '@material-ui/core';
 import { MainActivityLogTable } from '../tables/MainActivityLogTable/MainActivityLogTable';
 import {
-  LogEntryObject,
+  LogEntryNode,
   useAllLogEntriesQuery,
 } from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -15,8 +16,10 @@ export const StyledPaper = styled(Paper)`
 export const ActivityLogPage = (): React.ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const businessArea = useBusinessArea();
   const { data, refetch } = useAllLogEntriesQuery({
     variables: {
+      businessArea,
       first: rowsPerPage,
     },
     fetchPolicy: 'network-only',
@@ -25,7 +28,8 @@ export const ActivityLogPage = (): React.ReactElement => {
     return null;
   }
   const { edges } = data.allLogEntries;
-  const logEntries = edges.map((edge) => edge.node as LogEntryObject);
+  const { logEntryActionChoices } = data;
+  const logEntries = edges.map((edge) => edge.node as LogEntryNode);
   return (
     <>
       <PageHeader title='Activity Log' />
@@ -34,9 +38,11 @@ export const ActivityLogPage = (): React.ReactElement => {
           totalCount={data.allLogEntries.totalCount}
           rowsPerPage={rowsPerPage}
           logEntries={logEntries}
+          actionChoices={logEntryActionChoices}
           page={page}
           onChangePage={(event, newPage) => {
             const variables = {
+              businessArea,
               first: undefined,
               last: undefined,
               after: undefined,
@@ -57,6 +63,7 @@ export const ActivityLogPage = (): React.ReactElement => {
             setRowsPerPage(value);
             setPage(0);
             const variables = {
+              businessArea,
               first: rowsPerPage,
               after: undefined,
               last: undefined,
