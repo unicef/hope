@@ -48,10 +48,7 @@ export function DashboardPage(): React.ReactElement {
         <ExportModal />
       </PageHeader>
       <DashboardFilters filter={filter} onFilterChange={setFilter} />
-      <DashboardYearPage
-        selectedTab={selectedTab}
-        //    year={years[selectedTab]}
-      />
+      <DashboardYearPage selectedTab={selectedTab} year={years[selectedTab]} />
     </>
   );
 }

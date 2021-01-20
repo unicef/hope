@@ -1,33 +1,39 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const PaymentVerificationChart = (): React.ReactElement => {
-  const data = {
-    labels: ['Payment Verification'],
+interface PaymentVerificationChartProps {
+  data: AllChartsQuery['chartPaymentVerification'];
+}
+export const PaymentVerificationChart = ({
+  data,
+}: PaymentVerificationChartProps): React.ReactElement => {
+  const chartData = {
+    labels: data?.labels,
     datasets: [
       {
         barPercentage: 0.1,
-        label: 'Received',
+        label: data?.datasets[0]?.label,
         backgroundColor: '#8CD241',
-        data: [0.38],
+        data: data?.datasets[0]?.data,
       },
       {
         barPercentage: 0.1,
-        label: 'Received with Issues',
+        label: data?.datasets[1]?.label,
         backgroundColor: '#FFE9AC',
-        data: [0.28],
+        data: data?.datasets[1]?.data,
       },
       {
         barPercentage: 0.1,
-        label: 'Not Received',
+        label: data?.datasets[2]?.label,
         backgroundColor: '#FFAA1D',
-        data: [0.18],
+        data: data?.datasets[2]?.data,
       },
       {
         barPercentage: 0.1,
-        label: 'Not Responded',
+        label: data?.datasets[3]?.label,
         backgroundColor: '#E02020',
-        data: [0.16],
+        data: data?.datasets[3]?.data,
       },
     ],
   };
@@ -64,5 +70,5 @@ export const PaymentVerificationChart = (): React.ReactElement => {
     },
   };
 
-  return <HorizontalBar data={data} options={options} />;
+  return <HorizontalBar data={chartData} options={options} />;
 };

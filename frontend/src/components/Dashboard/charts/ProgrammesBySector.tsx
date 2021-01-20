@@ -1,32 +1,27 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const ProgrammesBySector = (): React.ReactElement => {
-  const data = {
-    labels: [
-      'Child Protection',
-      'Education',
-      'Gender',
-      'Health',
-      'HIV/AIDS',
-      'Multi Purpose',
-      'Nutrition',
-      'Social Policy',
-      'WASH',
-      'Name',
-    ],
+interface ProgrammesBySectorProps {
+  data: AllChartsQuery['chartProgrammesBySector'];
+}
+export const ProgrammesBySector = ({
+  data,
+}: ProgrammesBySectorProps): React.ReactElement => {
+  const chartData = {
+    labels: data?.labels,
     datasets: [
       {
         barPercentage: 0.4,
-        label: 'Programmes',
+        label: data?.datasets[0]?.label,
         backgroundColor: '#00A9FB',
-        data: [9, 10, 6, 7, 6, 8, 9, 10, 11, 12],
+        data: data?.datasets[0]?.data,
       },
       {
         barPercentage: 0.4,
-        label: 'Programmes with Cash+',
+        label: data?.datasets[1]?.label,
         backgroundColor: '#023F90',
-        data: [12, 16, 11, 9, 6, 11, 0, 9, 6, 9],
+        data: data?.datasets[1]?.data,
       },
     ],
   };
@@ -51,5 +46,5 @@ export const ProgrammesBySector = (): React.ReactElement => {
     },
   };
 
-  return <Bar data={data} options={options} />;
+  return <Bar data={chartData} options={options} />;
 };
