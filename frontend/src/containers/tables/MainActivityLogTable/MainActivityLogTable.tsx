@@ -11,9 +11,9 @@ import {
   ButtonPlaceHolder,
   Row,
 } from '../../../components/ActivityLogTable/TableStyledComponents';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
 
 const Table = styled.div`
   display: flex;
