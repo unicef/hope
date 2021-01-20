@@ -60,6 +60,8 @@ class GenerateReportContentHelpers:
             individual.deduplication_golden_record_results.get("possible_duplicates", "")
             if individual.deduplication_golden_record_results
             else "",
+            self._format_date(individual.first_registration_date),
+            self._format_date(individual.last_registration_date),
         )
 
     @staticmethod
@@ -108,8 +110,8 @@ class GenerateReportContentHelpers:
             household.male_age_group_18_59_disabled_count,
             household.male_age_group_60_count,
             household.male_age_group_60_disabled_count,
-            household.first_registration_date,
-            household.last_registration_date,
+            self._format_date(household.first_registration_date),
+            self._format_date(household.last_registration_date),
             household.org_name_enumerator,
         ]
         for program in household.programs.all():
@@ -143,13 +145,13 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
         return (
-            verification.cash_plan.ca_id,
             verification.id,
+            verification.cash_plan.ca_id,
             verification.cash_plan.program.name,
-            verification.activation_date,
+            self._format_date(verification.activation_date),
             verification.status,
             verification.verification_method,
-            verification.completion_date,
+            self._format_date(verification.completion_date),
             verification.sample_size,
             verification.responded_count,
             verification.received_count,
@@ -188,18 +190,21 @@ class GenerateReportContentHelpers:
                 cash_or_voucher = "voucher"
 
         return (
-            payment.cash_plan.ca_id if payment.cash_plan else "",
             payment.ca_id,
+            payment.cash_plan.ca_id if payment.cash_plan else "",
             payment.status,
             payment.currency,
             payment.delivered_quantity,
-            payment.delivery_date,
+            # TODO this will be delivered_quantity in usd
+            "",
+            self._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
             payment.entitlement_quantity,
             payment.target_population.id,
             payment.target_population.name,
             cash_or_voucher,
+            payment.household.id,
         )
 
     @staticmethod
@@ -217,10 +222,10 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
+            payment_verification.cash_plan_payment_verification.id,
             payment_verification.payment_record.ca_id,
             payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
-            payment_verification.cash_plan_payment_verification.id,
-            payment_verification.cash_plan_payment_verification.completion_date,
+            self._format_date(payment_verification.cash_plan_payment_verification.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -242,14 +247,14 @@ class GenerateReportContentHelpers:
         return (
             cash_plan.ca_id,
             cash_plan.name,
-            cash_plan.start_date,
-            cash_plan.end_date,
+            self._format_date(cash_plan.start_date),
+            self._format_date(cash_plan.end_date),
             cash_plan.program.name,
             cash_plan.funds_commitment,
             cash_plan.assistance_measurement,
             cash_plan.assistance_through,
             cash_plan.delivery_type,
-            cash_plan.dispersion_date,
+            self._format_date(cash_plan.dispersion_date),
             cash_plan.down_payment,
             cash_plan.total_delivered_quantity,
             cash_plan.total_undelivered_quantity,
@@ -258,7 +263,7 @@ class GenerateReportContentHelpers:
             cash_plan.total_persons_covered,
             cash_plan.total_persons_covered_revised,
             cash_plan.status,
-            cash_plan.status_date,
+            self._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
             cash_plan.verification_status,
@@ -309,11 +314,10 @@ class GenerateReportContentHelpers:
         return ", ".join([str(value) for value in values_list])
 
     @staticmethod
-    def _sum_values(*values):
-        total = 0
-        for value in values:
-            total = total + value if value else total
-        return total
+    def _format_date(date) -> str:
+        if not date:
+            return ""
+        return date.strftime("%Y-%m-%d")
 
 
 class GenerateReportService:
@@ -343,6 +347,8 @@ class GenerateReportService:
             "dedupe in Pop. status",  # DUPLICATE
             "dedupe in Pop.duplicates",
             "dedupe in Pop. possible duplicates",
+            "first registration date",  # 2000-06-24
+            "last registration date",  # 2000-06-24
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
             "household id",
@@ -381,8 +387,8 @@ class GenerateReportService:
             "organization name enumerator",
         ),
         Report.CASH_PLAN_VERIFICATION: (
+            "cash plan verification ID",
             "cash plan ID",  # ANT-21-CSH-00001
-            "id",
             "programme",  # Winterization 2020
             "activation date",
             "status",
@@ -399,24 +405,26 @@ class GenerateReportService:
             "age filter",  # {'max': 100, 'min': 0}
         ),
         Report.PAYMENTS: (
-            "cash plan ID",  # ANT-21-CSH-00001
             "payment record ID",  # ANT-21-CSH-00001-0000002
+            "cash plan ID",  # ANT-21-CSH-00001
             "status",  # Transaction successful
             "currency",
-            "delivered quantity",  # 999,00
+            "delivered quantity (local)",  # 999,00
+            "delivered quantity (USD)",  # 235,99
             "delivery date",  # 2020-11-02 07:50:18+00
             "delivery type",  # deposit to card
             "distribution modality",  # 10K AFN per hh
             "entitlement quantity",  # 1000,00
             "TP ID",
             "TP name",
-            "cash or voucher",  # if voucher or e-voucher -> voucher, else -> cash
+            "cash or voucher",  # if voucher or e-voucher -> voucher, else -> cash,
+            "household id",  # 145aacc4-160a-493e-9d36-4f7f981284c7
         ),
         Report.PAYMENT_VERIFICATION: (
+            "cash plan verification ID",
             "payment record ID",  # ANT-21-CSH-00001-0000002
             "cash plan ID",  # ANT-21-CSH-00001
-            "cash plan verification id",
-            "completion date",
+            "verification completion date",
             "received amount",  # 30,00
             "status",  # RECEIVED_WITH_ISSUES
             "status date",
@@ -458,7 +466,7 @@ class GenerateReportService:
             "budget in USD",  # 10000.00
             "frequency of payments",  # REGULAR
             "administrative areas of implementation",  # Juba, Morobo, Xyz
-            "idividual population goal",  # 50
+            "individual population goal",  # 50
             "total number of households",  # 4356
         ),
         # TODO: still needs work after requirements are more established
