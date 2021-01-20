@@ -33,3 +33,10 @@ def create_diff(old_object, new_object, mapping):
             change["to"] = str(new_value)
         changes_dict[repr_name] = change
     return changes_dict
+
+
+def copy_model_object(model_object):
+    model_dict = {}
+    model_dict.update(model_object.__dict__)
+    del model_dict["_state"]
+    return model_object.__class__(**model_dict)

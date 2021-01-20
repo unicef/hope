@@ -10,6 +10,8 @@ from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -126,6 +128,14 @@ class CreatePaymentVerificationMutation(PermissionMutation):
         PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)
         cash_plan.refresh_from_db()
         cls.process_verification_method(cash_plan_verification, input)
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            None,
+            cash_plan_verification,
+        )
         return cls(cash_plan=cash_plan)
 
     @classmethod
@@ -271,7 +281,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
             sex,
             age,
         ) = cls.process_sampling(cash_plan, input)
-
+        old_cash_plan_verification = copy_model_object(cash_plan_verification)
         cash_plan_verification.confidence_interval = confidence_interval
         cash_plan_verification.margin_of_error = margin_of_error
         cash_plan_verification.sample_size = payment_records_sample_count
@@ -292,6 +302,13 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cash_plan_verification.save()
         PaymentVerification.objects.bulk_create(payment_record_verifications_to_create)
         cash_plan.refresh_from_db()
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cash_plan_verification,
+            cash_plan_verification,
+        )
         cls.process_verification_method(cash_plan_verification, input)
         return cls(cash_plan=cash_plan)
 
@@ -376,7 +393,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
-
+        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_ACTIVATE, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_PENDING:
@@ -389,6 +406,14 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
             cls.activate_rapidpro(cashplan_payment_verification)
         cashplan_payment_verification.activation_date = timezone.now()
         cashplan_payment_verification.save()
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cashplan_payment_verification,
+            cashplan_payment_verification,
+        )
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
     @classmethod
@@ -442,6 +467,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
+        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_FINISH, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
@@ -450,6 +476,13 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
         cashplan_payment_verification.completion_date = timezone.now()
         cashplan_payment_verification.save()
         cls.create_grievance_tickets(cashplan_payment_verification)
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cashplan_payment_verification,
+            cashplan_payment_verification,
+        )
         return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
 
@@ -466,7 +499,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
     def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
-
+        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_DISCARD, cashplan_payment_verification.business_area)
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
@@ -485,6 +518,13 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
         cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
         cash_plan.save()
         cashplan_payment_verification.save()
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cashplan_payment_verification,
+            cashplan_payment_verification,
+        )
         return DiscardCashPlanVerificationMutation(cash_plan)
 
     @classmethod
@@ -536,6 +576,7 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         **kwargs,
     ):
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
+        old_payment_verification = copy_model_object(payment_verification)
         if (
             payment_verification.cash_plan_payment_verification.verification_method
             != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
@@ -573,8 +614,24 @@ class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):
         payment_verification.received_amount = received_amount
         payment_verification.save()
         cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.save()
+
+        log_create(
+            CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_cashplan_payment_verification,
+            cashplan_payment_verification,
+        )
+        log_create(
+            PaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_verification,
+            payment_verification,
+        )
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 
@@ -602,7 +659,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         if math.isnan(received_amount):
             received_amount = None
         payment_verification = get_object_or_404(PaymentVerification, id=decode_id_string(payment_verification_id))
-
+        old_payment_verification = copy_model_object(payment_verification)
         cls.has_permission(info, Permissions.PAYMENT_VERIFICATION_VERIFY, payment_verification.business_area)
         if (
             payment_verification.cash_plan_payment_verification.verification_method
@@ -630,8 +687,23 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
         payment_verification.received_amount = received_amount
         payment_verification.save()
         cashplan_payment_verification = payment_verification.cash_plan_payment_verification
+        old_cashplan_payment_verification = copy_model_object(cashplan_payment_verification)
         calculate_counts(cashplan_payment_verification)
         cashplan_payment_verification.save()
+        # log_create(
+        #     CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
+        #     "business_area",
+        #     info.context.user,
+        #     old_cashplan_payment_verification,
+        #     cashplan_payment_verification,
+        # )
+        log_create(
+            PaymentVerification.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_payment_verification,
+            payment_verification,
+        )
         return UpdatePaymentVerificationStatusAndReceivedAmount(payment_verification)
 
 

@@ -197,6 +197,15 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
 
 
 class PaymentVerification(TimeStampedUUIDModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "cash_plan_payment_verification",
+            "payment_record",
+            "status",
+            "status_date",
+            "received_amount",
+        ]
+    )
     STATUS_PENDING = "PENDING"
     STATUS_RECEIVED = "RECEIVED"
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"

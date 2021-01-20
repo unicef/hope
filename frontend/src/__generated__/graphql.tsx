@@ -3092,8 +3092,10 @@ export type Query = {
   allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
   paymentRecord?: Maybe<PaymentRecordNode>,
   paymentRecordVerification?: Maybe<PaymentVerificationNode>,
+  cashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNode>,
   allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
   allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>,
+  allCashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNodeConnection>,
   paymentRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentRecordEntitlementCardStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentRecordDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3282,6 +3284,11 @@ export type QueryPaymentRecordVerificationArgs = {
 };
 
 
+export type QueryCashPlanPaymentVerificationArgs = {
+  id: Scalars['ID']
+};
+
+
 export type QueryAllPaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -3305,6 +3312,14 @@ export type QueryAllPaymentVerificationsArgs = {
   search?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllCashPlanPaymentVerificationArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -6568,6 +6583,23 @@ export type CashPlanQuery = (
           ) }
         )> }
       )>> }
+    ) }
+  )> }
+);
+
+export type CashPlanPaymentVerificationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type CashPlanPaymentVerificationQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanPaymentVerification: Maybe<(
+    { __typename?: 'CashPlanPaymentVerificationNode' }
+    & Pick<CashPlanPaymentVerificationNode, 'id'>
+    & { cashPlan: (
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
     ) }
   )> }
 );
@@ -11602,6 +11634,59 @@ export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
 export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
 export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const CashPlanPaymentVerificationDocument = gql`
+    query CashPlanPaymentVerification($id: ID!) {
+  cashPlanPaymentVerification(id: $id) {
+    id
+    cashPlan {
+      id
+    }
+  }
+}
+    `;
+export type CashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>, 'query'> & ({ variables: CashPlanPaymentVerificationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CashPlanPaymentVerificationComponent = (props: CashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> query={CashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type CashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> & TChildProps;
+export function withCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanPaymentVerificationQuery,
+  CashPlanPaymentVerificationQueryVariables,
+  CashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables, CashPlanPaymentVerificationProps<TChildProps>>(CashPlanPaymentVerificationDocument, {
+      alias: 'cashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanPaymentVerificationQuery__
+ *
+ * To run a query within a React component, call `useCashPlanPaymentVerificationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanPaymentVerificationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanPaymentVerificationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCashPlanPaymentVerificationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+      }
+export function useCashPlanPaymentVerificationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+        }
+export type CashPlanPaymentVerificationQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationQuery>;
+export type CashPlanPaymentVerificationLazyQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationLazyQuery>;
+export type CashPlanPaymentVerificationQueryResult = ApolloReactCommon.QueryResult<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>;
 export const ExistingGrievanceTicketsDocument = gql`
     query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $category: String, $issueType: String, $orderBy: String) {
   existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, category: $category, issueType: $issueType, orderBy: $orderBy) {
@@ -15955,8 +16040,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
   paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
   paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
+  cashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>>,
   allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
   allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationsArgs>,
+  allCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllCashPlanPaymentVerificationArgs>,
   paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentRecordEntitlementCardStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
