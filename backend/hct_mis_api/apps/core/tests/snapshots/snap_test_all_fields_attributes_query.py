@@ -124,7 +124,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'FCS_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -153,7 +153,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'RCSI_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -1534,7 +1534,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'cereals_tuber_score_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -8522,7 +8522,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'hdds_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -12363,7 +12363,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_expense_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -12392,7 +12392,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_income_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -12757,7 +12757,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'score_NFI_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -13516,7 +13516,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_expense_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -13574,7 +13574,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_inc_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -13603,7 +13603,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_liter_yesterday_h_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Household',
@@ -14778,7 +14778,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'wellbeing_index_i_f',
                 'required': False,
-                'type': 'DECIMAL'
+                'type': 'STRING'
             },
             {
                 'associatedWith': 'Individual',
@@ -41841,23 +41841,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'other_id_issuer',
                 'required': False,
                 'type': 'SELECT_ONE'
-            },
-            {
-                'associatedWith': 'Household',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': '',
-                'labels': [
-                    {
-                        'label': '',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'pregnant_member',
-                'required': False,
-                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
