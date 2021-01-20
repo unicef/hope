@@ -72,3 +72,4 @@ class RegistrationDataImport(TimeStampedUUIDModel):
 
     class Meta:
         unique_together = ("name", "business_area")
+        verbose_name = "Registration data import"
