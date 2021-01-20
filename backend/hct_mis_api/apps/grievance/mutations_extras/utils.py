@@ -1,3 +1,4 @@
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
 
 
@@ -74,7 +75,11 @@ def remove_parsed_data_fields(data_dict, fields_list):
 
 def verify_flex_fields(flex_fields_to_verify, associated_with):
     import re
-    from hct_mis_api.apps.core.core_fields_attributes import FIELD_TYPES_TO_INTERNAL_TYPE, TYPE_SELECT_ONE, TYPE_SELECT_MANY
+    from hct_mis_api.apps.core.core_fields_attributes import (
+        FIELD_TYPES_TO_INTERNAL_TYPE,
+        TYPE_SELECT_ONE,
+        TYPE_SELECT_MANY,
+    )
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
@@ -101,7 +106,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
-def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
+def remove_individual_and_reassign_roles(ticket_details, individual_to_remove, info):
     from django.shortcuts import get_object_or_404
     from hct_mis_api.apps.core.utils import decode_id_string
     from graphql import GraphQLError
@@ -115,6 +120,7 @@ def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
         ROLE_NO_ROLE,
     )
 
+    old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
     roles_to_bulk_update = []
     for role_data in ticket_details.role_reassign_data.values():
         role_name = role_data.get("role")
@@ -122,6 +128,7 @@ def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
         individual_id = decode_id_string(role_data.get("individual"))
         household_id = decode_id_string(role_data.get("household"))
 
+        old_new_individual = get_object_or_404(Individual, id=individual_id)
         new_individual = get_object_or_404(Individual, id=individual_id)
 
         household = get_object_or_404(Household, id=household_id)
@@ -133,6 +140,14 @@ def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
             household.individuals.exclude(id=new_individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
             new_individual.relationship = HEAD
             new_individual.save()
+            log_create(
+                Individual.ACTIVITY_LOG_MAPPING,
+                "business_area",
+                info.context.user,
+                old_new_individual,
+                new_individual,
+            )
+
         if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
             role = get_object_or_404(
                 IndividualRoleInHousehold, role=role_name, household=household, individual=individual_to_remove
@@ -161,6 +176,13 @@ def remove_individual_and_reassign_roles(ticket_details, individual_to_remove):
 
     individual_to_remove.delete()
 
+    log_create(
+        Individual.ACTIVITY_LOG_MAPPING,
+        "business_area",
+        info.context.user,
+        old_individual_to_remove,
+        individual_to_remove,
+    )
     if removed_individual_household:
         if removed_individual_household.individuals.count() == 0:
             removed_individual_household.delete()

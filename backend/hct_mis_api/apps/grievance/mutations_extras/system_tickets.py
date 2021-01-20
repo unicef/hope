@@ -1,20 +1,29 @@
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.grievance.mutations_extras.utils import remove_individual_and_reassign_roles
 from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
 
 
-def close_system_flagging_ticket(grievance_ticket):
+def close_system_flagging_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:
         return
 
     individual = ticket_details.golden_records_individual
+    old_individual = Individual.objects.get(id=ticket_details.selected_individual.id)
 
     if ticket_details.approve_status is False:
         individual.sanction_list_possible_match = False
         individual.save()
+        log_create(
+            Individual.ACTIVITY_LOG_MAPPING,
+            "business_area",
+            info.context.user,
+            old_individual,
+            individual,
+        )
     else:
-        remove_individual_and_reassign_roles(ticket_details, individual)
+        remove_individual_and_reassign_roles(ticket_details, individual, info)
 
 
 def _clear_deduplication_individuals_fields(individuals):
@@ -34,7 +43,7 @@ def _clear_deduplication_individuals_fields(individuals):
     )
 
 
-def close_needs_adjudication_ticket(grievance_ticket):
+def close_needs_adjudication_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.ticket_details
 
     if not ticket_details:
@@ -48,4 +57,4 @@ def close_needs_adjudication_ticket(grievance_ticket):
         individual_to_remove = ticket_details.selected_individual
         unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
         _clear_deduplication_individuals_fields(unique_individuals)
-        remove_individual_and_reassign_roles(ticket_details, individual_to_remove)
+        remove_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
