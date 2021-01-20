@@ -1,13 +1,19 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const PaymentsChart = (): React.ReactElement => {
-  const data = {
-    labels: ['Successful Payments', 'Unsuccessful Payments'],
+interface PaymentsChartProps {
+  data: AllChartsQuery['chartPayment'];
+}
+export const PaymentsChart = ({
+  data,
+}: PaymentsChartProps): React.ReactElement => {
+  const chartData = {
+    labels: data?.labels,
     datasets: [
       {
         backgroundColor: ['#3363A5', '#FFAA1D'],
-        data: [80, 20],
+        data: data?.datasets[0]?.data,
       },
     ],
   };
@@ -18,5 +24,5 @@ export const PaymentsChart = (): React.ReactElement => {
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  return <Doughnut data={chartData} options={options} />;
 };

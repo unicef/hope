@@ -1,18 +1,19 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const GrievancesChart = (): React.ReactElement => {
-  const data = {
-    labels: [
-      'Resolved',
-      'Unresolved',
-      'Unresolved for longer than 30 days',
-      'Unresolved for longer than 60 days',
-    ],
+interface GrievancesChartProps {
+  data: AllChartsQuery['chartGrievances'];
+}
+export const GrievancesChart = ({
+  data,
+}: GrievancesChartProps): React.ReactElement => {
+  const chartData = {
+    labels: data?.labels,
     datasets: [
       {
         backgroundColor: ['#80CB26', '#FFE9AC', '#FFAA1D', '#E02020'],
-        data: [40, 20, 10, 30],
+        data: data?.datasets[0]?.data,
       },
     ],
   };
@@ -23,5 +24,5 @@ export const GrievancesChart = (): React.ReactElement => {
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  return <Doughnut data={chartData} options={options} />;
 };
