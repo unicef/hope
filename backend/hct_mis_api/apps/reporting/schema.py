@@ -1,10 +1,15 @@
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-from graphene_django.filter import DjangoFilterConnectionField
 
 from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, OrderingFilter
 
+from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
+    hopePermissionClass,
+    Permissions,
+    DjangoPermissionFilterConnectionField,
+)
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
@@ -25,7 +30,13 @@ class ReportFilter(FilterSet):
     order_by = OrderingFilter(fields=("report_type", "status", "created_at", "created_by__first_name", "date_from"))
 
 
-class ReportNode(DjangoObjectType):
+class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
+    permission_classes = (
+        hopePermissionClass(
+            Permissions.REPORTING_EXPORT,
+        ),
+    )
+
     class Meta:
         model = Report
         interfaces = (relay.Node,)
@@ -40,7 +51,15 @@ class ReportNode(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     report = relay.Node.Field(ReportNode)
-    all_reports = DjangoFilterConnectionField(ReportNode, filterset_class=ReportFilter)
+    all_reports = DjangoPermissionFilterConnectionField(
+        ReportNode,
+        filterset_class=ReportFilter,
+        permission_classes=(
+            hopePermissionClass(
+                Permissions.REPORTING_EXPORT,
+            ),
+        ),
+    )
 
     report_types_choices = graphene.List(ChoiceObject)
     report_status_choices = graphene.List(ChoiceObject)
