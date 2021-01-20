@@ -299,9 +299,16 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments_for_individuals(report: Report):
-        # TODO fix this
-        # delivery date for timeframe
-        return PaymentRecord.objects.none()
+        filter_vars = {
+            "business_area": report.business_area,
+            "delivery_date__gte": report.date_from,
+            "delivery_date__lte": report.date_to,
+        }
+        if report.admin_area.all().exists():
+            filter_vars["household__admin_area__in"] = report.admin_area.all()
+        if report.program:
+            filter_vars["cash_plan__program"] = report.program
+        return PaymentRecord.objects.filter(**filter_vars)
 
     @staticmethod
     def format_payments_for_individuals_row(self, payment_record: PaymentRecord) -> tuple:
@@ -610,7 +617,7 @@ class GenerateReportService:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
                 self.report.file.save(
-                    f"{self._report_type_to_str()}-{str(self.report.created_at.strftime('%y-%m-%d'))}.xlsx",
+                    f"{self._report_type_to_str()}-{GenerateReportContentHelpers._format_date(self.report.created_at)}.xlsx",
                     File(tmp),
                     save=False,
                 )
@@ -626,7 +633,7 @@ class GenerateReportService:
     def _send_email(self):
         context = {
             "report_type": self._report_type_to_str(),
-            "created_at": str(self.report.created_at.strftime("%y-%m-%d")),
+            "created_at": GenerateReportContentHelpers._format_date(self.report.created_at),
             "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
         }
         text_body = render_to_string("report.txt", context=context)
