@@ -536,3 +536,18 @@ def update_labels_mapping(csv_file):
 
     with open(file_path, "w") as f:
         print(new_content, file=f, end="")
+
+
+def chart_map_choices(choices):
+    return dict(choices)
+
+
+def chart_get_filtered_qs(obj, business_area_slug, year):
+    return obj.objects.filter(
+        business_area__slug=business_area_slug,
+        created_at__year=year
+    )
+
+
+# def chart_get_data(qs, mapped_choices, main_filter, extra_filters, count):
+#     return [qs.filter()]
