@@ -6,7 +6,7 @@ import React from 'react';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
-import { reportStatusToColor } from '../../../utils/utils';
+import { formatNumber, reportStatusToColor } from '../../../utils/utils';
 import { ReportNode } from '../../../__generated__/graphql';
 import { Pointer } from '../../../components/Pointer';
 
@@ -58,6 +58,9 @@ export const ReportingTableRow = ({
             statusToColor={reportStatusToColor}
           />
         </StatusContainer>
+      </TableCell>
+      <TableCell align='right'>
+        {formatNumber(report.numberOfRecords)}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{report.createdAt}</UniversalMoment>
