@@ -15,6 +15,9 @@ import { TotalAmountTransferredSection } from '../../components/Dashboard/sectio
 import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
 import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
 import { TotalCashTransferredByAdministrativeAreaTable } from '../../components/Dashboard/TotalCashTransferredByAdministrativeAreaTable';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useAllChartsQuery } from '../../__generated__/graphql';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PaddingContainer = styled.div`
   padding: 20px;
@@ -30,13 +33,22 @@ const CardTextLight = styled.div`
 `;
 
 interface DashboardYearPageProps {
-  // year: string;
+  year: string;
   selectedTab: number;
 }
 export function DashboardYearPage({
-  // year,
+  year,
   selectedTab,
 }: DashboardYearPageProps): React.ReactElement {
+  const businessArea = useBusinessArea();
+  const { data, loading } = useAllChartsQuery({
+    variables: {
+      year: parseInt(year, 10),
+      businessAreaSlug: businessArea,
+    },
+  });
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
   return (
     <TabPanel value={selectedTab} index={selectedTab}>
       <PaddingContainer>
@@ -45,7 +57,7 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection />
             <TotalAmountPlannedAndTransferredSection />
             <DashboardPaper title='Number of Programmes by Sector'>
-              <ProgrammesBySector />
+              <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
             <DashboardPaper title='Planned Budget and Total Transferred to Date'>
               <PlannedBudget />
@@ -53,7 +65,7 @@ export function DashboardYearPage({
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
               <TotalCashTransferredByAdministrativeAreaTable />
             </DashboardPaper>
-            <PaymentVerificationSection />
+            <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>
           <Grid item xs={4}>
             <PadddingLeftContainer>
@@ -70,11 +82,13 @@ export function DashboardYearPage({
                 <Grid item xs={12}>
                   <DashboardPaper title='Volume by Delivery Mechanism'>
                     <CardTextLight>IN USD</CardTextLight>
-                    <VolumeByDeliveryMechanism />
+                    <VolumeByDeliveryMechanism
+                      data={data.chartVolumeByDeliveryMechanism}
+                    />
                   </DashboardPaper>
-                  <GrievancesSection />
+                  <GrievancesSection data={data.chartGrievances} />
                   <DashboardPaper title='Payments'>
-                    <PaymentsChart />
+                    <PaymentsChart data={data.chartPayment} />
                   </DashboardPaper>
                 </Grid>
               </Grid>

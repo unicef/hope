@@ -1,15 +1,15 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const VolumeByDeliveryMechanism = (): React.ReactElement => {
-  const data = {
-    labels: [
-      'Cash in envelope',
-      'Deposit to card',
-      'Mobile money',
-      'Voucher',
-      'E-voucher',
-    ],
+interface VolumeByDeliveryMechanismProps {
+  data: AllChartsQuery['chartVolumeByDeliveryMechanism'];
+}
+export const VolumeByDeliveryMechanism = ({
+  data,
+}: VolumeByDeliveryMechanismProps): React.ReactElement => {
+  const chartData = {
+    labels: data?.labels,
     datasets: [
       {
         backgroundColor: [
@@ -19,7 +19,7 @@ export const VolumeByDeliveryMechanism = (): React.ReactElement => {
           '#FFAA1D',
           '#FFE498',
         ],
-        data: [10, 30, 20, 5, 35],
+        data: data?.datasets[0]?.data,
       },
     ],
   };
@@ -30,5 +30,5 @@ export const VolumeByDeliveryMechanism = (): React.ReactElement => {
     },
   };
 
-  return <Doughnut data={data} options={options} />;
+  return <Doughnut data={chartData} options={options} />;
 };
