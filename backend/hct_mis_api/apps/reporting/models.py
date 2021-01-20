@@ -1,5 +1,4 @@
 from django.db import models
-from django_countries.fields import CountryField
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -21,13 +20,13 @@ class Report(TimeStampedUUIDModel):
     INDIVIDUALS_AND_PAYMENT = 8
     REPORT_TYPES = (
         (INDIVIDUALS, _("Individuals")),
-        (HOUSEHOLD_DEMOGRAPHICS, _("Household Demographics")),
+        (HOUSEHOLD_DEMOGRAPHICS, _("Households")),
         (CASH_PLAN_VERIFICATION, _("Cash Plan Verification")),
         (PAYMENTS, _("Payments")),
         (PAYMENT_VERIFICATION, _("Payment verification")),
         (CASH_PLAN, _("Cash Plan")),
-        (PROGRAM, _("Program")),
-        (INDIVIDUALS_AND_PAYMENT, _("Individuals and Payment")),
+        (PROGRAM, _("Programme")),
+        (INDIVIDUALS_AND_PAYMENT, _("Individuals & Payment")),
     )
 
     business_area = models.ForeignKey("core.BusinessArea", related_name="reports", on_delete=models.CASCADE)
@@ -37,9 +36,8 @@ class Report(TimeStampedUUIDModel):
     report_type = models.IntegerField(choices=REPORT_TYPES)
     date_from = models.DateField()
     date_to = models.DateField()
+    number_of_records = models.IntegerField(blank=True, null=True)
     # any of these are optional and their requirements will depend on report type
-    # TODO: country probably is not needed and can be removed
-    country = CountryField(blank=True, null=True)
     program = models.ForeignKey(
         "program.Program", on_delete=models.CASCADE, blank=True, null=True, related_name="reports"
     )
