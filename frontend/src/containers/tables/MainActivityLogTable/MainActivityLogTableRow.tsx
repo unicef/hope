@@ -6,6 +6,7 @@ import { IconButton, makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
+import { Link } from 'react-router-dom';
 import {
   AllLogEntriesQuery,
   LogEntryAction,
@@ -16,10 +17,9 @@ import {
   Cell,
   Row,
 } from '../../../components/ActivityLogTable/TableStyledComponents';
-import { headCells } from './MainActivityLogTableHeadCells';
 import { Dashable } from '../../../components/Dashable';
-import { Link } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import { headCells } from './MainActivityLogTableHeadCells';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
@@ -29,7 +29,7 @@ const CollapseContainer = styled(Collapse)`
   background-color: #fafafa;
 `;
 const StyledLink = styled(Link)`
-    color: #000;
+  color: #000;
 `;
 // transitions not working in styled components
 const useStyles = makeStyles((theme: MiśTheme) => ({
@@ -75,14 +75,26 @@ function ObjectRepresentations({
     individual: `/${businessArea}/population/individuals/${btoa(
       'IndividualNode:' + id,
     )}`,
+    registrationdataimport: `/${businessArea}/registration-data-import/${btoa(
+      'RegistrationDataImportNode:' + id,
+    )}`,
+    cashplanpaymentverification: `/${businessArea}/csh-payment-verification/${btoa(
+      'CashPlanPaymentVerificationNode:' + id,
+    )}`,
+    paymentverification: `/${businessArea}/verification-records/${btoa(
+      'PaymentVerificationNode:' + id,
+    )}`,
   };
-  if (!(model in modelToUrlDict)) {
+  if (
+    !(model in modelToUrlDict) ||
+    logEntry.action === LogEntryAction.Delete ||
+    logEntry.action === LogEntryAction.SoftDelete
+  ) {
     return <>{logEntry.objectRepr}</>;
   }
-  if (logEntry.action === LogEntryAction.Delete) {
-    return <>{logEntry.objectRepr}</>;
-  }
-  return <StyledLink to={modelToUrlDict[model]}>{logEntry.objectRepr}</StyledLink>;
+  return (
+    <StyledLink to={modelToUrlDict[model]}>{logEntry.objectRepr}</StyledLink>
+  );
 }
 
 interface LogRowProps {
@@ -108,7 +120,7 @@ export function MainActivityLogTableRow({
         <Cell weight={headCells[1].weight}>
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+            : 'System'}
         </Cell>
         <Cell weight={headCells[2].weight}>{logEntry.contentType.name}</Cell>
         <Cell weight={headCells[3].weight}>
@@ -139,7 +151,7 @@ export function MainActivityLogTableRow({
         <Cell weight={headCells[1].weight}>
           {logEntry.user
             ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
-            : null}
+            : 'System'}
         </Cell>
         <Cell weight={headCells[2].weight}>{logEntry.contentType.name}</Cell>
         <Cell weight={headCells[3].weight}>
@@ -176,9 +188,11 @@ export function MainActivityLogTableRow({
                 {snakeToFieldReadable(key)}
               </Cell>
               <Cell weight={headCells[6].weight}>
-                {changes[key].from == null ? '-' : changes[key].from}
+                <Dashable>{changes[key].from}</Dashable>
               </Cell>
-              <Cell weight={headCells[7].weight}>{changes[key].to}</Cell>
+              <Cell weight={headCells[7].weight}>
+                <Dashable>{changes[key].to}</Dashable>
+              </Cell>
               <ButtonPlaceHolder />
             </Row>
           );

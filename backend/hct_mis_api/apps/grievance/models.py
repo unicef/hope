@@ -281,8 +281,10 @@ class GrievanceTicket(TimeStampedUUIDModel):
 
     @property
     def issue_type_log(self):
+        if self.issue_type is None:
+            return None
         issue_type_choices_dict = {}
-        for key,value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
+        for key, value in GrievanceTicket.ISSUE_TYPES_CHOICES.items():
             issue_type_choices_dict.update(value)
         return issue_type_choices_dict[self.issue_type]
 
