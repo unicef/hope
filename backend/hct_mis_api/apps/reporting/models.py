@@ -38,13 +38,12 @@ class Report(TimeStampedUUIDModel):
     date_from = models.DateField()
     date_to = models.DateField()
     # any of these are optional and their requirements will depend on report type
+    # TODO: country probably is not needed and can be removed
     country = CountryField(blank=True, null=True)
     program = models.ForeignKey(
         "program.Program", on_delete=models.CASCADE, blank=True, null=True, related_name="reports"
     )
-    admin_area = models.ForeignKey(
-        "core.AdminArea", on_delete=models.CASCADE, blank=True, null=True, related_name="reports"
-    )
+    admin_area = models.ManyToManyField("core.AdminArea", blank=True, related_name="reports")
 
     def __str__(self):
         return f"[{self.report_type}] Report for [{self.business_area}]"

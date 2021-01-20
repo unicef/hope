@@ -17,7 +17,7 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
     Permissions,
 )
-from hct_mis_api.apps.account.schema import LogEntryObjectConnection
+
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -74,7 +74,6 @@ class ProgramNode(BaseNodePermissionMixin, DjangoObjectType):
     total_delivered_quantity = graphene.Decimal()
     total_undelivered_quantity = graphene.Decimal()
     total_number_of_households = graphene.Int()
-    history = ConnectionField(LogEntryObjectConnection)
     individual_data_needed = graphene.Boolean()
 
     class Meta:

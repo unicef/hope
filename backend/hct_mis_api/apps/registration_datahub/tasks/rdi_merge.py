@@ -1,6 +1,8 @@
 from django.db import transaction
 from django.forms import model_to_dict
 
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
@@ -27,7 +29,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     KoboImportedSubmission,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    CheckAgainstSanctionListPreMergeTask,
+)
 
 
 class RdiMergeTask:
@@ -107,46 +111,6 @@ class RdiMergeTask:
         "who_answers_alt_phone",
     )
 
-    # def create_grievance_ticket_with_details(self, main_individual, possible_duplicate, business_area):
-    #     details_already_exists = TicketNeedsAdjudicationDetails.objects.filter(
-    #         golden_records_individual__in=(main_individual, possible_duplicate),
-    #         possible_duplicate__in=(main_individual, possible_duplicate),
-    #     ).exists()
-    #
-    #     if details_already_exists is True:
-    #         return None, None
-    #
-    #     ticket = GrievanceTicket.objects.create(
-    #         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
-    #         business_area=business_area,
-    #     )
-    #     ticket_details = TicketNeedsAdjudicationDetails(
-    #         ticket=ticket,
-    #         golden_records_individual=main_individual,
-    #         possible_duplicate=possible_duplicate,
-    #         selected_individual=None,
-    #     )
-    #     return ticket, ticket_details
-    #
-    # def create_needs_adjudication_tickets(self, individuals_queryset, results_key, business_area):
-    #     ticket_details_to_create = []
-    #     for possible_duplicate in individuals_queryset:
-    #         linked_tickets = []
-    #         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
-    #             print(individual)
-    #             ticket, ticket_details = self.create_grievance_ticket_with_details(
-    #                 main_individual=Individual.objects.get(id=individual.get("hit_id")),
-    #                 possible_duplicate=possible_duplicate,
-    #                 business_area=business_area,
-    #             )
-    #             if ticket is not None and ticket_details is not None:
-    #                 linked_tickets.append(ticket)
-    #                 ticket_details_to_create.append(ticket_details)
-    #
-    #         for ticket in linked_tickets:
-    #             ticket.linked_tickets.set([t for t in linked_tickets if t != ticket])
-    #
-    #     return ticket_details_to_create
 
     def merge_admin_area(
         self,
@@ -215,7 +179,8 @@ class RdiMergeTask:
         identities_to_create = []
         for imported_individual in imported_individuals:
             values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
-            household = households_dict.get(imported_individual.household.id)
+            imported_individual_household = imported_individual.household
+            household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
             individual = Individual(
                 **values,
                 household=household,
@@ -258,6 +223,7 @@ class RdiMergeTask:
         obj_hct = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
         )
+        old_obj_hct = copy_model_object(obj_hct)
         imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
         imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
             registration_data_import=obj_hub
@@ -329,4 +295,9 @@ class RdiMergeTask:
         CheckAgainstSanctionListPreMergeTask.execute()
 
         obj_hct.status = RegistrationDataImport.MERGED
+
         obj_hct.save()
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct
+        )
