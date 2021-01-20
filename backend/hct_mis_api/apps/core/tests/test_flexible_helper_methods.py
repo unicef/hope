@@ -35,7 +35,6 @@ class TestFlexibleHelperMethods(TestCase):
                 "hint",
                 "group",
                 "associated_with",
-                "history",
             ],
             [
                 "flex_attributes",
@@ -53,7 +52,6 @@ class TestFlexibleHelperMethods(TestCase):
                 "rght",
                 "tree_id",
                 "level",
-                "history",
             ],
             [
                 "is_removed",

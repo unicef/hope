@@ -95,12 +95,9 @@ class PaymentVerificationFilter(FilterSet):
 
 
 class CashPlanPaymentVerificationFilter(FilterSet):
-
     class Meta:
         fields = tuple()
         model = CashPlanPaymentVerification
-
-
 
 
 class RapidProFlowResult(graphene.ObjectType):

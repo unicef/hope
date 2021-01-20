@@ -308,9 +308,7 @@ class GrievanceTicket(TimeStampedUUIDModel):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        if len(self.description):
-            return self.description
-        return str(self.pk)
+        return self.description or str(self.pk)
 
 
 class GrievanceTicketThrough(TimeStampedUUIDModel):

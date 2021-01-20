@@ -26,12 +26,16 @@ def log_create(mapping, business_area_field, user=None, old_object=None, new_obj
         if is_removed and is_removed_old != is_removed:
             action = LogEntry.SOFT_DELETE
     business_area = nested_getattr(instance, business_area_field)
-    log = LogEntry(
-        action=action, content_object=instance, user=user, business_area=business_area, object_repr=str(instance)
+    log = LogEntry.objects.create(
+        action=action,
+        content_object=instance,
+        user=user,
+        business_area=business_area,
+        object_repr=str(instance),
+        changes=create_diff(old_object, new_object, mapping)
+        if action not in (LogEntry.DELETE, LogEntry.SOFT_DELETE)
+        else None,
     )
-    if action != LogEntry.DELETE and action != LogEntry.SOFT_DELETE:
-        log.changes = create_diff(old_object, new_object, mapping)
-    log.save()
     return log
 
 
