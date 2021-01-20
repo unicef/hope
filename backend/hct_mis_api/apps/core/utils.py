@@ -542,10 +542,13 @@ def chart_map_choices(choices):
     return dict(choices)
 
 
-def chart_get_filtered_qs(obj, business_area_slug, year):
+def chart_get_filtered_qs(obj, business_area_slug, year, additional_filters=None):
+    if additional_filters is None:
+        additional_filters = {}
     return obj.objects.filter(
         business_area__slug=business_area_slug,
-        created_at__year=year
+        created_at__year=year,
+        **additional_filters
     )
 
 
