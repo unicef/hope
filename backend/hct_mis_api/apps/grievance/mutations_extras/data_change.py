@@ -6,6 +6,7 @@ from django.utils import timezone
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.core.utils import to_snake_case
@@ -523,8 +524,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         for field, value_and_approve_status in individual_data.items()
         if value_and_approve_status.get("approve_status") is True and field != "previous_documents"
     }
-    old_individual = Individual.objects.get(id=individual.id)
-    Individual.objects.filter(id=individual.id).update(flex_fields=flex_fields, **only_approved_data)
+    old_individual = copy_model_object(individual)
+    merged_flex_fields = {}
+    if individual.flex_fields is not None:
+        merged_flex_fields.update(household.flex_fields)
+    merged_flex_fields.update(flex_fields)
+    Individual.objects.filter(id=individual.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_individual = Individual.objects.get(id=individual.id)
     relationship_to_head_of_household = individual_data.get("relationship")
     if household and relationship_to_head_of_household == HEAD:
@@ -577,8 +582,12 @@ def close_update_household_grievance_ticket(grievance_ticket, info):
         for field, value_and_approve_status in household_data.items()
         if value_and_approve_status.get("approve_status") is True
     }
-    old_household = Household.objects.get(id=household.id)
-    Household.objects.filter(id=household.id).update(flex_fields=flex_fields, **only_approved_data)
+    old_household = copy_model_object(household)
+    merged_flex_fields = {}
+    if household.flex_fields is not None:
+        merged_flex_fields.update(household.flex_fields)
+    merged_flex_fields.update(flex_fields)
+    Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_household = Household.objects.get(id=household.id)
     log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
