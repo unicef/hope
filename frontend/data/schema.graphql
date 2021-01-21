@@ -2281,7 +2281,7 @@ enum ProgramStatus {
 }
 
 type Query {
-  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!): LogEntryNodeConnection
+  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
   allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
