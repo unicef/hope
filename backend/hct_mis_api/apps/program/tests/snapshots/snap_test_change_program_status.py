@@ -9,22 +9,12 @@ snapshots = Snapshot()
 
 snapshots['TestChangeProgramStatus::test_status_change_0_draft_to_active_with_permission 1'] = {
     'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
-            'path': [
-                'updateProgram'
-            ]
+        'updateProgram': {
+            'program': {
+                'status': 'ACTIVE'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestChangeProgramStatus::test_status_change_1_draft_to_acive_without_permission 1'] = {
@@ -39,7 +29,7 @@ snapshots['TestChangeProgramStatus::test_status_change_1_draft_to_acive_without_
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'updateProgram'
             ]
@@ -49,22 +39,12 @@ snapshots['TestChangeProgramStatus::test_status_change_1_draft_to_acive_without_
 
 snapshots['TestChangeProgramStatus::test_status_change_2_finish_to_active_with_permission 1'] = {
     'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
-            'path': [
-                'updateProgram'
-            ]
+        'updateProgram': {
+            'program': {
+                'status': 'ACTIVE'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestChangeProgramStatus::test_status_change_3_finish_to_active_without_permission 1'] = {
@@ -79,7 +59,7 @@ snapshots['TestChangeProgramStatus::test_status_change_3_finish_to_active_withou
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'updateProgram'
             ]
@@ -99,7 +79,7 @@ snapshots['TestChangeProgramStatus::test_status_change_4_draft_to_finished_with_
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Draft status can only be changed to Active',
             'path': [
                 'updateProgram'
             ]
@@ -119,7 +99,7 @@ snapshots['TestChangeProgramStatus::test_status_change_5_draft_to_finished_witho
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'updateProgram'
             ]
@@ -129,22 +109,12 @@ snapshots['TestChangeProgramStatus::test_status_change_5_draft_to_finished_witho
 
 snapshots['TestChangeProgramStatus::test_status_change_6_active_to_finished_with_permission 1'] = {
     'data': {
-        'updateProgram': None
-    },
-    'errors': [
-        {
-            'locations': [
-                {
-                    'column': 7,
-                    'line': 3
-                }
-            ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
-            'path': [
-                'updateProgram'
-            ]
+        'updateProgram': {
+            'program': {
+                'status': 'FINISHED'
+            }
         }
-    ]
+    }
 }
 
 snapshots['TestChangeProgramStatus::test_status_change_7_active_to_finished_without_permission 1'] = {
@@ -159,7 +129,7 @@ snapshots['TestChangeProgramStatus::test_status_change_7_active_to_finished_with
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Permission Denied: User does not have correct permission.',
             'path': [
                 'updateProgram'
             ]
@@ -179,7 +149,7 @@ snapshots['TestChangeProgramStatus::test_status_change_8_active_to_draft 1'] = {
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Active status can only be changed to Finished',
             'path': [
                 'updateProgram'
             ]
@@ -199,7 +169,7 @@ snapshots['TestChangeProgramStatus::test_status_change_9_finished_to_draft 1'] =
                     'line': 3
                 }
             ],
-            'message': "mutate() missing 1 required positional argument: 'version'",
+            'message': 'Finished status can only be changed to Active',
             'path': [
                 'updateProgram'
             ]
