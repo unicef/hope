@@ -307,15 +307,18 @@ class Query(graphene.ObjectType):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
-        status_choices = PaymentVerification.STATUS_CHOICES
-        status_choices_mapping = dict(status_choices)
-        payment_verifications = PaymentVerification.objects.filter(
-            payment_record__business_area__slug=business_area_slug,
-            created_at__year=year
+        status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
+        payment_verifications = chart_get_filtered_qs(
+            PaymentVerification,
+            year,
+            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
         )
 
         dataset = [payment_verifications.filter(status=status).count() for status in status_choices_mapping.keys()]
-        dataset_percentage = [data / sum(dataset) for data in dataset]
+        try:
+            dataset_percentage = [data / sum(dataset) for data in dataset]
+        except ZeroDivisionError:
+            dataset_percentage = [0] * len(status_choices_mapping.values())
         dataset_percentage_done = [
             {
                 "label": status,
@@ -326,15 +329,15 @@ class Query(graphene.ObjectType):
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,
-            "households": payment_verifications.values('payment_record__household').count()
+            "households": payment_verifications.values_list('payment_record__household', flat=True).distinct().count()
         }
 
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
-        delivery_type_choices = PaymentRecord.DELIVERY_TYPE_CHOICE
-        delivery_type_choices_mapping = dict(delivery_type_choices)
-        payment_records = PaymentRecord.objects.filter(
-            business_area__slug=business_area_slug,
-            created_at__year=year
+        delivery_type_choices_mapping = chart_map_choices(PaymentRecord.DELIVERY_TYPE_CHOICE)
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
         )
         dataset = [
             {
@@ -350,7 +353,11 @@ class Query(graphene.ObjectType):
 
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
-        payment_records = chart_get_filtered_qs(PaymentRecord, business_area_slug, year)
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
+        )
         dataset = [
             {
                 "data": [
