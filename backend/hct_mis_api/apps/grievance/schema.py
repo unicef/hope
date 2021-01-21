@@ -646,7 +646,11 @@ class Query(graphene.ObjectType):
         ).order_by("name")
 
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
-        grievance_tickets = chart_get_filtered_qs(GrievanceTicket, business_area_slug, year)
+        grievance_tickets = chart_get_filtered_qs(
+            GrievanceTicket,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug}
+        )
         grievance_status_labels = [
             "Resolved",
             "Unresolved",

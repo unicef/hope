@@ -10,6 +10,7 @@ export const REPORT_QUERY = gql`
       dateFrom
       dateTo
       fileUrl
+      numberOfRecords
       createdBy {
         firstName
         lastName
