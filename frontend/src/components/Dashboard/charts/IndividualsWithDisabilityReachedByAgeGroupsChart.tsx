@@ -1,37 +1,29 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const IndividualsWithDisabilityReachedByAgeGroupsChart = (): React.ReactElement => {
-  const labels = [
-    'Females 0-5',
-    'Females 6-11',
-    'Females 12-17',
-    'Females 18-59',
-    'Females 60+',
-    'Males 0-5',
-    'Males 6-11',
-    'Males 12-17',
-    'Males 18-59',
-    'Males 60+',
-  ];
+interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
+  data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
+}
 
-  const withDisabilityData = [10, 10, 11, 12, 12, 12, 12, 10, 11, 12];
-  const withoutDisabilityData = [3, 10, 6, 7, 6, 8, 9, 10, 11, 12];
-
-  const data = {
+export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
+  data,
+}: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
+  const labels = data?.labels;
+  const chartData = {
     labels,
     datasets: [
       {
         barPercentage: 0.8,
-        label: 'with disability',
+        label: data?.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
-        data: withDisabilityData,
+        data: data?.datasets[0]?.data,
       },
       {
         barPercentage: 0.8,
-        label: 'without disability',
+        label: data?.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
-        data: withoutDisabilityData,
+        data: data?.datasets[1]?.data,
       },
     ],
   };
@@ -57,5 +49,5 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = (): React.ReactE
     },
   };
 
-  return <HorizontalBar data={data} options={options} />;
+  return <HorizontalBar data={chartData} options={options} />;
 };

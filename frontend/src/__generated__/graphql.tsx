@@ -523,6 +523,12 @@ export type ChartDatasetNode = {
   datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
 };
 
+export type ChartDetailedDatasetsNode = {
+   __typename?: 'ChartDetailedDatasetsNode',
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
+};
+
 export type ChartGrievanceTicketsNode = {
    __typename?: 'ChartGrievanceTicketsNode',
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -3202,7 +3208,11 @@ export type Query = {
   individual?: Maybe<IndividualNode>,
   allIndividuals?: Maybe<IndividualNodeConnection>,
   chartAllIndividualsReached?: Maybe<ChartDatasetNode>,
-  sectionHouseholdsReached?: Maybe<SectionTotalHouseholdsReachedNode>,
+  sectionHouseholdsReached?: Maybe<SectionTotalNode>,
+  sectionIndividualsReached?: Maybe<SectionTotalNode>,
+  sectionChildReached?: Maybe<SectionTotalNode>,
+  chartIndividualsReachedByAgeAndGender?: Maybe<ChartDatasetNode>,
+  chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>,
   residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3659,6 +3669,30 @@ export type QueryChartAllIndividualsReachedArgs = {
 
 
 export type QuerySectionHouseholdsReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QuerySectionIndividualsReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QuerySectionChildReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int']
 };
@@ -4211,8 +4245,8 @@ export type SaveKoboProjectImportDataMutation = {
   errors?: Maybe<Array<Maybe<KoboErrorNode>>>,
 };
 
-export type SectionTotalHouseholdsReachedNode = {
-   __typename?: 'SectionTotalHouseholdsReachedNode',
+export type SectionTotalNode = {
+   __typename?: 'SectionTotalNode',
   total?: Maybe<Scalars['Int']>,
 };
 
@@ -6243,6 +6277,29 @@ export type AllChartsQuery = (
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DatasetsNode' }
       & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, sectionHouseholdsReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, sectionIndividualsReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, sectionChildReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, chartIndividualsReachedByAgeAndGender: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartIndividualsWithDisabilityReachedByAge: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
     )>>> }
   )> }
 );
@@ -10750,6 +10807,28 @@ export const AllChartsDocument = gql`
     totalReferral
     totalPositiveFeedback
   }
+  sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+    total
+  }
+  sectionIndividualsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+    total
+  }
+  sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+    total
+  }
+  chartIndividualsReachedByAgeAndGender(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
 }
     `;
 export type AllChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllChartsQuery, AllChartsQueryVariables>, 'query'> & ({ variables: AllChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
@@ -14906,7 +14985,8 @@ export type ResolversTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  SectionTotalHouseholdsReachedNode: ResolverTypeWrapper<SectionTotalHouseholdsReachedNode>,
+  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
+  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
@@ -15238,7 +15318,8 @@ export type ResolversParentTypes = {
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  SectionTotalHouseholdsReachedNode: SectionTotalHouseholdsReachedNode,
+  SectionTotalNode: SectionTotalNode,
+  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
   ImportedHouseholdNode: ImportedHouseholdNode,
@@ -15568,6 +15649,11 @@ export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, Pare
 export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
+};
+
+export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDetailedDatasetsNode'] = ResolversParentTypes['ChartDetailedDatasetsNode']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
 };
 
 export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
@@ -16532,7 +16618,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
   allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
   chartAllIndividualsReached?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartAllIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
-  sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalHouseholdsReachedNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
+  sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
+  sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
+  sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
+  chartIndividualsReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>,
+  chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>,
   residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -16851,7 +16941,7 @@ export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, Parent
   errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
 };
 
-export type SectionTotalHouseholdsReachedNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalHouseholdsReachedNode'] = ResolversParentTypes['SectionTotalHouseholdsReachedNode']> = {
+export type SectionTotalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']> = {
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
@@ -17381,6 +17471,7 @@ export type Resolvers<ContextType = any> = {
   CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
   CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
   ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
+  ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
   ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
   ChartXDNode?: ChartXdNodeResolvers<ContextType>,
@@ -17507,7 +17598,7 @@ export type Resolvers<ContextType = any> = {
   SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<ContextType>,
   SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<ContextType>,
   SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
-  SectionTotalHouseholdsReachedNode?: SectionTotalHouseholdsReachedNodeResolvers<ContextType>,
+  SectionTotalNode?: SectionTotalNodeResolvers<ContextType>,
   ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
   ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
   ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>,
