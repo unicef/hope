@@ -719,18 +719,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_photo_i_c",
     },
-    {
-        "id": "b886d636-36cd-4beb-b2f9-6ddb204532d5",
-        "type": TYPE_INTEGER,
-        "name": "pregnant_member",
-        "lookup": "pregnant_member",
-        "required": False,
-        "label": {"English(EN)": ""},
-        "hint": "",
-        "choices": [],
-        "associated_with": _HOUSEHOLD,
-        "xlsx_field": "pregnant_member_h_c",
-    },
+    # {
+    #     "id": "b886d636-36cd-4beb-b2f9-6ddb204532d5",
+    #     "type": TYPE_INTEGER,
+    #     "name": "pregnant_member",
+    #     "lookup": "pregnant_member",
+    #     "required": False,
+    #     "label": {"English(EN)": ""},
+    #     "hint": "",
+    #     "choices": [],
+    #     "associated_with": _HOUSEHOLD,
+    #     "xlsx_field": "pregnant_member_h_c",
+    # },
     {
         "id": "07f7005f-e70d-409b-9dee-4c3414aba40b",
         "type": TYPE_INTEGER,
@@ -801,7 +801,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "f_pregnant_h_c",
+        "xlsx_field": "pregnant_h_c",
     },
     {
         "id": "57233f1b-93c3-4fd4-a885-92c512c5e32a",
@@ -1151,7 +1151,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "deviceid_h_c",
+        "xlsx_field": "deviceid",
     },
     {
         "id": "8f379d33-c5fd-4344-ba2b-73e136aba13a",
@@ -1304,7 +1304,7 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "start_h_c",
+        "xlsx_field": "start",
     },
     "end_h_c": {
         "id": "06e4c4a0-28d2-4530-be24-92623a5b48b0",
@@ -1316,7 +1316,7 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "end_h_c",
+        "xlsx_field": "end",
     },
 }
 
