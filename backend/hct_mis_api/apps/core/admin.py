@@ -48,7 +48,7 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
 
-    exclude = ("is_removed", "file_name", "status")
+    exclude = ("is_removed", "file_name", "status", "template_id")
 
     readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
 
