@@ -27,7 +27,9 @@ class ReportFilter(FilterSet):
         fields = ("created_by", "report_type", "status", "business_area")
         model = Report
 
-    order_by = OrderingFilter(fields=("report_type", "status", "created_at", "created_by__first_name", "date_from"))
+    order_by = OrderingFilter(
+        fields=("report_type", "status", "created_at", "created_by__first_name", "date_from", "number_of_records")
+    )
 
 
 class ReportNode(BaseNodePermissionMixin, DjangoObjectType):
