@@ -286,6 +286,11 @@ type ChartDatasetNode {
   datasets: [_DatasetsNode]
 }
 
+type ChartDetailedDatasetsNode {
+  labels: [String]
+  datasets: [_DetailedDatasetsNode]
+}
+
 type ChartGrievanceTicketsNode {
   labels: [String]
   datasets: [_DatasetsNode]
@@ -2365,7 +2370,11 @@ type Query {
   individual(id: ID!): IndividualNode
   allIndividuals(before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Icontains: String, sex: [String], age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, orderBy: String): IndividualNodeConnection
   chartAllIndividualsReached(businessAreaSlug: String!, year: Int!): ChartDatasetNode
-  sectionHouseholdsReached(businessAreaSlug: String!, year: Int!): SectionTotalHouseholdsReachedNode
+  sectionHouseholdsReached(businessAreaSlug: String!, year: Int!): SectionTotalNode
+  sectionIndividualsReached(businessAreaSlug: String!, year: Int!): SectionTotalNode
+  sectionChildReached(businessAreaSlug: String!, year: Int!): SectionTotalNode
+  chartIndividualsReachedByAgeAndGender(businessAreaSlug: String!, year: Int!): ChartDatasetNode
+  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: String!, year: Int!): ChartDetailedDatasetsNode
   residenceStatusChoices: [ChoiceObject]
   sexChoices: [ChoiceObject]
   maritalStatusChoices: [ChoiceObject]
@@ -2734,7 +2743,7 @@ type SaveKoboProjectImportDataMutation {
   errors: [KoboErrorNode]
 }
 
-type SectionTotalHouseholdsReachedNode {
+type SectionTotalNode {
   total: Int
 }
 

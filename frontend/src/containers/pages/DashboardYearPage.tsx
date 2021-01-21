@@ -71,13 +71,25 @@ export function DashboardYearPage({
             <PadddingLeftContainer>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <TotalNumberOfHouseholdsReachedSection />
+                  <TotalNumberOfHouseholdsReachedSection
+                    data={data.sectionHouseholdsReached}
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <TotalNumberOfIndividualsReachedSection />
+                  <TotalNumberOfIndividualsReachedSection
+                    data={data.sectionIndividualsReached}
+                    chartDataIndividuals={
+                      data.chartIndividualsReachedByAgeAndGender
+                    }
+                    chartDataIndividualsDisability={
+                      data.chartIndividualsWithDisabilityReachedByAge
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <TotalNumberOfChildrenReachedSection />
+                  <TotalNumberOfChildrenReachedSection
+                    data={data.sectionChildReached}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <DashboardPaper title='Volume by Delivery Mechanism'>

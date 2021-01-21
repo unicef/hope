@@ -45,5 +45,37 @@ export const Allcharts = gql`
       totalReferral
       totalPositiveFeedback
     }
+    sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+      total
+    }
+    sectionIndividualsReached(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+    ) {
+      total
+    }
+    sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+      total
+    }
+
+    chartIndividualsReachedByAgeAndGender(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+    ) {
+      datasets {
+        data
+      }
+      labels
+    }
+    chartIndividualsWithDisabilityReachedByAge(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+    ) {
+      datasets {
+        data
+        label
+      }
+      labels
+    }
   }
 `;
