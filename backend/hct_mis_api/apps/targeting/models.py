@@ -1,6 +1,5 @@
 import datetime
 
-from auditlog.registry import auditlog
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField
@@ -17,7 +16,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
@@ -54,6 +53,31 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     Has N:N association with households.
     """
+
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "name",
+            "ca_id",
+            "ca_hash_id",
+            "created_by",
+            "approved_at",
+            "approved_by",
+            "finalized_at",
+            "finalized_by",
+            "status",
+            "candidate_list_total_households",
+            "candidate_list_total_individuals",
+            "final_list_total_households",
+            "final_list_total_individuals",
+            "selection_computation_metadata",
+            "program",
+            "targeting_criteria_string",
+            "sent_to_datahub",
+            "steficon_rule",
+            "vulnerability_score_min",
+            "vulnerability_score_max",
+        ]
+    )
 
     STATUS_DRAFT = "DRAFT"
     STATUS_APPROVED = "APPROVED"
@@ -277,7 +301,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if not self.program:
             return None
         tp = (
-            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED)
+            TargetPopulation.objects.filter(
+                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED
+            )
             .order_by("-created_at")
             .first()
         )
@@ -290,6 +316,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
 
     class Meta:
         unique_together = ("name", "business_area")
+        verbose_name = "Target Population"
 
 
 class HouseholdSelection(TimeStampedUUIDModel):
@@ -650,5 +677,3 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
 
     def get_lookup_prefix(self, associated_with):
         return ""
-
-auditlog.register(TargetPopulation)

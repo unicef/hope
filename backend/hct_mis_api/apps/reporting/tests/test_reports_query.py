@@ -2,6 +2,7 @@ from django.core.management import call_command
 from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
@@ -73,19 +74,29 @@ class TestReportsQuery(APITestCase):
 
     @parameterized.expand(
         [
-            ("all", ALL_REPORTS_QUERY),
-            ("filter_by_status", ALL_REPORTS_FILTER_STATUS_QUERY),
-            ("filter_by_type", ALL_REPORTS_FILTER_TYPE_QUERY),
+            ("all_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_QUERY),
+            ("all_without_permissions", [], ALL_REPORTS_QUERY),
+            ("filter_by_status_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_FILTER_STATUS_QUERY),
+            ("filter_by_status_without_permissions", [], ALL_REPORTS_FILTER_STATUS_QUERY),
+            ("filter_by_type_with_permissions", [Permissions.REPORTING_EXPORT], ALL_REPORTS_FILTER_TYPE_QUERY),
         ]
     )
-    def test_reports_query_all(self, _, query_string):
+    def test_reports_query_all(self, _, permissions, query_string):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=query_string,
             context={"user": self.user},
         )
 
-    def test_report_query_single(self):
+    @parameterized.expand(
+        [
+            ("with_permissions", [Permissions.REPORTING_EXPORT]),
+            ("without_permissions", []),
+        ]
+    )
+    def test_report_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
         self.snapshot_graphql_request(
             request_string=REPORT_QUERY,

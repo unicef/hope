@@ -7,7 +7,7 @@ import { Paper } from '@material-ui/core';
 import TablePagination from '@material-ui/core/TablePagination';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { LogEntryObject } from '../../__generated__/graphql';
+import { LogEntryNode } from '../../__generated__/graphql';
 import { LogRow } from './LogRow';
 import { ButtonPlaceHolder, Row } from './TableStyledComponents';
 import { headCells } from './headCels';
@@ -42,7 +42,7 @@ const Toolbar = styled.div`
 `;
 
 interface ActivityLogTableProps {
-  logEntries: LogEntryObject[];
+  logEntries: LogEntryNode[];
   totalCount: number;
   rowsPerPage: number;
   page: number;

@@ -20,8 +20,8 @@ export const headCells: HeadCell<
   },
   {
     disablePadding: false,
-    label: 'Module',
-    id: 'module',
+    label: 'Entity',
+    id: 'content_type__name',
     numeric: false,
     weight: 1,
   },
