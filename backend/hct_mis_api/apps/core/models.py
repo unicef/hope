@@ -14,14 +14,6 @@ from hct_mis_api.apps.core.utils import unique_slugify
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
-SUCCESSFUL = "SUCCESSFUL"
-UNSUCCESSFUL = "UNSUCCESSFUL"
-KOBO_FORM_UPLOAD_STATUS_CHOICES = (
-    (SUCCESSFUL, _("Successful")),
-     (UNSUCCESSFUL, _("Unsuccessful")),
-)
-
-
 class BusinessArea(TimeStampedUUIDModel):
     """
     BusinessArea (EPRP called Workspace, also synonym was
@@ -234,10 +226,19 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
-        self.get_queryset().filter(kobo_form_upload_status=SUCCESSFUL).order_by("-created_at").first()
+        return self.get_queryset().filter(status=self.model.SUCCESSFUL).order_by("-created_at").first()
 
 
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
+    SUCCESSFUL = "SUCCESSFUL"
+    UNSUCCESSFUL = "UNSUCCESSFUL"
+    PROCESSING = "PROCESSING"
+    KOBO_FORM_UPLOAD_STATUS_CHOICES = (
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (PROCESSING, _("Processing")),
+    )
+
     class Meta:
         ordering = ("-created_at",)
 
@@ -250,9 +251,8 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
         null=True,
     )
     file = models.FileField()
-    kobo_form_upload_status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+    error_description = models.TextField(blank=True)
+    status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
 
-
-# auditlog.register(FlexibleAttributeChoice)
-# auditlog.register(FlexibleAttributeGroup)
-# auditlog.register(FlexibleAttribute)
+    def __str__(self):
+        return f"{self.file_name} - {self.created_at}"
