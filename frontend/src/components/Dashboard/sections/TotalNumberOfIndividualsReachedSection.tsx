@@ -12,6 +12,7 @@ import {
 } from '../DashboardCard';
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -27,8 +28,17 @@ const Title = styled(Box)`
   font-size: 18px;
   font-weight: normal;
 `;
+interface TotalNumberOfIndividualsReachedSectionProps {
+  data: AllChartsQuery['sectionIndividualsReached'];
+  chartDataIndividuals: AllChartsQuery['chartIndividualsReachedByAgeAndGender'];
+  chartDataIndividualsDisability: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];
+}
 
-export const TotalNumberOfIndividualsReachedSection = (): React.ReactElement => {
+export const TotalNumberOfIndividualsReachedSection = ({
+  data,
+  chartDataIndividuals,
+  chartDataIndividualsDisability,
+}: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -38,7 +48,7 @@ export const TotalNumberOfIndividualsReachedSection = (): React.ReactElement => 
         <Grid container justify='space-between' alignItems='center'>
           <Grid item>
             <CardAmountLink onClick={() => setDialogOpen(true)}>
-              169178378
+              {data?.total}
             </CardAmountLink>
           </Grid>
           <Grid item>
@@ -62,11 +72,15 @@ export const TotalNumberOfIndividualsReachedSection = (): React.ReactElement => 
               <Title mb={2}>
                 Individuals with Disability Reached by Age Groups
               </Title>
-              <IndividualsReachedByAgeAndGenderGroupsChart />
+              <IndividualsReachedByAgeAndGenderGroupsChart
+                data={chartDataIndividuals}
+              />
             </Box>
             <Box>
               <Title mb={2}>Individuals Reached by Age and Gender Groups</Title>
-              <IndividualsWithDisabilityReachedByAgeGroupsChart />
+              <IndividualsWithDisabilityReachedByAgeGroupsChart
+                data={chartDataIndividualsDisability}
+              />
             </Box>
           </DialogContainer>
         </DialogContent>

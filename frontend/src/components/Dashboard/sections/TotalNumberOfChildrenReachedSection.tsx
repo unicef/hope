@@ -7,14 +7,21 @@ import {
   DashboardCard,
   IconContainer,
 } from '../DashboardCard';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const TotalNumberOfChildrenReachedSection = (): React.ReactElement => {
+interface TotalNumberOfChildrenReachedSectionProps {
+  data: AllChartsQuery['sectionChildReached'];
+}
+
+export const TotalNumberOfChildrenReachedSection = ({
+  data,
+}: TotalNumberOfChildrenReachedSectionProps): React.ReactElement => {
   return (
     <DashboardCard color='#4CD0E0'>
       <CardTitle>TOTAL NUMBER OF CHILDREN REACHED</CardTitle>
       <Grid container justify='space-between' alignItems='center'>
         <Grid item>
-          <CardAmountSmaller>85234657</CardAmountSmaller>
+          <CardAmountSmaller>{data?.total}</CardAmountSmaller>
         </Grid>
         <Grid item>
           <IconContainer bg='#E4F7FA' color='#4CD0E0'>
