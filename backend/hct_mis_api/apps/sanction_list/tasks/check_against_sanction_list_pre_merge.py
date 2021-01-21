@@ -33,48 +33,36 @@ class CheckAgainstSanctionListPreMergeTask:
         ]
         alias_names_queries = [
             {
-                "multi_match": {
-                    "query": alias_name.name,
-                    "fields": [
-                        "full_name",
-                        "first_name",
-                        "middle_name",
-                        "family_name",
-                    ],
-                    "boost": 1.3,
+                "match": {
+                    "full_name": {
+                        "query": alias_name.name,
+                        "boost": 2.0
+                    }
                 }
-            } for alias_name in individual.alias_names.all()
+            }
+            for alias_name in individual.alias_names.all()
         ]
-
+        birth_dates_queries = [
+            {"match": {"birth_date": {"query": dob.date}}} for dob in individual.dates_of_birth.all()
+        ]
         queries = [
             {
-                "multi_match": {
-                    "query": individual.full_name,
-                    "fields": [
-                        "full_name",
-                        "first_name",
-                        "middle_name",
-                        "family_name",
-                    ],
-                    "boost": 2.0,
+                "match": {
+                    "full_name": {
+                        "query": individual.full_name,
+                        "boost": 2.0,
+                    }
                 }
             },
-            {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
         ]
         queries.extend(document_queries)
         queries.extend(alias_names_queries)
+        queries.extend(birth_dates_queries)
 
         query_dict = {
             "query": {
                 "bool": {
-                    "must": [
-                        {
-                            "dis_max": {
-                                "queries": queries,
-                                "tie_breaker": 1.0,
-                            }
-                        }
-                    ],
+                    "must": queries,
                 }
             },
         }
