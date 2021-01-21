@@ -25,6 +25,7 @@ MEDIA_LOCATION = "media"
 
 AZURE_ACCOUNT_NAME = os.getenv("STORAGE_AZURE_ACCOUNT_NAME", "")
 AZURE_ACCOUNT_KEY = os.getenv("STORAGE_AZURE_ACCOUNT_KEY", "")
+AZURE_URL_EXPIRATION_SECS = 10800
 
 AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
@@ -60,7 +61,8 @@ if os.getenv("POSTGRES_SSL", False):
     }
 
 sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"), integrations=[DjangoIntegration()],
+    dsn=os.getenv("SENTRY_DSN"),
+    integrations=[DjangoIntegration()],
 )
 
 AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")

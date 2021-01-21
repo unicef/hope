@@ -2522,7 +2522,7 @@ type ReportNode implements Node {
   reportType: Int!
   dateFrom: Date!
   dateTo: Date!
-  country: String
+  numberOfRecords: Int
   program: ProgramNode
   adminArea(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   fileUrl: String
