@@ -104,13 +104,3 @@ def count_population(results: list) -> Tuple[int, int]:
                     total_individuals_count -= 1
 
     return total_households_count, total_individuals_count
-
-
-# TODO: Remove later, used just for testing
-def do_import():
-    from django.conf import settings
-    from hct_mis_api.apps.core.kobo.api import KoboAPI
-    with open(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/kobo-template-valid.xlsx", "rb") as file:
-        from io import BytesIO
-        file_as_bytes = BytesIO(file.read())
-        resp = KoboAPI("afghanistan").create_survey_from_file(file_as_bytes)

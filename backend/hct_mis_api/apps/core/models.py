@@ -226,7 +226,13 @@ mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
 class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
-        return self.get_queryset().filter(status=self.model.SUCCESSFUL).order_by("-created_at").first()
+        return (
+            self.get_queryset()
+            .filter(status=self.model.SUCCESSFUL)
+            .exclude(template_id__exact="")
+            .order_by("-created_at")
+            .first()
+        )
 
 
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
@@ -253,6 +259,7 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     file = models.FileField()
     error_description = models.TextField(blank=True)
     status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+    template_id = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return f"{self.file_name} - {self.created_at}"
