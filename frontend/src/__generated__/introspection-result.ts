@@ -18,7 +18,10 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "ReportNode"
+            "name": "LogEntryNode"
+          },
+          {
+            "name": "UserNode"
           },
           {
             "name": "UserBusinessAreaNode"
@@ -39,15 +42,6 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "UserNode"
-          },
-          {
-            "name": "GrievanceTicketNode"
-          },
-          {
-            "name": "TicketNoteNode"
-          },
-          {
             "name": "TicketComplaintDetailsNode"
           },
           {
@@ -66,6 +60,9 @@
             "name": "SteficonRuleNode"
           },
           {
+            "name": "ReportNode"
+          },
+          {
             "name": "CashPlanPaymentVerificationNode"
           },
           {
@@ -81,13 +78,7 @@
             "name": "TicketSensitiveDetailsNode"
           },
           {
-            "name": "TicketHouseholdDataUpdateDetailsNode"
-          },
-          {
             "name": "TicketIndividualDataUpdateDetailsNode"
-          },
-          {
-            "name": "TicketAddIndividualDetailsNode"
           },
           {
             "name": "TicketDeleteIndividualDetailsNode"
@@ -114,10 +105,22 @@
             "name": "SanctionListIndividualDateOfBirthNode"
           },
           {
-            "name": "TicketNeedsAdjudicationDetailsNode"
+            "name": "DocumentNode"
           },
           {
-            "name": "DocumentNode"
+            "name": "TicketHouseholdDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketAddIndividualDetailsNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "TicketNoteNode"
+          },
+          {
+            "name": "TicketNeedsAdjudicationDetailsNode"
           },
           {
             "name": "BusinessAreaNode"
