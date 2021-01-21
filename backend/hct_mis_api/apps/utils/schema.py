@@ -39,3 +39,7 @@ class _DatasetsNode(graphene.ObjectType):
 class ChartDatasetNode(graphene.ObjectType):
     labels = graphene.List(graphene.String)
     datasets = graphene.List(_DatasetsNode)
+
+
+class SectionTotalNode(graphene.ObjectType):
+    total = graphene.Int()

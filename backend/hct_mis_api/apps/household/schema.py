@@ -53,7 +53,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 
 
 INDIVIDUALS_CHART_LABELS = [
@@ -413,10 +413,6 @@ class ChartAllHouseHoldsReached(ChartDatasetNode):
     male_age_group_12_17_count = graphene.Int()
     male_age_group_18_59_count = graphene.Int()
     male_age_group_60_count = graphene.Int()
-
-
-class SectionTotalNode(graphene.ObjectType):
-    total = graphene.Int()
 
 
 class Query(graphene.ObjectType):

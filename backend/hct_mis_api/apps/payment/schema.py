@@ -15,7 +15,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -218,6 +218,11 @@ class Query(graphene.ObjectType):
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
+    section_total_transferred = graphene.Field(
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
 
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
@@ -366,3 +371,6 @@ class Query(graphene.ObjectType):
             }
         ]
         return {"labels": status_choices_mapping.values(), "datasets": dataset}
+
+    def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
+        pass
