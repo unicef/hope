@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 import mptt
 from django.conf import settings
-from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -77,7 +79,7 @@ class BusinessArea(TimeStampedUUIDModel):
         ]
 
 
-class AdminAreaType(TimeStampedUUIDModel):
+class AdminAreaLevel(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
@@ -116,32 +118,71 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     related models:
         indicator.Reportable (ForeignKey): "reportable"
         core.AdminArea (ForeignKey): "self"
-        core.AdminAreaType: "type of admin area state/city"
+        core.AdminAreaLevel: "type of admin area state/city"
     """
 
-    class Meta:
-        unique_together = ("title", "admin_area_type")
-        ordering = ["title"]
-
-    objects = AdminAreaManager()
+    external_id = models.CharField(
+        help_text='An ID representing this instance in  datamart',
+        blank=True,
+        null=True,
+        max_length=32
+    )
 
     title = models.CharField(max_length=255)
+
+    admin_area_level = models.ForeignKey(
+        "AdminAreaLevel", verbose_name='Location Type', related_name='admin_areas', on_delete=models.CASCADE,
+    )
+
+    latitude = models.DecimalField(
+        null=True,
+        blank=True,
+        max_digits=8,
+        decimal_places=5,
+        validators=[
+            MinValueValidator(Decimal(-90)),
+            MaxValueValidator(Decimal(90))
+        ]
+    )
+    longitude = models.DecimalField(
+        null=True,
+        blank=True,
+        max_digits=8,
+        decimal_places=5,
+        validators=[
+            MinValueValidator(Decimal(-180)),
+            MaxValueValidator(Decimal(180))
+        ]
+    )
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name='Postal Code')
+
     parent = TreeForeignKey(
-        "self",
+        'self',
         verbose_name=_("Parent"),
         null=True,
         blank=True,
-        related_name="children",
+        related_name='children',
         db_index=True,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE
     )
 
-    admin_area_type = models.ForeignKey("AdminAreaType", on_delete=models.CASCADE, related_name="locations")
+    geom = models.MultiPolygonField(null=True, blank=True)
+    point = models.PointField(null=True, blank=True)
+    objects = AdminAreaManager()
 
-    geom = MultiPolygonField(null=True, blank=True)
-    point = PointField(null=True, blank=True)
+    class Meta:
+        unique_together = ('title', 'p_code')
+        ordering = ['title']
 
     def __str__(self):
+        if self.p_code:
+            return '{} ({} {})'.format(
+                self.title,
+                self.gateway.name,
+                "{}: {}".format(
+                    'CERD' if self.gateway.name == 'School' else 'PCode', self.p_code or ''
+                ))
+
         return self.title
 
     @property
@@ -150,14 +191,10 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def point_lat_long(self):
-        return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
-
-    @classmethod
-    def get_admin_areas_as_choices(cls, admin_level):
-        return [
-            {"label": {"English(EN)": admin_area.title}, "value": admin_area.title}
-            for admin_area in cls.objects.filter(admin_area_type__admin_level=admin_level)
-        ]
+        return "Lat: {}, Long: {}".format(
+            self.point.y,
+            self.point.x
+        )
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
