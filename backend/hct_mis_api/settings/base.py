@@ -377,7 +377,6 @@ ELASTICSEARCH_DSL_AUTOSYNC = False
 ELASTICSEARCH_HOST = os.getenv("ELASTICSEARCH_HOST", "elasticsearch:9200")
 
 RAPID_PRO_URL = os.getenv("RAPID_PRO_URL", "https://rapidpro.io")
-DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart.unicef.io")
 
 # DJANGO CONSTANCE settings
 CONSTANCE_REDIS_CONNECTION = f"redis://{REDIS_INSTANCE}/0"
