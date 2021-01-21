@@ -28,6 +28,7 @@ import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
 import { UniversalMoment } from '../UniversalMoment';
 import { REPORT_TYPES } from '../../utils/constants';
+import { FieldLabel } from '../FieldLabel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -208,6 +209,31 @@ export const NewReportForm = (): React.ReactElement => {
     }
     return fields;
   };
+  const renderTimeframeLabel = (reportType: string): string => {
+    let label = '';
+    switch (reportType) {
+      case REPORT_TYPES.INDIVIDUALS:
+      case REPORT_TYPES.HOUSEHOLD_DEMOGRAPHICS:
+        label = 'Last Registration Date';
+        break;
+      case REPORT_TYPES.CASH_PLAN_VERIFICATION:
+      case REPORT_TYPES.PAYMENT_VERIFICATION:
+        label = 'Completion Date';
+        break;
+      case REPORT_TYPES.PAYMENTS:
+      case REPORT_TYPES.INDIVIDUALS_AND_PAYMENT:
+        label = 'Delivery Date';
+        break;
+      case REPORT_TYPES.CASH_PLAN:
+      case REPORT_TYPES.PROGRAM:
+        label = 'End Date';
+        break;
+      default:
+        break;
+    }
+    return label;
+  };
+
   return (
     <>
       <Button
@@ -259,6 +285,10 @@ export const NewReportForm = (): React.ReactElement => {
                       />
                     </Grid>
                     <Grid item xs={12}>
+                      <FieldLabel>
+                        {renderTimeframeLabel(values.reportType)}
+                      </FieldLabel>
+
                       <Grid container spacing={3}>
                         <Grid item xs={6}>
                           <Field

@@ -3871,7 +3871,7 @@ export type ReportNode = Node & {
   reportType: Scalars['Int'],
   dateFrom: Scalars['Date'],
   dateTo: Scalars['Date'],
-  country?: Maybe<Scalars['String']>,
+  numberOfRecords?: Maybe<Scalars['Int']>,
   program?: Maybe<ProgramNode>,
   adminArea: AdminAreaNodeConnection,
   fileUrl?: Maybe<Scalars['String']>,
@@ -6448,7 +6448,7 @@ export type AllReportsQuery = (
       & Pick<ReportNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'ReportNode' }
-        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl'>
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl' | 'numberOfRecords'>
         & { createdBy: (
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'firstName' | 'lastName'>
@@ -7171,7 +7171,7 @@ export type ReportQuery = (
   { __typename?: 'Query' }
   & { report: Maybe<(
     { __typename?: 'ReportNode' }
-    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
     & { createdBy: (
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'firstName' | 'lastName'>
@@ -11301,6 +11301,7 @@ export const AllReportsDocument = gql`
           lastName
         }
         fileUrl
+        numberOfRecords
       }
     }
   }
@@ -12952,6 +12953,7 @@ export const ReportDocument = gql`
     dateFrom
     dateTo
     fileUrl
+    numberOfRecords
     createdBy {
       firstName
       lastName
@@ -16381,7 +16383,7 @@ export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversP
   reportType?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   dateFrom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
-  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
   adminArea?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
   fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,

@@ -49,6 +49,7 @@ export const ALL_REPORTS_QUERY = gql`
             lastName
           }
           fileUrl
+          numberOfRecords
         }
       }
     }
