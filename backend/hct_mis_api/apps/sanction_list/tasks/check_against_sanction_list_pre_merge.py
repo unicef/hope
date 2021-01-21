@@ -31,27 +31,36 @@ class CheckAgainstSanctionListPreMergeTask:
             }
             for doc in documents
         ]
+        birth_dates_queries = [
+            {"match": {"birth_date": {"query": dob.date, "boost": 0.6}}} for dob in individual.dates_of_birth.all()
+        ]
+
         alias_names_queries = [
             {
-                "match": {
-                    "full_name": {
-                        "query": alias_name.name,
-                        "boost": 2.0
-                    }
+                "multi_match": {
+                    "query": alias_name.name,
+                    "fields": [
+                        "full_name",
+                        "first_name",
+                        "middle_name",
+                        "family_name",
+                    ],
+                    "boost": 1.3,
                 }
-            }
-            for alias_name in individual.alias_names.all()
+            } for alias_name in individual.alias_names.all()
         ]
-        birth_dates_queries = [
-            {"match": {"birth_date": {"query": dob.date}}} for dob in individual.dates_of_birth.all()
-        ]
+
         queries = [
             {
-                "match": {
-                    "full_name": {
-                        "query": individual.full_name,
-                        "boost": 2.0,
-                    }
+                "multi_match": {
+                    "query": individual.full_name,
+                    "fields": [
+                        "full_name",
+                        "first_name",
+                        "middle_name",
+                        "family_name",
+                    ],
+                    "boost": 2.0,
                 }
             },
         ]
@@ -61,8 +70,8 @@ class CheckAgainstSanctionListPreMergeTask:
 
         query_dict = {
             "query": {
-                "bool": {
-                    "must": queries,
+                "dis_max": {
+                    "queries": queries,
                 }
             },
         }
