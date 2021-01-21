@@ -73,18 +73,21 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_survey_from_file(self, bytes_io_file):
+    def create_template_from_file(self, bytes_io_file, template_id=""):
         data = {
             "name": "Untitled",
-            "asset_type": "survey",
+            "asset_type": "template",
             "description": "",
             "sector": "",
             "country": "",
             "share-metadata": False,
         }
-        asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
-        asset_response_dict = asset_response.json()
-        asset_uid = asset_response_dict.get("uid")
+        if not template_id:
+            asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
+            asset_response_dict = asset_response.json()
+            asset_uid = asset_response_dict.get("uid")
+        else:
+            asset_uid = template_id
         file_import_data = {
             "assetUid": asset_uid,
             "destination": self._get_url(f"assets/{asset_uid}/", append_api=False, add_limit=False),
@@ -104,13 +107,8 @@ class KoboAPI:
             if import_status == "processing":
                 attempts -= 1
                 time.sleep(0.3)
-            elif import_status == "complete":
-                response = self._post_request(
-                    url=self._get_url(f"assets/{asset_uid}/deployment/", add_limit=False), data={"active": True}
-                )
-                return response.json()
             else:
-                return response_dict
+                return response_dict, asset_uid
 
         raise RetryError("Fetching import data took too long")
 
