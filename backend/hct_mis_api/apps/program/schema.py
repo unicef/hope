@@ -266,7 +266,11 @@ class Query(graphene.ObjectType):
 
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        programs = chart_get_filtered_qs(Program, business_area_slug, year)
+        programs = chart_get_filtered_qs(
+            Program,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug}
+        )
         datasets = [
             {
                 "label": "Programmes",
