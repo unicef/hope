@@ -86,11 +86,11 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def mutate(cls, root, info, program_data, version, **kwargs):
+    def mutate(cls, root, info, program_data, **kwargs):
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
-        check_concurrency_version_in_mutation(version, program)
+        check_concurrency_version_in_mutation(kwargs.get("version"), program)
         business_area = program.business_area
 
         # status update permissions if status is passed
