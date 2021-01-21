@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
 
 from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
@@ -59,6 +60,8 @@ class GenerateReportContentHelpers:
             individual.deduplication_golden_record_results.get("possible_duplicates", "")
             if individual.deduplication_golden_record_results
             else "",
+            self._format_date(individual.first_registration_date),
+            self._format_date(individual.last_registration_date),
         )
 
     @staticmethod
@@ -107,8 +110,8 @@ class GenerateReportContentHelpers:
             household.male_age_group_18_59_disabled_count,
             household.male_age_group_60_count,
             household.male_age_group_60_disabled_count,
-            household.first_registration_date,
-            household.last_registration_date,
+            self._format_date(household.first_registration_date),
+            self._format_date(household.last_registration_date),
             household.org_name_enumerator,
         ]
         for program in household.programs.all():
@@ -142,13 +145,13 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_cash_plan_verification_row(self, verification: CashPlanPaymentVerification) -> tuple:
         return (
-            verification.cash_plan.ca_id,
             verification.id,
+            verification.cash_plan.ca_id,
             verification.cash_plan.program.name,
-            verification.activation_date,
+            self._format_date(verification.activation_date),
             verification.status,
             verification.verification_method,
-            verification.completion_date,
+            self._format_date(verification.completion_date),
             verification.sample_size,
             verification.responded_count,
             verification.received_count,
@@ -187,18 +190,21 @@ class GenerateReportContentHelpers:
                 cash_or_voucher = "voucher"
 
         return (
-            payment.cash_plan.ca_id if payment.cash_plan else "",
             payment.ca_id,
+            payment.cash_plan.ca_id if payment.cash_plan else "",
             payment.status,
             payment.currency,
             payment.delivered_quantity,
-            payment.delivery_date,
+            # TODO this will be delivered_quantity in usd
+            "",
+            self._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
             payment.entitlement_quantity,
             payment.target_population.id,
             payment.target_population.name,
             cash_or_voucher,
+            payment.household.id,
         )
 
     @staticmethod
@@ -216,10 +222,10 @@ class GenerateReportContentHelpers:
     @classmethod
     def format_payment_verification_row(self, payment_verification: PaymentVerification) -> tuple:
         return (
+            payment_verification.cash_plan_payment_verification.id,
             payment_verification.payment_record.ca_id,
             payment_verification.cash_plan_payment_verification.cash_plan.ca_id,
-            payment_verification.cash_plan_payment_verification.id,
-            payment_verification.cash_plan_payment_verification.completion_date,
+            self._format_date(payment_verification.cash_plan_payment_verification.completion_date),
             payment_verification.received_amount,
             payment_verification.status,
             payment_verification.status_date,
@@ -233,7 +239,7 @@ class GenerateReportContentHelpers:
             "end_date__lte": report.date_to,
         }
         if report.program:
-            filter_vars["cash_plan__program"] = report.program
+            filter_vars["program"] = report.program
         return CashPlan.objects.filter(**filter_vars)
 
     @classmethod
@@ -241,14 +247,14 @@ class GenerateReportContentHelpers:
         return (
             cash_plan.ca_id,
             cash_plan.name,
-            cash_plan.start_date,
-            cash_plan.end_date,
+            self._format_date(cash_plan.start_date),
+            self._format_date(cash_plan.end_date),
             cash_plan.program.name,
             cash_plan.funds_commitment,
             cash_plan.assistance_measurement,
             cash_plan.assistance_through,
             cash_plan.delivery_type,
-            cash_plan.dispersion_date,
+            self._format_date(cash_plan.dispersion_date),
             cash_plan.down_payment,
             cash_plan.total_delivered_quantity,
             cash_plan.total_undelivered_quantity,
@@ -257,7 +263,7 @@ class GenerateReportContentHelpers:
             cash_plan.total_persons_covered,
             cash_plan.total_persons_covered_revised,
             cash_plan.status,
-            cash_plan.status_date,
+            self._format_date(cash_plan.status_date),
             cash_plan.vision_id,
             cash_plan.validation_alerts_count,
             cash_plan.verification_status,
@@ -308,11 +314,10 @@ class GenerateReportContentHelpers:
         return ", ".join([str(value) for value in values_list])
 
     @staticmethod
-    def _sum_values(*values):
-        total = 0
-        for value in values:
-            total = total + value if value else total
-        return total
+    def _format_date(date) -> str:
+        if not date:
+            return ""
+        return date.strftime("%Y-%m-%d")
 
 
 class GenerateReportService:
@@ -342,6 +347,8 @@ class GenerateReportService:
             "dedupe in Pop. status",  # DUPLICATE
             "dedupe in Pop.duplicates",
             "dedupe in Pop. possible duplicates",
+            "first registration date",  # 2000-06-24
+            "last registration date",  # 2000-06-24
         ),
         Report.HOUSEHOLD_DEMOGRAPHICS: (
             "household id",
@@ -380,8 +387,8 @@ class GenerateReportService:
             "organization name enumerator",
         ),
         Report.CASH_PLAN_VERIFICATION: (
+            "cash plan verification ID",
             "cash plan ID",  # ANT-21-CSH-00001
-            "id",
             "programme",  # Winterization 2020
             "activation date",
             "status",
@@ -398,24 +405,26 @@ class GenerateReportService:
             "age filter",  # {'max': 100, 'min': 0}
         ),
         Report.PAYMENTS: (
-            "cash plan ID",  # ANT-21-CSH-00001
             "payment record ID",  # ANT-21-CSH-00001-0000002
+            "cash plan ID",  # ANT-21-CSH-00001
             "status",  # Transaction successful
             "currency",
-            "delivered quantity",  # 999,00
+            "delivered quantity (local)",  # 999,00
+            "delivered quantity (USD)",  # 235,99
             "delivery date",  # 2020-11-02 07:50:18+00
             "delivery type",  # deposit to card
             "distribution modality",  # 10K AFN per hh
             "entitlement quantity",  # 1000,00
             "TP ID",
             "TP name",
-            "cash or voucher",  # if voucher or e-voucher -> voucher, else -> cash
+            "cash or voucher",  # if voucher or e-voucher -> voucher, else -> cash,
+            "household id",  # 145aacc4-160a-493e-9d36-4f7f981284c7
         ),
         Report.PAYMENT_VERIFICATION: (
+            "cash plan verification ID",
             "payment record ID",  # ANT-21-CSH-00001-0000002
             "cash plan ID",  # ANT-21-CSH-00001
-            "cash plan verification id",
-            "completion date",
+            "verification completion date",
             "received amount",  # 30,00
             "status",  # RECEIVED_WITH_ISSUES
             "status date",
@@ -457,7 +466,7 @@ class GenerateReportService:
             "budget in USD",  # 10000.00
             "frequency of payments",  # REGULAR
             "administrative areas of implementation",  # Juba, Morobo, Xyz
-            "idividual population goal",  # 50
+            "individual population goal",  # 50
             "total number of households",  # 4356
         ),
         # TODO: still needs work after requirements are more established
@@ -521,7 +530,7 @@ class GenerateReportService:
             GenerateReportContentHelpers.format_payments_for_individuals_row,
         ),
     }
-    FILTERS_SHEET = "Filters"
+    FILTERS_SHEET = "Meta"
     MAX_COL_WIDTH = 50
 
     def __init__(self, report: Report):
@@ -566,6 +575,7 @@ class GenerateReportService:
     def _add_rows(self) -> int:
         get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
         all_instances = get_row_methods[0](self.report)
+        self.report.number_of_records = all_instances.count()
         number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
         col_instances_len = 0
         for instance in all_instances:
@@ -596,11 +606,13 @@ class GenerateReportService:
     def generate_report(self):
         try:
             self.generate_workbook()
-            with NamedTemporaryFile(dir=settings.MEDIA_ROOT, suffix=".xlsx") as tmp:
+            with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
                 self.report.file.save(
-                    f"Report:_{self._report_type_to_str()}_{str(self.report.created_at)}.xlsx", File(tmp), save=False
+                    f"{self._report_type_to_str()}-{str(self.report.created_at.strftime('%y-%m-%d'))}.xlsx",
+                    File(tmp),
+                    save=False,
                 )
                 self.report.status = Report.COMPLETED
         except Exception as e:
@@ -612,20 +624,18 @@ class GenerateReportService:
             self._send_email()
 
     def _send_email(self):
-        # TODO update context when email content is known
-        text_body = render_to_string("report.txt", {})
-        html_body = render_to_string("report.html", {})
+        context = {
+            "report_type": self._report_type_to_str(),
+            "created_at": str(self.report.created_at.strftime("%y-%m-%d")),
+            "report_url": f'https://{settings.FRONTEND_HOST}/{self.business_area.slug}/reporting/{encode_id_base64(self.report.id, "Report")}',
+        }
+        text_body = render_to_string("report.txt", context=context)
+        html_body = render_to_string("report.html", context=context)
         msg = EmailMultiAlternatives(
-            subject="Your report",
+            subject="HOPE report generated",
             from_email=settings.EMAIL_HOST_USER,
             to=[self.report.created_by.email],
-            # cc=[settings.SANCTION_LIST_CC_MAIL],
             body=text_body,
-        )
-        msg.attach(
-            self.report.file.name,
-            self.report.file.read(),
-            "application/vnd.ms-excel",
         )
         msg.attach_alternative(html_body, "text/html")
         msg.send()
