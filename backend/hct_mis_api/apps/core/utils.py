@@ -542,15 +542,27 @@ def chart_map_choices(choices):
     return dict(choices)
 
 
-def chart_get_filtered_qs(obj, business_area_slug, year, additional_filters=None):
+def chart_get_filtered_qs(obj, year, business_area_slug_filter=None, additional_filters=None):
     if additional_filters is None:
         additional_filters = {}
+    if business_area_slug_filter is None:
+        business_area_slug_filter = {}
     return obj.objects.filter(
-        business_area__slug=business_area_slug,
         created_at__year=year,
+        **business_area_slug_filter,
         **additional_filters
     )
 
 
-# def chart_get_data(qs, mapped_choices, main_filter, extra_filters, count):
-#     return [qs.filter()]
+def parse_list_values_to_int(list_to_parse):
+    return list(map(lambda x: int(x or 0), list_to_parse))
+
+
+def sum_lists(qs_values, list_len):
+    data = [0] * list_len
+    for values in qs_values:
+        parsed_values = parse_list_values_to_int(values)
+        for i, value in enumerate(parsed_values):
+            data[i] += value
+
+    return data
