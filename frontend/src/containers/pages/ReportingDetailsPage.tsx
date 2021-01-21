@@ -167,7 +167,7 @@ export const ReportingDetailsPage = (): React.ReactElement => {
             color='primary'
             variant='contained'
             startIcon={<GetApp />}
-            onClick={() => window.open(report.fileUrl)}
+            href={report.fileUrl}
           >
             DOWNLOAD REPORT
           </Button>

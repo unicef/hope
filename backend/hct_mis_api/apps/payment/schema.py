@@ -235,7 +235,7 @@ class Query(graphene.ObjectType):
             confidence_interval = random_sampling_arguments.get("confidence_interval")
             margin_of_error = random_sampling_arguments.get("margin_of_error")
             sex = random_sampling_arguments.get("sex")
-            age = random_sampling_arguments.get("random_sampling_arguments")
+            age = random_sampling_arguments.get("age")
         if excluded_admin_areas is not None:
             payment_records = payment_records.filter(~(Q(household__admin_area__title__in=excluded_admin_areas)))
         if sex is not None:
@@ -244,7 +244,7 @@ class Query(graphene.ObjectType):
             payment_records = filter_age(
                 "household__head_of_household__birth_date",
                 payment_records,
-                age.get(min),
+                age.get("min"),
                 age.get("max"),
             )
         payment_records_sample_count = payment_records.count()
