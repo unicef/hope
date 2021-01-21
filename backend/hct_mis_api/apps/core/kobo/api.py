@@ -65,26 +65,34 @@ class KoboAPI:
         response.raise_for_status()
         return response.json()
 
-    def _post_request(self, url, data, files=None) -> requests.Response:
+    def _post_request(self, url, data=None, files=None) -> requests.Response:
         response = self._client.post(url=url, data=data, files=files)
-        response.raise_for_status()
+        return response
+
+    def _patch_request(self, url, data=None, files=None) -> requests.Response:
+        response = self._client.patch(url=url, data=data, files=files)
         return response
 
     def create_survey_from_file(self, bytes_io_file):
         data = {
             "name": "Untitled",
             "asset_type": "survey",
+            "description": "",
+            "sector": "",
+            "country": "",
+            "share-metadata": False,
         }
         asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
         asset_response_dict = asset_response.json()
         asset_uid = asset_response_dict.get("uid")
         file_import_data = {
             "assetUid": asset_uid,
+            "destination": self._get_url(f"assets/{asset_uid}/", append_api=False, add_limit=False),
         }
         file_import_response = self._post_request(
             url=self._get_url("imports/", append_api=False, add_limit=False),
             data=file_import_data,
-            files={"file": bytes_io_file}
+            files={"file": bytes_io_file},
         )
         file_import_response_dict = file_import_response.json()
         url = file_import_response_dict.get("url")
@@ -96,6 +104,11 @@ class KoboAPI:
             if import_status == "processing":
                 attempts -= 1
                 time.sleep(0.3)
+            elif import_status == "complete":
+                response = self._post_request(
+                    url=self._get_url(f"assets/{asset_uid}/deployment/", add_limit=False), data={"active": True}
+                )
+                return response.json()
             else:
                 return response_dict
 
