@@ -10,6 +10,7 @@ from django.core.files import File
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
@@ -100,6 +101,9 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
 
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
+        )
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportXLSX",
             context={
@@ -129,6 +133,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, registration_data_import_datahub_id, **kwargs):
+        old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
         cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
@@ -137,7 +142,9 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
         rdi_obj.status = RegistrationDataImport.DEDUPLICATION
         rdi_obj.save()
-
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_rdi_obj, rdi_obj
+        )
         AirflowApi.start_dag(
             dag_id="RegistrationDataImportDeduplication",
             context={"registration_data_import_id": str(registration_data_import_datahub_id)},
@@ -163,7 +170,9 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
         ) = create_registration_data_import_objects(registration_data_import_data, info.context.user, "KOBO")
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area)
-
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
+        )
         AirflowApi.start_dag(
             dag_id="CreateRegistrationDataImportKobo",
             context={
@@ -193,6 +202,10 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     @is_authenticated
     def mutate(cls, root, info, id, **kwargs):
         decode_id = decode_id_string(id)
+        old_obj_hct = RegistrationDataImport.objects.get(
+            id=decode_id,
+        )
+
         obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
         )
@@ -207,6 +220,10 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         )
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
+
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
+        )
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
@@ -309,7 +326,10 @@ class DeleteRegistrationDataImport(graphene.Mutation):
     @is_authenticated
     def mutate(cls, root, info, **kwargs):
         decoded_id = decode_id_string(kwargs.get("registration_data_import_id"))
-        RegistrationDataImport.objects.get(id=decoded_id).delete()
+        rdi_obj = RegistrationDataImport.objects.get(id=decoded_id)
+        rdi_obj.delete()
+
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, rdi_obj, None)
         return cls(ok=True)
 
 

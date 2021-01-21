@@ -2,6 +2,7 @@ import graphene
 from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
@@ -45,7 +46,6 @@ class UpdateProgramInput(graphene.InputObjectType):
     cash_plus = graphene.Boolean()
     population_goal = graphene.Int()
     administrative_areas_of_implementation = graphene.String()
-    business_area_slug = graphene.String()
     individual_data_needed = graphene.Boolean()
 
 
@@ -72,7 +72,7 @@ class CreateProgram(CommonValidator, PermissionMutation):
             status=Program.DRAFT,
             business_area=business_area,
         )
-
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
         return CreateProgram(program)
 
 
@@ -91,6 +91,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
 
         program = Program.objects.select_for_update().get(id=program_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), program)
+        old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
 
         # status update permissions if status is passed
@@ -104,14 +105,6 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
         # permission if updating any other fields
         if [k for k, v in program_data.items() if k != "status"]:
             cls.has_permission(info, Permissions.PROGRAMME_UPDATE, business_area)
-
-        # TODO: check if you can really update business area when editing programme (I don't see it in the form)
-        # If you can, should we check for permission in both areas?
-        business_area_slug = program_data.pop("business_area_slug", None)
-
-        if business_area_slug:
-            business_area = BusinessArea.objects.get(slug=business_area_slug)
-            program.business_area = business_area
         cls.validate(
             program_data=program_data,
             program=program,
@@ -125,6 +118,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
 
         program.save()
 
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
         return UpdateProgram(program)
 
 
@@ -139,13 +133,14 @@ class DeleteProgram(ProgramDeletionValidator, PermissionMutation):
     def mutate(cls, root, info, **kwargs):
         decoded_id = decode_id_string(kwargs.get("program_id"))
         program = Program.objects.get(id=decoded_id)
+        old_program = Program.objects.get(id=decoded_id)
 
         cls.has_permission(info, Permissions.PROGRAMME_REMOVE, program.business_area)
 
         cls.validate(program=program)
 
         program.delete()
-
+        log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
         return cls(ok=True)
 
 
