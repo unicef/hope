@@ -561,11 +561,13 @@ input FullListArguments {
 scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
-  cashPlanId: ID!
+  cashPlanId: ID
   sampling: String!
+  verificationChannel: String
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
 }
 
 type GetCashplanVerificationSampleSizeObject {

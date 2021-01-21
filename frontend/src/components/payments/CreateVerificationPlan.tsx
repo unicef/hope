@@ -58,8 +58,8 @@ const DialogContainer = styled.div`
 const initialValues = {
   confidenceInterval: 95,
   marginOfError: 5,
-  filterAgeMin: 0,
-  filterAgeMax: 0,
+  filterAgeMin: null,
+  filterAgeMax: null,
   filterSex: '',
   excludedAdminAreasFull: [],
   excludedAdminAreasRandom: [],
@@ -69,6 +69,44 @@ const initialValues = {
   ageCheckbox: false,
   sexCheckbox: false,
 };
+
+function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
+  const variables = {
+    input: {
+      cashPlanId,
+      sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
+      fullListArguments:
+        selectedTab === 0
+          ? {
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
+          : null,
+      verificationChannel: values.verificationChannel,
+      rapidProArguments:
+        values.verificationChannel === 'RAPIDPRO'
+          ? {
+              flowId: values.rapidProFlow,
+            }
+          : null,
+      randomSamplingArguments:
+        selectedTab === 1
+          ? {
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
+          : null,
+      businessAreaSlug: businessArea,
+    },
+  };
+  return variables;
+}
 
 export interface Props {
   cashPlanId: string;
@@ -98,32 +136,12 @@ export function CreateVerificationPlan({
   });
 
   const { data: sampleSizesData, refetch } = useSampleSizeQuery({
-    variables: {
-      input: {
-        cashPlanId,
-        sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-        businessAreaSlug: businessArea,
-        fullListArguments:
-          selectedTab === 0
-            ? {
-                excludedAdminAreas: formValues.excludedAdminAreasFull,
-              }
-            : null,
-        randomSamplingArguments:
-          selectedTab === 1
-            ? {
-                confidenceInterval: formValues.confidenceInterval * 0.01,
-                marginOfError: formValues.marginOfError * 0.01,
-                excludedAdminAreas: formValues.excludedAdminAreasRandom,
-                age: {
-                  min: formValues.filterAgeMin || 0,
-                  max: formValues.filterAgeMax || 0,
-                },
-                sex: formValues.filterSex,
-              }
-            : null,
-      },
-    },
+    variables: prepareVariables(
+      cashPlanId,
+      selectedTab,
+      formValues,
+      businessArea,
+    ),
   });
 
   useEffect(() => {
@@ -134,40 +152,12 @@ export function CreateVerificationPlan({
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
-      variables: {
-        input: {
-          cashPlanId,
-          sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-          fullListArguments:
-            selectedTab === 0
-              ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull || [],
-                }
-              : null,
-          verificationChannel: values.verificationChannel,
-          rapidProArguments:
-            values.verificationChannel === 'RAPIDPRO'
-              ? {
-                  flowId: values.rapidProFlow,
-                }
-              : null,
-          randomSamplingArguments:
-            selectedTab === 1
-              ? {
-                  confidenceInterval: values.confidenceInterval * 0.01,
-                  marginOfError: values.marginOfError * 0.01,
-                  excludedAdminAreas: values.adminCheckbox
-                    ? values.excludedAdminAreasRandom
-                    : [],
-                  age: values.ageCheckbox
-                    ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                    : null,
-                  sex: values.sexCheckbox ? values.filterSex : null,
-                }
-              : null,
-          businessAreaSlug: businessArea,
-        },
-      },
+      variables: prepareVariables(
+        cashPlanId,
+        selectedTab,
+        values,
+        businessArea,
+      ),
       refetchQueries: () => [
         { query: CashPlan, variables: { id: cashPlanId } },
       ],
