@@ -117,7 +117,7 @@ class TestSanctionListPreMerge(BaseElasticSearchTestCase):
 
         expected = [
             {"full_name": "Abdul Afghanistan", "sanction_list_possible_match": True},
-            {"full_name": "Choo Ryoong", "sanction_list_possible_match": True},
+            {"full_name": "Choo Ryoong", "sanction_list_possible_match": False},
             {"full_name": "Ri Won Ho", "sanction_list_possible_match": True},
             {"full_name": "Tescik Testowski", "sanction_list_possible_match": False},
             {"full_name": "Tessta Testowski", "sanction_list_possible_match": False},
