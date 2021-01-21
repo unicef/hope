@@ -14,7 +14,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
 )
-from hct_mis_api.apps.core.validators import validate_kobo_template
+from hct_mis_api.apps.core.validators import KoboTemplateValidator
 
 
 class XLSImportForm(forms.Form):
@@ -76,7 +76,7 @@ class XLSXKoboTemplateAdmin(admin.ModelAdmin):
                     "survey_sheet": wb.sheet_by_name("survey"),
                     "choices_sheet": wb.sheet_by_name("choices"),
                 }
-                validation_errors = validate_kobo_template(**sheets)
+                validation_errors = KoboTemplateValidator.validate_kobo_template(**sheets)
                 if validation_errors:
                     errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
                     form.add_error(field=None, error=errors)
