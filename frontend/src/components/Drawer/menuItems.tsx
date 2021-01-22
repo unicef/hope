@@ -108,6 +108,7 @@ export const menuItems = [
     href: '/reporting',
     selectedRegexp: /^\/test.*$/,
     icon: <TrendingUpRounded />,
+    permissions: [PERMISSIONS.REPORTING_EXPORT],
   },
   {
     name: 'User Management',

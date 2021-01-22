@@ -9,6 +9,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { useReportChoiceDataQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export const ReportingPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
@@ -30,15 +31,13 @@ export const ReportingPage = (): React.ReactElement => {
   if (choicesLoading) return <LoadingComponent />;
 
   if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions))
+    return <PermissionDenied />;
 
   return (
     <>
       <PageHeader title='Reporting'>
-        <>
-          {hasPermissions(PERMISSIONS.REPORTING_EXPORT, permissions) && (
-            <NewReportForm />
-          )}
-        </>
+        <NewReportForm />
       </PageHeader>
       <ReportingFilters
         filter={filter}

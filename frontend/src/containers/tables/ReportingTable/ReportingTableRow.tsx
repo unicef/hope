@@ -1,13 +1,14 @@
 import styled from 'styled-components';
-import { TableCell } from '@material-ui/core';
+import { TableCell, TableRow } from '@material-ui/core';
+import { GetApp } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import React from 'react';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
-import { reportStatusToColor } from '../../../utils/utils';
-import { GetApp } from '@material-ui/icons';
+import { formatNumber, reportStatusToColor } from '../../../utils/utils';
+import { ReportNode } from '../../../__generated__/graphql';
+import { Pointer } from '../../../components/Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -18,11 +19,22 @@ const UnderlinedTableCell = styled(TableCell)`
 `;
 const DownloadTableCell = styled(TableCell)`
   span {
+    color: #9f9f9f;
+    font-weight: 500;
     display: flex;
     justify-content: center;
   }
 `;
-export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
+interface ReportingTableRowProps {
+  report: ReportNode;
+  statusChoices: { [id: number]: string };
+  typeChoices: { [id: number]: string };
+}
+export const ReportingTableRow = ({
+  report,
+  typeChoices,
+  statusChoices,
+}: ReportingTableRowProps): React.ReactElement => {
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
@@ -31,14 +43,9 @@ export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
   };
 
   return (
-    <ClickableTableRow
-      hover
-      onClick={handleClick}
-      role='checkbox'
-      key={report.id}
-    >
-      <UnderlinedTableCell align='left'>
-        {typeChoices[report.reportType]}
+    <TableRow hover role='checkbox' key={report.id}>
+      <UnderlinedTableCell onClick={handleClick} align='left'>
+        <Pointer>{typeChoices[report.reportType]}</Pointer>
       </UnderlinedTableCell>
       <TableCell align='left'>
         <UniversalMoment>{report.dateFrom}</UniversalMoment> -{' '}
@@ -52,6 +59,9 @@ export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
           />
         </StatusContainer>
       </TableCell>
+      <TableCell align='right'>
+        {formatNumber(report.numberOfRecords)}
+      </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{report.createdAt}</UniversalMoment>
       </TableCell>
@@ -63,12 +73,12 @@ export const ReportingTableRow = ({ report, typeChoices, statusChoices }) => {
         onClick={report.fileUrl ? () => window.open(report.fileUrl) : undefined}
       >
         {report.fileUrl && (
-          <span>
+          <Pointer>
             <GetApp />
             DOWNLOAD
-          </span>
+          </Pointer>
         )}
       </DownloadTableCell>
-    </ClickableTableRow>
+    </TableRow>
   );
 };

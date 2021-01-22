@@ -5,7 +5,7 @@ import { IconButton, makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import { LogEntryObject } from '../../__generated__/graphql';
+import { LogEntryNode } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
 import { headCells } from './headCels';
 import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
@@ -30,11 +30,11 @@ const useStyles = makeStyles((theme: MiśTheme) => ({
 }));
 
 interface LogRowProps {
-  logEntry: LogEntryObject;
+  logEntry: LogEntryNode;
 }
 
 export function LogRow({ logEntry }: LogRowProps): ReactElement {
-  const changes = JSON.parse(logEntry.changesDisplayDict);
+  const {changes} = logEntry;
   const [expanded, setExpanded] = useState(false);
   const classes = useStyles({});
   const keys = Object.keys(changes);
@@ -46,13 +46,13 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight}>
-          {logEntry.actor
-            ? `${logEntry.actor.firstName} ${logEntry.actor.lastName}`
+          {logEntry.user
+            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
         <Cell weight={headCells[2].weight}>{keys[0]}</Cell>
-        <Cell weight={headCells[3].weight}>{changes[keys[0]][0]}</Cell>
-        <Cell weight={headCells[4].weight}>{changes[keys[0]][1]}</Cell>
+        <Cell weight={headCells[3].weight}>{changes[keys[0]].from}</Cell>
+        <Cell weight={headCells[4].weight}>{changes[keys[0]].to}</Cell>
         <ButtonPlaceHolder />
       </Row>
     );
@@ -64,8 +64,8 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
           {moment(logEntry.timestamp).format('DD MMM YYYY HH:mm')}
         </Cell>
         <Cell weight={headCells[1].weight}>
-          {logEntry.actor
-            ? `${logEntry.actor.firstName} ${logEntry.actor.lastName}`
+          {logEntry.user
+            ? `${logEntry.user.firstName} ${logEntry.user.lastName}`
             : null}
         </Cell>
         <Cell weight={headCells[2].weight}>Multiple</Cell>
@@ -90,8 +90,8 @@ export function LogRow({ logEntry }: LogRowProps): ReactElement {
               <Cell weight={headCells[0].weight} />
               <Cell weight={headCells[1].weight} />
               <Cell weight={headCells[2].weight}>{key}</Cell>
-              <Cell weight={headCells[3].weight}>{changes[key][0]}</Cell>
-              <Cell weight={headCells[4].weight}>{changes[key][1]}</Cell>
+              <Cell weight={headCells[3].weight}>{changes[key].from}</Cell>
+              <Cell weight={headCells[4].weight}>{changes[key].to}</Cell>
               <ButtonPlaceHolder />
             </Row>
           );

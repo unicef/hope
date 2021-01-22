@@ -36,6 +36,7 @@ import { UsersList } from './pages/UsersList';
 import { ReportingPage } from './pages/ReportingPage';
 import { ReportingDetailsPage } from './pages/ReportingDetailsPage';
 import { ActivityLogPage } from './pages/MainActivityLogPage';
+import {CashplanVerificationRedirectPage} from "./pages/CashplanVerificationRedirectPage";
 
 const Root = styled.div`
   display: flex;
@@ -106,6 +107,7 @@ export function HomeRouter(): React.ReactElement {
               <CashPlanDetailsPage />
             </Sentry.ErrorBoundary>
           </Route>
+
           <Route exact path='/:businessArea/target-population'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
@@ -142,6 +144,7 @@ export function HomeRouter(): React.ReactElement {
               <PaymentVerificationPage />
             </Sentry.ErrorBoundary>
           </Route>
+
           <Route path='/:businessArea/verification-records/:id'>
             <Sentry.ErrorBoundary
                 beforeCapture={(scope) => {
@@ -158,6 +161,15 @@ export function HomeRouter(): React.ReactElement {
               }}
             >
               <PaymentVerificationDetailsPage />
+            </Sentry.ErrorBoundary>
+          </Route>
+          <Route path='/:businessArea/csh-payment-verification/:id'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag("location", "/csh-payment-verification/:id")
+              }}
+            >
+              <CashplanVerificationRedirectPage />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/grievance-and-feedback/new-ticket'>

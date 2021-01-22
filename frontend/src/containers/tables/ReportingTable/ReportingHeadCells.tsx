@@ -1,7 +1,7 @@
-import React from 'react';
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
+import { ReportNode } from '../../../__generated__/graphql';
 
-export const headCells = [
+export const headCells: HeadCell<ReportNode>[] = [
   {
     disablePadding: false,
     label: 'Report Type',
@@ -19,6 +19,12 @@ export const headCells = [
     label: 'Status',
     id: 'status',
     numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: '# of records',
+    id: 'numberOfRecords',
+    numeric: true,
   },
   {
     disablePadding: false,
