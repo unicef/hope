@@ -9,10 +9,10 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
-class PaymentRecord(TimeStampedUUIDModel):
+class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_SUCCESS = "SUCCESS"
     STATUS_PENDING = "PENDING"
     STATUS_ERROR = "ERROR"
@@ -113,7 +113,7 @@ class ServiceProvider(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255)
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -196,7 +196,7 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     instance.cash_plan.save()
 
 
-class PaymentVerification(TimeStampedUUIDModel):
+class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "cash_plan_payment_verification",
