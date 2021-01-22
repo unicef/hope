@@ -11,8 +11,8 @@ from hct_mis_api.apps.program.models import Program
 
 class TestUpdateProgram(APITestCase):
     UPDATE_PROGRAM_MUTATION = """
-    mutation UpdateProgram($programData: UpdateProgramInput) {
-      updateProgram(programData: $programData) {
+    mutation UpdateProgram($programData: UpdateProgramInput, $version: BigInt) {
+      updateProgram(programData: $programData, version: $version) {
         program {
           name
           status
@@ -37,7 +37,8 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
-                }
+                },
+                "version": self.program.version
             },
         )
 
@@ -66,12 +67,14 @@ class TestUpdateProgram(APITestCase):
                     "id": self.id_to_base64(self.program.id, "ProgramNode"),
                     "name": "updated name",
                     "status": Program.ACTIVE,
-                }
+                },
+                "version": self.program.version
             },
         )
 
         updated_program = Program.objects.get(id=self.program.id)
         if should_be_updated:
+            print(updated_program.status)
             assert updated_program.status == Program.ACTIVE
             assert updated_program.name == "updated name"
         else:

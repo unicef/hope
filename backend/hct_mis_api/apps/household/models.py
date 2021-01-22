@@ -17,7 +17,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 BLANK = ""
 IDP = "IDP"
@@ -209,7 +209,7 @@ REGISTRATION_METHOD_CHOICES = (
 )
 
 
-class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -440,7 +440,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
