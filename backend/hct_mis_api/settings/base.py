@@ -461,4 +461,4 @@ AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
 TEST_OUTPUT_DIR = "./test-results"
 TEST_OUTPUT_FILE_NAME = "result.xml"
 
-KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN")
+KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
