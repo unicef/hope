@@ -16,7 +16,7 @@ from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
-
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
@@ -53,6 +53,31 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
 
     Has N:N association with households.
     """
+
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "name",
+            "ca_id",
+            "ca_hash_id",
+            "created_by",
+            "approved_at",
+            "approved_by",
+            "finalized_at",
+            "finalized_by",
+            "status",
+            "candidate_list_total_households",
+            "candidate_list_total_individuals",
+            "final_list_total_households",
+            "final_list_total_individuals",
+            "selection_computation_metadata",
+            "program",
+            "targeting_criteria_string",
+            "sent_to_datahub",
+            "steficon_rule",
+            "vulnerability_score_min",
+            "vulnerability_score_max",
+        ]
+    )
 
     STATUS_DRAFT = "DRAFT"
     STATUS_APPROVED = "APPROVED"
@@ -276,7 +301,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
         if not self.program:
             return None
         tp = (
-            TargetPopulation.objects.filter(program=self.program, steficon_rule__isnull=False)
+            TargetPopulation.objects.filter(
+                program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED
+            )
             .order_by("-created_at")
             .first()
         )
@@ -284,8 +311,12 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
             return None
         return tp.steficon_rule
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         unique_together = ("name", "business_area")
+        verbose_name = "Target Population"
 
 
 class HouseholdSelection(TimeStampedUUIDModel):

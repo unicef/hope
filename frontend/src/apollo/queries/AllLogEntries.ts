@@ -2,11 +2,14 @@ import { gql } from 'apollo-boost';
 
 export const ALL_LOG_ENTRIES_QUERY = gql`
   query AllLogEntries(
-    $objectId: String
+    $businessArea: String!
+    $objectId: UUID
     $after: String
     $before: String
     $first: Int
     $last: Int
+    $search: String
+    $module: String
   ) {
     allLogEntries(
       after: $after
@@ -14,6 +17,9 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
       first: $first
       last: $last
       objectId: $objectId
+      businessArea: $businessArea
+      search: $search
+      module: $module
     ) {
       pageInfo {
         hasNextPage
@@ -27,21 +33,27 @@ export const ALL_LOG_ENTRIES_QUERY = gql`
         node {
           id
           action
-          changesDisplayDict
+          changes
           objectRepr
+          objectId
           timestamp
           contentType{
             id
             appLabel
             model
+            name
           }
-          actor {
+          user {
             id
             firstName
             lastName
           }
         }
       }
+    }
+    logEntryActionChoices{
+      name
+      value
     }
   }
 `;

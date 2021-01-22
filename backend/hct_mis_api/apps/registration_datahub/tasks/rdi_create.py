@@ -14,12 +14,25 @@ from django.utils import timezone
 from django_countries.fields import Country
 from openpyxl_image_loader import SheetImageLoader
 
-from hct_mis_api.apps.core.core_fields_attributes import COLLECTORS_FIELDS, TYPE_DATE, TYPE_INTEGER, TYPE_SELECT_MANY, TYPE_SELECT_ONE
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.core_fields_attributes import (
+    COLLECTORS_FIELDS,
+    TYPE_DATE,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+)
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
-from hct_mis_api.apps.household.models import HEAD, IDENTIFICATION_TYPE_DICT, NON_BENEFICIARY, ROLE_ALTERNATE, ROLE_PRIMARY
+from hct_mis_api.apps.household.models import (
+    HEAD,
+    IDENTIFICATION_TYPE_DICT,
+    NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+)
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
@@ -495,13 +508,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
-
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
-
         import_data = ImportData.objects.get(id=import_data_id)
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)
@@ -516,11 +527,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
-
-        RegistrationDataImport.objects.filter(id=registration_data_import.hct_id).update(
-            status=RegistrationDataImport.IN_REVIEW
-        )
-
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis.status = RegistrationDataImport.IN_REVIEW
+        rdi_mis.save()
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
 
@@ -787,8 +798,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
-        RegistrationDataImport.objects.filter(id=registration_data_import.hct_id).update(
-            status=RegistrationDataImport.IN_REVIEW
-        )
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis.status = RegistrationDataImport.IN_REVIEW
+        rdi_mis.save()
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
 
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)

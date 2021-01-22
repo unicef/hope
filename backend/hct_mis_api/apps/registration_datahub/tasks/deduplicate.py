@@ -4,6 +4,7 @@ from constance import config
 from django.db.models import Q
 from django_countries.fields import Country
 
+from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import to_dict
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
@@ -469,6 +470,32 @@ class DeduplicateTask:
         ) = cls._get_duplicated_individuals(registration_data_import, individuals)
         cls._mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results)
 
+    @classmethod
+    def deduplicate_individuals_from_other_source(cls, individuals):
+        cls.business_area = individuals[0].business_area.slug
+        to_bulk_update_results = []
+        for individual in individuals:
+            (
+                duplicates,
+                possible_duplicates,
+                original_individuals_ids_duplicates,
+                original_individuals_ids_possible_duplicates,
+                results_data,
+            ) = cls.deduplicate_single_individual(individual)
+
+            individual.deduplication_golden_record_results = results_data
+            if duplicates:
+                individual.deduplication_golden_record_status = DUPLICATE
+            elif possible_duplicates:
+                individual.deduplication_golden_record_status = NEEDS_ADJUDICATION
+
+            to_bulk_update_results.append(individual)
+
+        Individual.objects.bulk_update(
+            to_bulk_update_results,
+            ["deduplication_golden_record_results", "deduplication_golden_record_status"],
+        )
+
     @staticmethod
     def _mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results):
         Individual.objects.filter(id__in=all_duplicates).update(deduplication_golden_record_status=DUPLICATE)
@@ -484,9 +511,13 @@ class DeduplicateTask:
 
     @staticmethod
     def set_error_message_and_status(registration_data_import, message):
+        old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
         registration_data_import.error_message = message
         registration_data_import.status = RegistrationDataImport.DEDUPLICATION_FAILED
         registration_data_import.save()
+        log_create(
+            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+        )
 
     @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
@@ -637,7 +668,11 @@ class DeduplicateTask:
                     set_of_all_original_individuals_ids_possible_duplicates
                 )
             ).update(deduplication_golden_record_status=UNIQUE)
-
+            old_rdi = RegistrationDataImport.objects.get(id=registration_data_import.id)
             registration_data_import.status = RegistrationDataImport.IN_REVIEW
             registration_data_import.error_message = ""
             registration_data_import.save()
+
+            log_create(
+                RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
+            )

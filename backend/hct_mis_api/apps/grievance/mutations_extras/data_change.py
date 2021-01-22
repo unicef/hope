@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
 
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.core.utils import to_snake_case
@@ -41,8 +43,8 @@ class HouseholdUpdateDataObjectType(graphene.InputObjectType):
     consent_sharing = graphene.List(graphene.String)
     residence_status = graphene.String()
     country_origin = graphene.String()
-    country = graphene.String(required=True)
-    size = graphene.Int(required=True)
+    country = graphene.String()
+    size = graphene.Int()
     address = graphene.String()
     female_age_group_0_5_count = graphene.Int()
     female_age_group_6_11_count = graphene.Int()
@@ -447,7 +449,7 @@ def update_add_individual_extras(root, info, input, grievance_ticket, extras, **
     return grievance_ticket
 
 
-def close_add_individual_grievance_ticket(grievance_ticket):
+def close_add_individual_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.add_individual_ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
@@ -483,7 +485,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
     handle_role(role, household, individual)
 
     Document.objects.bulk_create(documents_to_create)
-
+    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
     AirflowApi.start_dag(
         dag_id="DeduplicateAndCheckAgainstSanctionsList",
         context={
@@ -494,7 +496,7 @@ def close_add_individual_grievance_ticket(grievance_ticket):
     )
 
 
-def close_update_individual_grievance_ticket(grievance_ticket):
+def close_update_individual_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.individual_data_update_ticket_details
     if not ticket_details:
         return
@@ -522,9 +524,13 @@ def close_update_individual_grievance_ticket(grievance_ticket):
         for field, value_and_approve_status in individual_data.items()
         if value_and_approve_status.get("approve_status") is True and field != "previous_documents"
     }
-
-    Individual.objects.filter(id=individual.id).update(flex_fields=flex_fields, **only_approved_data)
-
+    old_individual = copy_model_object(individual)
+    merged_flex_fields = {}
+    if individual.flex_fields is not None:
+        merged_flex_fields.update(household.flex_fields)
+    merged_flex_fields.update(flex_fields)
+    Individual.objects.filter(id=individual.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+    new_individual = Individual.objects.get(id=individual.id)
     relationship_to_head_of_household = individual_data.get("relationship")
     if household and relationship_to_head_of_household == HEAD:
         household.head_of_household = individual
@@ -541,7 +547,7 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     ]
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
-
+    log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
     AirflowApi.start_dag(
         dag_id="DeduplicateAndCheckAgainstSanctionsList",
         context={
@@ -552,7 +558,7 @@ def close_update_individual_grievance_ticket(grievance_ticket):
     )
 
 
-def close_update_household_grievance_ticket(grievance_ticket):
+def close_update_household_grievance_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.household_data_update_ticket_details
     if not ticket_details:
         return
@@ -576,15 +582,20 @@ def close_update_household_grievance_ticket(grievance_ticket):
         for field, value_and_approve_status in household_data.items()
         if value_and_approve_status.get("approve_status") is True
     }
+    old_household = copy_model_object(household)
+    merged_flex_fields = {}
+    if household.flex_fields is not None:
+        merged_flex_fields.update(household.flex_fields)
+    merged_flex_fields.update(flex_fields)
+    Household.objects.filter(id=household.id).update(flex_fields=merged_flex_fields, **only_approved_data)
+    new_household = Household.objects.get(id=household.id)
+    log_create(Household.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_household, new_household)
 
-    Household.objects.filter(id=household.id).update(flex_fields=flex_fields, **only_approved_data)
 
-
-def close_delete_individual_ticket(grievance_ticket):
+def close_delete_individual_ticket(grievance_ticket, info):
     ticket_details = grievance_ticket.ticket_details
     if not ticket_details or ticket_details.approve_status is False:
         return
 
     individual_to_remove = ticket_details.individual
-
-    remove_individual_and_reassign_roles(ticket_details, individual_to_remove)
+    remove_individual_and_reassign_roles(ticket_details, individual_to_remove, info)

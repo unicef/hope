@@ -309,6 +309,11 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
+export function formatNumber(value: number): string {
+  if (!value && value !== 0) return '';
+  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
 }
