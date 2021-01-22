@@ -98,6 +98,8 @@ def filter_age(field_name, qs, min, max):
         min_date = date(current.year - max - 1, current.month, current.day,)
         min_date = min_date + timedelta(days=1)
         values = min_date
+    else:
+        return qs
     return qs.filter(**{f"{field_name}__{lookup_expr}": values})
 
 

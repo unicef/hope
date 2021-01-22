@@ -5,10 +5,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
-class RegistrationDataImport(TimeStampedUUIDModel):
+class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
