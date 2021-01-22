@@ -373,7 +373,7 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         cls.business_area = BusinessArea.objects.first()
-        cls.business_area.kobo_token = "1234ABC"
+        cls.business_area.kobo_username = "1234ABC"
         cls.business_area.save()
 
         admin1_type = AdminAreaType.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
