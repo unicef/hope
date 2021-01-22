@@ -31,6 +31,10 @@ class CheckAgainstSanctionListPreMergeTask:
             }
             for doc in documents
         ]
+        birth_dates_queries = [
+            {"match": {"birth_date": {"query": dob.date, "boost": 0.6}}} for dob in individual.dates_of_birth.all()
+        ]
+
         alias_names_queries = [
             {
                 "multi_match": {
@@ -59,22 +63,15 @@ class CheckAgainstSanctionListPreMergeTask:
                     "boost": 2.0,
                 }
             },
-            {"terms": {"birth_date": [dob.date for dob in individual.dates_of_birth.all()]}},
         ]
         queries.extend(document_queries)
         queries.extend(alias_names_queries)
+        queries.extend(birth_dates_queries)
 
         query_dict = {
             "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "dis_max": {
-                                "queries": queries,
-                                "tie_breaker": 1.0,
-                            }
-                        }
-                    ],
+                "dis_max": {
+                    "queries": queries,
                 }
             },
         }

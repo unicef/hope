@@ -5,7 +5,8 @@ from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.program.schema import ProgramNode
@@ -80,14 +81,16 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
 
     class Arguments:
         program_data = UpdateProgramInput()
+        version = BigInt(required=False)
 
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def mutate(cls, root, info, program_data):
+    def mutate(cls, root, info, program_data, **kwargs):
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
+        check_concurrency_version_in_mutation(kwargs.get("version"), program)
         old_program = Program.objects.get(id=program_id)
         business_area = program.business_area
 
