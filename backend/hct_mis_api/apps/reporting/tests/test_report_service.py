@@ -34,6 +34,8 @@ class TestGenerateReportService(TestCase):
             business_area=self.business_area,
         )
         self.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_type=area_type)
+        self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
+        self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
         self.households = []
         self.individuals = []
         for index, family_size in enumerate(family_sizes_list):
@@ -53,9 +55,10 @@ class TestGenerateReportService(TestCase):
             )
             self.households.append(household)
             self.individuals.extend(individuals)
-
-        self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
-        self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
+            if index % 2:
+                household.programs.add(self.program_1)
+            else:
+                household.programs.add(self.program_2)
 
         self.cash_plan_1 = CashPlanFactory(
             business_area=self.business_area, program=self.program_1, end_date="2020-01-01"
