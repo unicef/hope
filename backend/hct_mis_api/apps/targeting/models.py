@@ -26,7 +26,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -48,7 +48,7 @@ def get_integer_range(min_range=None, max_range=None):
     )
 
 
-class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel):
+class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyModel):
     """Model for target populations.
 
     Has N:N association with households.
