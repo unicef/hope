@@ -468,7 +468,13 @@ class DeduplicateTask:
             all_original_individuals_ids_possible_duplicates,
             to_bulk_update_results,
         ) = cls._get_duplicated_individuals(registration_data_import, individuals)
-        cls._mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results)
+        cls._mark_individuals(
+            all_duplicates,
+            all_possible_duplicates,
+            to_bulk_update_results,
+            all_original_individuals_ids_duplicates,
+            all_original_individuals_ids_possible_duplicates,
+        )
 
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals):
@@ -497,11 +503,19 @@ class DeduplicateTask:
         )
 
     @staticmethod
-    def _mark_individuals(all_duplicates, all_possible_duplicates, to_bulk_update_results):
-        Individual.objects.filter(id__in=all_duplicates).update(deduplication_golden_record_status=DUPLICATE)
+    def _mark_individuals(
+        all_duplicates,
+        all_possible_duplicates,
+        to_bulk_update_results,
+        all_original_individuals_ids_duplicates,
+        all_original_individuals_ids_possible_duplicates,
+    ):
+        Individual.objects.filter(
+            id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
+        ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
-        Individual.objects.filter(id__in=set(all_possible_duplicates).difference(set(all_duplicates))).update(
-            deduplication_golden_record_status=NEEDS_ADJUDICATION
+        Individual.objects.filter(id__in=all_duplicates + all_original_individuals_ids_duplicates).update(
+            deduplication_golden_record_status=DUPLICATE
         )
 
         Individual.objects.bulk_update(
