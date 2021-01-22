@@ -8,6 +8,8 @@ from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.payment.fixtures import CashPlanPaymentVerificationFactory, PaymentRecordFactory
 
 
 class TestGenerateReportService(TestCase):
@@ -48,15 +50,30 @@ class TestGenerateReportService(TestCase):
             self.households.append(household)
             self.individuals.extend(individuals)
 
+        self.program = ProgramFactory(business_area=self.business_area)
+        self.cash_plan = CashPlanFactory(business_area=self.business_area, program=self.program)
+        self.cash_plan_verification = CashPlanPaymentVerificationFactory(
+            cash_plan=self.cash_plan, completion_date="2020-01-01"
+        )
+        CashPlanPaymentVerificationFactory(
+            cash_plan=CashPlanFactory(business_area=self.business_area), completion_date="2020-01-01"
+        )
+        PaymentRecordFactory(household=self.households[0], business_area=self.business_area, delivery_date="2020-01-01")
+        PaymentRecordFactory(household=self.households[1], business_area=self.business_area, delivery_date="2020-01-01")
+
     @parameterized.expand(
         [
-            ("individuals_no_filter", Report.INDIVIDUALS, False, 6),
-            ("individuals_filter_admin_area", Report.INDIVIDUALS, True, 8),
-            ("households_no_filter", Report.HOUSEHOLD_DEMOGRAPHICS, False, 3),
-            ("households_filter_admin_area", Report.HOUSEHOLD_DEMOGRAPHICS, True, 4),
+            ("individuals_no_filter", Report.INDIVIDUALS, False, False, 6),
+            ("individuals_filter_admin_area", Report.INDIVIDUALS, True, False, 8),
+            ("households_no_filter", Report.HOUSEHOLD_DEMOGRAPHICS, False, False, 3),
+            ("households_filter_admin_area", Report.HOUSEHOLD_DEMOGRAPHICS, True, False, 4),
+            ("cash_plan_verifications_no_filter", Report.CASH_PLAN_VERIFICATION, False, False, 2),
+            ("cash_plan_verifications_program", Report.CASH_PLAN_VERIFICATION, False, True, 1),
+            ("payments_no_filter", Report.PAYMENTS, False, False, 2),
+            ("payments_filter_admin_area", Report.PAYMENTS, True, False, 1),
         ]
     )
-    def test_report_types(self, _, report_type, should_set_admin_area, number_of_records):
+    def test_report_types(self, _, report_type, should_set_admin_area, should_set_program, number_of_records):
 
         report = ReportFactory.create(
             created_by=self.user,
@@ -70,6 +87,10 @@ class TestGenerateReportService(TestCase):
             report.date_to = "2022-01-01"
             report.save()
             report.admin_area.set([self.admin_area_1])
+
+        if should_set_program:
+            report.program = self.program
+            report.save()
 
         report_service = self.GenerateReportService(report)
         report_service.generate_report()
