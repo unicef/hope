@@ -112,6 +112,8 @@ type ApproveTargetPopulationMutation {
 
 scalar Arg
 
+scalar BigInt
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -213,6 +215,7 @@ type CashPlanPaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -306,6 +309,7 @@ input CopyTargetPopulationInput {
 
 input CopyTargetPopulationMutationInput {
   targetPopulationData: CopyTargetPopulationInput
+  version: BigInt
   clientMutationId: String
 }
 
@@ -589,6 +593,7 @@ type GrievanceTicketNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   userModified: DateTime
   createdBy: UserNode
   assignedTo: UserNode
@@ -825,6 +830,7 @@ type HouseholdNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: HouseholdStatus!
   consentSign: String!
   consent: Boolean
@@ -1789,6 +1795,7 @@ type IndividualNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: IndividualStatus!
   individualId: String!
   photo: String!
@@ -2046,42 +2053,42 @@ type MergeRegistrationDataImportMutation {
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
-  updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
-  grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
-  createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
-  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
-  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!): NeedsAdjudicationApproveMutation
-  reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation
+  updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
+  grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
+  createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!, version: BigInt): NeedsAdjudicationApproveMutation
+  reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
-  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
+  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
-  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
-  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
-  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
-  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate): UpdatePaymentVerificationStatusAndReceivedAmount
-  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!): UpdatePaymentVerificationReceivedAndReceivedAmount
+  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
+  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
+  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
-  updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
+  updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
-  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
-  unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
-  finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
+  approveTargetPopulation(id: ID!, version: BigInt): ApproveTargetPopulationMutation
+  unapproveTargetPopulation(id: ID!, version: BigInt): UnapproveTargetPopulationMutation
+  finalizeTargetPopulation(id: ID!, version: BigInt): FinalizeTargetPopulationMutation
   setSteficonRuleOnTargetPopulation(input: SetSteficonRuleOnTargetPopulationMutationInput!): SetSteficonRuleOnTargetPopulationMutationPayload
   createProgram(programData: CreateProgramInput!): CreateProgram
-  updateProgram(programData: UpdateProgramInput): UpdateProgram
+  updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
-  mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
-  rerunDedupe(registrationDataImportDatahubId: ID!): RegistrationDeduplicationMutation
+  mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
+  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -2115,6 +2122,7 @@ type PaymentRecordNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   businessArea: UserBusinessAreaNode!
   status: PaymentRecordStatus!
   statusDate: DateTime!
@@ -2165,6 +2173,7 @@ type PaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
@@ -2210,6 +2219,7 @@ type ProgramNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   name: String!
   status: ProgramStatus!
   startDate: Date!
@@ -2446,6 +2456,7 @@ type RegistrationDataImportNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   name: String!
   status: RegistrationDataImportStatus!
   importDate: DateTime!
@@ -2735,6 +2746,7 @@ type ServiceProviderNodeEdge {
 input SetSteficonRuleOnTargetPopulationMutationInput {
   targetId: ID!
   steficonRuleId: ID
+  version: BigInt
   clientMutationId: String
 }
 
@@ -2783,6 +2795,7 @@ type TargetPopulationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
+  version: BigInt!
   name: String!
   caId: String
   caHashId: String
