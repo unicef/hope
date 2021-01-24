@@ -1,6 +1,8 @@
+import json
 import logging
 
 from constance import config
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django_countries.fields import Country
 
@@ -31,6 +33,7 @@ class DeduplicateTask:
     (disabling parallel)
     """
 
+    FUZZINESS = "AUTO:3,6"
     business_area = None
 
     @staticmethod
@@ -122,7 +125,7 @@ class DeduplicateTask:
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
                 queries_list = [
-                    {"match": {f"{prefix}.number": {"query": doc_number}}},
+                    {"match": {f"{prefix}.number": {"query": str(doc_number)}}},
                     {"match": {f"{prefix}.{document_type_key}": {"query": doc_type}}},
                 ]
                 if prefix == "documents":
@@ -141,7 +144,7 @@ class DeduplicateTask:
                         {
                             "bool": {
                                 "must": queries_list,
-                                "boost": 2,
+                                "boost": 4,
                             },
                         }
                     ]
@@ -150,16 +153,86 @@ class DeduplicateTask:
         return queries
 
     @classmethod
+    def _prepare_queries_for_names(cls, given_name, family_name, full_name):
+        """
+        prepares ES queries for
+        * givenName
+        * familyName
+        or
+        * full_name
+        max_score 8 if exact match or phonetic exact match
+        """
+        if not given_name or not family_name:
+            # max possible score 7
+            return [{"match": {"full_name": {"query": full_name, "boost": 8.0, "operator": "AND"}}}]
+        given_name_complex_query = cls._get_complex_query_for_name(given_name, "given_name")
+        family_name_complex_query = cls._get_complex_query_for_name(family_name, "family_name")
+        names_should_query = {
+            "bool": {
+                "should": [
+                    given_name_complex_query,
+                    family_name_complex_query,
+                ]
+            }
+        }
+        # max possible score 8
+        names_must_query = {
+            "bool": {
+                "must": [
+                    given_name_complex_query,
+                    family_name_complex_query,
+                ],
+                "boost": 4,
+            }
+        }
+        max_from_should_and_must = {"dis_max": {"queries": [names_should_query, names_must_query], "tie_breaker": 0}}
+
+        return [max_from_should_and_must]
+
+    @classmethod
+    def _get_complex_query_for_name(cls, name, field_name):
+        name_phonetic_query_dict = {"match": {f"{field_name}.phonetic": {"query": name}}}
+        # phonetic analyzer not working with fuzziness
+        name_fuzzy_query_dict = {
+            "match": {
+                field_name: {
+                    "query": name,
+                    "fuzziness": cls.FUZZINESS,
+                    "max_expansions": 50,
+                    "prefix_length": 0,
+                    "fuzzy_transpositions": True,
+                }
+            }
+        }
+        # choose max from fuzzy and phonetic
+        # phonetic score === 0 or 1
+        # fuzzy score <=1 changes if there is need make change
+        name_complex_query = {
+            "dis_max": {"queries": [name_fuzzy_query_dict, name_phonetic_query_dict], "tie_breaker": 0}
+        }
+        return name_complex_query
+
+    @classmethod
     def _prepare_query_dict(cls, individual, fields, min_score, only_in_rdi=False):
         query_fields = []
         boosted_match_fields = (
             "birth_date",
             "phone_no",
             "phone_no_alternative",
-            "relationship",
-            "full_name",
         )
+
+        given_name = fields.pop("given_name")
+        family_name = fields.pop("family_name")
+        full_name = fields.pop("full_name")
+
+        names_queries = cls._prepare_queries_for_names(given_name, family_name, full_name)
+        query_fields.extend(names_queries)
+
         for field_name, field_value in fields.items():
+            if field_value is None:
+                continue
+            if isinstance(field_value, str) and field_value == "":
+                continue
             if field_name == "household":
                 # queries_to_append = cls._prepare_household_query(field_value)
                 # ignore household fields because it gives better results
@@ -180,6 +253,7 @@ class DeduplicateTask:
                             field_name: {
                                 "query": field_value,
                                 "boost": 0.3,
+                                "auto_generate_synonyms_phrase_query": True,
                             }
                         }
                     }
@@ -215,9 +289,12 @@ class DeduplicateTask:
 
         query_dict = {
             "min_score": min_score,
+            # TODO add pagination
+            "size": "10000",
             "query": {
                 "bool": {
-                    "must": [{"dis_max": {"queries": query_fields, "tie_breaker": 1.0}}],
+                    "minimum_should_match": 1,
+                    "should": query_fields,
                     "must_not": [{"match": {"id": {"query": str(individual.id), "boost": 0}}}],
                 }
             },
@@ -241,6 +318,7 @@ class DeduplicateTask:
         possible_duplicates = []
         original_individuals_ids_duplicates = []
         original_individuals_ids_possible_duplicates = []
+        # TODO add pagination
         query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
@@ -258,6 +336,10 @@ class DeduplicateTask:
                 "location": individual_hit.admin2,  # + village
                 "dob": individual_hit.birth_date,
             }
+            if individual.given_name == "Muxamed":
+                print(individual_hit.given_name)
+                print(score)
+                print(score >= duplicate_score)
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
@@ -271,6 +353,11 @@ class DeduplicateTask:
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
 
+        if individual.given_name == "Muxamed":
+            print(duplicates)
+            print(possible_duplicates)
+            print(original_individuals_ids_duplicates)
+            print(original_individuals_ids_possible_duplicates)
         return (
             duplicates,
             possible_duplicates,
@@ -293,7 +380,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type"),
+            "documents": ("document_number", "type.type", "type.country"),
             "identities": ("document_number", "agency.type"),
             "household": (
                 "residence_status",
@@ -342,7 +429,7 @@ class DeduplicateTask:
             0,
             only_in_rdi,
         )
-
+        print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
@@ -563,7 +650,6 @@ class DeduplicateTask:
                 _,
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual, only_in_rdi=True)
-
             if len(results_data_imported["duplicates"]) > config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
