@@ -17,6 +17,7 @@ data:
   C_FORCE_ROOT: "1"
   AIRFLOW__CORE__BROKER_URL: redis://hope-main-redis-master:6379/0
   AIRFLOW__CELERY__BROKER_URL: redis://hope-main-redis-master:6379/0
+  AIRFLOW__CORE__EXECUTOR: CeleryExecutor
 {{- range $key, $value :=  .Values.backend.config }}
   {{ if eq $value "" }}
   {{ else }}
