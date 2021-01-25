@@ -62,16 +62,14 @@ class CheckAgainstSanctionListPreMergeTask:
         queries.extend(birth_dates_queries)
 
         query_dict = {
+            "size": 10000,
             "query": {
-                "size": 10000,
                 "bool": {
                     "minimum_should_match": 1,
                     "should": queries,
                 },
             },
         }
-        if individual.full_name == "Chang Chang Ha":
-            print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
 
         return query_dict
 
