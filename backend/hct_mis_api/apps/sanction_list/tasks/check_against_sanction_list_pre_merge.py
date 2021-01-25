@@ -1,6 +1,8 @@
+import json
 import logging
 
 from constance import config
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
@@ -27,52 +29,45 @@ class CheckAgainstSanctionListPreMergeTask:
                         {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
                         {"match": {"documents.country": doc.issuing_country.alpha3}},
                     ],
+                    "boost": 2,
                 }
             }
             for doc in documents
         ]
         birth_dates_queries = [
-            {"match": {"birth_date": {"query": dob.date, "boost": 0.6}}} for dob in individual.dates_of_birth.all()
+            {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
         ]
 
-        alias_names_queries = [
-            {
-                "multi_match": {
-                    "query": alias_name.name,
-                    "fields": [
-                        "full_name",
-                        "first_name",
-                        "middle_name",
-                        "family_name",
-                    ],
-                    "boost": 1.3,
-                }
-            } for alias_name in individual.alias_names.all()
-        ]
+        # alias_names_queries = [
+        #     {
+        #         "multi_match": {
+        #             "query": alias_name.name,
+        #             "fields": [
+        #                 "full_name",
+        #                 "first_name",
+        #                 "middle_name",
+        #                 "family_name",
+        #             ],
+        #             "boost": 1.3,
+        #         }
+        #     }
+        #     for alias_name in individual.alias_names.all()
+        # ]
 
         queries = [
-            {
-                "multi_match": {
-                    "query": individual.full_name,
-                    "fields": [
-                        "full_name",
-                        "first_name",
-                        "middle_name",
-                        "family_name",
-                    ],
-                    "boost": 2.0,
-                }
-            },
+            {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
         ]
         queries.extend(document_queries)
-        queries.extend(alias_names_queries)
+        # queries.extend(alias_names_queries)
         queries.extend(birth_dates_queries)
 
         query_dict = {
+            "size": 10000,
             "query": {
-                "dis_max": {
-                    "queries": queries,
-                }
+                "bool": {
+                    "minimum_should_match": 1,
+                    "should": queries,
+                },
             },
         }
 
@@ -109,8 +104,13 @@ class CheckAgainstSanctionListPreMergeTask:
                             golden_records_individual=marked_individual,
                             sanction_list_individual=individual,
                         )
-                        tickets_to_create.append(ticket)
-                        ticket_details_to_create.append(ticket_details)
+                        details_already_exists = TicketSystemFlaggingDetails.objects.filter(
+                            golden_records_individual=marked_individual,
+                            sanction_list_individual=individual,
+                        ).exists()
+                        if details_already_exists is False:
+                            tickets_to_create.append(ticket)
+                            ticket_details_to_create.append(ticket_details)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
