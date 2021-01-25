@@ -545,7 +545,6 @@ export type CopyTargetPopulationInput = {
 
 export type CopyTargetPopulationMutationInput = {
   targetPopulationData?: Maybe<CopyTargetPopulationInput>,
-  version?: Maybe<Scalars['BigInt']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
