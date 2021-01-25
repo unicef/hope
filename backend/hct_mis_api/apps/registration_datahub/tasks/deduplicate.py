@@ -57,7 +57,6 @@ class DeduplicateTask:
         queries_list.extend(names_queries)
         queries_list.extend(documents_queries)
         queries_list.extend(identities_queries)
-        queries_list.extend(households_and_roles_queries)
 
         for field_name, field_value in fields.items():
             if field_value is None:
@@ -133,6 +132,10 @@ class DeduplicateTask:
 
     @classmethod
     def _prepare_households_and_roles_queries(cls, households_and_roles):
+        """
+            Not needed
+            Not working
+        """
         queries = []
         for item in households_and_roles:
             role = item.get("role")
@@ -407,7 +410,7 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
-        print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
+        # print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
