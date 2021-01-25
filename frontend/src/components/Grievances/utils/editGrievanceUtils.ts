@@ -169,13 +169,19 @@ export function prepareInitialValues(
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string().required('Category is required').nullable(),
+  category: Yup.string()
+    .required('Category is required')
+    .nullable(),
   admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+  selectedPaymentRecords: Yup.array()
+    .of(Yup.string())
+    .nullable(),
+  selectedRelatedTickets: Yup.array()
+    .of(Yup.string())
+    .nullable(),
 });
 export const EmptyComponent = (): React.ReactElement => null;
 export const dataChangeComponentDict = {
@@ -359,7 +365,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values?.node?.admin?.title,
+    admin: values?.admin?.node?.title,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(
