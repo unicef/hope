@@ -632,15 +632,13 @@ class DeduplicateTask:
                 _,
                 results_data_imported,
             ) = cls.deduplicate_single_imported_individual(imported_individual)
-            if len(results_data_imported["duplicates"]) > config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
-                message = (
-                    "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
-                )
-                cls.set_error_message_and_status(registration_data_import, message)
-                break
-
             imported_individual.deduplication_batch_results = results_data_imported
+            if results_data_imported["duplicates"]:
+                imported_individual.deduplication_batch_status = DUPLICATE_IN_BATCH
+            else:
+                imported_individual.deduplication_batch_status = UNIQUE_IN_BATCH
+            all_duplicates.extend(imported_individuals_duplicates)
+            all_possible_duplicates.extend(imported_individuals_possible_duplicates)
 
             (
                 _,
@@ -649,25 +647,34 @@ class DeduplicateTask:
                 original_individuals_ids_possible_duplicates,
                 results_data,
             ) = cls.deduplicate_single_individual(imported_individual)
+            imported_individual.deduplication_golden_record_results = results_data
+            if results_data["duplicates"]:
+                imported_individual.deduplication_golden_record_status = DUPLICATE
+            elif results_data["possible_duplicates"]:
+                imported_individual.deduplication_golden_record_status = NEEDS_ADJUDICATION
+            else:
+                imported_individual.deduplication_golden_record_status = UNIQUE
+            all_original_individuals_ids_duplicates.extend(original_individuals_ids_duplicates)
+            all_original_individuals_ids_possible_duplicates.extend(original_individuals_ids_possible_duplicates)
 
-            if (
-                len(results_data["duplicates"]) > config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED
-                and imported_individuals.count() > 1
-            ):
+            checked_individuals_ids.append(imported_individual.id)
+            to_bulk_update_results.append(imported_individual)
+
+            if len(results_data_imported["duplicates"]) > config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
+                message = (
+                    "The number of individuals deemed duplicate with an individual record of the batch "
+                    f"exceed the maximum allowed ({config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
+                )
+                cls.set_error_message_and_status(registration_data_import, message)
+                break
+
+            if len(results_data["duplicates"]) > config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED:
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
                     f"exceed the maximum allowed ({config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
-
-            imported_individual.deduplication_golden_record_results = results_data
-
-            all_duplicates.extend(imported_individuals_duplicates)
-            all_possible_duplicates.extend(imported_individuals_possible_duplicates)
-            all_original_individuals_ids_duplicates.extend(original_individuals_ids_duplicates)
-            all_original_individuals_ids_possible_duplicates.extend(original_individuals_ids_possible_duplicates)
-            to_bulk_update_results.append(imported_individual)
 
             set_of_all_duplicates = set(all_duplicates)
             set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
@@ -704,35 +711,20 @@ class DeduplicateTask:
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
 
-        # BATCH
+        ImportedIndividual.objects.bulk_update(
+            to_bulk_update_results,
+            [
+                "deduplication_batch_results",
+                "deduplication_golden_record_results",
+                "deduplication_batch_status",
+                "deduplication_golden_record_status",
+            ],
+        )
         set_of_all_possible_duplicates = set(all_possible_duplicates)
         set_of_all_duplicates = set(all_duplicates)
-
-        ImportedIndividual.objects.filter(id__in=set_of_all_duplicates).update(
-            deduplication_batch_status=DUPLICATE_IN_BATCH
-        )
-
-        # ImportedIndividual.objects.filter(
-        #     id__in=set_of_all_possible_duplicates.difference(set_of_all_duplicates)
-        # ).update(deduplication_batch_status=SIMILAR_IN_BATCH)
-
-        # GOLDEN RECORD
         set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
         set_of_all_original_individuals_ids_possible_duplicates = set(all_original_individuals_ids_possible_duplicates)
 
-        ImportedIndividual.objects.filter(id__in=set_of_all_original_individuals_ids_duplicates).update(
-            deduplication_golden_record_status=DUPLICATE
-        )
-        ImportedIndividual.objects.filter(
-            id__in=set_of_all_original_individuals_ids_possible_duplicates.difference(
-                set_of_all_original_individuals_ids_duplicates
-            )
-        ).update(deduplication_golden_record_status=NEEDS_ADJUDICATION)
-
-        ImportedIndividual.objects.bulk_update(
-            to_bulk_update_results,
-            ["deduplication_batch_results", "deduplication_golden_record_results"],
-        )
         registration_data_import_datahub.refresh_from_db()
         if registration_data_import.status == RegistrationDataImport.DEDUPLICATION_FAILED:
             registration_data_import_datahub.individuals.filter(
