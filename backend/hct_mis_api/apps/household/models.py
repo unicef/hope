@@ -12,7 +12,7 @@ from model_utils import Choices
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import SoftDeletableModel
 from multiselectfield import MultiSelectField
-from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.validators import validate_international_phonenumber
 from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -517,8 +517,12 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         choices=MARITAL_STATUS_CHOICE,
         default=BLANK,
     )
-    phone_no = PhoneNumberField(blank=True)
-    phone_no_alternative = PhoneNumberField(blank=True)
+    phone_no = models.CharField(
+        max_length=128, validators=[validate_international_phonenumber], blank=True
+    )
+    phone_no_alternative = models.CharField(
+        max_length=128, validators=[validate_international_phonenumber], blank=True
+    )
     relationship = models.CharField(
         max_length=255,
         blank=True,
