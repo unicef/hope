@@ -337,7 +337,6 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         name = target_population_data.pop("name")
         target_id = utils.decode_id_string(target_population_data.pop("id"))
         target_population = TargetPopulation.objects.get(id=target_id)
-        check_concurrency_version_in_mutation(kwargs.get("version"), target_population)
 
         cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
 
