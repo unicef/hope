@@ -67,11 +67,13 @@ export function FinishVerificationPlan({
     showMessage('Verification plan has been finished');
   };
 
-  const beneficiariesPercent = (): number => {
+  const beneficiariesPercent = (): string => {
     if (verificationPlan?.respondedCount && verificationPlan?.sampleSize !== 0)
-      return (
-        (verificationPlan?.respondedCount / verificationPlan?.sampleSize) * 100
-      );
+      return;
+    (
+      (verificationPlan?.respondedCount / verificationPlan?.sampleSize) *
+      100
+    ).toFixed(2);
     return null;
   };
 
