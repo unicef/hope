@@ -419,3 +419,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
+
+export const getFullNodeFromEdgesById = (edges, id: string) => {
+  console.log(edges, id);
+  if (!edges) return null;
+  return edges.find((edge) => edge.node.id === id)?.node || null;
+};
