@@ -309,7 +309,6 @@ input CopyTargetPopulationInput {
 
 input CopyTargetPopulationMutationInput {
   targetPopulationData: CopyTargetPopulationInput
-  version: BigInt
   clientMutationId: String
 }
 

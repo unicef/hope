@@ -545,7 +545,6 @@ export type CopyTargetPopulationInput = {
 
 export type CopyTargetPopulationMutationInput = {
   targetPopulationData?: Maybe<CopyTargetPopulationInput>,
-  version?: Maybe<Scalars['BigInt']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -5972,7 +5971,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     )> }
   )> }
 );
@@ -10058,6 +10057,7 @@ export const UpdateProgramDocument = gql`
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
       individualDataNeeded
+      version
     }
   }
 }
