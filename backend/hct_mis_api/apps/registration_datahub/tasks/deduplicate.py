@@ -336,10 +336,6 @@ class DeduplicateTask:
                 "location": individual_hit.admin2,  # + village
                 "dob": individual_hit.birth_date,
             }
-            if individual.given_name == "Muxamed":
-                print(individual_hit.given_name)
-                print(score)
-                print(score >= duplicate_score)
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
@@ -352,12 +348,6 @@ class DeduplicateTask:
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
-
-        if individual.given_name == "Muxamed":
-            print(duplicates)
-            print(possible_duplicates)
-            print(original_individuals_ids_duplicates)
-            print(original_individuals_ids_possible_duplicates)
         return (
             duplicates,
             possible_duplicates,
