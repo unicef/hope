@@ -187,7 +187,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
-                "photo": file.name,
+                "photo": file,
             }
 
     def _handle_document_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
@@ -273,7 +273,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         else:
             self.identities[f"individual_{row_num}_{agency_type}"] = {
                 "individual": individual,
-                "photo": file_name,
+                "photo": file,
                 "agency": agency_type,
             }
 
