@@ -1,6 +1,8 @@
+import json
 import logging
 
 from constance import config
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
@@ -27,12 +29,13 @@ class CheckAgainstSanctionListPreMergeTask:
                         {"match": {"documents.type": IDENTIFICATION_TYPE_NATIONAL_ID}},
                         {"match": {"documents.country": doc.issuing_country.alpha3}},
                     ],
+                    "boost": 2,
                 }
             }
             for doc in documents
         ]
         birth_dates_queries = [
-            {"match": {"birth_date": {"query": dob.date, "boost": 0.6}}} for dob in individual.dates_of_birth.all()
+            {"match": {"birth_date": {"query": dob.date, "boost": 1}}} for dob in individual.dates_of_birth.all()
         ]
 
         # alias_names_queries = [
@@ -52,14 +55,7 @@ class CheckAgainstSanctionListPreMergeTask:
         # ]
 
         queries = [
-            {
-                "match": {
-                    "full_name": {
-                        "query": individual.full_name,
-                        "boost": 2.0,
-                    }
-                }
-            },
+            {"match": {"full_name": {"query": individual.full_name, "boost": 4, "operator": "and"}}},
         ]
         queries.extend(document_queries)
         # queries.extend(alias_names_queries)
@@ -67,11 +63,14 @@ class CheckAgainstSanctionListPreMergeTask:
 
         query_dict = {
             "query": {
-                "dis_max": {
-                    "queries": queries,
+                "bool": {
+                    "minimum_should_match": 1,
+                    "should": queries,
                 }
             },
         }
+        if individual.full_name == "Chang Chang Ha":
+            print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
 
         return query_dict
 

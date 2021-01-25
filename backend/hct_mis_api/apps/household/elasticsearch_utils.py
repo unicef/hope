@@ -6,9 +6,8 @@ from django_elasticsearch_dsl.registries import registry
 #     "double tf = Math.sqrt(doc.freq); double idf = 1.0; double norm = 1/"
 #     "Math.sqrt(doc.length); return query.boost * tf * idf * norm;"
 # )
-DEFAULT_SCRIPT = (
-    "return (1.0/doc.length)*query.boost"
-)
+DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
+
 
 def populate_index(queryset, doc, parallel=False):
     qs = queryset.iterator()
