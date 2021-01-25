@@ -105,8 +105,13 @@ class CheckAgainstSanctionListPreMergeTask:
                             golden_records_individual=marked_individual,
                             sanction_list_individual=individual,
                         )
-                        tickets_to_create.append(ticket)
-                        ticket_details_to_create.append(ticket_details)
+                        details_already_exists = TicketSystemFlaggingDetails.objects.filter(
+                            golden_records_individual=marked_individual,
+                            sanction_list_individual=individual,
+                        ).exists()
+                        if details_already_exists is False:
+                            tickets_to_create.append(ticket)
+                            ticket_details_to_create.append(ticket_details)
 
             log.debug(
                 f"SANCTION LIST INDIVIDUAL: {individual.full_name} - reference number: {individual.reference_number}"
