@@ -68,12 +68,16 @@ export function FinishVerificationPlan({
   };
 
   const beneficiariesPercent = (): string => {
-    if (verificationPlan?.respondedCount && verificationPlan?.sampleSize !== 0)
-      return;
-    (
-      (verificationPlan?.respondedCount / verificationPlan?.sampleSize) *
-      100
-    ).toFixed(2);
+    if (
+      verificationPlan?.respondedCount &&
+      verificationPlan?.sampleSize !== 0
+    ) {
+      return (
+        (verificationPlan?.respondedCount / verificationPlan?.sampleSize) *
+        100
+      ).toFixed(2);
+    }
+
     return null;
   };
 
