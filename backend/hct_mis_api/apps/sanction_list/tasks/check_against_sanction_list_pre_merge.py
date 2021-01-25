@@ -63,10 +63,11 @@ class CheckAgainstSanctionListPreMergeTask:
 
         query_dict = {
             "query": {
+                "size": 10000,
                 "bool": {
                     "minimum_should_match": 1,
                     "should": queries,
-                }
+                },
             },
         }
         if individual.full_name == "Chang Chang Ha":

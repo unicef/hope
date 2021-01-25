@@ -36,6 +36,91 @@ class DeduplicateTask:
     FUZZINESS = "AUTO:3,6"
     business_area = None
 
+    @classmethod
+    def _prepare_query_dict(cls, individual, fields, min_score):
+        fields_meta = {
+            "birth_date": {"boost": 2},
+            "phone_no": {"boost": 2},
+            "phone_no_alternative": {"boost": 2},
+            "sex": {"boost": 1},
+            "relationship": {"boost": 1},
+            "middle_name": {"boost": 1},
+            "admin1": {"boost": 1},
+            "admin2": {"boost": 1},
+            # household - not used right now
+        }
+        queries_list = []
+        names_queries = cls._prepare_queries_for_names_from_fields(fields)
+        documents_queries = cls._prepare_documents_queries_from_fields(fields)
+        identities_queries = cls._prepare_identities_queries_from_fields(fields)
+        households_and_roles_queries = cls._prepare_households_and_roles_queries_from_fields(fields)
+        queries_list.extend(names_queries)
+        queries_list.extend(documents_queries)
+        queries_list.extend(identities_queries)
+        queries_list.extend(households_and_roles_queries)
+
+        for field_name, field_value in fields.items():
+            if field_value is None:
+                continue
+            if isinstance(field_value, str) and field_value == "":
+                continue
+            if field_name not in fields_meta.keys():
+                continue
+            field_meta = fields_meta[field_name]
+            queries_to_append = [
+                {
+                    "match": {
+                        field_name: {
+                            "query": field_value,
+                            "boost": field_meta.get("boost", 1),
+                            "operator": field_meta.get("operator", "OR"),
+                        }
+                    }
+                }
+            ]
+            queries_list.extend(queries_to_append)
+
+        query_dict = {
+            "min_score": min_score,
+            # TODO add pagination
+            "size": "10000",
+            "query": {
+                "bool": {
+                    "minimum_should_match": 1,
+                    "should": queries_list,
+                    "must_not": [{"match": {"id": {"query": str(individual.id), "boost": 0}}}],
+                }
+            },
+        }
+        return query_dict
+
+    @classmethod
+    def _prepare_queries_for_names_from_fields(cls, fields):
+        given_name = fields.pop("given_name")
+        family_name = fields.pop("family_name")
+        full_name = fields.pop("full_name")
+        if all(x is None for x in (given_name, family_name, full_name)):
+            return []
+        return cls._prepare_queries_for_names(given_name, family_name, full_name)
+
+    @classmethod
+    def _prepare_households_and_roles_queries_from_fields(cls, fields):
+        households_and_roles = fields.pop("households_and_roles", [])
+        households_and_roles_queries = cls._prepare_households_and_roles_queries(households_and_roles)
+        return households_and_roles_queries
+
+    @classmethod
+    def _prepare_identities_queries_from_fields(cls, fields):
+        identities = fields.pop("identities", [])
+        identities_queries = cls._prepare_identities_or_documents_query(identities, "identity")
+        return identities_queries
+
+    @classmethod
+    def _prepare_documents_queries_from_fields(cls, fields):
+        documents = fields.pop("documents", [])
+        documents_queries = cls._prepare_identities_or_documents_query(documents, "document")
+        return documents_queries
+
     @staticmethod
     def _prepare_fields(individual, fields_names, dict_fields):
         fields = to_dict(individual, fields=fields_names, dict_fields=dict_fields)
@@ -47,7 +132,7 @@ class DeduplicateTask:
         return fields
 
     @classmethod
-    def prepare_households_and_roles(cls, households_and_roles):
+    def _prepare_households_and_roles_queries(cls, households_and_roles):
         queries = []
         for item in households_and_roles:
             role = item.get("role")
@@ -213,106 +298,6 @@ class DeduplicateTask:
         return name_complex_query
 
     @classmethod
-    def _prepare_query_dict(cls, individual, fields, min_score, only_in_rdi=False):
-        query_fields = []
-        boosted_match_fields = (
-            "birth_date",
-            "phone_no",
-            "phone_no_alternative",
-        )
-
-        given_name = fields.pop("given_name")
-        family_name = fields.pop("family_name")
-        full_name = fields.pop("full_name")
-
-        names_queries = cls._prepare_queries_for_names(given_name, family_name, full_name)
-        query_fields.extend(names_queries)
-
-        for field_name, field_value in fields.items():
-            if field_value is None:
-                continue
-            if isinstance(field_value, str) and field_value == "":
-                continue
-            if field_name == "household":
-                # queries_to_append = cls._prepare_household_query(field_value)
-                # ignore household fields because it gives better results
-                queries_to_append = []
-            elif field_name == "documents":
-                queries_to_append = cls._prepare_identities_or_documents_query(field_value, "document")
-            elif field_name == "identities":
-                queries_to_append = cls._prepare_identities_or_documents_query(field_value, "identity")
-            elif field_name == "households_and_roles":
-                queries_to_append = cls.prepare_households_and_roles(field_value)
-            elif field_name in (
-                "first_registration_date",
-                "last_registration_date",
-            ):
-                queries_to_append = [
-                    {
-                        "match": {
-                            field_name: {
-                                "query": field_value,
-                                "boost": 0.3,
-                                "auto_generate_synonyms_phrase_query": True,
-                            }
-                        }
-                    }
-                ]
-            elif field_name in (
-                "birth_date",
-                "sex",
-                "relationship",
-                "phone_no",
-                "phone_no_alternative",
-                "given_name",
-                "middle_name",
-                "family_name",
-                "full_name",
-            ):
-                queries_to_append = [
-                    {
-                        "match": {
-                            field_name: {
-                                "query": field_value,
-                                "boost": 2.0 if field_name in boosted_match_fields else 1.0,
-                                "operator": "AND" if field_name == "full_name" else "OR",
-                            }
-                        }
-                    }
-                ]
-            else:
-                queries_to_append = [
-                    {"fuzzy": {field_name: {"value": field_value, "fuzziness": "AUTO", "transpositions": True}}}
-                ]
-
-            query_fields.extend(queries_to_append)
-
-        query_dict = {
-            "min_score": min_score,
-            # TODO add pagination
-            "size": "10000",
-            "query": {
-                "bool": {
-                    "minimum_should_match": 1,
-                    "should": query_fields,
-                    "must_not": [{"match": {"id": {"query": str(individual.id), "boost": 0}}}],
-                }
-            },
-        }
-
-        if only_in_rdi is True:
-            query_dict["query"]["bool"]["filter"] = [
-                {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
-            ]
-        # business area should never be None but better double check
-        elif only_in_rdi is False and cls.business_area is not None:
-            query_dict["query"]["bool"]["filter"] = [
-                {"term": {"business_area": cls.business_area}},
-            ]
-
-        return query_dict
-
-    @classmethod
     def _get_duplicates_tuple(cls, query_dict, duplicate_score, document, individual):
         duplicates = []
         possible_duplicates = []
@@ -357,7 +342,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_imported_individual(cls, individual, only_in_rdi=False):
+    def deduplicate_single_imported_individual(cls, individual):
         fields_names = (
             "given_name",
             "full_name",
@@ -417,8 +402,11 @@ class DeduplicateTask:
             individual,
             fields,
             0,
-            only_in_rdi,
         )
+        # noinspection PyTypeChecker
+        query_dict["query"]["bool"]["filter"] = [
+            {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
+        ]
         print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
@@ -428,7 +416,7 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def deduplicate_single_individual(cls, individual, only_in_rdi=False):
+    def deduplicate_single_individual(cls, individual):
         fields_names = (
             "given_name",
             "full_name",
@@ -488,9 +476,10 @@ class DeduplicateTask:
             individual,
             fields,
             config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
-            only_in_rdi,
         )
-
+        query_dict["query"]["bool"]["filter"] = [
+            {"term": {"business_area": cls.business_area}},
+        ]
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE,
@@ -639,7 +628,7 @@ class DeduplicateTask:
                 _,
                 _,
                 results_data_imported,
-            ) = cls.deduplicate_single_imported_individual(imported_individual, only_in_rdi=True)
+            ) = cls.deduplicate_single_imported_individual(imported_individual)
             if len(results_data_imported["duplicates"]) > config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
