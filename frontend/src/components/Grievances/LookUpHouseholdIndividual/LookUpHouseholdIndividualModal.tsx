@@ -110,6 +110,30 @@ export const LookUpHouseholdIndividualModal = ({
     setLookUpDialogOpen(false);
     setSelectedTab(0);
   };
+
+  const shouldBeDisabled = (values): boolean => {
+    const individualRequiredIssueTypes = [
+      GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL,
+      GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL,
+    ];
+    const householdRequiredIssueTypes = [GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD];
+    const isHouseholdRequired = householdRequiredIssueTypes.includes(
+      values.issueType,
+    );
+    const isIndividualRequired = individualRequiredIssueTypes.includes(
+      values.issueType,
+    );
+    let result = false;
+    if (isIndividualRequired) {
+      result = !selectedIndividual || !values.identityVerified;
+    } else if (isHouseholdRequired) {
+      result = !selectedHousehold || !values.identityVerified;
+    } else {
+      result = !values.identityVerified;
+    }
+    return result;
+  };
+
   return (
     <Formik
       initialValues={initialValues}
@@ -210,7 +234,7 @@ export const LookUpHouseholdIndividualModal = ({
                   onClick={async () => {
                     await submitForm();
                   }}
-                  disabled={values.identityVerified === false}
+                  disabled={shouldBeDisabled(values)}
                   data-cy='button-submit'
                 >
                   SAVE
