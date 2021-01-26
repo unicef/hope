@@ -310,7 +310,7 @@ class DeduplicateTask:
         query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
-
+        print(results)
         results_data = {
             "duplicates": [],
             "possible_duplicates": [],
