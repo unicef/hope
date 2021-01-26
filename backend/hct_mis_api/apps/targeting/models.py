@@ -381,6 +381,7 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
 
     def get_query(self):
         query = super().get_query()
+        print("QUERU", query)
         try:
             if (
                 self.target_population_final
@@ -447,9 +448,18 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
 
 
 class TargetingIndividualRuleFilterBlockMixin:
-    def __init__(self, individual_block_filters=None):
+    def __init__(self, individual_block_filters=None, only_head_of_household=None):
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
+        self.only_head_of_household = only_head_of_household
+        if (
+            hasattr(self, "targeting_criteria_rule")
+            and hasattr(self.targeting_criteria_rule.targeting_criteria, "target_population_candidate")
+            and self.targeting_criteria_rule.targeting_criteria.target_population_candidate.program
+        ):
+            self.only_head_of_household = (
+                not self.targeting_criteria_rule.targeting_criteria.target_population_candidate.program.individual_data_needed
+            )
 
     def get_criteria_string(self):
         filters = (
@@ -473,6 +483,9 @@ class TargetingIndividualRuleFilterBlockMixin:
             individuals_query &= ruleFilter.get_query()
         if not filtered:
             return Q()
+        if self.only_head_of_household:
+            # only filtering against heads of household
+            individuals_query &= Q(heading_household__isnull=False)
         households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
         return Q(id__in=households_id)
 
