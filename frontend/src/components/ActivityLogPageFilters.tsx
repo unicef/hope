@@ -9,15 +9,6 @@ import InputLabel from '../shared/InputLabel';
 import Select from '../shared/Select';
 import { ContainerWithBorder } from './ContainerWithBorder';
 
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
