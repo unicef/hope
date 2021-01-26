@@ -44,6 +44,9 @@ export const PaymentVerificationChart = ({
     legend: {
       position: 'bottom',
     },
+    tooltips: {
+      mode: 'point',
+    },
     scales: {
       xAxes: [
         {
