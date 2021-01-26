@@ -160,7 +160,10 @@ export function CreateTargetPopulation(): React.ReactElement {
           )}
           <Results />
           {values.criterias.length ? (
-            <CreateTable variables={getTargetingCriteriaVariables(values)} />
+            <CreateTable
+              variables={getTargetingCriteriaVariables(values)}
+              program={values.program}
+            />
           ) : (
             <PaperContainer>
               <Typography variant='h6'>
