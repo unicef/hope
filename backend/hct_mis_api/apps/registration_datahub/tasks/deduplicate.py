@@ -133,8 +133,8 @@ class DeduplicateTask:
     @classmethod
     def _prepare_households_and_roles_queries(cls, households_and_roles):
         """
-            Not needed
-            Not working
+        Not needed
+        Not working
         """
         queries = []
         for item in households_and_roles:
@@ -310,7 +310,7 @@ class DeduplicateTask:
         query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
-        print(results)
+        print("Result", results)
         results_data = {
             "duplicates": [],
             "possible_duplicates": [],
@@ -325,6 +325,7 @@ class DeduplicateTask:
                 "dob": individual_hit.birth_date,
             }
             if score >= duplicate_score:
+                print("duplicate")
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
@@ -336,6 +337,7 @@ class DeduplicateTask:
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
+        print("duplicate", duplicates, possible_duplicates)
         return (
             duplicates,
             possible_duplicates,
