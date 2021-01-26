@@ -14,7 +14,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
-
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function filtersToVariables(filters) {
   const variables: { module?: string; search?: string } = {};
   if (filters.module !== '') {
@@ -48,14 +48,6 @@ export const ActivityLogPage = (): React.ReactElement => {
   const [filters, setFilters] = useState({ search: null, module: '' });
   const debouncedFilters = useDebounce(filters, 700);
   useEffect(() => {
-    console.log('xD', {
-      businessArea,
-      first: rowsPerPage,
-      last: undefined,
-      after: undefined,
-      before: undefined,
-      ...filtersToVariables(debouncedFilters),
-    });
     refetch({
       businessArea,
       first: rowsPerPage,
