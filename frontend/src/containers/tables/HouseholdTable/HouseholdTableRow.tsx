@@ -55,7 +55,7 @@ export function HouseHoldTableRow({
         {formatCurrency(household.totalCashReceived)}
       </TableCell>
       <TableCell align='right'>
-        <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
+        <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );
