@@ -453,15 +453,6 @@ class TargetingIndividualRuleFilterBlockMixin:
         if target_only_hoh is not None:
             self.target_only_hoh = target_only_hoh
 
-        # if (
-        #     hasattr(self, "targeting_criteria_rule")
-        #     and hasattr(self.targeting_criteria_rule.targeting_criteria, "target_population_candidate")
-        #     and self.targeting_criteria_rule.targeting_criteria.target_population_candidate.program
-        # ):
-        #     self.only_head_of_household = (
-        #         not self.targeting_criteria_rule.targeting_criteria.target_population_candidate.program.individual_data_needed
-        #     )
-
     def get_criteria_string(self):
         filters = (
             self.individual_block_filters
