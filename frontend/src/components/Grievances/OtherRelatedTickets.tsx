@@ -117,7 +117,7 @@ export const OtherRelatedTickets = ({
       </Title>
       <Box display='flex' flexDirection='column'>
         <LabelizedField
-          label={`For Household ${householdTickets[0].node.household?.unicefId} `}
+          label={`For Household ${householdTickets[0]?.node?.household?.unicefId} `}
         >
           <>{renderIds(openHouseholdTickets)}</>
         </LabelizedField>
@@ -136,7 +136,7 @@ export const OtherRelatedTickets = ({
           <Box mb={3} mt={3}>
             <Typography>Closed Tickets</Typography>
             <LabelizedField
-              label={`For Household ${closedHouseholdTickets[0].node.household?.unicefId} `}
+              label={`For Household ${closedHouseholdTickets[0]?.node?.household?.unicefId} `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>
