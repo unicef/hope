@@ -15,9 +15,9 @@ import {
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../utils/utils';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
-import { getFullNodeFromEdgesById } from '../../utils/utils';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
