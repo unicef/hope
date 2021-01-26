@@ -55,6 +55,9 @@ export const TotalAmountPlannedAndTransferredByCountryChart = (): React.ReactEle
     legend: {
       position: 'bottom',
     },
+    tooltips: {
+      mode: 'point',
+    },
     scales: {
       xAxes: [
         {
