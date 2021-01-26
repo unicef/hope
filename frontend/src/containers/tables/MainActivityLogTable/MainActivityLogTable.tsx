@@ -11,9 +11,9 @@ import {
   ButtonPlaceHolder,
   Row,
 } from '../../../components/ActivityLogTable/TableStyledComponents';
+import { useArrayToDict } from '../../../hooks/useArrayToDict';
 import { MainActivityLogTableRow } from './MainActivityLogTableRow';
 import { headCells } from './MainActivityLogTableHeadCells';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
 
 const Table = styled.div`
   display: flex;
@@ -22,7 +22,6 @@ const Table = styled.div`
 const HeadingCell = styled.div`
   display: flex;
   flex: ${({ weight }) => weight || 1};
-
   padding: 16px;
   font-size: 12px;
   text-align: left;
