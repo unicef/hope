@@ -410,7 +410,7 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
-        # print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
+        print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
