@@ -14,3 +14,19 @@ phonetic_analyzer = analyzer(
     tokenizer=tokenizer("standard"),
     filter=["lowercase", phonetic_filter],
 )
+
+name_synonym_analyzer_token_filter = token_filter(
+    'synonym_tokenfilter',
+    'synonym',
+    synonyms_path="synonyms.txt",
+)
+
+
+name_synonym_analyzer = analyzer(
+    'text_analyzer',
+    tokenizer='standard',
+    filter=[
+        'lowercase',
+        name_synonym_analyzer_token_filter,
+    ],
+)
