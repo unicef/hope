@@ -117,6 +117,9 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "status",
             "total_households",
             "total_family_size",
+            "program__id",
+            "final_list_total_households",
+            "candidate_list_total_households"
         )
     )
 
