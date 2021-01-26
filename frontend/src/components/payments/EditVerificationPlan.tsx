@@ -55,6 +55,49 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function prepareVariables(
+  cashPlanVerificationId,
+  selectedTab,
+  values,
+  businessArea,
+) {
+  return {
+    input: {
+      cashPlanPaymentVerificationId: cashPlanVerificationId,
+      sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
+      fullListArguments:
+        selectedTab === 0
+          ? {
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
+          : null,
+      verificationChannel: values.verificationChannel,
+      rapidProArguments:
+        values.verificationChannel === 'RAPIDPRO'
+          ? {
+              flowId: values.rapidProFlow,
+            }
+          : null,
+      randomSamplingArguments:
+        selectedTab === 1
+          ? {
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
+          : null,
+      businessAreaSlug: businessArea,
+    },
+  };
+}
+
 export interface Props {
   cashPlanVerificationId: string;
   cashPlanId: string;
@@ -85,8 +128,8 @@ export function EditVerificationPlan({
   const initialValues = {
     confidenceInterval: verification.confidenceInterval * 100 || 95,
     marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || 0,
-    filterAgeMax: verification.ageFilter?.max || 0,
+    filterAgeMin: verification.ageFilter?.min || null,
+    filterAgeMax: verification.ageFilter?.max || null,
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
@@ -110,36 +153,18 @@ export function EditVerificationPlan({
       businessArea,
     },
   });
-
+  const variablesForSampleSizeQuery = prepareVariables(
+    cashPlanVerificationId,
+    selectedTab,
+    formValues,
+    businessArea,
+  );
+  delete variablesForSampleSizeQuery.input.cashPlanPaymentVerificationId;
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  variablesForSampleSizeQuery.input.cashPlanId = cashPlanId;
   const { data: sampleSizesData, refetch } = useSampleSizeQuery({
-    variables: {
-      input: {
-        cashPlanId,
-        sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-        businessAreaSlug: businessArea,
-        fullListArguments:
-          selectedTab === 0
-            ? {
-                excludedAdminAreas: formValues.excludedAdminAreasFull,
-              }
-            : null,
-        randomSamplingArguments:
-          selectedTab === 1
-            ? {
-                confidenceInterval: Number(
-                  (formValues.confidenceInterval * 0.01).toFixed(2),
-                ),
-                marginOfError: formValues.marginOfError * 0.01,
-                excludedAdminAreas: formValues.excludedAdminAreasRandom,
-                age: {
-                  min: formValues.filterAgeMin || null,
-                  max: formValues.filterAgeMax || null,
-                },
-                sex: formValues.filterSex,
-              }
-            : null,
-      },
-    },
+    variables: variablesForSampleSizeQuery,
   });
 
   useEffect(() => {
@@ -150,40 +175,12 @@ export function EditVerificationPlan({
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
-      variables: {
-        input: {
-          cashPlanPaymentVerificationId: cashPlanVerificationId,
-          sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-          fullListArguments:
-            selectedTab === 0
-              ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull || [],
-                }
-              : null,
-          verificationChannel: values.verificationChannel,
-          rapidProArguments:
-            values.verificationChannel === 'RAPIDPRO'
-              ? {
-                  flowId: values.rapidProFlow,
-                }
-              : null,
-          randomSamplingArguments:
-            selectedTab === 1
-              ? {
-                  confidenceInterval: values.confidenceInterval * 0.01,
-                  marginOfError: values.marginOfError * 0.01,
-                  excludedAdminAreas: values.adminCheckbox
-                    ? values.excludedAdminAreasRandom
-                    : [],
-                  age: values.ageCheckbox
-                    ? { min: values.filterAgeMin, max: values.filterAgeMax }
-                    : null,
-                  sex: values.sexCheckbox ? values.filterSex : null,
-                }
-              : null,
-          businessAreaSlug: businessArea,
-        },
-      },
+      variables: prepareVariables(
+        cashPlanVerificationId,
+        selectedTab,
+        values,
+        businessArea,
+      ),
       refetchQueries: () => [
         { query: CashPlan, variables: { id: cashPlanId } },
       ],

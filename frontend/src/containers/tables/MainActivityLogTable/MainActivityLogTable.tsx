@@ -22,7 +22,6 @@ const Table = styled.div`
 const HeadingCell = styled.div`
   display: flex;
   flex: ${({ weight }) => weight || 1};
-
   padding: 16px;
   font-size: 12px;
   text-align: left;

@@ -1,23 +1,24 @@
-import graphene
+import datetime
+
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
+
+import graphene
 from django_filters import (
-    FilterSet,
     CharFilter,
-    ModelMultipleChoiceFilter,
-    OrderingFilter,
-    MultipleChoiceFilter,
-    TypedMultipleChoiceFilter,
     ChoiceFilter,
+    FilterSet,
     ModelChoiceFilter,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+    OrderingFilter,
+    TypedMultipleChoiceFilter,
     UUIDFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-
-import datetime
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -26,34 +27,40 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    _INDIVIDUAL,
     _HOUSEHOLD,
+    _INDIVIDUAL,
+    CORE_FIELDS_ATTRIBUTES,
     FIELDS_EXCLUDED_FROM_RDI,
-    XLSX_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
+    XLSX_ONLY_FIELDS,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
-from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr, chart_map_choices, chart_get_filtered_qs
+from hct_mis_api.apps.core.utils import (
+    chart_get_filtered_qs,
+    chart_map_choices,
+    choices_to_dict,
+    nested_getattr,
+    to_choice_object,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketNote,
-    TicketSensitiveDetails,
+    TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
+    TicketNote,
     TicketPaymentVerificationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -100,7 +107,7 @@ class GrievanceTicketFilter(FilterSet):
         fields=(
             "id",
             "status",
-            "assigned_to__first_name",
+            "assigned_to__last_name",
             "category",
             "created_at",
             "households_count",
@@ -516,9 +523,7 @@ class Query(graphene.ObjectType):
         filterset_class=TicketNoteFilter,
     )
     chart_grievances = graphene.Field(
-        ChartGrievanceTicketsNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        ChartGrievanceTicketsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
@@ -647,15 +652,13 @@ class Query(graphene.ObjectType):
 
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket,
-            year,
-            business_area_slug_filter={'business_area__slug': business_area_slug}
+            GrievanceTicket, year, business_area_slug_filter={"business_area__slug": business_area_slug}
         )
         grievance_status_labels = [
             "Resolved",
             "Unresolved",
             "Unresolved for longer than 30 days",
-            "Unresolved for longer than 60 days"
+            "Unresolved for longer than 60 days",
         ]
 
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
@@ -669,12 +672,11 @@ class Query(graphene.ObjectType):
                     grievance_tickets.filter(
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
                         created_at__lte=days_30_from_now,
-                        created_at__gt=days_60_from_now
+                        created_at__gt=days_60_from_now,
                     ).count(),  # Unresolved for longer than 30 daysxwxw
                     grievance_tickets.filter(
-                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__lte=days_60_from_now
-                    ).count()  # Unresolved for longer than 60 days
+                        ~Q(status=GrievanceTicket.STATUS_CLOSED), created_at__lte=days_60_from_now
+                    ).count(),  # Unresolved for longer than 60 days
                 ]
             },
         ]
