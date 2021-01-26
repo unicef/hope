@@ -45,6 +45,7 @@ export function CandidateListTab({
             ...getTargetingCriteriaVariables({
               criterias: values.candidateListCriterias,
             }),
+            program: selectedProgram?.id,
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'
