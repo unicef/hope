@@ -70,6 +70,7 @@ const initialValues = {
   sexCheckbox: false,
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
   const variables = {
     input: {
