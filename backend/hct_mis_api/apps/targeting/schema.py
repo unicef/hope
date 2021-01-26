@@ -1,3 +1,4 @@
+from typing import Union
 import django_filters
 import graphene
 from django.db.models import Q, Prefetch
@@ -119,7 +120,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "total_family_size",
             "program__id",
             "final_list_total_households",
-            "candidate_list_total_households"
+            "candidate_list_total_households",
         )
     )
 
@@ -243,9 +244,10 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
 
 
-def targeting_criteria_object_type_to_query(targeting_criteria_object_type, program):
+def targeting_criteria_object_type_to_query(targeting_criteria_object_type, program: Union[str, Program]):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
-    program = decode_and_get_object(program, Program, True)
+    if not isinstance(program, Program):
+        program = decode_and_get_object(program, Program, True)
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
     for rule in targeting_criteria_object_type.get("rules", []):
         targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
@@ -345,7 +347,7 @@ class Query(graphene.ObjectType):
             return (
                 prefetch_selections(
                     target_population_model.households.filter(
-                        targeting_criteria_object_type_to_query(targeting_criteria)
+                        targeting_criteria_object_type_to_query(targeting_criteria, target_population_model.program)
                     ),
                     target_population_model,
                 )
