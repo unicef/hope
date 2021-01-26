@@ -1,4 +1,5 @@
 import mptt
+from django.conf import settings
 from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -29,7 +30,9 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code = models.CharField(max_length=10,)
+    code = models.CharField(
+        max_length=10,
+    )
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
@@ -37,7 +40,11 @@ class BusinessArea(TimeStampedUUIDModel):
     kobo_token = models.CharField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True)
     rapid_pro_api_key = models.CharField(max_length=40, null=True)
-    slug = models.CharField(max_length=250, unique=True, db_index=True,)
+    slug = models.CharField(
+        max_length=250,
+        unique=True,
+        db_index=True,
+    )
     has_data_sharing_agreement = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -72,7 +79,10 @@ class AdminAreaType(TimeStampedUUIDModel):
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
 
     business_area = models.ForeignKey(
-        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_types", null=True,
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_types",
+        null=True,
     )
 
     class Meta:
@@ -166,7 +176,10 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     label = JSONField(default=dict)
     hint = JSONField(default=dict)
     group = models.ForeignKey(
-        "core.FlexibleAttributeGroup", on_delete=models.CASCADE, related_name="flex_attributes", null=True,
+        "core.FlexibleAttributeGroup",
+        on_delete=models.CASCADE,
+        related_name="flex_attributes",
+        null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
 
@@ -210,6 +223,43 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
-# auditlog.register(FlexibleAttributeChoice)
-# auditlog.register(FlexibleAttributeGroup)
-# auditlog.register(FlexibleAttribute)
+
+class XLSXKoboTemplateManager(models.Manager):
+    def latest_valid(self):
+        return (
+            self.get_queryset()
+            .filter(status=self.model.SUCCESSFUL)
+            .exclude(template_id__exact="")
+            .order_by("-created_at")
+            .first()
+        )
+
+
+class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
+    SUCCESSFUL = "SUCCESSFUL"
+    UNSUCCESSFUL = "UNSUCCESSFUL"
+    PROCESSING = "PROCESSING"
+    KOBO_FORM_UPLOAD_STATUS_CHOICES = (
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (PROCESSING, _("Processing")),
+    )
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    objects = XLSXKoboTemplateManager()
+
+    file_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    file = models.FileField()
+    error_description = models.TextField(blank=True)
+    status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+    template_id = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.file_name} - {self.created_at}"

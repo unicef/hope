@@ -10,13 +10,14 @@ from model_utils.models import SoftDeletableModel
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 
 class Program(
     SoftDeletableModel,
     TimeStampedUUIDModel,
     AbstractSyncable,
+    ConcurrencyModel
 ):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [

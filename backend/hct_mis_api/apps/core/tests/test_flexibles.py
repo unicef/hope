@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.contrib.admin import AdminSite
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+from xlrd import XLRDError
 
-from hct_mis_api.apps.core.admin import FlexibleAttributeAdmin
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
@@ -14,23 +13,9 @@ class MockSuperUser:
 
 
 class TestFlexibles(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-        site = AdminSite()
-        self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
-
     def load_xls(self, name):
-        with open(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}",
-            "rb",
-        ) as f:
-            file_upload = SimpleUploadedFile("xls_file", f.read(), content_type="text/html")
-            data = {"xls_file": file_upload}
-        request = self.factory.post("import-xls/", data=data, format="multipart")
-        setattr(request, "session", "session")
-        messages = FallbackStorage(request)
-        setattr(request, "_messages", messages)
-        return self.admin.import_xls(request)
+        task = FlexibleAttributeImporter()
+        task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 
     def test_flexible_init_update_delete(self):
         self.load_xls("flex_init.xls")
@@ -177,31 +162,32 @@ class TestFlexibles(TestCase):
             },
         )
 
-        self.load_xls("flex_update_invalid_types.xls")
+        self.assertRaises(ValidationError, self.load_xls, "flex_update_invalid_types.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 1)
         self.assertEqual(len(attribs), 1)
 
     def test_flexibles_missing_name(self):
-        response = self.load_xls("flex_field_missing_name.xls")
-        self.assertContains(response, "Name is required")
+        self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_flexibles_missing_english_label(self):
-        response = self.load_xls("flex_field_missing_english_label.xls")
-        self.assertContains(response, "English label cannot be empty")
+        self.assertRaisesMessage(
+            ValidationError, "English label cannot be empty", self.load_xls, "flex_field_missing_english_label.xls"
+        )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_load_invalid_file(self):
-        response = self.load_xls("erd arrows.jpg")
-        self.assertContains(response, "Unsupported format, or corrupt file")
+        self.assertRaises(
+            XLRDError, self.load_xls, "erd arrows.jpg"
+        )
 
     def test_reimport_soft_deleted_objects(self):
         self.load_xls("flex_init_valid_types.xls")

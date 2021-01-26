@@ -130,9 +130,6 @@ export function HouseholdFilters({
                 'data-cy': 'filters-residence-status-options',
               }}
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {choicesData.residenceStatusChoices.map((program) => (
                 <MenuItem key={program.value} value={program.value}>
                   {program.name}

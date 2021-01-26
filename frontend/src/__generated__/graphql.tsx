@@ -18,6 +18,7 @@ export type Scalars = {
   UUID: any,
   Arg: any,
   DateTime: any,
+  BigInt: any,
   Date: any,
   FlexFieldsScalar: any,
   Decimal: any,
@@ -195,6 +196,7 @@ export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
+
 
 
 export type BusinessAreaNode = Node & {
@@ -439,6 +441,7 @@ export type CashPlanPaymentVerificationNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   status: CashPlanPaymentVerificationStatus,
   cashPlan: CashPlanNode,
   sampling: CashPlanPaymentVerificationSampling,
@@ -591,6 +594,7 @@ export type CopyTargetPopulationInput = {
 
 export type CopyTargetPopulationMutationInput = {
   targetPopulationData?: Maybe<CopyTargetPopulationInput>,
+  version?: Maybe<Scalars['BigInt']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -873,11 +877,13 @@ export type FullListArguments = {
 
 
 export type GetCashplanVerificationSampleSizeInput = {
-  cashPlanId: Scalars['ID'],
+  cashPlanId?: Maybe<Scalars['ID']>,
   sampling: Scalars['String'],
+  verificationChannel?: Maybe<Scalars['String']>,
   businessAreaSlug: Scalars['String'],
   fullListArguments?: Maybe<FullListArguments>,
   randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+  rapidProArguments?: Maybe<RapidProArguments>,
 };
 
 export type GetCashplanVerificationSampleSizeObject = {
@@ -902,6 +908,7 @@ export type GrievanceTicketNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   userModified?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   assignedTo?: Maybe<UserNode>,
@@ -1172,6 +1179,7 @@ export type HouseholdNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
   status: HouseholdStatus,
   consentSign: Scalars['String'],
   consent?: Maybe<Scalars['Boolean']>,
@@ -2271,6 +2279,7 @@ export type IndividualNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
   status: IndividualStatus,
   individualId: Scalars['String'],
   photo: Scalars['String'],
@@ -2648,18 +2657,21 @@ export type MutationsCreateGrievanceTicketArgs = {
 
 
 export type MutationsUpdateGrievanceTicketArgs = {
-  input: UpdateGrievanceTicketInput
+  input: UpdateGrievanceTicketInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsGrievanceStatusChangeArgs = {
   grievanceTicketId?: Maybe<Scalars['ID']>,
-  status?: Maybe<Scalars['Int']>
+  status?: Maybe<Scalars['Int']>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsCreateTicketNoteArgs = {
-  noteInput: CreateTicketNoteInput
+  noteInput: CreateTicketNoteInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2668,46 +2680,55 @@ export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
-  individualApproveData?: Maybe<Scalars['JSONString']>
+  individualApproveData?: Maybe<Scalars['JSONString']>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsApproveHouseholdDataChangeArgs = {
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
-  householdApproveData?: Maybe<Scalars['JSONString']>
+  householdApproveData?: Maybe<Scalars['JSONString']>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsApproveAddIndividualArgs = {
   approveStatus: Scalars['Boolean'],
-  grievanceTicketId: Scalars['ID']
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsApproveDeleteIndividualArgs = {
   approveStatus: Scalars['Boolean'],
-  grievanceTicketId: Scalars['ID']
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsApproveSystemFlaggingArgs = {
   approveStatus: Scalars['Boolean'],
-  grievanceTicketId: Scalars['ID']
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId: Scalars['ID']
+  selectedIndividualId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsReassignRoleArgs = {
   grievanceTicketId: Scalars['ID'],
   householdId: Scalars['ID'],
+  householdVersion?: Maybe<Scalars['BigInt']>,
   individualId: Scalars['ID'],
-  role: Scalars['String']
+  individualVersion?: Maybe<Scalars['BigInt']>,
+  role: Scalars['String'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2717,7 +2738,8 @@ export type MutationsCreateCashPlanPaymentVerificationArgs = {
 
 
 export type MutationsEditCashPlanPaymentVerificationArgs = {
-  input: EditCashPlanPaymentVerificationInput
+  input: EditCashPlanPaymentVerificationInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2728,31 +2750,36 @@ export type MutationsImportXlsxCashPlanVerificationArgs = {
 
 
 export type MutationsActivateCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID']
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsFinishCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID']
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsDiscardCashPlanPaymentVerificationArgs = {
-  cashPlanVerificationId: Scalars['ID']
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
   paymentVerificationId: Scalars['ID'],
   receivedAmount: Scalars['Decimal'],
-  status?: Maybe<PaymentVerificationStatusForUpdate>
+  status?: Maybe<PaymentVerificationStatusForUpdate>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
   paymentVerificationId: Scalars['ID'],
   received: Scalars['Boolean'],
-  receivedAmount: Scalars['Decimal']
+  receivedAmount: Scalars['Decimal'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2762,7 +2789,8 @@ export type MutationsCreateTargetPopulationArgs = {
 
 
 export type MutationsUpdateTargetPopulationArgs = {
-  input: UpdateTargetPopulationInput
+  input: UpdateTargetPopulationInput,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2777,17 +2805,20 @@ export type MutationsDeleteTargetPopulationArgs = {
 
 
 export type MutationsApproveTargetPopulationArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsUnapproveTargetPopulationArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsFinalizeTargetPopulationArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2802,7 +2833,8 @@ export type MutationsCreateProgramArgs = {
 
 
 export type MutationsUpdateProgramArgs = {
-  programData?: Maybe<UpdateProgramInput>
+  programData?: Maybe<UpdateProgramInput>,
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2839,12 +2871,14 @@ export type MutationsSaveKoboImportDataArgs = {
 
 
 export type MutationsMergeRegistrationDataImportArgs = {
-  id: Scalars['ID']
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
 export type MutationsRerunDedupeArgs = {
-  registrationDataImportDatahubId: Scalars['ID']
+  registrationDataImportDatahubId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
 };
 
 
@@ -2885,6 +2919,7 @@ export type PaymentRecordNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   businessArea: UserBusinessAreaNode,
   status: PaymentRecordStatus,
   statusDate: Scalars['DateTime'],
@@ -2962,6 +2997,7 @@ export type PaymentVerificationNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
   paymentRecord: PaymentRecordNode,
   status: PaymentVerificationStatus,
@@ -3018,6 +3054,7 @@ export type ProgramNode = Node & {
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
   lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
   name: Scalars['String'],
   status: ProgramStatus,
   startDate: Scalars['Date'],
@@ -3248,7 +3285,9 @@ export type QueryAllLogEntriesArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   objectId?: Maybe<Scalars['UUID']>,
-  businessArea: Scalars['String']
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
 };
 
 
@@ -3897,6 +3936,7 @@ export type RegistrationDataImportNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
   name: Scalars['String'],
   status: RegistrationDataImportStatus,
   importDate: Scalars['DateTime'],
@@ -4297,6 +4337,7 @@ export type ServiceProviderNodeEdge = {
 export type SetSteficonRuleOnTargetPopulationMutationInput = {
   targetId: Scalars['ID'],
   steficonRuleId?: Maybe<Scalars['ID']>,
+  version?: Maybe<Scalars['BigInt']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -4475,6 +4516,7 @@ export type TargetPopulationNode = Node & {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   isRemoved: Scalars['Boolean'],
+  version: Scalars['BigInt'],
   name: Scalars['String'],
   caId?: Maybe<Scalars['String']>,
   caHashId?: Maybe<Scalars['String']>,
@@ -6056,7 +6098,8 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
 );
 
 export type UpdateProgramMutationVariables = {
-  programData: UpdateProgramInput
+  programData: UpdateProgramInput,
+  version: Scalars['BigInt']
 };
 
 
@@ -6456,7 +6499,9 @@ export type AllLogEntriesQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
 };
 
 
@@ -7342,7 +7387,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
   )> }
 );
 
@@ -10200,8 +10245,8 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult =
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
 export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
 export const UpdateProgramDocument = gql`
-    mutation UpdateProgram($programData: UpdateProgramInput!) {
-  updateProgram(programData: $programData) {
+    mutation UpdateProgram($programData: UpdateProgramInput!, $version: BigInt!) {
+  updateProgram(programData: $programData, version: $version) {
     program {
       id
       name
@@ -10256,6 +10301,7 @@ export function withUpdateProgram<TProps, TChildProps = {}>(operationOptions?: A
  * const [updateProgramMutation, { data, loading, error }] = useUpdateProgramMutation({
  *   variables: {
  *      programData: // value for 'programData'
+ *      version: // value for 'version'
  *   },
  * });
  */
@@ -11189,8 +11235,8 @@ export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQ
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
 export const AllLogEntriesDocument = gql`
-    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int) {
-  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea) {
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11263,6 +11309,8 @@ export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: A
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      search: // value for 'search'
+ *      module: // value for 'module'
  *   },
  * });
  */
@@ -13149,6 +13197,7 @@ export const ProgramDocument = gql`
     totalNumberOfHouseholds
     administrativeAreasOfImplementation
     individualDataNeeded
+    version
   }
 }
     `;
@@ -14805,6 +14854,7 @@ export type ResolversTypes = {
   HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
   HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
   HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
   HouseholdStatus: HouseholdStatus,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
@@ -14971,6 +15021,7 @@ export type ResolversTypes = {
   FullListArguments: FullListArguments,
   RandomSamplingArguments: RandomSamplingArguments,
   AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
   BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
   BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
@@ -15061,7 +15112,6 @@ export type ResolversTypes = {
   NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
   ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
@@ -15138,6 +15188,7 @@ export type ResolversParentTypes = {
   HouseholdNodeConnection: HouseholdNodeConnection,
   HouseholdNodeEdge: HouseholdNodeEdge,
   HouseholdNode: HouseholdNode,
+  BigInt: Scalars['BigInt'],
   HouseholdStatus: HouseholdStatus,
   HouseholdResidenceStatus: HouseholdResidenceStatus,
   IndividualNodeConnection: IndividualNodeConnection,
@@ -15304,6 +15355,7 @@ export type ResolversParentTypes = {
   FullListArguments: FullListArguments,
   RandomSamplingArguments: RandomSamplingArguments,
   AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
   GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
   BusinessAreaNodeConnection: BusinessAreaNodeConnection,
   BusinessAreaNodeEdge: BusinessAreaNodeEdge,
@@ -15394,7 +15446,6 @@ export type ResolversParentTypes = {
   NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
   ReassignRoleMutation: ReassignRoleMutation,
   CreatePaymentVerificationInput: CreatePaymentVerificationInput,
-  RapidProArguments: RapidProArguments,
   CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
   EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
   EditPaymentVerificationMutation: EditPaymentVerificationMutation,
@@ -15518,6 +15569,10 @@ export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
   name: 'Arg'
 }
 
+export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
+  name: 'BigInt'
+}
+
 export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -15613,6 +15668,7 @@ export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentTy
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
   cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
   sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
@@ -15877,6 +15933,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   userModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -15937,6 +15994,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['HouseholdStatus'], ParentType, ContextType>,
   consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
@@ -16230,6 +16288,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['IndividualStatus'], ParentType, ContextType>,
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -16440,6 +16499,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
   statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -16484,6 +16544,7 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
   paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
@@ -16510,6 +16571,7 @@ export type ProgramNodeResolvers<ContextType = any, ParentType extends Resolvers
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
   startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
@@ -16713,6 +16775,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['RegistrationDataImportStatus'], ParentType, ContextType>,
   importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
@@ -17065,6 +17128,7 @@ export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends 
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -17461,6 +17525,7 @@ export type Resolvers<ContextType = any> = {
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
+  BigInt?: GraphQLScalarType,
   BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
   BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
   BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,

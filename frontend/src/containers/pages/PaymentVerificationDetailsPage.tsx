@@ -51,8 +51,8 @@ const Title = styled.div`
 `;
 
 const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 `;
 
 const BorderLeftBox = styled.div`
@@ -259,8 +259,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <ChartContainer>
                     <Doughnut
-                      width={100}
-                      height={100}
+                      width={200}
+                      height={200}
                       options={{
                         maintainAspectRatio: false,
                         cutoutPercentage: 80,
@@ -273,8 +273,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [
-                              bankReconciliationSuccessPercentage,
-                              bankReconciliationErrorPercentage,
+                              bankReconciliationSuccessPercentage.toFixed(2),
+                              bankReconciliationErrorPercentage.toFixed(2),
                             ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],

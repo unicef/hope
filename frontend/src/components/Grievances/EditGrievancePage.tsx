@@ -208,11 +208,10 @@ export function EditGrievancePage(): React.ReactElement {
                 variables: { id: ticket.id },
               },
             ],
-          }).then((res) => {
-            return showMessage('Grievance Ticket edited.', {
-              pathname: `/${businessArea}/grievance-and-feedback/${res.data.updateGrievanceTicket.grievanceTicket.id}`,
-              historyMethod: 'push',
-            });
+          });
+          showMessage('Grievance Ticket edited.', {
+            pathname: `/${businessArea}/grievance-and-feedback/${ticket.id}`,
+            historyMethod: 'push',
           });
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
@@ -254,9 +253,7 @@ export function EditGrievancePage(): React.ReactElement {
                             setFieldValue('issueType', null);
                           }}
                           variant='outlined'
-                          choices={
-                            choicesData.grievanceTicketCategoryChoices
-                          }
+                          choices={choicesData.grievanceTicketCategoryChoices}
                           component={FormikSelectField}
                         />
                       </Grid>
