@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Paper } from '@material-ui/core';
 import { MainActivityLogTable } from '../tables/MainActivityLogTable/MainActivityLogTable';
@@ -8,10 +8,31 @@ import {
 } from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
 `;
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function filtersToVariables(filters) {
+  const variables: { module?: string; search?: string } = {};
+  if (filters.module !== '') {
+    variables.module = filters.module;
+  } else {
+    variables.module = undefined;
+  }
+  if (
+    filters.search !== '' &&
+    filters.search !== null &&
+    filters.search !== undefined
+  ) {
+    variables.search = filters.search;
+  } else {
+    variables.search = undefined;
+  }
+  return variables;
+}
 
 export const ActivityLogPage = (): React.ReactElement => {
   const [page, setPage] = useState(0);
@@ -24,6 +45,19 @@ export const ActivityLogPage = (): React.ReactElement => {
     },
     fetchPolicy: 'network-only',
   });
+  const [filters, setFilters] = useState({ search: null, module: '' });
+  const debouncedFilters = useDebounce(filters, 700);
+  useEffect(() => {
+    refetch({
+      businessArea,
+      first: rowsPerPage,
+      last: undefined,
+      after: undefined,
+      before: undefined,
+      ...filtersToVariables(debouncedFilters),
+    });
+    // eslint-disable-next-line
+  }, [debouncedFilters]);
   if (!data) {
     return null;
   }
@@ -33,6 +67,7 @@ export const ActivityLogPage = (): React.ReactElement => {
   return (
     <>
       <PageHeader title='Activity Log' />
+      <ActivityLogPageFilters filter={filters} onFilterChange={setFilters} />
       <StyledPaper>
         <MainActivityLogTable
           totalCount={data.allLogEntries.totalCount}
@@ -47,6 +82,7 @@ export const ActivityLogPage = (): React.ReactElement => {
               last: undefined,
               after: undefined,
               before: undefined,
+              ...filtersToVariables(debouncedFilters),
             };
             if (newPage < page) {
               variables.last = rowsPerPage;
@@ -68,6 +104,7 @@ export const ActivityLogPage = (): React.ReactElement => {
               after: undefined,
               last: undefined,
               before: undefined,
+              ...filtersToVariables(debouncedFilters),
             };
             refetch(variables);
           }}

@@ -160,9 +160,6 @@ export function LookUpIndividualFilters({
               label='Status'
               value={filter.status || []}
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {[
                 { value: 'ACTIVE', name: 'Active' },
                 { value: 'INACTIVE', name: 'Inactive' },

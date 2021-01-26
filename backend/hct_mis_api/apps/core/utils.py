@@ -2,6 +2,7 @@ from collections import MutableMapping, OrderedDict
 from typing import List
 
 from django.core.exceptions import ValidationError
+
 from django_filters import OrderingFilter
 
 
@@ -213,6 +214,7 @@ def get_combined_attributes():
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):
     import datetime as dt
+
     from django.db.models import Q
 
     query_dict = {}
@@ -380,6 +382,7 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
         from django.db.models.functions import Lower
+
         from django_filters.constants import EMPTY_VALUES
 
         if value in EMPTY_VALUES:
@@ -476,6 +479,15 @@ def to_snake_case(camel_case_string):
     return snake_case[0] + snake_case[1:].lower()
 
 
+def check_concurrency_version_in_mutation(version, target):
+    if version is None:
+        return
+    from graphql import GraphQLError
+
+    if version != target.version:
+        raise GraphQLError("Someone has modified this record")
+
+
 def update_labels_mapping(csv_file):
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
@@ -485,9 +497,11 @@ def update_labels_mapping(csv_file):
     csv_file: path to csv file, 2 columns needed (field name, english label)
     """
     import csv
-    import re
     import json
+    import re
+
     from django.conf import settings
+
     from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 
     with open(csv_file, newline="") as csv_file:
@@ -538,31 +552,13 @@ def update_labels_mapping(csv_file):
         print(new_content, file=f, end="")
 
 
-def chart_map_choices(choices):
-    return dict(choices)
+def xlrd_rows_iterator(sheet):
+    import xlrd
 
+    for row_number in range(1, sheet.nrows):
+        row = sheet.row(row_number)
 
-def chart_get_filtered_qs(obj, year, business_area_slug_filter=None, additional_filters=None):
-    if additional_filters is None:
-        additional_filters = {}
-    if business_area_slug_filter is None:
-        business_area_slug_filter = {}
-    return obj.objects.filter(
-        created_at__year=year,
-        **business_area_slug_filter,
-        **additional_filters
-    )
+        if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+            continue
 
-
-def parse_list_values_to_int(list_to_parse):
-    return list(map(lambda x: int(x or 0), list_to_parse))
-
-
-def sum_lists(qs_values, list_len):
-    data = [0] * list_len
-    for values in qs_values:
-        parsed_values = parse_list_values_to_int(values)
-        for i, value in enumerate(parsed_values):
-            data[i] += value
-
-    return data
+        yield row
