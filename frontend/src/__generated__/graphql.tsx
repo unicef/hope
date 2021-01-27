@@ -4371,6 +4371,7 @@ export type TargetingIndividualRuleFilterBlockNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   targetingCriteriaRule: TargetingCriteriaRuleNode,
+  targetOnlyHoh: Scalars['Boolean'],
   individualBlockFilters?: Maybe<Array<Maybe<TargetingIndividualBlockRuleFilterNode>>>,
 };
 
@@ -16732,6 +16733,7 @@ export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, P
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>>, ParentType, ContextType>,
 };
 
