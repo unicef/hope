@@ -1,10 +1,12 @@
 import json
 import logging
+from time import sleep
 
 from constance import config
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django_countries.fields import Country
+from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import to_dict
@@ -347,6 +349,15 @@ class DeduplicateTask:
         )
 
     @classmethod
+    def _wait_until_health_green(cls):
+        ok = False
+        while not ok:
+            health = connections.get_connection().cluster.health()
+            ok = health.get("status") == "green" and not health.get("timed_out")
+            log.info(f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')}")
+            sleep(5)
+
+    @classmethod
     def deduplicate_single_imported_individual(cls, individual):
         fields_names = (
             "given_name",
@@ -528,6 +539,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import, individuals=None):
+        cls._wait_until_health_green()
         if not registration_data_import:
             cls.business_area = individuals[0].business_area.slug
         else:
@@ -549,6 +561,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals):
+        cls._wait_until_health_green()
         cls.business_area = individuals[0].business_area.slug
         to_bulk_update_results = []
         for individual in individuals:
@@ -575,11 +588,11 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(
-        all_duplicates,
-        all_possible_duplicates,
-        to_bulk_update_results,
-        all_original_individuals_ids_duplicates,
-        all_original_individuals_ids_possible_duplicates,
+            all_duplicates,
+            all_possible_duplicates,
+            to_bulk_update_results,
+            all_original_individuals_ids_duplicates,
+            all_original_individuals_ids_possible_duplicates,
     ):
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
@@ -610,7 +623,7 @@ class DeduplicateTask:
             registration_data_import=registration_data_import_datahub
         )
         populate_index(imported_individuals, ImportedIndividualDocument)
-
+        cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
@@ -682,11 +695,12 @@ class DeduplicateTask:
             set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
 
             batch_amount_exceeded = (
-                len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
-            ) and imported_individuals.count() > 1
+                                            len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
+                                    ) and imported_individuals.count() > 1
             golden_record_amount_exceeded = (
-                len(set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
-            ) and imported_individuals.count() > 1
+                                                    len(
+                                                        set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
+                                            ) and imported_individuals.count() > 1
 
             checked_individuals_ids.append(imported_individual.id)
 
