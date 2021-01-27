@@ -419,3 +419,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const getFullNodeFromEdgesById = (edges, id: string) => {
+  if (!edges) return null;
+  return edges.find((edge) => edge.node.id === id)?.node || null;
+};

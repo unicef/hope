@@ -67,12 +67,16 @@ export function AddIndividualGrievanceDetails({
       );
     }) || [];
   const flexFieldLabes =
-    Object.entries(flexFields || {}).map(([key, value]) => {
+    Object.entries(flexFields || {}).map(([key, value]: [string, string|string[]]) => {
       let textValue = value;
       const fieldAttribute = fieldsDict[key];
       if (fieldAttribute.type === 'SELECT_ONE') {
         textValue = fieldAttribute.choices.find((item) => item.value === value)
           .labelEn;
+      }
+      if (fieldAttribute.type === 'SELECT_MANY') {
+          const values = fieldAttribute.choices.filter((item) => value.includes(item.value))
+          textValue = values.map((item) => item.labelEn).join(", ")
       }
       return (
         <Grid key={key} item xs={6}>

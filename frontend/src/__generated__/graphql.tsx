@@ -3523,6 +3523,7 @@ export type QueryAllTargetPopulationArgs = {
 
 export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
+  program: Scalars['ID'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -4323,7 +4324,6 @@ export type TargetingCriteriaRuleFilterObjectType = {
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments: Array<Maybe<Scalars['Arg']>>,
-  headOfHousehold?: Maybe<Scalars['Boolean']>,
 };
 
 export type TargetingCriteriaRuleNode = {
@@ -5971,7 +5971,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     )> }
   )> }
 );
@@ -7757,7 +7757,8 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   last?: Maybe<Scalars['Int']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  program: Scalars['ID']
 };
 
 
@@ -10058,6 +10059,7 @@ export const UpdateProgramDocument = gql`
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
       individualDataNeeded
+      version
     }
   }
 }
@@ -14295,8 +14297,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program) {
     edges {
       node {
         id
@@ -14357,6 +14359,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      before: // value for 'before'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      program: // value for 'program'
  *   },
  * });
  */
@@ -16290,7 +16293,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria'>>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program'>>,
   candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
