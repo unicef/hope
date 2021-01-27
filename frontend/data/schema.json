@@ -3411,6 +3411,16 @@
                 "defaultValue": null
               },
               {
+                "name": "household_AdminArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "age",
                 "description": null,
                 "type": {
@@ -16588,6 +16598,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TargetingCriteriaRuleNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetOnlyHoh",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
