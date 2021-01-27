@@ -14,6 +14,7 @@ def populate_index(queryset, doc, parallel=False):
     doc().update(qs, parallel=parallel)
 
 
+
 def _get_models(args):
     if args:
         models = []
