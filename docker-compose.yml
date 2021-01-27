@@ -53,12 +53,12 @@ services:
     command: "dev"
     depends_on:
       - db
-#      - redis
-#      - cash_assist_datahub_db
-#      - registration_datahub_db
-#      - elasticsearch
-#      - elasticsearch_test
-#      - airflow_webserver
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch
+      - elasticsearch_test
+      - airflow_webserver
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
