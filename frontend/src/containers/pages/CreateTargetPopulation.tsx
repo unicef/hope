@@ -22,6 +22,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { getFullNodeFromEdgesById } from '../../utils/utils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -70,9 +71,7 @@ export function CreateTargetPopulation(): React.ReactElement {
     },
   ];
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
   });
 
   return (
@@ -149,6 +148,10 @@ export function CreateTargetPopulation(): React.ReactElement {
                   helpers={arrayHelpers}
                   candidateListRules={values.criterias}
                   isEdit
+                  selectedProgram={getFullNodeFromEdgesById(
+                    allProgramsData?.allPrograms?.edges,
+                    values.program,
+                  )}
                 />
               )}
             />
@@ -157,7 +160,10 @@ export function CreateTargetPopulation(): React.ReactElement {
           )}
           <Results />
           {values.criterias.length ? (
-            <CreateTable variables={getTargetingCriteriaVariables(values)} />
+            <CreateTable
+              variables={getTargetingCriteriaVariables(values)}
+              program={values.program}
+            />
           ) : (
             <PaperContainer>
               <Typography variant='h6'>
