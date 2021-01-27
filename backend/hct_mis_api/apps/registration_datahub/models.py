@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from django_countries.fields import CountryField
 from multiselectfield import MultiSelectField
-from phonenumber_field.validators import validate_international_phonenumber
+from phonenumber_field.modelfields import PhoneNumberField
 from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -139,12 +139,8 @@ class ImportedIndividual(TimeStampedUUIDModel):
         max_length=255,
         choices=MARITAL_STATUS_CHOICE,
     )
-    phone_no = models.CharField(
-        max_length=128, validators=[validate_international_phonenumber], blank=True, default=BLANK
-    )
-    phone_no_alternative = models.CharField(
-        max_length=128, validators=[validate_international_phonenumber], blank=True, default=BLANK
-    )
+    phone_no = PhoneNumberField(blank=True, default=BLANK)
+    phone_no_alternative = PhoneNumberField(blank=True, default=BLANK)
     household = models.ForeignKey(
         "ImportedHousehold",
         null=True,
