@@ -1,10 +1,12 @@
 import json
 import logging
+from time import sleep
 
 from constance import config
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django_countries.fields import Country
+from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import to_dict
@@ -133,8 +135,8 @@ class DeduplicateTask:
     @classmethod
     def _prepare_households_and_roles_queries(cls, households_and_roles):
         """
-            Not needed
-            Not working
+        Not needed
+        Not working
         """
         queries = []
         for item in households_and_roles:
@@ -310,7 +312,7 @@ class DeduplicateTask:
         query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
-
+        print("Result", results)
         results_data = {
             "duplicates": [],
             "possible_duplicates": [],
@@ -324,7 +326,10 @@ class DeduplicateTask:
                 "location": individual_hit.admin2,  # + village
                 "dob": individual_hit.birth_date,
             }
+            print(individual_hit.full_name)
+            print("score", score, duplicate_score)
             if score >= duplicate_score:
+                print("duplicate")
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
@@ -336,6 +341,7 @@ class DeduplicateTask:
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
+        print("duplicate", duplicates, possible_duplicates)
         return (
             duplicates,
             possible_duplicates,
@@ -343,6 +349,22 @@ class DeduplicateTask:
             original_individuals_ids_possible_duplicates,
             results_data,
         )
+
+    @classmethod
+    def _wait_until_health_green(cls):
+        ok = False
+        while not ok:
+            health = connections.get_connection().cluster.health()
+            ok = (
+                health.get("status") == "green"
+                and not health.get("timed_out")
+                and health.get("number_of_pending_tasks") == 0
+            )
+            log.info(
+                f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')} "
+                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
+            )
+            sleep(5)
 
     @classmethod
     def deduplicate_single_imported_individual(cls, individual):
@@ -410,7 +432,7 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
-        # print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
+        print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
@@ -526,6 +548,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals(cls, registration_data_import, individuals=None):
+        cls._wait_until_health_green()
         if not registration_data_import:
             cls.business_area = individuals[0].business_area.slug
         else:
@@ -547,6 +570,7 @@ class DeduplicateTask:
 
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals):
+        cls._wait_until_health_green()
         cls.business_area = individuals[0].business_area.slug
         to_bulk_update_results = []
         for individual in individuals:
@@ -608,7 +632,7 @@ class DeduplicateTask:
             registration_data_import=registration_data_import_datahub
         )
         populate_index(imported_individuals, ImportedIndividualDocument)
-
+        cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
         cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
