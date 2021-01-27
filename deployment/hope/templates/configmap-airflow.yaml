@@ -13,7 +13,7 @@ data:
   DJANGO_ALLOWED_HOSTS: "{{.Values.ingress.host }},kubernetes.internal"
   DOMAIN: {{.Values.ingress.host }}
   ENV: {{ .Values.global.env }}
-  REDIS_INSTANCE: hope-redis-master
+  REDIS_INSTANCE: hope-main-redis-master
   C_FORCE_ROOT: "1"
   AIRFLOW__CORE__BROKER_URL: redis://hope-redis-master:6379/0
   AIRFLOW__CELERY__BROKER_URL: redis://hope-redis-master:6379/0
