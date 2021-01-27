@@ -1,8 +1,7 @@
 import xlrd
 from admin_extra_urls.extras import link, ExtraUrlMixin
-from adminfilters.filters import AllValuesComboFilter, RelatedFieldComboFilter
+from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter
 from django.contrib import admin
-from django.contrib.admin import ChoicesFieldListFilter
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms import forms
@@ -42,14 +41,6 @@ class BusinessAreaAdmin(admin.ModelAdmin):
         return bool(obj.kobo_token)
 
     kobo_is_enabled.boolean = True
-
-
-class ChoicesFieldComboFilter(ChoicesFieldListFilter):
-    template = 'adminfilters/combobox.html'
-
-
-class ChoicesFieldRadioFilter(ChoicesFieldListFilter):
-    template = 'adminfilters/fieldradio.html'
 
 
 @admin.register(FlexibleAttribute)
