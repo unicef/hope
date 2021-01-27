@@ -128,5 +128,6 @@ export const menuItems = [
     href: '/activity-log',
     selectedRegexp: /^\/test.*$/,
     icon: <TrackChangesIcon />,
+    permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
   },
 ];
