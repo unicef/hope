@@ -1,12 +1,15 @@
 import xlrd
 from admin_extra_urls.extras import link, ExtraUrlMixin
+from adminfilters.filters import AllValuesComboFilter, RelatedFieldComboFilter
 from django.contrib import admin
+from django.contrib.admin import ChoicesFieldListFilter
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.airflow_api import AirflowApi
@@ -26,22 +29,53 @@ class XLSImportForm(forms.Form):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "slug", "has_data_sharing_agreement", "rapidpro_is_enabled", "kobo_is_enabled")
+    search_fields = ("name",)
+    list_filter = ("has_data_sharing_agreement",)
+
+    def rapidpro_is_enabled(self, obj):
+        return bool(obj.rapid_pro_api_key)
+
+    rapidpro_is_enabled.boolean = True
+
+    def kobo_is_enabled(self, obj):
+        return bool(obj.kobo_token)
+
+    kobo_is_enabled.boolean = True
+
+
+class ChoicesFieldComboFilter(ChoicesFieldListFilter):
+    template = 'adminfilters/combobox.html'
+
+
+class ChoicesFieldRadioFilter(ChoicesFieldListFilter):
+    template = 'adminfilters/fieldradio.html'
 
 
 @admin.register(FlexibleAttribute)
 class FlexibleAttributeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("name", "type", "required", "is_removed")
+    list_filter = (("type", ChoicesFieldComboFilter),
+                   ("group", RelatedFieldComboFilter),
+                   "required", "associated_with", "is_removed")
+    search_fields = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(admin.ModelAdmin):
-    pass
+class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+    list_display = ("name", "required", "repeatable", "is_removed")
+    list_filter = ("required", "repeatable", "is_removed")
+    search_fields = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(FlexibleAttributeChoice)
 class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('list_name', 'name',)
+    search_fields = ('name',)
+    filter_horizontal = ('flex_attributes',)
+    ordering = ('list_name',)
 
 
 @admin.register(XLSXKoboTemplate)

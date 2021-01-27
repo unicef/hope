@@ -176,10 +176,10 @@ description = "Extra filters for django admin site"
 name = "django-adminfilters"
 optional = false
 python-versions = "*"
-version = "1.2.0"
+version = "1.3.0"
 
 [package.extras]
-dev = ["check-manifest", "coverage", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox", "pdbpp", "django", "autopep8", "check-manifest"]
+dev = ["check-manifest", "coverage", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox", "pdbpp", "django", "check-manifest", "pytest", "flake8"]
 test = ["check-manifest", "coverage", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox"]
 
 [[package]]
@@ -1275,7 +1275,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "65c8e2dfb5a52f93f059a72a6bf73a84890aac536f0859bdff15acca9aab0f12"
+content-hash = "a20ca8efb5812133bfbf620bd6f799a81014df097de6aa76b8fb07336e5c2700"
 python-versions = "3.7.3"
 
 [metadata.files]
@@ -1390,7 +1390,7 @@ django = [
     {file = "Django-2.2.16.tar.gz", hash = "sha256:62cf45e5ee425c52e411c0742e641a6588b7e8af0d2c274a27940931b2786594"},
 ]
 django-adminfilters = [
-    {file = "django-adminfilters-1.2.0.tar.gz", hash = "sha256:710e4607ad2d617150f13fa028cde8b2ac31d2175bdc3718f0b41d3dfc6d9aa8"},
+    {file = "django-adminfilters-1.3.0.tar.gz", hash = "sha256:33e4b00fa9bb59eacede64d2c4ad6fc3b46d89b7fc5c798cb5f5bb247e71a124"},
 ]
 django-appconf = [
     {file = "django-appconf-1.0.4.tar.gz", hash = "sha256:be58deb54a43d77d2e1621fe59f787681376d3cd0b8bd8e4758ef6c3a6453380"},
