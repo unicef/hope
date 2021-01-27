@@ -44,9 +44,9 @@ include_trailing_comma = true
 skip = "migrations"
 
 [tool.poetry]
-name = "HCT MIS Backend"
+name = "HOPE"
 version = "0.1.0"
-description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
+description = "HOPE is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
@@ -88,6 +88,7 @@ gevent = "20.9.0"
 PyJWT = "1.7.1"
 freezegun = "0.3.14"
 django-concurrency = "^2.2"
+django-adminfilters = "^1.2.0"
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"

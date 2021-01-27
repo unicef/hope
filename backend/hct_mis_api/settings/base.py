@@ -228,6 +228,7 @@ OTHER_APPS = [
     "django_elasticsearch_dsl",
     "constance",
     "admin_extra_urls",
+    "adminfilters",
     "multiselectfield",
     "mptt",
     "django_extensions",
