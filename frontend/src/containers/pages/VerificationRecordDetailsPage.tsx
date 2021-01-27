@@ -69,7 +69,13 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
   return (
     <div>
       {toolbar}
-      <VerificationRecordDetails paymentVerification={paymentVerification} />
+      <VerificationRecordDetails
+        paymentVerification={paymentVerification}
+        canViewActivityLog={hasPermissions(
+          PERMISSIONS.ACTIVITY_LOG_VIEW,
+          permissions,
+        )}
+      />
     </div>
   );
 }
