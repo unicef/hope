@@ -1,3 +1,4 @@
+from typing import Union
 import django_filters
 import graphene
 from django.db.models import Q, Prefetch
@@ -12,7 +13,7 @@ from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.schema import ExtendedConnection, FieldAttributeNode, ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, CustomOrderingFilter
+from hct_mis_api.apps.core.utils import decode_id_string, CustomOrderingFilter, decode_and_get_object
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
@@ -119,7 +120,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
             "total_family_size",
             "program__id",
             "final_list_total_households",
-            "candidate_list_total_households"
+            "candidate_list_total_households",
         )
     )
 
@@ -228,7 +229,6 @@ class TargetingCriteriaRuleFilterObjectType(graphene.InputObjectType):
     is_flex_field = graphene.Boolean(required=True)
     field_name = graphene.String(required=True)
     arguments = graphene.List(Arg, required=True)
-    head_of_household = graphene.Boolean(required=False)
 
 
 class TargetingIndividualRuleFilterBlockObjectType(graphene.InputObjectType):
@@ -244,8 +244,10 @@ class TargetingCriteriaObjectType(graphene.InputObjectType):
     rules = graphene.List(TargetingCriteriaRuleObjectType)
 
 
-def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
+def targeting_criteria_object_type_to_query(targeting_criteria_object_type, program: Union[str, Program]):
     TargetingCriteriaInputValidator.validate(targeting_criteria_object_type)
+    if not isinstance(program, Program):
+        program = decode_and_get_object(program, Program, True)
     targeting_criteria_querying = target_models.TargetingCriteriaQueryingMixin([])
     for rule in targeting_criteria_object_type.get("rules", []):
         targeting_criteria_rule_querying = target_models.TargetingCriteriaRuleQueryingMixin(
@@ -254,7 +256,9 @@ def targeting_criteria_object_type_to_query(targeting_criteria_object_type):
         for filter_dict in rule.get("filters", []):
             targeting_criteria_rule_querying.filters.append(target_models.TargetingCriteriaRuleFilter(**filter_dict))
         for individuals_filters_block_dict in rule.get("individuals_filters_blocks", []):
-            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin([])
+            individuals_filters_block = target_models.TargetingIndividualRuleFilterBlockMixin(
+                [], not program.individual_data_needed
+            )
             targeting_criteria_rule_querying.individuals_filters_blocks.append(individuals_filters_block)
             for individual_block_filter_dict in individuals_filters_block_dict.get("individual_block_filters", []):
                 individuals_filters_block.individual_block_filters.append(
@@ -281,6 +285,7 @@ class Query(graphene.ObjectType):
     golden_record_by_targeting_criteria = DjangoFilterConnectionField(
         HouseholdNode,
         targeting_criteria=TargetingCriteriaObjectType(required=True),
+        program=graphene.Argument(graphene.ID, required=True),
         filterset_class=HouseholdFilter,
     )
     candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
@@ -342,7 +347,7 @@ class Query(graphene.ObjectType):
             return (
                 prefetch_selections(
                     target_population_model.households.filter(
-                        targeting_criteria_object_type_to_query(targeting_criteria)
+                        targeting_criteria_object_type_to_query(targeting_criteria, target_population_model.program)
                     ),
                     target_population_model,
                 )
@@ -361,7 +366,7 @@ class Query(graphene.ObjectType):
             .all()
         )
 
-    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, **kwargs):
+    def resolve_golden_record_by_targeting_criteria(parent, info, targeting_criteria, program, **kwargs):
         return prefetch_selections(
-            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria))
+            Household.objects.filter(targeting_criteria_object_type_to_query(targeting_criteria, program))
         ).distinct()

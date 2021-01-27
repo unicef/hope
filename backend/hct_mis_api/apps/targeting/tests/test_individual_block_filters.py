@@ -12,7 +12,6 @@ from hct_mis_api.apps.targeting.models import (
     TargetingCriteriaQueryingMixin,
     TargetingCriteriaRuleQueryingMixin,
     TargetingIndividualRuleFilterBlockMixin,
-    TargetingCriteriaRuleFilter,
 )
 
 
@@ -43,7 +42,9 @@ class TestIndividualBlockFilter(TestCase):
         tcr = TargetingCriteriaRule()
         tcr.targeting_criteria = tc
         tcr.save()
-        individuals_filters_block = TargetingIndividualRuleFilterBlock(targeting_criteria_rule=tcr)
+        individuals_filters_block = TargetingIndividualRuleFilterBlock(
+            targeting_criteria_rule=tcr, target_only_hoh=False
+        )
         individuals_filters_block.save()
         married_rule_filter = TargetingIndividualBlockRuleFilter(
             individuals_filters_block=individuals_filters_block,
@@ -76,7 +77,7 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[MALE],
         )
         individuals_filters_block = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[married_rule_filter, sex_filter]
+            individual_block_filters=[married_rule_filter, sex_filter], target_only_hoh=False
         )
         tcr = TargetingCriteriaRuleQueryingMixin(filters=[], individuals_filters_blocks=[individuals_filters_block])
         tc = TargetingCriteriaQueryingMixin(rules=[tcr])
@@ -107,10 +108,10 @@ class TestIndividualBlockFilter(TestCase):
             arguments=[FEMALE],
         )
         individuals_filters_block1 = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[married_rule_filter, female_sex_filter]
+            individual_block_filters=[married_rule_filter, female_sex_filter], target_only_hoh=False
         )
         individuals_filters_block2 = TargetingIndividualRuleFilterBlockMixin(
-            individual_block_filters=[single_rule_filter, male_sex_filter]
+            individual_block_filters=[single_rule_filter, male_sex_filter], target_only_hoh=False
         )
         tcr = TargetingCriteriaRuleQueryingMixin(
             filters=[], individuals_filters_blocks=[individuals_filters_block1, individuals_filters_block2]
