@@ -453,13 +453,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please create Verification Plan
         </BottomTitle>
       ) : null}
-      {cashPlan.verifications?.edges[0]?.node?.id && (
-        <TableWrapper>
-          <UniversalActivityLogTable
-            objectId={cashPlan.verifications.edges[0].node.id}
-          />
-        </TableWrapper>
-      )}
+      {cashPlan.verifications?.edges[0]?.node?.id &&
+        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable
+              objectId={cashPlan.verifications.edges[0].node.id}
+            />
+          </TableWrapper>
+        )}
     </>
   );
 }
