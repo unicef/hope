@@ -39,13 +39,13 @@ export function CandidateListTab({
         )}
       />
       <Results />
-      {values.candidateListCriterias.length ? (
+      {values.candidateListCriterias.length && selectedProgram ? (
         <TargetPopulationHouseholdTable
           variables={{
             ...getTargetingCriteriaVariables({
               criterias: values.candidateListCriterias,
             }),
-            program: selectedProgram?.id,
+            program: selectedProgram.id,
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'
