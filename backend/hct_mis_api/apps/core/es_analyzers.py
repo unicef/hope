@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from elasticsearch_dsl import token_filter, analyzer, tokenizer
 
@@ -11,10 +13,7 @@ phonetic_analyzer = analyzer(
     tokenizer=tokenizer("standard"),
     filter=["lowercase", phonetic_filter],
 )
-import os
 
-cwd = os.getcwd()
-print("path", os.path.join(settings.PROJECT_ROOT, "../data/synonyms.txt"))
 with open(os.path.join(settings.PROJECT_ROOT, "../data/synonyms.txt"), "r") as synonyms_file:
     synonyms = synonyms_file.readlines()
 
