@@ -75,6 +75,7 @@ export function FinishProgram({
           id: program.id,
           status: ProgramStatus.Finished,
         },
+        version: program.version,
       },
     });
     if (!response.errors && response.data.updateProgram) {

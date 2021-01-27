@@ -50,7 +50,7 @@ description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
 [tool.poetry.dependencies]
-python = "3.7.3"
+python = "3.9.1"
 Django = "2.2.16"
 django_compressor = "2.3"
 django-storages = { version = "1.8", extras = ["azure"] }
@@ -65,14 +65,12 @@ django-mptt = "0.11.0"
 django-extensions = "2.2.6"
 elasticsearch-dsl ="^7.0.0"
 django-elasticsearch-dsl = "7.1.4"
-scipy = "1.5.1"
 django-constance = { version = "2.7.0", extras = ["redis"] }
 django-auditlog = { git = "https://github.com/Tivix/django-auditlog.git", branch="master" }
 admin-extra-urls = "2.2.0"
 unittest-xml-reporting = "3.0.4"
 django-multiselectfield = "0.1.12"
 Jinja2 = "2.11.2"
-Pillow = "7.0.0"
 psycopg2 = "2.8.4"
 pycountry = "19.8.18"
 openpyxl = "3.0.3"
@@ -87,6 +85,7 @@ gunicorn = "20.0.4"
 gevent = "20.9.0"
 PyJWT = "1.7.1"
 freezegun = "0.3.14"
+django-concurrency = "^2.2"
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"
