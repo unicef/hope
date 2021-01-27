@@ -355,8 +355,15 @@ class DeduplicateTask:
         ok = False
         while not ok:
             health = connections.get_connection().cluster.health()
-            ok = health.get("status") == "green" and not health.get("timed_out")
-            log.info(f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')}")
+            ok = (
+                health.get("status") == "green"
+                and not health.get("timed_out")
+                and health.get("number_of_pending_tasks") == 0
+            )
+            log.info(
+                f"Check ES - status: {health.get('status')} timeout: {health.get('timed_out')} "
+                f"number of pending tasks:{health.get('number_of_pending_tasks')}"
+            )
             sleep(5)
 
     @classmethod
