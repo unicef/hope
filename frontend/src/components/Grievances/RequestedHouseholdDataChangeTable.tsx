@@ -167,7 +167,7 @@ export function RequestedHouseholdDataChangeTable({
   const householdData = {
     ...ticket.householdDataUpdateTicketDetails.householdData,
   };
-  const flexFields = householdData.flex_fields;
+  const flexFields = householdData.flex_fields || {};
   delete householdData.flex_fields;
   const entries = Object.entries(householdData);
   const entriesFlexFields = Object.entries(flexFields);
