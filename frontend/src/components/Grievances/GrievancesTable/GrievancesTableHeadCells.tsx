@@ -21,7 +21,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'Assigned to',
-    id: 'assigned_to__first_name',
+    id: 'assigned_to__last_name',
     numeric: false,
     dataCy: 'assignedTo',
   },

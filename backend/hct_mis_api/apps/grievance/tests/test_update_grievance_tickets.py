@@ -230,7 +230,8 @@ class TestUpdateGrievanceTickets(APITestCase):
     )
     def test_update_add_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.add_individual_grievance_ticket.save()
         input_data = {
             "input": {
                 "description": self.add_individual_grievance_ticket.description,
@@ -299,7 +300,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             self.assertTrue(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
 
         self.assertEqual(result, expected_result)
-        self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        if name == "without_permission":
+            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        else:
+            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
 
     @parameterized.expand(
         [
@@ -316,7 +320,8 @@ class TestUpdateGrievanceTickets(APITestCase):
     )
     def test_update_change_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.individual_data_change_grievance_ticket.save()
         input_data = {
             "input": {
                 "description": self.individual_data_change_grievance_ticket.description,
@@ -397,7 +402,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "relationship": "UNKNOWN",
             }
         self.assertEqual(result, expected_result)
-        self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        if name == "without_permission":
+            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        else:
+            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
 
     @parameterized.expand(
         [
