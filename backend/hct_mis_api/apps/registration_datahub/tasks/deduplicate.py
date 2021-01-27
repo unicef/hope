@@ -326,6 +326,8 @@ class DeduplicateTask:
                 "location": individual_hit.admin2,  # + village
                 "dob": individual_hit.birth_date,
             }
+            print(individual_hit.full_name)
+            print("score", score, duplicate_score)
             if score >= duplicate_score:
                 print("duplicate")
                 duplicates.append(individual_hit.id)
@@ -588,11 +590,11 @@ class DeduplicateTask:
 
     @staticmethod
     def _mark_individuals(
-            all_duplicates,
-            all_possible_duplicates,
-            to_bulk_update_results,
-            all_original_individuals_ids_duplicates,
-            all_original_individuals_ids_possible_duplicates,
+        all_duplicates,
+        all_possible_duplicates,
+        to_bulk_update_results,
+        all_original_individuals_ids_duplicates,
+        all_original_individuals_ids_possible_duplicates,
     ):
         Individual.objects.filter(
             id__in=all_possible_duplicates + all_original_individuals_ids_possible_duplicates
@@ -695,12 +697,11 @@ class DeduplicateTask:
             set_of_all_original_individuals_ids_duplicates = set(all_original_individuals_ids_duplicates)
 
             batch_amount_exceeded = (
-                                            len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
-                                    ) and imported_individuals.count() > 1
+                len(set_of_all_duplicates) >= allowed_duplicates_batch_amount
+            ) and imported_individuals.count() > 1
             golden_record_amount_exceeded = (
-                                                    len(
-                                                        set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
-                                            ) and imported_individuals.count() > 1
+                len(set_of_all_original_individuals_ids_duplicates) >= allowed_duplicates_golden_record_amount
+            ) and imported_individuals.count() > 1
 
             checked_individuals_ids.append(imported_individual.id)
 
