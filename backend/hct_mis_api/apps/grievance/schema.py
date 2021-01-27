@@ -98,7 +98,7 @@ class GrievanceTicketFilter(FilterSet):
         fields=(
             "id",
             "status",
-            "assigned_to__first_name",
+            "assigned_to__last_name",
             "category",
             "created_at",
             "households_count",

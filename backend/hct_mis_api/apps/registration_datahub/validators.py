@@ -145,6 +145,14 @@ class ImportDataValidator(BaseValidator):
                         if is_xlsx is True:
                             error["row_number"] = row_number
                         invalid_rows.append(error)
+                    elif issuing_country and not value:
+                        error = {
+                            "header": key,
+                            "message": f"Number for {key} is required, when issuing country is provided",
+                        }
+                        if is_xlsx is True:
+                            error["row_number"] = row_number
+                        invalid_rows.append(error)
 
         return invalid_rows
 
@@ -165,6 +173,14 @@ class ImportDataValidator(BaseValidator):
                     error = {
                         "header": key,
                         "message": f"Issuing country is required: agency: {values['agency']} no: {value}",
+                    }
+                    if is_xlsx is True:
+                        error["row_number"] = row_number
+                    invalid_rows.append(error)
+                elif issuing_country and not value:
+                    error = {
+                        "header": key,
+                        "message": f"Number for {key} is required, when issuing country is provided",
                     }
                     if is_xlsx is True:
                         error["row_number"] = row_number

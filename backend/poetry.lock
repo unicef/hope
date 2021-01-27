@@ -209,6 +209,14 @@ rcssmin = "1.0.6"
 rjsmin = "1.1.0"
 
 [[package]]
+name = "django-concurrency"
+version = "2.2"
+description = "Optimistic lock implementation for Django. Prevents users from doing concurrent editing."
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "django-constance"
 version = "2.7.0"
 description = "Django live settings with pluggable backends, including Redis."
@@ -1209,7 +1217,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.7.3"
-content-hash = "a9ff7bef9d3ce9bca5973afa8bc41488ea6fe487e619c5bb1371e97bd1f2c2d9"
+content-hash = "596df69b65ee16173f3a974f63b6d45adf3a3da66931e50e26452064811d755b"
 
 [metadata.files]
 admin-extra-urls = [
@@ -1330,6 +1338,9 @@ django-auditlog = []
 django-compressor = [
     {file = "django_compressor-2.3-py2.py3-none-any.whl", hash = "sha256:da9ee5ce4fc8b9211dcecd2229520514a4ba9ac3bcdc59b48092ec4d7f6b96b0"},
     {file = "django_compressor-2.3.tar.gz", hash = "sha256:47c86347f75c64954a06afbbfc820a750619e10c23a49272b865020a407b7edd"},
+]
+django-concurrency = [
+    {file = "django-concurrency-2.2.tar.gz", hash = "sha256:655d7222b38dc840071285c96b94d59a52065c15e246ebeb5abd6c563a401cc8"},
 ]
 django-constance = [
     {file = "django-constance-2.7.0.tar.gz", hash = "sha256:62bdb1a3aef20d80e18d832b30ffcc6626762c538817a5a3571bcefa5a55c849"},
