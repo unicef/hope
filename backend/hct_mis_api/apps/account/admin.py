@@ -1,5 +1,5 @@
 from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter, AllValuesComboFilter
-from admin_extra_urls.extras import ExtraUrlMixin, link, action
+from admin_extra_urls.api import ExtraUrlMixin, action
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
@@ -128,7 +128,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
-    @link()
+    @action()
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 

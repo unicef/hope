@@ -1,4 +1,6 @@
 # Register your models here.
+from admin_extra_urls.api import action
+from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import TextFieldFilter, AllValuesComboFilter, AllValuesRadioFilter
 from django.contrib import admin
 
@@ -13,11 +15,15 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 
 
 @admin.register(Session)
-class SessionAdmin(admin.ModelAdmin):
+class SessionAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ('timestamp', 'id', 'source', 'status', 'last_modified_date', 'business_area')
     date_hierarchy = 'timestamp'
     list_filter = ('status', 'source', TextFieldFilter.factory('business_area'))
     ordering = 'timestamp',
+
+    @action
+    def inspect(self, pk):
+        pass
 
 
 @admin.register(CashPlan)
@@ -46,10 +52,9 @@ class ServiceProviderAdmin(admin.ModelAdmin):
     list_display = ('session', 'business_area', 'full_name', 'short_name', 'country')
     raw_id_fields = ('session',)
     date_hierarchy = 'session__timestamp'
-    search_fields = ('full_name', )
+    search_fields = ('full_name',)
     list_filter = (TextFieldFilter.factory('session__id'),
                    TextFieldFilter.factory('business_area'))
-
 
 
 @admin.register(Programme)
