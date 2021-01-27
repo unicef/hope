@@ -7,7 +7,7 @@ python-versions = "*"
 version = "7.0.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Disable App Nap on macOS >= 10.9"
 marker = "python_version >= \"3.4\" and sys_platform == \"darwin\""
 name = "appnope"
@@ -61,7 +61,7 @@ version = "2.9.0"
 pytz = ">=2015.7"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Specifications for callback functions passed in to an API"
 marker = "python_version >= \"3.4\""
 name = "backcall"
@@ -97,7 +97,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "4.0.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Cross-platform colored terminal text."
 marker = "python_version >= \"3.4\" and sys_platform == \"win32\""
 name = "colorama"
@@ -125,7 +125,7 @@ ssh = ["bcrypt (>=3.1.5)"]
 test = ["pytest (>=3.6.0,<3.9.0 || >3.9.0,<3.9.1 || >3.9.1,<3.9.2 || >3.9.2)", "pretend", "iso8601", "pytz", "hypothesis (>=1.11.4,<3.79.2 || >3.79.2)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Decorators for Humans"
 marker = "python_version >= \"3.4\""
 name = "decorator"
@@ -136,10 +136,11 @@ version = "4.4.2"
 [[package]]
 category = "main"
 description = "XML bomb protection for Python stdlib modules"
+marker = "python_version >= \"3.0\""
 name = "defusedxml"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "0.7.0rc1"
+version = "0.7.0rc2"
 
 [[package]]
 category = "main"
@@ -156,18 +157,6 @@ sqlparse = ">=0.2.2"
 [package.extras]
 argon2 = ["argon2-cffi (>=16.1.0)"]
 bcrypt = ["bcrypt"]
-
-[[package]]
-category = "main"
-description = "Django mixin to easily add urls to any ModelAdmin"
-name = "django-admin-extra-urls"
-optional = false
-python-versions = "*"
-version = "3.1"
-
-[package.extras]
-dev = ["autopep8", "check-manifest", "flake8", "pep8", "readme", "wheel", "sphinx", "coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
-tests = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytest", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "tox (>=2.3)", "wheel"]
 
 [[package]]
 category = "main"
@@ -637,7 +626,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.10"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "IPython-enabled pdb"
 name = "ipdb"
 optional = false
@@ -652,7 +641,7 @@ python = ">=3.4"
 version = ">=5.1.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "IPython: Productive Interactive Computing"
 marker = "python_version >= \"3.4\""
 name = "ipython"
@@ -685,7 +674,7 @@ qtconsole = ["qtconsole"]
 test = ["nose (>=0.10.1)", "requests", "testpath", "pygments", "nbformat", "ipykernel", "numpy (>=1.14)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Vestigial utilities from IPython"
 marker = "python_version >= \"3.4\""
 name = "ipython-genutils"
@@ -702,20 +691,20 @@ python-versions = "*"
 version = "1.4.1"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "An autocompletion tool for Python that can be used for text editors."
 marker = "python_version >= \"3.4\""
 name = "jedi"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "0.17.2"
+python-versions = ">=3.6"
+version = "0.18.0"
 
 [package.dependencies]
-parso = ">=0.7.0,<0.8.0"
+parso = ">=0.8.0,<0.9.0"
 
 [package.extras]
-qa = ["flake8 (3.7.9)"]
-testing = ["Django (<3.1)", "colorama", "docopt", "pytest (>=3.9.0,<5.0.0)"]
+qa = ["flake8 (3.8.3)", "mypy (0.782)"]
+testing = ["Django (<3.1)", "colorama", "docopt", "pytest (<6.0.0)"]
 
 [[package]]
 category = "main"
@@ -797,16 +786,18 @@ dev = ["jinja2"]
 [[package]]
 category = "main"
 description = "A Python Parser"
+marker = "python_version >= \"3.4\""
 name = "parso"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.7.1"
+python-versions = ">=3.6"
+version = "0.8.1"
 
 [package.extras]
-testing = ["docopt", "pytest (>=3.0.7)"]
+qa = ["flake8 (3.8.3)", "mypy (0.782)"]
+testing = ["docopt", "pytest (<6.0.0)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Pexpect allows easy control of interactive console applications."
 marker = "python_version >= \"3.4\" and sys_platform != \"win32\""
 name = "pexpect"
@@ -826,7 +817,7 @@ python-versions = "*"
 version = "8.11.1"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Tiny 'shelve'-like database with concurrency support"
 marker = "python_version >= \"3.4\""
 name = "pickleshare"
@@ -857,7 +848,7 @@ six = "*"
 test = ["pytest (>=2.7.3)", "pytest-cov", "coveralls", "futures", "pytest-benchmark", "mock"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Library for building powerful interactive command lines in Python"
 marker = "python_version >= \"3.4\""
 name = "prompt-toolkit"
@@ -877,7 +868,7 @@ python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 version = "2.8.4"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Run a subprocess in a pseudo terminal"
 marker = "python_version >= \"3.4\" and sys_platform != \"win32\""
 name = "ptyprocess"
@@ -896,13 +887,14 @@ version = "19.8.18"
 [[package]]
 category = "main"
 description = "C parser in Python"
+marker = "platform_python_implementation == \"CPython\" and sys_platform == \"win32\""
 name = "pycparser"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.20"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Pygments is a syntax highlighting package written in Python."
 marker = "python_version >= \"3.4\""
 name = "pygments"
@@ -1178,7 +1170,7 @@ python-versions = "*"
 version = "1.3"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Traitlets Python configuration system"
 marker = "python_version >= \"3.4\""
 name = "traitlets"
@@ -1214,15 +1206,16 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Python extension to run WebAssembly binaries"
+marker = "python_version >= \"3.5\" and platform_machine == \"x86_64\" and sys_platform == \"darwin\" or python_version >= \"3.5\" and platform_machine == \"x86_64\" and sys_platform == \"linux\""
 name = "wasmer"
 optional = false
 python-versions = "*"
-version = "0.4.1"
+version = "1.0.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Measures the displayed width of unicode strings in a terminal"
 marker = "python_version >= \"3.4\""
 name = "wcwidth"
@@ -1270,10 +1263,14 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "abe4f1b9bd22557cfb78eb66151d4e084527b360356cdfd2ff0237b14930b511"
+content-hash = "b3615bb58463840c0c4250dc74f764038d200573cbfdd2e36416d6be336ed4d0"
 python-versions = "3.7.3"
 
 [metadata.files]
+admin-extra-urls = [
+    {file = "admin-extra-urls-2.2.0.tar.gz", hash = "sha256:5b886ed045559f308d50f53f04b16a44fb2b1894e395dba6fb055306726a748f"},
+    {file = "admin_extra_urls-2.2.0-py2.py3-none-any.whl", hash = "sha256:75441038a916f0a5eb10d2c2a60c45aa2047b0e475d82a016408bad755bd9c78"},
+]
 aniso8601 = [
     {file = "aniso8601-7.0.0-py2.py3-none-any.whl", hash = "sha256:d10a4bf949f619f719b227ef5386e31f49a2b6d453004b21f02661ccc8670c7b"},
     {file = "aniso8601-7.0.0.tar.gz", hash = "sha256:513d2b6637b7853806ae79ffaca6f3e8754bdd547048f5ccc1420aec4b714f1e"},
@@ -1373,15 +1370,12 @@ decorator = [
     {file = "decorator-4.4.2.tar.gz", hash = "sha256:e3a62f0520172440ca0dcc823749319382e377f37f140a0b99ef45fecb84bfe7"},
 ]
 defusedxml = [
-    {file = "defusedxml-0.7.0rc1-py2.py3-none-any.whl", hash = "sha256:8ede8ba04cf5bf7999e1492fa77df545db83717f52c5eab625f97228ebd539bf"},
-    {file = "defusedxml-0.7.0rc1.tar.gz", hash = "sha256:aa621655d72cdd30f57073893b96cd0c3831a85b08b8e4954531bdac47e3e8c8"},
+    {file = "defusedxml-0.7.0rc2-py2.py3-none-any.whl", hash = "sha256:a034ed41d090f2348e4ac209fb3796b54728f7bf5ba326b2c5c599c293c80659"},
+    {file = "defusedxml-0.7.0rc2.tar.gz", hash = "sha256:24173aa6820e52524921533ff5af04bf5f0096f21c1628195ae59b44731acc5c"},
 ]
 django = [
     {file = "Django-2.2.16-py3-none-any.whl", hash = "sha256:83ced795a0f239f41d8ecabf51cc5fad4b97462a6008dc12e5af3cb9288724ec"},
     {file = "Django-2.2.16.tar.gz", hash = "sha256:62cf45e5ee425c52e411c0742e641a6588b7e8af0d2c274a27940931b2786594"},
-]
-django-admin-extra-urls = [
-    {file = "django-admin-extra-urls-3.1.tar.gz", hash = "sha256:74e0816132edb770a0d15bef84315dcf5ca8b0ee5ebcb6ce307827a582a5369b"},
 ]
 django-adminfilters = [
     {file = "django-adminfilters-1.3.1.tar.gz", hash = "sha256:5f016c7b3174e499dfad34afb4efb752bb20a47ffc58f88f1260fc7f21f31f37"},
@@ -1591,8 +1585,8 @@ jdcal = [
     {file = "jdcal-1.4.1.tar.gz", hash = "sha256:472872e096eb8df219c23f2689fc336668bdb43d194094b5cc1707e1640acfc8"},
 ]
 jedi = [
-    {file = "jedi-0.17.2-py2.py3-none-any.whl", hash = "sha256:98cc583fa0f2f8304968199b01b6b4b94f469a1f4a74c1560506ca2a211378b5"},
-    {file = "jedi-0.17.2.tar.gz", hash = "sha256:86ed7d9b750603e4ba582ea8edc678657fb4007894a12bcf6f4bb97892f31d20"},
+    {file = "jedi-0.18.0-py2.py3-none-any.whl", hash = "sha256:18456d83f65f400ab0c2d3319e48520420ef43b23a086fdc05dff34132f0fb93"},
+    {file = "jedi-0.18.0.tar.gz", hash = "sha256:92550a404bad8afed881a137ec9a461fed49eca661414be45059329614ed0707"},
 ]
 jinja2 = [
     {file = "Jinja2-2.11.2-py2.py3-none-any.whl", hash = "sha256:f0a4641d3cf955324a89c04f3d94663aa4d638abe8f733ecd3582848e1c37035"},
@@ -1680,8 +1674,8 @@ parameterized = [
     {file = "parameterized-0.7.4.tar.gz", hash = "sha256:190f8cc7230eee0b56b30d7f074fd4d165f7c45e6077582d0813c8557e738490"},
 ]
 parso = [
-    {file = "parso-0.7.1-py2.py3-none-any.whl", hash = "sha256:97218d9159b2520ff45eb78028ba8b50d2bc61dcc062a9682666f2dc4bd331ea"},
-    {file = "parso-0.7.1.tar.gz", hash = "sha256:caba44724b994a8a5e086460bb212abc5a8bc46951bf4a9a1210745953622eb9"},
+    {file = "parso-0.8.1-py2.py3-none-any.whl", hash = "sha256:15b00182f472319383252c18d5913b69269590616c947747bc50bf4ac768f410"},
+    {file = "parso-0.8.1.tar.gz", hash = "sha256:8519430ad07087d4c997fda3a7918f7cfa27cb58972a8c89c2a0295a1c940e9e"},
 ]
 pexpect = [
     {file = "pexpect-4.8.0-py2.py3-none-any.whl", hash = "sha256:0b48a55dcb3c05f3329815901ea4fc1537514d6ba867a152b581d69ae3710937"},
@@ -1878,13 +1872,19 @@ urllib3 = [
     {file = "urllib3-1.26.3.tar.gz", hash = "sha256:de3eedaad74a2683334e282005cd8d7f22f4d55fa690a2a1020a416cb0a47e73"},
 ]
 wasmer = [
-    {file = "wasmer-0.4.1-cp36-cp36m-macosx_10_7_x86_64.whl", hash = "sha256:519d9f7a33f0dc28498edf8d074944df1cfda3f4d56a6b0a9dc606e99f230c07"},
-    {file = "wasmer-0.4.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:c36c6c7a3582c0467ea76c5b86a5a25c2e1a713669ebf8fc6511b26f30828ed7"},
-    {file = "wasmer-0.4.1-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:6e37fd76931da954d12f7708e7fc790c479e17ea6dfe54bb4f1403d6fe919c62"},
-    {file = "wasmer-0.4.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:d5a58b318628bd48605a4810ee9ba030ec4423dee730d45f031bd082cf36ad8b"},
-    {file = "wasmer-0.4.1-cp38-cp38-macosx_10_7_x86_64.whl", hash = "sha256:f864b1e910e6803aa8f3ed9c371b145f0b6fd191f5fbefea011ac7ed4258734d"},
-    {file = "wasmer-0.4.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:fa1c8479781c91e6b814ef006f6e099b6550eba12601a8617475fb514fc09365"},
-    {file = "wasmer-0.4.1-py3-none-any.whl", hash = "sha256:92aee4b3994735f72e27c9deaca36d063781ddfd1068756bf63509288c1a2c14"},
+    {file = "wasmer-1.0.0-cp36-cp36m-macosx_10_7_x86_64.whl", hash = "sha256:0d755a93184380f9785e1f8269b070f4a4a3285ae0f7f9571cfaf2ea215b102d"},
+    {file = "wasmer-1.0.0-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:6b41046db73facc064cb9649627d9cdd1b88ada74e745134e44e09ada6827056"},
+    {file = "wasmer-1.0.0-cp36-none-win_amd64.whl", hash = "sha256:d77b169079183c131d398c57dfc36e5cc4b34ae2543878ac2056e858f040c099"},
+    {file = "wasmer-1.0.0-cp37-cp37m-macosx_10_7_x86_64.whl", hash = "sha256:e2ecd788140468d2d489fc92537b47e2baf4ffdec00fe41f055715d261e4988b"},
+    {file = "wasmer-1.0.0-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:dd6c5ab2c41e9fd31442483ac7adc81d886cc3242d604dc3c895df257aa7dbe2"},
+    {file = "wasmer-1.0.0-cp37-none-win_amd64.whl", hash = "sha256:15b355fed4ebe9d912a7fe236391aac591cc64c7647e14e517c2a6f451a83914"},
+    {file = "wasmer-1.0.0-cp38-cp38-macosx_10_7_x86_64.whl", hash = "sha256:11e73026cb7e9a948b86324bd573cafe4d7be91f65ff45b1dc67485044348754"},
+    {file = "wasmer-1.0.0-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:a08be93aff695ce3be871994f726716b68bef36bd583bccad75778359cd273df"},
+    {file = "wasmer-1.0.0-cp38-none-win_amd64.whl", hash = "sha256:8b13214b5dcc84d43f4c44e2309442497f19137561afada7f34babad89365355"},
+    {file = "wasmer-1.0.0-cp39-cp39-macosx_10_7_x86_64.whl", hash = "sha256:1fada13fb536f44e12d7c98c557f5b7a55df94389d3cb90964193dcc8e16f0fa"},
+    {file = "wasmer-1.0.0-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:04e5d51eed336be0e1bf1445aa032fc34466b77220c26732b8990df872f29e92"},
+    {file = "wasmer-1.0.0-cp39-none-win_amd64.whl", hash = "sha256:690c5ed46a98e91bc638f52a25e5011c5baa1ef0581f414018eb7aa0e7f844bc"},
+    {file = "wasmer-1.0.0-py3-none-any.whl", hash = "sha256:427e9c5e5301a453a09b8b9ceb8c793d85411b8f45e54c9c0d801566dd8d214e"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

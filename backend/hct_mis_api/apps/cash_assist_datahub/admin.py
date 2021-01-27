@@ -1,7 +1,7 @@
 # Register your models here.
+from adminfilters.filters import TextFieldFilter, AllValuesComboFilter, AllValuesRadioFilter
 from admin_extra_urls.api import action
 from admin_extra_urls.mixins import ExtraUrlMixin
-from adminfilters.filters import TextFieldFilter, AllValuesComboFilter, AllValuesRadioFilter
 from django.contrib import admin
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.template.response import TemplateResponse
