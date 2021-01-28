@@ -24,12 +24,9 @@ export const FormikTextField = ({
 }): React.ReactElement => {
   const isInvalid =
     get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount>0);
+    (get(form.touched, field.name) || form.submitCount > 0);
   const handleKeyPress = (evt): void => {
-    if (
-      otherProps.type === 'number' &&
-      ['e', 'E', '+', '-'].includes(evt.key)
-    ) {
+    if (type === 'number' && ['e', 'E', '+', '-'].includes(evt.key)) {
       evt.preventDefault();
     }
   };

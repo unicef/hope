@@ -146,10 +146,10 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Registered Date'>
+              <LabelizedField label='Registration Date'>
                 <div>
                   <UniversalMoment>
-                    {household.registrationDataImport.importDate}
+                    {household.lastRegistrationDate}
                   </UniversalMoment>
                 </div>
               </LabelizedField>
@@ -180,9 +180,11 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
           </Grid>
         </Overview>
-        <Content>
-          <UniversalActivityLogTable objectId={data.household.id} />
-        </Content>
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <Content>
+            <UniversalActivityLogTable objectId={data.household.id} />
+          </Content>
+        )}
       </Container>
     </div>
   );

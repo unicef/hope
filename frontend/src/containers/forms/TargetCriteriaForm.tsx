@@ -121,6 +121,7 @@ interface TargetCriteriaFormPropTypes {
   open: boolean;
   onClose: () => void;
   title: string;
+  shouldShowWarningForIndividualFilter?: boolean;
 }
 
 export function TargetCriteriaForm({
@@ -129,6 +130,7 @@ export function TargetCriteriaForm({
   open,
   onClose,
   title,
+  shouldShowWarningForIndividualFilter,
 }: TargetCriteriaFormPropTypes): React.ReactElement {
   const { data, loading } = useImportedIndividualFieldsQuery();
   const filtersArrayWrapperRef = useRef(null);
@@ -194,160 +196,166 @@ export function TargetCriteriaForm({
         enableReinitialize
       >
         {({ submitForm, values, resetForm, errors }) => (
-          <>
-            <Dialog
-              open={open}
-              onClose={onClose}
-              scroll='paper'
-              aria-labelledby='form-dialog-title'
-              fullWidth
-              maxWidth='md'
-            >
-              <DialogTitleWrapper>
-                <DialogTitle id='scroll-dialog-title' disableTypography>
-                  <Typography variant='h6'>{title}</Typography>
-                </DialogTitle>
-              </DialogTitleWrapper>
-              <DialogContent>
-                {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          <Dialog
+            open={open}
+            onClose={onClose}
+            scroll='paper'
+            aria-labelledby='form-dialog-title'
+            fullWidth
+            maxWidth='md'
+          >
+            <DialogTitleWrapper>
+              <DialogTitle id='scroll-dialog-title' disableTypography>
+                <Typography variant='h6'>{title}</Typography>
+              </DialogTitle>
+            </DialogTitleWrapper>
+            <DialogContent>
+              {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
                 // @ts-ignore
                 errors.nonFieldErrors && (
                   <DialogError>
                     <ul>
-                      {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                      // @ts-ignore
-                      errors.nonFieldErrors.map((message) => (
-                        <li>{message}</li>
-                      ))}
+                      {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                        // @ts-ignore
+                        errors.nonFieldErrors.map((message) => (
+                          <li>{message}</li>
+                        ))
+                      }
                     </ul>
                   </DialogError>
+                )
+              }
+
+              <DialogDescription>
+                All rules defined below have to be true for the entire
+                household.
+              </DialogDescription>
+              <FieldArray
+                name='filters'
+                render={(arrayHelpers) => (
+                  <ArrayFieldWrapper
+                    arrayHelpers={arrayHelpers}
+                    ref={filtersArrayWrapperRef}
+                  >
+                    {values.filters.map((each, index) => {
+                      return (
+                        <TargetingCriteriaFilter
+                          //eslint-disable-next-line
+                          key={index}
+                          index={index}
+                          data={householdData}
+                          each={each}
+                          onChange={(e, object) => {
+                            if (object) {
+                              return chooseFieldType(
+                                object,
+                                arrayHelpers,
+                                index,
+                              );
+                            }
+                            return clearField(arrayHelpers, index);
+                          }}
+                          values={values}
+                          onClick={() => arrayHelpers.remove(index)}
+                        />
+                      );
+                    })}
+                  </ArrayFieldWrapper>
                 )}
-
+              />
+              <Box display='flex' flexDirection='column'>
+                <ButtonBox>
+                  <Button
+                    onClick={() =>
+                      filtersArrayWrapperRef.current
+                        .getArrayHelpers()
+                        .push({ fieldName: '' })
+                    }
+                    color='primary'
+                  >
+                    <AddIcon />
+                    ADD HOUSEHOLD RULE
+                  </Button>
+                </ButtonBox>
+              </Box>
+              <AndDivider>
+                <AndDividerLabel>And</AndDividerLabel>
+              </AndDivider>
+              {values.individualsFiltersBlocks.length &&
+              shouldShowWarningForIndividualFilter ? (
                 <DialogDescription>
-                  All rules defined below have to be true for the entire
-                  household.
+                  In your programme, individual rules can only be applied to
+                  head of households.
                 </DialogDescription>
-                <FieldArray
-                  name='filters'
-                  render={(arrayHelpers) => (
-                    <ArrayFieldWrapper
-                      arrayHelpers={arrayHelpers}
-                      ref={filtersArrayWrapperRef}
-                    >
-                      {values.filters.map((each, index) => {
-                        return (
-                          <TargetingCriteriaFilter
-                            //eslint-disable-next-line
-                            key={index}
-                            index={index}
-                            data={householdData}
-                            each={each}
-                            onChange={(e, object) => {
-                              if (object) {
-                                return chooseFieldType(
-                                  object,
-                                  arrayHelpers,
-                                  index,
-                                );
-                              }
-                              return clearField(arrayHelpers, index);
-                            }}
-                            values={values}
-                            onClick={() => arrayHelpers.remove(index)}
-                          />
-                        );
-                      })}
-                    </ArrayFieldWrapper>
-                  )}
-                />
-                <Box display='flex' flexDirection='column'>
-                  <ButtonBox>
+              ) : null}
+              <FieldArray
+                name='individualsFiltersBlocks'
+                render={(arrayHelpers) => (
+                  <ArrayFieldWrapper
+                    arrayHelpers={arrayHelpers}
+                    ref={individualsFiltersBlocksWrapperRef}
+                  >
+                    {values.individualsFiltersBlocks.map((each, index) => {
+                      return (
+                        <TargetCriteriaFilterBlocks
+                          //eslint-disable-next-line
+                          key={index}
+                          blockIndex={index}
+                          data={individualData}
+                          values={values}
+                          onDelete={() => arrayHelpers.remove(index)}
+                        />
+                      );
+                    })}
+                  </ArrayFieldWrapper>
+                )}
+              />
+              <Box display='flex' flexDirection='column'>
+                <ButtonBox>
+                  <Button
+                    onClick={() =>
+                      individualsFiltersBlocksWrapperRef.current
+                        .getArrayHelpers()
+                        .push({
+                          individualBlockFilters: [{ fieldName: '' }],
+                        })
+                    }
+                    color='primary'
+                  >
+                    <AddIcon />
+                    ADD INDIVIDUAL RULE GROUP
+                  </Button>
+                </ButtonBox>
+              </Box>
+            </DialogContent>
+            <DialogFooter>
+              <DialogActions>
+                <StyledBox display='flex' justifyContent='flex-end'>
+                  <div>
                     <Button
-                      onClick={() =>
-                        filtersArrayWrapperRef.current
-                          .getArrayHelpers()
-                          .push({ fieldName: '' })
-                      }
-                      color='primary'
+                      onClick={() => {
+                        resetForm();
+                        onClose();
+                      }}
                     >
-                      <AddIcon />
-                      ADD HOUSEHOLD RULE
+                      Cancel
                     </Button>
-                  </ButtonBox>
-                </Box>
-                <AndDivider>
-                  <AndDividerLabel>And</AndDividerLabel>
-                </AndDivider>
-                {/*<DialogDescription>*/}
-
-                {/*</DialogDescription>*/}
-                <FieldArray
-                  name='individualsFiltersBlocks'
-                  render={(arrayHelpers) => (
-                    <ArrayFieldWrapper
-                      arrayHelpers={arrayHelpers}
-                      ref={individualsFiltersBlocksWrapperRef}
-                    >
-                      {values.individualsFiltersBlocks.map((each, index) => {
-                        return (
-                          <TargetCriteriaFilterBlocks
-                            //eslint-disable-next-line
-                            key={index}
-                            blockIndex={index}
-                            data={individualData}
-                            values={values}
-                            onDelete={() => arrayHelpers.remove(index)}
-                          />
-                        );
-                      })}
-                    </ArrayFieldWrapper>
-                  )}
-                />
-                <Box display='flex' flexDirection='column'>
-                  <ButtonBox>
                     <Button
-                      onClick={() =>
-                        individualsFiltersBlocksWrapperRef.current
-                          .getArrayHelpers()
-                          .push({
-                            individualBlockFilters: [{ fieldName: '' }],
-                          })
-                      }
+                      onClick={submitForm}
+                      type='submit'
                       color='primary'
+                      variant='contained'
+                      data-cy='button-target-population-add-criteria'
                     >
-                      <AddIcon />
-                      ADD INDIVIDUAL RULE GROUP
+                      Save
                     </Button>
-                  </ButtonBox>
-                </Box>
-              </DialogContent>
-              <DialogFooter>
-                <DialogActions>
-                  <StyledBox display='flex' justifyContent='flex-end'>
-                    <div>
-                      <Button
-                        onClick={() => {
-                          resetForm();
-                          onClose();
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={submitForm}
-                        type='submit'
-                        color='primary'
-                        variant='contained'
-                        data-cy='button-target-population-add-criteria'
-                      >
-                        Save
-                      </Button>
-                    </div>
-                  </StyledBox>
-                </DialogActions>
-              </DialogFooter>
-            </Dialog>
-          </>
+                  </div>
+                </StyledBox>
+              </DialogActions>
+            </DialogFooter>
+          </Dialog>
         )}
       </Formik>
     </DialogContainer>

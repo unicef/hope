@@ -84,9 +84,6 @@ export function PaymentFilters({
               multiple
               value={filter.verificationStatus || []}
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {statusChoicesData.cashPlanVerificationStatusChoices.map(
                 (item) => {
                   return (
