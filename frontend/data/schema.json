@@ -3411,6 +3411,16 @@
                 "defaultValue": null
               },
               {
+                "name": "household_AdminArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "age",
                 "description": null,
                 "type": {
