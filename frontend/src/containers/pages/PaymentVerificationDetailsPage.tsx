@@ -51,8 +51,8 @@ const Title = styled.div`
 `;
 
 const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 `;
 
 const BorderLeftBox = styled.div`
@@ -249,18 +249,28 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>{bankReconciliationSuccessPercentage.toFixed(2)}%</p>
+                      <p>
+                        {bankReconciliationSuccessPercentage
+                          ? bankReconciliationSuccessPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>{bankReconciliationErrorPercentage.toFixed(2)}%</p>
+                      <p>
+                        {bankReconciliationErrorPercentage
+                          ? bankReconciliationErrorPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
                 <Grid item xs={6}>
                   <ChartContainer>
                     <Doughnut
-                      width={100}
-                      height={100}
+                      width={200}
+                      height={200}
                       options={{
                         maintainAspectRatio: false,
                         cutoutPercentage: 65,
@@ -273,8 +283,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [
-                              bankReconciliationSuccessPercentage,
-                              bankReconciliationErrorPercentage,
+                              bankReconciliationSuccessPercentage.toFixed(2),
+                              bankReconciliationErrorPercentage.toFixed(2),
                             ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
@@ -453,13 +463,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please create Verification Plan
         </BottomTitle>
       ) : null}
-      {cashPlan.verifications?.edges[0]?.node?.id && (
-        <TableWrapper>
-          <UniversalActivityLogTable
-            objectId={cashPlan.verifications.edges[0].node.id}
-          />
-        </TableWrapper>
-      )}
+      {cashPlan.verifications?.edges[0]?.node?.id &&
+        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable
+              objectId={cashPlan.verifications.edges[0].node.id}
+            />
+          </TableWrapper>
+        )}
     </>
   );
 }

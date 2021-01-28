@@ -55,6 +55,7 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(
   cashPlanVerificationId,
   selectedTab,
@@ -152,11 +153,16 @@ export function EditVerificationPlan({
       businessArea,
     },
   });
-  const variablesForSampleSizeQuery = prepareVariables(cashPlanVerificationId,selectedTab,formValues,businessArea)
-  delete  variablesForSampleSizeQuery.input.cashPlanPaymentVerificationId;
+  const variablesForSampleSizeQuery = prepareVariables(
+    cashPlanVerificationId,
+    selectedTab,
+    formValues,
+    businessArea,
+  );
+  delete variablesForSampleSizeQuery.input.cashPlanPaymentVerificationId;
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  variablesForSampleSizeQuery.input.cashPlanId = cashPlanId
+  variablesForSampleSizeQuery.input.cashPlanId = cashPlanId;
   const { data: sampleSizesData, refetch } = useSampleSizeQuery({
     variables: variablesForSampleSizeQuery,
   });
@@ -399,11 +405,8 @@ export function EditVerificationPlan({
                       fontWeight='fontWeightBold'
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
-                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'

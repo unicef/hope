@@ -31,9 +31,8 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
-    return `You approved ${
-      values.selected.length + values.selectedFlexFields.length || 0
-    } change${
+    return `You approved ${values.selected.length +
+      values.selectedFlexFields.length || 0} change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
@@ -54,6 +53,10 @@ export function RequestedHouseholdDataChange({
   ).length;
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
+  const shouldShowEditButton = (values): boolean =>
+    values.selected.length &&
+    !isEdit &&
+    ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
   return (
     <Formik
       initialValues={{
@@ -102,7 +105,7 @@ export function RequestedHouseholdDataChange({
           <Title>
             <Box display='flex' justifyContent='space-between'>
               <Typography variant='h6'>Requested Data Change</Typography>
-              {values.selected.length && !isEdit ? (
+              {shouldShowEditButton(values) ? (
                 <Button
                   onClick={() => setEdit(true)}
                   variant='outlined'
