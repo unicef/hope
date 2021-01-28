@@ -426,7 +426,7 @@ CONSTANCE_CONFIG = {
         "positive_floats",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        15.0,
+        11.0,
         "Results equal or above this score are considered duplicates",
         "positive_floats",
     ),
@@ -442,7 +442,7 @@ CONSTANCE_CONFIG = {
     ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (
-        25,
+        4.8,
         "Results equal or above this score are considered possible matches",
         "positive_floats",
     ),

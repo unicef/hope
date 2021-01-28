@@ -7,6 +7,7 @@ import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.shortcuts import get_object_or_404
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
@@ -16,7 +17,8 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
@@ -120,6 +122,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         registration_data_import_datahub_id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def validate_object_status(cls, rdi_obj, *args, **kwargs):
@@ -130,10 +133,10 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, registration_data_import_datahub_id):
+    def mutate(cls, root, info, registration_data_import_datahub_id, **kwargs):
         old_rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
         rdi_obj = RegistrationDataImport.objects.get(datahub_id=registration_data_import_datahub_id)
-
+        check_concurrency_version_in_mutation(kwargs.get("version"), rdi_obj)
         cls.has_permission(info, Permissions.RDI_RERUN_DEDUPE, rdi_obj.business_area)
 
         cls.validate(rdi_obj=rdi_obj)
@@ -158,8 +161,16 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
+    def check_is_not_empty(cls, import_data_id):
+        import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+            raise ValidationError("Cannot import empty KoBo form")
+
+    @classmethod
     @is_authenticated
     def mutate(cls, root, info, registration_data_import_data):
+        cls.check_is_not_empty(registration_data_import_data.import_data_id)
+
         (
             created_obj_datahub,
             created_obj_hct,
@@ -188,6 +199,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        version = BigInt(required=False)
 
     @classmethod
     def validate_object_status(cls, *args, **kwargs):
@@ -197,7 +209,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, id):
+    def mutate(cls, root, info, id, **kwargs):
         decode_id = decode_id_string(id)
         old_obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
@@ -206,6 +218,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         obj_hct = RegistrationDataImport.objects.get(
             id=decode_id,
         )
+        check_concurrency_version_in_mutation(kwargs.get("version"), obj_hct)
 
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 

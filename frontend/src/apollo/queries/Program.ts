@@ -19,6 +19,7 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
       individualDataNeeded
+      version
     }
   }
 `;
