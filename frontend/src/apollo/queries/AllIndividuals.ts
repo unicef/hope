@@ -17,6 +17,7 @@ export const AllIndividuals = gql`
     $householdId: UUID
     $excludedId: String
     $businessArea: String
+    $adminArea: ID
   ) {
     allIndividuals(
       before: $before
@@ -34,6 +35,7 @@ export const AllIndividuals = gql`
       household_Id: $householdId
       excludedId: $excludedId
       businessArea: $businessArea
+      household_AdminArea: $adminArea
     ) {
       totalCount
       pageInfo {
