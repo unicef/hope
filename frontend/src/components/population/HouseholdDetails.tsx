@@ -120,7 +120,7 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='UNHCR CASE ID'>
-                <Missing />
+                {household?.unhcrId}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
