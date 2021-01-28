@@ -517,14 +517,8 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
             raise GraphQLError("You can discard only ACTIVE verification")
         cash_plan = cashplan_payment_verification.cash_plan
         payment_records = cls.get_new_payment_records(cashplan_payment_verification)
-        payment_record_verifications_to_create = []
         for payment_record in payment_records:
-            payment_record_verification = PaymentVerification(
-                status_date=timezone.now(),
-                cash_plan_payment_verification=cashplan_payment_verification,
-                payment_record=payment_record,
-            )
-            payment_record_verifications_to_create.append(payment_record_verification)
+            payment_record.verifications.all().delete()
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
         cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
         cash_plan.save()
