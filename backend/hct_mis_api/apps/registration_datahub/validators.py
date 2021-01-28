@@ -1,6 +1,7 @@
 import re
 from collections import Counter, defaultdict
 from datetime import datetime
+from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
 from typing import List, Union
@@ -134,13 +135,15 @@ class ImportDataValidator(BaseValidator):
                             error["row_number"] = row_number
                         invalid_rows.append(error)
             else:
-                for validation_data, issuing_country in zip(values["validation_data"], issuing_countries):
-                    value = validation_data["value"]
-                    row_number = validation_data.get("row_number")
+                for validation_data, issuing_country in zip_longest(values["validation_data"], issuing_countries):
+                    value = validation_data.get("value") if isinstance(validation_data, dict) else validation_data
+                    row_number = (
+                        validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
+                    )
                     if value and not issuing_country:
                         error = {
                             "header": key,
-                            "message": f"Issuing country for {key} is required, " "when any document data are provided",
+                            "message": f"Issuing country for {key} is required, when any document data are provided",
                         }
                         if is_xlsx is True:
                             error["row_number"] = row_number
@@ -163,10 +166,11 @@ class ImportDataValidator(BaseValidator):
             issuing_countries = values.get("issuing_countries")
             if not issuing_countries:
                 issuing_countries = [None] * len(values["validation_data"])
-            for data_dict, issuing_country in zip(values["validation_data"], issuing_countries):
-                value = data_dict["value"]
-                row_number = data_dict.get("row_number")
-
+            for data_dict, issuing_country in zip_longest(values["validation_data"], issuing_countries):
+                value = data_dict.get("value") if isinstance(data_dict, dict) else data_dict
+                row_number = (
+                    data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
+                )
                 if not value and not issuing_country:
                     continue
                 elif value and not issuing_country:

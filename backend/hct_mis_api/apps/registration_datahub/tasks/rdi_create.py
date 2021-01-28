@@ -202,7 +202,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["issuing_country"] = Country(value)
         else:
-            suffix = "other" if header.startswith("other_id") else header.replace("issuer", "no")
+            suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
                 "issuing_country": Country(value),
