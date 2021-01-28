@@ -129,6 +129,7 @@ class IndividualFilter(FilterSet):
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
+            "household__admin_area": ["exact"],
         }
 
     order_by = CustomOrderingFilter(

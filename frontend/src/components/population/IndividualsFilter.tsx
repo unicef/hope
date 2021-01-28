@@ -10,6 +10,7 @@ import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
 import { ContainerWithBorder } from '../ContainerWithBorder';
 import { FieldLabel } from '../FieldLabel';
+import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,
@@ -36,7 +37,6 @@ const SearchTextField = styled(TextField)`
 const StartInputAdornment = styled(InputAdornment)`
   margin-right: 0;
 `;
-
 
 interface IndividualsFilterProps {
   onFilterChange;
@@ -66,6 +66,18 @@ export function IndividualsFilter({
               ),
             }}
             data-cy='filters-search'
+          />
+        </Grid>
+        <Grid item>
+          <AdminAreasAutocomplete
+            value={filter.adminArea}
+            onChange={(e, option) => {
+              if (!option) {
+                onFilterChange({ ...filter, adminArea: undefined });
+                return;
+              }
+              onFilterChange({ ...filter, adminArea: option });
+            }}
           />
         </Grid>
         <Grid item>
