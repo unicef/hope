@@ -25,6 +25,7 @@ from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRo
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NoDeleteMixin
 
 
 class RoleAdminForm(ModelForm):
@@ -106,7 +107,7 @@ class UserRoleInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, NoDeleteMixin, BaseUserAdmin):
     list_display = ("username", "email", "first_name", "last_name", "status", "is_active", "is_staff", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
@@ -211,7 +212,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
 
 @admin.register(Role)
-class RoleAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name",)
     search_fields = ('name',)
     form = RoleAdminForm
@@ -224,7 +225,7 @@ class RoleAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 
 @admin.register(UserRole)
-class UserRoleAdmin(admin.ModelAdmin):
+class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
     raw_id_fields = ('user', "business_area")
@@ -253,6 +254,6 @@ class IncompatibleRoleFilter(SimpleListFilter):
 
 
 @admin.register(IncompatibleRoles)
-class IncompatibleRolesAdmin(admin.ModelAdmin):
+class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)

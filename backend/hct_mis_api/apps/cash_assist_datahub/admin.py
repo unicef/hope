@@ -15,10 +15,11 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     ServiceProvider,
     PaymentRecord,
 )
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(Session)
-class SessionAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ('timestamp', 'id', 'source', 'status', 'last_modified_date', 'business_area')
     date_hierarchy = 'timestamp'
     list_filter = ('status', 'source', TextFieldFilter.factory('business_area'))
@@ -48,7 +49,7 @@ class SessionAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(admin.ModelAdmin):
+class CashPlanAdmin(HOPEModelAdminBase):
     list_display = ('session', 'name', 'status', 'business_area', 'cash_plan_id')
     list_filter = ('status',
                    TextFieldFilter.factory('session__id'),
@@ -58,7 +59,7 @@ class CashPlanAdmin(admin.ModelAdmin):
 
 
 @admin.register(PaymentRecord)
-class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class PaymentRecordAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ('session', 'business_area', 'status', 'full_name')
     raw_id_fields = ('session',)
     date_hierarchy = 'session__timestamp'
@@ -108,7 +109,7 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 
 @admin.register(ServiceProvider)
-class ServiceProviderAdmin(admin.ModelAdmin):
+class ServiceProviderAdmin(HOPEModelAdminBase):
     list_display = ('session', 'business_area', 'full_name', 'short_name', 'country')
     raw_id_fields = ('session',)
     date_hierarchy = 'session__timestamp'
@@ -118,7 +119,7 @@ class ServiceProviderAdmin(admin.ModelAdmin):
 
 
 @admin.register(Programme)
-class ProgrammeAdmin(admin.ModelAdmin):
+class ProgrammeAdmin(HOPEModelAdminBase):
     list_display = ('session', 'mis_id', 'ca_id', 'ca_hash_id')
     raw_id_fields = ('session',)
     date_hierarchy = 'session__timestamp'
@@ -129,7 +130,7 @@ class ProgrammeAdmin(admin.ModelAdmin):
 
 
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(admin.ModelAdmin):
+class TargetPopulationAdmin(HOPEModelAdminBase):
     list_display = ('session', 'mis_id', 'ca_id', 'ca_hash_id')
     raw_id_fields = ('session',)
     date_hierarchy = 'session__timestamp'

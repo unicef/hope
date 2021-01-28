@@ -1,5 +1,5 @@
 import xlrd
-from admin_extra_urls.extras import link, ExtraUrlMixin
+from admin_extra_urls.api import link, ExtraUrlMixin
 from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter
 from django.contrib import admin
 from django.contrib.messages import ERROR
@@ -20,6 +20,7 @@ from hct_mis_api.apps.core.models import (
     XLSXKoboTemplate,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class XLSImportForm(forms.Form):
@@ -27,10 +28,13 @@ class XLSImportForm(forms.Form):
 
 
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(admin.ModelAdmin):
+class BusinessAreaAdmin(HOPEModelAdminBase):
     list_display = ("name", "slug", "has_data_sharing_agreement", "rapidpro_is_enabled", "kobo_is_enabled")
     search_fields = ("name",)
     list_filter = ("has_data_sharing_agreement",)
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
 
     def rapidpro_is_enabled(self, obj):
         return bool(obj.rapid_pro_api_key)
@@ -44,7 +48,7 @@ class BusinessAreaAdmin(admin.ModelAdmin):
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
+class FlexibleAttributeAdmin(HOPEModelAdminBase):
     list_display = ("name", "type", "required", "is_removed")
     list_filter = (("type", ChoicesFieldComboFilter),
                    ("group", RelatedFieldComboFilter),
@@ -62,7 +66,7 @@ class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
+class FlexibleAttributeChoiceAdmin(HOPEModelAdminBase):
     list_display = ('list_name', 'name',)
     search_fields = ('name',)
     filter_horizontal = ('flex_attributes',)
@@ -70,7 +74,7 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
 
     exclude = ("is_removed", "file_name", "status", "template_id")
