@@ -2930,6 +2930,7 @@ type TargetingIndividualRuleFilterBlockNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
+  targetOnlyHoh: Boolean!
   individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
 }
 
