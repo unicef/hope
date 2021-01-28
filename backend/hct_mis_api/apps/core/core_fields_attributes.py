@@ -797,7 +797,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "pregnant_count",
         "lookup": "pregnant_count",
         "required": False,
-        "label": {"English(EN)": ""},
+        "label": {"English(EN)": "Pregnant count"},
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
