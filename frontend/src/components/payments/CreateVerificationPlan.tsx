@@ -385,10 +385,7 @@ export function CreateVerificationPlan({
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
                       of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'
