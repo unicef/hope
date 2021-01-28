@@ -238,6 +238,14 @@ class ExistingGrievanceTicketFilter(FilterSet):
         payment_record_objects = cleaned_data.pop("payment_record", None)
         household_object = cleaned_data.pop("household", None)
         individual_object = cleaned_data.pop("individual", None)
+        # if any of these filters were passed in as wrong ids we need to return an empty queryset instead of completely ignore that filter value
+        # as expected in OtherRelatedTickets.tsx component when passing random household id
+        if (household_object is None and self.form.data.get("household")) or (
+            payment_record_objects is None
+            and self.form.data.get("payment_record")
+            or (individual_object is None and self.form.data.get("individual"))
+        ):
+            return queryset.none()
         if household_object is None:
             queryset.model.objects.none()
         for name, value in cleaned_data.items():

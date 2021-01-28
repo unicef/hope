@@ -61,7 +61,13 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
         breadCrumbs={breadCrumbsItems}
       />
       <Container>
-        <PaymentRecordDetails paymentRecord={paymentRecord} />
+        <PaymentRecordDetails
+          paymentRecord={paymentRecord}
+          canViewActivityLog={hasPermissions(
+            PERMISSIONS.ACTIVITY_LOG_VIEW,
+            permissions,
+          )}
+        />
       </Container>
     </div>
   );
