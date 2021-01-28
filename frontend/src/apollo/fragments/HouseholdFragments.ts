@@ -13,6 +13,7 @@ export const householdMinimal = gql`
     sanctionListPossibleMatch
     hasDuplicates
     unicefId
+    unhcrId
     geopoint
     village
     adminArea {
