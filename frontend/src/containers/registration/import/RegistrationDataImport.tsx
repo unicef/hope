@@ -235,7 +235,14 @@ export function RegistrationDataImport(): React.ReactElement {
       </div>
     );
   }
-
+  if (importType === 'kobo') {
+    disabled =
+      !koboImportData ||
+      (koboImportData?.saveKoboImportData?.importData?.numberOfHouseholds ===
+        0 &&
+        koboImportData?.saveKoboImportData?.importData?.numberOfIndividuals ===
+          0);
+  }
   return (
     <span>
       <Button
