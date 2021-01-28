@@ -6559,7 +6559,10 @@ export type AllSanctionListIndividualsQuery = (
   )> }
 );
 
-export type AllSteficonRulesQueryVariables = {};
+export type AllSteficonRulesQueryVariables = {
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
+};
 
 
 export type AllSteficonRulesQuery = (
@@ -11507,8 +11510,8 @@ export type AllSanctionListIndividualsQueryHookResult = ReturnType<typeof useAll
 export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsLazyQuery>;
 export type AllSanctionListIndividualsQueryResult = ApolloReactCommon.QueryResult<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>;
 export const AllSteficonRulesDocument = gql`
-    query AllSteficonRules {
-  allSteficonRules {
+    query AllSteficonRules($enabled: Boolean, $deprecated: Boolean) {
+  allSteficonRules(enabled: $enabled, deprecated: $deprecated) {
     edges {
       node {
         id
@@ -11548,6 +11551,8 @@ export function withAllSteficonRules<TProps, TChildProps = {}>(operationOptions?
  * @example
  * const { data, loading, error } = useAllSteficonRulesQuery({
  *   variables: {
+ *      enabled: // value for 'enabled'
+ *      deprecated: // value for 'deprecated'
  *   },
  * });
  */
