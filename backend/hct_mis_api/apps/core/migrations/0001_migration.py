@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
                 ('rght', models.PositiveIntegerField(editable=False)),
                 ('tree_id', models.PositiveIntegerField(db_index=True, editable=False)),
                 ('level', models.PositiveIntegerField(editable=False)),
-                ('admin_area_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='locations', to='core.AdminAreaLevel')),
+                ('admin_area_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='locations', to='core.AdminAreaType')),
                 ('parent', mptt.fields.TreeForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='children', to='core.AdminArea', verbose_name='Parent')),
             ],
             options={
