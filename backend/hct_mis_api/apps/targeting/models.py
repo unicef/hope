@@ -447,9 +447,11 @@ class TargetingCriteriaRule(TimeStampedUUIDModel, TargetingCriteriaRuleQueryingM
 
 
 class TargetingIndividualRuleFilterBlockMixin:
-    def __init__(self, individual_block_filters=None):
+    def __init__(self, individual_block_filters=None, target_only_hoh=None):
         if individual_block_filters is not None:
             self.individual_block_filters = individual_block_filters
+        if target_only_hoh is not None:
+            self.target_only_hoh = target_only_hoh
 
     def get_criteria_string(self):
         filters = (
@@ -473,6 +475,9 @@ class TargetingIndividualRuleFilterBlockMixin:
             individuals_query &= ruleFilter.get_query()
         if not filtered:
             return Q()
+        if self.target_only_hoh:
+            # only filtering against heads of household
+            individuals_query &= Q(heading_household__isnull=False)
         households_id = Individual.objects.filter(individuals_query).values_list("household_id", flat=True)
         return Q(id__in=households_id)
 
@@ -484,6 +489,7 @@ class TargetingIndividualRuleFilterBlock(
     targeting_criteria_rule = models.ForeignKey(
         "TargetingCriteriaRule", on_delete=models.CASCADE, related_name="individuals_filters_blocks"
     )
+    target_only_hoh = models.BooleanField(default=False)
 
 
 class TargetingCriteriaFilterMixin:

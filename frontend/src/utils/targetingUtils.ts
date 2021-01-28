@@ -74,7 +74,12 @@ export function mapFiltersToInitialValues(filters): any[] {
         case 'CONTAINS':
           return mappedFilters.push({
             ...each,
-            value: each.arguments,
+            value:
+              // could just be each.arguments[0] maybe? added a check to cover all bases
+              // in cases I tested it was always an array which would mess up filter value
+              typeof each.arguments === 'string'
+                ? each.arguments
+                : each.arguments[0],
           });
         default:
           return mappedFilters.push({
