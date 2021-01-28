@@ -46,7 +46,7 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
     TYPE_SELECT_ONE: str,
     TYPE_SELECT_MANY: list,
     TYPE_GEOPOINT: str,
-    TYPE_DECIMAL: int,
+    TYPE_DECIMAL: (int, float),
 }
 
 _INDIVIDUAL = "Individual"
