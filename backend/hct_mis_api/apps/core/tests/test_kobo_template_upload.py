@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.conf import settings
 from django.contrib.admin import AdminSite
 from django.contrib.messages import get_messages
@@ -5,6 +7,7 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import Client, TestCase, RequestFactory
 from django.urls import reverse
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.admin import XLSXKoboTemplateAdmin
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 
@@ -33,7 +36,9 @@ class TestKoboTemplateUpload(TestCase):
             data = {"xls_file": f}
             url = reverse("admin:core_xlsxkobotemplate_add")
             request = self.factory.post(url, data=data, format="multipart")
-            request.user = MockSuperUser()
+            user = UserFactory()
+            user.has_perm = lambda perm: True
+            request.user = user
 
             return request
 
@@ -51,6 +56,7 @@ class TestKoboTemplateUpload(TestCase):
 
         self.assertEqual(form.errors, expected_errors)
 
+    @patch("hct_mis_api.apps.core.airflow_api.AirflowApi.start_dag", new=lambda *args, **kwargs: None)
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
         setattr(request, "session", "session")
@@ -59,4 +65,8 @@ class TestKoboTemplateUpload(TestCase):
         response = self.admin.add_view(request, form_url="", extra_context=None)
         stored_messages = tuple(get_messages(request))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(stored_messages[0].message, "Your xls file has been imported, ")
+        self.assertEqual(
+            stored_messages[0].message,
+            "Core field validation successful, running KoBo Template upload task..., "
+            "Import status will change after task completion",
+        )

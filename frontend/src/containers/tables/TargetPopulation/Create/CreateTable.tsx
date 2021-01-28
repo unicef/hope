@@ -12,15 +12,18 @@ const TableWrapper = styled.div`
 interface TargetPopulationHouseholdProps {
   id?: string;
   variables?;
+  program: string;
 }
 
 export const CreateTable = ({
   id = null,
   variables,
+  program,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
+    program,
   };
   return (
     <TableWrapper>
