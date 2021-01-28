@@ -154,6 +154,7 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__admin_area__title__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(household__id__icontains=value)
+            q_obj |= Q(household__unicef_id=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
 
