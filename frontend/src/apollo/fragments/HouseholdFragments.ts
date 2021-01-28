@@ -13,6 +13,7 @@ export const householdMinimal = gql`
     sanctionListPossibleMatch
     hasDuplicates
     unicefId
+    flexFields
     unhcrId
     geopoint
     village
