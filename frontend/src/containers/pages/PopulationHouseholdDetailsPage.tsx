@@ -180,9 +180,11 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
           </Grid>
         </Overview>
-        <Content>
-          <UniversalActivityLogTable objectId={data.household.id} />
-        </Content>
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <Content>
+            <UniversalActivityLogTable objectId={data.household.id} />
+          </Content>
+        )}
       </Container>
     </div>
   );
