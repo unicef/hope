@@ -24,6 +24,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_assets_list, reduce_asset
 from hct_mis_api.apps.core.models import (
@@ -40,6 +41,9 @@ from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
         field_name="admin_area_level__business_area__slug",
+    )
+    level = IntegerFilter(
+        field_name="level",
     )
 
     class Meta:
