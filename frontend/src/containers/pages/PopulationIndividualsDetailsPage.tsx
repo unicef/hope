@@ -71,7 +71,9 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
         <CashPlus individual={individual as IndividualNode} />
-        <UniversalActivityLogTable objectId={individual.id} />
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <UniversalActivityLogTable objectId={individual.id} />
+        )}
       </Container>
     </div>
   );

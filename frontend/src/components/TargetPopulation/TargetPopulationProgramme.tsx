@@ -40,14 +40,6 @@ export function TargetPopulationProgramme({
     value: edge.node.id,
   }));
 
-  const confirmTitle = <span>Programme Change</span>;
-  const confirmContent = (
-    <span>
-      Are you sure you want to change the programme ? <br /> Changing the
-      programme will result in deleting your current Targeting Criteria.
-    </span>
-  );
-
   return (
     <PaperContainer data-cy='target-population-program-container'>
       <Title>
@@ -65,8 +57,7 @@ export function TargetPopulationProgramme({
             variant='outlined'
             required
             choices={mappedPrograms}
-            confirmTitle={confirmTitle}
-            confirmContent={confirmContent}
+            allProgramsEdges={allProgramsEdges}
             component={program ? FormikSelectFieldConfirm : FormikSelectField}
           />
         </Box>

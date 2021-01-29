@@ -77,6 +77,11 @@ export function RequestedIndividualDataChange({
       selectedDocumentsToRemove.push(i);
     }
   }
+  const shouldShowEditButton = (allChangesLength): boolean =>
+    allChangesLength &&
+    !isEdit &&
+    ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
   return (
     <Formik
       initialValues={{
@@ -149,7 +154,7 @@ export function RequestedIndividualDataChange({
             <Title>
               <Box display='flex' justifyContent='space-between'>
                 <Typography variant='h6'>Requested Data Change</Typography>
-                {allChangesLength && !isEdit ? (
+                {shouldShowEditButton(allChangesLength) ? (
                   <Button
                     onClick={() => setEdit(true)}
                     variant='outlined'
