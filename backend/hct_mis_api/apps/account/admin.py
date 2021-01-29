@@ -25,7 +25,7 @@ from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRo
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NoDeleteMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
 
 
 class RoleAdminForm(ModelForm):
@@ -107,7 +107,7 @@ class UserRoleInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAdmin(ExtraUrlMixin, NoDeleteMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
     list_display = ("username", "email", "first_name", "last_name", "status", "is_active", "is_staff", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
