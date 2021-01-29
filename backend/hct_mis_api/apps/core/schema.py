@@ -239,7 +239,7 @@ class KoboAssetObjectConnection(Connection):
 
 def get_fields_attr_generators(flex_field):
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.order_by("name").all()
+        yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
         yield from XLSX_ONLY_FIELDS
