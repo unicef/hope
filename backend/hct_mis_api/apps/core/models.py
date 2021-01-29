@@ -79,7 +79,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
-
+    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
@@ -114,45 +114,44 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     """
 
     external_id = models.CharField(
-        help_text='An ID representing this instance in  datamart',
-        blank=True,
-        null=True,
-        max_length=32
+        help_text="An ID representing this instance in  datamart", blank=True, null=True, max_length=32
     )
 
     title = models.CharField(max_length=255)
 
     admin_area_level = models.ForeignKey(
-        "AdminAreaLevel", verbose_name='Location Type', related_name='admin_areas', on_delete=models.CASCADE,
+        "AdminAreaLevel",
+        verbose_name="Location Type",
+        related_name="admin_areas",
+        on_delete=models.CASCADE,
     )
 
-    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name='Postal Code')
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="Postal Code")
 
     parent = TreeForeignKey(
-        'self',
+        "self",
         verbose_name=_("Parent"),
         null=True,
         blank=True,
-        related_name='children',
+        related_name="children",
         db_index=True,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     geom = models.MultiPolygonField(null=True, blank=True)
     point = models.PointField(null=True, blank=True)
     objects = AdminAreaManager()
 
     class Meta:
-        unique_together = ('title', 'p_code')
-        ordering = ['title']
+        unique_together = ("title", "p_code")
+        ordering = ["title"]
 
     def __str__(self):
         if self.p_code:
-            return '{} ({} {})'.format(
+            return "{} ({} {})".format(
                 self.title,
                 self.admin_area_level.name,
-                "{}: {}".format(
-                    'CERD' if self.admin_area_level.name == 'School' else 'PCode', self.p_code or ''
-                ))
+                "{}: {}".format("CERD" if self.admin_area_level.name == "School" else "PCode", self.p_code or ""),
+            )
 
         return self.title
 
@@ -162,10 +161,14 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
     @property
     def point_lat_long(self):
-        return "Lat: {}, Long: {}".format(
-            self.point.y,
-            self.point.x
-        )
+        return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
+
+    @classmethod
+    def get_admin_areas_as_choices(cls, admin_level, business_area=None):
+        queryset = cls.objects.filter(level=admin_level)
+        if business_area is not None:
+            queryset.filter(admin_area_level__business_area=business_area)
+        return [{"label": {"English(EN)": admin_area.title}, "value": admin_area.title} for admin_area in queryset]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):

@@ -57,7 +57,7 @@ class CreateReport(ReportValidator, PermissionMutation):
         if admin_area_ids:
             admin_areas = [
                 get_object_or_404(
-                    AdminArea, id=decode_id_string(admin_area_id), admin_area_type__business_area=business_area
+                    AdminArea, id=decode_id_string(admin_area_id), admin_area_level__business_area=business_area
                 )
                 for admin_area_id in admin_area_ids
             ]
