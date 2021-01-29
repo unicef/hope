@@ -15,6 +15,7 @@ import {
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../utils/utils';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 
@@ -78,9 +79,7 @@ export function EditTargetPopulation({
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .min(2, 'Too short')
-      .max(255, 'Too long'),
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
   });
 
   return (
@@ -170,7 +169,13 @@ export function EditTargetPopulation({
             loading={loadingPrograms}
             program={values.program}
           />
-          <CandidateListTab values={values} />
+          <CandidateListTab
+            values={values}
+            selectedProgram={getFullNodeFromEdgesById(
+              allProgramsData?.allPrograms?.edges,
+              values.program,
+            )}
+          />
         </Form>
       )}
     </Formik>

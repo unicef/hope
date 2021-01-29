@@ -12,6 +12,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class FinalListTargetingCriteriaQueryTestCase(APITestCase):
@@ -47,6 +48,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         cls.households = []
         call_command("loadbusinessareas")
         business_area = BusinessArea.objects.first()
+        program = ProgramFactory(business_area=business_area, individual_data_needed=True)
         _ = create_household(
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
@@ -76,6 +78,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_APPROVED,
+            program=program,
         )
         cls.target_population_size_2.households.set(cls.households)
         cls.target_population_size_2.save()
@@ -87,6 +90,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_APPROVED,
+            program=program,
         )
         cls.target_population_residence_status.households.set(cls.households)
         cls.target_population_residence_status.save()
@@ -98,6 +102,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             created_by=cls.user,
             final_list_targeting_criteria=targeting_criteria,
             status=TargetPopulation.STATUS_FINALIZED,
+            program=program,
         )
         cls.target_population_size_1_finalized.save()
         HouseholdSelection.objects.create(

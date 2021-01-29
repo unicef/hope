@@ -216,10 +216,10 @@ airflow:
         tlsSecret: "aks-unitst-tls"
     annotations: []
   redis:
-    usePassword: false
+    enabled: false
   airflow:
     redis:
-      usePassword: false
+      enabled: false
     baseUrl: airflow.test
     extraEnvVarsCM: hope-airflow-extra
     extraEnvVarsSecret: hope-airflow-extra

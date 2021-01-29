@@ -545,7 +545,6 @@ export type CopyTargetPopulationInput = {
 
 export type CopyTargetPopulationMutationInput = {
   targetPopulationData?: Maybe<CopyTargetPopulationInput>,
-  version?: Maybe<Scalars['BigInt']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -3524,6 +3523,7 @@ export type QueryAllTargetPopulationArgs = {
 
 export type QueryGoldenRecordByTargetingCriteriaArgs = {
   targetingCriteria: TargetingCriteriaObjectType,
+  program: Scalars['ID'],
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -3601,6 +3601,7 @@ export type QueryAllIndividualsArgs = {
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
+  household_AdminArea?: Maybe<Scalars['ID']>,
   age?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
@@ -4324,7 +4325,6 @@ export type TargetingCriteriaRuleFilterObjectType = {
   isFlexField: Scalars['Boolean'],
   fieldName: Scalars['String'],
   arguments: Array<Maybe<Scalars['Arg']>>,
-  headOfHousehold?: Maybe<Scalars['Boolean']>,
 };
 
 export type TargetingCriteriaRuleNode = {
@@ -4372,6 +4372,7 @@ export type TargetingIndividualRuleFilterBlockNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   targetingCriteriaRule: TargetingCriteriaRuleNode,
+  targetOnlyHoh: Scalars['Boolean'],
   individualBlockFilters?: Maybe<Array<Maybe<TargetingIndividualBlockRuleFilterNode>>>,
 };
 
@@ -5168,7 +5169,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
   & { adminArea: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title'>
@@ -5972,7 +5973,7 @@ export type UpdateProgramMutation = (
     { __typename?: 'UpdateProgram' }
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded'>
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
     )> }
   )> }
 );
@@ -6264,7 +6265,8 @@ export type AllIndividualsQueryVariables = {
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
   excludedId?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>
 };
 
 
@@ -6559,7 +6561,10 @@ export type AllSanctionListIndividualsQuery = (
   )> }
 );
 
-export type AllSteficonRulesQueryVariables = {};
+export type AllSteficonRulesQueryVariables = {
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
+};
 
 
 export type AllSteficonRulesQuery = (
@@ -7758,7 +7763,8 @@ export type GoldenRecordByTargetingCriteriaQueryVariables = {
   after?: Maybe<Scalars['String']>,
   before?: Maybe<Scalars['String']>,
   last?: Maybe<Scalars['Int']>,
-  orderBy?: Maybe<Scalars['String']>
+  orderBy?: Maybe<Scalars['String']>,
+  program: Scalars['ID']
 };
 
 
@@ -7820,6 +7826,8 @@ export const HouseholdMinimalFragmentDoc = gql`
   sanctionListPossibleMatch
   hasDuplicates
   unicefId
+  flexFields
+  unhcrId
   geopoint
   village
   adminArea {
@@ -10058,6 +10066,7 @@ export const UpdateProgramDocument = gql`
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
       individualDataNeeded
+      version
     }
   }
 }
@@ -10845,8 +10854,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea) {
     totalCount
     pageInfo {
       startCursor
@@ -10906,6 +10915,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      householdId: // value for 'householdId'
  *      excludedId: // value for 'excludedId'
  *      businessArea: // value for 'businessArea'
+ *      adminArea: // value for 'adminArea'
  *   },
  * });
  */
@@ -11504,8 +11514,8 @@ export type AllSanctionListIndividualsQueryHookResult = ReturnType<typeof useAll
 export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsLazyQuery>;
 export type AllSanctionListIndividualsQueryResult = ApolloReactCommon.QueryResult<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>;
 export const AllSteficonRulesDocument = gql`
-    query AllSteficonRules {
-  allSteficonRules {
+    query AllSteficonRules($enabled: Boolean, $deprecated: Boolean) {
+  allSteficonRules(enabled: $enabled, deprecated: $deprecated) {
     edges {
       node {
         id
@@ -11545,6 +11555,8 @@ export function withAllSteficonRules<TProps, TChildProps = {}>(operationOptions?
  * @example
  * const { data, loading, error } = useAllSteficonRulesQuery({
  *   variables: {
+ *      enabled: // value for 'enabled'
+ *      deprecated: // value for 'deprecated'
  *   },
  * });
  */
@@ -14295,8 +14307,8 @@ export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
 export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
 export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
 export const GoldenRecordByTargetingCriteriaDocument = gql`
-    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String) {
-  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program) {
     edges {
       node {
         id
@@ -14357,6 +14369,7 @@ export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(op
  *      before: // value for 'before'
  *      last: // value for 'last'
  *      orderBy: // value for 'orderBy'
+ *      program: // value for 'program'
  *   },
  * });
  */
@@ -16290,7 +16303,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
   allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
-  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria'>>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program'>>,
   candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
   targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -16729,6 +16742,7 @@ export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, P
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>>, ParentType, ContextType>,
 };
 
