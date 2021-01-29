@@ -58,7 +58,7 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="admin_area", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
 
     class Meta:
@@ -115,7 +115,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")

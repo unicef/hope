@@ -7,7 +7,7 @@ from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.reporting.fixtures import ReportFactory
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
-from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
@@ -28,12 +28,12 @@ class TestGenerateReportService(TestCase):
         self.user = UserFactory.create()
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         last_registration_dates = ("2020-01-01", "2021-01-01")
-        area_type = AdminAreaTypeFactory(
+        area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_type=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="Adminarea Test", admin_area_level=area_type)
         self.program_1 = ProgramFactory(business_area=self.business_area, end_date="2020-01-01")
         self.program_2 = ProgramFactory(business_area=self.business_area, end_date="2022-01-01")
         self.households = []
