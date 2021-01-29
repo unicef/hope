@@ -2,20 +2,26 @@ from django.core.management import BaseCommand
 from django.db.models import Q
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.models import Role, IncompatibleRoles
+from hct_mis_api.apps.core.datamart.api import DatamartAPI
+from hct_mis_api.apps.core.models import BusinessArea
 
 
 class Command(BaseCommand):
-    help = "Generate roles"
+    help = "Load Admin Areas"
 
     def add_arguments(self, parser):
 
         parser.add_argument(
-            "--bussines_area",
-            dest="file",
+            "--business_area",
+            dest="business_area",
             action="store",
-            nargs="?",
+            nargs=1,
             type=str,
-            help="bussines_area",
+            help="business_area",
         )
 
     def handle(self, *args, **options):
+        business_area = BusinessArea.objects.filter(name=options["business_area"][0]).first()
+        api = DatamartAPI()
+        locations = api.get_locations_geo_data(business_area)
+        admin_areas = api.generate_admin_areas(locations, business_area)
