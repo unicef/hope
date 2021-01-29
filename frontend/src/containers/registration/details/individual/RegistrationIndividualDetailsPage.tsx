@@ -36,7 +36,7 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
   });
 
   if (loading) return <LoadingComponent />;
-  if (!isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
   if (!data || permissions === null) return null;
 
   const { importedIndividual } = data;

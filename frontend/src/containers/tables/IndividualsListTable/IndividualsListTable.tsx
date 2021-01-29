@@ -29,6 +29,7 @@ export const IndividualsListTable = ({
     businessArea,
     sex: [filter.sex],
     search: filter.text,
+    adminArea: filter.adminArea?.node?.id,
   };
 
   return (
