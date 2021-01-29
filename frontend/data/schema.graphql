@@ -123,7 +123,7 @@ type BusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
@@ -3239,7 +3239,7 @@ type UserBusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
