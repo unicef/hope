@@ -376,15 +376,11 @@ class TestRdiKoboCreateTask(TestCase):
         cls.business_area.kobo_token = "1234ABC"
         cls.business_area.save()
 
-        admin0_type = AdminAreaLevel.objects.create(name="Country", admin_level=1, business_area=cls.business_area)
-        admin1_type = AdminAreaLevel.objects.create(name="Province", admin_level=1, business_area=cls.business_area)
-        admin2_type = AdminAreaLevel.objects.create(name="District", admin_level=2, business_area=cls.business_area)
-        admin0 = AdminArea.objects.create(title="SO25", admin_area_level=admin0_type)
-        admin0.save()
-        admin1 = AdminArea.objects.create(title="SO25", admin_area_level=admin1_type, parent=admin0)
-        admin1.save()
-        admin2 = AdminArea.objects.create(title="SO2502", admin_area_level=admin2_type, parent=admin1)
-        admin2.save()
+        admin1_level = AdminAreaLevel.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
+        admin1 = AdminArea.objects.create(title="SO25", admin_area_level=admin1_level)
+
+        admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
+        AdminArea.objects.create(title="SO2502", parent=admin1, admin_area_level=admin2_level)
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug
