@@ -90,7 +90,7 @@ class IndividualDocument(Document):
         if household:
             admin_area = household.admin_area
             if admin_area:
-                children = admin_area.children.filter(admin_area_type__admin_level=2).first()
+                children = admin_area.children.filter(admin_area_level__admin_level=2).first()
                 if children:
                     return children.title
                 return

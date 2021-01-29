@@ -5,14 +5,18 @@ from factory import fuzzy
 from pytz import utc
 
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.core.models import BusinessArea, AdminAreaType
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketSensitiveDetails,
     TicketComplaintDetails,
     TicketNote,
-    TicketAddIndividualDetails, TicketIndividualDataUpdateDetails, TicketHouseholdDataUpdateDetails,
-    TicketDeleteIndividualDetails, TicketSystemFlaggingDetails, TicketNeedsAdjudicationDetails,
+    TicketAddIndividualDetails,
+    TicketIndividualDataUpdateDetails,
+    TicketHouseholdDataUpdateDetails,
+    TicketDeleteIndividualDetails,
+    TicketSystemFlaggingDetails,
+    TicketNeedsAdjudicationDetails,
 )
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
@@ -35,7 +39,7 @@ class GrievanceTicketFactory(factory.DjangoModelFactory):
     )
     description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     admin = factory.LazyAttribute(
-        lambda o: AdminAreaType.objects.filter(admin_level=2).order_by("?").first().display_name
+        lambda o: AdminArea.objects.filter(admin_area_level__busines_area__slug="afghanistan")
     )
     area = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
     language = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
@@ -219,4 +223,3 @@ class TicketNeedsAdjudicationDetailsFactory(factory.DjangoModelFactory):
             issue_type=None,
         ),
     )
-

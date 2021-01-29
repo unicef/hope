@@ -8,7 +8,7 @@ from django.db.models import Q
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
@@ -98,15 +98,15 @@ class Command(BaseCommand):
 
     def _generate_admin_areas(self):
         business_area = BusinessArea.objects.first()
-        state_area_type = AdminAreaTypeFactory(name="State", business_area=business_area, admin_level=1)
-        province_area_type = AdminAreaTypeFactory(name="Province", business_area=business_area, admin_level=2)
+        state_area_type = AdminAreaLevelFactory(name="State", business_area=business_area, admin_level=1)
+        province_area_type = AdminAreaLevelFactory(name="Province", business_area=business_area, admin_level=2)
         AdminAreaFactory.create_batch(
             6,
-            admin_area_type=state_area_type,
+            admin_area_level=state_area_type,
         )
         AdminAreaFactory.create_batch(
             6,
-            admin_area_type=province_area_type,
+            admin_area_level=province_area_type,
         )
 
     @staticmethod
