@@ -3,6 +3,7 @@ import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { EmptyTable } from '../../components/table/EmptyTable';
 import { columnToOrderBy } from '../../utils/utils';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];
@@ -52,6 +53,7 @@ export function UniversalTable<T, K>({
   }
   const { data, refetch, loading, error } = query({
     variables: initVariables,
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
 
@@ -64,9 +66,11 @@ export function UniversalTable<T, K>({
     // eslint-disable-next-line no-console
     console.error(error);
   }
-  if (!data) {
+  if (!loading && !data) {
     return <EmptyTable />;
   }
+  if (!data && loading) return <LoadingComponent />;
+
   let correctTitle = title;
   if (getTitle) {
     correctTitle = getTitle(data);
@@ -102,6 +106,7 @@ export function UniversalTable<T, K>({
           variables.after = edges[edges.length - 1].cursor;
           variables.first = rowsPerPage;
         }
+
         if (orderBy) {
           variables.orderBy = columnToOrderBy(orderBy, orderDirection);
         }
