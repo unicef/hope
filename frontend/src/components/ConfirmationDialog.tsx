@@ -16,20 +16,18 @@ interface ConfirmationDialogProps {
   content?;
   continueText?;
 }
-const DialogTitleWrapper = styled.div`
+export const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
 `;
 
-const DialogFooter = styled.div`
+export const DialogFooter = styled.div`
   padding: 12px 16px;
   margin: 0;
   border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
   text-align: right;
 `;
 
-export class ConfirmationDialog extends React.Component<
-  ConfirmationDialogProps
-> {
+export class ConfirmationDialog extends React.Component<ConfirmationDialogProps> {
   //eslint-disable-next-line
   state = {
     open: false,

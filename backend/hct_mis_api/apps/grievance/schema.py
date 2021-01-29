@@ -27,8 +27,6 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     _HOUSEHOLD,
-    FIELDS_EXCLUDED_FROM_RDI,
-    XLSX_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -59,19 +57,23 @@ from hct_mis_api.apps.utils.schema import Arg
 class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
-            "household": ("id",),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "household": ("unicef_id",),
         },
         "sensitive_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
-            "household": ("id",),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "household": ("unicef_id",),
         },
         "individual_data_update_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
         },
-        "add_individual_ticket_details": {"household": ("id",)},
-        "system_flagging_ticket_details": {"golden_records_individual": ("id",)},
-        "needs_adjudication_ticket_details": {"golden_records_individual": ("id",)},
+        "add_individual_ticket_details": {"household": ("unicef_id",)},
+        "system_flagging_ticket_details": {
+            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+        },
+        "needs_adjudication_ticket_details": {
+            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+        },
     }
     TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
 
@@ -285,7 +287,6 @@ class TicketNoteFilter(FilterSet):
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
-
     permission_classes = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
