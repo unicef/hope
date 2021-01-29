@@ -112,7 +112,7 @@ export function TableComponent<T>({
   let body;
   if (loading) {
     body = (
-      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+      <TableRow style={{ height: 53 * rowsPerPage, minHeight: 53 }}>
         <TableCell colSpan={headCells.length}>
           <LoadingComponent />
         </TableCell>
@@ -186,6 +186,8 @@ export function TableComponent<T>({
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
+        backIconButtonProps={{ ...(loading && { disabled: true }) }}
+        nextIconButtonProps={{ ...(loading && { disabled: true }) }}
       />
     </>
   );
