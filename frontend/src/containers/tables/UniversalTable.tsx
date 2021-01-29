@@ -136,6 +136,7 @@ export function UniversalTable<T, K>({
         }
         setOrderBy(property);
         setOrderDirection(direction);
+        setPage(0);
         refetch({
           last: undefined,
           before: undefined,
