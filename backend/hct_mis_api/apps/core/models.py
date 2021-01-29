@@ -83,13 +83,13 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
-        related_name="admin_area_types",
+        related_name="admin_area_level",
         null=True,
     )
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "AdminAreaType type"
+        verbose_name = "Admin Area Level"
         unique_together = ("business_area", "admin_level")
 
     def __str__(self):
@@ -98,7 +98,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_type")
+        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -126,26 +126,6 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         "AdminAreaLevel", verbose_name='Location Type', related_name='admin_areas', on_delete=models.CASCADE,
     )
 
-    latitude = models.DecimalField(
-        null=True,
-        blank=True,
-        max_digits=8,
-        decimal_places=5,
-        validators=[
-            MinValueValidator(Decimal(-90)),
-            MaxValueValidator(Decimal(90))
-        ]
-    )
-    longitude = models.DecimalField(
-        null=True,
-        blank=True,
-        max_digits=8,
-        decimal_places=5,
-        validators=[
-            MinValueValidator(Decimal(-180)),
-            MaxValueValidator(Decimal(180))
-        ]
-    )
     p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name='Postal Code')
 
     parent = TreeForeignKey(
@@ -157,7 +137,6 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         db_index=True,
         on_delete=models.CASCADE
     )
-
     geom = models.MultiPolygonField(null=True, blank=True)
     point = models.PointField(null=True, blank=True)
     objects = AdminAreaManager()
@@ -170,9 +149,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         if self.p_code:
             return '{} ({} {})'.format(
                 self.title,
-                self.gateway.name,
+                self.admin_area_level.name,
                 "{}: {}".format(
-                    'CERD' if self.gateway.name == 'School' else 'PCode', self.p_code or ''
+                    'CERD' if self.admin_area_level.name == 'School' else 'PCode', self.p_code or ''
                 ))
 
         return self.title
