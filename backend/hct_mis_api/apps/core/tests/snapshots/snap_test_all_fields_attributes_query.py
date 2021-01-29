@@ -41967,10 +41967,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': '',
+                'labelEn': 'Pregnant count',
                 'labels': [
                     {
-                        'label': '',
+                        'label': 'Pregnant count',
                         'language': 'English(EN)'
                     }
                 ],
