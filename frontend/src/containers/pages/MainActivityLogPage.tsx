@@ -63,6 +63,7 @@ export const ActivityLogPage = (): React.ReactElement => {
       permissions &&
       hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
     ) {
+      setPage(0);
       refetch({
         businessArea,
         first: rowsPerPage,
