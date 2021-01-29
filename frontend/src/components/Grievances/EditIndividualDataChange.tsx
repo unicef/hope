@@ -20,6 +20,7 @@ import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 
 const Title = styled.div`
   width: 100%;
@@ -48,8 +49,7 @@ export const EditIndividualDataChangeField = ({
     case 'DECIMAL':
       fieldProps = {
         fullWidth: true,
-        component: FormikTextField,
-        type: 'number',
+        component: FormikDecimalField,
       };
       break;
     case 'INTEGER':
