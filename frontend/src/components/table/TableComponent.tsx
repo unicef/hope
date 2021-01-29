@@ -112,7 +112,7 @@ export function TableComponent<T>({
   let body;
   if (loading) {
     body = (
-      <TableRow style={{ height: 53 * rowsPerPage, minHeight: 53 }}>
+      <TableRow style={{ height: 57 * rowsPerPage, minHeight: 57 }}>
         <TableCell colSpan={headCells.length}>
           <LoadingComponent />
         </TableCell>
@@ -120,7 +120,7 @@ export function TableComponent<T>({
     );
   } else if (!data.length) {
     body = (
-      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+      <TableRow style={{ height: 57 * emptyRows, minHeight: 57 }}>
         <TableCell colSpan={headCells.length}>
           <div className={classes.empty}>
             <FindInPageIcon className={classes.icon} fontSize='inherit' />
@@ -140,7 +140,7 @@ export function TableComponent<T>({
           return renderRow(row);
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 53 * emptyRows }}>
+          <TableRow style={{ height: 57 * emptyRows }}>
             <TableCell colSpan={headCells.length} />
           </TableRow>
         )}
