@@ -608,7 +608,8 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         return self.unicef_id
 
     class Meta:
-        verbose_name="Individual"
+        verbose_name = "Individual"
+
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
