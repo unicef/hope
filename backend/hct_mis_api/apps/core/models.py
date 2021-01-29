@@ -168,7 +168,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         queryset = cls.objects.filter(level=admin_level)
         if business_area is not None:
             queryset.filter(admin_area_level__business_area=business_area)
-        return [{"label": {"English(EN)": admin_area.title}, "value": admin_area.title} for admin_area in queryset]
+        return [{"label": {"English(EN)": admin_area.p_code}, "value": admin_area.title} for admin_area in queryset]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
