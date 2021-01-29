@@ -13,6 +13,8 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { EmptyTable } from '../../components/table/EmptyTable';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -43,11 +45,12 @@ export const ActivityLogPage = (): React.ReactElement => {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
-  const { data, refetch } = useAllLogEntriesQuery({
+  const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
       first: rowsPerPage,
     },
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
   const [filters, setFilters] = useState({ search: null, module: '' });
@@ -76,9 +79,10 @@ export const ActivityLogPage = (): React.ReactElement => {
   if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
     return <PermissionDenied />;
 
-  if (!data) {
-    return null;
+  if (!data && !loading) {
+    return <EmptyTable />;
   }
+  if (!data && loading) return <LoadingComponent />;
   const { edges } = data.allLogEntries;
   const { logEntryActionChoices } = data;
   const logEntries = edges.map((edge) => edge.node as LogEntryNode);
@@ -93,6 +97,7 @@ export const ActivityLogPage = (): React.ReactElement => {
           logEntries={logEntries}
           actionChoices={logEntryActionChoices}
           page={page}
+          loading={loading}
           onChangePage={(event, newPage) => {
             const variables = {
               businessArea,
