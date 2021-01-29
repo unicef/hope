@@ -20291,6 +20291,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
+                'labelEn': 'Who answers this phone?',
+                'labels': [
+                    {
+                        'label': 'Who answers this phone?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'who_answers_phone',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
                 'labelEn': 'Alternative phone number',
                 'labels': [
                     {
@@ -20299,6 +20316,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'phone_no_alternative',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Who answers this phone?',
+                'labels': [
+                    {
+                        'label': 'Who answers this phone?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'who_answers_alt_phone',
                 'required': False,
                 'type': 'STRING'
             },
@@ -41933,10 +41967,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
-                'labelEn': '',
+                'labelEn': 'Pregnant count',
                 'labels': [
                     {
-                        'label': '',
+                        'label': 'Pregnant count',
                         'language': 'English(EN)'
                     }
                 ],
@@ -42854,40 +42888,6 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'org_name_enumerator',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Who answers this phone?',
-                'labels': [
-                    {
-                        'label': 'Who answers this phone?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'who_answers_phone',
-                'required': False,
-                'type': 'STRING'
-            },
-            {
-                'associatedWith': 'Individual',
-                'choices': [
-                ],
-                'hint': '',
-                'isFlexField': False,
-                'labelEn': 'Who answers this phone?',
-                'labels': [
-                    {
-                        'label': 'Who answers this phone?',
-                        'language': 'English(EN)'
-                    }
-                ],
-                'name': 'who_answers_alt_phone',
                 'required': False,
                 'type': 'STRING'
             },

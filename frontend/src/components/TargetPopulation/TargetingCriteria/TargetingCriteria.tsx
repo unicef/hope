@@ -73,6 +73,7 @@ interface TargetingCriteriaProps {
   isEdit?: boolean;
   helpers?;
   targetPopulation?: TargetPopulationQuery['targetPopulation'];
+  selectedProgram?;
 }
 
 export function TargetingCriteria({
@@ -80,6 +81,7 @@ export function TargetingCriteria({
   isEdit = false,
   helpers,
   targetPopulation,
+  selectedProgram,
 }: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
@@ -133,6 +135,9 @@ export function TargetingCriteria({
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
+                shouldShowWarningForIndividualFilter={
+                  selectedProgram && !selectedProgram.individualDataNeeded
+                }
               />
             </>
           )}

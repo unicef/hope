@@ -159,7 +159,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -179,7 +179,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -197,7 +197,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -228,13 +228,13 @@ class TestRdiCreateTask(TestCase):
             individual,
             "birth_certificate_photo_i_c",
         )
-        expected = {
-            "individual_14_birth_certificate_no_i_c": {"individual": individual, "photo": f"12-2020-06-22 12:00.jpg"}
-        }
-        self.assertEqual(task.documents, expected)
+        self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
+        birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
+        self.assertEqual(birth_certificate["individual"], individual)
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
 
         birth_cert_doc = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -248,13 +248,13 @@ class TestRdiCreateTask(TestCase):
             individual,
             "birth_certificate_photo_i_c",
         )
-        expected = {
-            "individual_14_birth_certificate_no_i_c": {
-                **birth_cert_doc["individual_14_birth_certificate_no_i_c"],
-                "photo": f"12-2020-06-22 12:00.jpg",
-            }
-        }
-        self.assertEqual(task.documents, expected)
+
+        self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
+        birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
+        self.assertEqual(birth_certificate["name"], "Birth Certificate")
+        self.assertEqual(birth_certificate["type"], "BIRTH_CERTIFICATE")
+        self.assertEqual(birth_certificate["value"], "CD1247246Q12W")
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
 
     def test_handle_geopoint_field(self):
         empty_geopoint = ""
@@ -280,7 +280,7 @@ class TestRdiCreateTask(TestCase):
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         task.documents = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
