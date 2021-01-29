@@ -24,7 +24,7 @@ class AdminAreaLevelFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = AdminAreaLevel
-        django_get_or_create = ("name",)
+        django_get_or_create = ("business_area", "admin_level",)
 
     name = None
     display_name = factory.LazyAttribute(lambda o: o.name)
