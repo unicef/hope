@@ -18,7 +18,13 @@ const PaperContainer = styled(Paper)`
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
-export function CandidateListTab({ values }: { values }): React.ReactElement {
+export function CandidateListTab({
+  values,
+  selectedProgram,
+}: {
+  values;
+  selectedProgram?;
+}): React.ReactElement {
   return (
     <>
       <FieldArray
@@ -28,16 +34,18 @@ export function CandidateListTab({ values }: { values }): React.ReactElement {
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
             isEdit
+            selectedProgram={selectedProgram}
           />
         )}
       />
       <Results />
-      {values.candidateListCriterias.length ? (
+      {values.candidateListCriterias.length && selectedProgram ? (
         <TargetPopulationHouseholdTable
           variables={{
             ...getTargetingCriteriaVariables({
               criterias: values.candidateListCriterias,
             }),
+            program: selectedProgram.id,
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'

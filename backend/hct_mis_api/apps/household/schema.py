@@ -129,6 +129,7 @@ class IndividualFilter(FilterSet):
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
+            "household__admin_area": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -153,6 +154,7 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__admin_area__title__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(household__id__icontains=value)
+            q_obj |= Q(household__unicef_id=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
 
@@ -330,6 +332,10 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     observed_disability = graphene.List(graphene.String)
+    relationship = graphene.Enum(
+        "IndividualRelationship",
+        [(x[0], x[0]) for x in RELATIONSHIP_CHOICE],
+    )
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -346,6 +352,12 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
+
+    def resolve_relationship(parent, info):
+        # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
+        if not parent.relationship:
+            return None
+        return parent.relationship
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

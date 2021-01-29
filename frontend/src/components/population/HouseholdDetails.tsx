@@ -8,7 +8,6 @@ import {
 } from '../../__generated__/graphql';
 import { choicesToDict, formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
 import { ContentLink } from '../ContentLink';
 
 const Container = styled.div`
@@ -120,17 +119,17 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='UNHCR CASE ID'>
-                <Missing />
+                {household?.unhcrId}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='LENGTH OF TIME SINCE ARRIVAL'>
-                <Missing />
+                {household.flexFields?.months_displaced_h_f}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='NUMBER OF TIMES DISPLACED'>
-                <Missing />
+                {household.flexFields?.number_times_displaced_h_f}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
