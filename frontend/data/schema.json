@@ -6800,7 +6800,7 @@
             "deprecationReason": null
           },
           {
-            "name": "koboToken",
+            "name": "koboUsername",
             "description": null,
             "args": [],
             "type": {
@@ -27380,7 +27380,7 @@
             "deprecationReason": null
           },
           {
-            "name": "koboToken",
+            "name": "koboUsername",
             "description": null,
             "args": [],
             "type": {
