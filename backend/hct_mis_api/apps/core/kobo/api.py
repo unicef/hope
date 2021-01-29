@@ -128,7 +128,7 @@ class KoboAPI:
         submissions_url = self._get_url(f"assets/{uid}/data")
 
         response_dict = self._handle_paginated_results(submissions_url)
-        return filter_by_owner(response_dict, self.business_area)
+        return response_dict
 
     def get_attached_file(self, url: str) -> BytesIO:
         response = self._client.get(url=url)
