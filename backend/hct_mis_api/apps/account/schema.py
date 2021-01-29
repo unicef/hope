@@ -66,7 +66,7 @@ class UsersFilter(FilterSet):
         business_area_slug = self.data.get("business_area")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(user_roles__role__name=value, user_roles__business_area__slug=business_area_slug)
+            q_obj |= Q(user_roles__role__id=value, user_roles__business_area__slug=business_area_slug)
         return qs.filter(q_obj)
 
 
