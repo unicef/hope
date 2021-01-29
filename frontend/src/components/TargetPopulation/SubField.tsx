@@ -5,6 +5,7 @@ import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 
 const FlexWrapper = styled.div`
   display: flex;
@@ -23,20 +24,18 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
             <Field
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
-              type='number'
               variant='outlined'
               fullWidth
-              component={FormikTextField}
+              component={FormikDecimalField}
             />
           </InlineField>
           <InlineField>
             <Field
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
-              type='number'
               variant='outlined'
               fullWidth
-              component={FormikTextField}
+              component={FormikDecimalField}
             />
           </InlineField>
         </FlexWrapper>
