@@ -7,6 +7,7 @@ import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.shortcuts import get_object_or_404
 from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
@@ -160,8 +161,16 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
         registration_data_import_data = RegistrationKoboImportMutationInput(required=True)
 
     @classmethod
+    def check_is_not_empty(cls, import_data_id):
+        import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
+        if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+            raise ValidationError("Cannot import empty KoBo form")
+
+    @classmethod
     @is_authenticated
     def mutate(cls, root, info, registration_data_import_data):
+        cls.check_is_not_empty(registration_data_import_data.import_data_id)
+
         (
             created_obj_datahub,
             created_obj_hct,

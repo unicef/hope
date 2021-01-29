@@ -7,12 +7,12 @@ import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogT
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { decodeIdString } from '../../utils/utils';
 
-interface ProgramActivityLogTableProps {
+interface UniversalActivityLogTableProps {
   objectId: string;
 }
 export function UniversalActivityLogTable({
   objectId,
-}: ProgramActivityLogTableProps): ReactElement {
+}: UniversalActivityLogTableProps): ReactElement {
   const [page, setPage] = useState(0);
   const businessArea = useBusinessArea();
   const [rowsPerPage, setRowsPerPage] = useState(5);

@@ -70,6 +70,7 @@ const initialValues = {
   sexCheckbox: false,
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
   const variables = {
     input: {
@@ -384,10 +385,7 @@ export function CreateVerificationPlan({
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
                       of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'

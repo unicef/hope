@@ -37,10 +37,12 @@ const StatusContainer = styled.div`
 `;
 interface VerificationRecordDetailsProps {
   paymentVerification: PaymentVerificationNode;
+  canViewActivityLog: boolean;
 }
 
 export function VerificationRecordDetails({
   paymentVerification,
+  canViewActivityLog,
 }: VerificationRecordDetailsProps): React.ReactElement {
   return (
     <>
@@ -232,9 +234,11 @@ export function VerificationRecordDetails({
           </Grid>
         </Grid>
       </Overview>
-      <TableWrapper>
-        <UniversalActivityLogTable objectId={paymentVerification.id} />
-      </TableWrapper>
+      {canViewActivityLog && (
+        <TableWrapper>
+          <UniversalActivityLogTable objectId={paymentVerification.id} />
+        </TableWrapper>
+      )}
     </>
   );
 }
