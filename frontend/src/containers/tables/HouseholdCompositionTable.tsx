@@ -10,7 +10,6 @@ import {
 import styled from 'styled-components';
 import React, { ReactElement } from 'react';
 import { HouseholdDetailedFragment } from '../../__generated__/graphql';
-import { Missing } from '../../components/Missing';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;
@@ -109,7 +108,7 @@ export function HouseholdCompositionTable({
               {household.femaleAgeGroup1859DisabledCount}
             </GreyTableCell>
             <GreyTableCell align='left'>
-              <Missing />
+              {household.pregnantCount}
             </GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
@@ -127,9 +126,7 @@ export function HouseholdCompositionTable({
             <GreyTableCell align='left'>
               {household.femaleAgeGroup60DisabledCount}
             </GreyTableCell>
-            <GreyTableCell align='left'>
-              <Missing />
-            </GreyTableCell>
+            <GreyTableCell align='left'>-</GreyTableCell>
             <TableCell align='left' />
             <GreyTableCell align='left'>
               {household.maleAgeGroup60Count}
