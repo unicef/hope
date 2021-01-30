@@ -39,7 +39,7 @@ export function AdminAreaFixedAutocomplete({
       title: debouncedInputText,
       businessArea,
       first: 50,
-      level:2,
+      level: 2,
     },
   });
 
@@ -69,9 +69,9 @@ export function AdminAreaFixedAutocomplete({
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e,reason) => {
+      onClose={(e, reason) => {
         setOpen(false);
-        if (value||reason==="select-option") return;
+        if (value || reason === 'select-option') return;
         onInputTextChange(null);
       }}
       getOptionSelected={(option, selectedValue) => {
