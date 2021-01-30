@@ -72,6 +72,16 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
+            <LabelizedField label='ADMINISTRATIVE LEVEL 1'>
+              {household.admin1}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='ADMINISTRATIVE LEVEL 2'>
+              {household.admin2}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
             <LabelizedField label='Total Cash Received'>
               <Missing />
             </LabelizedField>

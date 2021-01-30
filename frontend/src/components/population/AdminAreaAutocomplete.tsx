@@ -37,26 +37,34 @@ export function AdminAreasAutocomplete({
   const businessArea = useBusinessArea();
   const { data, loading } = useAllAdminAreasQuery({
     variables: {
-      first: 100,
+      first: 50,
       title: debouncedInputText,
       businessArea,
+      level:2,
     },
   });
+  console.log('valuevalue',value)
   useEffect(() => {
     setNewValue(value);
-    onInputTextChange('');
+    // onInputTextChange('');
   }, [data, value]);
+  const onChangeMiddleware = (e, selectedValue, reason) => {
+    onInputTextChange(selectedValue?.node?.title);
+    onChange(e, selectedValue, reason);
+  };
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
       filterOptions={(options1) => options1}
-      onChange={onChange}
+      onChange={onChangeMiddleware}
       value={newValue}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={() => {
+      onClose={(e,reason) => {
         setOpen(false);
+        if (value||reason==="select-option") return;
+        onInputTextChange(null);
       }}
       getOptionSelected={(option, value1) => {
         return value1?.node?.id === option.node.id;
