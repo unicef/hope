@@ -40,10 +40,10 @@ export function AdminAreasAutocomplete({
       first: 50,
       title: debouncedInputText,
       businessArea,
-      level:2,
+      level: 2,
     },
   });
-  console.log('valuevalue',value)
+  console.log('valuevalue', value);
   useEffect(() => {
     setNewValue(value);
     // onInputTextChange('');
@@ -61,9 +61,9 @@ export function AdminAreasAutocomplete({
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={(e,reason) => {
+      onClose={(e, reason) => {
         setOpen(false);
-        if (value||reason==="select-option") return;
+        if (value || reason === 'select-option') return;
         onInputTextChange(null);
       }}
       getOptionSelected={(option, value1) => {
