@@ -24,7 +24,7 @@ from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
-from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
+from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode, SectionTotalNode
 
 
 class ProgramFilter(FilterSet):
@@ -174,20 +174,20 @@ class ChartProgramFilter(FilterSet):
         return qs.filter(q_obj)
 
 
-class XDChartDatasetNode(graphene.ObjectType):
-    label = graphene.String()
-    data = graphene.List(graphene.Int)
-
-
-class ChartXDNode(graphene.ObjectType):
-    permission_classes = (
-        hopePermissionClass(
-            Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-        ),
-    )
-    labels = graphene.List(graphene.String)
-    # dataset = graphene.List(graphene.Int)
-    datasets = graphene.List(XDChartDatasetNode)
+# class XDChartDatasetNode(graphene.ObjectType):
+#     label = graphene.String()
+#     data = graphene.List(graphene.Int)
+#
+#
+# class ChartXDNode(graphene.ObjectType):
+#     permission_classes = (
+#         hopePermissionClass(
+#             Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+#         ),
+#     )
+#     labels = graphene.List(graphene.String)
+#     # dataset = graphene.List(graphene.Int)
+#     datasets = graphene.List(XDChartDatasetNode)
 
 
 class Query(graphene.ObjectType):
@@ -202,8 +202,13 @@ class Query(graphene.ObjectType):
         ),
     )
     chart_programmes_by_sector = graphene.Field(
-        ChartXDNode,
+        ChartDetailedDatasetsNode,
         # ChartDetailedDatasetsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
+    chart_planned_budget = graphene.Field(
+        SectionTotalNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
@@ -284,3 +289,19 @@ class Query(graphene.ObjectType):
             },
         ]
         return {"labels": sector_choice_mapping.values(), "datasets": datasets}
+
+    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+        programs = chart_get_filtered_qs(
+            Program,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
+            additional_filters={'start_date__year': year, "end_date__year": year}
+        )
+        for p in Program.objects.filter(business_area__slug=business_area_slug):
+            print(p.start_date)
+            print(p.end_date)
+        print(programs)
+        # print(programs.filter(updated_at__month=1).aggregate(Sum('cash_plans__payment_records'))['cash_plans__payment_records__sum'])
+        # print(programs.prefetch_related('cash_plans'))
+
+        return {"total": 12}
