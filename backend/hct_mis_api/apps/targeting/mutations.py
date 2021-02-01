@@ -369,10 +369,20 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
         for rule in targeting_criteria.rules.all():
             rule_copy = TargetingCriteriaRule(targeting_criteria=targeting_criteria_copy)
             rule_copy.save()
-            for filter in rule.filters.all():
-                filter.pk = None
-                filter.targeting_criteria_rule = rule_copy
-                filter.save()
+            for hh_filter in rule.filters.all():
+                hh_filter.pk = None
+                hh_filter.targeting_criteria_rule = rule_copy
+                hh_filter.save()
+            for ind_filter_block in rule.individuals_filters_blocks.all():
+                ind_filter_block_copy = TargetingIndividualRuleFilterBlock(
+                    targeting_criteria_rule=rule_copy, target_only_hoh=ind_filter_block.target_only_hoh
+                )
+                ind_filter_block_copy.save()
+                for ind_filter in ind_filter_block.individual_block_filters.all():
+                    ind_filter.pk = None
+                    ind_filter.individuals_filters_block = ind_filter_block_copy
+                    ind_filter.save()
+
         return targeting_criteria_copy
 
 
@@ -426,7 +436,7 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
         old_target_population = TargetPopulation.objects.get(id=target_id)
         cls.has_permission(_info, Permissions.TARGETING_UPDATE, target_population.business_area)
 
-        encoded_steficon_rule_id = kwargs["steficon_rule_id"]
+        encoded_steficon_rule_id = kwargs.get("steficon_rule_id")
         if encoded_steficon_rule_id is not None:
             steficon_rule_id = utils.decode_id_string(encoded_steficon_rule_id)
             if (
@@ -435,6 +445,8 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
             ):
                 raise GraphQLError("You can't change steficon rule for this Target Population")
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
+            if not steficon_rule.enabled or steficon_rule.deprecated:
+                raise GraphQLError("This steficon rule is not enabled or is deprecated.")
             target_population.steficon_rule = steficon_rule
             target_population.save()
             interpreter = mapping[steficon_rule.language](steficon_rule.definition)

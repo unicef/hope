@@ -23,7 +23,7 @@ export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'payment_record__household',
+    id: 'payment_record__household__unicef_id',
     numeric: false,
   },
   {

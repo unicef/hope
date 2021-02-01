@@ -1697,6 +1697,16 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "level",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -3407,6 +3417,16 @@
                     "name": "String",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "household_AdminArea",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -6790,7 +6810,7 @@
             "deprecationReason": null
           },
           {
-            "name": "koboToken",
+            "name": "koboUsername",
             "description": null,
             "args": [],
             "type": {
@@ -6858,7 +6878,7 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreaTypes",
+            "name": "adminAreaLevel",
             "description": null,
             "args": [
               {
@@ -8009,6 +8029,18 @@
             "deprecationReason": null
           },
           {
+            "name": "realAdminLevel",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "businessArea",
             "description": null,
             "args": [],
@@ -8021,7 +8053,7 @@
             "deprecationReason": null
           },
           {
-            "name": "locations",
+            "name": "adminAreas",
             "description": null,
             "args": [
               {
@@ -8263,6 +8295,18 @@
             "deprecationReason": null
           },
           {
+            "name": "externalId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "title",
             "description": null,
             "args": [],
@@ -8279,19 +8323,7 @@
             "deprecationReason": null
           },
           {
-            "name": "parent",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "AdminAreaNode",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "adminAreaType",
+            "name": "adminAreaLevel",
             "description": null,
             "args": [],
             "type": {
@@ -8302,6 +8334,30 @@
                 "name": "AdminAreaTypeNode",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "pCode",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "parent",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AdminAreaNode",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -10369,6 +10425,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "admin1",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AdminAreaNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "admin2",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "AdminAreaNode",
               "ofType": null
             },
             "isDeprecated": false,
@@ -16588,6 +16668,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TargetingCriteriaRuleNode",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetOnlyHoh",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -27354,7 +27450,7 @@
             "deprecationReason": null
           },
           {
-            "name": "koboToken",
+            "name": "koboUsername",
             "description": null,
             "args": [],
             "type": {
@@ -27422,7 +27518,7 @@
             "deprecationReason": null
           },
           {
-            "name": "adminAreaTypes",
+            "name": "adminAreaLevel",
             "description": null,
             "args": [
               {
