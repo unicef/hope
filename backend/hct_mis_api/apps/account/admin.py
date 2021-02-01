@@ -9,7 +9,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
-from django.forms import MultipleChoiceField, CheckboxSelectMultiple
+from django.forms import MultipleChoiceField, CheckboxSelectMultiple, ModelChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
@@ -41,6 +41,7 @@ class RoleAdminForm(ModelForm):
 
 
 class UserRoleAdminForm(ModelForm):
+    role = ModelChoiceField(Role.objects.order_by('name'))
     class Meta:
         model = UserRole
         fields = "__all__"
