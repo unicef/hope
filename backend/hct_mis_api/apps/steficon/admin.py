@@ -20,43 +20,41 @@ from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelecti
 
 @register(Rule)
 class RuleAdmin(ExtraUrlMixin, ModelAdmin):
-    list_display = ('name', 'language')
+    list_display = ('name', 'language', 'enabled', 'deprecated')
+    list_filter = ('language', 'enabled', 'deprecated')
+    search_fields = ('name',)
     form = RuleForm
 
-    @action(label="Preview")
-    def _preview(self, request, pk):
-        opts = self.model._meta
-        app_label = opts.app_label
-
-        rule = Rule.objects.get(pk=pk)
-        interpreter = mapping[rule.language](rule.definition)
-        elements = []
-        for tp in TargetPopulation.objects.all()[:100]:
-            value = interpreter.execute(hh=tp.household)
-            tp.vulnerability_score = value
-            elements.append(tp)
-        self.message_user(request, "%s scores calculated" % len(elements))
-
-        context = {'elements': elements,
-                   'opts': opts,
-                   'app_label': app_label,
-                   'rule': rule}
-        return TemplateResponse(request, 'preview_rule.html', context)
-
-    @action()
-    def run(self, request, pk):
-        rule = Rule.objects.get(pk=pk)
-        interpreter = mapping[rule.language](rule.definition)
-
-        i = 0
-
-        for selection in HouseholdSelection.objects.all():
-            i += 1
-            value = interpreter.execute(hh=selection.household)
-            selection.vulnerability_score = value
-            selection.save(update_fields=['vulnerability_score'])
-        self.message_user(request, f"{i} scores calculated")
-
-    @link()
-    def preview(self, request):
-        pass
+    # @action(label="Preview")
+    # def _preview(self, request, pk):
+    #     opts = self.model._meta
+    #     app_label = opts.app_label
+    #
+    #     rule = Rule.objects.get(pk=pk)
+    #     interpreter = mapping[rule.language](rule.definition)
+    #     elements = []
+    #     for tp in TargetPopulation.objects.all()[:100]:
+    #         value = interpreter.execute(hh=tp.household)
+    #         tp.vulnerability_score = value
+    #         elements.append(tp)
+    #     self.message_user(request, "%s scores calculated" % len(elements))
+    #
+    #     context = {'elements': elements,
+    #                'opts': opts,
+    #                'app_label': app_label,
+    #                'rule': rule}
+    #     return TemplateResponse(request, 'preview_rule.html', context)
+    #
+    # @action()
+    # def run(self, request, pk):
+    #     rule = Rule.objects.get(pk=pk)
+    #     interpreter = mapping[rule.language](rule.definition)
+    #
+    #     i = 0
+    #
+    #     for selection in HouseholdSelection.objects.all():
+    #         i += 1
+    #         value = interpreter.execute(hh=selection.household)
+    #         selection.vulnerability_score = value
+    #         selection.save(update_fields=['vulnerability_score'])
+    #     self.message_user(request, f"{i} scores calculated")
