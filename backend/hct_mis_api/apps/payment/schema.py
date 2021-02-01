@@ -15,7 +15,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode, TableTotalCashTransferred
 from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -223,6 +223,11 @@ class Query(graphene.ObjectType):
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
+    table_total_cash_transferred_by_administrative_area = graphene.Field(
+        TableTotalCashTransferred,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True)
+    )
 
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
@@ -373,4 +378,50 @@ class Query(graphene.ObjectType):
         return {"labels": status_choices_mapping.values(), "datasets": dataset}
 
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
-        pass
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
+            additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
+        )
+        return {"total": payment_records.aggregate(Sum('delivered_quantity'))['delivered_quantity__sum']}
+
+    def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
+            additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
+        )
+        payment_records_hh = payment_records.select_related('household').filter(
+            household__admin_area__admin_area_type__admin_level=2
+        )
+        transferred_money_by_admin_area = {}
+        for hh in payment_records_hh:
+            admin_area = hh.household.admin_area.title
+            quantity = hh.delivered_quantity
+            try:
+                transferred_money_by_admin_area[admin_area] += quantity
+            except KeyError:
+                transferred_money_by_admin_area[admin_area] = quantity
+
+        data = []
+        for index, (admin_area, quantity) in enumerate(transferred_money_by_admin_area.items()):
+            data.append(
+                {
+                    'id': str(index),
+                    'admin2': admin_area,
+                    'totalCashTransferred': quantity,
+                }
+            )
+        return {'data': data}
+
+    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={'business_area__slug': business_area_slug},
+            additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
+        )
+        print(payment_records.values_list('updated_at__month', 'delivered_quantity'))
+        return {"total": 12}
