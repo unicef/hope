@@ -106,7 +106,7 @@ export const menuItems = [
   {
     name: 'Reporting',
     href: '/reporting',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/reporting.*$/,
     icon: <TrendingUpRounded />,
     permissions: [PERMISSIONS.REPORTING_EXPORT],
   },
@@ -126,7 +126,8 @@ export const menuItems = [
   {
     name: 'Activity Log',
     href: '/activity-log',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/activity-log.*$/,
     icon: <TrackChangesIcon />,
+    permissions: [PERMISSIONS.ACTIVITY_LOG_VIEW],
   },
 ];

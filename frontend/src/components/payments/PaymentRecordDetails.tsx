@@ -40,10 +40,12 @@ const StatusContainer = styled.div`
 `;
 interface VerificationRecordDetailsProps {
   paymentRecord: PaymentRecordNode;
+  canViewActivityLog: boolean;
 }
 
 export function PaymentRecordDetails({
   paymentRecord,
+  canViewActivityLog,
 }: VerificationRecordDetailsProps): React.ReactElement {
   let paymentVerification: PaymentVerificationNode = null;
   if (paymentRecord.verifications.totalCount > 0) {
@@ -228,7 +230,7 @@ export function PaymentRecordDetails({
           </Grid>
         </Grid>
       </Overview>
-      {paymentVerification != null ? (
+      {paymentVerification != null && canViewActivityLog ? (
         <TableWrapper>
           <UniversalActivityLogTable objectId={paymentVerification.id} />
         </TableWrapper>

@@ -113,6 +113,7 @@ services:
       - ./airflow/dags:/usr/local/airflow/dags
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: webserver
     logging:  #NOTE: noisy output silenced
       driver: "none"
@@ -155,6 +156,7 @@ services:
       - ./airflow/dags:/usr/local/airflow/dags
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: scheduler
     logging:  #NOTE: noisy output silenced
       driver: "none"
@@ -175,6 +177,7 @@ services:
       - ./airflow/connectors:/usr/local/airflow/connectors
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: worker
 
   elasticsearch:
