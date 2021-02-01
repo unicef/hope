@@ -78,6 +78,7 @@ class RdiMergeTask:
         "collect_individual_data",
         "currency",
         "unhcr_id",
+        "geopoint",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -110,7 +111,6 @@ class RdiMergeTask:
         "who_answers_phone",
         "who_answers_alt_phone",
     )
-
 
     def merge_admin_area(
         self,
@@ -298,6 +298,4 @@ class RdiMergeTask:
 
         obj_hct.save()
 
-        log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct
-        )
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
