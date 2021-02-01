@@ -66,8 +66,9 @@ const validationSchema = Yup.object().shape({
     .required('CashAssist Scope is required')
     .min(2, 'Too short')
     .max(50, 'Too long'),
-  startDate: Yup.date().required(),
+  startDate: Yup.date().required('Start Date is required'),
   endDate: Yup.date()
+    .required('End Date is required')
     .when(
       'startDate',
       (startDate, schema) =>
@@ -79,20 +80,23 @@ const validationSchema = Yup.object().shape({
           )}`,
         ),
       '',
-    )
-    .required(),
+    ),
   sector: Yup.string()
     .required('Sector is required')
     .min(2, 'Too short')
     .max(50, 'Too long'),
-  budget: Yup.number().min(0),
+  budget: Yup.number()
+    .min(0)
+    .max(99999999, 'Number is too big'),
   administrativeAreasOfImplementation: Yup.string()
     .min(2, 'Too short')
     .max(255, 'Too long'),
   description: Yup.string()
     .min(2, 'Too short')
     .max(255, 'Too long'),
-  populationGoal: Yup.number().min(0),
+  populationGoal: Yup.number()
+    .min(0)
+    .max(99999999, 'Number is too big'),
 });
 
 interface ProgramFormPropTypes {

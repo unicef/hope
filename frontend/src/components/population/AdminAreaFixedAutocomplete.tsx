@@ -15,7 +15,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   .MuiFormControl-marginDense {
-    margin-top: 4px;
+    //margin-top: 4px;
   }
 `;
 
@@ -38,6 +38,8 @@ export function AdminAreaFixedAutocomplete({
     variables: {
       title: debouncedInputText,
       businessArea,
+      first: 50,
+      level: 2,
     },
   });
 
@@ -51,20 +53,26 @@ export function AdminAreaFixedAutocomplete({
     } else {
       setNewValue(null);
     }
-    onInputTextChange('');
+    // onInputTextChange('');
   }, [data, value]);
+  const onChangeMiddleware = (e, selectedValue, reason) => {
+    onInputTextChange(selectedValue?.node?.title);
+    onChange(e, selectedValue, reason);
+  };
 
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}
       filterOptions={(options1) => options1}
-      onChange={onChange}
+      onChange={onChangeMiddleware}
       value={newValue}
       onOpen={() => {
         setOpen(true);
       }}
-      onClose={() => {
+      onClose={(e, reason) => {
         setOpen(false);
+        if (value || reason === 'select-option') return;
+        onInputTextChange(null);
       }}
       getOptionSelected={(option, selectedValue) => {
         return selectedValue?.node?.id === option.node.id;

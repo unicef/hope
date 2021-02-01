@@ -425,7 +425,7 @@ CONSTANCE_CONFIG = {
         "positive_floats",
     ),
     "DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE": (
-        15.0,
+        11.0,
         "Results equal or above this score are considered duplicates",
         "positive_floats",
     ),
@@ -441,7 +441,7 @@ CONSTANCE_CONFIG = {
     ),
     # SANCTION LIST
     "SANCTION_LIST_MATCH_SCORE": (
-        25,
+        4.8,
         "Results equal or above this score are considered possible matches",
         "positive_floats",
     ),
@@ -460,3 +460,9 @@ AZURE_TOKEN_URL = "https://login.microsoftonline.com/unicef.org/oauth2/token"
 
 TEST_OUTPUT_DIR = "./test-results"
 TEST_OUTPUT_FILE_NAME = "result.xml"
+
+DATAMART_USER = os.getenv("DATAMART_USER")
+DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
+DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
+
+KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")

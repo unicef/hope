@@ -19,7 +19,7 @@ from django.test import TestCase
 from django_countries.fields import Country
 from PIL import Image
 
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaType, BusinessArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea, AdminAreaLevel
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     DocumentType,
@@ -159,7 +159,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -179,7 +179,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -197,7 +197,7 @@ class TestRdiCreateTask(TestCase):
             individual,
         )
         expected = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -228,13 +228,13 @@ class TestRdiCreateTask(TestCase):
             individual,
             "birth_certificate_photo_i_c",
         )
-        expected = {
-            "individual_14_birth_certificate_no_i_c": {"individual": individual, "photo": f"12-2020-06-22 12:00.jpg"}
-        }
-        self.assertEqual(task.documents, expected)
+        self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
+        birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
+        self.assertEqual(birth_certificate["individual"], individual)
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
 
         birth_cert_doc = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -248,13 +248,13 @@ class TestRdiCreateTask(TestCase):
             individual,
             "birth_certificate_photo_i_c",
         )
-        expected = {
-            "individual_14_birth_certificate_no_i_c": {
-                **birth_cert_doc["individual_14_birth_certificate_no_i_c"],
-                "photo": f"12-2020-06-22 12:00.jpg",
-            }
-        }
-        self.assertEqual(task.documents, expected)
+
+        self.assertIn("individual_14_birth_certificate_i_c", task.documents.keys())
+        birth_certificate = task.documents["individual_14_birth_certificate_i_c"]
+        self.assertEqual(birth_certificate["name"], "Birth Certificate")
+        self.assertEqual(birth_certificate["type"], "BIRTH_CERTIFICATE")
+        self.assertEqual(birth_certificate["value"], "CD1247246Q12W")
+        self.assertEqual(birth_certificate["photo"].name, "12-2020-06-22 12:00.jpg")
 
     def test_handle_geopoint_field(self):
         empty_geopoint = ""
@@ -280,7 +280,7 @@ class TestRdiCreateTask(TestCase):
             type=IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
         )
         task.documents = {
-            "individual_14_birth_certificate_no_i_c": {
+            "individual_14_birth_certificate_i_c": {
                 "individual": individual,
                 "name": "Birth Certificate",
                 "type": "BIRTH_CERTIFICATE",
@@ -373,14 +373,14 @@ class TestRdiKoboCreateTask(TestCase):
         )
 
         cls.business_area = BusinessArea.objects.first()
-        cls.business_area.kobo_token = "1234ABC"
+        cls.business_area.kobo_username = "1234ABC"
         cls.business_area.save()
 
-        admin1_type = AdminAreaType.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
-        admin1 = AdminArea.objects.create(title="SO25", admin_area_type=admin1_type)
+        admin1_level = AdminAreaLevel.objects.create(name="Bakool", admin_level=1, business_area=cls.business_area)
+        admin1 = AdminArea.objects.create(p_code="SO25", title="SO25", admin_area_level=admin1_level)
 
-        admin2_type = AdminAreaType.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
-        AdminArea.objects.create(title="SO2502", parent=admin1, admin_area_type=admin2_type)
+        admin2_level = AdminAreaLevel.objects.create(name="Ceel Barde", admin_level=2, business_area=cls.business_area)
+        AdminArea.objects.create(p_code="SO2502", title="SO2502", parent=admin1, admin_area_level=admin2_level)
 
         cls.registration_data_import = RegistrationDataImportDatahubFactory(
             import_data=cls.import_data, business_area_slug=cls.business_area.slug

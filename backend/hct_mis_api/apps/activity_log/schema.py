@@ -1,11 +1,11 @@
 import graphene
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django_filters import FilterSet, CharFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField, hopePermissionClass, Permissions
-from hct_mis_api.apps.account.schema import UserObjectType
 from hct_mis_api.apps.activity_log.models import LogEntry
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -15,10 +15,29 @@ from hct_mis_api.apps.utils.schema import Arg
 
 class LogEntryFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
+    search = CharFilter(method="search_filter")
+    module = CharFilter(
+        field_name="content_type__model",
+    )
 
     class Meta:
         model = LogEntry
         fields = ("object_id",)
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            if value.lower() == "system":
+                q_obj |= Q(user__isnull=True)
+            q_obj |= Q(content_type__model__icontains=value)
+            q_obj |= Q(object_id__icontains=value)
+            q_obj |= Q(action__icontains=value)
+            q_obj |= Q(object_repr__icontains=value)
+            q_obj |= Q(user__first_name__icontains=value)
+            q_obj |= Q(user__last_name__icontains=value)
+            q_obj |= Q(user__email__icontains=value)
+            q_obj |= Q(timestamp__icontains=value)
+        return qs.filter(q_obj)
 
 
 class ContentTypeObjectType(DjangoObjectType):

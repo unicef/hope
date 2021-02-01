@@ -48,9 +48,11 @@ type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  externalId: String
   title: String!
+  adminAreaLevel: AdminAreaTypeNode!
+  pCode: String
   parent: AdminAreaNode
-  adminAreaType: AdminAreaTypeNode!
   lft: Int!
   rght: Int!
   treeId: Int!
@@ -80,8 +82,9 @@ type AdminAreaTypeNode implements Node {
   name: String!
   displayName: String
   adminLevel: Int!
+  realAdminLevel: Int
   businessArea: UserBusinessAreaNode
-  locations(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
 }
 
 type AdminAreaTypeNodeConnection {
@@ -112,6 +115,8 @@ type ApproveTargetPopulationMutation {
 
 scalar Arg
 
+scalar BigInt
+
 type BusinessAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -121,12 +126,12 @@ type BusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
-  adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -213,6 +218,7 @@ type CashPlanPaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   status: CashPlanPaymentVerificationStatus!
   cashPlan: CashPlanNode!
   sampling: CashPlanPaymentVerificationSampling!
@@ -561,11 +567,13 @@ input FullListArguments {
 scalar GeoJSON
 
 input GetCashplanVerificationSampleSizeInput {
-  cashPlanId: ID!
+  cashPlanId: ID
   sampling: String!
+  verificationChannel: String
   businessAreaSlug: String!
   fullListArguments: FullListArguments
   randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
 }
 
 type GetCashplanVerificationSampleSizeObject {
@@ -587,6 +595,7 @@ type GrievanceTicketNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   userModified: DateTime
   createdBy: UserNode
   assignedTo: UserNode
@@ -823,6 +832,7 @@ type HouseholdNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: HouseholdStatus!
   consentSign: String!
   consent: Boolean
@@ -890,6 +900,8 @@ type HouseholdNode implements Node {
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
   hasDuplicates: Boolean
+  admin1: AdminAreaNode
+  admin2: AdminAreaNode
 }
 
 type HouseholdNodeConnection {
@@ -1787,6 +1799,7 @@ type IndividualNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   status: IndividualStatus!
   individualId: String!
   photo: String!
@@ -2044,42 +2057,42 @@ type MergeRegistrationDataImportMutation {
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
-  updateGrievanceTicket(input: UpdateGrievanceTicketInput!): UpdateGrievanceTicketMutation
-  grievanceStatusChange(grievanceTicketId: ID, status: Int): GrievanceStatusChangeMutation
-  createTicketNote(noteInput: CreateTicketNoteInput!): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString): IndividualDataChangeApproveMutation
-  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString): HouseholdDataChangeApproveMutation
-  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!): NeedsAdjudicationApproveMutation
-  reassignRole(grievanceTicketId: ID!, householdId: ID!, individualId: ID!, role: String!): ReassignRoleMutation
+  updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
+  grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
+  createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!, version: BigInt): NeedsAdjudicationApproveMutation
+  reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
-  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!): EditPaymentVerificationMutation
+  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
   importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
-  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!): ActivateCashPlanVerificationMutation
-  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!): FinishCashPlanVerificationMutation
-  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!): DiscardCashPlanVerificationMutation
-  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate): UpdatePaymentVerificationStatusAndReceivedAmount
-  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!): UpdatePaymentVerificationReceivedAndReceivedAmount
+  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
+  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
+  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
   createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
-  updateTargetPopulation(input: UpdateTargetPopulationInput!): UpdateTargetPopulationMutation
+  updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
   copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
   deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
-  approveTargetPopulation(id: ID!): ApproveTargetPopulationMutation
-  unapproveTargetPopulation(id: ID!): UnapproveTargetPopulationMutation
-  finalizeTargetPopulation(id: ID!): FinalizeTargetPopulationMutation
+  approveTargetPopulation(id: ID!, version: BigInt): ApproveTargetPopulationMutation
+  unapproveTargetPopulation(id: ID!, version: BigInt): UnapproveTargetPopulationMutation
+  finalizeTargetPopulation(id: ID!, version: BigInt): FinalizeTargetPopulationMutation
   setSteficonRuleOnTargetPopulation(input: SetSteficonRuleOnTargetPopulationMutationInput!): SetSteficonRuleOnTargetPopulationMutationPayload
   createProgram(programData: CreateProgramInput!): CreateProgram
-  updateProgram(programData: UpdateProgramInput): UpdateProgram
+  updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
   deleteProgram(programId: String!): DeleteProgram
   uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
   saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
-  mergeRegistrationDataImport(id: ID!): MergeRegistrationDataImportMutation
-  rerunDedupe(registrationDataImportDatahubId: ID!): RegistrationDeduplicationMutation
+  mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
+  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
 }
 
@@ -2113,6 +2126,7 @@ type PaymentRecordNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   businessArea: UserBusinessAreaNode!
   status: PaymentRecordStatus!
   statusDate: DateTime!
@@ -2163,6 +2177,7 @@ type PaymentVerificationNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
@@ -2208,6 +2223,7 @@ type ProgramNode implements Node {
   updatedAt: DateTime!
   isRemoved: Boolean!
   lastSyncAt: DateTime
+  version: BigInt!
   name: String!
   status: ProgramStatus!
   startDate: Date!
@@ -2269,7 +2285,7 @@ enum ProgramStatus {
 }
 
 type Query {
-  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!): LogEntryNodeConnection
+  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
   allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
@@ -2304,7 +2320,7 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
-  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
+  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String, level: Int): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
@@ -2323,14 +2339,14 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
   candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Icontains: String, address: String, address_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
   individual(id: ID!): IndividualNode
-  allIndividuals(before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Icontains: String, sex: [String], age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, orderBy: String): IndividualNodeConnection
+  allIndividuals(before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Icontains: String, sex: [String], household_AdminArea: ID, age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, orderBy: String): IndividualNodeConnection
   residenceStatusChoices: [ChoiceObject]
   sexChoices: [ChoiceObject]
   maritalStatusChoices: [ChoiceObject]
@@ -2444,6 +2460,7 @@ type RegistrationDataImportNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  version: BigInt!
   name: String!
   status: RegistrationDataImportStatus!
   importDate: DateTime!
@@ -2520,7 +2537,7 @@ type ReportNode implements Node {
   reportType: Int!
   dateFrom: Date!
   dateTo: Date!
-  country: String
+  numberOfRecords: Int
   program: ProgramNode
   adminArea(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
   fileUrl: String
@@ -2733,6 +2750,7 @@ type ServiceProviderNodeEdge {
 input SetSteficonRuleOnTargetPopulationMutationInput {
   targetId: ID!
   steficonRuleId: ID
+  version: BigInt
   clientMutationId: String
 }
 
@@ -2781,6 +2799,7 @@ type TargetPopulationNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
+  version: BigInt!
   name: String!
   caId: String
   caHashId: String
@@ -2872,7 +2891,6 @@ input TargetingCriteriaRuleFilterObjectType {
   isFlexField: Boolean!
   fieldName: String!
   arguments: [Arg]!
-  headOfHousehold: Boolean
 }
 
 type TargetingCriteriaRuleNode {
@@ -2917,6 +2935,7 @@ type TargetingIndividualRuleFilterBlockNode {
   createdAt: DateTime!
   updatedAt: DateTime!
   targetingCriteriaRule: TargetingCriteriaRuleNode!
+  targetOnlyHoh: Boolean!
   individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
 }
 
@@ -3225,12 +3244,12 @@ type UserBusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
-  adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!

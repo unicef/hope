@@ -17,7 +17,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, SoftDeletableDefaultManagerModel
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 BLANK = ""
 IDP = "IDP"
@@ -209,7 +209,7 @@ REGISTRATION_METHOD_CHOICES = (
 )
 
 
-class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -342,6 +342,30 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         verbose_name = "Household"
 
     @property
+    def admin1(self):
+        if self.admin_area is None:
+            return None
+        if self.admin_area.level == 0:
+            return None
+        current_admin = self.admin_area
+        while current_admin.level != 1:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin2(self):
+        if self.admin_area is None:
+            return None
+        if self.admin_area.level == 0:
+            return None
+        if self.admin_area.level == 1:
+            return None
+        current_admin = self.admin_area
+        while current_admin.level != 2:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
     def sanction_list_possible_match(self):
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
@@ -440,7 +464,7 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
+class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
@@ -608,7 +632,8 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable):
         return self.unicef_id
 
     class Meta:
-        verbose_name="Individual"
+        verbose_name = "Individual"
+
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
