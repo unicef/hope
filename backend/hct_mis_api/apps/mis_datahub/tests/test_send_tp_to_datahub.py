@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.test import TestCase
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
-from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
@@ -64,12 +64,12 @@ class TestSendTpToDatahub(TestCase):
         cls._pre_test_commands()
 
         business_area_with_data_sharing = BusinessArea.objects.first()
-        state_area_type = AdminAreaTypeFactory(
+        state_area_type = AdminAreaLevelFactory(
             name="State",
             business_area=business_area_with_data_sharing,
             admin_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_type=state_area_type)
+        admin_area = AdminAreaFactory(admin_area_level=state_area_type)
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
         test_agency = Agency.objects.create(type="test", label="test")
 
