@@ -309,6 +309,11 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
+export function formatNumber(value: number): string {
+  if (!value && value !== 0) return '';
+  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
 }
@@ -414,3 +419,9 @@ export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
 
 export const isPermissionDeniedError = (error): boolean =>
   error?.message.includes('Permission Denied');
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const getFullNodeFromEdgesById = (edges, id) => {
+  if (!edges) return null;
+  return edges.find((edge) => edge.node.id === id)?.node || null;
+};

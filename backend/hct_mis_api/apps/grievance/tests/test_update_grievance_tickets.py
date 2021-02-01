@@ -7,7 +7,7 @@ from django_countries.fields import Country
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
@@ -69,13 +69,13 @@ class TestUpdateGrievanceTickets(APITestCase):
         self.user = UserFactory(id="a5c44eeb-482e-49c2-b5ab-d769f83db116")
         self.user_two = UserFactory(id="a34716d8-aaf1-4c70-bdd8-0d58be94981a")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(
+        area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_type=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_type=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -230,7 +230,8 @@ class TestUpdateGrievanceTickets(APITestCase):
     )
     def test_update_add_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        self.add_individual_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.add_individual_grievance_ticket.save()
         input_data = {
             "input": {
                 "description": self.add_individual_grievance_ticket.description,
@@ -299,7 +300,10 @@ class TestUpdateGrievanceTickets(APITestCase):
             self.assertTrue(self.add_individual_grievance_ticket.add_individual_ticket_details.approve_status)
 
         self.assertEqual(result, expected_result)
-        self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        if name == "without_permission":
+            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        else:
+            self.assertEqual(self.add_individual_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
 
     @parameterized.expand(
         [
@@ -316,7 +320,8 @@ class TestUpdateGrievanceTickets(APITestCase):
     )
     def test_update_change_individual(self, name, permissions):
         self.create_user_role_with_permissions(self.user, permissions, self.business_area)
-
+        self.individual_data_change_grievance_ticket.status = GrievanceTicket.STATUS_FOR_APPROVAL
+        self.individual_data_change_grievance_ticket.save()
         input_data = {
             "input": {
                 "description": self.individual_data_change_grievance_ticket.description,
@@ -397,7 +402,10 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "relationship": "UNKNOWN",
             }
         self.assertEqual(result, expected_result)
-        self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        if name == "without_permission":
+            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_FOR_APPROVAL)
+        else:
+            self.assertEqual(self.individual_data_change_grievance_ticket.status, GrievanceTicket.STATUS_IN_PROGRESS)
 
     @parameterized.expand(
         [

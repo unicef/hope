@@ -13,14 +13,21 @@ export const householdMinimal = gql`
     sanctionListPossibleMatch
     hasDuplicates
     unicefId
+    flexFields
+    unhcrId
     geopoint
     village
-    adminArea {
+    admin1{
       id
       title
-      adminAreaType {
-        adminLevel
-      }
+      level
+      pCode
+    }
+    admin2{
+      id
+      title
+      level
+      pCode
     }
     headOfHousehold {
       id
