@@ -579,7 +579,7 @@ class Query(graphene.ObjectType):
         yield from KOBO_ONLY_INDIVIDUAL_FIELDS.values()
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).order_by("name")
+        ).order_by("created_at")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
@@ -635,4 +635,4 @@ class Query(graphene.ObjectType):
         ]
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).order_by("name")
+        ).order_by("created_at")
