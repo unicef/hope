@@ -150,9 +150,6 @@ class JSONLazyString(graphene.Scalar):
         return json.loads(value)
 
 
-
-
-
 class Query(graphene.ObjectType):
     me = graphene.Field(UserNode)
     all_users = DjangoPermissionFilterConnectionField(

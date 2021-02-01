@@ -48,9 +48,11 @@ type AdminAreaNode implements Node {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
+  externalId: String
   title: String!
+  adminAreaLevel: AdminAreaTypeNode!
+  pCode: String
   parent: AdminAreaNode
-  adminAreaType: AdminAreaTypeNode!
   lft: Int!
   rght: Int!
   treeId: Int!
@@ -80,8 +82,9 @@ type AdminAreaTypeNode implements Node {
   name: String!
   displayName: String
   adminLevel: Int!
+  realAdminLevel: Int
   businessArea: UserBusinessAreaNode
-  locations(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
 }
 
 type AdminAreaTypeNodeConnection {
@@ -123,12 +126,12 @@ type BusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
-  adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
@@ -897,6 +900,8 @@ type HouseholdNode implements Node {
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
   hasDuplicates: Boolean
+  admin1: AdminAreaNode
+  admin2: AdminAreaNode
 }
 
 type HouseholdNodeConnection {
@@ -2315,7 +2320,7 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
-  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String): AdminAreaNodeConnection
+  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Icontains: String, businessArea: String, level: Int): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
@@ -3239,12 +3244,12 @@ type UserBusinessAreaNode implements Node {
   longName: String!
   regionCode: String!
   regionName: String!
-  koboToken: String
+  koboUsername: String
   rapidProHost: String
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
-  adminAreaTypes(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
