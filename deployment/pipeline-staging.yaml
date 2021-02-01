@@ -127,6 +127,9 @@ stages:
                 backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
                 backend.secret.KOBO_API_URL=$(KOBO_API_URL),\
                 backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
+                frontend.secret.DATAMART_USER=$(DATAMART_USER),\
+                frontend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
+                frontend.secret.DATAMART_URL=$(DATAMART_URL),\
                 frontend.secret.SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN),\
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
                 ingress.host=stg-hope.unitst.org,\
