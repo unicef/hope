@@ -74,9 +74,11 @@ export type AdminAreaNode = Node & {
   id: Scalars['ID'],
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
+  externalId?: Maybe<Scalars['String']>,
   title: Scalars['String'],
+  adminAreaLevel: AdminAreaTypeNode,
+  pCode?: Maybe<Scalars['String']>,
   parent?: Maybe<AdminAreaNode>,
-  adminAreaType: AdminAreaTypeNode,
   lft: Scalars['Int'],
   rght: Scalars['Int'],
   treeId: Scalars['Int'],
@@ -143,12 +145,13 @@ export type AdminAreaTypeNode = Node & {
   name: Scalars['String'],
   displayName?: Maybe<Scalars['String']>,
   adminLevel: Scalars['Int'],
+  realAdminLevel?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<UserBusinessAreaNode>,
-  locations: AdminAreaNodeConnection,
+  adminAreas: AdminAreaNodeConnection,
 };
 
 
-export type AdminAreaTypeNodeLocationsArgs = {
+export type AdminAreaTypeNodeAdminAreasArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -198,12 +201,12 @@ export type BusinessAreaNode = Node & {
   longName: Scalars['String'],
   regionCode: Scalars['String'],
   regionName: Scalars['String'],
-  koboToken?: Maybe<Scalars['String']>,
+  koboUsername?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
-  adminAreaTypes: AdminAreaTypeNodeConnection,
+  adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
@@ -219,7 +222,7 @@ export type BusinessAreaNode = Node & {
 };
 
 
-export type BusinessAreaNodeAdminAreaTypesArgs = {
+export type BusinessAreaNodeAdminAreaLevelArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -1197,6 +1200,8 @@ export type HouseholdNode = Node & {
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
+  admin1?: Maybe<AdminAreaNode>,
+  admin2?: Maybe<AdminAreaNode>,
 };
 
 
@@ -3403,7 +3408,8 @@ export type QueryAllAdminAreasArgs = {
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>,
   title_Icontains?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>
 };
 
 
@@ -3601,6 +3607,7 @@ export type QueryAllIndividualsArgs = {
   fullName?: Maybe<Scalars['String']>,
   fullName_Icontains?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
+  household_AdminArea?: Maybe<Scalars['ID']>,
   age?: Maybe<Scalars['String']>,
   search?: Maybe<Scalars['String']>,
   lastRegistrationDate?: Maybe<Scalars['String']>,
@@ -4371,6 +4378,7 @@ export type TargetingIndividualRuleFilterBlockNode = {
   createdAt: Scalars['DateTime'],
   updatedAt: Scalars['DateTime'],
   targetingCriteriaRule: TargetingCriteriaRuleNode,
+  targetOnlyHoh: Scalars['Boolean'],
   individualBlockFilters?: Maybe<Array<Maybe<TargetingIndividualBlockRuleFilterNode>>>,
 };
 
@@ -4805,12 +4813,12 @@ export type UserBusinessAreaNode = Node & {
   longName: Scalars['String'],
   regionCode: Scalars['String'],
   regionName: Scalars['String'],
-  koboToken?: Maybe<Scalars['String']>,
+  koboUsername?: Maybe<Scalars['String']>,
   rapidProHost?: Maybe<Scalars['String']>,
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
-  adminAreaTypes: AdminAreaTypeNodeConnection,
+  adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
   serviceproviderSet: ServiceProviderNodeConnection,
@@ -4827,7 +4835,7 @@ export type UserBusinessAreaNode = Node & {
 };
 
 
-export type UserBusinessAreaNodeAdminAreaTypesArgs = {
+export type UserBusinessAreaNodeAdminAreaLevelArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
@@ -5167,14 +5175,13 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'geopoint' | 'village' | 'address'>
-  & { adminArea: Maybe<(
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
-    & Pick<AdminAreaNode, 'id' | 'title'>
-    & { adminAreaType: (
-      { __typename?: 'AdminAreaTypeNode' }
-      & Pick<AdminAreaTypeNode, 'adminLevel'>
-    ) }
+    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+  )>, admin2: Maybe<(
+    { __typename?: 'AdminAreaNode' }
+    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
   )>, headOfHousehold: (
     { __typename?: 'IndividualNode' }
     & Pick<IndividualNode, 'id' | 'fullName'>
@@ -5267,13 +5274,12 @@ export type IndividualMinimalFragment = (
   ), household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
-    & { adminArea: Maybe<(
+    & { admin1: Maybe<(
       { __typename?: 'AdminAreaNode' }
-      & Pick<AdminAreaNode, 'id' | 'title'>
-      & { adminAreaType: (
-        { __typename?: 'AdminAreaTypeNode' }
-        & Pick<AdminAreaTypeNode, 'adminLevel'>
-      ) }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+    )>, admin2: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
     )>, programs: (
       { __typename?: 'ProgramNodeConnection' }
       & { edges: Array<Maybe<(
@@ -6059,6 +6065,7 @@ export type AllAddIndividualFieldsQuery = (
 export type AllAdminAreasQueryVariables = {
   title?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>,
   first?: Maybe<Scalars['Int']>
 };
 
@@ -6263,7 +6270,8 @@ export type AllIndividualsQueryVariables = {
   lastRegistrationDate?: Maybe<Scalars['String']>,
   householdId?: Maybe<Scalars['UUID']>,
   excludedId?: Maybe<Scalars['String']>,
-  businessArea?: Maybe<Scalars['String']>
+  businessArea?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>
 };
 
 
@@ -6558,7 +6566,10 @@ export type AllSanctionListIndividualsQuery = (
   )> }
 );
 
-export type AllSteficonRulesQueryVariables = {};
+export type AllSteficonRulesQueryVariables = {
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
+};
 
 
 export type AllSteficonRulesQuery = (
@@ -7820,14 +7831,21 @@ export const HouseholdMinimalFragmentDoc = gql`
   sanctionListPossibleMatch
   hasDuplicates
   unicefId
+  flexFields
+  unhcrId
   geopoint
   village
-  adminArea {
+  admin1 {
     id
     title
-    adminAreaType {
-      adminLevel
-    }
+    level
+    pCode
+  }
+  admin2 {
+    id
+    title
+    level
+    pCode
   }
   headOfHousehold {
     id
@@ -7881,12 +7899,17 @@ export const IndividualMinimalFragmentDoc = gql`
     id
     unicefId
     status
-    adminArea {
+    admin1 {
       id
       title
-      adminAreaType {
-        adminLevel
-      }
+      level
+      pCode
+    }
+    admin2 {
+      id
+      title
+      level
+      pCode
     }
     programs {
       edges {
@@ -10390,8 +10413,8 @@ export type AllAddIndividualFieldsQueryHookResult = ReturnType<typeof useAllAddI
 export type AllAddIndividualFieldsLazyQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsLazyQuery>;
 export type AllAddIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>;
 export const AllAdminAreasDocument = gql`
-    query AllAdminAreas($title: String, $businessArea: String, $first: Int) {
-  allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first) {
+    query AllAdminAreas($title: String, $businessArea: String, $level: Int, $first: Int) {
+  allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first, level: $level) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -10439,6 +10462,7 @@ export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: A
  *   variables: {
  *      title: // value for 'title'
  *      businessArea: // value for 'businessArea'
+ *      level: // value for 'level'
  *      first: // value for 'first'
  *   },
  * });
@@ -10846,8 +10870,8 @@ export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQue
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea) {
     totalCount
     pageInfo {
       startCursor
@@ -10907,6 +10931,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      householdId: // value for 'householdId'
  *      excludedId: // value for 'excludedId'
  *      businessArea: // value for 'businessArea'
+ *      adminArea: // value for 'adminArea'
  *   },
  * });
  */
@@ -11505,8 +11530,8 @@ export type AllSanctionListIndividualsQueryHookResult = ReturnType<typeof useAll
 export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsLazyQuery>;
 export type AllSanctionListIndividualsQueryResult = ApolloReactCommon.QueryResult<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>;
 export const AllSteficonRulesDocument = gql`
-    query AllSteficonRules {
-  allSteficonRules {
+    query AllSteficonRules($enabled: Boolean, $deprecated: Boolean) {
+  allSteficonRules(enabled: $enabled, deprecated: $deprecated) {
     edges {
       node {
         id
@@ -11546,6 +11571,8 @@ export function withAllSteficonRules<TProps, TChildProps = {}>(operationOptions?
  * @example
  * const { data, loading, error } = useAllSteficonRulesQuery({
  *   variables: {
+ *      enabled: // value for 'enabled'
+ *      deprecated: // value for 'deprecated'
  *   },
  * });
  */
@@ -15167,9 +15194,11 @@ export type AdminAreaNodeResolvers<ContextType = any, ParentType extends Resolve
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNode'], ParentType, ContextType>,
+  pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
-  adminAreaType?: Resolver<ResolversTypes['AdminAreaTypeNode'], ParentType, ContextType>,
   lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -15199,8 +15228,9 @@ export type AdminAreaTypeNodeResolvers<ContextType = any, ParentType extends Res
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   adminLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  realAdminLevel?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
-  locations?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeLocationsArgs>,
+  adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeAdminAreasArgs>,
 };
 
 export type AdminAreaTypeNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaTypeNodeConnection'] = ResolversParentTypes['AdminAreaTypeNodeConnection']> = {
@@ -15241,12 +15271,12 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  adminAreaTypes?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaTypesArgs>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
@@ -15688,6 +15718,8 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  admin1?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
 };
 
 export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
@@ -16731,6 +16763,7 @@ export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, P
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>>, ParentType, ContextType>,
 };
 
@@ -17023,12 +17056,12 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  koboToken?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  adminAreaTypes?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaTypesArgs>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
   serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeServiceproviderSetArgs>,

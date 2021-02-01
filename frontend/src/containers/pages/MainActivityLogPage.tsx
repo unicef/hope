@@ -10,6 +10,11 @@ import { PageHeader } from '../../components/PageHeader';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters';
 import { useDebounce } from '../../hooks/useDebounce';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { EmptyTable } from '../../components/table/EmptyTable';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;
@@ -38,29 +43,47 @@ export const ActivityLogPage = (): React.ReactElement => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const businessArea = useBusinessArea();
-  const { data, refetch } = useAllLogEntriesQuery({
+  const permissions = usePermissions();
+
+  const { data, refetch, loading } = useAllLogEntriesQuery({
     variables: {
       businessArea,
       first: rowsPerPage,
     },
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
   const [filters, setFilters] = useState({ search: null, module: '' });
   const debouncedFilters = useDebounce(filters, 700);
+
   useEffect(() => {
-    refetch({
-      businessArea,
-      first: rowsPerPage,
-      last: undefined,
-      after: undefined,
-      before: undefined,
-      ...filtersToVariables(debouncedFilters),
-    });
+    // we need to check for permission before refetch, otherwise returned permission denied error
+    // breaks the page
+    if (
+      permissions &&
+      hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions)
+    ) {
+      setPage(0);
+      refetch({
+        businessArea,
+        first: rowsPerPage,
+        last: undefined,
+        after: undefined,
+        before: undefined,
+        ...filtersToVariables(debouncedFilters),
+      });
+    }
     // eslint-disable-next-line
   }, [debouncedFilters]);
-  if (!data) {
-    return null;
+
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions))
+    return <PermissionDenied />;
+
+  if (!data && !loading) {
+    return <EmptyTable />;
   }
+  if (!data && loading) return <LoadingComponent />;
   const { edges } = data.allLogEntries;
   const { logEntryActionChoices } = data;
   const logEntries = edges.map((edge) => edge.node as LogEntryNode);
@@ -75,6 +98,7 @@ export const ActivityLogPage = (): React.ReactElement => {
           logEntries={logEntries}
           actionChoices={logEntryActionChoices}
           page={page}
+          loading={loading}
           onChangePage={(event, newPage) => {
             const variables = {
               businessArea,

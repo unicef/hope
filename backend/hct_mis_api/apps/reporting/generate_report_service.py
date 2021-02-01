@@ -561,6 +561,16 @@ class GenerateReportService:
         ),
     }
     OPTIONAL_HEADERS = {Report.HOUSEHOLD_DEMOGRAPHICS: "programme enrolled"}
+    TIMEFRAME_CELL_LABELS = {
+        Report.INDIVIDUALS: ("Last Registration Date From", "Last Registration Date To"),
+        Report.HOUSEHOLD_DEMOGRAPHICS: ("Last Registration Date From", "Last Registration Date To"),
+        Report.CASH_PLAN_VERIFICATION: ("Completion Date From", "Completion Date To"),
+        Report.PAYMENT_VERIFICATION: ("Completion Date From", "Completion Date To"),
+        Report.PAYMENTS: ("Delivery Date From", "Delivery Date To"),
+        Report.INDIVIDUALS_AND_PAYMENT: ("Delivery Date From", "Delivery Date To"),
+        Report.CASH_PLAN: ("End Date From", "End Date To"),
+        Report.PROGRAM: ("End Date From", "End Date To"),
+    }
     ROW_CONTENT_METHODS = {
         Report.INDIVIDUALS: (
             GenerateReportContentHelpers.get_individuals,
@@ -610,8 +620,8 @@ class GenerateReportService:
         filter_rows = [
             ("Report type", str(self._report_type_to_str())),
             ("Business area", self.business_area.name),
-            ("From date", str(self.report.date_from)),
-            ("To date", str(self.report.date_to)),
+            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_from)),
+            (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_to)),
         ]
 
         if self.report.admin_area.all().exists():

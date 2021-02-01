@@ -96,9 +96,11 @@ export function ProgramDetailsPage(): React.ReactElement {
             <CashPlanTable program={program} />
           </TableWrapper>
         )}
-        <TableWrapper>
-          <UniversalActivityLogTable objectId={program.id} />
-        </TableWrapper>
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable objectId={program.id} />
+          </TableWrapper>
+        )}
       </Container>
     </div>
   );

@@ -249,10 +249,20 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>{bankReconciliationSuccessPercentage.toFixed(2)}%</p>
+                      <p>
+                        {bankReconciliationSuccessPercentage
+                          ? bankReconciliationSuccessPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>{bankReconciliationErrorPercentage.toFixed(2)}%</p>
+                      <p>
+                        {bankReconciliationErrorPercentage
+                          ? bankReconciliationErrorPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -453,13 +463,14 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please create Verification Plan
         </BottomTitle>
       ) : null}
-      {cashPlan.verifications?.edges[0]?.node?.id && (
-        <TableWrapper>
-          <UniversalActivityLogTable
-            objectId={cashPlan.verifications.edges[0].node.id}
-          />
-        </TableWrapper>
-      )}
+      {cashPlan.verifications?.edges[0]?.node?.id &&
+        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable
+              objectId={cashPlan.verifications.edges[0].node.id}
+            />
+          </TableWrapper>
+        )}
     </>
   );
 }
