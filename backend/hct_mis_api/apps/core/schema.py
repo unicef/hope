@@ -24,6 +24,7 @@ from graphql import GraphQLError
 
 from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import reduce_assets_list, reduce_asset
 from hct_mis_api.apps.core.models import (
@@ -32,7 +33,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
-    AdminAreaType,
+    AdminAreaLevel,
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 from hct_mis_api.apps.account.permissions import (
@@ -43,7 +44,10 @@ from hct_mis_api.apps.account.permissions import (
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
-        field_name="admin_area_type__business_area__slug",
+        field_name="admin_area_level__business_area__slug",
+    )
+    level = IntegerFilter(
+        field_name="level",
     )
 
     class Meta:
@@ -70,7 +74,7 @@ class AdminAreaNode(DjangoObjectType):
 
 class AdminAreaTypeNode(DjangoObjectType):
     class Meta:
-        model = AdminAreaType
+        model = AdminAreaLevel
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -243,7 +247,7 @@ class KoboAssetObjectConnection(Connection):
 
 def get_fields_attr_generators(flex_field):
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.order_by("name").all()
+        yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
         yield from XLSX_ONLY_FIELDS

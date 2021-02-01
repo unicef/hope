@@ -29,8 +29,6 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     _HOUSEHOLD,
-    FIELDS_EXCLUDED_FROM_RDI,
-    XLSX_ONLY_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -61,19 +59,23 @@ from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 class GrievanceTicketFilter(FilterSet):
     SEARCH_TICKET_TYPES_LOOKUPS = {
         "complaint_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
-            "household": ("id",),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "household": ("unicef_id",),
         },
         "sensitive_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
-            "household": ("id",),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
+            "household": ("unicef_id",),
         },
         "individual_data_update_ticket_details": {
-            "individual": ("full_name", "id", "phone_no", "phone_no_alternative"),
+            "individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative"),
         },
-        "add_individual_ticket_details": {"household": ("id",)},
-        "system_flagging_ticket_details": {"golden_records_individual": ("id",)},
-        "needs_adjudication_ticket_details": {"golden_records_individual": ("id",)},
+        "add_individual_ticket_details": {"household": ("unicef_id",)},
+        "system_flagging_ticket_details": {
+            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+        },
+        "needs_adjudication_ticket_details": {
+            "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
+        },
     }
     TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
 
@@ -82,7 +84,7 @@ class GrievanceTicketFilter(FilterSet):
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
     fsp = ModelMultipleChoiceFilter(method="fsp_filter", queryset=ServiceProvider.objects.all())
     admin = ModelMultipleChoiceFilter(
-        field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
     created_at_range = DateTimeRangeFilter(field_name="created_at")
     permissions = MultipleChoiceFilter(choices=Permissions.choices(), method="permissions_filter")
@@ -100,7 +102,7 @@ class GrievanceTicketFilter(FilterSet):
         fields=(
             "id",
             "status",
-            "assigned_to__first_name",
+            "assigned_to__last_name",
             "category",
             "created_at",
             "households_count",
@@ -240,6 +242,14 @@ class ExistingGrievanceTicketFilter(FilterSet):
         payment_record_objects = cleaned_data.pop("payment_record", None)
         household_object = cleaned_data.pop("household", None)
         individual_object = cleaned_data.pop("individual", None)
+        # if any of these filters were passed in as wrong ids we need to return an empty queryset instead of completely ignore that filter value
+        # as expected in OtherRelatedTickets.tsx component when passing random household id
+        if (household_object is None and self.form.data.get("household")) or (
+            payment_record_objects is None
+            and self.form.data.get("payment_record")
+            or (individual_object is None and self.form.data.get("individual"))
+        ):
+            return queryset.none()
         if household_object is None:
             queryset.model.objects.none()
         for name, value in cleaned_data.items():
@@ -279,7 +289,6 @@ class TicketNoteFilter(FilterSet):
 
 
 class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
-
     permission_classes = (
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR),
@@ -587,7 +596,7 @@ class Query(graphene.ObjectType):
         yield from KOBO_ONLY_INDIVIDUAL_FIELDS.values()
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
-        ).order_by("name")
+        ).order_by("created_at")
 
     def resolve_all_edit_household_fields_attributes(self, info, **kwargs):
         ACCEPTABLE_FIELDS = [
@@ -643,7 +652,7 @@ class Query(graphene.ObjectType):
         ]
         yield from FlexibleAttribute.objects.filter(
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
-        ).order_by("name")
+        ).order_by("created_at")
 
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
@@ -670,7 +679,7 @@ class Query(graphene.ObjectType):
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
                         created_at__lte=days_30_from_now,
                         created_at__gt=days_60_from_now
-                    ).count(),  # Unresolved for longer than 30 daysxwxw
+                    ).count(),  # Unresolved for longer than 30 days
                     grievance_tickets.filter(
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
                         created_at__lte=days_60_from_now

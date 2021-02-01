@@ -476,6 +476,14 @@ def to_snake_case(camel_case_string):
     return snake_case[0] + snake_case[1:].lower()
 
 
+def check_concurrency_version_in_mutation(version, target):
+    if version is None:
+        return
+    from graphql import GraphQLError
+    if version != target.version:
+        raise GraphQLError("Someone has modified this record")
+
+
 def update_labels_mapping(csv_file):
     """
     WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
@@ -536,6 +544,18 @@ def update_labels_mapping(csv_file):
 
     with open(file_path, "w") as f:
         print(new_content, file=f, end="")
+
+
+def xlrd_rows_iterator(sheet):
+    import xlrd
+
+    for row_number in range(1, sheet.nrows):
+        row = sheet.row(row_number)
+
+        if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+            continue
+
+        yield row
 
 
 def chart_map_choices(choices):

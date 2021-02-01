@@ -175,9 +175,6 @@ export function LookUpHouseholdFilters({
               label='Status'
               value={filter.residenceStatus || ''}
             >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
               {choicesData.residenceStatusChoices.map((item) => {
                 return (
                   <MenuItem key={item.value} value={item.value}>

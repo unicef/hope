@@ -75,6 +75,7 @@ export function ActivateProgram({
           id: program.id,
           status: ProgramStatus.Active,
         },
+        version: program.version,
       },
     });
     if (!response.errors && response.data.updateProgram) {

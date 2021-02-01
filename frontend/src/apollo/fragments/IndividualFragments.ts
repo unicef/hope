@@ -35,12 +35,17 @@ export const individualMinimal = gql`
       id
       unicefId
       status
-      adminArea {
+      admin1{
         id
         title
-        adminAreaType {
-          adminLevel
-        }
+        level
+        pCode
+      }
+      admin2{
+        id
+        title
+        level
+        pCode
       }
       programs {
         edges {
