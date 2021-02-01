@@ -11,7 +11,7 @@ from django.db.models import QuerySet
 from django.forms import model_to_dict
 from django.utils.functional import cached_property
 
-from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.countries import SanctionListCountries as Countries
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
