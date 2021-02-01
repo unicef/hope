@@ -441,4 +441,4 @@ class Query(graphene.ObjectType):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
     def resolve_countries_choices(self, info, **kwargs):
-        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
