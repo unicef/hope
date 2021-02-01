@@ -112,8 +112,7 @@ export function FinishProgram({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to finish this Programme and push data to
-            CashAssist?
+            Are you sure you want to finish this Programme?
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
