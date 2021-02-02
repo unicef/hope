@@ -33,7 +33,10 @@ export function ProgrammeTableRow({
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
-        {household.selection?.vulnerabilityScore || '-'}
+        {household.selection?.vulnerabilityScore ||
+        household.selection?.vulnerabilityScore === 0
+          ? household.selection?.vulnerabilityScore
+          : '-'}
       </TableCell>
     </ClickableTableRow>
   );
