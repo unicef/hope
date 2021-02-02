@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 def populate_existing_payment_record_usd_amount(apps, schema_editor):
-    CashPlan = apps.get_model("program", "CashPlan")
     PaymentRecord = apps.get_model("payment", "PaymentRecord")
     all_payment_records = PaymentRecord.objects.all()
 
