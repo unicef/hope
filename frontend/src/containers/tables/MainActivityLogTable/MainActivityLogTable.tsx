@@ -45,6 +45,7 @@ interface MainActivityLogTableProps {
   onChangePage: (event: unknown, newPage: number) => void;
   onChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
   actionChoices: AllLogEntriesQuery['logEntryActionChoices'];
+  loading: boolean;
 }
 export function MainActivityLogTable({
   logEntries,
@@ -54,6 +55,7 @@ export function MainActivityLogTable({
   onChangePage,
   onChangeRowsPerPage,
   actionChoices,
+  loading = false,
 }: MainActivityLogTableProps): ReactElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expanded, setExpanded] = useState(true);
@@ -90,6 +92,8 @@ export function MainActivityLogTable({
           page={page}
           onChangePage={onChangePage}
           onChangeRowsPerPage={onChangeRowsPerPage}
+          backIconButtonProps={{ ...(loading && { disabled: true }) }}
+          nextIconButtonProps={{ ...(loading && { disabled: true }) }}
         />
       </Collapse>
     </PaperContainer>

@@ -3,10 +3,12 @@ import time
 from io import BytesIO
 
 import requests
+from django.conf import settings
 from requests.adapters import HTTPAdapter
 from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
 
+from hct_mis_api.apps.core.kobo.common import filter_by_owner
 from hct_mis_api.apps.core.models import BusinessArea
 
 
@@ -24,8 +26,8 @@ class KoboAPI:
     def __init__(self, business_area_slug, kpi_url: str = None):
         if kpi_url:
             self.KPI_URL = kpi_url
-
-        self._get_token(business_area_slug)
+        self.business_area = BusinessArea.objects.get(slug=business_area_slug)
+        self._get_token()
 
     def _handle_paginated_results(self, url):
         next_url = url
@@ -47,16 +49,15 @@ class KoboAPI:
         # the maximum limit per page is 30000
         return f"{self.KPI_URL}/{endpoint}?format=json{'&limit=30000' if add_limit else ''}"
 
-    def _get_token(self, business_area_slug):
+    def _get_token(self):
         self._client = requests.session()
         retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504], method_whitelist=False)
         self._client.mount(self.KPI_URL, HTTPAdapter(max_retries=retries))
 
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
-        token = business_area.kobo_token
+        token = settings.KOBO_MASTER_API_TOKEN
 
         if not token:
-            raise TokenNotProvided("Token is not set for this business area.")
+            raise TokenNotProvided("Token is not set")
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
@@ -115,7 +116,8 @@ class KoboAPI:
     def get_all_projects_data(self) -> list:
         projects_url = self._get_url("assets")
 
-        return self._handle_paginated_results(projects_url)
+        response_dict = self._handle_paginated_results(projects_url)
+        return filter_by_owner(response_dict, self.business_area)
 
     def get_single_project_data(self, uid: str) -> dict:
         projects_url = self._get_url(f"assets/{uid}")
@@ -125,7 +127,8 @@ class KoboAPI:
     def get_project_submissions(self, uid: str) -> list:
         submissions_url = self._get_url(f"assets/{uid}/data")
 
-        return self._handle_paginated_results(submissions_url)
+        response_dict = self._handle_paginated_results(submissions_url)
+        return response_dict
 
     def get_attached_file(self, url: str) -> BytesIO:
         response = self._client.get(url=url)

@@ -20,6 +20,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         totalNumberOfHouseholds
         administrativeAreasOfImplementation
         individualDataNeeded
+        version
       }
     }
   }
