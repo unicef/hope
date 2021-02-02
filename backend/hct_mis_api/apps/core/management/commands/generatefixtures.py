@@ -1,5 +1,6 @@
 import random
 import time
+from decimal import Decimal
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -158,7 +159,9 @@ class Command(BaseCommand):
                     target_population=target_population,
                     delivered_quantity_usd=None,
                 )
-                payment_record.delivered_quantity_usd = cash_plan.exchange_rate * payment_record.delivered_quantity
+                payment_record.delivered_quantity_usd = Decimal(
+                    cash_plan.exchange_rate * payment_record.delivered_quantity
+                ).quantize(Decimal(".01"))
                 payment_record.save()
 
                 should_create_grievance = random.choice((True, False))

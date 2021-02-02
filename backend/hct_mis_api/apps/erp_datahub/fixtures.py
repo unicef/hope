@@ -4,7 +4,6 @@ from pytz import utc
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.erp_datahub.models import FundsCommitment
-from hct_mis_api.apps.account.fixtures import UserFactory
 
 
 class FundsCommitmentFactory(factory.DjangoModelFactory):
@@ -19,11 +18,9 @@ class FundsCommitmentFactory(factory.DjangoModelFactory):
 
     total_open_amount_local = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     total_open_amount_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
-    created_by = factory.SubFactory(UserFactory)
     update_date = factory.Faker(
         "date_time_this_decade",
         before_now=True,
         after_now=False,
         tzinfo=utc,
     )
-    updated_by = factory.SubFactory(UserFactory)

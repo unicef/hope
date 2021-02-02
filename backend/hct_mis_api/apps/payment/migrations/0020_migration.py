@@ -12,7 +12,9 @@ def populate_existing_payment_record_usd_amount(apps, schema_editor):
     for payment_record in all_payment_records:
         exchange_rate = payment_record.cash_plan.exchange_rate if payment_record.cash_plan else None
         if exchange_rate:
-            payment_record.delivered_quantity_usd = payment_record.delivered_quantity * exchange_rate
+            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity * exchange_rate).quantize(
+                Decimal(".01")
+            )
     PaymentRecord.objects.bulk_update(all_payment_records, ["delivered_quantity_usd"])
 
 
