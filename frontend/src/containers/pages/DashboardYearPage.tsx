@@ -54,16 +54,20 @@ export function DashboardYearPage({
       <PaddingContainer>
         <Grid container>
           <Grid item xs={8}>
-            <TotalAmountTransferredSection />
+            <TotalAmountTransferredSection
+              data={data.sectionTotalTransferred}
+            />
             <TotalAmountPlannedAndTransferredSection />
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
             <DashboardPaper title='Planned Budget and Total Transferred to Date'>
-              <PlannedBudget />
+              <PlannedBudget data={data.chartPlannedBudget} />
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
-              <TotalCashTransferredByAdministrativeAreaTable />
+              <TotalCashTransferredByAdministrativeAreaTable
+                data={data.tableTotalCashTransferredByAdministrativeArea.data}
+              />
             </DashboardPaper>
             <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>

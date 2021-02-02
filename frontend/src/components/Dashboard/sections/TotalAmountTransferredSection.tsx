@@ -8,8 +8,14 @@ import {
   DashboardCard,
   IconContainer,
 } from '../DashboardCard';
+import { AllChartsQuery } from '../../../__generated__/graphql';
 
-export const TotalAmountTransferredSection = (): React.ReactElement => {
+interface TotalAmountTransferredSectionProps {
+  data: AllChartsQuery['sectionTotalTransferred'];
+}
+export const TotalAmountTransferredSection = ({
+  data,
+}: TotalAmountTransferredSectionProps): React.ReactElement => {
   return (
     <DashboardCard color='#1E877D'>
       <Grid container justify='space-between' alignItems='center'>
@@ -20,7 +26,7 @@ export const TotalAmountTransferredSection = (): React.ReactElement => {
         <Grid item>
           <Grid container spacing={3} alignItems='center'>
             <Grid item>
-              <CardAmount>$32634245</CardAmount>
+              <CardAmount>${data?.total}</CardAmount>
             </Grid>
             <Grid item>
               <IconContainer bg='#d9eceb' color='#03867b'>

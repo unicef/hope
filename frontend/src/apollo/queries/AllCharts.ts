@@ -77,5 +77,25 @@ export const Allcharts = gql`
       }
       labels
     }
+    sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year) {
+      total
+    }
+    tableTotalCashTransferredByAdministrativeArea(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+    ) {
+      data {
+        id
+        admin2
+        totalCashTransferred
+      }
+    }
+    chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year) {
+      datasets {
+        data
+        label
+      }
+      labels
+    }
   }
 `;

@@ -43,12 +43,11 @@ export function AdminAreasAutocomplete({
       level: 2,
     },
   });
-  console.log('valuevalue', value);
   useEffect(() => {
     setNewValue(value);
     // onInputTextChange('');
   }, [data, value]);
-  const onChangeMiddleware = (e, selectedValue, reason) => {
+  const onChangeMiddleware = (e, selectedValue, reason): void => {
     onInputTextChange(selectedValue?.node?.title);
     onChange(e, selectedValue, reason);
   };
