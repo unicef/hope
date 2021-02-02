@@ -343,6 +343,10 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             grievance_ticket.assigned_to = assigned_to
             if grievance_ticket.status in (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL):
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+        else:
+            if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
+                grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
+
 
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()

@@ -47,7 +47,7 @@ export function HouseHoldTableRow({
       <TableCell align='left'>{household.unicefId}</TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
+      <TableCell align='left'>{household.admin2?.title || '-'}</TableCell>
       <TableCell align='left'>
         {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>

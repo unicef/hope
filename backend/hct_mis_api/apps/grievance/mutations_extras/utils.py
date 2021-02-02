@@ -74,7 +74,6 @@ def remove_parsed_data_fields(data_dict, fields_list):
 
 
 def verify_flex_fields(flex_fields_to_verify, associated_with):
-    import re
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
         TYPE_SELECT_ONE,
@@ -93,7 +92,6 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
         field_choices = set(f.get("value") for f in flex_field["choices"])
-
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
             raise ValueError(f"invalid value type for a field {name}")
 
@@ -101,7 +99,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
             raise ValueError(f"invalid value: {value} for a field {name}")
 
         if field_type == TYPE_SELECT_MANY:
-            values = set(re.split("[, ;]+", value))
+            values = set(value)
             if values.issubset(field_choices) is False:
                 raise ValueError(f"invalid value: {value} for a field {name}")
 

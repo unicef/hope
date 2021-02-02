@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
-from hct_mis_api.apps.core.es_analyzers import phonetic_analyzer
+from hct_mis_api.apps.core.es_analyzers import phonetic_analyzer, name_synonym_analyzer
 from .elasticsearch_utils import DEFAULT_SCRIPT
 from .models import Individual
 
@@ -9,7 +9,9 @@ from .models import Individual
 @registry.register_document
 class IndividualDocument(Document):
     id = fields.KeywordField(boost=0)
-    given_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
+    given_name = fields.TextField(
+        analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
+    )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
     family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
     full_name = fields.TextField(analyzer=phonetic_analyzer)
@@ -88,7 +90,7 @@ class IndividualDocument(Document):
         if household:
             admin_area = household.admin_area
             if admin_area:
-                children = admin_area.children.filter(admin_area_type__admin_level=2).first()
+                children = admin_area.children.filter(admin_area_level__admin_level=2).first()
                 if children:
                     return children.title
                 return
