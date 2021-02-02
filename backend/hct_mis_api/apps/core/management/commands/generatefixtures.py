@@ -156,7 +156,10 @@ class Command(BaseCommand):
                     cash_plan=cash_plan,
                     household=household,
                     target_population=target_population,
+                    delivered_quantity_usd=None,
                 )
+                payment_record.delivered_quantity_usd = cash_plan.exchange_rate * payment_record.delivered_quantity
+                payment_record.save()
 
                 should_create_grievance = random.choice((True, False))
                 if should_create_grievance:
