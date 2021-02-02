@@ -83,9 +83,8 @@ def prepare_choices_for_validation(choices_sheet):
         english_label = ""
         for cell, header_name in zip(row, choices_headers_map):
             cell_value = cell.value
-
             if header_name == "list_name" and cell_value != last_list_name:
-                last_list_name = cell_value
+                last_list_name = str(cell_value).strip()
             elif header_name == "name":
                 if isinstance(cell_value, float) and cell_value.is_integer():
                     cell_value = str(int(cell_value))
@@ -95,9 +94,7 @@ def prepare_choices_for_validation(choices_sheet):
 
                 choice_value = cell_value
             elif header_name == "label:English(EN)":
-                from unicodedata import normalize
-
-                english_label = normalize("NFKD", str(cell_value))
+                english_label = str(cell_value).strip()
 
         if last_list_name is not None and choice_value is not None:
             choices_mapping[last_list_name].append({"label": {"English(EN)": english_label}, "value": choice_value})
@@ -129,17 +126,6 @@ class KoboTemplateValidator:
         "estimated_birth_date_i_c"
     )
     FIELDS_EXCLUDED_FROM_CHOICE_CHECK = (
-        "country_h_c",
-        "country_origin_h_c",
-        "birth_certificate_issuer_i_c",
-        "drivers_license_issuer_i_c",
-        "electoral_card_issuer_i_c",
-        "unhcr_id_issuer_i_c",
-        "national_passport_issuer_i_c",
-        "national_id_issuer_i_c",
-        "scope_id_issuer_i_c",
-        "other_id_issuer_i_c",
-        "currency_h_c",
         # temporarily disabled from checking
         "admin1_h_c",
         "admin2_h_c",

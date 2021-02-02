@@ -342,6 +342,30 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
         verbose_name = "Household"
 
     @property
+    def admin1(self):
+        if self.admin_area is None:
+            return None
+        if self.admin_area.level == 0:
+            return None
+        current_admin = self.admin_area
+        while current_admin.level != 1:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
+    def admin2(self):
+        if self.admin_area is None:
+            return None
+        if self.admin_area.level == 0:
+            return None
+        if self.admin_area.level == 1:
+            return None
+        current_admin = self.admin_area
+        while current_admin.level != 2:
+            current_admin = current_admin.parent
+        return current_admin
+
+    @property
     def sanction_list_possible_match(self):
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
@@ -608,7 +632,8 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         return self.unicef_id
 
     class Meta:
-        verbose_name="Individual"
+        verbose_name = "Individual"
+
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"
