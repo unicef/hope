@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -53,7 +53,7 @@ from hct_mis_api.apps.household.models import (
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode
+from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 
 
 INDIVIDUALS_CHART_LABELS = [
@@ -76,7 +76,7 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="admin_area", queryset=AdminArea.objects.filter(level=2)
     )
 
     class Meta:
@@ -133,7 +133,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")
@@ -147,6 +147,7 @@ class IndividualFilter(FilterSet):
             "full_name": ["exact", "icontains"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
+            "household__admin_area": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -171,6 +172,7 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(household__admin_area__title__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(household__id__icontains=value)
+            q_obj |= Q(household__unicef_id=value)
             q_obj |= Q(full_name__icontains=value)
         return qs.filter(q_obj)
 
@@ -267,6 +269,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     sanction_list_possible_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
+    admin1 = graphene.Field(AdminAreaNode)
+    admin2 = graphene.Field(AdminAreaNode)
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -348,6 +352,10 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     observed_disability = graphene.List(graphene.String)
+    relationship = graphene.Enum(
+        "IndividualRelationship",
+        [(x[0], x[0]) for x in RELATIONSHIP_CHOICE],
+    )
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -364,6 +372,12 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_batch_status == DUPLICATE_IN_BATCH else "possible_duplicates"
         results = parent.deduplication_batch_results.get(key, {})
         return encode_ids(results, "ImportedIndividual", "hit_id")
+
+    def resolve_relationship(parent, info):
+        # custom resolver so when relationship value is empty string, query does not break (since empty string is not one of enum choices, we need to return None)
+        if not parent.relationship:
+            return None
+        return parent.relationship
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -413,10 +427,6 @@ class ChartAllHouseHoldsReached(ChartDatasetNode):
     male_age_group_12_17_count = graphene.Int()
     male_age_group_18_59_count = graphene.Int()
     male_age_group_60_count = graphene.Int()
-
-
-class SectionTotalNode(graphene.ObjectType):
-    total = graphene.Int()
 
 
 class Query(graphene.ObjectType):

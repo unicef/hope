@@ -1,7 +1,7 @@
 import factory
 from faker import Faker
 
-from hct_mis_api.apps.core.models import AdminArea, AdminAreaType
+from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel
 
 faker = Faker()
 
@@ -15,7 +15,7 @@ def create_fake_multipolygon():
     return MultiPolygon(p1, p2)
 
 
-class AdminAreaTypeFactory(factory.DjangoModelFactory):
+class AdminAreaLevelFactory(factory.DjangoModelFactory):
     """
     Arguments:
         country {Country} -- Country ORM objects
@@ -23,8 +23,8 @@ class AdminAreaTypeFactory(factory.DjangoModelFactory):
     """
 
     class Meta:
-        model = AdminAreaType
-        django_get_or_create = ("name",)
+        model = AdminAreaLevel
+        django_get_or_create = ("business_area", "admin_level",)
 
     name = None
     display_name = factory.LazyAttribute(lambda o: o.name)
@@ -35,19 +35,19 @@ class AdminAreaTypeFactory(factory.DjangoModelFactory):
 class AdminAreaFactory(factory.DjangoModelFactory):
     """
     Arguments:
-        admin_area_type {AdminAreaType} -- AdminAreaType ORM objects
+        admin_area_level {AdminAreaType} -- AdminAreaType ORM objects
     """
 
     class Meta:
         model = AdminArea
         django_get_or_create = (
             "title",
-            "admin_area_type",
+            "admin_area_level",
         )
 
     title = factory.LazyFunction(faker.city)
-    # We are going to fill admin_area_type type manually
-    admin_area_type = None
+    # We are going to fill admin_area_level type manually
+    admin_area_level = None
     parent = None
     geom = factory.LazyFunction(create_fake_multipolygon)
     point = None

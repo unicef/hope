@@ -39,3 +39,17 @@ class _DatasetsNode(graphene.ObjectType):
 class ChartDatasetNode(graphene.ObjectType):
     labels = graphene.List(graphene.String)
     datasets = graphene.List(_DatasetsNode)
+
+
+class SectionTotalNode(graphene.ObjectType):
+    total = graphene.Float()
+
+
+class _TableTotalCashTransferredDataNode(graphene.ObjectType):
+    id = graphene.String()
+    admin2 = graphene.String()
+    totalCashTransferred = graphene.String()
+
+
+class TableTotalCashTransferred(graphene.ObjectType):
+    data = graphene.List(_TableTotalCashTransferredDataNode)

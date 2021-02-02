@@ -32,6 +32,7 @@ from hct_mis_api.apps.household.models import (
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    IDENTIFICATION_TYPE_OTHER,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -85,6 +86,7 @@ class RdiBaseCreateTask:
                         upper_value = single_choice.upper()
                         if upper_value in choices:
                             valid_choices.append(upper_value)
+                            continue
 
                     if single_choice not in choices:
                         try:
@@ -202,7 +204,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["issuing_country"] = Country(value)
         else:
-            suffix = "other" if header.startswith("other_id") else header.replace("issuer", "no")
+            suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
                 "issuing_country": Country(value),
@@ -646,10 +648,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     )
                 else:
                     type_name = document_name.upper()
+                    if type_name == "OTHER_ID":
+                        type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name)
                     country = Country(data["issuing_country"])
                     if label is None:
                         label = data["name"]
+
                     document_type = ImportedDocumentType.objects.get(
                         country=country,
                         label=label,
@@ -718,7 +723,10 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         for i_field, i_value in individual.items():
                             if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
                                 key = (
-                                    i_field.replace("_photo_i_c", "").replace("_no_i_c", "").replace("_issuer_i_c", "")
+                                    i_field.replace("_photo_i_c", "")
+                                    .replace("_no_i_c", "")
+                                    .replace("_issuer_i_c", "")
+                                    .replace("_type_i_c", "")
                                 )
                                 if i_field.endswith("_type_i_c"):
                                     value_key = "name"

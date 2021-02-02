@@ -18,6 +18,7 @@ import {
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LabelizedField } from '../LabelizedField';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 
 const Title = styled.div`
   width: 100%;
@@ -39,8 +40,7 @@ export const EditHouseholdDataChangeField = ({
   switch (field.type) {
     case 'DECIMAL':
       fieldProps = {
-        component: FormikTextField,
-        type: 'number',
+        component: FormikDecimalField,
       };
       break;
     case 'STRING':
