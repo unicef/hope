@@ -6,8 +6,8 @@ from operators.pull_from_erp_dh_operator import PullFromErpDh
 dag = DAG(
     "PullFromErpDh",
     description="Pull data from erp datahub schema",
-    schedule_interval="@hourly",
-    start_date=datetime.now() - timedelta(hours=23, minutes=30),
+    schedule_interval="30 * * * *",
+    start_date=datetime.now() - timedelta(days=1),
 )
 
 django_operator = PullFromErpDh(
