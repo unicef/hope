@@ -17,10 +17,10 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 
 const Title = styled.div`
   width: 100%;
