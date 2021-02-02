@@ -1,40 +1,21 @@
 import subprocess
 
-from django.core.management import call_command
-from django.core.management.commands import makemigrations
+from django.core.management import call_command, BaseCommand
+from django.db import connections
+
+from hct_mis_api.apps.core.management.sql import sql_drop_tables
 
 
-class Command(makemigrations.Command):
+class Command(BaseCommand):
     def handle(self, *args, **options):
-        call_command(
-            "reset_db",
-            "--noinput",
-            "--close-sessions",
-        )
-        call_command(
-            "reset_db",
-            "--noinput",
-            "--close-sessions",
-            router="cash_assist_datahub_ca",
-        )
-        call_command(
-            "reset_db",
-            "--noinput",
-            "--close-sessions",
-            router="cash_assist_datahub_mis",
-        )
-        call_command(
-            "reset_db",
-            "--noinput",
-            "--close-sessions",
-            router="cash_assist_datahub_erp",
-        )
-        call_command(
-            "reset_db",
-            "--noinput",
-            "--close-sessions",
-            router="registration_datahub",
-        )
+        for connection_name in connections:
+            connection = connections[connection_name]
+            with connection.cursor() as cursor:
+                sql = sql_drop_tables(connection)
+                if not sql:
+                    continue
+                print(sql)
+                cursor.execute(sql)
         subprocess.call(["./create_schemas.sh"])
         call_command("migratealldb")
         call_command("loadbusinessareas")

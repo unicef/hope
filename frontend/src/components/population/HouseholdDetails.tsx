@@ -8,7 +8,6 @@ import {
 } from '../../__generated__/graphql';
 import { choicesToDict, formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
 import { ContentLink } from '../ContentLink';
 
 const Container = styled.div`
@@ -55,7 +54,6 @@ export function HouseholdDetails({
   const residenceChoicesDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
-  console.log('household', household);
   return (
     <>
       <Container>
@@ -106,12 +104,12 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 1'>
-                {household.address}
+                {household.admin1?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 2'>
-                {household.adminArea?.title}
+                {household.admin2?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>

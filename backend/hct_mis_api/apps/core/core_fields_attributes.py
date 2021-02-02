@@ -3,9 +3,9 @@ from functools import reduce
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from pycountry import currencies
 
 from hct_mis_api.apps.core.countries import Countries
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query
 from hct_mis_api.apps.household.models import (
@@ -372,6 +372,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "xlsx_field": "phone_no_i_c",
     },
     {
+        "id": "8e10289e-235a-4af5-a745-8c3082b820f5",
+        "type": TYPE_STRING,
+        "name": "who_answers_phone",
+        "lookup": "who_answers_phone",
+        "required": False,
+        "label": {"English(EN)": "Who answers this phone?"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "who_answers_phone_i_c",
+    },
+    {
         "id": "f7609980-95c4-4b18-82dc-132a04ce7d65",
         "type": TYPE_STRING,
         "name": "phone_no_alternative",
@@ -382,6 +394,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "phone_no_alternative_i_c",
+    },
+    {
+        "id": "2448dbfe-e746-4aea-9e74-e635a3195dc5",
+        "type": TYPE_STRING,
+        "name": "who_answers_alt_phone",
+        "lookup": "who_answers_alt_phone",
+        "required": False,
+        "label": {"English(EN)": "Who answers this phone?"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "who_answers_alt_phone_i_c",
     },
     {
         "id": "e991e0e2-d6be-4abd-b3bc-9122091ca96e",
@@ -415,7 +439,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in CURRENCY_CHOICES],
+        "choices": [{"label": {"English(EN)": currency.name}, "value": currency.alpha_3} for currency in currencies],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
     },
@@ -797,7 +821,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "name": "pregnant_count",
         "lookup": "pregnant_count",
         "required": False,
-        "label": {"English(EN)": ""},
+        "label": {"English(EN)": "Pregnant count"},
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
@@ -1200,30 +1224,6 @@ CORE_FIELDS_ATTRIBUTES = [
         "choices": [],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "org_name_enumerator_h_c",
-    },
-    {
-        "id": "8e10289e-235a-4af5-a745-8c3082b820f5",
-        "type": TYPE_STRING,
-        "name": "who_answers_phone",
-        "lookup": "who_answers_phone",
-        "required": False,
-        "label": {"English(EN)": "Who answers this phone?"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "who_answers_phone_i_c",
-    },
-    {
-        "id": "2448dbfe-e746-4aea-9e74-e635a3195dc5",
-        "type": TYPE_STRING,
-        "name": "who_answers_alt_phone",
-        "lookup": "who_answers_alt_phone",
-        "required": False,
-        "label": {"English(EN)": "Who answers this phone?"},
-        "hint": "",
-        "choices": [],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "who_answers_alt_phone_i_c",
     },
 ]
 
