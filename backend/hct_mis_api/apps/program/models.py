@@ -186,7 +186,7 @@ class CashPlan(TimeStampedUUIDModel):
     assistance_through = models.CharField(max_length=255)
     vision_id = models.CharField(max_length=255)
     funds_commitment = models.CharField(max_length=255)
-    exchange_rate = models.DecimalField(decimal_places=10, blank=True, null=True, max_digits=12)
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
     down_payment = models.CharField(max_length=255)
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField()
