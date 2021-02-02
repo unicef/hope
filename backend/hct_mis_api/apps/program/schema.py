@@ -24,7 +24,7 @@ from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
-from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode, SectionTotalNode
+from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
 class ProgramFilter(FilterSet):
@@ -152,9 +152,6 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-from graphene_django.filter import DjangoFilterConnectionField
-
-
 class ChartProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
 
@@ -172,22 +169,6 @@ class ChartProgramFilter(FilterSet):
             q_obj |= Q(last_name__icontains=value)
             q_obj |= Q(email__icontains=value)
         return qs.filter(q_obj)
-
-
-# class XDChartDatasetNode(graphene.ObjectType):
-#     label = graphene.String()
-#     data = graphene.List(graphene.Int)
-#
-#
-# class ChartXDNode(graphene.ObjectType):
-#     permission_classes = (
-#         hopePermissionClass(
-#             Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-#         ),
-#     )
-#     labels = graphene.List(graphene.String)
-#     # dataset = graphene.List(graphene.Int)
-#     datasets = graphene.List(XDChartDatasetNode)
 
 
 class Query(graphene.ObjectType):
@@ -208,7 +189,7 @@ class Query(graphene.ObjectType):
         year=graphene.Int(required=True)
     )
     chart_planned_budget = graphene.Field(
-        SectionTotalNode,
+        ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
@@ -296,12 +277,34 @@ class Query(graphene.ObjectType):
             year,
             business_area_slug_filter={'business_area__slug': business_area_slug},
             additional_filters={'start_date__year': year, "end_date__year": year}
-        )
-        for p in Program.objects.filter(business_area__slug=business_area_slug):
-            print(p.start_date)
-            print(p.end_date)
-        print(programs)
-        # print(programs.filter(updated_at__month=1).aggregate(Sum('cash_plans__payment_records'))['cash_plans__payment_records__sum'])
-        # print(programs.prefetch_related('cash_plans'))
+        ).prefetch_related('cash_plans__payment_records')
 
-        return {"total": 12}
+        previous_transfers_data = [0] * 12
+        cash_transfers_data = [0] * 12
+        previous_sum = 0
+        for month in range(1, 13):
+            payment_records_by_delivery_month = programs.filter(
+                cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
+                cash_plans__payment_records__delivery_date__year=year,
+                cash_plans__payment_records__delivery_date__month=month
+            ).values_list(
+                "cash_plans__payment_records__delivered_quantity",
+                flat=True
+            ).distinct()
+            for quantity_delivered in payment_records_by_delivery_month:
+                cash_transfers_data[month - 1] += quantity_delivered
+                previous_sum += quantity_delivered
+            previous_transfers_data[month - 1] = previous_sum
+        labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        datasets = [
+            {
+                "label": "Previous Transfers",
+                "data": previous_transfers_data
+            },
+            {
+                "label": "Cash Assistance",
+                "data": cash_transfers_data
+            },
+        ]
+
+        return {"labels": labels, "datasets": datasets}
