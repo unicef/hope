@@ -38,6 +38,13 @@ export type _DetailedDatasetsNode = {
   data?: Maybe<Array<Maybe<Scalars['Float']>>>,
 };
 
+export type _TableTotalCashTransferredDataNode = {
+   __typename?: '_TableTotalCashTransferredDataNode',
+  id?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Scalars['String']>,
+  totalCashTransferred?: Maybe<Scalars['String']>,
+};
+
 export type ActivateCashPlanVerificationMutation = {
    __typename?: 'ActivateCashPlanVerificationMutation',
   cashPlan?: Maybe<CashPlanNode>,
@@ -553,12 +560,6 @@ export type ChartPaymentVerification = {
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
   households?: Maybe<Scalars['Int']>,
-};
-
-export type ChartXdNode = {
-   __typename?: 'ChartXDNode',
-  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
-  datasets?: Maybe<Array<Maybe<XdChartDatasetNode>>>,
 };
 
 export type CheckAgainstSanctionListMutation = {
@@ -3210,6 +3211,8 @@ export type Query = {
   chartPaymentVerification?: Maybe<ChartPaymentVerification>,
   chartVolumeByDeliveryMechanism?: Maybe<ChartDatasetNode>,
   chartPayment?: Maybe<ChartDatasetNode>,
+  sectionTotalTransferred?: Maybe<SectionTotalNode>,
+  tableTotalCashTransferredByAdministrativeArea?: Maybe<TableTotalCashTransferred>,
   paymentRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentRecordEntitlementCardStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   paymentRecordDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3230,7 +3233,8 @@ export type Query = {
   cashAssistUrlPrefix?: Maybe<Scalars['String']>,
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
-  chartProgrammesBySector?: Maybe<ChartXdNode>,
+  chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
+  chartPlannedBudget?: Maybe<ChartDetailedDatasetsNode>,
   cashPlan?: Maybe<CashPlanNode>,
   allCashPlans?: Maybe<CashPlanNodeConnection>,
   programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3470,6 +3474,18 @@ export type QueryChartPaymentArgs = {
 };
 
 
+export type QuerySectionTotalTransferredArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
 export type QueryAllRapidProFlowsArgs = {
   businessAreaSlug: Scalars['String']
 };
@@ -3555,6 +3571,12 @@ export type QueryAllProgramsArgs = {
 
 
 export type QueryChartProgrammesBySectorArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int']
+};
+
+
+export type QueryChartPlannedBudgetArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int']
 };
@@ -4294,7 +4316,7 @@ export type SaveKoboProjectImportDataMutation = {
 
 export type SectionTotalNode = {
    __typename?: 'SectionTotalNode',
-  total?: Maybe<Scalars['Int']>,
+  total?: Maybe<Scalars['Float']>,
 };
 
 export type SensitiveGrievanceTicketExtras = {
@@ -4417,6 +4439,11 @@ export type SteficonRuleNodeEdge = {
    __typename?: 'SteficonRuleNodeEdge',
   node?: Maybe<SteficonRuleNode>,
   cursor: Scalars['String'],
+};
+
+export type TableTotalCashTransferred = {
+   __typename?: 'TableTotalCashTransferred',
+  data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataNode>>>,
 };
 
 export type TargetingCriteriaNode = {
@@ -5289,12 +5316,6 @@ export enum UserStatus {
   Inactive = 'INACTIVE'
 }
 
-
-export type XdChartDatasetNode = {
-   __typename?: 'XDChartDatasetNode',
-  label?: Maybe<Scalars['String']>,
-  data?: Maybe<Array<Maybe<Scalars['Int']>>>,
-};
 
 export type XlsxErrorNode = {
    __typename?: 'XlsxErrorNode',
@@ -6293,11 +6314,11 @@ export type AllChartsQueryVariables = {
 export type AllChartsQuery = (
   { __typename?: 'Query' }
   & { chartProgrammesBySector: Maybe<(
-    { __typename?: 'ChartXDNode' }
-    & Pick<ChartXdNode, 'labels'>
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
     & { datasets: Maybe<Array<Maybe<(
-      { __typename?: 'XDChartDatasetNode' }
-      & Pick<XdChartDatasetNode, 'label' | 'data'>
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'label' | 'data'>
     )>>> }
   )>, chartPaymentVerification: Maybe<(
     { __typename?: 'ChartPaymentVerification' }
@@ -6344,6 +6365,22 @@ export type AllChartsQuery = (
       & Pick<_DatasetsNode, 'data'>
     )>>> }
   )>, chartIndividualsWithDisabilityReachedByAge: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
+  )>, sectionTotalTransferred: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, tableTotalCashTransferredByAdministrativeArea: Maybe<(
+    { __typename?: 'TableTotalCashTransferred' }
+    & { data: Maybe<Array<Maybe<(
+      { __typename?: '_TableTotalCashTransferredDataNode' }
+      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred'>
+    )>>> }
+  )>, chartPlannedBudget: Maybe<(
     { __typename?: 'ChartDetailedDatasetsNode' }
     & Pick<ChartDetailedDatasetsNode, 'labels'>
     & { datasets: Maybe<Array<Maybe<(
@@ -10900,6 +10937,23 @@ export const AllChartsDocument = gql`
     }
     labels
   }
+  sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year) {
+    total
+  }
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year) {
+    data {
+      id
+      admin2
+      totalCashTransferred
+    }
+  }
+  chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
 }
     `;
 export type AllChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllChartsQuery, AllChartsQueryVariables>, 'query'> & ({ variables: AllChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
@@ -15043,6 +15097,9 @@ export type ResolversTypes = {
   ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
   _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
   ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
+  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
+  TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>,
+  _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>,
   RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
   RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
   RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
@@ -15059,14 +15116,11 @@ export type ResolversTypes = {
   KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
   KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
   KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
-  ChartXDNode: ResolverTypeWrapper<ChartXdNode>,
-  XDChartDatasetNode: ResolverTypeWrapper<XdChartDatasetNode>,
+  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
-  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
   UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
   UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
   ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
@@ -15377,6 +15431,9 @@ export type ResolversParentTypes = {
   ChartPaymentVerification: ChartPaymentVerification,
   _DetailedDatasetsNode: _DetailedDatasetsNode,
   ChartDatasetNode: ChartDatasetNode,
+  SectionTotalNode: SectionTotalNode,
+  TableTotalCashTransferred: TableTotalCashTransferred,
+  _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode,
   RapidProFlow: RapidProFlow,
   RapidProFlowRun: RapidProFlowRun,
   RapidProFlowResult: RapidProFlowResult,
@@ -15393,14 +15450,11 @@ export type ResolversParentTypes = {
   KoboAssetObject: KoboAssetObject,
   KoboAssetObjectConnection: KoboAssetObjectConnection,
   KoboAssetObjectEdge: KoboAssetObjectEdge,
-  ChartXDNode: ChartXdNode,
-  XDChartDatasetNode: XdChartDatasetNode,
+  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
   TargetingCriteriaObjectType: TargetingCriteriaObjectType,
   TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
   TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
   TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
-  SectionTotalNode: SectionTotalNode,
-  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
   UserNodeConnection: UserNodeConnection,
   UserNodeEdge: UserNodeEdge,
   ImportedHouseholdNode: ImportedHouseholdNode,
@@ -15527,6 +15581,12 @@ export type _DatasetsNodeResolvers<ContextType = any, ParentType extends Resolve
 export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_DetailedDatasetsNode'] = ResolversParentTypes['_DetailedDatasetsNode']> = {
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Float']>>>, ParentType, ContextType>,
+};
+
+export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalCashTransferred?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
@@ -15760,11 +15820,6 @@ export type ChartPaymentVerificationResolvers<ContextType = any, ParentType exte
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
   households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-};
-
-export type ChartXdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartXDNode'] = ResolversParentTypes['ChartXDNode']> = {
-  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['XDChartDatasetNode']>>>, ParentType, ContextType>,
 };
 
 export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']> = {
@@ -16675,6 +16730,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>,
   chartVolumeByDeliveryMechanism?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartVolumeByDeliveryMechanismArgs, 'businessAreaSlug' | 'year'>>,
   chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>,
+  sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>,
+  tableTotalCashTransferredByAdministrativeArea?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferred']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaArgs, 'businessAreaSlug' | 'year'>>,
   paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentRecordEntitlementCardStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -16695,7 +16752,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
-  chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartXDNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
+  chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
+  chartPlannedBudget?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPlannedBudgetArgs, 'businessAreaSlug' | 'year'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -17039,7 +17097,7 @@ export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, Parent
 };
 
 export type SectionTotalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']> = {
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  total?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
 };
 
 export type ServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNode'] = ResolversParentTypes['ServiceProviderNode']> = {
@@ -17105,6 +17163,10 @@ export type SteficonRuleNodeConnectionResolvers<ContextType = any, ParentType ex
 export type SteficonRuleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeEdge'] = ResolversParentTypes['SteficonRuleNodeEdge']> = {
   node?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TableTotalCashTransferredResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']> = {
+  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>, ParentType, ContextType>,
 };
 
 export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
@@ -17530,11 +17592,6 @@ export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'UUID'
 }
 
-export type XdChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XDChartDatasetNode'] = ResolversParentTypes['XDChartDatasetNode']> = {
-  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>,
-};
-
 export type XlsxErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxErrorNode'] = ResolversParentTypes['XlsxErrorNode']> = {
   sheet?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   coordinates?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -17550,6 +17607,7 @@ export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends Reso
 export type Resolvers<ContextType = any> = {
   _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
   _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
+  _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
   ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
   AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
   AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
@@ -17574,7 +17632,6 @@ export type Resolvers<ContextType = any> = {
   ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
   ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
   ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
-  ChartXDNode?: ChartXdNodeResolvers<ContextType>,
   CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
   ChoiceObject?: ChoiceObjectResolvers<ContextType>,
   ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
@@ -17708,6 +17765,7 @@ export type Resolvers<ContextType = any> = {
   SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>,
   SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>,
   SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>,
+  TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>,
   TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
   TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
   TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
@@ -17760,7 +17818,6 @@ export type Resolvers<ContextType = any> = {
   UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
   UserRoleNode?: UserRoleNodeResolvers<ContextType>,
   UUID?: GraphQLScalarType,
-  XDChartDatasetNode?: XdChartDatasetNodeResolvers<ContextType>,
   XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,
   XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>,
 };
