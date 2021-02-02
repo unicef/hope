@@ -13,7 +13,11 @@ class PullFromErpDatahubTask:
 
         for cash_plan in cash_plans_without_exchange_rate:
             try:
-                funds_commitment = FundsCommitment.objects.get(funds_commitment_number=cash_plan.funds_commitment)
+                funds_commitment = FundsCommitment.objects.filter(
+                    funds_commitment_number=cash_plan.funds_commitment
+                ).first()
+                if not funds_commitment:
+                    continue
                 cash_plan.exchange_rate = (
                     funds_commitment.total_open_amount_usd / funds_commitment.total_open_amount_local
                 )
