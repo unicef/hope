@@ -394,7 +394,7 @@ class Query(graphene.ObjectType):
             additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
         )
         payment_records_hh = payment_records.select_related('household').filter(
-            household__admin_area__admin_area_type__admin_level=2
+            household__admin_area__admin_area_level__admin_level=2
         )
         transferred_money_by_admin_area = {}
         for hh in payment_records_hh:
@@ -416,12 +416,12 @@ class Query(graphene.ObjectType):
             )
         return {'data': data}
 
-    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={'business_area__slug': business_area_slug},
-            additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
-        )
-        print(payment_records.values_list('updated_at__month', 'delivered_quantity'))
-        return {"total": 12}
+    # def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+    #     payment_records = chart_get_filtered_qs(
+    #         PaymentRecord,
+    #         year,
+    #         business_area_slug_filter={'business_area__slug': business_area_slug},
+    #         additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
+    #     )
+    #     print(payment_records.values_list('updated_at__month', 'delivered_quantity'))
+    #     return {"total": 12}
