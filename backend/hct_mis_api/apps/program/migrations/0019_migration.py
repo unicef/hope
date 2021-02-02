@@ -10,7 +10,11 @@ def populate_existing_cash_plan_rates(apps, schema_editor):
 
     for cash_plan in all_cash_plans:
         try:
-            funds_commitment = FundsCommitment.objects.get(funds_commitment_number=cash_plan.funds_commitment)
+            funds_commitment = FundsCommitment.objects.filter(
+                funds_commitment_number=cash_plan.funds_commitment
+            ).first()
+            if not funds_commitment:
+                continue
             cash_plan.exchange_rate = funds_commitment.total_open_amount_usd / funds_commitment.total_open_amount_local
         except Exception:
             pass
