@@ -83,7 +83,7 @@ class TestPullDataFromErpDatahub(TestCase):
         task = PullFromErpDatahubTask()
         task.execute()
         self.cash_plan_1.refresh_from_db()
-        self.assertEqual(self.cash_plan_1.exchange_rate, 2)
+        self.assertEqual(self.cash_plan_1.exchange_rate, Decimal(2))
         self.cash_plan_2.refresh_from_db()
         self.assertEqual(self.cash_plan_2.exchange_rate, Decimal("1.33333333"))
         self.cash_plan_3.refresh_from_db()
