@@ -1,3 +1,4 @@
+from decimal import Decimal
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.erp_datahub.models import FundsCommitment
@@ -18,9 +19,9 @@ class PullFromErpDatahubTask:
                 ).first()
                 if not funds_commitment:
                     continue
-                cash_plan.exchange_rate = (
+                cash_plan.exchange_rate = Decimal(
                     funds_commitment.total_open_amount_usd / funds_commitment.total_open_amount_local
-                )
+                ).quantize(Decimal(".00000001"))
             except Exception:
                 pass
         CashPlan.objects.bulk_update(cash_plans_without_exchange_rate, ["exchange_rate"])
@@ -31,5 +32,7 @@ class PullFromErpDatahubTask:
         )
         for payment_record in payment_records_to_update:
             exchange_rate = payment_record.cash_plan.exchange_rate
-            payment_record.delivered_quantity_usd = payment_record.delivered_quantity * exchange_rate
+            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity * exchange_rate).quantize(
+                Decimal(".01")
+            )
         PaymentRecord.objects.bulk_update(payment_records_to_update, ["delivered_quantity_usd"])
