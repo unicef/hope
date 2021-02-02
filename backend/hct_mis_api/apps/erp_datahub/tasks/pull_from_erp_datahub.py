@@ -1,13 +1,9 @@
-from django.db import transaction
-
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.erp_datahub.models import FundsCommitment
 
 
 class PullFromErpDatahubTask:
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="cash_assist_datahub_erp")
     def execute(self):
         self.update_cash_plans()
         self.update_payment_records()
