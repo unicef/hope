@@ -38,7 +38,9 @@ export function validate(
         values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
-          if (!el.fieldName || !el.fieldValue) {
+          if (el.fieldValue === 0) {
+            delete errors.householdDataUpdateFields;
+          } else if (!el.fieldName || !el.fieldValue) {
             errors.householdDataUpdateFields =
               'Field and field value are required';
           }
@@ -69,7 +71,9 @@ export function validate(
         values.individualDataUpdateFields[0]?.fieldName
       ) {
         values.individualDataUpdateFields.forEach((el) => {
-          if (!el.fieldName || !el.fieldValue) {
+          if (el.fieldValue === 0) {
+            delete errors.individualDataUpdateFields;
+          } else if (!el.fieldName || !el.fieldValue) {
             errors.individualDataUpdateFields =
               'Field and field value are required';
           }
