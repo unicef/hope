@@ -1,10 +1,7 @@
-import subprocess
-
-from django.core.management import call_command
-from django.core.management.commands import makemigrations
+from django.core.management import call_command, BaseCommand
 
 
-class Command(makemigrations.Command):
+class Command(BaseCommand):
     def handle(self, *args, **options):
         call_command("initempty")
         call_command("generatefixtures", "--noinput", flush=False)

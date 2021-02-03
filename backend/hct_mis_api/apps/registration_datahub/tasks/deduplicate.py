@@ -184,7 +184,7 @@ class DeduplicateTask:
                 else:
                     admin_areas = {
                         "admin1": data.title if data else None,
-                        "admin2": data.children.filter(admin_area_type__admin_level=2).first(),
+                        "admin2": data.children.filter(admin_area_level__admin_level=2).first(),
                     }
                 queries.extend([{"match": {admin_area: {"query": value}}} for admin_area, value in admin_areas.items()])
             else:
@@ -312,7 +312,6 @@ class DeduplicateTask:
         query = document.search().params(search_type="dfs_query_then_fetch").from_dict(query_dict)
         query._index = document._index._name
         results = query.execute()
-        print("Result", results)
         results_data = {
             "duplicates": [],
             "possible_duplicates": [],
@@ -326,10 +325,7 @@ class DeduplicateTask:
                 "location": individual_hit.admin2,  # + village
                 "dob": individual_hit.birth_date,
             }
-            print(individual_hit.full_name)
-            print("score", score, duplicate_score)
             if score >= duplicate_score:
-                print("duplicate")
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
                 results_core_data["proximity_to_score"] = score - duplicate_score
@@ -341,7 +337,6 @@ class DeduplicateTask:
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
-        print("duplicate", duplicates, possible_duplicates)
         return (
             duplicates,
             possible_duplicates,
@@ -432,7 +427,6 @@ class DeduplicateTask:
         query_dict["query"]["bool"]["filter"] = [
             {"term": {"registration_data_import_id": str(individual.registration_data_import.id)}},
         ]
-        print(json.dumps(query_dict, indent=1, cls=DjangoJSONEncoder))
         return cls._get_duplicates_tuple(
             query_dict,
             config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
