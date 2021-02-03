@@ -1,4 +1,5 @@
-from django_countries import Countries as InternalCountries
+from django_countries import countries as internal_countries
+from django_countries.fields import Country
 
 from hct_mis_api.apps.core.utils import CaseInsensitiveTuple
 
@@ -6,9 +7,8 @@ from hct_mis_api.apps.core.utils import CaseInsensitiveTuple
 class Countries:
     @classmethod
     def get_countries(cls):
-        countries_instance = InternalCountries()
         return [
-            (label, alpha2, countries_instance.alpha3(alpha2)) for alpha2, label in countries_instance.countries.items()
+            (label, alpha2, Country(alpha2).alpha3) for alpha2, label in internal_countries
         ]
 
     @classmethod

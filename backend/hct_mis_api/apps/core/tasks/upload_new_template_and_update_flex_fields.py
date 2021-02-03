@@ -29,7 +29,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
         try:
             file_as_bytes = BytesIO(xlsx_kobo_template_object.file.read())
 
-            response, asset_uid = KoboAPI("afghanistan").create_template_from_file(file_as_bytes, template_id)
+            response, asset_uid = KoboAPI().create_template_from_file(file_as_bytes, template_id)
             response_status = response.get("status")
             response_details = response.get("detail")
 
