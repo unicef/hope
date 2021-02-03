@@ -345,7 +345,8 @@ class FlexibleAttributeImporter:
     @transaction.atomic
     def import_xls(self, xls_file):
         self.current_group_tree = [None]
-        wb = xlrd.open_workbook(filename=xls_file)
+        xls_file.seek(0)
+        wb = xlrd.open_workbook(file_contents=xls_file.read())
         sheets = {
             "survey": wb.sheet_by_name("survey"),
             "choices": wb.sheet_by_name("choices"),
