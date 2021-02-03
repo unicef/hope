@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import moment from 'moment';
 import * as Yup from 'yup';
 import get from 'lodash/get';
 import { Field, Form, Formik } from 'formik';
@@ -26,7 +27,6 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
 import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
 import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
-import { UniversalMoment } from '../UniversalMoment';
 import { REPORT_TYPES } from '../../utils/constants';
 import { FieldLabel } from '../FieldLabel';
 
@@ -51,9 +51,8 @@ const validationSchema = Yup.object().shape({
         dateFrom &&
         schema.min(
           dateFrom,
-          `End date have to be greater than ${(
-            <UniversalMoment>{dateFrom}</UniversalMoment>
-          )}`,
+          `End date have to be greater than
+          ${moment(dateFrom).format('YYYY-MM-DD')}`,
         ),
       '',
     )
