@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import moment from 'moment';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -21,7 +22,6 @@ import { FormikDateField } from '../../shared/Formik/FormikDateField';
 import { selectFields } from '../../utils/utils';
 import { DialogActions } from '../dialogs/DialogActions';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { UniversalMoment } from '../../components/UniversalMoment';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -57,6 +57,9 @@ const FullWidth = styled.div`
   width: 100%;
 `;
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
 const validationSchema = Yup.object().shape({
   name: Yup.string()
     .required('Programme name is required')
@@ -69,14 +72,15 @@ const validationSchema = Yup.object().shape({
   startDate: Yup.date().required('Start Date is required'),
   endDate: Yup.date()
     .required('End Date is required')
+    .min(today, 'End Date cannot be in the past')
     .when(
       'startDate',
       (startDate, schema) =>
         startDate &&
         schema.min(
           startDate,
-          `End date have to be greater than ${(
-            <UniversalMoment>{startDate}</UniversalMoment>
+          `End date have to be greater than ${moment(startDate).format(
+            'YYYY-MM-DD',
           )}`,
         ),
       '',
@@ -246,7 +250,7 @@ export function ProgramForm({
                         decoratorEnd={
                           <CalendarTodayRoundedIcon color='disabled' />
                         }
-                        minDate={values.startDate}
+                        minDate={today}
                       />
                     </DateField>
                   </DateFields>
