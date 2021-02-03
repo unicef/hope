@@ -2,6 +2,7 @@ from collections import defaultdict
 
 import xlrd
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
 
@@ -345,8 +346,11 @@ class FlexibleAttributeImporter:
     @transaction.atomic
     def import_xls(self, xls_file):
         self.current_group_tree = [None]
-        xls_file.seek(0)
-        wb = xlrd.open_workbook(file_contents=xls_file.read())
+        if isinstance(xls_file,File):
+            xls_file.seek(0)
+            wb = xlrd.open_workbook(file_contents=xls_file.read())
+        else:
+            wb = xlrd.open_workbook(filename=xls_file)
         sheets = {
             "survey": wb.sheet_by_name("survey"),
             "choices": wb.sheet_by_name("choices"),
