@@ -2354,6 +2354,8 @@ type Query {
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
+  allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
+  allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
   me: UserNode
   allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
   userRolesChoices: [ChoiceObject]

@@ -425,3 +425,16 @@ export const getFullNodeFromEdgesById = (edges, id) => {
   if (!edges) return null;
   return edges.find((edge) => edge.node.id === id)?.node || null;
 };
+
+export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
+  let textValue = value;
+  console.log(fieldAttribute)
+  if (fieldAttribute.type === 'SELECT_ONE') {
+    textValue = fieldAttribute.choices.find((item) => item.value === value).labelEn;
+  }
+  if (fieldAttribute.type === 'SELECT_MANY') {
+    const values = fieldAttribute.choices.filter((item) => value.includes(item.value))
+    textValue = values.map((item) => item.labelEn).join(", ")
+  }
+  return textValue
+}
