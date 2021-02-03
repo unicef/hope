@@ -78,6 +78,7 @@ class RdiMergeTask:
         "collect_individual_data",
         "currency",
         "unhcr_id",
+        "geopoint",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -111,7 +112,6 @@ class RdiMergeTask:
         "who_answers_alt_phone",
     )
 
-
     def merge_admin_area(
         self,
         imported_household,
@@ -121,11 +121,11 @@ class RdiMergeTask:
         admin2 = imported_household.admin2
         try:
             if admin2 is not None:
-                admin_area = AdminArea.objects.get(title=admin2)
+                admin_area = AdminArea.objects.filter(title=admin2).first()
                 household.admin_area = admin_area
                 return
             if admin1 is not None:
-                admin_area = AdminArea.objects.get(title=admin1)
+                admin_area = AdminArea.objects.filter(title=admin1).first()
                 household.admin_area = admin_area
                 return
         except AdminArea.DoesNotExist:
@@ -298,6 +298,4 @@ class RdiMergeTask:
 
         obj_hct.save()
 
-        log_create(
-            RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct
-        )
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)

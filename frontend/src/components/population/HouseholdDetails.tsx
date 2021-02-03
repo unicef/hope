@@ -104,17 +104,19 @@ export function HouseholdDetails({
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 1'>
-                {household.address}
+                {household.admin1?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='Administrative Level 2'>
-                {household.adminArea?.title}
+                {household.admin2?.title}
               </LabelizedField>
             </Grid>
             <Grid item xs={6}>
               <LabelizedField label='Geolocation'>
-                {household.geopoint}
+                {household.geopoint
+                  ? `${household.geopoint.coordinates[0]}, ${household.geopoint.coordinates[1]}`
+                  : '-'}
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>

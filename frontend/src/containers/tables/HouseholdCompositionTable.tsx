@@ -100,7 +100,7 @@ export function HouseholdCompositionTable({
             </GreyTableCell>
           </TableRow>
           <TableRow>
-            <TableCell align='left'>12-&lt;59</TableCell>
+            <TableCell align='left'>18-&lt;59</TableCell>
             <GreyTableCell align='left'>
               {household.femaleAgeGroup1859Count}
             </GreyTableCell>
