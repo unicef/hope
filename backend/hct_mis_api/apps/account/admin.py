@@ -109,7 +109,7 @@ class UserRoleInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
-    list_display = ("username", "email", "first_name", "last_name", "status", "is_active", "is_staff", "is_superuser")
+    list_display = ("username", "email", "first_name", "last_name","job_title", "status", "is_active", "is_staff", "is_superuser")
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
@@ -127,6 +127,7 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Job Title"), {"fields": ("job_title", )}),
     )
     inlines = (UserRoleInline,)
 
