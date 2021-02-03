@@ -174,7 +174,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             """,
     )
     steficon_rule = models.ForeignKey(
-        "steficon.Rule", null=True, on_delete=models.SET_NULL, related_name="target_populations"
+        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations"
     )
     vulnerability_score_min = models.DecimalField(
         null=True,
