@@ -4,7 +4,7 @@ from parameterized import parameterized
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import TicketNoteFactory, GrievanceTicketFactory
 
@@ -44,8 +44,8 @@ class TestTicketNotes(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaTypeFactory(name="Admin type one", admin_level=2, business_area=self.business_area)
-        AdminAreaFactory(title="City Test", admin_area_type=area_type)
+        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area)
+        AdminAreaFactory(title="City Test", admin_area_level=area_type)
         self.user = UserFactory.create(first_name="John", last_name="Doe")
         self.ticket_1 = GrievanceTicketFactory(id="5d64ef51-5ed5-4891-b1a3-44a24acb7720")
         self.ticket_2 = GrievanceTicketFactory(id="1dd2dc43-d418-45bd-b9f7-7545dd4c13a5")

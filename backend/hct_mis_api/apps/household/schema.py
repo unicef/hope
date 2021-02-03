@@ -22,7 +22,7 @@ from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -58,7 +58,7 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="admin_area", queryset=AdminArea.objects.filter(level=2)
     )
 
     class Meta:
@@ -115,7 +115,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area", queryset=AdminArea.objects.filter(admin_area_type__admin_level=2)
+        field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2)
     )
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")
@@ -251,6 +251,8 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     sanction_list_possible_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
+    admin1 = graphene.Field(AdminAreaNode)
+    admin2 = graphene.Field(AdminAreaNode)
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -439,4 +441,4 @@ class Query(graphene.ObjectType):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
     def resolve_countries_choices(self, info, **kwargs):
-        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])

@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 import mptt
 from django.conf import settings
-from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -69,7 +71,7 @@ class BusinessArea(TimeStampedUUIDModel):
         ]
 
 
-class AdminAreaType(TimeStampedUUIDModel):
+class AdminAreaLevel(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
@@ -77,17 +79,17 @@ class AdminAreaType(TimeStampedUUIDModel):
     name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
-
+    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
-        related_name="admin_area_types",
+        related_name="admin_area_level",
         null=True,
     )
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "AdminAreaType type"
+        verbose_name = "Admin Area Level"
         unique_together = ("business_area", "admin_level")
 
     def __str__(self):
@@ -96,7 +98,7 @@ class AdminAreaType(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_type")
+        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -108,16 +110,24 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     related models:
         indicator.Reportable (ForeignKey): "reportable"
         core.AdminArea (ForeignKey): "self"
-        core.AdminAreaType: "type of admin area state/city"
+        core.AdminAreaLevel: "type of admin area state/city"
     """
 
-    class Meta:
-        unique_together = ("title", "admin_area_type")
-        ordering = ["title"]
-
-    objects = AdminAreaManager()
+    external_id = models.CharField(
+        help_text="An ID representing this instance in  datamart", blank=True, null=True, max_length=32
+    )
 
     title = models.CharField(max_length=255)
+
+    admin_area_level = models.ForeignKey(
+        "AdminAreaLevel",
+        verbose_name="Location Type",
+        related_name="admin_areas",
+        on_delete=models.CASCADE,
+    )
+
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="Postal Code")
+
     parent = TreeForeignKey(
         "self",
         verbose_name=_("Parent"),
@@ -127,13 +137,22 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+    geom = models.MultiPolygonField(null=True, blank=True)
+    point = models.PointField(null=True, blank=True)
+    objects = AdminAreaManager()
 
-    admin_area_type = models.ForeignKey("AdminAreaType", on_delete=models.CASCADE, related_name="locations")
-
-    geom = MultiPolygonField(null=True, blank=True)
-    point = PointField(null=True, blank=True)
+    class Meta:
+        unique_together = ("title", "p_code")
+        ordering = ["title"]
 
     def __str__(self):
+        if self.p_code:
+            return "{} ({} {})".format(
+                self.title,
+                self.admin_area_level.name,
+                "{}: {}".format("CERD" if self.admin_area_level.name == "School" else "PCode", self.p_code or ""),
+            )
+
         return self.title
 
     @property
@@ -145,11 +164,11 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
 
     @classmethod
-    def get_admin_areas_as_choices(cls, admin_level):
-        return [
-            {"label": {"English(EN)": admin_area.title}, "value": admin_area.title}
-            for admin_area in cls.objects.filter(admin_area_type__admin_level=admin_level)
-        ]
+    def get_admin_areas_as_choices(cls, admin_level, business_area=None):
+        queryset = cls.objects.filter(level=admin_level)
+        if business_area is not None:
+            queryset.filter(admin_area_level__business_area=business_area)
+        return [{"label": {"English(EN)": admin_area.p_code}, "value": admin_area.title} for admin_area in queryset]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
