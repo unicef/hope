@@ -159,16 +159,20 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
 
                     switch_dict = {
-                        "feedback": lambda: GrievanceTicketFactory(),
+                        "feedback": lambda: GrievanceTicketFactory(
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title
+                        ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title,
                         ),
                         "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title,
                         ),
                     }
 
