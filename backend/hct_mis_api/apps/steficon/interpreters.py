@@ -1,3 +1,4 @@
+import random
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -40,7 +41,7 @@ class PythonExec(Interpreter):
         return compile(self.init_string, "<code>", mode="exec")
 
     def execute(self, **context):
-        gl = {"__builtins__": {}}
+        gl = {"__builtins__": {'random': random}}
         pts = Score()
         locals_ = dict(context)
         locals_["pts"] = pts
