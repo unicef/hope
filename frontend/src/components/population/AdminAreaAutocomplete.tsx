@@ -43,7 +43,6 @@ export function AdminAreasAutocomplete({
       level: 2,
     },
   });
-  console.log('valuevalue', value);
   useEffect(() => {
     setNewValue(value);
     // onInputTextChange('');
