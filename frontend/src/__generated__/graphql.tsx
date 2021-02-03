@@ -3201,6 +3201,8 @@ export type Query = {
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   me?: Maybe<UserNode>,
   allUsers?: Maybe<UserNodeConnection>,
   userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -6255,6 +6257,28 @@ export type AllHouseholdsQuery = (
   )> }
 );
 
+export type AllHouseholdsFlexFieldsAttributesQueryVariables = {};
+
+
+export type AllHouseholdsFlexFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allHouseholdsFlexFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
 export type AllIndividualsQueryVariables = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
@@ -6292,6 +6316,28 @@ export type AllIndividualsQuery = (
       )> }
     )>> }
   )> }
+);
+
+export type AllIndividualsFlexFieldsAttributesQueryVariables = {};
+
+
+export type AllIndividualsFlexFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allIndividualsFlexFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
 );
 
 export type AllLogEntriesQueryVariables = {
@@ -10869,6 +10915,76 @@ export function useAllHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQue
 export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
 export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
 export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
+export const AllHouseholdsFlexFieldsAttributesDocument = gql`
+    query AllHouseholdsFlexFieldsAttributes {
+  allHouseholdsFlexFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllHouseholdsFlexFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllHouseholdsFlexFieldsAttributesComponent = (props: AllHouseholdsFlexFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables> query={AllHouseholdsFlexFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllHouseholdsFlexFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables> & TChildProps;
+export function withAllHouseholdsFlexFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllHouseholdsFlexFieldsAttributesQuery,
+  AllHouseholdsFlexFieldsAttributesQueryVariables,
+  AllHouseholdsFlexFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables, AllHouseholdsFlexFieldsAttributesProps<TChildProps>>(AllHouseholdsFlexFieldsAttributesDocument, {
+      alias: 'allHouseholdsFlexFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllHouseholdsFlexFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllHouseholdsFlexFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllHouseholdsFlexFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllHouseholdsFlexFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllHouseholdsFlexFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, baseOptions);
+      }
+export function useAllHouseholdsFlexFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, baseOptions);
+        }
+export type AllHouseholdsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesQuery>;
+export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesLazyQuery>;
+export type AllHouseholdsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>;
 export const AllIndividualsDocument = gql`
     query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID) {
   allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea) {
@@ -10944,6 +11060,76 @@ export function useAllIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQu
 export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQuery>;
 export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
 export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
+export const AllIndividualsFlexFieldsAttributesDocument = gql`
+    query AllIndividualsFlexFieldsAttributes {
+  allIndividualsFlexFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllIndividualsFlexFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllIndividualsFlexFieldsAttributesComponent = (props: AllIndividualsFlexFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables> query={AllIndividualsFlexFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllIndividualsFlexFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables> & TChildProps;
+export function withAllIndividualsFlexFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllIndividualsFlexFieldsAttributesQuery,
+  AllIndividualsFlexFieldsAttributesQueryVariables,
+  AllIndividualsFlexFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables, AllIndividualsFlexFieldsAttributesProps<TChildProps>>(AllIndividualsFlexFieldsAttributesDocument, {
+      alias: 'allIndividualsFlexFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllIndividualsFlexFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllIndividualsFlexFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllIndividualsFlexFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllIndividualsFlexFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllIndividualsFlexFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, baseOptions);
+      }
+export function useAllIndividualsFlexFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, baseOptions);
+        }
+export type AllIndividualsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesQuery>;
+export type AllIndividualsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesLazyQuery>;
+export type AllIndividualsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>;
 export const AllLogEntriesDocument = gql`
     query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
   allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
@@ -16339,6 +16525,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
   userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
