@@ -1,7 +1,9 @@
-from decimal import Decimal
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.erp_datahub.models import FundsCommitment
+from hct_mis_api.apps.erp_datahub.utils import (
+    get_payment_record_delivered_quantity_in_usd,
+    get_exchange_rate_for_cash_plan,
+)
 
 
 class PullFromErpDatahubTask:
@@ -13,26 +15,18 @@ class PullFromErpDatahubTask:
         cash_plans_without_exchange_rate = CashPlan.objects.filter(exchange_rate__isnull=True)
 
         for cash_plan in cash_plans_without_exchange_rate:
-            try:
-                funds_commitment = FundsCommitment.objects.filter(
-                    funds_commitment_number=cash_plan.funds_commitment
-                ).first()
-                if not funds_commitment:
-                    continue
-                cash_plan.exchange_rate = Decimal(
-                    funds_commitment.total_open_amount_usd / funds_commitment.total_open_amount_local
-                ).quantize(Decimal(".00000001"))
-            except Exception:
-                pass
+            cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
+
         CashPlan.objects.bulk_update(cash_plans_without_exchange_rate, ["exchange_rate"])
 
     def update_payment_records(self):
         payment_records_to_update = PaymentRecord.objects.filter(
-            delivered_quantity_usd__isnull=True, cash_plan__isnull=False, cash_plan__exchange_rate__isnull=False
+            delivered_quantity_usd__isnull=True,
+            delivered_quantity__isnull=False,
+            cash_plan__isnull=False,
+            cash_plan__exchange_rate__isnull=False,
         )
         for payment_record in payment_records_to_update:
-            exchange_rate = payment_record.cash_plan.exchange_rate
-            payment_record.delivered_quantity_usd = Decimal(payment_record.delivered_quantity * exchange_rate).quantize(
-                Decimal(".01")
-            )
+            payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
+
         PaymentRecord.objects.bulk_update(payment_records_to_update, ["delivered_quantity_usd"])
