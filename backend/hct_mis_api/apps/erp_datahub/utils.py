@@ -8,7 +8,11 @@ def get_exchange_rate_for_cash_plan(cash_plan: CashPlan):
     if not cash_plan.funds_commitment:
         return None
     try:
-        funds_commitment = FundsCommitment.objects.filter(funds_commitment_number=cash_plan.funds_commitment).first()
+        funds_commitment = FundsCommitment.objects.filter(
+            funds_commitment_number=cash_plan.funds_commitment,
+            total_open_amount_usd__isnull=False,
+            total_open_amount_local__isnull=False,
+        ).first()
         if not funds_commitment:
             return None
         return Decimal(funds_commitment.total_open_amount_usd / funds_commitment.total_open_amount_local).quantize(
