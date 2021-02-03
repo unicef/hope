@@ -43,7 +43,7 @@ class AdminAreaFilter(FilterSet):
         field_name="admin_area_level__business_area__slug",
     )
     level = IntegerFilter(
-        field_name="level",
+        field_name="admin_area_level__admin_level",
     )
 
     class Meta:
