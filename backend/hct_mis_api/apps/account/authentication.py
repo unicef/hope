@@ -66,11 +66,9 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
     ms_graph = MicrosoftGraphAPI()
     user_data = ms_graph.get_user_data(details["email"])
     business_area_code = user_data.get("extension_f4805b4021f643d0aa596e1367d432f1_unicefBusinessAreaCode")
-    job_title = user_data.get("jobTitle")
+    user.job_title = user_data.get("jobTitle", "")
 
     user.set_unusable_password()
-    if job_title is not None:
-        user.job_title = job_title
     user.save()
     if business_area_code:
         basic_user_role = UserRole()
