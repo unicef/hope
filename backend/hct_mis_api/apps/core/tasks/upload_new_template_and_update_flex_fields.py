@@ -41,7 +41,7 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 return
             else:
                 flex_fields_task = FlexibleAttributeImporter()
-                flex_fields_task.import_xls(xlsx_kobo_template_object.file.path)
+                flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, xlsx_kobo_template_id
