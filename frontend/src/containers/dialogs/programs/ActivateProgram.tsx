@@ -113,8 +113,7 @@ export function ActivateProgram({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogDescription>
-            Are you sure you want to activate this Programme and push data to
-            CashAssist?
+            Are you sure you want to activate this Programme?
           </DialogDescription>
         </DialogContent>
         <DialogFooter>
