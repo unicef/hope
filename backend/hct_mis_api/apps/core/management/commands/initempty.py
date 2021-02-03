@@ -19,7 +19,7 @@ class Command(BaseCommand):
         subprocess.call(["./create_schemas.sh"])
         call_command("migratealldb")
         call_command("loadbusinessareas")
-        call_command("loadflexfieldsattributes")
+        # call_command("loadflexfieldsattributes")
         call_command("generatedocumenttypes")
         call_command("search_index", "--rebuild", "-f")
         call_command("generateroles")
