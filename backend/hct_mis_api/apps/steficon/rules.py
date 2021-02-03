@@ -1,6 +1,3 @@
-from collections import namedtuple
-from typing import NamedTuple
-
 from hct_mis_api.apps.steficon.score import Score
 from hct_mis_api.apps.household.models import Household
 
