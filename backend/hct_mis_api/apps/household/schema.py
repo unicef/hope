@@ -503,7 +503,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
     def resolve_countries_choices(self, info, **kwargs):
-        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
     # def resolve_chart_all_individuals_reached(self, info, business_area_slug, year, **kwargs):
     #     households_qs = chart_get_filtered_qs(Household, business_area_slug, year)

@@ -16,7 +16,8 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
-    AdminArea, AdminAreaLevel,
+    AdminArea,
+    AdminAreaLevel,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 
@@ -33,6 +34,7 @@ class BusinessAreaAdmin(admin.ModelAdmin):
 @admin.register(AdminArea)
 class AdminAreaAdmin(admin.ModelAdmin):
     list_display = ("title", "parent")
+
 
 @admin.register(AdminAreaLevel)
 class AdminAreaAdmin(admin.ModelAdmin):
