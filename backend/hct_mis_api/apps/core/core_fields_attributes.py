@@ -3,9 +3,9 @@ from functools import reduce
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from pycountry import currencies
 
 from hct_mis_api.apps.core.countries import Countries
-from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query
 from hct_mis_api.apps.household.models import (
@@ -439,7 +439,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in CURRENCY_CHOICES],
+        "choices": [{"label": {"English(EN)": currency.name}, "value": currency.alpha_3} for currency in currencies],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
     },
