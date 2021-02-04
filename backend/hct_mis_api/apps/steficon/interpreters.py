@@ -98,5 +98,5 @@ class Jinja(Interpreter):
         return Decimal(output.strip())
 
 
-interpreters = [PythonExec, Jinja, PythonFunction, ]
+interpreters = [PythonExec, PythonFunction, ]
 mapping = {a.label.lower(): a for a in interpreters}
