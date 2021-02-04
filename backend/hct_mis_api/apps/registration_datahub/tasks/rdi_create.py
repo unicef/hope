@@ -56,6 +56,9 @@ class RdiBaseCreateTask:
     FLEX_FIELDS = serialize_flex_attributes()
 
     def _cast_value(self, value, header):
+        if isinstance(value, str):
+            value = value.strip()
+
         if value in (None, ""):
             return value
 
@@ -73,13 +76,13 @@ class RdiBaseCreateTask:
             choices = [x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]]
 
             if value_type == TYPE_SELECT_MANY:
-                values = value.strip()
+                values = []
                 if "," in value:
-                    values = values.split(",")
+                    values = value.split(",")
                 elif ";" in value:
-                    values = values.split(";")
+                    values = value.split(";")
                 else:
-                    values = values.split(" ")
+                    values = value.split(" ")
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):
