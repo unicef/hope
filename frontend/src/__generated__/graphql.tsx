@@ -6839,7 +6839,7 @@ export type GrievanceTicketQuery = (
       & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate'>
+        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate' | 'lastRegistrationDate'>
         & { documents: (
           { __typename?: 'DocumentNodeConnection' }
           & { edges: Array<Maybe<(
@@ -6891,7 +6891,7 @@ export type GrievanceTicketQuery = (
       & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -6901,7 +6901,7 @@ export type GrievanceTicketQuery = (
         )>>> }
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -12084,6 +12084,7 @@ export const GrievanceTicketDocument = gql`
         id
         fullName
         birthDate
+        lastRegistrationDate
         documents {
           edges {
             node {
@@ -12137,6 +12138,7 @@ export const GrievanceTicketDocument = gql`
         }
         fullName
         birthDate
+        lastRegistrationDate
         sex
         deduplicationGoldenRecordResults {
           hitId
@@ -12147,6 +12149,7 @@ export const GrievanceTicketDocument = gql`
       possibleDuplicate {
         id
         unicefId
+        lastRegistrationDate
         household {
           unicefId
           id
