@@ -96,7 +96,6 @@ export function UserProfileMenu({
                   id='menu-list-grow'
                   onKeyDown={handleListKeyDown}
                 >
-                  <MenuItem onClick={handleClose}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout} data-cy='menu-item-logout'>
                     Logout
                   </MenuItem>
