@@ -120,7 +120,7 @@ export function NeedsAdjudicationDetails({
             <TableCell align='left'>Gender</TableCell>
             <TableCell align='left'>Date of Birth</TableCell>
             <TableCell align='left'>Similarity Score</TableCell>
-            <TableCell align='left'>Date TBD</TableCell>
+            <TableCell align='left'>Last Registration Date</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -164,7 +164,11 @@ export function NeedsAdjudicationDetails({
                 (item) => item.hitId === details.possibleDuplicate?.id,
               )?.score || '-'}
             </TableCell>
-            <TableCell align='left'>Date TBD</TableCell>
+            <TableCell align='left'>
+              <UniversalMoment>
+                {details.goldenRecordsIndividual?.lastRegistrationDate}
+              </UniversalMoment>
+            </TableCell>
           </TableRow>
           <TableRow>
             <TableCell align='left'>
@@ -202,7 +206,11 @@ export function NeedsAdjudicationDetails({
                 (item) => item.hitId === details.goldenRecordsIndividual?.id,
               )?.score || '-'}
             </TableCell>
-            <TableCell align='left'>Date TBD</TableCell>
+            <TableCell align='left'>
+              <UniversalMoment>
+                {details.possibleDuplicate?.lastRegistrationDate}
+              </UniversalMoment>
+            </TableCell>
           </TableRow>
         </TableBody>
       </StyledTable>

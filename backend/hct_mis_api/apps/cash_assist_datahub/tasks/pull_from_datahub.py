@@ -8,6 +8,10 @@ from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from hct_mis_api.apps.erp_datahub.utils import (
+    get_exchange_rate_for_cash_plan,
+    get_payment_record_delivered_quantity_in_usd,
+)
 
 
 class PullFromDatahubTask:
@@ -86,7 +90,7 @@ class PullFromDatahubTask:
                         session = Session.STATUS_FAILED
                         session.save()
                         raise e
-            except:
+            except Exception:
                 pass
 
     def build_arg_dict(self, model_object, mapping_dict):
@@ -109,15 +113,20 @@ class PullFromDatahubTask:
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
             cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
-            (cash_plan, created,) = CashPlan.objects.update_or_create(
-                ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args
-            )
+            (
+                cash_plan,
+                created,
+            ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
+            if not cash_plan.exchange_rate:
+                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
+                cash_plan.save(update_fields=["exchange_rate"])
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
-                dh_payment_record, PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
+                dh_payment_record,
+                PullFromDatahubTask.MAPPING_PAYMENT_RECORD_DICT,
             )
 
             payment_record_args["business_area"] = BusinessArea.objects.get(code=dh_payment_record.business_area)
@@ -125,15 +134,20 @@ class PullFromDatahubTask:
                 ca_id=dh_payment_record.service_provider_ca_id
             )
             payment_record_args["cash_plan"] = CashPlan.objects.get(ca_id=dh_payment_record.cash_plan_ca_id)
-            (payment_record, created,) = PaymentRecord.objects.update_or_create(
-                ca_id=dh_payment_record.ca_id, defaults=payment_record_args
-            )
+            (
+                payment_record,
+                created,
+            ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
+            if not payment_record.delivered_quantity_usd:
+                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
+                payment_record.save(update_fields=["delivered_quantity_usd"])
 
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)
         for dh_service_provider in dh_service_providers:
             service_provider_args = self.build_arg_dict(
-                dh_service_provider, PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
+                dh_service_provider,
+                PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
             (service_provider, created,) = ServiceProvider.objects.update_or_create(
