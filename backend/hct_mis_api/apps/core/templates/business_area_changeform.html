@@ -1,0 +1,9 @@
+{% extends 'admin/change_form.html' %} {% block submit_buttons_bottom %}
+<div class="submit-row">
+  <input
+    type="submit"
+    value="Test RapidPro Connection"
+    name="_test_connection"
+  />
+</div>
+{{block.super }} {% endblock %}
