@@ -1,4 +1,5 @@
 from collections import defaultdict
+from os.path import isfile
 
 import xlrd
 from django.core.exceptions import ValidationError
@@ -346,11 +347,11 @@ class FlexibleAttributeImporter:
     @transaction.atomic
     def import_xls(self, xls_file):
         self.current_group_tree = [None]
-        if isinstance(xls_file,File):
+        if isinstance(xls_file, str) and isfile(xls_file):
+            wb = xlrd.open_workbook(filename=xls_file)
+        else:
             xls_file.seek(0)
             wb = xlrd.open_workbook(file_contents=xls_file.read())
-        else:
-            wb = xlrd.open_workbook(filename=xls_file)
         sheets = {
             "survey": wb.sheet_by_name("survey"),
             "choices": wb.sheet_by_name("choices"),
