@@ -21,6 +21,7 @@ class RuleAdmin(ExtraUrlMixin, ModelAdmin):
     list_filter = ('language', 'enabled', 'deprecated')
     search_fields = ('name',)
     form = RuleForm
+
     readonly_fields = ('updated_by',)
     change_form_template = None
 
