@@ -1,4 +1,5 @@
 from django.contrib import admin
+from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter, TextFieldFilter
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -10,43 +11,52 @@ from hct_mis_api.apps.grievance.models import (
     TicketAddIndividualDetails,
     TicketDeleteIndividualDetails,
 )
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(GrievanceTicket)
-class GrievanceTicketAdmin(admin.ModelAdmin):
-    pass
+class GrievanceTicketAdmin(HOPEModelAdminBase):
+    list_display = ('created_at', 'created_by', 'assigned_to', 'status', 'category')
+    raw_id_fields = ('created_by', 'assigned_to')
+    list_filter = (('status', ChoicesFieldComboFilter),
+                   ('category', ChoicesFieldComboFilter),
+                   ('business_area', RelatedFieldComboFilter),
+                   TextFieldFilter.factory('created_by__username__istartswith'),
+                   TextFieldFilter.factory('assigned_to__username__istartswith'),
+                   'updated_at',
+                   )
 
 
 @admin.register(TicketNote)
-class TicketNoteAdmin(admin.ModelAdmin):
+class TicketNoteAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketComplaintDetails)
-class TicketComplaintDetailsAdmin(admin.ModelAdmin):
+class TicketComplaintDetailsAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketSensitiveDetails)
-class TicketSensitiveDetailsAdmin(admin.ModelAdmin):
+class TicketSensitiveDetailsAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketHouseholdDataUpdateDetails)
-class TicketHouseholdDataUpdateDetailsAdmin(admin.ModelAdmin):
+class TicketHouseholdDataUpdateDetailsAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketIndividualDataUpdateDetails)
-class TicketIndividualDataUpdateDetailsAdmin(admin.ModelAdmin):
+class TicketIndividualDataUpdateDetailsAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketAddIndividualDetails)
-class TicketAddIndividualDetailsAdmin(admin.ModelAdmin):
+class TicketAddIndividualDetailsAdmin(HOPEModelAdminBase):
     pass
 
 
 @admin.register(TicketDeleteIndividualDetails)
-class TicketDeleteIndividualDetailsAdmin(admin.ModelAdmin):
+class TicketDeleteIndividualDetailsAdmin(HOPEModelAdminBase):
     pass
