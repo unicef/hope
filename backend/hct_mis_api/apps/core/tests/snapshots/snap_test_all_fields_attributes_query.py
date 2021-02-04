@@ -15508,10 +15508,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -17066,6 +17066,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -18015,10 +18025,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -19573,6 +19583,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -22869,10 +22889,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -24427,6 +24447,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -25393,10 +25423,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -26951,6 +26981,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -27917,10 +27957,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -29475,6 +29515,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -30441,10 +30491,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -31999,6 +32049,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -32965,10 +33025,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -34523,6 +34583,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -35489,10 +35559,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -37047,6 +37117,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -38013,10 +38093,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -39571,6 +39651,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
@@ -40554,10 +40644,10 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'FJI'
                     },
                     {
-                        'labelEn': 'Falkland Islands  [Malvinas]',
+                        'labelEn': 'Falkland Islands (Malvinas)',
                         'labels': [
                             {
-                                'label': 'Falkland Islands  [Malvinas]',
+                                'label': 'Falkland Islands (Malvinas)',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -42112,6 +42202,16 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'TZA'
+                    },
+                    {
+                        'labelEn': 'Unknown or Not Applicable',
+                        'labels': [
+                            {
+                                'label': 'Unknown or Not Applicable',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'U'
                     },
                     {
                         'labelEn': 'Uganda',
