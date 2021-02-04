@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode, TableTotalCashTransferred
-from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
+from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs, chart_permission_decorator
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -316,6 +316,7 @@ class Query(graphene.ObjectType):
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
         payment_verifications = chart_get_filtered_qs(
@@ -342,6 +343,7 @@ class Query(graphene.ObjectType):
             "households": payment_verifications.values_list('payment_record__household', flat=True).distinct().count()
         }
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
         delivery_type_choices_mapping = chart_map_choices(PaymentRecord.DELIVERY_TYPE_CHOICE)
         payment_records = chart_get_filtered_qs(
@@ -361,6 +363,7 @@ class Query(graphene.ObjectType):
         ]
         return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
         payment_records = chart_get_filtered_qs(
@@ -377,6 +380,7 @@ class Query(graphene.ObjectType):
         ]
         return {"labels": status_choices_mapping.values(), "datasets": dataset}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
@@ -386,6 +390,7 @@ class Query(graphene.ObjectType):
         )
         return {"total": payment_records.aggregate(Sum('delivered_quantity'))['delivered_quantity__sum']}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
@@ -415,13 +420,3 @@ class Query(graphene.ObjectType):
                 }
             )
         return {'data': data}
-
-    # def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
-    #     payment_records = chart_get_filtered_qs(
-    #         PaymentRecord,
-    #         year,
-    #         business_area_slug_filter={'business_area__slug': business_area_slug},
-    #         additional_filters={'status': PaymentRecord.STATUS_SUCCESS}
-    #     )
-    #     print(payment_records.values_list('updated_at__month', 'delivered_quantity'))
-    #     return {"total": 12}
