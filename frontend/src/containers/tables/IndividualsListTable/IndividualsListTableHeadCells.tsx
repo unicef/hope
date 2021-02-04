@@ -53,7 +53,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'household__admin_area__title',
     numeric: false,
     dataCy: 'individual-location',
