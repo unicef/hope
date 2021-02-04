@@ -88,6 +88,9 @@ class AbstractSession(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return f"#{self.id} on {self.timestamp}"
+
 
 class AbstractSyncable(models.Model):
     last_sync_at = models.DateTimeField(null=True)
