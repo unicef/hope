@@ -94,6 +94,9 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
+    delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
+    )
     delivery_date = models.DateTimeField()
     service_provider = models.ForeignKey(
         "payment.ServiceProvider",
