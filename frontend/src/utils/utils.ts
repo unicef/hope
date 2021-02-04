@@ -428,7 +428,6 @@ export const getFullNodeFromEdgesById = (edges, id) => {
 
 export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
   let textValue = value;
-  console.log(fieldAttribute)
   if (fieldAttribute.type === 'SELECT_ONE') {
     textValue = fieldAttribute.choices.find((item) => item.value === value).labelEn;
   }
