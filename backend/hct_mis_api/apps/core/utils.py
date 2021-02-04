@@ -481,6 +481,7 @@ def check_concurrency_version_in_mutation(version, target):
     if version is None:
         return
     from graphql import GraphQLError
+
     if version != target.version:
         raise GraphQLError("Someone has modified this record")
 

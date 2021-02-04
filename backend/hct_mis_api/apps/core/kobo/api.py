@@ -23,10 +23,13 @@ class TokenInvalid(Exception):
 class KoboAPI:
     KPI_URL = os.getenv("KOBO_API_URL", "https://kobo.humanitarianresponse.info")
 
-    def __init__(self, business_area_slug, kpi_url: str = None):
+    def __init__(self, business_area_slug: str = None, kpi_url: str = None):
         if kpi_url:
             self.KPI_URL = kpi_url
-        self.business_area = BusinessArea.objects.get(slug=business_area_slug)
+        if business_area_slug is not None:
+            self.business_area = BusinessArea.objects.get(slug=business_area_slug)
+        else:
+            self.business_area = None
         self._get_token()
 
     def _handle_paginated_results(self, url):
@@ -114,6 +117,8 @@ class KoboAPI:
         raise RetryError("Fetching import data took too long")
 
     def get_all_projects_data(self) -> list:
+        if not self.business_area:
+            raise ValueError("Business area is not provided")
         projects_url = self._get_url("assets")
 
         response_dict = self._handle_paginated_results(projects_url)
