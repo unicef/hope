@@ -18,9 +18,9 @@ class TestBasicRule(TestCase):
                                        'name': ''})
 
     def test_execution(self):
-        rule = Rule(definition="score.value=1")
+        rule = Rule(definition="score.value=101")
         value = rule.execute(hh=self.household)
-        self.assertEqual(value, 1)
+        self.assertEqual(value, 101)
 
     def test_history(self):
         rule = Rule(definition="score.value=1", enabled=True)
