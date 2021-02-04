@@ -7,6 +7,7 @@ from django.forms import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+from django.http import HttpResponseRedirect
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.airflow_api import AirflowApi
@@ -29,6 +30,14 @@ class XLSImportForm(forms.Form):
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
+    change_form_template = "business_area_changeform.html"
+
+    def response_change(self, request, obj):
+        if "_test_connection" in request.POST:
+            print(request)
+            print(obj)
+            return HttpResponseRedirect(".")
+        return super().response_change(request, obj)
 
 
 @admin.register(AdminArea)
