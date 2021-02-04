@@ -1,21 +1,49 @@
 from concurrency.fields import AutoIncVersionField
 from django.contrib.postgres.fields import JSONField, ArrayField, CICharField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.transaction import atomic
+from django.core.validators import ProhibitNullCharactersValidator
 
 from django.forms import model_to_dict
+from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.steficon.interpreters import interpreters, mapping
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 MONITORED_FIELDS = ['name', 'enabled', 'deprecated', 'language', 'definition']
 
+@deconstructible
+class DoubleSpaceValidator:
+    message = _('Double spaces characters are not allowed.')
+    code = 'double_spaces_characters_not_allowed'
+
+    def __call__(self, value):
+        if '  ' in str(value):
+            raise ValidationError(self.message, code=self.code)
+
+
+@deconstructible
+class StartEndSpaceValidator:
+    message = _('Leading or trailing spaces characters are not allowed.')
+    code = 'leading_trailing_spaces_characters_not_allowed'
+
+    def __call__(self, value):
+        v = str(value)
+        if v.startswith(' ') or v.endswith(' '):
+            raise ValidationError(self.message, code=self.code)
+
 
 class Rule(TimeStampedUUIDModel):
     LANGUAGES = [[a.label.lower(), a.label] for a in interpreters]
     version = AutoIncVersionField()
-    name = CICharField(max_length=100, unique=True)
+    name = CICharField(max_length=100, unique=True,
+                       validators=[ProhibitNullCharactersValidator(),
+                                   StartEndSpaceValidator(),
+                                   DoubleSpaceValidator()]
+                       )
     definition = models.TextField(blank=True, default='score.value=0')
     enabled = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
@@ -50,7 +78,6 @@ class Rule(TimeStampedUUIDModel):
                                           new_state=self.as_dict(),
                                           affected_fields=changes,
                                           updated_by=self.updated_by)
-
         super().save(force_insert, force_update, using, update_fields)
 
     def delete(self, using=None, keep_parents=False):
