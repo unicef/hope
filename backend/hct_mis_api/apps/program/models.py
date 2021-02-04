@@ -13,12 +13,7 @@ from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 
-class Program(
-    SoftDeletableModel,
-    TimeStampedUUIDModel,
-    AbstractSyncable,
-    ConcurrencyModel
-):
+class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "name",
@@ -191,6 +186,7 @@ class CashPlan(TimeStampedUUIDModel):
     assistance_through = models.CharField(max_length=255)
     vision_id = models.CharField(max_length=255)
     funds_commitment = models.CharField(max_length=255)
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
     down_payment = models.CharField(max_length=255)
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField()
