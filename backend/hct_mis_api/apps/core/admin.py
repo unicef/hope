@@ -90,7 +90,7 @@ class FlexibleAttributeChoiceAdmin(HOPEModelAdminBase):
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
 
     exclude = ("is_removed", "file_name", "status", "template_id")
