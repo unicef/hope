@@ -132,7 +132,7 @@ class RapidProAPI:
             all_flows = self.get_flows()
             test_flow = next((flow for flow in all_flows if flow["name"] == "test_connection"), None)
             if not test_flow:
-                return "No test_connection flow found."
+                return "Initial connection was successful but no test_connection flow found in results list."
             self.start_flow(test_flow["uuid"], [])
         except Exception as e:
             return str(e)
