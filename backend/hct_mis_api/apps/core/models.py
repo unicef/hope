@@ -255,10 +255,12 @@ class XLSXKoboTemplateManager(models.Manager):
 
 
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
+    UPLOADED = "UPLOADED"
     SUCCESSFUL = "SUCCESSFUL"
     UNSUCCESSFUL = "UNSUCCESSFUL"
     PROCESSING = "PROCESSING"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
+        (UPLOADED, _("Uploaded")),
         (SUCCESSFUL, _("Successful")),
         (UNSUCCESSFUL, _("Unsuccessful")),
         (PROCESSING, _("Processing")),
