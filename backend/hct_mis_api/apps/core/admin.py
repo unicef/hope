@@ -1,6 +1,9 @@
+import logging
+
 import xlrd
-from admin_extra_urls.extras import link, ExtraUrlMixin
-from django.contrib import admin
+from admin_extra_urls.api import ExtraUrlMixin, action
+from adminfilters.filters import TextFieldFilter, ForeignKeyFieldFilter
+from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms import forms
@@ -20,6 +23,8 @@ from hct_mis_api.apps.core.models import (
     AdminAreaLevel,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+
+logger = logging.getLogger(__name__)
 
 
 class XLSImportForm(forms.Form):
@@ -58,23 +63,28 @@ class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
 
 @admin.register(XLSXKoboTemplate)
 class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
+    list_display = ("original_file_name", "uploaded_by", "created_at", "file", "_status")
 
     exclude = ("is_removed", "file_name", "status", "template_id")
+    readonly_fields = ("original_file_name", "uploaded_by", "file", "_status", "error_description")
+    list_filter = ("status",
+                   ForeignKeyFieldFilter.factory("uploaded_by_username__istartswith",
+                                                 "Uploaded By"),
+                   )
+    search_fields = ("file_name",)
+    date_hierarchy = "created_at"
+    ordering = ("-created_at",)
 
-    readonly_fields = ("original_file_name", "uploaded_by", "file", "import_status", "error_description")
+    COLORS = {XLSXKoboTemplate.SUCCESSFUL: "89eb34",
+              XLSXKoboTemplate.UNSUCCESSFUL: "e30b0b",
+              XLSXKoboTemplate.PROCESSING: "7a807b",
+              XLSXKoboTemplate.UPLOADED: "FFAE19",
+              }
 
-    def import_status(self, obj):
-        if obj.status == self.model.SUCCESSFUL:
-            color = "89eb34"
-        elif obj.status == self.model.UNSUCCESSFUL:
-            color = "e30b0b"
-        else:
-            color = "7a807b"
-
+    def _status(self, obj):
         return format_html(
             '<span style="color: #{};">{}</span>',
-            color,
+            self.COLORS[obj.status],
             obj.status,
         )
 
@@ -86,7 +96,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
-    @link()
+    @action()
     def download_last_valid_file(self, request):
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
@@ -96,6 +106,26 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             "There is no valid file to download",
             level=ERROR,
         )
+
+    @action(visible=lambda o: o and o.status == XLSXKoboTemplate.UPLOADED)
+    def post_to_kobo(self, request, pk, obj=None):
+        if obj is None:
+            obj = self.get_object(request, pk)
+        try:
+            AirflowApi.start_dag(
+                dag_id="UploadNewKoboTemplateAndUpdateFlexFields",
+                context={"xlsx_kobo_template_id": str(obj.id)},
+            )
+            obj.status = XLSXKoboTemplate.PROCESSING
+            obj.save()
+            self.message_user(
+                request,
+                "Running KoBo Template upload task..., "
+                "Import status will change after task completion",
+            )
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
 
     def add_view(self, request, form_url="", extra_context=None):
         if not self.has_add_permission(request):
@@ -138,17 +168,13 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     file_name=xls_file.name,
                     uploaded_by=request.user,
                     file=xls_file,
-                    status=XLSXKoboTemplate.PROCESSING,
+                    status=XLSXKoboTemplate.UPLOADED,
                 )
-                self.message_user(
-                    request,
-                    "Core field validation successful, running KoBo Template upload task..., "
-                    "Import status will change after task completion",
-                )
-                AirflowApi.start_dag(
-                    dag_id="UploadNewKoboTemplateAndUpdateFlexFields",
-                    context={"xlsx_kobo_template_id": str(xlsx_kobo_template_object.id)},
-                )
+                self.message_user(request, "Core field validation successful. File uploaded")
+                self.post_to_kobo(request,
+                                  pk=xlsx_kobo_template_object.pk,
+                                  obj=xlsx_kobo_template_object)
+
                 return redirect("..")
         else:
             payload["form"] = form_class()
