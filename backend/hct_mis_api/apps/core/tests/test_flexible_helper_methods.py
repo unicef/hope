@@ -10,9 +10,7 @@ from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 class TestFlexibleHelperMethods(TestCase):
     def setUp(self):
         self.importer = FlexibleAttributeImporter()
-        wb = xlrd.open_workbook(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls",
-        )
+        wb = xlrd.open_workbook(filename=f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/flex_init.xls")
         self.survey_sheet = wb.sheet_by_name("survey")
         self.choices_sheet = wb.sheet_by_name("choices")
         self.importer._reset_model_fields_variables()

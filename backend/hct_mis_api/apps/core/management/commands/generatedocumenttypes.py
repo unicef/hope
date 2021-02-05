@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from django_countries.data import COUNTRIES
+from django_countries import countries
 
 from hct_mis_api.apps.household.models import IDENTIFICATION_TYPE_CHOICE, Agency, DocumentType
 from hct_mis_api.apps.registration_datahub.models import ImportedAgency
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         rdh_document_types = []
         agencies = []
         rdh_agencies = []
-        for alpha2 in COUNTRIES:
+        for alpha2, _ in countries:
             for doc_type, label in identification_type_choice:
                 document_types.append(DocumentType(country=alpha2, label=label, type=doc_type))
                 rdh_document_types.append(RDHDocumentType(country=alpha2, label=label, type=doc_type))

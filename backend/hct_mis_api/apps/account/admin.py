@@ -31,7 +31,7 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
 class RoleAdminForm(ModelForm):
     permissions = MultipleChoiceField(
         required=False,
-        widget=FilteredSelectMultiple('', False),
+        widget=FilteredSelectMultiple("", False),
         choices=Permissions.choices(),
     )
 
@@ -41,7 +41,8 @@ class RoleAdminForm(ModelForm):
 
 
 class UserRoleAdminForm(ModelForm):
-    role = ModelChoiceField(Role.objects.order_by('name'))
+    role = ModelChoiceField(Role.objects.order_by("name"))
+
     class Meta:
         model = UserRole
         fields = "__all__"
@@ -91,9 +92,9 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                       and not form_two.cleaned_data.get("DELETE")
-                       and form_two.cleaned_data["business_area"] == business_area
-                       and form_two.cleaned_data["role"].id in incompatible_roles
+                    and not form_two.cleaned_data.get("DELETE")
+                    and form_two.cleaned_data["business_area"] == business_area
+                    and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
@@ -109,7 +110,17 @@ class UserRoleInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
-    list_display = ("username", "email", "first_name", "last_name", "status", "is_active", "is_staff", "is_superuser")
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "job_title",
+        "status",
+        "is_active",
+        "is_staff",
+        "is_superuser",
+    )
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
@@ -127,6 +138,7 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
             },
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
 
@@ -171,6 +183,7 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
                             user.first_name = ""
                         if user.last_name is None:
                             user.last_name = ""
+                        user.job_title = user_data.get("jobTitle", "")
                         user.set_unusable_password()
                         users_to_bulk_create.append(user)
                         users_role_to_bulk_create.append(UserRole(role=role, business_area=business_area, user=user))
@@ -215,7 +228,7 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
 @admin.register(Role)
 class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name",)
-    search_fields = ('name',)
+    search_fields = ("name",)
     form = RoleAdminForm
 
     @action()
@@ -229,27 +242,30 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 class UserRoleAdmin(HOPEModelAdminBase):
     list_display = ("user", "role", "business_area")
     form = UserRoleAdminForm
-    raw_id_fields = ('user', "business_area")
-    list_filter = (ForeignKeyFieldFilter.factory('user|username|istartswith', "Username"),
-                   ('business_area', RelatedFieldComboFilter),
-                   ('role', RelatedFieldComboFilter)
-                   )
+    raw_id_fields = ("user", "business_area")
+    list_filter = (
+        ForeignKeyFieldFilter.factory("user|username|istartswith", "Username"),
+        ("business_area", RelatedFieldComboFilter),
+        ("role", RelatedFieldComboFilter),
+    )
 
 
 class IncompatibleRoleFilter(SimpleListFilter):
-    template = 'adminfilters/fieldcombobox.html'
+    template = "adminfilters/fieldcombobox.html"
     title = "Role"
-    parameter_name = 'role'
+    parameter_name = "role"
 
     def lookups(self, request, model_admin):
-        types = Role.objects.values_list('id', 'name')
-        return list(types.order_by('name').distinct())
+        types = Role.objects.values_list("id", "name")
+        return list(types.order_by("name").distinct())
 
     def queryset(self, request, queryset):
         if not self.value():
             return queryset
         try:
-            return queryset.filter(Q(role_one=self.value()) | Q(role_two=self.value()), )
+            return queryset.filter(
+                Q(role_one=self.value()) | Q(role_two=self.value()),
+            )
         except (ValueError, ValidationError) as e:
             raise IncorrectLookupParameters(e)
 
