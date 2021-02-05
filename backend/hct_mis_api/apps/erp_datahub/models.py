@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from hct_mis_api.apps.utils.models import AbstractSession
-
 
 class FundsCommitment(models.Model):
     rec_serial_number = models.CharField(max_length=10, null=True)
@@ -52,6 +50,8 @@ class FundsCommitment(models.Model):
     ca_sync_flag = models.BooleanField(default=False)
     ca_sync_date = models.DateTimeField(null=True)
 
+    def __str__(self):
+        return self.funds_commitment_number
 
 
 class DownPayment(models.Model):
