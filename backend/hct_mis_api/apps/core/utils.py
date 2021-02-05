@@ -574,11 +574,7 @@ def chart_get_filtered_qs(obj, year, business_area_slug_filter=None, additional_
         additional_filters = {}
     if business_area_slug_filter is None:
         business_area_slug_filter = {}
-    return obj.objects.filter(
-        created_at__year=year,
-        **business_area_slug_filter,
-        **additional_filters
-    )
+    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -602,11 +598,11 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
     @functools.wraps(chart_resolve)
     def resolve_f(*args, **kwargs):
         from hct_mis_api.apps.core.models import BusinessArea
+
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
-            business_area = BusinessArea.objects.filter(slug=kwargs.get('business_area_slug')).first()
+            business_area = BusinessArea.objects.filter(slug=kwargs.get("business_area_slug")).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
 
     return resolve_f
-

@@ -35,7 +35,13 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
-from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr, chart_get_filtered_qs, chart_permission_decorator
+from hct_mis_api.apps.core.utils import (
+    to_choice_object,
+    choices_to_dict,
+    nested_getattr,
+    chart_get_filtered_qs,
+    chart_permission_decorator,
+)
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
@@ -525,9 +531,7 @@ class Query(graphene.ObjectType):
         filterset_class=TicketNoteFilter,
     )
     chart_grievances = graphene.Field(
-        ChartGrievanceTicketsNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        ChartGrievanceTicketsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
@@ -657,15 +661,13 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket,
-            year,
-            business_area_slug_filter={'business_area__slug': business_area_slug}
+            GrievanceTicket, year, business_area_slug_filter={"business_area__slug": business_area_slug}
         )
         grievance_status_labels = [
             "Resolved",
             "Unresolved",
             "Unresolved for longer than 30 days",
-            "Unresolved for longer than 60 days"
+            "Unresolved for longer than 60 days",
         ]
 
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
@@ -679,12 +681,11 @@ class Query(graphene.ObjectType):
                     grievance_tickets.filter(
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
                         created_at__lte=days_30_from_now,
-                        created_at__gt=days_60_from_now
+                        created_at__gt=days_60_from_now,
                     ).count(),  # Unresolved for longer than 30 days
                     grievance_tickets.filter(
-                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__lte=days_60_from_now
-                    ).count()  # Unresolved for longer than 60 days
+                        ~Q(status=GrievanceTicket.STATUS_CLOSED), created_at__lte=days_60_from_now
+                    ).count(),  # Unresolved for longer than 60 days
                 ]
             },
         ]
