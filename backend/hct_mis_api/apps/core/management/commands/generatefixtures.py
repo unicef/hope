@@ -1,5 +1,6 @@
 import random
 import time
+from decimal import Decimal
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
@@ -8,7 +9,6 @@ from django.db.models import Q
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
-from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
@@ -97,17 +97,7 @@ class Command(BaseCommand):
         )
 
     def _generate_admin_areas(self):
-        business_area = BusinessArea.objects.first()
-        state_area_type = AdminAreaLevelFactory(name="State", business_area=business_area, admin_level=1)
-        province_area_type = AdminAreaLevelFactory(name="Province", business_area=business_area, admin_level=2)
-        AdminAreaFactory.create_batch(
-            6,
-            admin_area_level=state_area_type,
-        )
-        AdminAreaFactory.create_batch(
-            6,
-            admin_area_level=province_area_type,
-        )
+        call_command("loadadminareas", "--business_area", "Afghanistan")
 
     @staticmethod
     def _generate_program_with_dependencies(options):
@@ -156,7 +146,12 @@ class Command(BaseCommand):
                     cash_plan=cash_plan,
                     household=household,
                     target_population=target_population,
+                    delivered_quantity_usd=None,
                 )
+                payment_record.delivered_quantity_usd = Decimal(
+                    cash_plan.exchange_rate * payment_record.delivered_quantity
+                ).quantize(Decimal(".01"))
+                payment_record.save()
 
                 should_create_grievance = random.choice((True, False))
                 if should_create_grievance:
@@ -164,16 +159,20 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
 
                     switch_dict = {
-                        "feedback": lambda: GrievanceTicketFactory(),
+                        "feedback": lambda: GrievanceTicketFactory(
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title
+                        ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title,
                         ),
                         "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
                             household=household,
                             individual=random.choice(individuals),
                             payment_record=payment_record if should_contain_payment_record else None,
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title,
                         ),
                     }
 

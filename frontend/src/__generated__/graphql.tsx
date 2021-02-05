@@ -399,6 +399,7 @@ export type CashPlanNode = Node & {
   assistanceThrough: Scalars['String'],
   visionId: Scalars['String'],
   fundsCommitment: Scalars['String'],
+  exchangeRate?: Maybe<Scalars['Float']>,
   downPayment: Scalars['String'],
   validationAlertsCount: Scalars['Int'],
   totalPersonsCovered: Scalars['Int'],
@@ -2944,6 +2945,7 @@ export type PaymentRecordNode = Node & {
   currency: Scalars['String'],
   entitlementQuantity: Scalars['Float'],
   deliveredQuantity: Scalars['Float'],
+  deliveredQuantityUsd?: Maybe<Scalars['Float']>,
   deliveryDate: Scalars['DateTime'],
   serviceProvider: ServiceProviderNode,
   transactionReferenceId?: Maybe<Scalars['String']>,
@@ -7080,7 +7082,7 @@ export type GrievanceTicketQuery = (
       & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate'>
+        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate' | 'lastRegistrationDate'>
         & { documents: (
           { __typename?: 'DocumentNodeConnection' }
           & { edges: Array<Maybe<(
@@ -7132,7 +7134,7 @@ export type GrievanceTicketQuery = (
       & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId'>
@@ -7142,7 +7144,7 @@ export type GrievanceTicketQuery = (
         )>>> }
       ), possibleDuplicate: (
         { __typename?: 'IndividualNode' }
-        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'sex'>
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
         & { household: Maybe<(
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -12452,6 +12454,7 @@ export const GrievanceTicketDocument = gql`
         id
         fullName
         birthDate
+        lastRegistrationDate
         documents {
           edges {
             node {
@@ -12505,6 +12508,7 @@ export const GrievanceTicketDocument = gql`
         }
         fullName
         birthDate
+        lastRegistrationDate
         sex
         deduplicationGoldenRecordResults {
           hitId
@@ -12515,6 +12519,7 @@ export const GrievanceTicketDocument = gql`
       possibleDuplicate {
         id
         unicefId
+        lastRegistrationDate
         household {
           unicefId
           id
@@ -15729,6 +15734,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   visionId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   fundsCommitment?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   downPayment?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -16608,6 +16614,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
   deliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   deliveryDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,

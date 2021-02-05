@@ -1,5 +1,6 @@
 from collections import MutableMapping, OrderedDict
 from typing import List
+import functools
 
 from django.core.exceptions import ValidationError
 
@@ -592,3 +593,20 @@ def sum_lists(qs_values, list_len):
             data[i] += value
 
     return data
+
+
+def chart_permission_decorator(chart_resolve=None, permissions=None):
+    if chart_resolve is None:
+        return functools.partial(chart_permission_decorator, permissions=permissions)
+
+    @functools.wraps(chart_resolve)
+    def resolve_f(*args, **kwargs):
+        from hct_mis_api.apps.core.models import BusinessArea
+        _, resolve_info = args
+        if resolve_info.context.user.is_authenticated:
+            business_area = BusinessArea.objects.filter(slug=kwargs.get('business_area_slug')).first()
+            if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
+                return chart_resolve(*args, **kwargs)
+
+    return resolve_f
+
