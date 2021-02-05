@@ -187,6 +187,7 @@ type CashPlanNode implements Node {
   assistanceThrough: String!
   visionId: String!
   fundsCommitment: String!
+  exchangeRate: Float
   downPayment: String!
   validationAlertsCount: Int!
   totalPersonsCovered: Int!
@@ -2146,6 +2147,7 @@ type PaymentRecordNode implements Node {
   currency: String!
   entitlementQuantity: Float!
   deliveredQuantity: Float!
+  deliveredQuantityUsd: Float
   deliveryDate: DateTime!
   serviceProvider: ServiceProviderNode!
   transactionReferenceId: String

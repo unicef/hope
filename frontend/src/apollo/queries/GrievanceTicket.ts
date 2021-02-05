@@ -90,9 +90,10 @@ export const GrievanceTicket = gql`
           id
           fullName
           birthDate
-          documents{
-            edges{
-              node{
+          lastRegistrationDate
+          documents {
+            edges {
+              node {
                 id
                 documentNumber
               }
@@ -103,7 +104,7 @@ export const GrievanceTicket = gql`
           id
           fullName
           referenceNumber
-          
+
           datesOfBirth {
             edges {
               node {
@@ -133,44 +134,46 @@ export const GrievanceTicket = gql`
           }
         }
       }
-      needsAdjudicationTicketDetails{
+      needsAdjudicationTicketDetails {
         id
-        
-        goldenRecordsIndividual{
+
+        goldenRecordsIndividual {
           id
           unicefId
-          household{
+          household {
             id
             unicefId
           }
           fullName
           birthDate
+          lastRegistrationDate
           sex
-          deduplicationGoldenRecordResults{
+          deduplicationGoldenRecordResults {
             hitId
             proximityToScore
             score
           }
         }
-        possibleDuplicate{
+        possibleDuplicate {
           id
           unicefId
-          household{
+          lastRegistrationDate
+          household {
             unicefId
             id
           }
           fullName
           birthDate
           sex
-          deduplicationGoldenRecordResults{
+          deduplicationGoldenRecordResults {
             hitId
             proximityToScore
             score
           }
         }
-        selectedIndividual{
+        selectedIndividual {
           ...individualDetailed
-          household{
+          household {
             ...householdDetailed
           }
           householdsAndRoles {
