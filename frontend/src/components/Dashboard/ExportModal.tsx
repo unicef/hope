@@ -61,23 +61,14 @@ export const ExportModal = (): React.ReactElement => {
     }
     setSelected([]);
   };
-  const onCheckboxClick = (event, name): void => {
+  const onCheckboxClick = (name): void => {
     const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+    const newSelected = [];
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(name);
     }
-
     setSelected(newSelected);
   };
   const renderRows = (): Array<React.ReactElement> => {
@@ -88,7 +79,7 @@ export const ExportModal = (): React.ReactElement => {
           <TableCell align='left'>
             <Checkbox
               color='primary'
-              onClick={(event) => onCheckboxClick(event, el.id)}
+              onClick={() => onCheckboxClick(el.id)}
               checked={isItemSelected}
               inputProps={{ 'aria-labelledby': el.id }}
             />
