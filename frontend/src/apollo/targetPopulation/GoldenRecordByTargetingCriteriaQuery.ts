@@ -9,6 +9,7 @@ export const GoldenRecordByTargetingCriteria = gql`
     $last: Int
     $orderBy: String
     $program: ID!
+    $businessArea: String
   ) {
     goldenRecordByTargetingCriteria(
       targetingCriteria: $targetingCriteria
@@ -18,6 +19,7 @@ export const GoldenRecordByTargetingCriteria = gql`
       last: $last
       orderBy: $orderBy
       program: $program
+      businessArea: $businessArea
     ) {
       edges {
         node {

@@ -175,6 +175,7 @@ export function EditTargetPopulation({
               allProgramsData?.allPrograms?.edges,
               values.program,
             )}
+            businessArea={businessArea}
           />
         </Form>
       )}
