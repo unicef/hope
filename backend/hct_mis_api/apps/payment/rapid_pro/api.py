@@ -56,7 +56,10 @@ class RapidProAPI:
         urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
 
-        response = self._handle_post_request(RapidProAPI.FLOW_STARTS_ENDPOINT, data,)
+        response = self._handle_post_request(
+            RapidProAPI.FLOW_STARTS_ENDPOINT,
+            data,
+        )
         return response
 
     def get_flow_runs(self):
@@ -116,7 +119,21 @@ class RapidProAPI:
         group = self.create_group(f"Verify: {cash_plan_verification.id}")
         for individual in individuals:
             self.create_contact(
-                f"{individual.unicef_id}", individual.phone_no, group["uuid"],
+                f"{individual.unicef_id}",
+                individual.phone_no,
+                group["uuid"],
             )
 
         return group
+
+    def test_connection_flow(self):
+        # TODO: should we assume 'test_connection' flow will be in this list??
+        try:
+            all_flows = self.get_flows()
+            test_flow = next((flow for flow in all_flows if flow["name"] == "test_connection"), None)
+            if not test_flow:
+                return "No test_connection flow found."
+            self.start_flow(test_flow["uuid"], [])
+        except Exception as e:
+            return str(e)
+        return None

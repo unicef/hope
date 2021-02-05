@@ -1,6 +1,6 @@
 import xlrd
 from admin_extra_urls.extras import link, ExtraUrlMixin
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms import forms
@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.models import (
     AdminAreaLevel,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 
 
 class XLSImportForm(forms.Form):
@@ -33,9 +34,13 @@ class BusinessAreaAdmin(admin.ModelAdmin):
     change_form_template = "business_area_changeform.html"
 
     def response_change(self, request, obj):
-        if "_test_connection" in request.POST:
-            print(request)
-            print(obj)
+        if "_test_rapidpro_connection" in request.POST:
+            api = RapidProAPI(obj.slug)
+            error = api.test_connection_flow()
+            if error:
+                messages.error(request, error)
+            else:
+                messages.success(request, "Connection successful")
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)
 
