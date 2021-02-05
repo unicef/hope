@@ -198,8 +198,7 @@ class GenerateReportContentHelpers:
             payment.status,
             payment.currency,
             payment.delivered_quantity,
-            # TODO this will be delivered_quantity in usd
-            "TBD: IN USD",
+            payment.delivered_quantity_usd,
             self._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
@@ -324,6 +323,7 @@ class GenerateReportContentHelpers:
             )
             .annotate(payment_currency=ArrayAgg("household__payment_records__currency"))
             .annotate(total_delivered_quantity_local=Sum("household__payment_records__delivered_quantity"))
+            .annotate(total_delivered_quantity_usd=Sum("household__payment_records__delivered_quantity_usd"))
             .order_by("household__id")
         )
 
@@ -338,7 +338,7 @@ class GenerateReportContentHelpers:
             individual.payments_made,
             ", ".join(individual.payment_currency),
             individual.total_delivered_quantity_local,
-            "TBD: IN USD",
+            individual.total_delivered_quantity_usd,
             individual.birth_date,
             individual.estimated_birth_date,
             individual.sex,

@@ -35,7 +35,7 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
-from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr, chart_map_choices, chart_get_filtered_qs
+from hct_mis_api.apps.core.utils import to_choice_object, choices_to_dict, nested_getattr, chart_get_filtered_qs, chart_permission_decorator
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketNote,
@@ -654,6 +654,7 @@ class Query(graphene.ObjectType):
             associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
         ).order_by("created_at")
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket,

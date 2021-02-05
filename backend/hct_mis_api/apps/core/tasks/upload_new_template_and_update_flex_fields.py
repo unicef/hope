@@ -21,27 +21,30 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             return
 
         last_valid_template = XLSXKoboTemplate.objects.latest_valid()
-        template_id = last_valid_template.template_id
+        if last_valid_template is None:
+            template_id = None
+        else:
+            template_id = last_valid_template.template_id
 
         try:
             file_as_bytes = BytesIO(xlsx_kobo_template_object.file.read())
 
-            response, asset_uid = KoboAPI("afghanistan").create_template_from_file(file_as_bytes, template_id)
+            response, asset_uid = KoboAPI().create_template_from_file(file_as_bytes, template_id)
             response_status = response.get("status")
             response_details = response.get("detail")
 
             if response_status == "error" or response_details:
                 error_message = response.get("messages", "") if response_status == "error" else response_details
                 self._save_message_status_template_id(
-                    xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                    xlsx_kobo_template_object, error_message, XLSXKoboTemplate.UNSUCCESSFUL, asset_uid
                 )
                 return
             else:
                 flex_fields_task = FlexibleAttributeImporter()
-                flex_fields_task.import_xls(xlsx_kobo_template_object.file.path)
+                flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
             self._save_message_status_template_id(
-                xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, template_id
+                xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid
             )
 
         except Exception as e:
