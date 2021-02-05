@@ -1,24 +1,24 @@
-import xlrd
-from admin_extra_urls.extras import link, ExtraUrlMixin
+from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter, TextFieldFilter
 from django.contrib import admin
 from django.contrib.messages import ERROR
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.forms import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+
+import xlrd
+from admin_extra_urls.api import ExtraUrlMixin, link
+from mptt.admin import MPTTModelAdmin
 from xlrd import XLRDError
 
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.core.airflow_api import AirflowApi
-from hct_mis_api.apps.core.models import (
-    BusinessArea,
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-    XLSXKoboTemplate,
-    AdminArea,
-    AdminAreaLevel,
-)
+from hct_mis_api.apps.core.models import (AdminArea, AdminAreaLevel,
+                                          BusinessArea, FlexibleAttribute,
+                                          FlexibleAttributeChoice,
+                                          FlexibleAttributeGroup,
+                                          XLSXKoboTemplate, )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 
 
@@ -28,36 +28,69 @@ class XLSImportForm(forms.Form):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
+    list_display = ("name", "slug", "code", "region_code",
+                    "region_name", "rapidpro_enabled", "kobo_enabled")
+    search_fields = ("name", "code")
+    list_filter = ("has_data_sharing_agreement",
+                   TextFieldFilter.factory("kobo_username__istartswith", "Kobo username"),
+                   )
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def rapidpro_enabled(self, obj):
+        return bool(obj.rapid_pro_api_key)
+
+    rapidpro_enabled.boolean = True
+
+    def kobo_enabled(self, obj):
+        return bool(obj.kobo_username)
+
+    kobo_enabled.boolean = True
 
 
 @admin.register(AdminArea)
-class AdminAreaAdmin(admin.ModelAdmin):
-    list_display = ("title", "parent")
+class AdminAreaAdmin(MPTTModelAdmin):
+    list_display = ("title", "parent", "admin_area_level")
+    search_fields = ("name",)
+    list_filter = ("admin_area_level",)
 
 
 @admin.register(AdminAreaLevel)
-class AdminAreaAdmin(admin.ModelAdmin):
-    list_display = ("name", "business_area")
+class AdminAreaLevelAdmin(admin.ModelAdmin):
+    list_display = ("name", "business_area", "admin_level")
+    search_fields = ("name",)
+    list_filter = ("business_area", RelatedFieldComboFilter),
 
 
 @admin.register(FlexibleAttribute)
-class FlexibleAttributeAdmin(admin.ModelAdmin):
-    pass
+class FlexibleAttributeAdmin(HOPEModelAdminBase):
+    list_display = ("name", "type", "required", "is_removed")
+    list_filter = (("type", ChoicesFieldComboFilter),
+                   ("group", RelatedFieldComboFilter),
+                   "required", "associated_with", "is_removed")
+    search_fields = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(admin.ModelAdmin):
-    pass
+class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+    list_display = ("name", "required", "repeatable", "is_removed")
+    list_filter = ("required", "repeatable", "is_removed")
+    search_fields = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(FlexibleAttributeChoice)
-class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
-    pass
+class FlexibleAttributeChoiceAdmin(HOPEModelAdminBase):
+    list_display = ('list_name', 'name',)
+    search_fields = ('name',)
+    filter_horizontal = ('flex_attributes',)
+    ordering = ('list_name',)
 
 
 @admin.register(XLSXKoboTemplate)
-class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
+class XLSXKoboTemplateAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("original_file_name", "uploaded_by", "created_at", "file", "import_status")
 
     exclude = ("is_removed", "file_name", "status", "template_id")
