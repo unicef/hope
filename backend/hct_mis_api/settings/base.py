@@ -9,6 +9,7 @@ import sys
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -137,7 +138,6 @@ DATABASES = {
     },
 }
 
-
 # If app is not specified here it will use default db
 DATABASE_APPS_MAPPING = {
     "cash_assist_datahub": "cash_assist_datahub_ca",
@@ -228,6 +228,7 @@ OTHER_APPS = [
     "django_elasticsearch_dsl",
     "constance",
     "admin_extra_urls",
+    "adminfilters",
     "multiselectfield",
     "mptt",
     "django_extensions",
@@ -466,3 +467,11 @@ DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
 DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
 
 KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
+
+COUNTRIES_OVERRIDE = {
+    "U": {
+        "name": _("Unknown or Not Applicable"),
+        "alpha3": "U",
+        "ioc_code": "U",
+    },
+}

@@ -21,7 +21,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs
+from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, chart_map_choices, chart_get_filtered_qs, chart_permission_decorator
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
@@ -193,7 +193,7 @@ class Query(graphene.ObjectType):
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True)
     )
-    # chart_program = relay.Node.Field(ChartProgramNode)
+
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
@@ -250,6 +250,7 @@ class Query(graphene.ObjectType):
             )
         ).order_by("-updated_at", "custom_order")
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         programs = chart_get_filtered_qs(
@@ -271,6 +272,7 @@ class Query(graphene.ObjectType):
         ]
         return {"labels": sector_choice_mapping.values(), "datasets": datasets}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
         programs = chart_get_filtered_qs(
             Program,

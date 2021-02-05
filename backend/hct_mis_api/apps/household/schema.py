@@ -29,7 +29,8 @@ from hct_mis_api.apps.core.utils import (
     encode_ids,
     to_choice_object,
     chart_get_filtered_qs,
-    sum_lists
+    sum_lists,
+    chart_permission_decorator
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -503,11 +504,9 @@ class Query(graphene.ObjectType):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
     def resolve_countries_choices(self, info, **kwargs):
-        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.COUNTRIES])
+        return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
-    # def resolve_chart_all_individuals_reached(self, info, business_area_slug, year, **kwargs):
-    #     households_qs = chart_get_filtered_qs(Household, business_area_slug, year)
-
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
@@ -519,6 +518,7 @@ class Query(graphene.ObjectType):
             "total": payment_verifications_qs.values_list('payment_record__household', flat=True).distinct().count()
         }
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
@@ -529,6 +529,7 @@ class Query(graphene.ObjectType):
         reached_households = set([pv.payment_record.household for pv in payment_verifications_qs])
         return {"total": sum([hh.individuals.all().count() for hh in reached_households])}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
@@ -552,6 +553,7 @@ class Query(graphene.ObjectType):
 
         return {"total": sum(sum_lists(households_child_values, len(households_child_params)))}
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
@@ -591,6 +593,7 @@ class Query(graphene.ObjectType):
             'datasets': [{'data': sum_lists(households_values, len(households_params))}]
         }
 
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
