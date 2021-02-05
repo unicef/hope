@@ -30,7 +30,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     chart_get_filtered_qs,
     sum_lists,
-    chart_permission_decorator
+    chart_permission_decorator,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -58,16 +58,16 @@ from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDataset
 
 
 INDIVIDUALS_CHART_LABELS = [
-    'Females 0-5',
-    'Females 6-11',
-    'Females 12-17',
-    'Females 18-59',
-    'Females 60+',
-    'Males 0-5',
-    'Males 6-11',
-    'Males 12-17',
-    'Males 18-59',
-    'Males 60+'
+    "Females 0-5",
+    "Females 6-11",
+    "Females 12-17",
+    "Females 18-59",
+    "Females 60+",
+    "Males 0-5",
+    "Males 6-11",
+    "Males 12-17",
+    "Males 18-59",
+    "Males 60+",
 ]
 
 
@@ -76,9 +76,7 @@ class HouseholdFilter(FilterSet):
     size = IntegerRangeFilter(field_name="size")
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(
-        field_name="admin_area", queryset=AdminArea.objects.filter(level=2)
-    )
+    admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
 
     class Meta:
         model = Household
@@ -133,9 +131,7 @@ class IndividualFilter(FilterSet):
     programs = ModelMultipleChoiceFilter(field_name="household__programs", queryset=Program.objects.all())
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
-    admin2 = ModelMultipleChoiceFilter(
-        field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2)
-    )
+    admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")
 
@@ -444,34 +440,22 @@ class Query(graphene.ObjectType):
         permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
     chart_all_individuals_reached = graphene.Field(
-        ChartDatasetNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     section_households_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     section_individuals_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     section_child_reached = graphene.Field(
-        SectionTotalNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     chart_individuals_reached_by_age_and_gender = graphene.Field(
-        ChartDatasetNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
     chart_individuals_with_disability_reached_by_age = graphene.Field(
-        ChartDetailedDatasetsNode,
-        business_area_slug=graphene.String(required=True),
-        year=graphene.Int(required=True)
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
     )
 
     residence_status_choices = graphene.List(ChoiceObject)
@@ -511,11 +495,11 @@ class Query(graphene.ObjectType):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
-            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={"status": PaymentVerification.STATUS_RECEIVED},
         )
         return {
-            "total": payment_verifications_qs.values_list('payment_record__household', flat=True).distinct().count()
+            "total": payment_verifications_qs.values_list("payment_record__household", flat=True).distinct().count()
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -523,7 +507,7 @@ class Query(graphene.ObjectType):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
-            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={"status": PaymentVerification.STATUS_RECEIVED},
         )
         reached_households = set([pv.payment_record.household for pv in payment_verifications_qs])
@@ -534,22 +518,20 @@ class Query(graphene.ObjectType):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
-            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={"status": PaymentVerification.STATUS_RECEIVED},
         )
 
         households_child_params = [
-            'payment_record__household__female_age_group_0_5_count',
-            'payment_record__household__female_age_group_0_5_disabled_count',
-            'payment_record__household__female_age_group_6_11_count',
-            'payment_record__household__female_age_group_6_11_disabled_count',
-            'payment_record__household__female_age_group_12_17_count',
-            'payment_record__household__female_age_group_12_17_disabled_count',
+            "payment_record__household__female_age_group_0_5_count",
+            "payment_record__household__female_age_group_0_5_disabled_count",
+            "payment_record__household__female_age_group_6_11_count",
+            "payment_record__household__female_age_group_6_11_disabled_count",
+            "payment_record__household__female_age_group_12_17_count",
+            "payment_record__household__female_age_group_12_17_disabled_count",
         ]
 
-        households_child_values = payment_verifications_qs.values_list(
-            *households_child_params
-        ).distinct()
+        households_child_values = payment_verifications_qs.values_list(*households_child_params).distinct()
 
         return {"total": sum(sum_lists(households_child_values, len(households_child_params)))}
 
@@ -558,39 +540,37 @@ class Query(graphene.ObjectType):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
-            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={"status": PaymentVerification.STATUS_RECEIVED},
         )
         households_params = [
-            'payment_record__household__female_age_group_0_5_count',
-            'payment_record__household__female_age_group_0_5_disabled_count',
-            'payment_record__household__female_age_group_6_11_count',
-            'payment_record__household__female_age_group_6_11_disabled_count',
-            'payment_record__household__female_age_group_12_17_count',
-            'payment_record__household__female_age_group_12_17_disabled_count',
-            'payment_record__household__female_age_group_18_59_count',
-            'payment_record__household__female_age_group_18_59_disabled_count',
-            'payment_record__household__female_age_group_60_count',
-            'payment_record__household__female_age_group_60_disabled_count',
-            'payment_record__household__male_age_group_0_5_count',
-            'payment_record__household__male_age_group_0_5_disabled_count',
-            'payment_record__household__male_age_group_6_11_count',
-            'payment_record__household__male_age_group_6_11_disabled_count',
-            'payment_record__household__male_age_group_12_17_count',
-            'payment_record__household__male_age_group_12_17_disabled_count',
-            'payment_record__household__male_age_group_18_59_count',
-            'payment_record__household__male_age_group_18_59_disabled_count',
-            'payment_record__household__male_age_group_60_count',
-            'payment_record__household__male_age_group_60_disabled_count',
+            "payment_record__household__female_age_group_0_5_count",
+            "payment_record__household__female_age_group_0_5_disabled_count",
+            "payment_record__household__female_age_group_6_11_count",
+            "payment_record__household__female_age_group_6_11_disabled_count",
+            "payment_record__household__female_age_group_12_17_count",
+            "payment_record__household__female_age_group_12_17_disabled_count",
+            "payment_record__household__female_age_group_18_59_count",
+            "payment_record__household__female_age_group_18_59_disabled_count",
+            "payment_record__household__female_age_group_60_count",
+            "payment_record__household__female_age_group_60_disabled_count",
+            "payment_record__household__male_age_group_0_5_count",
+            "payment_record__household__male_age_group_0_5_disabled_count",
+            "payment_record__household__male_age_group_6_11_count",
+            "payment_record__household__male_age_group_6_11_disabled_count",
+            "payment_record__household__male_age_group_12_17_count",
+            "payment_record__household__male_age_group_12_17_disabled_count",
+            "payment_record__household__male_age_group_18_59_count",
+            "payment_record__household__male_age_group_18_59_disabled_count",
+            "payment_record__household__male_age_group_60_count",
+            "payment_record__household__male_age_group_60_disabled_count",
         ]
 
-        households_values = payment_verifications_qs.values_list(
-            *households_params
-        ).distinct()
+        households_values = payment_verifications_qs.values_list(*households_params).distinct()
 
         return {
-            'labels': INDIVIDUALS_CHART_LABELS,
-            'datasets': [{'data': sum_lists(households_values, len(households_params))}]
+            "labels": INDIVIDUALS_CHART_LABELS,
+            "datasets": [{"data": sum_lists(households_values, len(households_params))}],
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -598,32 +578,32 @@ class Query(graphene.ObjectType):
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
-            business_area_slug_filter={'payment_record__business_area__slug': business_area_slug},
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
             additional_filters={"status": PaymentVerification.STATUS_RECEIVED},
         )
         households_params_with_disability = [
-            'payment_record__household__female_age_group_0_5_disabled_count',
-            'payment_record__household__female_age_group_6_11_disabled_count',
-            'payment_record__household__female_age_group_12_17_disabled_count',
-            'payment_record__household__female_age_group_18_59_disabled_count',
-            'payment_record__household__female_age_group_60_disabled_count',
-            'payment_record__household__male_age_group_0_5_disabled_count',
-            'payment_record__household__male_age_group_6_11_disabled_count',
-            'payment_record__household__male_age_group_12_17_disabled_count',
-            'payment_record__household__male_age_group_18_59_disabled_count',
-            'payment_record__household__male_age_group_60_disabled_count',
+            "payment_record__household__female_age_group_0_5_disabled_count",
+            "payment_record__household__female_age_group_6_11_disabled_count",
+            "payment_record__household__female_age_group_12_17_disabled_count",
+            "payment_record__household__female_age_group_18_59_disabled_count",
+            "payment_record__household__female_age_group_60_disabled_count",
+            "payment_record__household__male_age_group_0_5_disabled_count",
+            "payment_record__household__male_age_group_6_11_disabled_count",
+            "payment_record__household__male_age_group_12_17_disabled_count",
+            "payment_record__household__male_age_group_18_59_disabled_count",
+            "payment_record__household__male_age_group_60_disabled_count",
         ]
         households_params_without_disability = [
-            'payment_record__household__female_age_group_0_5_count',
-            'payment_record__household__female_age_group_6_11_count',
-            'payment_record__household__female_age_group_12_17_count',
-            'payment_record__household__female_age_group_18_59_count',
-            'payment_record__household__female_age_group_60_count',
-            'payment_record__household__male_age_group_0_5_count',
-            'payment_record__household__male_age_group_6_11_count',
-            'payment_record__household__male_age_group_12_17_count',
-            'payment_record__household__male_age_group_18_59_count',
-            'payment_record__household__male_age_group_60_count',
+            "payment_record__household__female_age_group_0_5_count",
+            "payment_record__household__female_age_group_6_11_count",
+            "payment_record__household__female_age_group_12_17_count",
+            "payment_record__household__female_age_group_18_59_count",
+            "payment_record__household__female_age_group_60_count",
+            "payment_record__household__male_age_group_0_5_count",
+            "payment_record__household__male_age_group_6_11_count",
+            "payment_record__household__male_age_group_12_17_count",
+            "payment_record__household__male_age_group_18_59_count",
+            "payment_record__household__male_age_group_60_count",
         ]
 
         households_with_disability_values = payment_verifications_qs.values_list(
@@ -636,17 +616,13 @@ class Query(graphene.ObjectType):
 
         datasets = [
             {
-                "label": 'with disability',
-                "data": sum_lists(households_with_disability_values, len(households_params_with_disability))
+                "label": "with disability",
+                "data": sum_lists(households_with_disability_values, len(households_params_with_disability)),
             },
             {
-                "label": 'without disability',
-                "data": sum_lists(households_without_disability_values, len(households_params_without_disability))
-            }
+                "label": "without disability",
+                "data": sum_lists(households_without_disability_values, len(households_params_without_disability)),
+            },
         ]
 
-        return {
-            'labels': INDIVIDUALS_CHART_LABELS,
-            'datasets': datasets
-        }
-
+        return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}

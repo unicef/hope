@@ -36,10 +36,6 @@ from hct_mis_api.apps.core.models import (
     AdminAreaLevel,
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
-from hct_mis_api.apps.account.permissions import (
-    hopePermissionClass,
-    Permissions,
-)
 
 
 class AdminAreaFilter(FilterSet):
