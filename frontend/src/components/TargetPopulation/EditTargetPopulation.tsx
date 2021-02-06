@@ -99,7 +99,7 @@ export function EditTargetPopulation({
               }),
             },
           },
-          refetchQueries: [
+          refetchQueries: () => [
             {
               query: TARGET_POPULATION_QUERY,
               variables: {
@@ -115,7 +115,7 @@ export function EditTargetPopulation({
         });
       }}
     >
-      {({ submitForm, values }) => (
+      {({ values }) => (
         <Form>
           <PageHeader
             title={
@@ -152,7 +152,6 @@ export function EditTargetPopulation({
                   variant='contained'
                   color='primary'
                   type='submit'
-                  onClick={submitForm}
                   disabled={
                     values.criterias?.length +
                       values.candidateListCriterias?.length ===
