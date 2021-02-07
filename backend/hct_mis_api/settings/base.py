@@ -483,6 +483,7 @@ if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.logging import LoggingIntegration
+    from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
         level=logging.INFO,  # Capture info and above as breadcrumbs
@@ -496,6 +497,6 @@ if SENTRY_DSN:
                       # RedisIntegration(),
                       # CeleryIntegration()
                       ],
-        # release=sos.get_full_version(),
+        release=get_full_version(),
         send_default_pii=True
     )
