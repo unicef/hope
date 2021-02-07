@@ -1,9 +1,11 @@
 from admin_extra_urls.decorators import action
 from admin_extra_urls.mixins import ExtraUrlMixin
-from django.contrib import admin
+from django.contrib import admin, messages
 from adminfilters.filters import TextFieldFilter, RelatedFieldComboFilter, AllValuesComboFilter, \
     ChoicesFieldComboFilter, MaxMinFilter
+from django.contrib.messages import DEFAULT_TAGS
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from hct_mis_api.apps.household.models import (
@@ -13,7 +15,7 @@ from hct_mis_api.apps.household.models import (
     Document,
     Agency,
     IndividualRoleInHousehold,
-    IndividualIdentity,
+    IndividualIdentity, ROLE_PRIMARY, ROLE_ALTERNATE, HEAD,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
 
@@ -39,7 +41,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Household)
 class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("unicef_id", "country", "head_of_household", "size", )
+    list_display = ("unicef_id", "country", "head_of_household", "size",)
     list_filter = (TextFieldFilter.factory("unicef_id", "UNICEF ID"),
                    TextFieldFilter.factory("unhcr_id", "UNHCR ID"),
                    TextFieldFilter.factory("id", "MIS ID"),
@@ -83,10 +85,53 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
+    @action()
+    def sanity_check(self, request, pk):
+        # NOTE: this code is not should be optimized in the future and it is not
+        # intended to be used in bulk
+        hh = self.get_object(request, pk)
+        warnings = []
+        primary = None
+        head = None
+        try:
+            primary = IndividualRoleInHousehold.objects.get(household=hh,
+                                                        role=ROLE_PRIMARY)
+        except IndividualRoleInHousehold.DoesNotExist:
+            warnings.append([messages.ERROR, 'Head of househould not found'])
+
+        alternate = IndividualRoleInHousehold.objects.filter(household=hh,
+                                                             role=ROLE_ALTERNATE).first()
+        try:
+            head = hh.individuals.get(relationship=HEAD)
+        except IndividualRoleInHousehold.DoesNotExist:
+            warnings.append([messages.ERROR, 'Head of househould not found'])
+
+        if hh.collect_individual_data:
+            # FIXME: this count() must exclude duplicates/withdrawn when this attributes
+            # will be implemented
+            if hh.individuals.count() != hh.size:
+                warnings.append([messages.WARNING, 'HH size does not match'])
+
+        else:
+            if hh.individuals.count() > 1:
+                warnings.append([messages.ERROR, 'Individual data not collected but members found'])
+        # TODO: add ghosts (duplicates, withdrawn)
+
+        context = {'opts': Household._meta,
+                   'app_label': Household._meta.app_label,
+                   'original': hh,
+                   'head': head,
+                   'primary': primary,
+                   'alternate': alternate,
+                   'warnings': [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings],
+                   }
+        return TemplateResponse(request,
+                                "admin/household/household/sanity_check.html", context)
+
 
 @admin.register(Individual)
 class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
-    list_display = ("unicef_id", "given_name", "family_name", "household", "sex", "relationship", "birth_date", )
+    list_display = ("unicef_id", "given_name", "family_name", "household", "sex", "relationship", "birth_date",)
     search_fields = ('family_name',)
     list_filter = (TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
                    TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
@@ -100,7 +145,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         (None, {
             'fields': (('full_name', 'status', 'is_removed'),
                        ('sex', 'birth_date', 'marital_status'),
-                       ('unicef_id', ),
+                       ('unicef_id',),
                        ('household', 'relationship'),
                        )
         }),
@@ -127,7 +172,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 @admin.register(IndividualRoleInHousehold)
 class IndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
     list_display = ("individual_id", "household_id", "role")
-    list_filter = ("role", )
+    list_filter = ("role",)
     raw_id_fields = ("individual", "household",)
 
 
