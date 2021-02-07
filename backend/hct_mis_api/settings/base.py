@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 import os
 import sys
 
@@ -476,3 +477,27 @@ COUNTRIES_OVERRIDE = {
         "ioc_code": "U",
     },
 }
+
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+
+    import sos
+
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR  # Send errors as events
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(transaction_style='url'),
+                      sentry_logging,
+                      # RedisIntegration(),
+                      # CeleryIntegration()
+                      ],
+        # release=sos.get_full_version(),
+        send_default_pii=True
+    )
