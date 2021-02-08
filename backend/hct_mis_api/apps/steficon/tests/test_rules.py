@@ -11,11 +11,10 @@ class TestBasicRule(TestCase):
 
     def test_rule(self):
         r = Rule(definition="score.value=1.0")
-        self.assertEqual(r.as_dict(), {'definition': 'score.value=1.0',
-                                       'deprecated': False,
-                                       'enabled': False,
-                                       'language': 'python',
-                                       'name': ''})
+        self.assertEqual(
+            r.as_dict(),
+            {"definition": "score.value=1.0", "deprecated": False, "enabled": False, "language": "python", "name": ""},
+        )
 
     def test_execution(self):
         rule = Rule(definition="score.value=101")
@@ -37,8 +36,8 @@ class TestBasicRule(TestCase):
         history = rule.history.first()
         self.assertTrue(history)
         self.assertEqual(history.new_state, rule.as_dict())
-        self.assertEqual(history.previous_state['definition'], 'score.value=1')
-        self.assertEqual(history.affected_fields, ['definition'])
+        self.assertEqual(history.previous_state["definition"], "score.value=1")
+        self.assertEqual(history.affected_fields, ["definition"])
 
     def test_revert(self):
         rule = Rule(definition="score.value=1", enabled=True)

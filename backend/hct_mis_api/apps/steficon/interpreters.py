@@ -43,9 +43,7 @@ class PythonExec(Interpreter):
         return compile(self.init_string, "<code>", mode="exec")
 
     def execute(self, **context):
-        gl = {"__builtins__": {'random': random,
-                               'datetime': datetime,
-                               'dateutil': dateutil}}
+        gl = {"__builtins__": {"random": random, "datetime": datetime, "dateutil": dateutil}}
         pts = Score()
         locals_ = dict(context)
         locals_["score"] = pts
@@ -54,8 +52,7 @@ class PythonExec(Interpreter):
 
     def validate(self):
         errors = []
-        for forbidden in ["__import__", "raw",
-                          "connection", "import", "delete", "save", "eval", "exec"]:
+        for forbidden in ["__import__", "raw", "connection", "import", "delete", "save", "eval", "exec"]:
             if forbidden in self.init_string:
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
@@ -98,5 +95,8 @@ class Jinja(Interpreter):
         return Decimal(output.strip())
 
 
-interpreters = [PythonExec, PythonFunction, ]
+interpreters = [
+    PythonExec,
+    PythonFunction,
+]
 mapping = {a.label.lower(): a for a in interpreters}

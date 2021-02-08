@@ -11,7 +11,7 @@ from pygments.lexers.python import PythonLexer
 register = template.Library()
 
 
-@register.filter(name='getattr')
+@register.filter(name="getattr")
 def get_attr(d, v):
     return getattr(d, v)
 
@@ -23,8 +23,7 @@ def define(val=None):
 
 @register.filter
 def adults(hh):
-    return hh.members.filter(age__gte=18, age__lte=65,
-                             work__in=["fulltime", "seasonal", "parttime"]).count()
+    return hh.members.filter(age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]).count()
 
 
 @register.filter
@@ -40,31 +39,39 @@ def get_item(dictionary, key):
 
 @register.filter
 def pygmentize(code, language):
-    formatter = HtmlFormatter(style='colorful')
+    formatter = HtmlFormatter(style="colorful")
     formatted_code = highlight(code, PythonLexer(), formatter)
     return mark_safe(formatted_code)
 
 
 @register.filter
 def diff(state):
-    left = state.previous_state['definition'].split('\n')
-    right = state.new_state['definition'].split('\n')
+    left = state.previous_state["definition"].split("\n")
+    right = state.new_state["definition"].split("\n")
     if state.version + 1 == state.rule.version:
-        label = 'Current'
+        label = "Current"
     else:
         label = state.version + 1
 
-    return mark_safe(difflib.HtmlDiff().make_table(left, right,
-                                                   f"Code before changes - Version: {state.version}",
-                                                   f"Code after changes - {state.updated_by} - Version: {label}",
-                                                   ))
+    return mark_safe(
+        difflib.HtmlDiff().make_table(
+            left,
+            right,
+            f"Code before changes - Version: {state.version}",
+            f"Code after changes - {state.updated_by} - Version: {label}",
+        )
+    )
 
 
 @register.filter
 def diff_to_current(state):
-    left = state.new_state['definition'].split('\n')
-    right = state.rule.definition.split('\n')
-    return mark_safe(difflib.HtmlDiff().make_table(left, right,
-                                                   f"Version: {state.version} code",
-                                                   f"Current code: Version {state.rule.version}",
-                                                   ))
+    left = state.new_state["definition"].split("\n")
+    right = state.rule.definition.split("\n")
+    return mark_safe(
+        difflib.HtmlDiff().make_table(
+            left,
+            right,
+            f"Version: {state.version} code",
+            f"Current code: Version {state.rule.version}",
+        )
+    )
