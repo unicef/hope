@@ -16,8 +16,7 @@ def hajati(hh: Household):
 
     # **** Indicator 1.2 - Working Adults ****
     adults = hh.members.filter(age__gte=18, age__lte=65).count()
-    working_adult = hh.members.filter(age__gte=18, age__lte=65,
-                                      work__in=["fulltime", "seasonal", "parttime"]).count()
+    working_adult = hh.members.filter(age__gte=18, age__lte=65, work__in=["fulltime", "seasonal", "parttime"]).count()
     if working_adult >= 1:
         pts.adult = 1
     else:
@@ -25,9 +24,9 @@ def hajati(hh: Household):
     #  **** Indicator 1.3 - Head of Household ****
 
     head = hh.members.get(relation_to_head=1)
-    if head.gender == 'M':
+    if head.gender == "M":
         pts.hhhead = 1
-    if head.gender == 'F':
+    if head.gender == "F":
         pts.hhhead = 0
     if head.age > 65 and (working_adult == 0 or adults == 0):
         pts.hhhead = -0.5
