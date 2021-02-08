@@ -7,5 +7,5 @@ class TargetPopulationCAPushOperator(DjangoOperator):
     households and any other relevant data necessary.
     """
 
-    def execute(self, context):
+    def try_execute(self, context):
         pass
