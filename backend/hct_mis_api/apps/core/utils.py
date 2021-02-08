@@ -1,7 +1,9 @@
 from collections import MutableMapping, OrderedDict
 from typing import List
+import functools
 
 from django.core.exceptions import ValidationError
+
 from django_filters import OrderingFilter
 
 
@@ -213,6 +215,7 @@ def get_combined_attributes():
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):
     import datetime as dt
+
     from django.db.models import Q
 
     query_dict = {}
@@ -380,6 +383,7 @@ def build_arg_dict_from_dict(data_dict, mapping_dict):
 class CustomOrderingFilter(OrderingFilter):
     def filter(self, qs, value):
         from django.db.models.functions import Lower
+
         from django_filters.constants import EMPTY_VALUES
 
         if value in EMPTY_VALUES:
@@ -494,9 +498,11 @@ def update_labels_mapping(csv_file):
     csv_file: path to csv file, 2 columns needed (field name, english label)
     """
     import csv
-    import re
     import json
+    import re
+
     from django.conf import settings
+
     from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
 
     with open(csv_file, newline="") as csv_file:
@@ -557,3 +563,46 @@ def xlrd_rows_iterator(sheet):
             continue
 
         yield row
+
+
+def chart_map_choices(choices):
+    return dict(choices)
+
+
+def chart_get_filtered_qs(obj, year, business_area_slug_filter=None, additional_filters=None):
+    if additional_filters is None:
+        additional_filters = {}
+    if business_area_slug_filter is None:
+        business_area_slug_filter = {}
+    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
+
+
+def parse_list_values_to_int(list_to_parse):
+    return list(map(lambda x: int(x or 0), list_to_parse))
+
+
+def sum_lists(qs_values, list_len):
+    data = [0] * list_len
+    for values in qs_values:
+        parsed_values = parse_list_values_to_int(values)
+        for i, value in enumerate(parsed_values):
+            data[i] += value
+
+    return data
+
+
+def chart_permission_decorator(chart_resolve=None, permissions=None):
+    if chart_resolve is None:
+        return functools.partial(chart_permission_decorator, permissions=permissions)
+
+    @functools.wraps(chart_resolve)
+    def resolve_f(*args, **kwargs):
+        from hct_mis_api.apps.core.models import BusinessArea
+
+        _, resolve_info = args
+        if resolve_info.context.user.is_authenticated:
+            business_area = BusinessArea.objects.filter(slug=kwargs.get("business_area_slug")).first()
+            if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
+                return chart_resolve(*args, **kwargs)
+
+    return resolve_f
