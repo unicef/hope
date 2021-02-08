@@ -10,12 +10,12 @@ class RuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        exclude = ('updated_by',)
+        exclude = ("updated_by",)
 
     def clean(self):
         self._validate_unique = True
-        code = self.cleaned_data['definition']
-        language = self.cleaned_data['language']
+        code = self.cleaned_data["definition"]
+        language = self.cleaned_data["language"]
         i = mapping[language](code)
         i.validate()
         return self.cleaned_data
