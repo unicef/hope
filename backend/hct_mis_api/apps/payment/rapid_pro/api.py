@@ -126,17 +126,27 @@ class RapidProAPI:
 
         return group
 
-    def test_connection_flow(self, flow_name, phone_number):
+    def test_connection_start_flow(self, flow_name, phone_number):
         try:
             all_flows = self.get_flows()
             test_flow = next((flow for flow in all_flows if flow["name"] == flow_name), None)
             if not test_flow:
                 return (
                     f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
-                )
-            self.start_flow(test_flow["uuid"], [phone_number])
-            result = self.get_flow_runs()
-            print(result)
+                ), None
+            # self.start_flow(test_flow["uuid"], [phone_number])
+            return None, test_flow['uuid']
         except Exception as e:
-            return str(e)
-        return None
+            return str(e), None
+    
+    def test_connection_flow_run(self, flow_uuid, phone_number):
+        try:
+            flow_runs = self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}")
+            print(flow_runs)
+            results_for_contact = [flow_run for flow_run in flow_runs if flow_run.get('contact', {}).get('urn', {}) == f'tel:{phone_number}']
+            responded = [result['values'] for result in results_for_contact if result['responded']]
+            not_responded = len([result for result in results_for_contact if not result['responded']])
+            return None, {'responded': responded, 'not_responded': not_responded}
+        except Exception as e:
+            return str(e), None
+
