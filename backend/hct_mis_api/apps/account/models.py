@@ -4,13 +4,14 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 INVITED = "INVITED"
@@ -91,6 +92,14 @@ class Role(TimeStampedUUIDModel):
 @receiver(pre_save, sender=get_user_model())
 def pre_save_user(sender, instance, *args, **kwargs):
     instance.available_for_export = True
+
+
+@receiver(post_save, sender=get_user_model())
+def post_save_user(sender, instance, *args, **kwargs):
+    business_area = BusinessArea.objects.filter(slug="global").first()
+    role = Role.objects.filter(name="Basic User").first()
+    if business_area and role:
+        UserRole.objects.create(business_area=business_area, user=instance, role=role)
 
 
 class IncompatibleRoles(TimeStampedUUIDModel):
