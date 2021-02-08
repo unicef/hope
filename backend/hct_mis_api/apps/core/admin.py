@@ -1,4 +1,5 @@
 import xlrd
+from datetime import datetime
 from admin_extra_urls.extras import link, ExtraUrlMixin, action
 from django.contrib import admin, messages
 from django.conf.urls import url
@@ -35,6 +36,9 @@ class TestRapidproForm(forms.Form):
         required=True,
     )
     flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
+    check_result = forms.BooleanField(label="Check result", widget=forms.HiddenInput(), initial=False, required=False)
+    # start_flow_at = forms.DateTimeField(widget=forms.HiddenInput(), required=False)
+    flow_uuid = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 @admin.register(BusinessArea)
@@ -66,22 +70,54 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
         if request.method == "GET":
             context["form"] = TestRapidproForm()
-
+            context["flow_started"] = None
+            context["flow_uuid"] = ""
             return TemplateResponse(request, "core/test_rapidpro.html", context)
         else:
             form = TestRapidproForm(request.POST)
+            print(form)
             if form.is_valid():
-                phone_number = form.cleaned_data["phone_number"]
-                flow_name = form.cleaned_data["flow_name"]
+                phone_number = form.cleaned_data.get("phone_number", None)
+                flow_name = form.cleaned_data.get("flow_name", None)
                 context["phone_number"] = phone_number
                 context["flow_name"] = flow_name
-                print(phone_number, flow_name)
                 api = RapidProAPI(context["business_area"].slug)
-                error = api.test_connection_flow(flow_name, phone_number)
-                if error:
-                    messages.error(request, error)
+                if not form.cleaned_data.get("flow_uuid", None):
+                    print('FLOW HAS NOT STARTED SO STARTING')
+                    context["start_flow_at"] = datetime.now()
+                    error, flow_uuid = api.test_connection_start_flow(flow_name, phone_number)
+                    # error, flow_uuid = None, 'sfwefe'
+                    context["flow_uuid"] = flow_uuid
+
+                    if error:
+                        messages.error(request, error)
+                        context["flow_started"] = False
+                    else:
+                        messages.success(request, "Connection successful")
+                        context["flow_started"] = True
                 else:
-                    messages.success(request, "Connection successful")
+                    print("SHOUD ONLY CHECK RESULTS")
+                    start_flow_at = form.cleaned_data.get("start_flow_at")
+                    flow_uuid = form.cleaned_data.get("flow_uuid")
+                    context['flow_uuid'] = flow_uuid
+                    context["flow_started"] = True
+
+                    error, result = api.test_connection_flow_run(flow_uuid, phone_number)
+                    # error, result = None, ['dwdw']
+                    context["run_result"] = result
+                    if error:
+                        messages.error(request, error)
+
+                # print(phone_number, flow_name)
+                # print(form.cleaned_data.get("check_result"))
+            else:
+                print("FORM INVALID")
+                # api = RapidProAPI(context["business_area"].slug)
+                # error = api.test_connection_flow(flow_name, phone_number)
+                # if error:
+                #     messages.error(request, error)
+                # else:
+                #     messages.success(request, "Connection successful")
             #     target_population = form.cleaned_data["target_population"]
             #     context["title"] = f"Test results of `{self.object.name}` against `{target_population}`"
             #     context["target_population"] = target_population
@@ -96,6 +132,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
             #         self.message_user(request, "%s scores calculated" % len(elements))
             #     else:
             #         self.message_user(request, "No records found", messages.WARNING)
+            context["form"] = form
             return TemplateResponse(request, "core/test_rapidpro.html", context)
 
     # def response_change(self, request, obj):

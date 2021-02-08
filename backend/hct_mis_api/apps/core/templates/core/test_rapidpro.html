@@ -18,20 +18,74 @@
 </div>
 {% endblock %} {% block content %}
 
-{% if not phone_number%}
+{% if flow_started is None%}
 <div>
 <p>After submitting, we will atempt to find a flow with name 'Test' and initiate it.
 If you would like to use a different flow, please enter the name (case sensitive).</p>
 <p>Enter your phone number so you can confirm the received message.</p>
 
 </div>
-{% else%}
+{% endif%}
+{% if flow_started is False%}
 <div>
-<h3>Test ran for phone number {{phone_number }} and flow {{flow_name}}</h3>
+<h3>Test flow for phone number {{phone_number }} and flow {{flow_name}} failed.</h3>
 </div>
 {% endif %}
-<form method="post">
-  {% csrf_token %} {{ form.as_p }}
-  <input type="submit" />
+{% if flow_started is True%}
+<div>
+<h3>Test flow {{flow_name}} for phone number {{phone_number }} was successfuly started. Message to the submitted phone number was sent. You can check flow run result by clicking the button bellow.</h3>
+</div>
+{% endif %}
+<form method="post" action=".">
+  {% csrf_token %} 
+  {% comment %} {%if flow_started is None%} {% endcomment %}
+  <div class="fieldWrapper">
+    {{ form.flow_name.errors }}
+    <label for="{{ form.flow_name.id_for_label }}">Name of the test flow:</label>
+    {{ form.flow_name }}
+</div>
+  <div class="fieldWrapper">
+    {{ form.phone_number.errors }}
+    <label for="{{ form.phone_number.id_for_label }}">Phone number:</label>
+    {{ form.phone_number }}
+</div>
+{% comment %} {% endif%} {% endcomment %}
+{% if run_result %}
+RUN RESULT
+{% endif%}
+{% if run_result%}
+{% if run_result.responded %}<h3>Responses received:</h3>
+<ul>{% for rec in run_result.responded%}
+<li>{{rec}}</li>
+{% endfor%}
+{%endif%}
+</ul>
+{% if run_result.not_responded%}
+<h3>Messages sent but responses not received: {{run_result.not_responded}} times.</h3>
+{% endif%}
+
+{% endif%}
+
+{% comment %} <div class="fieldWrapper">
+
+    {{ form.check_result.errors }}
+    <input type="checkbox" hidden name='check_result' {% if flow_started is True%}checked{%endif%}/>
+
+</div> {% endcomment %}
+<div class="fieldWrapper">
+
+    {{ form.flow_uuid.errors }}
+    <input  hidden name='flow_uuid' value="{{flow_uuid}}"/>
+
+</div>
+{% comment %} <div class="fieldWrapper">
+
+    {{ form.start_flow_at.errors }}
+    <input  hidden name='start_flow_at' value="{{start_flow_at}}"/>
+
+</div> {% endcomment %}
+
+  {% if flow_started is not False %} <button type="submit">{% if flow_started %}Check result{% else%}Start flow{% endif%} </button>{% endif%}
 </form>
 {% endblock%}
+
