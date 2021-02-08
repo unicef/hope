@@ -189,6 +189,12 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
                         user.set_unusable_password()
                         users_to_bulk_create.append(user)
                         users_role_to_bulk_create.append(UserRole(role=role, business_area=business_area, user=user))
+                        global_business_area = BusinessArea.objects.filter(slug="global").first()
+                        basic_role = Role.objects.filter(name="Basic User").first()
+                        if global_business_area and basic_role:
+                            users_role_to_bulk_create.append(
+                                UserRole(business_area=global_business_area, user=user, role=basic_role)
+                            )
                     except ValidationError:
                         error = True
                         message = _(f"{email} is not a valid email address.")

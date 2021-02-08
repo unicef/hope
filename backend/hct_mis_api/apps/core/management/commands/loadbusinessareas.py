@@ -51,4 +51,14 @@ class Command(BaseCommand):
                 has_data_sharing_agreement=True,
             )
             business_area.save()
+
+        # Create Global Business Area
+        BusinessArea.objects.create(
+            code="GLOBAL",
+            name="Global",
+            long_name="Global Business Area",
+            region_code="GLOBAL",
+            region_name="GLOBAL",
+            has_data_sharing_agreement=True,
+        )
         logger.debug(f"Imported business areas from {file}")
