@@ -126,14 +126,17 @@ class RapidProAPI:
 
         return group
 
-    def test_connection_flow(self):
-        # TODO: should we assume 'test_connection' flow will be in this list??
+    def test_connection_flow(self, flow_name, phone_number):
         try:
             all_flows = self.get_flows()
-            test_flow = next((flow for flow in all_flows if flow["name"] == "test_connection"), None)
+            test_flow = next((flow for flow in all_flows if flow["name"] == flow_name), None)
             if not test_flow:
-                return "Initial connection was successful but no test_connection flow found in results list."
-            self.start_flow(test_flow["uuid"], [])
+                return (
+                    f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
+                )
+            self.start_flow(test_flow["uuid"], [phone_number])
+            result = self.get_flow_runs()
+            print(result)
         except Exception as e:
             return str(e)
         return None
