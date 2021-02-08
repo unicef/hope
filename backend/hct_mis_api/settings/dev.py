@@ -1,5 +1,8 @@
 from __future__ import absolute_import
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from .base import *  # noqa: ignore=F403
 
 # dev overrides
@@ -34,3 +37,8 @@ ELASTICSEARCH_DSL = {
     "test": {"hosts": "elasticsearch_test:9200"},
 }
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# sentry_sdk.init(
+#     dsn=os.getenv("SENTRY_DSN"),
+#     integrations=[DjangoIntegration()],
+#     debug=True
+# )
