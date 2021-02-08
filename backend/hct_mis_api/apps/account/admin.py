@@ -183,7 +183,9 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
                             user.first_name = ""
                         if user.last_name is None:
                             user.last_name = ""
-                        user.job_title = user_data.get("jobTitle", "")
+                        job_title = user_data.get("jobTitle")
+                        if job_title is not None:
+                            user.job_title = job_title
                         user.set_unusable_password()
                         users_to_bulk_create.append(user)
                         users_role_to_bulk_create.append(UserRole(role=role, business_area=business_area, user=user))
