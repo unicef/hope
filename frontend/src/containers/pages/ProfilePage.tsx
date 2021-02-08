@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import { useMeQuery } from '../../__generated__/graphql';
-import { setAuthenticated } from '../../utils/utils';
 import { LOGIN_URL } from '../../config';
 
 export function ProfilePage(): React.ReactElement {
@@ -19,6 +18,5 @@ export function ProfilePage(): React.ReactElement {
   if (error) {
     return null;
   }
-  setAuthenticated(true);
   return <Redirect to={next} />;
 }
