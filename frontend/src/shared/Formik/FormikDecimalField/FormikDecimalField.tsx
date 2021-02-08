@@ -18,7 +18,6 @@ export const FormikDecimalField = ({
   form,
   decoratorStart,
   decoratorEnd,
-  precision,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -30,11 +29,7 @@ export const FormikDecimalField = ({
     }
   };
 
-  // const onBlur = (e): void => {
-  //     form.handleBlur(e);
-  // };
-
-  function handleChange(e) {
+  function handleChange(e): void {
     form.setFieldValue(field.name, e.target.value.toString(), true);
   }
 

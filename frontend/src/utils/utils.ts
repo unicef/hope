@@ -228,13 +228,6 @@ export function reportStatusToColor(
   }
 }
 
-export function isAuthenticated(): boolean {
-  return Boolean(localStorage.getItem('AUTHENTICATED'));
-}
-export function setAuthenticated(authenticated: boolean): void {
-  localStorage.setItem('AUTHENTICATED', `${authenticated}`);
-}
-
 export function selectFields(
   fullObject,
   keys: string[],
