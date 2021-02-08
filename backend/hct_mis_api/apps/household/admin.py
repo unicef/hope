@@ -110,6 +110,12 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         except IndividualRoleInHousehold.DoesNotExist:
             warnings.append([messages.ERROR, "Head of househould not found"])
 
+        total_in_ranges = 0
+        for gender in ["male", "female"]:
+            for range in ["0_5", "6_11", "12_17","18_59", "60"]:
+                field = f"{gender}_age_group_{range}_count"
+                total_in_ranges += getattr(hh, field, 0) or 0
+
         if hh.collect_individual_data:
             # FIXME: this count() must exclude duplicates/withdrawn when this attributes
             # will be implemented
@@ -119,6 +125,10 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         else:
             if hh.individuals.count() > 1:
                 warnings.append([messages.ERROR, "Individual data not collected but members found"])
+
+        if hh.size != total_in_ranges:
+            warnings.append([messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
+
         # TODO: add ghosts (duplicates, withdrawn)
 
         context = {
