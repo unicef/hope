@@ -1,6 +1,8 @@
+import datetime
 import random
 from decimal import Decimal
 
+import dateutil
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -41,16 +43,16 @@ class PythonExec(Interpreter):
         return compile(self.init_string, "<code>", mode="exec")
 
     def execute(self, **context):
-        gl = {"__builtins__": {'random': random}}
+        gl = {"__builtins__": {"random": random, "datetime": datetime, "dateutil": dateutil}}
         pts = Score()
         locals_ = dict(context)
-        locals_["pts"] = pts
+        locals_["score"] = pts
         exec(self.code, gl, locals_)
-        return pts.total()
+        return pts.value
 
     def validate(self):
         errors = []
-        for forbidden in ["__import__", "delete", "save", "eval", "exec"]:
+        for forbidden in ["__import__", "raw", "connection", "import", "delete", "save", "eval", "exec"]:
             if forbidden in self.init_string:
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
@@ -88,10 +90,13 @@ class Jinja(Interpreter):
 
     def execute(self, **context):
         pts = Score()
-        context["pts"] = pts
+        context["score"] = pts
         output = self.code.render(**context)
         return Decimal(output.strip())
 
 
-interpreters = [Jinja, PythonFunction, PythonExec]
+interpreters = [
+    PythonExec,
+    PythonFunction,
+]
 mapping = {a.label.lower(): a for a in interpreters}
