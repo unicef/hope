@@ -19,6 +19,7 @@ class SteficonRuleNode(DjangoObjectType):
         model = Rule
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        exclude = ("version",)
 
 
 class Query(graphene.ObjectType):
