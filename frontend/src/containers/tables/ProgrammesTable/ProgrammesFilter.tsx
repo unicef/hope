@@ -4,6 +4,7 @@ import {
   Grid,
   InputAdornment,
   MenuItem,
+  Paper,
 } from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
@@ -17,7 +18,7 @@ import Select from '../../../shared/Select';
 import TextField from '../../../shared/TextField';
 import { FieldLabel } from '../../../components/FieldLabel';
 
-const Container = styled.div`
+const Container = styled(Paper)`
   display: flex;
   flex: 1;
   width: 100%;
@@ -26,10 +27,6 @@ const Container = styled.div`
     ${({ theme }) => theme.spacing(11)}px;
   flex-direction: row;
   align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
   && > div {
     margin: 5px;
   }
