@@ -9,7 +9,8 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message }) => {
       if (message.toLowerCase().includes('user is not authenticated')) {
-        window.location.replace('/login');
+
+        window.location.replace(`/login?next=${window.location.pathname}${window.location.search}`);
       }
       if (message.toLowerCase().includes('user does not have correct permission')) {
         // eslint-disable-next-line no-console
