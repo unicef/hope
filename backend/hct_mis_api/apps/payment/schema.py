@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, FilterSet, OrderingFilter
@@ -15,7 +15,21 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object, decode_id_string, is_valid_uuid, CustomOrderingFilter
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    SectionTotalNode,
+    TableTotalCashTransferred,
+)
+from hct_mis_api.apps.core.utils import (
+    to_choice_object,
+    decode_id_string,
+    is_valid_uuid,
+    CustomOrderingFilter,
+    chart_map_choices,
+    chart_get_filtered_qs,
+    chart_permission_decorator,
+)
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
@@ -178,6 +192,10 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
     sample_size = graphene.Int()
 
 
+class ChartPaymentVerification(ChartDetailedDatasetsNode):
+    households = graphene.Int()
+
+
 class Query(graphene.ObjectType):
     payment_record = relay.Node.Field(PaymentRecordNode)
     payment_record_verification = relay.Node.Field(PaymentVerificationNode)
@@ -197,6 +215,23 @@ class Query(graphene.ObjectType):
         filterset_class=CashPlanPaymentVerificationFilter,
         permission_classes=(hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_DETAILS),),
     )
+
+    chart_payment_verification = graphene.Field(
+        ChartPaymentVerification, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+    )
+    chart_volume_by_delivery_mechanism = graphene.Field(
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+    )
+    chart_payment = graphene.Field(
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+    )
+    section_total_transferred = graphene.Field(
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+    )
+    table_total_cash_transferred_by_administrative_area = graphene.Field(
+        TableTotalCashTransferred, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+    )
+
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
     payment_record_delivery_type_choices = graphene.List(ChoiceObject)
@@ -283,3 +318,100 @@ class Query(graphene.ObjectType):
 
     def resolve_payment_verification_status_choices(self, info, **kwargs):
         return to_choice_object(PaymentVerification.STATUS_CHOICES)
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
+        status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
+        payment_verifications = chart_get_filtered_qs(
+            PaymentVerification,
+            year,
+            business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
+        )
+
+        dataset = [payment_verifications.filter(status=status).count() for status in status_choices_mapping.keys()]
+        try:
+            dataset_percentage = [data / sum(dataset) for data in dataset]
+        except ZeroDivisionError:
+            dataset_percentage = [0] * len(status_choices_mapping.values())
+        dataset_percentage_done = [
+            {"label": status, "data": [dataset_percentage_value]}
+            for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
+        ]
+        return {
+            "labels": ["Payment Verification"],
+            "datasets": dataset_percentage_done,
+            "households": payment_verifications.values_list("payment_record__household", flat=True).distinct().count(),
+        }
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
+        delivery_type_choices_mapping = chart_map_choices(PaymentRecord.DELIVERY_TYPE_CHOICE)
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
+        )
+        dataset = [
+            {
+                "data": [
+                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity"))[
+                        "delivered_quantity__sum"
+                    ]
+                    for delivery_type in delivery_type_choices_mapping.keys()
+                ]
+            }
+        ]
+        return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
+        status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
+        )
+        dataset = [
+            {"data": [payment_records.filter(status=status).count() for status in status_choices_mapping.keys()]}
+        ]
+        return {"labels": status_choices_mapping.values(), "datasets": dataset}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
+        )
+        return {"total": payment_records.aggregate(Sum("delivered_quantity"))["delivered_quantity__sum"]}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
+        )
+        payment_records_hh = payment_records.select_related("household").filter(
+            household__admin_area__admin_area_level__admin_level=2
+        )
+        transferred_money_by_admin_area = {}
+        for hh in payment_records_hh:
+            admin_area = hh.household.admin_area.title
+            quantity = hh.delivered_quantity
+            try:
+                transferred_money_by_admin_area[admin_area] += quantity
+            except KeyError:
+                transferred_money_by_admin_area[admin_area] = quantity
+
+        data = [
+            {
+                "id": str(index),
+                "admin2": admin_area,
+                "totalCashTransferred": quantity,
+            }
+            for index, (admin_area, quantity) in enumerate(transferred_money_by_admin_area.items())
+        ]
+        return {"data": data}
