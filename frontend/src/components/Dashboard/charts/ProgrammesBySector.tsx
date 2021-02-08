@@ -35,6 +35,9 @@ export const ProgrammesBySector = ({
       xAxes: [
         {
           stacked: true,
+          ticks: {
+            stepSize: 1,
+          },
         },
       ],
       yAxes: [
