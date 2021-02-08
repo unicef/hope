@@ -67,19 +67,20 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     exclude = ("is_removed", "file_name", "status", "template_id")
     readonly_fields = ("original_file_name", "uploaded_by", "file", "_status", "error_description")
-    list_filter = ("status",
-                   ForeignKeyFieldFilter.factory("uploaded_by_username__istartswith",
-                                                 "Uploaded By"),
-                   )
+    list_filter = (
+        "status",
+        ForeignKeyFieldFilter.factory("uploaded_by_username__istartswith", "Uploaded By"),
+    )
     search_fields = ("file_name",)
     date_hierarchy = "created_at"
     ordering = ("-created_at",)
 
-    COLORS = {XLSXKoboTemplate.SUCCESSFUL: "89eb34",
-              XLSXKoboTemplate.UNSUCCESSFUL: "e30b0b",
-              XLSXKoboTemplate.PROCESSING: "7a807b",
-              XLSXKoboTemplate.UPLOADED: "FFAE19",
-              }
+    COLORS = {
+        XLSXKoboTemplate.SUCCESSFUL: "89eb34",
+        XLSXKoboTemplate.UNSUCCESSFUL: "e30b0b",
+        XLSXKoboTemplate.PROCESSING: "7a807b",
+        XLSXKoboTemplate.UPLOADED: "FFAE19",
+    }
 
     def _status(self, obj):
         return format_html(
@@ -120,8 +121,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             obj.save()
             self.message_user(
                 request,
-                "Running KoBo Template upload task..., "
-                "Import status will change after task completion",
+                "Running KoBo Template upload task..., " "Import status will change after task completion",
             )
         except Exception as e:
             logger.exception(e)
@@ -171,9 +171,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     status=XLSXKoboTemplate.UPLOADED,
                 )
                 self.message_user(request, "Core field validation successful. File uploaded")
-                self.post_to_kobo(request,
-                                  pk=xlsx_kobo_template_object.pk,
-                                  obj=xlsx_kobo_template_object)
+                self.post_to_kobo(request, pk=xlsx_kobo_template_object.pk, obj=xlsx_kobo_template_object)
 
                 return redirect("..")
         else:

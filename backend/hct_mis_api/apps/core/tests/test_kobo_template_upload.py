@@ -65,8 +65,8 @@ class TestKoboTemplateUpload(TestCase):
         response = self.admin.add_view(request, form_url="", extra_context=None)
         stored_messages = tuple(get_messages(request))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(stored_messages[0].message, "Core field validation successful. File uploaded")
         self.assertEqual(
-            stored_messages[0].message,
-            "Core field validation successful, running KoBo Template upload task..., "
-            "Import status will change after task completion",
+            stored_messages[1].message,
+            "Running KoBo Template upload task..., " "Import status will change after task completion",
         )
