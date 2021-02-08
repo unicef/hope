@@ -509,6 +509,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, registration_data_import_id, import_data_id, business_area_id):
+        raise Exception('aXD')
         self.households = {}
         self.documents = {}
         self.identities = {}

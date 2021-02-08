@@ -14,6 +14,7 @@ RUN apt-get update -yqq \
         libgdal20 \
         graphviz \
         acl
+RUN pip install "apache-airflow[sentry]"==1.10.9
 
 ARG AIRFLOW_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_HOME}
