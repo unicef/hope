@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %} {% load i18n admin_urls static %} 
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo;
+  <a href="{% url 'admin:app_list' app_label=opts.app_label %}"
+    >{{ opts.app_config.verbose_name }}</a
+  >
+  &rsaquo;
+  <a href="{% url opts|admin_urlname:'changelist' %}"
+    >{{ opts.verbose_name_plural|capfirst }}</a
+  >
+  &rsaquo;
+  <a href="{% url opts|admin_urlname:'change'  object_id=business_area.pk %}"
+    >{{ business_area }}</a
+  >
+  &rsaquo; Test RapidPRO connection
+</div>
+{% endblock %} {% block content %}
+
+{% if not phone_number%}
+<div>
+<p>After submitting, we will atempt to find a flow with name 'Test' and initiate it.
+If you would like to use a different flow, please enter the name (case sensitive).</p>
+<p>Enter your phone number so you can confirm the received message.</p>
+
+</div>
+{% else%}
+<div>
+<h3>Test ran for phone number {{phone_number }} and flow {{flow_name}}</h3>
+</div>
+{% endif %}
+<form method="post">
+  {% csrf_token %} {{ form.as_p }}
+  <input type="submit" />
+</form>
+{% endblock%}
