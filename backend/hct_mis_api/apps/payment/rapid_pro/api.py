@@ -138,23 +138,33 @@ class RapidProAPI:
             return None, response
         except Exception as e:
             return str(e), None
-    
+
     def test_connection_flow_run(self, flow_uuid, phone_number, timestamp=None):
         try:
+            # getting start flow that was initiated during test, should be the most recent one with matching flow uuid
             flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")
-            flow_start = [flow_start for flow_start in flow_starts['results'] if flow_start['flow']['uuid'] == flow_uuid]
-            flow_start_result = None
+            flow_start = [
+                flow_start for flow_start in flow_starts["results"] if flow_start["flow"]["uuid"] == flow_uuid
+            ]
+            flow_start_status = None
             if flow_start:
-                flow_start_result = flow_start[0]['status']
+                flow_start_status = flow_start[0]["status"]
+
             flow_runs_url = f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}"
             if timestamp:
                 flow_runs_url += f"&after={timestamp}"
             flow_runs = self._get_paginated_results(flow_runs_url)
-            print(flow_runs)
-            results_for_contact = [flow_run for flow_run in flow_runs if flow_run.get('contact', {}).get('urn', {}) == f'tel:{phone_number}']
-            responded = [result['values'] for result in results_for_contact if result['responded']]
-            not_responded = len([result for result in results_for_contact if not result['responded']])
-            return None, {'responded': responded, 'not_responded': not_responded, 'flow_start': flow_start_result}
+            results_for_contact = [
+                flow_run
+                for flow_run in flow_runs
+                if flow_run.get("contact", {}).get("urn", {}) == f"tel:{phone_number}"
+            ]
+            responded = [result["values"] for result in results_for_contact if result["responded"]]
+            not_responded = len([result for result in results_for_contact if not result["responded"]])
+            return None, {
+                "responded": responded,
+                "not_responded": not_responded,
+                "flow_start_status": flow_start_status,
+            }
         except Exception as e:
             return str(e), None
-
