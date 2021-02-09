@@ -2,7 +2,7 @@ import os
 import sys
 from airflow.models import BaseOperator
 from airflow.operators.sensors import BaseSensorOperator
-from sentry_sdk import capture_exception, Hub, capture_message
+import sentry_sdk
 
 
 def setup_django_for_airflow():
@@ -19,14 +19,12 @@ class DjangoOperator(BaseOperator):
         setup_django_for_airflow()
 
     def execute(self, context, **kwargs):
-        print(Hub.current)
-        capture_message('Something went wrong')
-        # try:
-        self.try_execute(context, **kwargs)
-        # except Exception as e:
-        #     print(Hub.current)
-        #     capture_exception(e)
-        #     raise
+        try:
+            self.try_execute(context, **kwargs)
+        except Exception as e:
+            sentry_sdk.capture_exception(e)
+            sentry_sdk.flush()
+            raise
 
 
 class DjangoSensorOperator(BaseSensorOperator):
