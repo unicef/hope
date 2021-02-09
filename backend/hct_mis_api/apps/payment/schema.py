@@ -29,7 +29,8 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    chart_filters_decoder
+    chart_filters_decoder,
+    chart_create_filter_query
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -392,9 +393,16 @@ class Query(graphene.ObjectType):
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
+            additional_filters={
+                "status": PaymentRecord.STATUS_SUCCESS,
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            },
         )
-        return {"total": payment_records.aggregate(Sum("delivered_quantity"))["delivered_quantity__sum"]}
+        return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
