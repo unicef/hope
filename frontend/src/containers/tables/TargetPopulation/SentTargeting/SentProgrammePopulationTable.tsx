@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import styled from 'styled-components';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { UniversalTable } from '../../UniversalTable';
 import { ProgrammeTableRow } from './ProgrammeTableRow';
 import { headCells as programmeHeadCells } from './ProgrammeHeadCells';
@@ -26,9 +27,11 @@ export const SentTargetPopulationTable = ({
   selectedTab,
   canViewDetails,
 }: TargetPopulationHouseholdProps): ReactElement => {
+  const businessArea = useBusinessArea();
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
+    businessArea,
   };
   return (
     <TableWrapper>

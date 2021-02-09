@@ -20,7 +20,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
     AdminArea,
-    AdminAreaLevel,
+    AdminAreaLevel, CountryCodeMap,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
@@ -286,3 +286,15 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
         self.has_add_permission = has_add_permission
 
         return template_response
+
+
+@admin.register(CountryCodeMap)
+class CountryCodeMapAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    list_display = ('country', 'alpha2', 'alpha3', 'ca_code')
+    search_fields = ("country", )
+
+    def alpha2(self, obj):
+        return obj.country.countries.alpha2(obj.country.code)
+
+    def alpha3(self, obj):
+        return obj.country.countries.alpha3(obj.country.code)
