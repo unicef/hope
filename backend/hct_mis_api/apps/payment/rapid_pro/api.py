@@ -134,19 +134,27 @@ class RapidProAPI:
                 return (
                     f"Initial connection was successful but no flow with name '{flow_name}' was found in results list."
                 ), None
-            # self.start_flow(test_flow["uuid"], [phone_number])
-            return None, test_flow['uuid']
+            response = self.start_flow(test_flow["uuid"], [phone_number])
+            return None, response
         except Exception as e:
             return str(e), None
     
-    def test_connection_flow_run(self, flow_uuid, phone_number):
+    def test_connection_flow_run(self, flow_uuid, phone_number, timestamp=None):
         try:
-            flow_runs = self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}")
+            flow_starts = self._handle_get_request(f"{RapidProAPI.FLOW_STARTS_ENDPOINT}")
+            flow_start = [flow_start for flow_start in flow_starts['results'] if flow_start['flow']['uuid'] == flow_uuid]
+            flow_start_result = None
+            if flow_start:
+                flow_start_result = flow_start[0]['status']
+            flow_runs_url = f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}"
+            if timestamp:
+                flow_runs_url += f"&after={timestamp}"
+            flow_runs = self._get_paginated_results(flow_runs_url)
             print(flow_runs)
             results_for_contact = [flow_run for flow_run in flow_runs if flow_run.get('contact', {}).get('urn', {}) == f'tel:{phone_number}']
             responded = [result['values'] for result in results_for_contact if result['responded']]
             not_responded = len([result for result in results_for_contact if not result['responded']])
-            return None, {'responded': responded, 'not_responded': not_responded}
+            return None, {'responded': responded, 'not_responded': not_responded, 'flow_start': flow_start_result}
         except Exception as e:
             return str(e), None
 
