@@ -4,8 +4,10 @@ import { TargetPopulationHouseholdTable } from '../../../containers/tables/Targe
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 export function TargetPopulationTab({ values }): React.ReactElement {
+  const businessArea = useBusinessArea();
   return (
     <>
       <FieldArray
@@ -23,6 +25,7 @@ export function TargetPopulationTab({ values }): React.ReactElement {
       <TargetPopulationHouseholdTable
         variables={{
           targetPopulation: values.id,
+          businessArea,
           ...(values.targetPopulationCriterias.length && {
             targetingCriteria: {
               rules: values.targetPopulationCriterias.map((rule) => {
