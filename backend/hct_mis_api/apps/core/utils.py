@@ -612,13 +612,13 @@ def chart_filters_decoder(filters):
     return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
 
 
-def chart_create_filter_query(filters, program_path="id", administrative_area_path="admin_areas__id"):
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
     if filters.get('program') is not None:
-        filter_query.update({program_path: filters.get('program')})
+        filter_query.update({program_id_path: filters.get('program')})
     if filters.get('administrative_area') is not None:
         filter_query.update({
-            administrative_area_path: filters.get('administrative_area'),
+            f"{administrative_area_path}__id": filters.get('administrative_area'),
             f"{administrative_area_path}__admin_area_level__admin_level": 2
         })
     return filter_query
