@@ -9,6 +9,7 @@ export const LookUpPaymentRecords = gql`
     $orderBy: String
     $first: Int
     $last: Int
+    $businessArea: String
   ) {
     allPaymentRecords(
       cashPlan: $cashPlan
@@ -18,6 +19,7 @@ export const LookUpPaymentRecords = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
