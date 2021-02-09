@@ -20,7 +20,8 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
     AdminArea,
-    AdminAreaLevel, CountryCodeMap,
+    AdminAreaLevel,
+    CountryCodeMap,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
@@ -36,9 +37,9 @@ class TestRapidproForm(forms.Form):
         required=True,
     )
     flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
-    check_result = forms.BooleanField(label="Check result", widget=forms.HiddenInput(), initial=False, required=False)
+    # check_result = forms.BooleanField(label="Check result", widget=forms.HiddenInput(), initial=False, required=False)
     # start_flow_at = forms.DateTimeField(widget=forms.HiddenInput(), required=False)
-    flow_uuid = forms.CharField(widget=forms.HiddenInput(), required=False)
+    # flow_uuid = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 @admin.register(BusinessArea)
@@ -67,91 +68,53 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     @action(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
         context = self.get_context(request, pk)
+        api = RapidProAPI(context["business_area"].slug)
 
         if request.method == "GET":
-            context["form"] = TestRapidproForm()
-            context["flow_started"] = None
-            context["flow_uuid"] = ""
-            return TemplateResponse(request, "core/test_rapidpro.html", context)
+            phone_number = request.GET.get("phone_number", None)
+            flow_uuid = request.GET.get("flow_uuid", None)
+            flow_name = request.GET.get('flow_name', None)
+            timestamp = request.GET.get('timestamp', None)
+            if timestamp:
+                timestamp = datetime.fromtimestamp(int(timestamp))
+            if phone_number and flow_uuid:
+                error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
+                context["run_result"] = result
+                context["phone_number"] = phone_number
+                context["flow_uuid"] = flow_uuid
+                context["flow_name"] = flow_name
+
+                if error:
+                    messages.error(request, error)
+                else:
+                    messages.success(request, "Connection successful")
+            else:
+                context["form"] = TestRapidproForm()
         else:
             form = TestRapidproForm(request.POST)
-            print(form)
             if form.is_valid():
-                phone_number = form.cleaned_data.get("phone_number", None)
-                flow_name = form.cleaned_data.get("flow_name", None)
+                phone_number = form.cleaned_data["phone_number"]
+                flow_name = form.cleaned_data["flow_name"]
                 context["phone_number"] = phone_number
                 context["flow_name"] = flow_name
-                api = RapidProAPI(context["business_area"].slug)
-                if not form.cleaned_data.get("flow_uuid", None):
-                    print('FLOW HAS NOT STARTED SO STARTING')
-                    context["start_flow_at"] = datetime.now()
-                    error, flow_uuid = api.test_connection_start_flow(flow_name, phone_number)
-                    # error, flow_uuid = None, 'sfwefe'
-                    context["flow_uuid"] = flow_uuid
+                context["timestamp"] = datetime.now().timestamp()
+                print(context["timestamp"])
+                error, response = api.test_connection_start_flow(flow_name, phone_number)
+                if response:
+                    context["flow_uuid"] = response['flow']['uuid']
+                    context['flow_status'] = response['status']
 
-                    if error:
-                        messages.error(request, error)
-                        context["flow_started"] = False
-                    else:
-                        messages.success(request, "Connection successful")
-                        context["flow_started"] = True
+
+                if error:
+                    messages.error(request, error)
                 else:
-                    print("SHOUD ONLY CHECK RESULTS")
-                    start_flow_at = form.cleaned_data.get("start_flow_at")
-                    flow_uuid = form.cleaned_data.get("flow_uuid")
-                    context['flow_uuid'] = flow_uuid
-                    context["flow_started"] = True
+                    messages.success(request, "Connection successful")
 
-                    error, result = api.test_connection_flow_run(flow_uuid, phone_number)
-                    # error, result = None, ['dwdw']
-                    context["run_result"] = result
-                    if error:
-                        messages.error(request, error)
-
-                # print(phone_number, flow_name)
-                # print(form.cleaned_data.get("check_result"))
             else:
                 print("FORM INVALID")
-                # api = RapidProAPI(context["business_area"].slug)
-                # error = api.test_connection_flow(flow_name, phone_number)
-                # if error:
-                #     messages.error(request, error)
-                # else:
-                #     messages.success(request, "Connection successful")
-            #     target_population = form.cleaned_data["target_population"]
-            #     context["title"] = f"Test results of `{self.object.name}` against `{target_population}`"
-            #     context["target_population"] = target_population
-            #     elements = []
-            #     context["elements"] = elements
-            #     entries = context["target_population"].selections.all()[:100]
-            #     if entries:
-            #         for tp in entries:
-            #             value = context["rule"].execute(hh=tp.household)
-            #             tp.vulnerability_score = value
-            #             elements.append(tp)
-            #         self.message_user(request, "%s scores calculated" % len(elements))
-            #     else:
-            #         self.message_user(request, "No records found", messages.WARNING)
             context["form"] = form
-            return TemplateResponse(request, "core/test_rapidpro.html", context)
 
-    # def response_change(self, request, obj):
-    #     if "_test_rapidpro_connection" in request.POST:
-    #         api = RapidProAPI(obj.slug)
-    #         error = api.test_connection_flow()
-    #         if error:
-    #             messages.error(request, error)
-    #         else:
-    #             messages.success(request, "Connection successful")
-    #         return HttpResponseRedirect(".")
-    #     return super().response_change(request, obj)
-
-
-# class BusinessAreaTestRapidproAdmin(admin.AdminSite):
-#     def get_urls(self):
-#         urls = super(BusinessAreaTestRapidproAdmin, self).get_urls()
-#         custom_urls = [url(r"test-rapidpro$", test_rapidpro_view, name="test_rapidpro")]
-#         return urls + custom_urls
+        return TemplateResponse(request, "core/test_rapidpro.html", context)
 
 
 @admin.register(AdminArea)
@@ -290,8 +253,8 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 @admin.register(CountryCodeMap)
 class CountryCodeMapAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ('country', 'alpha2', 'alpha3', 'ca_code')
-    search_fields = ("country", )
+    list_display = ("country", "alpha2", "alpha3", "ca_code")
+    search_fields = ("country",)
 
     def alpha2(self, obj):
         return obj.country.countries.alpha2(obj.country.code)
