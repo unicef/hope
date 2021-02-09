@@ -38,6 +38,7 @@ class HouseholdFilter(FilterSet):
             "unicef_id",
         )
     )
+    business_area = CharFilter(field_name="business_area__slug")
 
 
 class TargetPopulationFilter(django_filters.FilterSet):
@@ -282,22 +283,29 @@ class Query(graphene.ObjectType):
     all_target_population = DjangoPermissionFilterConnectionField(
         TargetPopulationNode, permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_LIST),)
     )
-    golden_record_by_targeting_criteria = DjangoFilterConnectionField(
+    golden_record_by_targeting_criteria = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         targeting_criteria=TargetingCriteriaObjectType(required=True),
         program=graphene.Argument(graphene.ID, required=True),
         filterset_class=HouseholdFilter,
+        permission_classes=(
+            hopePermissionClass(Permissions.TARGETING_UPDATE),
+            hopePermissionClass(Permissions.TARGETING_CREATE),
+            hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),
+        ),
     )
-    candidate_households_list_by_targeting_criteria = DjangoFilterConnectionField(
+    candidate_households_list_by_targeting_criteria = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         filterset_class=HouseholdFilter,
+        permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),),
     )
-    final_households_list_by_targeting_criteria = DjangoFilterConnectionField(
+    final_households_list_by_targeting_criteria = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         target_population=graphene.Argument(graphene.ID, required=True),
         targeting_criteria=TargetingCriteriaObjectType(),
         filterset_class=HouseholdFilter,
+        permission_classes=(hopePermissionClass(Permissions.TARGETING_VIEW_DETAILS),),
     )
     target_population_status_choices = graphene.List(ChoiceObject)
 
