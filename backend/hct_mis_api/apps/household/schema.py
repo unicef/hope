@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     sum_lists,
     chart_permission_decorator,
+    chart_filters_decoder
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -439,23 +440,31 @@ class Query(graphene.ObjectType):
         filterset_class=IndividualFilter,
         permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
+
+    # TODO: Missing resolve! Will be done under user story
     chart_all_individuals_reached = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_households_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_individuals_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_child_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_individuals_reached_by_age_and_gender = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_individuals_with_disability_reached_by_age = graphene.Field(
-        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program = graphene.String(required=False), administrative_area = graphene.String(required=False)
     )
 
     residence_status_choices = graphene.List(ChoiceObject)
@@ -492,6 +501,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -504,6 +514,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -515,6 +526,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -537,6 +549,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -575,6 +588,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
