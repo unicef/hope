@@ -127,6 +127,8 @@ class RapidProAPI:
         return group
 
     def test_connection_start_flow(self, flow_name, phone_number):
+        # find flow by name, get its uuid and start it
+        # if no flow with that name is found, return error
         try:
             all_flows = self.get_flows()
             test_flow = next((flow for flow in all_flows if flow["name"] == flow_name), None)
@@ -150,6 +152,7 @@ class RapidProAPI:
             if flow_start:
                 flow_start_status = flow_start[0]["status"]
 
+            # get the flow run for the specified phone number
             flow_runs_url = f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?flow={flow_uuid}"
             if timestamp:
                 flow_runs_url += f"&after={timestamp}"
@@ -157,13 +160,14 @@ class RapidProAPI:
             results_for_contact = [
                 flow_run
                 for flow_run in flow_runs
-                if flow_run.get("contact", {}).get("urn", {}) == f"tel:{phone_number}"
+                if flow_run.get("contact", {}).get("urn", "") == f"tel:{phone_number}"
             ]
+            # format results for template
             responded = [result["values"] for result in results_for_contact if result["responded"]]
-            not_responded = len([result for result in results_for_contact if not result["responded"]])
+            not_responded_count = len([result for result in results_for_contact if not result["responded"]])
             return None, {
                 "responded": responded,
-                "not_responded": not_responded,
+                "not_responded": not_responded_count,
                 "flow_start_status": flow_start_status,
             }
         except Exception as e:
