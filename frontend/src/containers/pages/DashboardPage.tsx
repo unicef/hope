@@ -4,13 +4,28 @@ import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
 import { DashboardYearPage } from './DashboardYearPage';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function DashboardPage(): React.ReactElement {
+  const permissions = usePermissions();
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
     admin2: '',
   });
+  if (!permissions) return null;
+
+  const hasPermissionToView = hasPermissions(
+    PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
+    permissions,
+  );
+  const hasPermissionToExport = hasPermissions(
+    PERMISSIONS.DASHBOARD_EXPORT,
+    permissions,
+  );
+
   const years = [
     '2021',
     '2020',
@@ -45,10 +60,19 @@ export function DashboardPage(): React.ReactElement {
   return (
     <>
       <PageHeader tabs={tabs} title='Dashboard'>
-        <ExportModal />
+        {hasPermissionToExport && <ExportModal />}
       </PageHeader>
-      <DashboardFilters filter={filter} onFilterChange={setFilter} />
-      <DashboardYearPage selectedTab={selectedTab} year={years[selectedTab]} />
+      {hasPermissionToView ? (
+        <>
+          <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          <DashboardYearPage
+            selectedTab={selectedTab}
+            year={years[selectedTab]}
+          />
+        </>
+      ) : (
+        <PermissionDenied />
+      )}
     </>
   );
 }
