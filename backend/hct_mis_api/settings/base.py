@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 import os
 import sys
 
@@ -159,6 +160,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
 ]
 
 TEMPLATES = [
@@ -475,3 +477,26 @@ COUNTRIES_OVERRIDE = {
         "ioc_code": "U",
     },
 }
+
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    from hct_mis_api import get_full_version
+
+    sentry_logging = LoggingIntegration(
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR  # Send errors as events
+    )
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(transaction_style='url'),
+                      sentry_logging,
+                      # RedisIntegration(),
+                      # CeleryIntegration()
+                      ],
+        release=get_full_version(),
+        send_default_pii=True
+    )
