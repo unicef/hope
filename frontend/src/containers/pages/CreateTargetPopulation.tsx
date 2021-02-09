@@ -163,6 +163,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             <CreateTable
               variables={getTargetingCriteriaVariables(values)}
               program={values.program}
+              businessArea={businessArea}
             />
           ) : (
             <PaperContainer>

@@ -228,7 +228,6 @@ export const LookUpHouseholdIndividualModal = ({
                 </Box>
                 <Button onClick={() => handleCancel()}>CANCEL</Button>
                 <Button
-                  type='submit'
                   color='primary'
                   variant='contained'
                   onClick={async () => {
