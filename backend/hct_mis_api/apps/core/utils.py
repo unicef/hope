@@ -606,3 +606,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
                 return chart_resolve(*args, **kwargs)
 
     return resolve_f
+
+
+def chart_filters_decoder(filters):
+    return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
