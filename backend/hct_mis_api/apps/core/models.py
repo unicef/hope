@@ -32,9 +32,7 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code = models.CharField(
-        max_length=10,
-    )
+    code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
@@ -247,10 +245,10 @@ class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
         return (
             self.get_queryset()
-            .filter(status=self.model.SUCCESSFUL)
-            .exclude(template_id__exact="")
-            .order_by("-created_at")
-            .first()
+                .filter(status=self.model.SUCCESSFUL)
+                .exclude(template_id__exact="")
+                .order_by("-created_at")
+                .first()
         )
 
 
