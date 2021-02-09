@@ -60,10 +60,6 @@ if os.getenv("POSTGRES_SSL", False):
         "sslrootcert": "/code/psql-cert.crt",
     }
 
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    integrations=[DjangoIntegration()],
-)
 
 AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
 

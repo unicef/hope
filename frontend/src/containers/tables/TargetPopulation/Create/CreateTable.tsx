@@ -13,17 +13,20 @@ interface TargetPopulationHouseholdProps {
   id?: string;
   variables?;
   program: string;
+  businessArea: string;
 }
 
 export const CreateTable = ({
   id = null,
   variables,
   program,
+  businessArea,
 }: TargetPopulationHouseholdProps): ReactElement => {
   const initialVariables = {
     ...(id && { targetPopulation: id }),
     ...variables,
     program,
+    businessArea,
   };
   return (
     <TableWrapper>
