@@ -273,7 +273,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                       height={200}
                       options={{
                         maintainAspectRatio: false,
-                        cutoutPercentage: 65,
+                        cutoutPercentage: 80,
                         legend: {
                           display: false,
                         },
@@ -375,7 +375,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   height={200}
                   options={{
                     maintainAspectRatio: false,
-                    cutoutPercentage: 65,
+                    cutoutPercentage: 80,
                     legend: {
                       display: false,
                     },
