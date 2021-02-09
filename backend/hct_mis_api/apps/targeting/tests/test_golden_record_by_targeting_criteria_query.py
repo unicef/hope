@@ -1,15 +1,18 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.account.fixtures import UserFactory
 
 
 class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     QUERY = """
-    query GoldenRecordFilter($targetingCriteria: TargetingCriteriaObjectType!, $program: ID!) {
-      goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program) {
+    query GoldenRecordFilter($targetingCriteria: TargetingCriteriaObjectType!, $program: ID!, $businessArea: String) {
+      goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, program: $program, businessArea: $businessArea) {
         totalCount
         edges {
           node {
@@ -87,44 +90,93 @@ class GoldenRecordTargetingCriteriaQueryTestCase(APITestCase):
     def setUpTestData(cls):
         call_command("loadflexfieldsattributes")
         call_command("loadbusinessareas")
-        business_area = BusinessArea.objects.first()
-        program = ProgramFactory(business_area=business_area, individual_data_needed=True)
+        cls.business_area = BusinessArea.objects.first()
+        cls.user = UserFactory.create()
+        program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.household_size_1 = household
         cls.household_residence_status_citizen = cls.household_size_1
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
         )
         cls.household_residence_status_refugee = household
         cls.household_size_2 = cls.household_residence_status_refugee
-        cls.variables = {"program": cls.id_to_base64(program.id, "Program")}
+        cls.variables = {"program": cls.id_to_base64(program.id, "Program"), "businessArea": cls.business_area.slug}
 
-    def test_golden_record_by_targeting_criteria_size(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_golden_record_by_targeting_criteria_size(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={**self.variables, **GoldenRecordTargetingCriteriaQueryTestCase.FAMILY_SIZE_2_VARIABLES},
         )
 
-    def test_golden_record_by_targeting_criteria_residence_status(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_golden_record_by_targeting_criteria_residence_status(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={
                 **self.variables,
                 **GoldenRecordTargetingCriteriaQueryTestCase.RESIDENCE_STATUS_REFUGEE_VARIABLES,
             },
         )
 
-    def test_golden_record_by_targeting_criteria_flex_field(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_golden_record_by_targeting_criteria_flex_field(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={**self.variables, **GoldenRecordTargetingCriteriaQueryTestCase.FLEX_FIELD_VARIABLES},
         )
 
-    def test_golden_record_by_targeting_criteria_select_many(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_golden_record_by_targeting_criteria_select_many(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=GoldenRecordTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={**self.variables, **GoldenRecordTargetingCriteriaQueryTestCase.SELECT_MANY_VARIABLES},
         )
