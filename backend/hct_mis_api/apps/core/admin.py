@@ -1,15 +1,12 @@
 import xlrd
-from datetime import datetime
 from admin_extra_urls.extras import link, ExtraUrlMixin, action
 from django.contrib import admin, messages
-from django.conf.urls import url
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
 from django import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
-from django.http import HttpResponseRedirect
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.airflow_api import AirflowApi
@@ -37,15 +34,11 @@ class TestRapidproForm(forms.Form):
         required=True,
     )
     flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
-    # check_result = forms.BooleanField(label="Check result", widget=forms.HiddenInput(), initial=False, required=False)
-    # start_flow_at = forms.DateTimeField(widget=forms.HiddenInput(), required=False)
-    # flow_uuid = forms.CharField(widget=forms.HiddenInput(), required=False)
 
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
-    # change_form_template = "core/business_area_changeform.html"
 
     def get_context(self, request, pk=None, **kwargs):
         opts = self.model._meta
@@ -73,16 +66,16 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         if request.method == "GET":
             phone_number = request.GET.get("phone_number", None)
             flow_uuid = request.GET.get("flow_uuid", None)
-            flow_name = request.GET.get('flow_name', None)
-            timestamp = request.GET.get('timestamp', None)
-            if timestamp:
-                timestamp = datetime.fromtimestamp(int(timestamp))
-            if phone_number and flow_uuid:
+            flow_name = request.GET.get("flow_name", None)
+            timestamp = request.GET.get("timestamp", None)
+
+            if all([phone_number, flow_uuid, flow_name, timestamp]):
                 error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
                 context["run_result"] = result
                 context["phone_number"] = phone_number
                 context["flow_uuid"] = flow_uuid
                 context["flow_name"] = flow_name
+                context["timestamp"] = timestamp
 
                 if error:
                     messages.error(request, error)
@@ -97,21 +90,18 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
                 flow_name = form.cleaned_data["flow_name"]
                 context["phone_number"] = phone_number
                 context["flow_name"] = flow_name
-                context["timestamp"] = datetime.now().timestamp()
-                print(context["timestamp"])
+
                 error, response = api.test_connection_start_flow(flow_name, phone_number)
                 if response:
-                    context["flow_uuid"] = response['flow']['uuid']
-                    context['flow_status'] = response['status']
-
+                    context["flow_uuid"] = response["flow"]["uuid"]
+                    context["flow_status"] = response["status"]
+                    context["timestamp"] = response["created_on"]
 
                 if error:
                     messages.error(request, error)
                 else:
                     messages.success(request, "Connection successful")
 
-            else:
-                print("FORM INVALID")
             context["form"] = form
 
         return TemplateResponse(request, "core/test_rapidpro.html", context)
@@ -123,7 +113,7 @@ class AdminAreaAdmin(admin.ModelAdmin):
 
 
 @admin.register(AdminAreaLevel)
-class AdminAreaAdmin(admin.ModelAdmin):
+class AdminAreaLevelAdmin(admin.ModelAdmin):
     list_display = ("name", "business_area")
 
 
