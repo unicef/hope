@@ -55,7 +55,7 @@ class SmartFieldsetMixin:
         return fieldsets
 
 
-class HOPEModelAdminBase(NeedRootMixin, DisplayAllMixin, admin.ModelAdmin):
+class HOPEModelAdminBase(DisplayAllMixin, admin.ModelAdmin):
     list_per_page = 50
 
     def get_fields(self, request, obj=None):
