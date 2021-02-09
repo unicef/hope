@@ -21,9 +21,11 @@ const PaperContainer = styled(Paper)`
 export function CandidateListTab({
   values,
   selectedProgram,
+  businessArea,
 }: {
   values;
   selectedProgram?;
+  businessArea?;
 }): React.ReactElement {
   return (
     <>
@@ -46,6 +48,7 @@ export function CandidateListTab({
               criterias: values.candidateListCriterias,
             }),
             program: selectedProgram.id,
+            businessArea,
           }}
           query={useGoldenRecordByTargetingCriteriaQuery}
           queryObjectName='goldenRecordByTargetingCriteria'
