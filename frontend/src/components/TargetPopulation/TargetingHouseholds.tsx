@@ -2,12 +2,15 @@ import React from 'react';
 import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
 import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__generated__/graphql';
 import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 export function TargetingHouseholds({
   status,
   id,
   canViewDetails,
 }): React.ReactElement {
+  const businessArea = useBusinessArea();
+
   let table;
   switch (status) {
     case 'DRAFT':
@@ -17,6 +20,7 @@ export function TargetingHouseholds({
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
           queryObjectName='candidateHouseholdsListByTargetingCriteria'
           canViewDetails={canViewDetails}
+          variables={{ businessArea }}
         />
       );
       break;
@@ -25,6 +29,7 @@ export function TargetingHouseholds({
         <ApprovedTargetPopulationTable
           id={id}
           canViewDetails={canViewDetails}
+          variables={{ businessArea }}
         />
       );
       break;
@@ -35,6 +40,7 @@ export function TargetingHouseholds({
           query={useCandidateHouseholdsListByTargetingCriteriaQuery}
           queryObjectName='candidateHouseholdsListByTargetingCriteria'
           canViewDetails={canViewDetails}
+          variables={{ businessArea }}
         />
       );
       break;
