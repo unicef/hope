@@ -12,13 +12,29 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Import Users</h1>
-    <h3>Type a list of emails of ActiveDirectory users to add them to HOPE</h3>
-    <form method="POST" id="load_users" novalidate>
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div><input type="submit" value="Add to HOPE"></div>
-    </form>
+    {% if not results %}
+        <h1>Import Users</h1>
+        <h3>Type a list of emails of ActiveDirectory users to add them to HOPE</h3>
+        <form method="POST" id="load_users" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div><input type="submit" value="Add to HOPE"></div>
+        </form>
+    {% else %}
+        <h1>Import Users</h1>
+        {% if results.created %}
+            <h3>The following user have been added to HOPE</h3>
+            {{ results.created|join:", " }}
+        {% endif %}
+        {% if results.updated %}
+            <h3>The following users have been found in HOPE and have been updated (role added)</h3>
+            {{ results.updated|join:", " }}
+        {% endif %}
+       {% if results.missing %}
+            <h3 class="errors">The following users have not been found in the ActiveDirectory</h3>
+            {{ results.missing|join:", " }}
+        {% endif %}
+    {% endif %}
 {% endblock content %}
 
 {% block submit_buttons_bottom %}{% endblock %}

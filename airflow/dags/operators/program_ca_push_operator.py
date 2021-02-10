@@ -7,5 +7,5 @@ class ProgramCAPushOperator(DjangoOperator):
     from HCT database to CA datahub.
     """
 
-    def execute(self, context):
+    def try_execute(self, context):
         pass

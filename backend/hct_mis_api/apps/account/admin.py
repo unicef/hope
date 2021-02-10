@@ -1,3 +1,7 @@
+import logging
+from collections import namedtuple
+from dataclasses import dataclass
+
 from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter, AllValuesComboFilter
 from admin_extra_urls.api import ExtraUrlMixin, action
 from django.contrib import admin
@@ -26,6 +30,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
+
+logger = logging.getLogger(__name__)
 
 
 class RoleAdminForm(ModelForm):
@@ -110,6 +116,8 @@ class UserRoleInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
+    Results = namedtuple("Result", "created,missing,updated")
+
     list_display = (
         "username",
         "email",
@@ -142,85 +150,92 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
+    def get_context(self, request, pk=None, **kwargs):
+        opts = self.model._meta
+        app_label = opts.app_label
+        self.object = None
+
+        context = {
+            **self.admin_site.each_context(request),
+            **kwargs,
+            "opts": opts,
+            "app_label": app_label,
+        }
+        if pk:
+            self.object = self.get_object(request, pk)
+            context["original"] = self.object
+        return context
+
+    @action()
+    def privileges(self, request, pk):
+        ctx = self.get_context(request, pk)
+        return TemplateResponse(request, "admin/privileges.html", ctx)
+
     @action()
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
-        opts = self.model._meta
-        ctx = {
-            "opts": opts,
-            "app_label": "account",
-            "change": True,
-            "is_popup": False,
-            "save_as": False,
-            "has_delete_permission": False,
-            "has_add_permission": False,
-            "has_change_permission": True,
-        }
+        ctx = self.get_context(
+            request,
+            None,
+            **{
+                "change": True,
+                "is_popup": False,
+                "save_as": False,
+                "has_delete_permission": False,
+                "has_add_permission": False,
+                "has_change_permission": True,
+            },
+        )
         if request.method == "POST":
             form = LoadUsersForm(request.POST)
-            error = False
             if form.is_valid():
-                emails = form.cleaned_data["emails"].split()
-                role_id = form.cleaned_data["role"]
-                role = Role.objects.get(id=role_id)
-                business_area_id = form.cleaned_data["business_area"]
-                business_area = BusinessArea.objects.get(id=business_area_id)
+                emails = set(form.cleaned_data["emails"].split())
+                role = form.cleaned_data["role"]
+                business_area = form.cleaned_data["business_area"]
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
-                ms_graph = MicrosoftGraphAPI()
-                users = User.objects.filter(email__in=emails)
-                emails = list(set(emails))
-                for user in users:
-                    emails.remove(user.email)
-                for email in emails:
-                    try:
-                        validate_email(email)
-                        user_data = ms_graph.get_user_data(email)
-                        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
-                        user = User(**user_args)
-                        if user.first_name is None:
-                            user.first_name = ""
-                        if user.last_name is None:
-                            user.last_name = ""
-                        job_title = user_data.get("jobTitle")
-                        if job_title is not None:
-                            user.job_title = job_title
-                        user.set_unusable_password()
-                        users_to_bulk_create.append(user)
-                        users_role_to_bulk_create.append(UserRole(role=role, business_area=business_area, user=user))
-                    except ValidationError:
-                        error = True
-                        message = _(f"{email} is not a valid email address.")
-                        form.add_error("emails", message)
-                    except HTTPError as e:
-                        error = True
-                        if e.response.status_code != 404:
-                            raise
-                        message = _(f"{email} does not exist in the Unicef Active Directory")
-                        form.add_error("emails", message)
-                    except Http404:
-                        error = True
-                        message = _(f"{email} does not exist in the Unicef Active Directory")
-                        form.add_error("emails", message)
+                existing = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
+                results = self.Results([], [], [])
+                try:
+                    ms_graph = MicrosoftGraphAPI()
+                    for email in emails:
+                        try:
+                            if email in existing:
+                                user = User.objects.get(email=email)
+                                results.updated.append(user)
+                            else:
+                                user_data = ms_graph.get_user_data(email)
+                                user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+                                user = User(**user_args)
+                                if user.first_name is None:
+                                    user.first_name = ""
+                                if user.last_name is None:
+                                    user.last_name = ""
+                                job_title = user_data.get("jobTitle")
+                                if job_title is not None:
+                                    user.job_title = job_title
+                                user.set_unusable_password()
+                                users_to_bulk_create.append(user)
 
-                if not error:
+                                results.created.append(user)
+
+                            users_role_to_bulk_create.append(
+                                UserRole(role=role, business_area=business_area, user=user)
+                            )
+                        except HTTPError as e:
+                            if e.response.status_code != 404:
+                                raise
+                            results.missing.append(email)
+                        except Http404:
+                            results.missing.append(email)
                     User.objects.bulk_create(users_to_bulk_create)
-                    UserRole.objects.bulk_create(users_role_to_bulk_create)
-                    messages_added_list = [
-                        f"<a href='/api/admin/account/user/{user.id}/change/'>{user.email}</a> has been imported from AD"
-                        for user in users_to_bulk_create
-                    ]
-                    messages_already_exist_list = [
-                        f"<a href='/api/admin/account/user/{user.id}/change/'>{user.email}</a> already exists in HOPE database"
-                        for user in users
-                    ]
-                    for message in messages_added_list:
-                        messages.success(request, mark_safe(message))
-                    for message in messages_already_exist_list:
-                        messages.warning(request, mark_safe(message))
-                    return redirect("/api/admin/account/user/")
-
+                    UserRole.objects.bulk_create(users_role_to_bulk_create, ignore_conflicts=True)
+                    ctx["results"] = results
+                    return TemplateResponse(request, "admin/load_users.html", ctx)
+                except Exception as e:
+                    logger.exception(e)
+                    self.message_user(request, str(e), messages.ERROR)
         else:
             form = LoadUsersForm()
         ctx["form"] = form
@@ -235,7 +250,6 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
     @action()
     def members(self, request, pk):
-        # obj = Role.objects.get(pk=pk)
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
 
