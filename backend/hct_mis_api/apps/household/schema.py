@@ -354,6 +354,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         "IndividualRelationship",
         [(x[0], x[0]) for x in RELATIONSHIP_CHOICE],
     )
+    photo = graphene.String()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -376,6 +377,11 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         if not parent.relationship:
             return None
         return parent.relationship
+
+    def resolve_photo(parent, info):
+        if parent.photo:
+            return parent.photo.url
+        return
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

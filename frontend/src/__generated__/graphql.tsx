@@ -4109,9 +4109,8 @@ export type RoleNode = {
 };
 
 export enum RuleLanguage {
-  Jinja2 = 'JINJA2',
-  Internal = 'INTERNAL',
-  Python = 'PYTHON'
+  Python = 'PYTHON',
+  Internal = 'INTERNAL'
 }
 
 export type SanctionListIndividualAliasNameNode = Node & {
@@ -4405,6 +4404,8 @@ export type SteficonRuleNode = Node & {
   enabled: Scalars['Boolean'],
   deprecated: Scalars['Boolean'],
   language: RuleLanguage,
+  createdBy?: Maybe<UserNode>,
+  updatedBy?: Maybe<UserNode>,
   targetPopulations: TargetPopulationNodeConnection,
 };
 
@@ -5460,7 +5461,7 @@ export type IndividualMinimalFragment = (
 
 export type IndividualDetailedFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8296,6 +8297,7 @@ export const IndividualDetailedFragmentDoc = gql`
   seeingDisability
   physicalDisability
   selfcareDisability
+  photo
   workStatus
   documents {
     edges {
@@ -17170,6 +17172,8 @@ export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends Reso
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   language?: Resolver<ResolversTypes['RuleLanguage'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, SteficonRuleNodeTargetPopulationsArgs>,
 };
 
