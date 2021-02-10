@@ -18159,6 +18159,30 @@
             "deprecationReason": null
           },
           {
+            "name": "createdBy",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "updatedBy",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "UserNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetPopulations",
             "description": null,
             "args": [
@@ -18414,19 +18438,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "JINJA2",
+            "name": "PYTHON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "INTERNAL",
-            "description": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "PYTHON",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

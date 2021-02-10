@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class RDIDeduplicationOperator(DjangoOperator):
-    def execute(self, context, **kwargs):
+    def try_execute(self, context, **kwargs):
         from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
         from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
