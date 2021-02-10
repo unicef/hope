@@ -16,6 +16,7 @@ interface TotalNumberOfHouseholdsReachedSectionProps {
 export const TotalNumberOfHouseholdsReachedSection = ({
   data,
 }: TotalNumberOfHouseholdsReachedSectionProps): React.ReactElement => {
+  if (!data) return null;
   return (
     <DashboardCard color='#00A9FB'>
       <CardTitle>TOTAL NUMBER OF HOUSEHOLDS REACHED</CardTitle>
