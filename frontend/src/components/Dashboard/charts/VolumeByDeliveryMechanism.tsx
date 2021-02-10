@@ -8,6 +8,7 @@ interface VolumeByDeliveryMechanismProps {
 export const VolumeByDeliveryMechanism = ({
   data,
 }: VolumeByDeliveryMechanismProps): React.ReactElement => {
+  if (!data) return null;
   const chartData = {
     labels: data?.labels,
     datasets: [

@@ -17,6 +17,7 @@ import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { isPermissionDeniedError } from '../../utils/utils';
+import { IndividualPhotoModal } from '../../components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -66,7 +67,11 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
         }
         withFlag={individual.sanctionListPossibleMatch}
         withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
-      />
+      >
+        {individual.photo ? (
+          <IndividualPhotoModal individual={individual as IndividualNode} />
+        ) : null}
+      </PageHeader>
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />

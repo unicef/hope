@@ -14,6 +14,7 @@ interface TotalCashTransferredByAdministrativeAreaTableProps {
 export const TotalCashTransferredByAdministrativeAreaTable = ({
   data,
 }: TotalCashTransferredByAdministrativeAreaTableProps): React.ReactElement => {
+  if (!data) return null;
   const renderRows = (): Array<React.ReactElement> => {
     if (!data) {
       return null;

@@ -2609,9 +2609,8 @@ type RoleNode {
 }
 
 enum RuleLanguage {
-  JINJA2
-  INTERNAL
   PYTHON
+  INTERNAL
 }
 
 type SanctionListIndividualAliasNameNode implements Node {
@@ -2828,6 +2827,8 @@ type SteficonRuleNode implements Node {
   enabled: Boolean!
   deprecated: Boolean!
   language: RuleLanguage!
+  createdBy: UserNode
+  updatedBy: UserNode
   targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
 }
 

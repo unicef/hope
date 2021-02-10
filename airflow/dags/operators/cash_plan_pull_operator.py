@@ -7,5 +7,5 @@ class CashPlanPullOperator(DjangoOperator):
     payment records from the CA datahub to HCT database.
     """
 
-    def execute(self, context):
+    def try_execute(self, context):
         pass
