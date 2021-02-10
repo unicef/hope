@@ -40,7 +40,7 @@ export const TotalNumberOfIndividualsReachedSection = ({
   chartDataIndividualsDisability,
 }: TotalNumberOfIndividualsReachedSectionProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-
+  if (!data) return null;
   return (
     <>
       <DashboardCard color='#345DA0'>
