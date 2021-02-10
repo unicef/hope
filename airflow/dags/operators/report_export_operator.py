@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class ReportExportOperator(DjangoOperator):
-    def execute(self, context, **kwargs):
+    def try_execute(self, context, **kwargs):
         from hct_mis_api.apps.reporting.generate_report_service import (
             GenerateReportService,
         )
