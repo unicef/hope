@@ -20,6 +20,7 @@ export const GrievancesSection = ({
   data,
 }: GrievancesSectionProps): React.ReactElement => {
   const [show, setShow] = useState(false);
+  if (!data) return null;
   return (
     <DashboardPaper title='Grievances'>
       <CardTitleSmaller>TOTAL NUMBER OF GRIEVANCES</CardTitleSmaller>
