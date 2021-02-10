@@ -204,8 +204,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return []
         return (
             self.vulnerability_score_filtered_households.filter(selections__final=True)
-            .order_by("created_at")
-            .distinct()
+                .order_by("created_at")
+                .distinct()
         )
 
     @property
@@ -304,8 +304,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             TargetPopulation.objects.filter(
                 program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED
             )
-            .order_by("-created_at")
-            .first()
+                .order_by("-created_at")
+                .first()
         )
         if tp is None:
             return None
@@ -364,6 +364,9 @@ class TargetingCriteriaQueryingMixin:
         rules_string = [x.get_criteria_string() for x in rules]
         return " OR ".join(rules_string).strip()
 
+    def get_basic_query(self):
+        return Q(deactivated=False)
+
     def get_query(self):
         query = Q()
         rules = self.rules if isinstance(self.rules, list) else self.rules.all()
@@ -383,10 +386,10 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         query = super().get_query()
         try:
             if (
-                self.target_population_final
-                and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
-                and self.target_population_final.program is not None
-                and self.target_population_final.program.individual_data_needed
+                    self.target_population_final
+                    and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
+                    and self.target_population_final.program is not None
+                    and self.target_population_final.program.individual_data_needed
             ):
                 query &= Q(size__gt=0)
         except TargetPopulation.DoesNotExist:
@@ -462,8 +465,11 @@ class TargetingIndividualRuleFilterBlockMixin:
         filters_string = [x.get_criteria_string() for x in filters]
         return f"({' AND '.join(filters_string).strip()})"
 
+    def get_basic_individual_query(self):
+        return Q(household__active=True) & Q(duplicate=False) & Q(withdrawn=False)
+
     def get_query(self):
-        individuals_query = Q()
+        individuals_query = self.get_basic_individual_query()
         filters = (
             self.individual_block_filters
             if isinstance(self.individual_block_filters, list)
@@ -493,7 +499,6 @@ class TargetingIndividualRuleFilterBlock(
 
 
 class TargetingCriteriaFilterMixin:
-
     COMPARISION_ATTRIBUTES = {
         "EQUALS": {
             "arguments": 1,
