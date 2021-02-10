@@ -66,7 +66,7 @@ export function DashboardYearPage({
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
               <TotalCashTransferredByAdministrativeAreaTable
-                data={data.tableTotalCashTransferredByAdministrativeArea.data}
+                data={data.tableTotalCashTransferredByAdministrativeArea?.data}
               />
             </DashboardPaper>
             <PaymentVerificationSection data={data.chartPaymentVerification} />
