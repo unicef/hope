@@ -8,7 +8,7 @@ class RegistrationKoboImportOperator(DjangoOperator):
     update the status of that registration data import instance.
     """
 
-    def execute(self, context):
+    def try_execute(self, context):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask
 
         dag_run = context["dag_run"]
