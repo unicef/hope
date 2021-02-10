@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}{% load engine i18n admin_urls static admin_modify %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'change' original.pk %}">{{ original }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'test_steficon' original.pk %}">Test</a>
+
+    </div>
+{% endblock %}
+
+{% block content %}
+    {% if original.selections.count == 0 %}
+        <b>{{ original }}</b> does not contains records
+    {% elif form %}
+        <form method="post">
+            <h3>Nothing will be changed in the existing data.</h3>
+            {% csrf_token %}
+            <table>
+                {{ form }}
+            </table>
+            <input type="submit" value="Test">
+        </form>
+    {% else %}
+        {% if not elements %}
+            <h1>No entries in selected population</h1>
+        {% else %}
+            <h2>Calculated records: {{ elements|length }}</h2>
+            <table>
+                <tr>
+                    <th>HH Id</th>
+                    <th>HH Head</th>
+                    <th>HH size</th>
+                    <th>Score</th>
+                </tr>
+                {% for el in elements %}
+                    <tr>
+                        <td>{{ el.household.unicef_id }}</td>
+                        <td>{{ el.household.head_of_household.full_name }}</td>
+                        <td>{{ el.household.size }}</td>
+                        <td>{{ el.vulnerability_score }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

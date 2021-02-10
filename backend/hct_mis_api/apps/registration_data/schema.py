@@ -38,7 +38,8 @@ class RegistrationDataImportFilter(FilterSet):
             "import_date",
             "number_of_individuals",
             "number_of_households",
-            Lower("imported_by__given_name"),
+            "data_source",
+            Lower("imported_by__first_name"),
         )
     )
 

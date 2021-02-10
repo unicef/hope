@@ -15,7 +15,8 @@ RUN apt-get update -yqq \
         graphviz \
         acl \
         wget
-
+#I'm sorry, but puckel also use pip to install airflow
+RUN pip install "apache-airflow[sentry]"==1.10.9
 ARG AIRFLOW_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_HOME}
 
