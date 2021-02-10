@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
+from hct_mis_api.apps.household.models import Individual, Household, STATUS_ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -23,7 +23,7 @@ class GenerateReportContentHelpers:
     def get_individuals(report: Report):
         filter_vars = {
             "household__business_area": report.business_area,
-            "status": ACTIVE,
+            "status": STATUS_ACTIVE,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }
@@ -71,7 +71,7 @@ class GenerateReportContentHelpers:
     def get_households(report: Report):
         filter_vars = {
             "business_area": report.business_area,
-            "status": ACTIVE,
+            "status": STATUS_ACTIVE,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }

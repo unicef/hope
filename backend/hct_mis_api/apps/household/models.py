@@ -151,9 +151,9 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
-ACTIVE = "ACTIVE"
-INACTIVE = "INACTIVE"
-INDIVIDUAL_HOUSEHOLD_STATUS = ((ACTIVE, "Active"), (INACTIVE, "Inactive"))
+STATUS_ACTIVE = "ACTIVE"
+STATUS_INACTIVE = "INACTIVE"
+INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
@@ -267,7 +267,8 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
             "unhcr_id",
         ]
     )
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    deactivated = models.BooleanField(default=False)
+    deactivated_date = models.DateTimeField(null=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
@@ -468,6 +469,8 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
+            "duplicate",
+            "withdrawn",
             "individual_id",
             "photo",
             "full_name",
@@ -510,8 +513,11 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
             "who_answers_alt_phone",
         ]
     )
-
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    duplicate = models.BooleanField(default=False)
+    duplicate_date = models.DateTimeField(null=True)
+    withdrawn = models.BooleanField(default=False)
+    withdrawn_date = models.DateTimeField(null=True)
+    is_removed_date = models.DateTimeField(null=True)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
@@ -627,6 +633,12 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         values = [str(getattr(self, field)) for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
+
+    @property
+    def status(self):
+        if self.duplicate or self.withdrawn:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
 
     def __str__(self):
         return self.unicef_id
