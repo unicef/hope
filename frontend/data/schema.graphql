@@ -2378,9 +2378,9 @@ type Query {
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
   allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
-  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
-  candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
-  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String): HouseholdNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   targetPopulationStatusChoices: [ChoiceObject]
   household(id: ID!): HouseholdNode
   allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Icontains: String, address: String, address_Icontains: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Icontains: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
