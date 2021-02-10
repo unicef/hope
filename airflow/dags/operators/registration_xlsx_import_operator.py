@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class RegistrationXLSXImportOperator(DjangoOperator):
-    def execute(self, context, **kwargs):
+    def try_execute(self, context, **kwargs):
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 
         dag_run = context["dag_run"]

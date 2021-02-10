@@ -9,6 +9,7 @@ interface PlannedBudgetProps {
 export const PlannedBudget = ({
   data,
 }: PlannedBudgetProps): React.ReactElement => {
+  if (!data) return null;
   const chartdata = {
     labels: data?.labels,
     datasets: [

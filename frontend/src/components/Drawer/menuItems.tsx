@@ -18,8 +18,9 @@ export const menuItems = [
   {
     name: 'Country Dashboard',
     href: '/#',
-    selectedRegexp: /^\/test.*$/,
+    selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
+    permissions: [PERMISSIONS.DASHBOARD_VIEW_COUNTRY],
   },
   {
     name: 'Registration Data Import',
