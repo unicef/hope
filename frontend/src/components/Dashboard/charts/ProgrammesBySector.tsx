@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
+import { HorizontalBar } from 'react-chartjs-2';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface ProgrammesBySectorProps {
@@ -35,6 +35,9 @@ export const ProgrammesBySector = ({
       xAxes: [
         {
           stacked: true,
+          ticks: {
+            stepSize: 1,
+          },
         },
       ],
       yAxes: [
@@ -46,5 +49,5 @@ export const ProgrammesBySector = ({
     },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return <HorizontalBar data={chartData} options={options} />;
 };
