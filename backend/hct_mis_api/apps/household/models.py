@@ -6,6 +6,7 @@ from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -212,6 +213,7 @@ REGISTRATION_METHOD_CHOICES = (
 class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
+            "withdrawn",
             "status",
             "consent_sign",
             "consent",
@@ -267,8 +269,8 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
             "unhcr_id",
         ]
     )
-    deactivated = models.BooleanField(default=False)
-    deactivated_date = models.DateTimeField(null=True)
+    withdrawn = models.BooleanField(default=False)
+    withdrawn_date = models.DateTimeField(null=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
@@ -341,6 +343,17 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
 
     class Meta:
         verbose_name = "Household"
+
+    @property
+    def status(self):
+        if self.withdrawn:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
 
     @property
     def admin1(self):
@@ -639,6 +652,18 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         if self.duplicate or self.withdrawn:
             return STATUS_INACTIVE
         return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
+
+    def mark_as_duplicate(self, original_individual=None):
+        if original_individual is not None:
+            self.unicef_id = original_individual.unicef_id
+        self.duplicate = True
+        self.duplicate_date = timezone.now()
+        self.save()
 
     def __str__(self):
         return self.unicef_id
