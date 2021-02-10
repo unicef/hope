@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.utils import (
     encode_ids,
     to_choice_object,
     chart_get_filtered_qs,
-    sum_lists,
+    sum_lists_with_values,
     chart_permission_decorator,
     chart_filters_decoder,
     chart_create_filter_query
@@ -414,19 +414,6 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class ChartAllHouseHoldsReached(ChartDatasetNode):
-    female_age_group_0_5_count = graphene.Int()
-    female_age_group_6_11_count = graphene.Int()
-    female_age_group_12_17_count = graphene.Int()
-    female_age_group_18_59_count = graphene.Int()
-    female_age_group_60_count = graphene.Int()
-    male_age_group_0_5_count = graphene.Int()
-    male_age_group_6_11_count = graphene.Int()
-    male_age_group_12_17_count = graphene.Int()
-    male_age_group_18_59_count = graphene.Int()
-    male_age_group_60_count = graphene.Int()
-
-
 class Query(graphene.ObjectType):
     household = relay.Node.Field(HouseholdNode)
     all_households = DjangoPermissionFilterConnectionField(
@@ -521,7 +508,7 @@ class Query(graphene.ObjectType):
 
         household_individuals_counts = payment_records_qs.select_related('household').values_list(
             *households_individuals_params).distinct("household__id")
-        return {"total": sum(sum_lists(household_individuals_counts, len(households_individuals_params)))}
+        return {"total": sum(sum_lists_with_values(household_individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
@@ -538,7 +525,7 @@ class Query(graphene.ObjectType):
 
         household_child_counts = payment_records_qs.select_related('household').values_list(
             *households_child_params).distinct("household__id")
-        return {"total": sum(sum_lists(household_child_counts, len(households_child_params)))}
+        return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
@@ -572,7 +559,7 @@ class Query(graphene.ObjectType):
             *households_params).distinct("household__id")
         return {
             "labels": INDIVIDUALS_CHART_LABELS,
-            "datasets": [{"data": sum_lists(household_child_counts, len(households_params))}],
+            "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -614,11 +601,11 @@ class Query(graphene.ObjectType):
         datasets = [
             {
                 "label": "with disability",
-                "data": sum_lists(households_with_disability_counts, len(households_params_with_disability)),
+                "data": sum_lists_with_values(households_with_disability_counts, len(households_params_with_disability)),
             },
             {
                 "label": "without disability",
-                "data": sum_lists(households_without_disability_counts, len(households_params_without_disability)),
+                "data": sum_lists_with_values(households_without_disability_counts, len(households_params_without_disability)),
             },
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
