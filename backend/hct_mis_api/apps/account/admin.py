@@ -1,9 +1,8 @@
 import logging
 from collections import namedtuple
-from dataclasses import dataclass
 
-from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter, AllValuesComboFilter
 from admin_extra_urls.api import ExtraUrlMixin, action
+from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
@@ -11,24 +10,21 @@ from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
-from django.core.validators import validate_email
 from django.db.models import Q
-from django.forms import MultipleChoiceField, CheckboxSelectMultiple, ModelChoiceField
+from django.forms import MultipleChoiceField, ModelChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
 
 from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
 from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRoles
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
 
 logger = logging.getLogger(__name__)
