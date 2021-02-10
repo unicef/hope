@@ -11,6 +11,7 @@ interface PaymentVerificationSectionProps {
 export const PaymentVerificationSection = ({
   data,
 }: PaymentVerificationSectionProps): React.ReactElement => {
+  if (!data) return null;
   return (
     <DashboardPaper title='Payment Verification'>
       <Box mt={3}>
