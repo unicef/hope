@@ -252,6 +252,8 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
 
+        self.assertIn(self.household, self.program.households.all())
+
 
 class TestSessionsPullDataFromDatahub(TestCase):
     multi_db = True
