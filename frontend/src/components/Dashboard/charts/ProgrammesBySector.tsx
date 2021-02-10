@@ -8,6 +8,7 @@ interface ProgrammesBySectorProps {
 export const ProgrammesBySector = ({
   data,
 }: ProgrammesBySectorProps): React.ReactElement => {
+  if (!data) return null;
   const chartData = {
     labels: data?.labels,
     datasets: [
