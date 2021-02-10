@@ -31,7 +31,7 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
-    job_title = models.CharField(max_length=255, blank='')
+    job_title = models.CharField(max_length=255, blank="")
 
     def __str__(self):
         if self.first_name or self.last_name:
@@ -99,12 +99,13 @@ def post_save_user(sender, instance, *args, **kwargs):
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
-        UserRole.objects.create(business_area=business_area, user=instance, role=role)
+        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
 
 
 class IncompatibleRoles(TimeStampedUUIDModel):
     """
-    Keeps track of what roles are incompatible: user cannot be assigned both of the roles in the same business area at the same time
+    Keeps track of what roles are incompatible:
+    user cannot be assigned both of the roles in the same business area at the same time
     """
 
     role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
@@ -134,7 +135,8 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         if failing_users:
             raise ValidationError(
                 _(
-                    f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair."
+                    f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
+                    "Please fix them before creating this incompatible roles pair."
                 )
             )
 

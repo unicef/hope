@@ -3,8 +3,10 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 
 from django_filters import OrderingFilter
+from graphql import GraphQLError
 
 
 class CaseInsensitiveTuple(tuple):
@@ -569,10 +571,12 @@ def chart_map_choices(choices):
     return dict(choices)
 
 
-def chart_get_filtered_qs(obj, year, business_area_slug_filter=None, additional_filters=None):
+def chart_get_filtered_qs(
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
-    if business_area_slug_filter is None:
+    if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
     return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
 
@@ -601,8 +605,10 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
 
         _, resolve_info = args
         if resolve_info.context.user.is_authenticated:
-            business_area = BusinessArea.objects.filter(slug=kwargs.get("business_area_slug")).first()
+            business_area_slug = kwargs.get("business_area_slug", "global")
+            business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
+            raise GraphQLError("Permission Denied")
 
     return resolve_f
