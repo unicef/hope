@@ -8,7 +8,7 @@ class RegistrationKoboImportHourlyOperator(DjangoOperator):
     update the status of that registration data import instance.
     """
 
-    def execute(self, context, **kwargs):
+    def try_execute(self, context, **kwargs):
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,
