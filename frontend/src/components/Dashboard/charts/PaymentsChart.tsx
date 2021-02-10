@@ -8,6 +8,7 @@ interface PaymentsChartProps {
 export const PaymentsChart = ({
   data,
 }: PaymentsChartProps): React.ReactElement => {
+  if (!data) return null;
   const chartData = {
     labels: data?.labels,
     datasets: [
