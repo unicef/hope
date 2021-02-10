@@ -141,6 +141,8 @@ class PullFromDatahubTask:
             if not payment_record.delivered_quantity_usd:
                 payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
+            if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
+                payment_record.household.programs.add(payment_record.cash_plan.program)
 
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)

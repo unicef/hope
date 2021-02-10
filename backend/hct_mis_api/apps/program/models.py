@@ -133,9 +133,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self):
-        return self.cash_plans.aggregate(
-            households=Coalesce(Sum("total_persons_covered"), 0),
-        )["households"]
+        return self.households.count()
 
     @property
     def admin_areas_log(self):
