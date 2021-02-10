@@ -178,6 +178,8 @@ stages:
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\
+                backend.secret.AIRFLOW__SENTRY__SENTRY_DSN=$(AIRFLOW__SENTRY__SENTRY_DSN),\
+                backend.secret.AIRFLOW__SENTRY__SENTRY_ON='$(AIRFLOW__SENTRY__SENTRY_ON)',\
                 frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\
