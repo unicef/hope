@@ -22,7 +22,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         default_roles_matrix = [
-            {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_HQ]},
+            {"name": "Basic User", "permissions": [Permissions.DASHBOARD_VIEW_COUNTRY]},
             {
                 "name": "Advanced Registration Reader",
                 "permissions": [
