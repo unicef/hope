@@ -141,6 +141,10 @@ export const PERMISSIONS = {
 
   // Other
   ALL_VIEW_PII_DATA_ON_LISTS: 'ALL_VIEW_PII_DATA_ON_LISTS',
+
+  // Dashboard
+  DASHBOARD_VIEW_COUNTRY: 'DASHBOARD_VIEW_COUNTRY',
+  DASHBOARD_EXPORT: 'DASHBOARD_EXPORT',
 };
 
 export function hasPermissions(
