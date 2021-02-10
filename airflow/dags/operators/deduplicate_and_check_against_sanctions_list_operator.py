@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class DeduplicateAndCheckAgainstSanctionsListOperator(DjangoOperator):
-    def execute(self, context):
+    def try_execute(self, context):
         from hct_mis_api.apps.grievance.tasks.deduplicate_and_check_sanctions import (
             DeduplicateAndCheckAgainstSanctionsListTask,
         )

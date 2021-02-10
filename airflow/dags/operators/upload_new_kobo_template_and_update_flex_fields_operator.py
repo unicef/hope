@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsOperator(DjangoOperator):
-    def execute(self, context):
+    def try_execute(self, context):
         from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import (
             UploadNewKoboTemplateAndUpdateFlexFieldsTask,
         )
