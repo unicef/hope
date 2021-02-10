@@ -268,6 +268,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     consent_sharing = graphene.List(graphene.String)
     admin1 = graphene.Field(AdminAreaNode)
     admin2 = graphene.Field(AdminAreaNode)
+    status = graphene.String()
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -342,7 +343,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER),
     )
-
+    status = graphene.String()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()

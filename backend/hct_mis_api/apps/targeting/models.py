@@ -365,7 +365,7 @@ class TargetingCriteriaQueryingMixin:
         return " OR ".join(rules_string).strip()
 
     def get_basic_query(self):
-        return Q(deactivated=False)
+        return Q(widthdrawn=False)
 
     def get_query(self):
         query = Q()
