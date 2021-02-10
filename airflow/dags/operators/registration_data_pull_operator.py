@@ -10,5 +10,5 @@ class RegistrationDataPullOperator(DjangoOperator):
     instance (to 'merged').
     """
 
-    def execute(self, context):
+    def try_execute(self, context):
         pass
