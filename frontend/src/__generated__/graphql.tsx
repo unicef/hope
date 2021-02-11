@@ -2289,7 +2289,7 @@ export type IndividualNode = Node & {
   version: Scalars['BigInt'],
   status: IndividualStatus,
   individualId: Scalars['String'],
-  photo: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
   fullName: Scalars['String'],
   givenName: Scalars['String'],
   middleName: Scalars['String'],
@@ -3461,31 +3461,41 @@ export type QueryAllCashPlanPaymentVerificationArgs = {
 
 export type QueryChartPaymentVerificationArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartVolumeByDeliveryMechanismArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartPaymentArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionTotalTransferredArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3575,13 +3585,17 @@ export type QueryAllProgramsArgs = {
 
 export type QueryChartProgrammesBySectorArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartPlannedBudgetArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3738,37 +3752,49 @@ export type QueryAllIndividualsArgs = {
 
 export type QueryChartAllIndividualsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionHouseholdsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionIndividualsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionChildReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -6315,7 +6341,9 @@ export type AllCashPlansQuery = (
 
 export type AllChartsQueryVariables = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -10887,15 +10915,15 @@ export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery
 export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
 export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
 export const AllChartsDocument = gql`
-    query AllCharts($businessAreaSlug: String!, $year: Int!) {
-  chartProgrammesBySector(businessAreaSlug: $businessAreaSlug, year: $year) {
+    query AllCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String) {
+  chartProgrammesBySector(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     labels
     datasets {
       label
       data
     }
   }
-  chartPaymentVerification(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartPaymentVerification(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       label
       data
@@ -10903,13 +10931,13 @@ export const AllChartsDocument = gql`
     labels
     households
   }
-  chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
     }
     labels
   }
-  chartPayment(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartPayment(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
     }
@@ -10937,13 +10965,13 @@ export const AllChartsDocument = gql`
   sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year) {
     total
   }
-  chartIndividualsReachedByAgeAndGender(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartIndividualsReachedByAgeAndGender(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
     }
     labels
   }
-  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
       label
@@ -10960,7 +10988,7 @@ export const AllChartsDocument = gql`
       totalCashTransferred
     }
   }
-  chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
       label
@@ -11001,6 +11029,8 @@ export function withAllCharts<TProps, TChildProps = {}>(operationOptions?: Apoll
  *   variables: {
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      year: // value for 'year'
+ *      program: // value for 'program'
+ *      administrativeArea: // value for 'administrativeArea'
  *   },
  * });
  */
@@ -16401,7 +16431,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['IndividualStatus'], ParentType, ContextType>,
   individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
