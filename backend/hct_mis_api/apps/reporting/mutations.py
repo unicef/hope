@@ -119,7 +119,7 @@ class CreateDashboardReport(PermissionMutation):
             context={"dashboard_report_id": str(report.id)},
         )
 
-        return CreateReport(True)
+        return CreateDashboardReport(True)
 
 
 class Mutations(graphene.ObjectType):

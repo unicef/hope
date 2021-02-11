@@ -49,12 +49,14 @@ class GenerateDashboardReportService:
         self.report_types = report.report_type
         self.business_area = report.business_area
         # TODO check if this is best way to determin if global
-        self.hq_or_country = self.HQ if report.business_area.name == "Global" else self.COUNTRY
+        self.hq_or_country = self.HQ if report.business_area.slug == "global" else self.COUNTRY
 
     def _create_workbook(self) -> openpyxl.Workbook:
+        print("CREATING")
         wb = openpyxl.Workbook()
         ws_meta = wb.active
         ws_meta.title = self.META_SHEET
+        print("TITLE", ws_meta.title)
         self.wb = wb
         self.ws_meta = ws_meta
         return wb
@@ -115,22 +117,29 @@ class GenerateDashboardReportService:
 
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
-            active_sheet = self.wb.create_sheet(self._report_type_to_str(report_type))
+            print("IN FOR LOOP", report_type)
+            sheet_title = self._report_type_to_str(report_type)
+            print("SHEET TITLE", sheet_title)
+            active_sheet = self.wb.create_sheet(sheet_title)
+            print("CREATED ACTIVE SHEET")
             self._add_headers(active_sheet, report_type)
+            print("ADDED HEADERS")
             self._add_rows()
-
+            print("ADDED ROWS")
             self._adjust_column_width_from_col(active_sheet, 1, len(self.HEADERS[report_type][self.hq_or_country]), 0)
+            print("ADJUTED WIDTH")
         return self.wb
 
     def generate_report(self):
         try:
             self.generate_workbook()
+            print(self.wb)
             with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
-                # TODO make better file name
+                file_name = ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
                 self.report.file.save(
-                    f"Report-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
+                    f"{file_name}-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
                     File(tmp),
                     save=False,
                 )
@@ -196,7 +205,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     def _report_type_to_str(self, report_type) -> str:
-        return [name for value, name in Report.REPORT_TYPES if value == report_type][0]
+        return str([name for value, name in Report.REPORT_TYPES if value == report_type][0])
 
     def _stringify_all_values(self, row: tuple) -> tuple:
         str_row = []
