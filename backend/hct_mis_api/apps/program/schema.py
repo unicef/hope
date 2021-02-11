@@ -190,7 +190,6 @@ class Query(graphene.ObjectType):
     )
     chart_programmes_by_sector = graphene.Field(
         ChartDetailedDatasetsNode,
-        # ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
         program=graphene.String(required=False), administrative_area=graphene.String(required=False)
@@ -264,21 +263,32 @@ class Query(graphene.ObjectType):
             Program, year, business_area_slug_filter={"business_area__slug": business_area_slug},
             additional_filters={**chart_create_filter_query(filters)}
         )
+
+        programmes_wo_cash_plus = []
+        programmes_with_cash_plus = []
+        labels = []
+
+        for sector in sector_choice_mapping.keys():
+            programs_by_sector = programs.filter(sector=sector)
+            program_wo_cash_count = programs_by_sector.filter(cash_plus=False).count()
+            program_with_cash_count = programs_by_sector.filter(cash_plus=True).count()
+            if program_wo_cash_count > 0 or program_with_cash_count > 0:
+                programmes_wo_cash_plus.append(program_wo_cash_count)
+                programmes_with_cash_plus.append(program_with_cash_count)
+                labels.append(sector_choice_mapping.get(sector))
+
         datasets = [
             {
                 "label": "Programmes",
-                "data": [
-                    programs.filter(sector=sector, cash_plus=False).count() for sector in sector_choice_mapping.keys()
-                ],
+                "data": programmes_wo_cash_plus
             },
             {
                 "label": "Programmes with Cash+",
-                "data": [
-                    programs.filter(sector=sector, cash_plus=True).count() for sector in sector_choice_mapping.keys()
-                ],
+                "data": programmes_with_cash_plus
             },
         ]
-        return {"labels": sector_choice_mapping.values(), "datasets": datasets}
+
+        return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
