@@ -8,7 +8,7 @@ from hct_mis_api.apps.core.airflow_api import AirflowApi
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
 from hct_mis_api.apps.reporting.schema import ReportNode
-from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.models import Report, DashboardReport
 from hct_mis_api.apps.reporting.validators import ReportValidator
 from hct_mis_api.apps.program.models import Program
 
@@ -74,5 +74,54 @@ class CreateReport(ReportValidator, PermissionMutation):
         return CreateReport(report)
 
 
+class CreateDashboardReportInput(graphene.InputObjectType):
+    report_types = graphene.List(graphene.Int, required=True)
+    business_area_slug = graphene.String(required=True)
+    year = graphene.Int(required=True)
+    admin_area = graphene.ID()
+    program = graphene.ID()
+
+
+class CreateDashboardReport(PermissionMutation):
+    success = graphene.Boolean()
+
+    class Arguments:
+        report_data = CreateDashboardReportInput(required=True)
+
+    @classmethod
+    @is_authenticated
+    def mutate(cls, root, info, report_data):
+        business_area = BusinessArea.objects.get(slug=report_data.pop("business_area_slug"))
+        cls.has_permission(info, Permissions.DASHBOARD_EXPORT, business_area)
+
+        report_vars = {
+            "business_area": business_area,
+            "created_by": info.context.user,
+            "status": DashboardReport.IN_PROGRESS,
+            "report_type": report_data["report_types"],
+            "year": report_data["year"],
+        }
+
+        program_id = report_data.pop("program", None)
+        admin_area_id = report_data.pop("admin_area", None)
+        if program_id:
+            program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
+            report_vars["program"] = program
+
+        if admin_area_id:
+            admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id), business_area=business_area)
+            report_vars["admin_area"] = admin_area
+
+        report = DashboardReport.objects.create(**report_vars)
+
+        AirflowApi.start_dag(
+            dag_id="DashboardReportExport",
+            context={"dashboard_report_id": str(report.id)},
+        )
+
+        return CreateReport(True)
+
+
 class Mutations(graphene.ObjectType):
     create_report = CreateReport.Field()
+    create_dashboard_report = CreateDashboardReport.Field()
