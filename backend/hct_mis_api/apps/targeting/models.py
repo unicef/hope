@@ -466,7 +466,7 @@ class TargetingIndividualRuleFilterBlockMixin:
         return f"({' AND '.join(filters_string).strip()})"
 
     def get_basic_individual_query(self):
-        return Q(household__active=True) & Q(duplicate=False) & Q(withdrawn=False)
+        return Q(household__withdrawn=False) & Q(duplicate=False) & Q(withdrawn=False)
 
     def get_query(self):
         individuals_query = self.get_basic_individual_query()
