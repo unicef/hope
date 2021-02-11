@@ -35,13 +35,13 @@ export const individualMinimal = gql`
       id
       unicefId
       status
-      admin1{
+      admin1 {
         id
         title
         level
         pCode
       }
-      admin2{
+      admin2 {
         id
         title
         level
@@ -84,6 +84,7 @@ export const individualDetailed = gql`
     seeingDisability
     physicalDisability
     selfcareDisability
+    photo
     workStatus
     documents {
       edges {
