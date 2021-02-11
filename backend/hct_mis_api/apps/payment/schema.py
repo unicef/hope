@@ -29,7 +29,8 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    chart_filters_decoder
+    chart_filters_decoder,
+    chart_create_filter_query
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -358,12 +359,19 @@ class Query(graphene.ObjectType):
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            },
         )
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity"))[
-                        "delivered_quantity__sum"
+                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity_usd"))[
+                        "delivered_quantity_usd__sum"
                     ]
                     for delivery_type in delivery_type_choices_mapping.keys()
                 ]
