@@ -29,6 +29,7 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_get_filtered_qs,
     chart_permission_decorator,
+    chart_filters_decoder
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -217,19 +218,24 @@ class Query(graphene.ObjectType):
     )
 
     chart_payment_verification = graphene.Field(
-        ChartPaymentVerification, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartPaymentVerification, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_volume_by_delivery_mechanism = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_payment = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_total_transferred = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     table_total_cash_transferred_by_administrative_area = graphene.Field(
-        TableTotalCashTransferred, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        TableTotalCashTransferred, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
 
     payment_record_status_choices = graphene.List(ChoiceObject)
@@ -321,6 +327,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment_verification(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentVerification.STATUS_CHOICES)
         payment_verifications = chart_get_filtered_qs(
             PaymentVerification,
@@ -345,6 +352,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         delivery_type_choices_mapping = chart_map_choices(PaymentRecord.DELIVERY_TYPE_CHOICE)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
@@ -365,6 +373,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
@@ -378,6 +387,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
@@ -388,6 +398,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,

@@ -16,6 +16,7 @@ interface TotalAmountTransferredSectionProps {
 export const TotalAmountTransferredSection = ({
   data,
 }: TotalAmountTransferredSectionProps): React.ReactElement => {
+  if (!data) return null;
   return (
     <DashboardCard color='#1E877D'>
       <Grid container justify='space-between' alignItems='center'>
