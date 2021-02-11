@@ -730,6 +730,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                     .replace("_no_i_c", "")
                                     .replace("_issuer_i_c", "")
                                     .replace("_type_i_c", "")
+                                    .replace("_i_c", "")
                                 )
                                 if i_field.endswith("_type_i_c"):
                                     value_key = "name"
