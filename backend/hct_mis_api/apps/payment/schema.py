@@ -430,7 +430,7 @@ class Query(graphene.ObjectType):
         ]
         return {"data": data}
 
-    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_HQ])
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
