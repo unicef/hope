@@ -1832,7 +1832,7 @@ type IndividualNode implements Node {
   version: BigInt!
   status: IndividualStatus!
   individualId: String!
-  photo: String!
+  photo: String
   fullName: String!
   givenName: String!
   middleName: String!
@@ -2322,6 +2322,7 @@ type Query {
   allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
+  dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Icontains: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
