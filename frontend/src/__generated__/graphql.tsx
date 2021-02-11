@@ -5789,6 +5789,19 @@ export type CreateCashPlanPaymentVerificationMutation = (
   )> }
 );
 
+export type CreateDashboardReportMutationVariables = {
+  reportData: CreateDashboardReportInput
+};
+
+
+export type CreateDashboardReportMutation = (
+  { __typename?: 'Mutations' }
+  & { createDashboardReport: Maybe<(
+    { __typename?: 'CreateDashboardReport' }
+    & Pick<CreateDashboardReport, 'success'>
+  )> }
+);
+
 export type CreateGrievanceMutationVariables = {
   input: CreateGrievanceTicketInput
 };
@@ -9206,6 +9219,55 @@ export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: Apoll
 export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
 export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export const CreateDashboardReportDocument = gql`
+    mutation CreateDashboardReport($reportData: CreateDashboardReportInput!) {
+  createDashboardReport(reportData: $reportData) {
+    success
+  }
+}
+    `;
+export type CreateDashboardReportMutationFn = ApolloReactCommon.MutationFunction<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>;
+export type CreateDashboardReportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>, 'mutation'>;
+
+    export const CreateDashboardReportComponent = (props: CreateDashboardReportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables> mutation={CreateDashboardReportDocument} {...props} />
+    );
+    
+export type CreateDashboardReportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateDashboardReportMutation, CreateDashboardReportMutationVariables> & TChildProps;
+export function withCreateDashboardReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateDashboardReportMutation,
+  CreateDashboardReportMutationVariables,
+  CreateDashboardReportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateDashboardReportMutation, CreateDashboardReportMutationVariables, CreateDashboardReportProps<TChildProps>>(CreateDashboardReportDocument, {
+      alias: 'createDashboardReport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateDashboardReportMutation__
+ *
+ * To run a mutation, you first call `useCreateDashboardReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDashboardReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDashboardReportMutation, { data, loading, error }] = useCreateDashboardReportMutation({
+ *   variables: {
+ *      reportData: // value for 'reportData'
+ *   },
+ * });
+ */
+export function useCreateDashboardReportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>(CreateDashboardReportDocument, baseOptions);
+      }
+export type CreateDashboardReportMutationHookResult = ReturnType<typeof useCreateDashboardReportMutation>;
+export type CreateDashboardReportMutationResult = ApolloReactCommon.MutationResult<CreateDashboardReportMutation>;
+export type CreateDashboardReportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>;
 export const CreateGrievanceDocument = gql`
     mutation CreateGrievance($input: CreateGrievanceTicketInput!) {
   createGrievanceTicket(input: $input) {
