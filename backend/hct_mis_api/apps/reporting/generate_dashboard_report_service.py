@@ -52,38 +52,26 @@ class GenerateDashboardReportService:
         self.hq_or_country = self.HQ if report.business_area.slug == "global" else self.COUNTRY
 
     def _create_workbook(self) -> openpyxl.Workbook:
-        print("CREATING")
         wb = openpyxl.Workbook()
         ws_meta = wb.active
         ws_meta.title = self.META_SHEET
-        print("TITLE", ws_meta.title)
         self.wb = wb
         self.ws_meta = ws_meta
         return wb
 
-    # def _add_filters_info(self):
-    #     filter_rows = [
-    #         ("Report type", str(self._report_type_to_str())),
-    #         ("Business area", self.business_area.name),
-    #         (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_from)),
-    #         (GenerateReportService.TIMEFRAME_CELL_LABELS[self.report_type][0], str(self.report.date_to)),
-    #     ]
-
-    #     if self.report.admin_area.all().exists():
-    #         filter_rows.append(
-    #             (
-    #                 "Administrative area 2",
-    #                 GenerateReportContentHelpers._to_values_list(self.report.admin_area.all(), "title"),
-    #             )
-    #         )
-    #     if self.report.program:
-    #         filter_rows.append(("Program", self.report.program.name))
-
-    #     for filter_row in filter_rows:
-    #         self.ws_filters.append(filter_row)
+    def _format_meta_tab(self):
+        self.ws_meta.append(self.META_HEADERS)
+        info_row = (
+            self._report_types_to_joined_str(),
+            self._format_date(self.report.created_at),
+            self.report.created_by,
+            self.business_area.name,
+            str(self.report.year),
+        )
+        self.ws_meta.append(info_row)
 
     def _add_headers(self, active_sheet, report_type):
-        headers_row = GenerateDashboardReportService.HEADERS[report_type][self.hq_or_country]
+        headers_row = self.HEADERS[report_type][self.hq_or_country]
         active_sheet.append(headers_row)
 
     def _add_rows(self):
@@ -111,8 +99,7 @@ class GenerateDashboardReportService:
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
-        # add meta sheet info
-        # self._add_filters_info()
+        self._format_meta_tab()
         self._adjust_column_width_from_col(self.ws_meta, 1, 5, 1)
 
         # loop through all selected report types and add sheet for each
@@ -137,9 +124,8 @@ class GenerateDashboardReportService:
             with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
-                file_name = ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
                 self.report.file.save(
-                    f"{file_name}-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
+                    f"{self._report_types_to_joined_str()}-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
                     File(tmp),
                     save=False,
                 )
@@ -207,8 +193,16 @@ class GenerateDashboardReportService:
     def _report_type_to_str(self, report_type) -> str:
         return str([name for value, name in Report.REPORT_TYPES if value == report_type][0])
 
+    def _report_types_to_joined_str(self) -> str:
+        return ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
+
     def _stringify_all_values(self, row: tuple) -> tuple:
         str_row = []
         for value in row:
             str_row.append(str(value if value is not None else ""))
         return tuple(str_row)
+
+    def _format_date(self, date) -> str:
+        if not date:
+            return ""
+        return date.strftime("%Y-%m-%d")
