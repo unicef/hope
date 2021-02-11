@@ -35,16 +35,20 @@ const CardTextLight = styled.div`
 interface DashboardYearPageProps {
   year: string;
   selectedTab: number;
+  filter;
 }
 export function DashboardYearPage({
   year,
   selectedTab,
+  filter,
 }: DashboardYearPageProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const { data, loading } = useAllChartsQuery({
     variables: {
       year: parseInt(year, 10),
       businessAreaSlug: businessArea,
+      program: filter.program,
+      administrativeArea: filter.administrativeArea,
     },
   });
   if (loading) return <LoadingComponent />;
