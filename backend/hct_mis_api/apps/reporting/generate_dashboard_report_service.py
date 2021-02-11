@@ -11,11 +11,12 @@ from tempfile import NamedTemporaryFile
 
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.reporting.models import Report, DashboardReport
+from hct_mis_api.apps.reporting.models import DashboardReport
 from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.account.models import User
 
 
 class GenerateDashboardReportContentHelpers:
@@ -30,15 +31,184 @@ class GenerateDashboardReportContentHelpers:
             return ""
         return date.strftime("%Y-%m-%d")
 
+    @staticmethod
+    def _is_report_global(report):
+        return report.business_area.slug == "global"
+
+    @staticmethod
+    def get_beneficiaries(report: DashboardReport):
+        # TODO: implement
+        return []
+
+    @classmethod
+    def format_beneficiaries(self, instance, is_hq: bool) -> tuple:
+        # TODO: implement
+        return ()
+
 
 class GenerateDashboardReportService:
     HQ = 1
     COUNTRY = 2
+    SHARED = 3
     HEADERS = {
         DashboardReport.BENEFICIARIES_REACHED: {
-            HQ: ("business area", "country", "households reached", "individuals reached", "children reached"),
-            COUNTRY: ("business area", "programme", "households reached", "individuals reached", "children reached"),
-        }
+            HQ: ("business area", "country"),
+            COUNTRY: ("business area", "programme"),
+            SHARED: ("households reached", "individuals reached", "children reached"),
+        },
+        DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA: {
+            HQ: (),
+            COUNTRY: (
+                "Admin Level 2",
+                "Admin Code",
+                "Total tranferred (USD)",
+                "Households reached",
+                "Female 0-5 Reached",
+                "Female 6-11 Reached",
+                "Female 12-17 Reached",
+                "Female 18-59 Reached",
+                "Female 60+ Reached",
+                "Male 0-5 Reached",
+                "Male 6-11 Reached",
+                "Male 12-17 Reached",
+                "Male 18-59 Reached",
+                "Male 60+ Reached",
+            ),
+            SHARED: (),
+        },
+        DashboardReport.PAYMENT_VERIFICATION: {
+            HQ: (),
+            COUNTRY: (),
+            SHARED: (
+                "business area",
+                "country",
+                "programme",
+                "cash plan verifications",
+                "Households Contacted",
+                "average sampling",
+                "Received",
+                "Not Received",
+                "Received with issues",
+                "Not Responded",
+            ),
+        },
+        DashboardReport.GRIEVANCES_AND_FEEDBACK: {
+            HQ: (
+                "business area",
+                "country",
+            ),
+            COUNTRY: (
+                "business area",
+                "programme",
+            ),
+            SHARED: (
+                "grievance tickets",
+                "feedback tickets",
+                "resolved tickets",
+                "Unresolved >30 days",
+                "Unresolved >60 days",
+                "open sensitive grievances",
+            ),
+        },
+        DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY: {
+            HQ: ("business area", "country", "actual cash transferred", "actual voucher transferred"),
+            COUNTRY: (),
+            SHARED: (),
+        },
+        DashboardReport.PROGRAMS: {
+            HQ: (),
+            COUNTRY: (),
+            SHARED: (
+                "business area",
+                "country",
+                "programme",
+                "sector",
+                "cash+",
+                "frequency",
+                "unsuccessful payment",
+                "January cash",
+                "January voucher",
+                "February cash",
+                "February voucher",
+                "March cash",
+                "March voucher",
+                "April cash",
+                "April voucher",
+                "May cash",
+                "May voucher",
+                "June cash",
+                "June voucher",
+                "July cash",
+                "July voucher",
+                "August cash",
+                "August voucher",
+                "September cash",
+                "September voucher",
+                "October cash",
+                "October voucher",
+                "November cash",
+                "November voucher",
+                "December cash",
+                "December voucher",
+            ),
+        },
+        DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: {
+            HQ: (
+                "business area",
+                "country",
+            ),
+            COUNTRY: (
+                "business area",
+                "programme",
+            ),
+            SHARED: (
+                "Cash in envelope",
+                "cash by FSP",
+                "deposit to card",
+                "mobile money",
+                "voucher",
+                "e-voucher",
+            ),
+        },
+        DashboardReport.INDIVIDUALS_REACHED: {
+            HQ: (
+                "business area",
+                "country",
+            ),
+            COUNTRY: (
+                "business area",
+                "programme",
+            ),
+            SHARED: (
+                "females 0-5 reached",
+                "females 0-5 w/ disability reached",
+                "females 6-11 reached",
+                "females 6-11 w/ disability reached",
+                "females 12-17 reached",
+                "females 12-17 w/ disability reached",
+                "females 18-59 reached",
+                "females 18-59 w/ disability reached",
+                "females 60+ reached",
+                "females 60+ w/ disability reached",
+                "males 0-5 reached",
+                "males 0-5 w/ disability reached",
+                "males 6-11 reached",
+                "males 6-11 w/ disability reached",
+                "males 12-17 reached",
+                "males 12-17 w/ disability reached",
+                "males 18-59 reached",
+                "males 18-59 w/ disability reached",
+                "males 60+ reached",
+                "males 60+ w/ disability reached",
+            ),
+        },
+    }
+    ROW_CONTENT_METHODS = {
+        DashboardReport.BENEFICIARIES_REACHED: (
+            GenerateDashboardReportContentHelpers.get_beneficiaries,
+            GenerateDashboardReportContentHelpers.format_beneficiaries,
+        ),
+        # TODO: add the rest of the methods
     }
     META_HEADERS = ("report type", "creation date", "created by", "business area", "report year")
     META_SHEET = "Meta data"
@@ -64,38 +234,24 @@ class GenerateDashboardReportService:
         info_row = (
             self._report_types_to_joined_str(),
             self._format_date(self.report.created_at),
-            self.report.created_by,
+            self._format_user_name(self.report.created_by),
             self.business_area.name,
             str(self.report.year),
         )
         self.ws_meta.append(info_row)
 
-    def _add_headers(self, active_sheet, report_type):
-        headers_row = self.HEADERS[report_type][self.hq_or_country]
+    def _add_headers(self, active_sheet, report_type) -> int:
+        headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
         active_sheet.append(headers_row)
+        return len(headers_row)
 
-    def _add_rows(self):
-        pass
-        # get_row_methods = GenerateReportService.ROW_CONTENT_METHODS[self.report_type]
-        # all_instances = get_row_methods[0](self.report)
-        # self.report.number_of_records = all_instances.count()
-        # number_of_columns_based_on_set_headers = len(GenerateReportService.HEADERS[self.report_type])
-        # col_instances_len = 0
-        # for instance in all_instances:
-        #     row = get_row_methods[1](instance)
-        #     str_row = self._stringify_all_values(row)
-        #     if len(str_row) > col_instances_len:
-        #         col_instances_len = len(str_row)
-        #     self.ws_report.append(str_row)
-        # if col_instances_len > number_of_columns_based_on_set_headers:
-        #     # to cover bases when we create extra columns for reverse foreign key instances and we don't know in advance how many columns there will be
-        #     self._add_missing_headers(
-        #         self.ws_report,
-        #         number_of_columns_based_on_set_headers + 1,
-        #         col_instances_len,
-        #         GenerateReportService.OPTIONAL_HEADERS.get(self.report_type, ""),
-        #     )
-        # return col_instances_len
+    def _add_rows(self, active_sheet, report_type):
+        get_row_methods = self.ROW_CONTENT_METHODS[report_type]
+        all_instances = get_row_methods[0](self.report)
+        for instance in all_instances:
+            row = get_row_methods[1](instance, self.hq_or_country == self.HQ)
+            str_row = self._stringify_all_values(row)
+            active_sheet.append(str_row)
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
@@ -109,11 +265,11 @@ class GenerateDashboardReportService:
             print("SHEET TITLE", sheet_title)
             active_sheet = self.wb.create_sheet(sheet_title)
             print("CREATED ACTIVE SHEET")
-            self._add_headers(active_sheet, report_type)
+            number_of_columns = self._add_headers(active_sheet, report_type)
             print("ADDED HEADERS")
             self._add_rows()
             print("ADDED ROWS")
-            self._adjust_column_width_from_col(active_sheet, 1, len(self.HEADERS[report_type][self.hq_or_country]), 0)
+            self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
             print("ADJUTED WIDTH")
         return self.wb
 
@@ -191,7 +347,7 @@ class GenerateDashboardReportService:
             ws.column_dimensions[col_name].width = value
 
     def _report_type_to_str(self, report_type) -> str:
-        return str([name for value, name in Report.REPORT_TYPES if value == report_type][0])
+        return str([name for value, name in DashboardReport.REPORT_TYPES if value == report_type][0])
 
     def _report_types_to_joined_str(self) -> str:
         return ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
@@ -206,3 +362,8 @@ class GenerateDashboardReportService:
         if not date:
             return ""
         return date.strftime("%Y-%m-%d")
+
+    def _format_user_name(self, user: User) -> str:
+        return (
+            f"{user.first_name} {user.last_name}" if user.first_name or user.last_name else user.email or user.username
+        )
