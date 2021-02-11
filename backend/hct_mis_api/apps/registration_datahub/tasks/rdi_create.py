@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_INTEGER,
     TYPE_SELECT_MANY,
     TYPE_SELECT_ONE,
+    TYPE_STRING,
 )
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
@@ -64,6 +65,11 @@ class RdiBaseCreateTask:
 
         value_type = self.COMBINED_FIELDS[header]["type"]
 
+        if value_type == TYPE_STRING:
+            if isinstance(value, float) and value.is_integer():
+                value = int(value)
+            return str(value)
+
         if value_type == TYPE_INTEGER:
             return int(value)
 
@@ -76,7 +82,6 @@ class RdiBaseCreateTask:
             choices = [x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]]
 
             if value_type == TYPE_SELECT_MANY:
-                values = []
                 if "," in value:
                     values = value.split(",")
                 elif ";" in value:
