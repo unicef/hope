@@ -3486,31 +3486,41 @@ export type QueryAllCashPlanPaymentVerificationArgs = {
 
 export type QueryChartPaymentVerificationArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartVolumeByDeliveryMechanismArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartPaymentArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionTotalTransferredArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3600,13 +3610,17 @@ export type QueryAllProgramsArgs = {
 
 export type QueryChartProgrammesBySectorArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartPlannedBudgetArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3763,37 +3777,49 @@ export type QueryAllIndividualsArgs = {
 
 export type QueryChartAllIndividualsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionHouseholdsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionIndividualsReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QuerySectionChildReachedArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
 export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
