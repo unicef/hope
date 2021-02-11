@@ -623,6 +623,19 @@ export type CountAndPercentageNode = {
   percentage?: Maybe<Scalars['Float']>,
 };
 
+export type CreateDashboardReport = {
+   __typename?: 'CreateDashboardReport',
+  success?: Maybe<Scalars['Boolean']>,
+};
+
+export type CreateDashboardReportInput = {
+  reportTypes: Array<Maybe<Scalars['Int']>>,
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  adminArea?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
+};
+
 export type CreateGrievanceTicketExtrasInput = {
   category?: Maybe<CategoryExtrasInput>,
   issueType?: Maybe<IssueTypeExtrasInput>,
@@ -2612,6 +2625,7 @@ export type MergeRegistrationDataImportMutation = {
 export type Mutations = {
    __typename?: 'Mutations',
   createReport?: Maybe<CreateReport>,
+  createDashboardReport?: Maybe<CreateDashboardReport>,
   createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
   updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
   grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
@@ -2655,6 +2669,11 @@ export type Mutations = {
 
 export type MutationsCreateReportArgs = {
   reportData: CreateReportInput
+};
+
+
+export type MutationsCreateDashboardReportArgs = {
+  reportData: CreateDashboardReportInput
 };
 
 
@@ -15255,6 +15274,8 @@ export type ResolversTypes = {
   Mutations: ResolverTypeWrapper<{}>,
   CreateReportInput: CreateReportInput,
   CreateReport: ResolverTypeWrapper<CreateReport>,
+  CreateDashboardReportInput: CreateDashboardReportInput,
+  CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
   CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
   CategoryExtrasInput: CategoryExtrasInput,
@@ -15589,6 +15610,8 @@ export type ResolversParentTypes = {
   Mutations: {},
   CreateReportInput: CreateReportInput,
   CreateReport: CreateReport,
+  CreateDashboardReportInput: CreateDashboardReportInput,
+  CreateDashboardReport: CreateDashboardReport,
   CreateGrievanceTicketInput: CreateGrievanceTicketInput,
   CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
   CategoryExtrasInput: CategoryExtrasInput,
@@ -15947,6 +15970,10 @@ export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends
 export type CountAndPercentageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CountAndPercentageNode'] = ResolversParentTypes['CountAndPercentageNode']> = {
   count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   percentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
+export type CreateDashboardReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateDashboardReport'] = ResolversParentTypes['CreateDashboardReport']> = {
+  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
@@ -16619,6 +16646,7 @@ export type MergeRegistrationDataImportMutationResolvers<ContextType = any, Pare
 
 export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
   createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
+  createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
   createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
   updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
   grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
@@ -17734,6 +17762,7 @@ export type Resolvers<ContextType = any> = {
   CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
   CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
   CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
+  CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
   CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
   CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
   CreateProgram?: CreateProgramResolvers<ContextType>,

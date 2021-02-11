@@ -123,25 +123,25 @@ class GenerateDashboardReportService:
         return self.wb
 
     def generate_report(self):
-        pass
-        # try:
-        #     self.generate_workbook()
-        #     with NamedTemporaryFile() as tmp:
-        #         self.wb.save(tmp.name)
-        #         tmp.seek(0)
-        #         self.report.file.save(
-        #             f"{self._report_type_to_str()}-{GenerateReportContentHelpers._format_date(self.report.created_at)}.xlsx",
-        #             File(tmp),
-        #             save=False,
-        #         )
-        #         self.report.status = Report.COMPLETED
-        # except Exception as e:
-        #     print("ERROR", e)
-        #     self.report.status = Report.FAILED
-        # self.report.save()
+        try:
+            self.generate_workbook()
+            with NamedTemporaryFile() as tmp:
+                self.wb.save(tmp.name)
+                tmp.seek(0)
+                # TODO make better file name
+                self.report.file.save(
+                    f"Report-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
+                    File(tmp),
+                    save=False,
+                )
+                self.report.status = DashboardReport.COMPLETED
+        except Exception as e:
+            print("ERROR", e)
+            self.report.status = DashboardReport.FAILED
+        self.report.save()
 
-        # if self.report.file:
-        #     self._send_email()
+        if self.report.file:
+            self._send_email()
 
     def _send_email(self):
         pass

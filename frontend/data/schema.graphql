@@ -362,6 +362,18 @@ type CountAndPercentageNode {
   percentage: Float
 }
 
+type CreateDashboardReport {
+  success: Boolean
+}
+
+input CreateDashboardReportInput {
+  reportTypes: [Int]!
+  businessAreaSlug: String!
+  year: Int!
+  adminArea: ID
+  program: ID
+}
+
 input CreateGrievanceTicketExtrasInput {
   category: CategoryExtrasInput
   issueType: IssueTypeExtrasInput
@@ -2086,6 +2098,7 @@ type MergeRegistrationDataImportMutation {
 
 type Mutations {
   createReport(reportData: CreateReportInput!): CreateReport
+  createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
   createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
