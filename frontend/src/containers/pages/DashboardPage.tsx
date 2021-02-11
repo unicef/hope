@@ -60,7 +60,9 @@ export function DashboardPage(): React.ReactElement {
   return (
     <>
       <PageHeader tabs={tabs} title='Dashboard'>
-        {hasPermissionToExport && <ExportModal />}
+        {hasPermissionToExport && (
+          <ExportModal filter={filter} year={years[selectedTab]} />
+        )}
       </PageHeader>
       {hasPermissionToView ? (
         <>

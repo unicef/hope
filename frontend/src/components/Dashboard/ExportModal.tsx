@@ -38,12 +38,12 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
-export const ExportModal = (): React.ReactElement => {
+export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
-
+  console.log(filter, year);
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
@@ -101,17 +101,13 @@ export const ExportModal = (): React.ReactElement => {
     });
   };
 
-  const prepareVariables = () => {
-    const variables = {
-      businessAreaSlug: businessArea,
-      reportTypes: selected,
-      // TODO get these from parent component
-      year: 2021,
-      adminArea: '',
-      program: '',
-    };
-    return variables;
-  };
+  const prepareVariables = () => ({
+    businessAreaSlug: businessArea,
+    reportTypes: selected,
+    year: parseInt(year, 10),
+    adminArea: filter.admin2,
+    program: filter.program,
+  });
 
   const submitFormHandler = async (): Promise<void> => {
     const response = await mutate({
