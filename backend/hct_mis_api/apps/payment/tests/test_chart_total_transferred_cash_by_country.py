@@ -61,7 +61,7 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
         [
             (
                 "with_permission",
-                [Permissions.DASHBOARD_VIEW_HQ],
+                [Permissions.DASHBOARD_VIEW_COUNTRY],
             ),
             ("without_permission", []),
         ]
