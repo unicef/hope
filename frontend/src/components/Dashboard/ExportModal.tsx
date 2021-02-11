@@ -15,9 +15,13 @@ import {
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useDashboardReportChoiceDataQuery } from '../../__generated__/graphql';
+import {
+  useDashboardReportChoiceDataQuery,
+  useCreateDashboardReportMutation,
+} from '../../__generated__/graphql';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -38,13 +42,16 @@ export const ExportModal = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
   const businessArea = useBusinessArea();
+  const { showMessage } = useSnackbar();
+
   const numSelected = selected.length;
-  const isSelected = (name: string): boolean => selected.includes(name);
+  const isSelected = (id: string): boolean => selected.includes(id);
 
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const [mutate] = useCreateDashboardReportMutation();
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
@@ -64,16 +71,17 @@ export const ExportModal = (): React.ReactElement => {
     }
     setSelected([]);
   };
-  const onCheckboxClick = (name): void => {
-    const selectedIndex = selected.indexOf(name);
-    const newSelected = [];
+  const onCheckboxClick = (id: string): void => {
+    const selectedIndex = selected.indexOf(id);
+    const newSelected = [...selected];
     if (selectedIndex !== -1) {
       newSelected.splice(selectedIndex, 1);
     } else {
-      newSelected.push(name);
+      newSelected.push(id);
     }
     setSelected(newSelected);
   };
+
   const renderRows = (): Array<React.ReactElement> => {
     return data.map((el) => {
       const isItemSelected = isSelected(el.id);
@@ -91,6 +99,32 @@ export const ExportModal = (): React.ReactElement => {
         </TableRow>
       );
     });
+  };
+
+  const prepareVariables = () => {
+    const variables = {
+      businessAreaSlug: businessArea,
+      reportTypes: selected,
+      // TODO get these from parent component
+      year: 2021,
+      adminArea: '',
+      program: '',
+    };
+    return variables;
+  };
+
+  const submitFormHandler = async (): Promise<void> => {
+    const response = await mutate({
+      variables: {
+        reportData: prepareVariables(),
+      },
+    });
+    if (!response.errors && response.data.createDashboardReport.success) {
+      showMessage('Report was created.');
+    } else {
+      showMessage('Report create action failed.');
+    }
+    setDialogOpen(false);
   };
 
   return (
@@ -153,7 +187,7 @@ export const ExportModal = (): React.ReactElement => {
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => null}
+              onClick={submitFormHandler}
               data-cy='button-submit'
             >
               Export
