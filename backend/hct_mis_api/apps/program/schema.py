@@ -27,6 +27,8 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_get_filtered_qs,
     chart_permission_decorator,
+    chart_filters_decoder,
+    chart_create_filter_query
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
@@ -191,9 +193,11 @@ class Query(graphene.ObjectType):
         # ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_planned_budget = graphene.Field(
-        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
@@ -254,9 +258,11 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
         programs = chart_get_filtered_qs(
-            Program, year, business_area_slug_filter={"business_area__slug": business_area_slug}
+            Program, year, business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={**chart_create_filter_query(filters)}
         )
         datasets = [
             {
@@ -276,11 +282,12 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         programs = chart_get_filtered_qs(
             Program,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"start_date__year": year, "end_date__year": year},
+            additional_filters={"start_date__year": year, "end_date__year": year, **chart_create_filter_query(filters)},
         ).prefetch_related("cash_plans__payment_records")
 
         previous_transfers_data = [0] * 12
