@@ -15,6 +15,9 @@ import {
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import { useDashboardReportChoiceDataQuery } from '../../__generated__/graphql';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../LoadingComponent';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -34,23 +37,23 @@ const DialogContainer = styled.div`
 export const ExportModal = (): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
+  const businessArea = useBusinessArea();
   const numSelected = selected.length;
   const isSelected = (name: string): boolean => selected.includes(name);
 
-  //TODO change line below
-  const data = [
-    { id: '1', name: 'Total Amount Transferred' },
-    { id: '2', name: 'Total Amount Planned and Transferred by Country' },
-    { id: '4', name: 'Beneficiaries Reached' },
-    { id: '5', name: 'Individuals Reached by Age and Gender Groups' },
-    { id: '6', name: 'Individuals with Disability Reached by Age Groups' },
-    { id: '7', name: 'Volume by Delivery Mechanism' },
-    { id: '8', name: 'Grievances' },
-    { id: '9', name: 'Programmes by Sector' },
-    { id: '10', name: 'Monthly Transfers' },
-    { id: '11', name: 'Payments' },
-    { id: '12', name: 'Payment Verification' },
-  ];
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+
+  if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
+
+  const data = choicesData.dashboardReportTypesChoices.map((choice) => ({
+    id: choice.value,
+    name: choice.name,
+  }));
+
   const rowCount = data.length;
 
   const onSelectAllClick = (event, rows): void => {
