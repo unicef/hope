@@ -16,7 +16,7 @@ class TimeStampedUUIDModel(UUIDModel):
         abstract = True
 
 
-class SoftDeletableModel(models.Model):
+class SoftDeletableModelWithDate(models.Model):
     """
     An abstract base class model with a ``is_removed`` field that
     marks entries that are not going to be used anymore, but are
@@ -60,7 +60,6 @@ class SoftDeletionTreeManager(TreeManager):
 
 class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
     is_removed = models.BooleanField(default=False)
-    removed_date = models.DateTimeField(null=True)
 
     class Meta:
         abstract = True
