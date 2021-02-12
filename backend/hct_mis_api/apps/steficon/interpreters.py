@@ -3,7 +3,6 @@ import random
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
-from symbol import classdef
 
 import dateutil
 from django.core.exceptions import ValidationError
@@ -13,8 +12,9 @@ from django.utils.safestring import mark_safe
 from jinja2 import Environment
 
 from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.steficon.score import Score
-from hct_mis_api.apps.steficon.templatetags import engine
+from .config import config
+from .score import Score
+from .templatetags import engine
 import logging
 
 logger = logging.getLogger(__name__)
@@ -52,16 +52,27 @@ class PythonExec(Interpreter):
     def execute(self, **context):
         gl = {
             "__builtins__": {
-                "random": random,
                 "__build_class__": __build_class__,
                 "__name__": __name__,
-                "int": int,
-                "str": str,
+                "bytearray": bytearray,
+                "bytes": bytes,
+                "complex": complex,
+                "dict": dict,
                 "float": float,
-                "datetime": datetime,
-                "dateutil": dateutil,
+                "frozenset": frozenset,
+                "int": int,
+                "list": list,
+                "memoryview": memoryview,
+                "range": range,
+                "set": set,
+                "str": str,
+                "tuple": tuple,
             }
         }
+        for module_name in config.BUILTIN_MODULES:
+            mod = __import__(module_name)
+            gl["__builtins__"][module_name] = mod
+
         pts = Score()
         locals_ = dict(context)
         locals_["score"] = pts

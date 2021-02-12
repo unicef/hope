@@ -1,7 +1,7 @@
-.pager{
-    padding: 10px;
-    margin-bottom: 20px;
-}
+/*.pager{*/
+/*    padding: 10px;*/
+/*    margin-bottom: 20px;*/
+/*}*/
 table.diff, table.diff td {
     font-family: monospace, sans-serif;
 }
@@ -14,16 +14,30 @@ table.diff td {
     font-size: 16px;
 }
 
-.diff_header {
+table.diff  td.diff_header.lineno{
+    width: 20px!important;
+    max-width: 20px!important;
+}
+table.diff  td.code{
+    width: 300px!important;
+}
+
+th.diff_header {
     font-weight: bold;
+    width:50%;
+    max-width:50%;
 }
 
 td.diff_header {
-    text-align: right
+    text-align: right;
+    max-width:30px;
+    width:30px;
 }
 
 .diff_next {
     display: none;
+    max-width:30px;
+    width:30px;
 }
 
 .diff_add {

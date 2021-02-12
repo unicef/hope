@@ -21,7 +21,7 @@
         <tr>
             <td>{{ field }}</td>
             <td>{{ original.rule.as_dict|get_item:field }}</td>
-            <td>{{ original.previous_state|get_item:field }}</td>
+            <td>{{ original.before|get_item:field }}</td>
             <td></td>
         </tr>
         {% endfor %}

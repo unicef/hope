@@ -9,11 +9,13 @@
     &rsaquo; <a href="{% url opts|admin_urlname:'diff' original.pk %}">Code History</a>
     &rsaquo; Revert to {{ state.timestamp|date:"d, M Y H:i" }}
 {% endblock %}
-{% block content_title %}<h1>Warning!!. You are reverting rule to the {{ state.timestamp|date:"d, M Y H:i" }} state.</h1>{% endblock %}
+{% block content_title %}<h1>Warning!!</h1>
+<h2>You are reverting rule '{{ original }}' to commit #{{ state.version }} of {{ state.timestamp|date:"d, M Y H:i" }}.</h2>
+{% endblock %}
 {% block object-tools-items %}
 <li><form method="post">{% csrf_token %}
-    &nbsp;&nbsp;<input class="default" type="submit" name="_restore" value="Restore all data">&nbsp;
-    &nbsp;&nbsp;<input type="submit" name="_revert"  value="Revert Code">&nbsp;&nbsp;</form></li>
+    &nbsp;&nbsp;<input class="default" type="submit" name="_restore" value="Restore All Data">&nbsp;
+    &nbsp;&nbsp;<input type="submit" name="_revert"  value="Revert Code Only">&nbsp;&nbsp;</form></li>
 {% endblock %}
 {% block action-content %}
         <fieldset class="module aligned">
@@ -22,29 +24,29 @@
                 <tr>
                     <th></th>
                     <th>Current</th>
-                    <th>After reverting</th>
+                    <th>After Restore</th>
                     <th></th>
                 </tr>
                 {% for field in MONITORED_FIELDS|slice:"-1" %}
                     <tr>
                         <th>{{ field }}</th>
                         <td>{{ state.rule.as_dict|get_item:field }}</td>
-                        <td>{{ state.previous_state|get_item:field }}</td>
+                        <td>{{ state.before|get_item:field }}</td>
                         <td></td>
                     </tr>
                 {% endfor %}
             </table>
         </fieldset>
         <fieldset class="module aligned collapse open">
-            <h2>Code</h2>
+            <h2>Code after Revert/Restore</h2>
             <div class="code d-none" id="tab-diff">
-                {{ state.previous_state.definition|pygmentize }}
+                {{ state.before.definition|pygmentize }}
             </div>
         </fieldset>
         <fieldset class="module aligned collapse">
-            <h2>Diff</h2>
+            <h2>Code Changes</h2>
             <div class="code d-none" id="tab-diff">
-                {{ state|diff_to_current:"Code after revert,Current code" }}
+                {{ state|diff:"before,current" }}
             </div>
         </fieldset>
         <pre class="code" id="tab-code">
