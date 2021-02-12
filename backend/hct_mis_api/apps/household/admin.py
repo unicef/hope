@@ -112,7 +112,7 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for range in ["0_5", "6_11", "12_17","18_59", "60"]:
+            for range in ["0_5", "6_11", "12_17", "18_59", "60"]:
                 field = f"{gender}_age_group_{range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
@@ -127,7 +127,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                 warnings.append([messages.ERROR, "Individual data not collected but members found"])
 
         if hh.size != total_in_ranges:
-            warnings.append([messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
+            warnings.append(
+                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
 
         # TODO: add ghosts (duplicates, withdrawn)
 
@@ -168,7 +169,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             None,
             {
                 "fields": (
-                    ("full_name", "status", "is_removed"),
+                    ("full_name", "withdrawn", "withdrawn_date", "duplicate", "duplicate_date", "is_removed", "removed_date"),
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
