@@ -14767,6 +14767,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Do you consent?',
+                'labels': [
+                    {
+                        'label': 'Do you consent?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'consent',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
                     {
                         'labelEn': 'Aruba',
                         'labels': [
@@ -19872,6 +19889,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '',
                 'isFlexField': False,
+                'labelEn': 'Is this a returnee household?',
+                'labels': [
+                    {
+                        'label': 'Is this a returnee household?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'returnee',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
                 'labelEn': 'What is the household size?',
                 'labels': [
                     {
@@ -20171,6 +20205,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'birth_date',
                 'required': True,
                 'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Estimated birth date?',
+                'labels': [
+                    {
+                        'label': 'Estimated birth date?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'estimated_birth_date',
+                'required': True,
+                'type': 'BOOL'
             },
             {
                 'associatedWith': 'Individual',
@@ -42777,6 +42828,23 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Is the individual pregnant?',
+                'labels': [
+                    {
+                        'label': 'Is the individual pregnant?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'pregnant',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                     {
                         'labelEn': 'No',
                         'labels': [
@@ -43249,6 +43317,40 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'comms_disability',
                 'required': False,
                 'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Female child headed household',
+                'labels': [
+                    {
+                        'label': 'Female child headed household',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'fchild_hoh',
+                'required': False,
+                'type': 'BOOL'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Child headed household',
+                'labels': [
+                    {
+                        'label': 'Child headed household',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'child_hoh',
+                'required': False,
+                'type': 'BOOL'
             },
             {
                 'associatedWith': 'Household',
