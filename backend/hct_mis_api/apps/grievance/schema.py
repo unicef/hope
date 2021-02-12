@@ -42,7 +42,6 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     chart_permission_decorator,
     chart_filters_decoder,
-    chart_create_filter_query,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
@@ -659,16 +658,20 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
         grievance_tickets = chart_get_filtered_qs(
             GrievanceTicket, year, business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    administrative_area_path="cash_plan__program__admin_areas"
-                )
-            },
         )
+
+        filters = chart_filters_decoder(kwargs)
+        if filters.get("administrative_area") is not None:
+            from hct_mis_api.apps.core.models import AdminArea
+            try:
+                grievance_tickets = grievance_tickets.filter(
+                    admin=AdminArea.objects.get(id=filters.get("administrative_area")).title
+                )
+            except AdminArea.DoesNotExist:
+                pass
+
         grievance_status_labels = [
             "Resolved",
             "Unresolved",
