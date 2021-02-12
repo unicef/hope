@@ -109,7 +109,6 @@ class TestPullDataFromDatahub(TestCase):
         dh_cash_plan1.assistance_through = "Test Bank"
         dh_cash_plan1.vision_id = "random-csh-vision-id"
         dh_cash_plan1.funds_commitment = "123"
-        dh_cash_plan1.down_payment = "100"
         dh_cash_plan1.validation_alerts_count = 0
         dh_cash_plan1.total_persons_covered = 1
         dh_cash_plan1.total_persons_covered_revised = 1

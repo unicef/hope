@@ -16,6 +16,9 @@ export const TotalCashTransferredByAdministrativeAreaTable = ({
 }: TotalCashTransferredByAdministrativeAreaTableProps): React.ReactElement => {
   if (!data) return null;
   const renderRows = (): Array<React.ReactElement> => {
+    if (!data) {
+      return null;
+    }
     return data.map((el) => {
       return (
         <TableRow key={el.id}>

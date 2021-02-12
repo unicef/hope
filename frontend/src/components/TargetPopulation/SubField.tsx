@@ -119,6 +119,31 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
           component={FormikTextField}
         />
       );
+    case 'BOOL':
+      return (
+        <Field
+          name={`${baseName}.value`}
+          label={`${field.fieldAttribute.labelEn}`}
+          choices={[
+            {
+              admin: null,
+              labelEn: 'Yes',
+              labels: [{ label: 'Yes', language: 'English(EN)' }],
+              listName: null,
+              value: "True",
+            },
+            {
+              admin: null,
+              labelEn: 'No',
+              labels: [{ label: 'No', language: 'English(EN)' }],
+              listName: null,
+              value: "False",
+            },
+          ]}
+          index={index}
+          component={FormikSelectField}
+        />
+      );
     default:
       return <p>{field.fieldAttribute.type}</p>;
   }
