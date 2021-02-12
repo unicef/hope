@@ -79,10 +79,8 @@ export function populationStatusToColor(
   switch (status) {
     case 'ACTIVE':
       return theme.hctPalette.green;
-    case 'INACTIVE':
-      return theme.hctPalette.gray;
     default:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.gray;
   }
 }
 
