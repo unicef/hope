@@ -21,8 +21,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode
+from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     sum_lists,
     chart_permission_decorator,
+    chart_filters_decoder
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -115,8 +116,7 @@ class HouseholdFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(head_of_household__given_name__icontains=value)
-            q_obj |= Q(head_of_household__family_name__icontains=value)
+            q_obj |= Q(head_of_household__full_name__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(id__icontains=value)
         return qs.filter(q_obj)
@@ -268,6 +268,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     consent_sharing = graphene.List(graphene.String)
     admin1 = graphene.Field(AdminAreaNode)
     admin2 = graphene.Field(AdminAreaNode)
+    status = graphene.String()
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -342,7 +343,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_CREATOR),
         hopePermissionClass(Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS_AS_OWNER),
     )
-
+    status = graphene.String()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     flex_fields = FlexFieldsScalar()
@@ -445,23 +446,31 @@ class Query(graphene.ObjectType):
         filterset_class=IndividualFilter,
         permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
     )
+
+    # TODO: Missing resolve! Will be done under user story
     chart_all_individuals_reached = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_households_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_individuals_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     section_child_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_individuals_reached_by_age_and_gender = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
     chart_individuals_with_disability_reached_by_age = graphene.Field(
-        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True)
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program = graphene.String(required=False), administrative_area = graphene.String(required=False)
     )
 
     residence_status_choices = graphene.List(ChoiceObject)
@@ -471,6 +480,19 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
+
+    all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
+    all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
+
+    def resolve_all_households_flex_fields_attributes(self, info, **kwargs):
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+        ).order_by("created_at")
+
+    def resolve_all_individuals_flex_fields_attributes(self, info, **kwargs):
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+        ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
@@ -498,6 +520,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -510,6 +533,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -521,6 +545,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -543,6 +568,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
@@ -581,6 +607,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_individuals_with_disability_reached_by_age(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
         payment_verifications_qs = chart_get_filtered_qs(
             PaymentVerification,
             year,
