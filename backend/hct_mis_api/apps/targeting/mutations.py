@@ -7,7 +7,7 @@ from django.utils import timezone
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, PermissionRelayMutation, Permissions
-from core import utils
+from hct_mis_api.apps.core import utils
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.airflow_api import AirflowApi
