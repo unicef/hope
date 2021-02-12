@@ -394,7 +394,6 @@ class Query(graphene.ObjectType):
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
             additional_filters={
-                "status": PaymentRecord.STATUS_SUCCESS,
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
