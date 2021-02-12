@@ -11,7 +11,7 @@ export const PlannedBudget = ({
 }: PlannedBudgetProps): React.ReactElement => {
   if (!data) return null;
   const chartdata = {
-    labels: data.labels,
+    labels: data?.labels,
     datasets: [
       {
         barPercentage: 0.4,

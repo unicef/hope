@@ -499,7 +499,7 @@ class TargetingCriteriaFilterMixin:
             "arguments": 1,
             "lookup": "",
             "negative": False,
-            "supported_types": ["INTEGER", "SELECT_ONE", "STRING"],
+            "supported_types": ["INTEGER", "SELECT_ONE", "STRING", "BOOL"],
         },
         "NOT_EQUALS": {"arguments": 1, "lookup": "", "negative": True, "supported_types": ["INTEGER", "SELECT_ONE"]},
         "CONTAINS": {
