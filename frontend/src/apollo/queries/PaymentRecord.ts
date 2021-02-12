@@ -7,6 +7,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       status
       statusDate
       caId
+      caHashId
       household {
         id
         size

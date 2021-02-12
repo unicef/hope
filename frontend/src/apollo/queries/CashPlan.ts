@@ -15,6 +15,7 @@ export const CashPlan = gql`
       dispersionDate
       assistanceThrough
       caId
+      caHashId
       dispersionDate
       verificationStatus
       bankReconciliationSuccess
