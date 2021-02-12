@@ -86,13 +86,13 @@ export const DashboardFilters = ({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.adminArea}
+            value={filter.administrativeArea}
             onChange={(e, option) => {
               if (!option) {
-                onFilterChange({ ...filter, adminArea: undefined });
+                onFilterChange({ ...filter, administrativeArea: undefined });
                 return;
               }
-              onFilterChange({ ...filter, adminArea: option });
+              onFilterChange({ ...filter, administrativeArea: option });
             }}
           />
         </Grid>
