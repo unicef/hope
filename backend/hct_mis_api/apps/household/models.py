@@ -6,6 +6,7 @@ from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -17,7 +18,7 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel, SoftDeletableModelWithDate
 
 BLANK = ""
 IDP = "IDP"
@@ -151,9 +152,11 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
-ACTIVE = "ACTIVE"
-INACTIVE = "INACTIVE"
-INDIVIDUAL_HOUSEHOLD_STATUS = ((ACTIVE, "Active"), (INACTIVE, "Inactive"))
+STATUS_ACTIVE = "ACTIVE"
+STATUS_INACTIVE = "INACTIVE"
+STATUS_WITHDRAWN = 'WITHDRAWN'
+STATUS_DUPLICATE = 'DUPLICATE'
+INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
@@ -209,9 +212,10 @@ REGISTRATION_METHOD_CHOICES = (
 )
 
 
-class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
+            "withdrawn",
             "status",
             "consent_sign",
             "consent",
@@ -267,7 +271,8 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
             "unhcr_id",
         ]
     )
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    withdrawn = models.BooleanField(default=False)
+    withdrawn_date = models.DateTimeField(null=True, blank=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
@@ -319,7 +324,7 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
         blank=True,
     )
     returnee = models.NullBooleanField()
-    flex_fields = JSONField(default=dict)
+    flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
@@ -340,6 +345,17 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
 
     class Meta:
         verbose_name = "Household"
+
+    @property
+    def status(self):
+        if self.withdrawn:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
 
     @property
     def admin1(self):
@@ -464,10 +480,12 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
+            "duplicate",
+            "withdrawn",
             "individual_id",
             "photo",
             "full_name",
@@ -510,8 +528,10 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
             "who_answers_alt_phone",
         ]
     )
-
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    duplicate = models.BooleanField(default=False)
+    duplicate_date = models.DateTimeField(null=True, blank=True)
+    withdrawn = models.BooleanField(default=False)
+    withdrawn_date = models.DateTimeField(null=True, blank=True)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
     full_name = models.CharField(
@@ -576,7 +596,7 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    flex_fields = JSONField(default=dict)
+    flex_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.NullBooleanField()
     administration_of_rutf = models.NullBooleanField()
     unicef_id = models.CharField(max_length=250, blank=True)
@@ -627,6 +647,29 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         values = [str(getattr(self, field)) for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
+
+    @property
+    def status(self):
+        statuses = []
+        if self.duplicate:
+            statuses.append(STATUS_DUPLICATE)
+        if self.withdrawn:
+            statuses.append(STATUS_WITHDRAWN)
+        if len(statuses) > 0:
+            return ", ".join(statuses)
+        return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
+
+    def mark_as_duplicate(self, original_individual=None):
+        if original_individual is not None:
+            self.unicef_id = original_individual.unicef_id
+        self.duplicate = True
+        self.duplicate_date = timezone.now()
+        self.save()
 
     def __str__(self):
         return self.unicef_id

@@ -365,7 +365,7 @@ class TestCloseDataChangeTickets(APITestCase):
             },
         )
         if should_close:
-            self.assertFalse(Individual.objects.filter(id=self.individuals_household_two[0].id).exists())
+            self.assertTrue(Individual.objects.filter(id=self.individuals_household_two[0].id).first().withdrawn)
             changed_role_exists = IndividualRoleInHousehold.objects.filter(
                 role=ROLE_PRIMARY, household=self.household_two, individual=self.individuals_household_two[1]
             ).exists()
