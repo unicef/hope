@@ -13,6 +13,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_payment_record_delivered_quantity_in_usd,
 )
 
+log = logging.getLogger(__name__)
 
 class PullFromDatahubTask:
     MAPPING_CASH_PLAN_DICT = {
@@ -82,16 +83,13 @@ class PullFromDatahubTask:
             if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
                 continue
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
-            try:
-                for session in sessions:
-                    try:
-                        self.copy_session(session)
-                    except Exception as e:
-                        session = Session.STATUS_FAILED
-                        session.save()
-                        raise e
-            except Exception:
-                pass
+            for session in sessions:
+                try:
+                    self.copy_session(session)
+                except Exception as e:
+                    session.status = Session.STATUS_FAILED
+                    session.save()
+                    log.warning(e)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
