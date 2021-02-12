@@ -60,7 +60,7 @@ services:
   celery_worker:
     stdin_open: true
     tty: true
-    image: unicef/hct-mis-backend
+    image: unicef/hct-mis-celery-worker
     env_file:
       - .env
     environment:
@@ -73,7 +73,8 @@ services:
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    command: "celery -A hct_mis worker -l INFO"
+    restart: always
+    command: "celery -A hct_mis_api.apps.core.celery worker -l INFO"
     depends_on:
       - db
       - redis
@@ -81,6 +82,33 @@ services:
       - registration_datahub_db
       - elasticsearch
       - elasticsearch_test
+
+  celery-beat:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-celery-beat
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+      args:
+        APP_ENV: DEV
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch
+      - elasticsearch_test
+
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
