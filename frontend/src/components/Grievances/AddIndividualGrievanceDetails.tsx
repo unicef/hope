@@ -11,6 +11,7 @@ import { LabelizedField } from '../LabelizedField';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
+import { getFlexFieldTextValue } from "../../utils/utils"
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -66,23 +67,13 @@ export function AddIndividualGrievanceDetails({
         </Grid>
       );
     }) || [];
-  const flexFieldLabes =
+  const flexFieldLabels =
     Object.entries(flexFields || {}).map(([key, value]: [string, string|string[]]) => {
-      let textValue = value;
-      const fieldAttribute = fieldsDict[key];
-      if (fieldAttribute.type === 'SELECT_ONE') {
-        textValue = fieldAttribute.choices.find((item) => item.value === value)
-          .labelEn;
-      }
-      if (fieldAttribute.type === 'SELECT_MANY') {
-          const values = fieldAttribute.choices.filter((item) => value.includes(item.value))
-          textValue = values.map((item) => item.labelEn).join(", ")
-      }
       return (
         <Grid key={key} item xs={6}>
           <LabelizedField
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={textValue}
+            value={getFlexFieldTextValue(key, value, fieldsDict[key])}
           />
         </Grid>
       );
@@ -98,7 +89,7 @@ export function AddIndividualGrievanceDetails({
         </Grid>
       );
     }) || [];
-  const allLabels = [...labels, ...flexFieldLabes, ...documentLabels];
+  const allLabels = [...labels, ...flexFieldLabels, ...documentLabels];
   return (
     <StyledBox>
       <Title>

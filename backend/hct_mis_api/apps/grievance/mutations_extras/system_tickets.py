@@ -1,5 +1,6 @@
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.grievance.mutations_extras.utils import remove_individual_and_reassign_roles
+from hct_mis_api.apps.grievance.mutations_extras.utils import withdraw_individual_and_reassign_roles, \
+    mark_as_duplicate_individual_and_reassign_roles
 from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
 
 
@@ -23,7 +24,7 @@ def close_system_flagging_ticket(grievance_ticket, info):
             individual,
         )
     else:
-        remove_individual_and_reassign_roles(ticket_details, individual, info)
+        withdraw_individual_and_reassign_roles(ticket_details, individual, info)
 
 
 def _clear_deduplication_individuals_fields(individuals):
@@ -57,4 +58,5 @@ def close_needs_adjudication_ticket(grievance_ticket, info):
         individual_to_remove = ticket_details.selected_individual
         unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
         _clear_deduplication_individuals_fields(unique_individuals)
-        remove_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
+        mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info,
+                                                        unique_individuals[0])
