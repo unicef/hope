@@ -1,18 +1,19 @@
 import openpyxl
 import copy
+import functools
 from django.core.files import File
 from openpyxl.utils import get_column_letter
-from django.db.models import Min, Max, Sum, Q, Count
+from django.db.models import Min, Max, Sum, Q, Count, F
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
 
-from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.reporting.models import DashboardReport
-from hct_mis_api.apps.household.models import Individual, Household, ACTIVE
+from hct_mis_api.apps.household.models import Individual, Household
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -32,18 +33,98 @@ class GenerateDashboardReportContentHelpers:
         return date.strftime("%Y-%m-%d")
 
     @staticmethod
-    def _is_report_global(report):
+    def _is_report_global(report: DashboardReport):
         return report.business_area.slug == "global"
 
-    @staticmethod
-    def get_beneficiaries(report: DashboardReport):
-        # TODO: implement
-        return []
+    @classmethod
+    def get_beneficiaries(self, report: DashboardReport):
+        # TODO add admin area and program filters
+        filter_vars = {
+            "delivery_date__year": report.year,
+            "delivered_quantity__gt": 0,
+        }
+        if not self._is_report_global(report):
+            filter_vars["business_area"] = report.business_area
+
+        tot_individual_count_fields = [
+            "total_female_0_5",
+            "total_female_6_11",
+            "total_female_12_17",
+            "total_female_18_59",
+            "total_female_60",
+            "total_male_0_5",
+            "total_male_6_11",
+            "total_male_12_17",
+            "total_male_18_59",
+            "total_male_60",
+        ]
+        tot_children_count_fields = [
+            "total_female_0_5",
+            "total_female_6_11",
+            "total_female_12_17",
+            "total_male_0_5",
+            "total_male_6_11",
+            "total_male_12_17",
+        ]
+
+        valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
+
+        instances = None
+        valid_payment_records_in_instance_filter_key = None
+        if self._is_report_global(report):
+            instances = (
+                BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
+                .annotate(business_area_code=F("code"))
+                .annotate(num_households=Count("paymentrecord__household", distinct=True))
+                .values("name", "id", "num_households", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "business_area"
+        else:
+            instances = (
+                Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+                .annotate(num_households=Count("cash_plans__payment_records__household", distinct=True))
+                .annotate(business_area_code=F("business_area__code"))
+                .values("id", "name", "num_households", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "cash_plan__program"
+
+        for instance in instances:
+            valid_payment_records_in_instance = valid_payment_records.filter(
+                **{valid_payment_records_in_instance_filter_key: instance["id"]}
+            )
+            households = (
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance)
+                .distinct()
+                .aggregate(
+                    total_female_0_5=Sum("female_age_group_0_5_count"),
+                    total_female_6_11=Sum("female_age_group_6_11_count"),
+                    total_female_12_17=Sum("female_age_group_12_17_count"),
+                    total_female_18_59=Sum("female_age_group_18_59_count"),
+                    total_female_60=Sum("female_age_group_60_count"),
+                    total_male_0_5=Sum("male_age_group_0_5_count"),
+                    total_male_6_11=Sum("male_age_group_6_11_count"),
+                    total_male_12_17=Sum("male_age_group_12_17_count"),
+                    total_male_18_59=Sum("male_age_group_18_59_count"),
+                    total_male_60=Sum("male_age_group_60_count"),
+                )
+            )
+            instance["total_children"] = functools.reduce(
+                lambda a, b: a + households[b] if households[b] else a, tot_children_count_fields, 0
+            )
+            instance["total_individuals"] = functools.reduce(
+                lambda a, b: a + households[b] if households[b] else a, tot_individual_count_fields, 0
+            )
+        return instances
 
     @classmethod
     def format_beneficiaries(self, instance, is_hq: bool) -> tuple:
-        # TODO: implement
-        return ()
+        return (
+            instance.get("business_area_code", ""),
+            instance.get("name", ""),
+            instance.get("num_households", ""),
+            instance.get("total_individuals", ""),
+            instance.get("total_children", ""),
+        )
 
 
 class GenerateDashboardReportService:
@@ -267,7 +348,7 @@ class GenerateDashboardReportService:
             print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
             print("ADDED HEADERS")
-            self._add_rows()
+            self._add_rows(active_sheet, report_type)
             print("ADDED ROWS")
             self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
             print("ADJUTED WIDTH")
