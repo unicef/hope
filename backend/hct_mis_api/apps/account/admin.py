@@ -146,25 +146,9 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
-    def get_context(self, request, pk=None, **kwargs):
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.object = None
-
-        context = {
-            **self.admin_site.each_context(request),
-            **kwargs,
-            "opts": opts,
-            "app_label": app_label,
-        }
-        if pk:
-            self.object = self.get_object(request, pk)
-            context["original"] = self.object
-        return context
-
     @action()
     def privileges(self, request, pk):
-        ctx = self.get_context(request, pk)
+        ctx = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/privileges.html", ctx)
 
     @action()

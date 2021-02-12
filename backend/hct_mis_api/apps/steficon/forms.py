@@ -1,8 +1,15 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.steficon.interpreters import mapping
 from hct_mis_api.apps.steficon.models import Rule
-from steficon.widget import CodeWidget
+from hct_mis_api.apps.steficon.widget import CodeWidget
+import black
+
+mode = black.Mode(
+    line_length=80,
+    string_normalization=True,
+)
 
 
 class RuleForm(forms.ModelForm):
@@ -10,7 +17,7 @@ class RuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        exclude = ("updated_by",)
+        exclude = ("updated_by", "created_by")
 
     def clean(self):
         self._validate_unique = True
@@ -18,4 +25,9 @@ class RuleForm(forms.ModelForm):
         language = self.cleaned_data["language"]
         i = mapping[language](code)
         i.validate()
+        try:
+            code = black.format_file_contents(code, fast=False, mode=mode)
+            self.cleaned_data["definition"] = code
+        except Exception as e:
+            raise ValidationError({"definition": str(e)})
         return self.cleaned_data
