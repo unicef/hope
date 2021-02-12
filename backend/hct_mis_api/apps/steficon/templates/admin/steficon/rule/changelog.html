@@ -21,7 +21,7 @@
             </tr>
         {% for state in original.history.all %}
             <tr>
-                <td><a href="{% url opts|admin_urlname:'diff' state.rule.pk %}?"state_pk="{{ state.pk }}">{{ state.timestamp }}</a></td>
+                <td><a href="{% url opts|admin_urlname:'diff' state.rule.pk %}?state_pk={{ state.pk }}">{{ state.timestamp }}</a></td>
                 <td>{{ state.updated_by }}</td>
                 <td>{{ state.affected_fields|join:"," }}</td>
 {#                <td>{{ rule }}</td>#}

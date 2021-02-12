@@ -101,6 +101,7 @@ pytz = "2020.4"
 social-auth-core = "3.3.3"
 urllib3 = "1.26.2"
 wasmer = "0.4.1"
+blask = "^0.2.2"
 
 
 [tool.poetry.dev-dependencies]

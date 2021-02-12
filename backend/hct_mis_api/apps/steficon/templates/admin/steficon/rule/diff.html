@@ -30,13 +30,13 @@
     <fieldset class="module collapse open">
         <h2>Diff with current code</h2>
         <div class="code d-none" id="tab-diff">
-            {{ state|diff_to_current }}
+            {{ state|diff:"before,current" }}
         </div>
     </fieldset>
     <fieldset class="module aligned collapse">
         <h2>Commit changes</h2>
         <div class="code d-none" id="tab-diff">
-            {{ state|diff_to_current }}
+            {{ state|diff:"after,before" }}
         </div>
     </fieldset>
 {% endblock %}
