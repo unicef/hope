@@ -2,8 +2,10 @@
     padding: 10px;
     margin-bottom: 20px;
 }
-table.diff {
-    font-family: Courier;
+table.diff, table.diff td {
+    font-family: monospace, sans-serif;
+}
+table.diff{
     font-size: 14px;
     border: medium;
     width: 100%;

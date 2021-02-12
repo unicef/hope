@@ -115,8 +115,8 @@ class RuleCommit(models.Model):
         return f"Commit #{self.id} of {self.rule}"
 
     @atomic
-    def revert(self):
-        for field in MONITORED_FIELDS:
+    def revert(self, fields=MONITORED_FIELDS):
+        for field in fields:
             setattr(self.rule, field, self.previous_state[field])
         self.rule.save()
 

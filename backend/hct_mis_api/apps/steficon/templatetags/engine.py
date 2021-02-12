@@ -3,10 +3,11 @@ import json
 
 from django import template
 from django.utils.safestring import mark_safe
-from pygments import highlight
+from pygments import highlight, lexers
 from pygments.formatters import HtmlFormatter
-from pygments.lexers import JsonLexer
-from pygments.lexers.python import PythonLexer
+
+# from pygments.lexers.python import PythonLexer
+# from pygments.lexers.data import JsonLexer
 
 register = template.Library()
 
@@ -29,7 +30,8 @@ def adults(hh):
 @register.filter
 def pretty_json(json_object):
     json_str = json.dumps(json_object, indent=4, sort_keys=True)
-    return mark_safe(highlight(json_str, JsonLexer(), HtmlFormatter()))
+    lex = lexers.get_lexer_by_name("json")
+    return mark_safe(highlight(json_str, lex, HtmlFormatter()))
 
 
 @register.filter
@@ -38,9 +40,10 @@ def get_item(dictionary, key):
 
 
 @register.filter
-def pygmentize(code, language):
-    formatter = HtmlFormatter(style="colorful")
-    formatted_code = highlight(code, PythonLexer(), formatter)
+def pygmentize(code):
+    formatter = HtmlFormatter(linenos=True)
+    lex = lexers.get_lexer_by_name("python")
+    formatted_code = highlight(code, lex, formatter)
     return mark_safe(formatted_code)
 
 
@@ -64,14 +67,14 @@ def diff(state):
 
 
 @register.filter
-def diff_to_current(state):
-    left = state.new_state["definition"].split("\n")
+def diff_to_current(state, headers=None):
+    left = state.previous_state["definition"].split("\n")
     right = state.rule.definition.split("\n")
+    if not headers:
+        headers = "Version: {state.version} code,Current code: Version {state.rule.version}"
+
+    left_header, right_header = headers.split(",")
+
     return mark_safe(
-        difflib.HtmlDiff().make_table(
-            left,
-            right,
-            f"Version: {state.version} code",
-            f"Current code: Version {state.rule.version}",
-        )
+        difflib.HtmlDiff().make_table(left, right, left_header.format(state=state), right_header.format(state=state))
     )
