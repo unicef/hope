@@ -21,8 +21,8 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
-from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode
+from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
+from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     decode_id_string,
@@ -481,6 +481,19 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
+
+    all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
+    all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
+
+    def resolve_all_households_flex_fields_attributes(self, info, **kwargs):
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_HOUSEHOLD
+        ).order_by("created_at")
+
+    def resolve_all_individuals_flex_fields_attributes(self, info, **kwargs):
+        yield from FlexibleAttribute.objects.filter(
+            associated_with=FlexibleAttribute.ASSOCIATED_WITH_INDIVIDUAL
+        ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
         return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")

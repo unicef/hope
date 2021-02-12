@@ -1,15 +1,30 @@
 import { gql } from 'apollo-boost';
 
 export const Allcharts = gql`
-  query AllCharts($businessAreaSlug: String!, $year: Int!) {
-    chartProgrammesBySector(businessAreaSlug: $businessAreaSlug, year: $year) {
+  query AllCharts(
+    $businessAreaSlug: String!
+    $year: Int!
+    $program: String
+    $administrativeArea: String
+  ) {
+    chartProgrammesBySector(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       labels
       datasets {
         label
         data
       }
     }
-    chartPaymentVerification(businessAreaSlug: $businessAreaSlug, year: $year) {
+    chartPaymentVerification(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       datasets {
         label
         data
@@ -20,13 +35,20 @@ export const Allcharts = gql`
     chartVolumeByDeliveryMechanism(
       businessAreaSlug: $businessAreaSlug
       year: $year
+      program: $program
+      administrativeArea: $administrativeArea
     ) {
       datasets {
         data
       }
       labels
     }
-    chartPayment(businessAreaSlug: $businessAreaSlug, year: $year) {
+    chartPayment(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       datasets {
         data
       }
@@ -61,6 +83,8 @@ export const Allcharts = gql`
     chartIndividualsReachedByAgeAndGender(
       businessAreaSlug: $businessAreaSlug
       year: $year
+      program: $program
+      administrativeArea: $administrativeArea
     ) {
       datasets {
         data
@@ -70,6 +94,8 @@ export const Allcharts = gql`
     chartIndividualsWithDisabilityReachedByAge(
       businessAreaSlug: $businessAreaSlug
       year: $year
+      program: $program
+      administrativeArea: $administrativeArea
     ) {
       datasets {
         data
@@ -90,7 +116,12 @@ export const Allcharts = gql`
         totalCashTransferred
       }
     }
-    chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year) {
+    chartPlannedBudget(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       datasets {
         data
         label
