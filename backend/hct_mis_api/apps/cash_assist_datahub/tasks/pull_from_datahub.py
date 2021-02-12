@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.db.models import Count
 
@@ -58,6 +60,7 @@ class PullFromDatahubTask:
         "total_persons_covered": "total_persons_covered",
         "full_name": "full_name",
         "household_id": "household_mis_id",
+        "head_of_household_id": "head_of_household_mis_id",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
         "status": "status",
