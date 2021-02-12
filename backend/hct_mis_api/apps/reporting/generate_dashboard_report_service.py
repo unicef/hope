@@ -381,7 +381,7 @@ class GenerateDashboardReportService:
             print("IN FOR LOOP", report_type)
             sheet_title = self._report_type_to_str(report_type)
             print("SHEET TITLE", sheet_title)
-            active_sheet = self.wb.create_sheet(sheet_title)
+            active_sheet = self.wb.create_sheet(sheet_title, -1)
             print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
             print("ADDED HEADERS")
