@@ -116,8 +116,7 @@ class HouseholdFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(head_of_household__given_name__icontains=value)
-            q_obj |= Q(head_of_household__family_name__icontains=value)
+            q_obj |= Q(head_of_household__full_name__icontains=value)
             q_obj |= Q(unicef_id__icontains=value)
             q_obj |= Q(id__icontains=value)
         return qs.filter(q_obj)
