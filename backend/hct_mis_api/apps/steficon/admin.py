@@ -106,7 +106,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
         context["state"] = state
         # context["action"] = "Code history"
         context["title"] = (
-            f"Change #{state.id} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
+            f"Change #{state.version} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
         )
 
         return TemplateResponse(request, "admin/steficon/rule/diff.html", context)

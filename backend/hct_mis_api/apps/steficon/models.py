@@ -72,8 +72,8 @@ class Rule(TimeStampedUUIDModel):
                 RuleCommit.objects.create(
                     rule=self,
                     version=self.version,
-                    previous_state=stored,
-                    new_state=self.as_dict(),
+                    before=stored,
+                    after=self.as_dict(),
                     affected_fields=changes,
                     updated_by=self.updated_by,
                 )
@@ -102,8 +102,8 @@ class RuleCommit(models.Model):
     updated_by = models.ForeignKey("account.User", related_name="+", null=True, on_delete=models.PROTECT)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
-    previous_state = JSONField(help_text="The record before change", editable=False)
-    new_state = JSONField(help_text="The record after apply changes", editable=False)
+    before = JSONField(help_text="The record before change", editable=False)
+    after = JSONField(help_text="The record after apply changes", editable=False)
 
     class Meta:
         verbose_name = "Rule (History)"
@@ -117,17 +117,17 @@ class RuleCommit(models.Model):
     @atomic
     def revert(self, fields=MONITORED_FIELDS):
         for field in fields:
-            setattr(self.rule, field, self.previous_state[field])
+            setattr(self.rule, field, self.before[field])
         self.rule.save()
 
-    def diff_with_current(self):
-        data1 = self.rule.as_dict()
-        data2 = Rule(**self.new_state).as_dict()
-        diff = set(data1.items()).symmetric_difference(data2.items())
-        return dict(diff)
-
-    def diff_with_sta(self):
-        data1 = Rule(**self.previous_state).as_dict()
-        data2 = Rule(**self.new_state).as_dict()
-        diff = set(data1.items()).symmetric_difference(data2.items())
-        return dict(diff)
+    # def diff_with_current(self):
+    #     data1 = self.rule.as_dict()
+    #     data2 = Rule(**self.af).as_dict()
+    #     diff = set(data1.items()).symmetric_difference(data2.items())
+    #     return dict(diff)
+    #
+    # def diff_with_sta(self):
+    #     data1 = Rule(**self.previous_state).as_dict()
+    #     data2 = Rule(**self.new_state).as_dict()
+    #     diff = set(data1.items()).symmetric_difference(data2.items())
+    #     return dict(diff)

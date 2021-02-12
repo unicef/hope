@@ -1,4 +1,4 @@
-{% extends "admin_extra_urls/action_page.html" %}{% load engine %}
+{% extends "admin_extra_urls/change_form.html" %}{% load engine %}
 {% block after_related_objects %}
     <table>
     <tr>
@@ -14,7 +14,7 @@
         <td>Updates</td>
     </tr>
     <tr>
-        <td>{{ original.previous_state|pretty_json }}</td>
+        <td>{{ original.before|pretty_json }}</td>
         <td>{{ original.changes|pretty_json }}</td>
     </tr>
     </table>
