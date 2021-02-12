@@ -17,7 +17,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_PENDING = "PENDING"
     STATUS_ERROR = "ERROR"
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Sucess")),
+        (STATUS_SUCCESS, _("Success")),
         (STATUS_PENDING, _("Pending")),
         (STATUS_ERROR, _("Error")),
     )
@@ -78,7 +78,6 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     entitlement_card_issue_date = models.DateField()
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        default="ACTIVE",
         max_length=20,
     )
     currency = models.CharField(
