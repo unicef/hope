@@ -21,8 +21,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
     handle_role,
     prepare_previous_documents,
-    verify_flex_fields,
-    remove_individual_and_reassign_roles,
+    verify_flex_fields, withdraw_individual_and_reassign_roles,
 )
 from hct_mis_api.apps.household.models import (
     Individual,
@@ -602,4 +601,4 @@ def close_delete_individual_ticket(grievance_ticket, info):
         return
 
     individual_to_remove = ticket_details.individual
-    remove_individual_and_reassign_roles(ticket_details, individual_to_remove, info)
+    withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove, info)

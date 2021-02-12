@@ -29,7 +29,8 @@ from hct_mis_api.apps.core.utils import (
     chart_map_choices,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    chart_filters_decoder
+    chart_filters_decoder,
+    chart_create_filter_query
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -237,6 +238,9 @@ class Query(graphene.ObjectType):
         TableTotalCashTransferred, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
         program=graphene.String(required=False), administrative_area=graphene.String(required=False)
     )
+    chart_total_transferred_cash_by_country = graphene.Field(
+        ChartDetailedDatasetsNode, year=graphene.Int(required=True)
+    )
 
     payment_record_status_choices = graphene.List(ChoiceObject)
     payment_record_entitlement_card_status_choices = graphene.List(ChoiceObject)
@@ -358,12 +362,19 @@ class Query(graphene.ObjectType):
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            },
         )
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity"))[
-                        "delivered_quantity__sum"
+                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity_usd"))[
+                        "delivered_quantity_usd__sum"
                     ]
                     for delivery_type in delivery_type_choices_mapping.keys()
                 ]
@@ -374,16 +385,27 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
-        status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            }
         )
         dataset = [
-            {"data": [payment_records.filter(status=status).count() for status in status_choices_mapping.keys()]}
+            {
+                "data": [
+                    payment_records.filter(delivered_quantity__gt=0).count(),
+                    payment_records.filter(delivered_quantity=0).count()
+                ]
+            }
         ]
-        return {"labels": status_choices_mapping.values(), "datasets": dataset}
+        return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
@@ -392,9 +414,15 @@ class Query(graphene.ObjectType):
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            },
         )
-        return {"total": payment_records.aggregate(Sum("delivered_quantity"))["delivered_quantity__sum"]}
+        return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
@@ -426,3 +454,36 @@ class Query(graphene.ObjectType):
             for index, (admin_area, quantity) in enumerate(transferred_money_by_admin_area.items())
         ]
         return {"data": data}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
+            year,
+            business_area_slug_filter={"business_area__slug": "global"},
+        )
+        countries_and_amounts = (
+            payment_records.values("business_area__name")
+            .order_by("business_area__name")
+            .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
+            .annotate(total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
+        )
+
+        labels = []
+        planned_amounts = []
+        cash_transferred = []
+        voucher_transferred = []
+        for data_dict in countries_and_amounts:
+            labels.append(data_dict.get("business_area__name"))
+            planned_amounts.append(data_dict.get("to_be_delivered"))
+            cash_transferred.append(data_dict.get("total_delivered_cash"))
+            voucher_transferred.append(data_dict.get("total_delivered_voucher", 0))
+
+        # TODO: use real amount when Voucher type will be added
+        datasets = [
+            {"label": "Planned amount", "data": planned_amounts},
+            {"label": "Actual cash transferred", "data": cash_transferred},
+            {"label": "Actual voucher transferred", "data": voucher_transferred},
+        ]
+
+        return {"labels": labels, "datasets": datasets}
