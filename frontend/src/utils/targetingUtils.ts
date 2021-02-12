@@ -154,6 +154,10 @@ export function formatCriteriaFilters(filters) {
         values = [each.value.from, each.value.to];
         comparisionMethod = 'RANGE';
         break;
+      case 'BOOL':
+        comparisionMethod = 'EQUALS';
+        values = [each.value];
+        break;
       default:
         comparisionMethod = 'CONTAINS';
     }

@@ -44,9 +44,24 @@ def flex_field_households(o):
 
 def flex_field_individual(o):
     return {
-        "seeing_disability_i_f": random.choice(["some_difficulty", "lot_difficulty", "cannot_do", None]),
-        "hearing_disability_i_f": random.choice(["some_difficulty", "lot_difficulty", "cannot_do", None]),
-        "physical_disability_i_f": random.choice(["some_difficulty", "lot_difficulty", "cannot_do", None]),
+        "wellbeing_index_i_f": random.choice(["24", "150d", "666", None]),
+        "school_enrolled_before_i_f": random.choice(["0", "1", None]),
+        "diff_challenges_i_f": random.choice(
+            [
+                "bullying",
+                "distance_school",
+                "exclude_disabled",
+                "financial_cons",
+                "no_interest",
+                "performance_issues",
+                "physical_abuse",
+                "poor_teaching",
+                "psych_distress",
+                "safety_fear",
+                "verbal_abuse",
+                None
+            ]
+        ),
     }
 
 
