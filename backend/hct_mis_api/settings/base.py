@@ -12,6 +12,8 @@ from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
+
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -486,29 +488,27 @@ if SENTRY_DSN:
     from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,  # Capture info and above as breadcrumbs
-        event_level=logging.ERROR  # Send errors as events
+        level=logging.INFO, event_level=logging.ERROR  # Capture info and above as breadcrumbs  # Send errors as events
     )
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(transaction_style='url'),
-                      sentry_logging,
-                      # RedisIntegration(),
-                      # CeleryIntegration()
-                      ],
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            sentry_logging,
+            # RedisIntegration(),
+            # CeleryIntegration()
+        ],
         release=get_full_version(),
-        send_default_pii=True
+        send_default_pii=True,
     )
 
-CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_BROKER_URL = f"redis://{REDIS_INSTANCE}/0"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
-# CELERY_BEAT_SCHEDULE = {
-#     "tu wale taska elo": {
-#         "task": "task",
-#         "schedule": crontab(hour=23, minute=59),
-#     },
-# }
+CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
