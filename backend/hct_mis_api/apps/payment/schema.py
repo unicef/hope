@@ -382,16 +382,27 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
-        status_choices_mapping = chart_map_choices(PaymentRecord.STATUS_CHOICE)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas"
+                )
+            }
         )
         dataset = [
-            {"data": [payment_records.filter(status=status).count() for status in status_choices_mapping.keys()]}
+            {
+                "data": [
+                    payment_records.filter(delivered_quantity__gt=0).count(),
+                    payment_records.filter(delivered_quantity=0).count()
+                ]
+            }
         ]
-        return {"labels": status_choices_mapping.values(), "datasets": dataset}
+        return {"labels": ["Successful Payments", "Unsuccessful Payments"], "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
