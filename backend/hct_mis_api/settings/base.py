@@ -500,3 +500,15 @@ if SENTRY_DSN:
         release=get_full_version(),
         send_default_pii=True
     )
+
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+# CELERY_BEAT_SCHEDULE = {
+#     "tu wale taska elo": {
+#         "task": "task",
+#         "schedule": crontab(hour=23, minute=59),
+#     },
+# }
