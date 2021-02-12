@@ -13,7 +13,7 @@ export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
-    admin2: '',
+    administrativeArea: '',
   });
   if (!permissions) return null;
 
@@ -68,6 +68,7 @@ export function DashboardPage(): React.ReactElement {
           <DashboardYearPage
             selectedTab={selectedTab}
             year={years[selectedTab]}
+            filter={filter}
           />
         </>
       ) : (
