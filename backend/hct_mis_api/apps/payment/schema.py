@@ -400,8 +400,8 @@ class Query(graphene.ObjectType):
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivered_quantity__gt=0).count(),
-                    payment_records.filter(delivered_quantity=0).count()
+                    payment_records.filter(delivered_quantity_usd__gt=0).count(),
+                    payment_records.filter(delivered_quantity_usd=0).count()
                 ]
             }
         ]
