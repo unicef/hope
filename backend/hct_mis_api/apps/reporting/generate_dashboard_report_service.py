@@ -38,11 +38,14 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_beneficiaries(self, report: DashboardReport):
-        # TODO add admin area and program filters
         filter_vars = {
             "delivery_date__year": report.year,
             "delivered_quantity__gt": 0,
         }
+        if report.admin_area:
+            filter_vars["household__admin_area"] = report.admin_area
+        if report.program:
+            filter_vars["cash_plan__program"] = report.program
         if not self._is_report_global(report):
             filter_vars["business_area"] = report.business_area
 
@@ -114,10 +117,33 @@ class GenerateDashboardReportContentHelpers:
             instance["total_individuals"] = functools.reduce(
                 lambda a, b: a + households[b] if households[b] else a, tot_individual_count_fields, 0
             )
-        return instances
+        # get total distincts (can't use the sum of column since some households might belong to multiple programs)
+        households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
+        total_households = households.count()
+        households_aggr = households.aggregate(
+            total_female_0_5=Sum("female_age_group_0_5_count"),
+            total_female_6_11=Sum("female_age_group_6_11_count"),
+            total_female_12_17=Sum("female_age_group_12_17_count"),
+            total_female_18_59=Sum("female_age_group_18_59_count"),
+            total_female_60=Sum("female_age_group_60_count"),
+            total_male_0_5=Sum("male_age_group_0_5_count"),
+            total_male_6_11=Sum("male_age_group_6_11_count"),
+            total_male_12_17=Sum("male_age_group_12_17_count"),
+            total_male_18_59=Sum("male_age_group_18_59_count"),
+            total_male_60=Sum("male_age_group_60_count"),
+        )
+        return instances, (
+            total_households,
+            functools.reduce(
+                lambda a, b: a + households_aggr[b] if households_aggr[b] else a, tot_individual_count_fields, 0
+            ),
+            functools.reduce(
+                lambda a, b: a + households_aggr[b] if households_aggr[b] else a, tot_children_count_fields, 0
+            ),
+        )
 
     @classmethod
-    def format_beneficiaries(self, instance, is_hq: bool) -> tuple:
+    def format_beneficiaries_row(self, instance, is_hq: bool) -> tuple:
         return (
             instance.get("business_area_code", ""),
             instance.get("name", ""),
@@ -125,6 +151,10 @@ class GenerateDashboardReportContentHelpers:
             instance.get("total_individuals", ""),
             instance.get("total_children", ""),
         )
+
+    @classmethod
+    def format_beneficiaries_total(self, totals):
+        return ("", "Total distinct") + tuple(totals)
 
 
 class GenerateDashboardReportService:
@@ -287,7 +317,8 @@ class GenerateDashboardReportService:
     ROW_CONTENT_METHODS = {
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
-            GenerateDashboardReportContentHelpers.format_beneficiaries,
+            GenerateDashboardReportContentHelpers.format_beneficiaries_row,
+            GenerateDashboardReportContentHelpers.format_beneficiaries_total,
         ),
         # TODO: add the rest of the methods
     }
@@ -299,7 +330,6 @@ class GenerateDashboardReportService:
         self.report = report
         self.report_types = report.report_type
         self.business_area = report.business_area
-        # TODO check if this is best way to determin if global
         self.hq_or_country = self.HQ if report.business_area.slug == "global" else self.COUNTRY
 
     def _create_workbook(self) -> openpyxl.Workbook:
@@ -328,11 +358,14 @@ class GenerateDashboardReportService:
 
     def _add_rows(self, active_sheet, report_type):
         get_row_methods = self.ROW_CONTENT_METHODS[report_type]
-        all_instances = get_row_methods[0](self.report)
+        all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
             row = get_row_methods[1](instance, self.hq_or_country == self.HQ)
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
+        totals_row = get_row_methods[2](totals)
+        str_totals_row = self._stringify_all_values(totals_row)
+        active_sheet.append(str_totals_row)
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
