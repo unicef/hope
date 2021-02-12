@@ -74,7 +74,6 @@ class TestUpdateProgram(APITestCase):
 
         updated_program = Program.objects.get(id=self.program.id)
         if should_be_updated:
-            print(updated_program.status)
             assert updated_program.status == Program.ACTIVE
             assert updated_program.name == "updated name"
         else:

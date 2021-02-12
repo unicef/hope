@@ -1,5 +1,6 @@
 # Create your models here.
 from django.db import models
+from django.utils import timezone
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
@@ -15,6 +16,35 @@ class TimeStampedUUIDModel(UUIDModel):
         abstract = True
 
 
+class SoftDeletableModelWithDate(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+    is_removed = models.BooleanField(default=False)
+    removed_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    objects = SoftDeletableManager()
+    all_objects = models.Manager()
+
+    def delete(self, using=None, soft=True, *args, **kwargs):
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.removed_date = timezone.now()
+            self.save(using=using)
+        else:
+            return super().delete(using=using, *args, **kwargs)
+
+
 class SoftDeletionTreeManager(TreeManager):
     def get_queryset(self, *args, **kwargs):
         """
@@ -22,9 +52,9 @@ class SoftDeletionTreeManager(TreeManager):
         """
         return (
             super(TreeManager, self)
-            .get_queryset(*args, **kwargs)
-            .filter(is_removed=False)
-            .order_by(self.tree_id_attr, self.left_attr)
+                .get_queryset(*args, **kwargs)
+                .filter(is_removed=False)
+                .order_by(self.tree_id_attr, self.left_attr)
         )
 
 
@@ -44,6 +74,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
         """
         if soft:
             self.is_removed = True
+            self.removed_date = timezone.now()
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
@@ -93,7 +124,7 @@ class AbstractSession(models.Model):
 
 
 class AbstractSyncable(models.Model):
-    last_sync_at = models.DateTimeField(null=True)
+    last_sync_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
