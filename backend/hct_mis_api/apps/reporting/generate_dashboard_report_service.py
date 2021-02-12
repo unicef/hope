@@ -3,6 +3,7 @@ import copy
 import functools
 from django.core.files import File
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font
 from django.db.models import Min, Max, Sum, Q, Count, F
 from django.contrib.postgres.aggregates.general import ArrayAgg
 from django.conf import settings
@@ -71,9 +72,9 @@ class GenerateDashboardReportContentHelpers:
         ]
 
         valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
-
         instances = None
         valid_payment_records_in_instance_filter_key = None
+
         if self._is_report_global(report):
             instances = (
                 BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
@@ -132,6 +133,7 @@ class GenerateDashboardReportContentHelpers:
             total_male_18_59=Sum("male_age_group_18_59_count"),
             total_male_60=Sum("male_age_group_60_count"),
         )
+        # return instances for rows and totals row info
         return instances, (
             total_households,
             functools.reduce(
@@ -142,8 +144,8 @@ class GenerateDashboardReportContentHelpers:
             ),
         )
 
-    @classmethod
-    def format_beneficiaries_row(self, instance, is_hq: bool) -> tuple:
+    @staticmethod
+    def format_beneficiaries_row(instance: dict, is_hq: bool) -> tuple:
         return (
             instance.get("business_area_code", ""),
             instance.get("name", ""),
@@ -152,8 +154,8 @@ class GenerateDashboardReportContentHelpers:
             instance.get("total_children", ""),
         )
 
-    @classmethod
-    def format_beneficiaries_total(self, totals):
+    @staticmethod
+    def format_beneficiaries_total(totals) -> tuple:
         return ("", "Total distinct") + tuple(totals)
 
 
@@ -366,10 +368,12 @@ class GenerateDashboardReportService:
         totals_row = get_row_methods[2](totals)
         str_totals_row = self._stringify_all_values(totals_row)
         active_sheet.append(str_totals_row)
+        return len(all_instances)
 
     def generate_workbook(self) -> openpyxl.Workbook:
         self._create_workbook()
         self._format_meta_tab()
+        self._add_font_style_to_sheet(self.ws_meta)
         self._adjust_column_width_from_col(self.ws_meta, 1, 5, 1)
 
         # loop through all selected report types and add sheet for each
@@ -381,9 +385,10 @@ class GenerateDashboardReportService:
             print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
             print("ADDED HEADERS")
-            self._add_rows(active_sheet, report_type)
+            number_of_rows = self._add_rows(active_sheet, report_type)
             print("ADDED ROWS")
             self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
+            self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
             print("ADJUTED WIDTH")
         return self.wb
 
@@ -459,6 +464,13 @@ class GenerateDashboardReportService:
                 else value
             )
             ws.column_dimensions[col_name].width = value
+
+    def _add_font_style_to_sheet(self, ws, totals_row=None):
+        bold_font = Font(bold=True)
+        for cell in ws["1:1"]:
+            cell.font = bold_font
+        if totals_row:
+            ws[f"B{totals_row}"].font = bold_font
 
     def _report_type_to_str(self, report_type) -> str:
         return str([name for value, name in DashboardReport.REPORT_TYPES if value == report_type][0])
