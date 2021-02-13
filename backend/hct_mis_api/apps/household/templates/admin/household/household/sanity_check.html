@@ -69,22 +69,30 @@
         <tr>
             <td><h3>MEMBERS</h3></td>
         </tr>
-        <th>Relationship</th><th>Name</th><th>Unicef ID</th><th>Gender</th>
-        {% for member in original.individuals.all %}
+    <tr>
+        <th>Relationship</th><th>Name</th><th>Unicef ID</th><th>Gender</th><th>Duplicate</th><th>Withdrawn</th>
+    </tr>
+        {% for member in active_individuals.all %}
             <tr>
                 <td>{{ member.relationship }}</td>
                 <td>{{ member.full_name }}</td>
                 <td>{{ member.unicef_id }}</td>
                 <td>{{ member.sex }}</td>
+                <td>{{ member.duplicate }}</td>
+                <td>{{ member.withdrawn }}</td>
             </tr>
         {% endfor %}
     </table>
-    <h3>GHOSTS</h3>
+    <h3>GHOST RECORDS</h3>
     <table>
-        {% for ghost in ghosts %}
+        {% for ghost in ghosts_individuals.all %}
             <tr>
                 <td>{{ member.relationship }}</td>
-                <td>{{ member }}</td>
+                <td>{{ member.full_name }}</td>
+                <td>{{ member.unicef_id }}</td>
+                <td>{{ member.sex }}</td>
+                <td>{{ member.duplicate }}</td>
+                <td>{{ member.withdrawn }}</td>
             </tr>
         {% endfor %}
     </table>
