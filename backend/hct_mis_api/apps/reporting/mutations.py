@@ -75,7 +75,7 @@ class CreateReport(ReportValidator, PermissionMutation):
 
 
 class CreateDashboardReportInput(graphene.InputObjectType):
-    report_types = graphene.List(graphene.Int, required=True)
+    report_types = graphene.List(graphene.String, required=True)
     business_area_slug = graphene.String(required=True)
     year = graphene.Int(required=True)
     admin_area = graphene.ID()
