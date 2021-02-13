@@ -109,7 +109,7 @@ class CreateDashboardReport(PermissionMutation):
             report_vars["program"] = program
 
         if admin_area_id:
-            admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id), business_area=business_area)
+            admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
             report_vars["admin_area"] = admin_area
 
         report = DashboardReport.objects.create(**report_vars)

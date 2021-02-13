@@ -3,10 +3,10 @@ import { Tabs, Tab } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
-import { DashboardYearPage } from './DashboardYearPage';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
