@@ -43,7 +43,6 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [selected, setSelected] = useState([]);
   const businessArea = useBusinessArea();
   const { showMessage } = useSnackbar();
-  console.log(filter, year);
   const numSelected = selected.length;
   const isSelected = (id: string): boolean => selected.includes(id);
 
@@ -101,18 +100,16 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     });
   };
 
-  const prepareVariables = () => ({
-    businessAreaSlug: businessArea,
-    reportTypes: selected,
-    year: parseInt(year, 10),
-    adminArea: filter.admin2,
-    program: filter.program,
-  });
-
   const submitFormHandler = async (): Promise<void> => {
     const response = await mutate({
       variables: {
-        reportData: prepareVariables(),
+        reportData: {
+          businessAreaSlug: businessArea,
+          reportTypes: selected,
+          year: parseInt(year, 10),
+          adminArea: filter.administrativeArea?.node.id,
+          program: filter.program,
+        },
       },
     });
     if (!response.errors && response.data.createDashboardReport.success) {
@@ -120,6 +117,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     } else {
       showMessage('Report create action failed.');
     }
+    setSelected([]);
     setDialogOpen(false);
   };
 
