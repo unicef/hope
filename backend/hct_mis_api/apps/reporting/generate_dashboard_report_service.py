@@ -35,7 +35,7 @@ class GenerateDashboardReportContentHelpers:
         return report.business_area.slug == "global"
 
     @classmethod
-    def get_beneficiaries(self, report: DashboardReport):
+    def _format_filters_for_payment_records(self, report: DashboardReport):
         filter_vars = {
             "delivery_date__year": report.year,
             "delivered_quantity__gt": 0,
@@ -46,6 +46,12 @@ class GenerateDashboardReportContentHelpers:
             filter_vars["cash_plan__program"] = report.program
         if not self._is_report_global(report):
             filter_vars["business_area"] = report.business_area
+
+        return filter_vars
+
+    @classmethod
+    def get_beneficiaries(self, report: DashboardReport):
+        filter_vars = self._format_filters_for_payment_records(report)
 
         tot_individual_count_fields = [
             "total_female_0_5",
@@ -89,25 +95,26 @@ class GenerateDashboardReportContentHelpers:
             )
             valid_payment_records_in_instance_filter_key = "cash_plan__program"
 
+        def aggregate_households(households):
+            return households.aggregate(
+                total_female_0_5=Sum("female_age_group_0_5_count"),
+                total_female_6_11=Sum("female_age_group_6_11_count"),
+                total_female_12_17=Sum("female_age_group_12_17_count"),
+                total_female_18_59=Sum("female_age_group_18_59_count"),
+                total_female_60=Sum("female_age_group_60_count"),
+                total_male_0_5=Sum("male_age_group_0_5_count"),
+                total_male_6_11=Sum("male_age_group_6_11_count"),
+                total_male_12_17=Sum("male_age_group_12_17_count"),
+                total_male_18_59=Sum("male_age_group_18_59_count"),
+                total_male_60=Sum("male_age_group_60_count"),
+            )
+
         for instance in instances:
             valid_payment_records_in_instance = valid_payment_records.filter(
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
-            households = (
-                Household.objects.filter(payment_records__in=valid_payment_records_in_instance)
-                .distinct()
-                .aggregate(
-                    total_female_0_5=Sum("female_age_group_0_5_count"),
-                    total_female_6_11=Sum("female_age_group_6_11_count"),
-                    total_female_12_17=Sum("female_age_group_12_17_count"),
-                    total_female_18_59=Sum("female_age_group_18_59_count"),
-                    total_female_60=Sum("female_age_group_60_count"),
-                    total_male_0_5=Sum("male_age_group_0_5_count"),
-                    total_male_6_11=Sum("male_age_group_6_11_count"),
-                    total_male_12_17=Sum("male_age_group_12_17_count"),
-                    total_male_18_59=Sum("male_age_group_18_59_count"),
-                    total_male_60=Sum("male_age_group_60_count"),
-                )
+            households = aggregate_households(
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct()
             )
             instance["total_children"] = functools.reduce(
                 lambda a, b: a + households[b] if households[b] else a, tot_children_count_fields, 0
@@ -118,18 +125,7 @@ class GenerateDashboardReportContentHelpers:
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
         households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
         total_households = households.count()
-        households_aggr = households.aggregate(
-            total_female_0_5=Sum("female_age_group_0_5_count"),
-            total_female_6_11=Sum("female_age_group_6_11_count"),
-            total_female_12_17=Sum("female_age_group_12_17_count"),
-            total_female_18_59=Sum("female_age_group_18_59_count"),
-            total_female_60=Sum("female_age_group_60_count"),
-            total_male_0_5=Sum("male_age_group_0_5_count"),
-            total_male_6_11=Sum("male_age_group_6_11_count"),
-            total_male_12_17=Sum("male_age_group_12_17_count"),
-            total_male_18_59=Sum("male_age_group_18_59_count"),
-            total_male_60=Sum("male_age_group_60_count"),
-        )
+        households_aggr = aggregate_households(households)
         # return instances for rows and totals row info
         return instances, (
             total_households,
@@ -151,9 +147,99 @@ class GenerateDashboardReportContentHelpers:
             instance.get("total_children", ""),
         )
 
+    @classmethod
+    def get_individuals(self, report: DashboardReport):
+        filter_vars = self._format_filters_for_payment_records(report)
+
+        valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
+        instances = None
+        valid_payment_records_in_instance_filter_key = None
+
+        if self._is_report_global(report):
+            instances = (
+                BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
+                .distinct()
+                .annotate(business_area_code=F("code"))
+                .values("name", "id", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "business_area"
+        else:
+            instances = (
+                Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+                .distinct()
+                .annotate(business_area_code=F("business_area__code"))
+                .values("id", "name", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "cash_plan__program"
+
+        def aggregate_households(households):
+            return households.aggregate(
+                total_female_0_5=Sum("female_age_group_0_5_count"),
+                total_female_0_5_disabled=Sum("female_age_group_0_5_disabled_count"),
+                total_female_6_11=Sum("female_age_group_6_11_count"),
+                total_female_6_11_disabled=Sum("female_age_group_6_11_disabled_count"),
+                total_female_12_17=Sum("female_age_group_12_17_count"),
+                total_female_12_17_disabled=Sum("female_age_group_12_17_disabled_count"),
+                total_female_18_59=Sum("female_age_group_18_59_count"),
+                total_female_18_59_disabled=Sum("female_age_group_18_59_disabled_count"),
+                total_female_60=Sum("female_age_group_60_count"),
+                total_female_60_disabled=Sum("female_age_group_60_disabled_count"),
+                total_male_0_5=Sum("male_age_group_0_5_count"),
+                total_male_0_5_disabled=Sum("male_age_group_0_5_disabled_count"),
+                total_male_6_11=Sum("male_age_group_6_11_count"),
+                total_male_6_11_disabled=Sum("male_age_group_6_11_disabled_count"),
+                total_male_12_17=Sum("male_age_group_12_17_count"),
+                total_male_12_17_disabled=Sum("male_age_group_12_17_disabled_count"),
+                total_male_18_59=Sum("male_age_group_18_59_count"),
+                total_male_18_59_disabled=Sum("male_age_group_18_59_disabled_count"),
+                total_male_60=Sum("male_age_group_60_count"),
+                total_male_60_disabled=Sum("male_age_group_60_disabled_count"),
+            )
+
+        for instance in instances:
+            valid_payment_records_in_instance = valid_payment_records.filter(
+                **{valid_payment_records_in_instance_filter_key: instance["id"]}
+            )
+            households = aggregate_households(
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct()
+            )
+
+            for key, value in households.items():
+                instance[key] = value
+
+        # get total distincts (can't use the sum of column since some households might belong to multiple programs)
+        households_aggr = aggregate_households(
+            Household.objects.filter(payment_records__in=valid_payment_records).distinct()
+        )
+        # return instances for rows and totals row info
+        return instances, tuple([value for key, value in households_aggr.items()])
+
     @staticmethod
-    def format_beneficiaries_total(totals) -> tuple:
-        return ("", "Total distinct") + tuple(totals)
+    def format_individuals_row(instance: dict, is_hq: bool) -> tuple:
+        return (
+            instance.get("business_area_code", ""),
+            instance.get("name", ""),
+            instance.get("total_female_0_5", ""),
+            instance.get("total_female_0_5_disabled", ""),
+            instance.get("total_female_6_11", ""),
+            instance.get("total_female_6_11_disabled", ""),
+            instance.get("total_female_12_17", ""),
+            instance.get("total_female_12_17_disabled", ""),
+            instance.get("total_female_18_59", ""),
+            instance.get("total_female_18_59_disabled", ""),
+            instance.get("total_female_60", ""),
+            instance.get("total_female_60_disabled", ""),
+            instance.get("total_male_0_5", ""),
+            instance.get("total_male_0_5_disabled", ""),
+            instance.get("total_male_6_11", ""),
+            instance.get("total_male_6_11_disabled", ""),
+            instance.get("total_male_12_17", ""),
+            instance.get("total_male_12_17_disabled", ""),
+            instance.get("total_male_18_59", ""),
+            instance.get("total_male_18_59_disabled", ""),
+            instance.get("total_male_60", ""),
+            instance.get("total_male_60_disabled", ""),
+        )
 
 
 class GenerateDashboardReportService:
@@ -317,8 +403,11 @@ class GenerateDashboardReportService:
         DashboardReport.BENEFICIARIES_REACHED: (
             GenerateDashboardReportContentHelpers.get_beneficiaries,
             GenerateDashboardReportContentHelpers.format_beneficiaries_row,
-            GenerateDashboardReportContentHelpers.format_beneficiaries_total,
         ),
+        DashboardReport.INDIVIDUALS_REACHED: (
+            GenerateDashboardReportContentHelpers.get_individuals,
+            GenerateDashboardReportContentHelpers.format_individuals_row,
+        )
         # TODO: add the rest of the methods
     }
     META_HEADERS = ("report type", "creation date", "created by", "business area", "report year")
@@ -355,6 +444,14 @@ class GenerateDashboardReportService:
         active_sheet.append(headers_row)
         return len(headers_row)
 
+    def _append_totals_row(self, active_sheet, report_type, totals):
+        label = "Total"
+        if report_type in [DashboardReport.BENEFICIARIES_REACHED, DashboardReport.INDIVIDUALS_REACHED]:
+            label = "Total distinct"
+        totals_row = ("", label) + totals
+        str_totals_row = self._stringify_all_values(totals_row)
+        active_sheet.append(str_totals_row)
+
     def _add_rows(self, active_sheet, report_type):
         get_row_methods = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
@@ -362,9 +459,7 @@ class GenerateDashboardReportService:
             row = get_row_methods[1](instance, self.hq_or_country == self.HQ)
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
-        totals_row = get_row_methods[2](totals)
-        str_totals_row = self._stringify_all_values(totals_row)
-        active_sheet.append(str_totals_row)
+        self._append_totals_row(active_sheet, report_type, totals)
         return len(all_instances)
 
     def generate_workbook(self) -> openpyxl.Workbook:
