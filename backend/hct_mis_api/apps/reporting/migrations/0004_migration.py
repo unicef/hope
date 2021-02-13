@@ -37,17 +37,18 @@ class Migration(migrations.Migration):
                 (
                     "report_type",
                     hct_mis_api.apps.account.models.ChoiceArrayField(
-                        base_field=models.PositiveSmallIntegerField(
+                        base_field=models.CharField(
                             choices=[
-                                (1, "Total transferred by country"),
-                                (2, "Total transferred by administrative area"),
-                                (3, "Beneficiaries reached"),
-                                (4, "Individuals reached drilldown"),
-                                (5, "Volume by delivery mechanism"),
-                                (6, "Grievances and Feedback"),
-                                (7, "Programmes"),
-                                (8, "Payment verification"),
-                            ]
+                                ("TOTAL_TRANSFERRED_BY_COUNTRY", "Total transferred by country"),
+                                ("TOTAL_TRANSFERRED_BY_ADMIN_AREA", "Total transferred by administrative area"),
+                                ("BENEFICIARIES_REACHED", "Beneficiaries reached"),
+                                ("INDIVIDUALS_REACHED", "Individuals reached drilldown"),
+                                ("VOLUME_BY_DELIVERY_MECHANISM", "Volume by delivery mechanism"),
+                                ("GRIEVANCES_AND_FEEDBACK", "Grievances and Feedback"),
+                                ("PROGRAMS", "Programmes"),
+                                ("PAYMENT_VERIFICATION", "Payment verification"),
+                            ],
+                            max_length=255,
                         ),
                         size=None,
                     ),
