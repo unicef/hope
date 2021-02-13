@@ -1,7 +1,6 @@
 from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.postgres.fields import ArrayField
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.account.models import ChoiceArrayField
