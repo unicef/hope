@@ -185,10 +185,10 @@ type CashPlanNode implements Node {
   deliveryType: CashPlanDeliveryType
   assistanceMeasurement: String!
   assistanceThrough: String!
-  visionId: String!
-  fundsCommitment: String!
+  visionId: String
+  fundsCommitment: String
   exchangeRate: Float
-  downPayment: String!
+  downPayment: String
   validationAlertsCount: Int!
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
@@ -367,7 +367,7 @@ type CreateDashboardReport {
 }
 
 input CreateDashboardReportInput {
-  reportTypes: [Int]!
+  reportTypes: [String]!
   businessAreaSlug: String!
   year: Int!
   adminArea: ID
@@ -872,9 +872,11 @@ type HouseholdNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
+  removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
-  status: HouseholdStatus!
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
   consentSign: String!
   consent: Boolean
   consentSharing: [String]
@@ -943,6 +945,7 @@ type HouseholdNode implements Node {
   hasDuplicates: Boolean
   admin1: AdminAreaNode
   admin2: AdminAreaNode
+  status: String
 }
 
 type HouseholdNodeConnection {
@@ -987,11 +990,6 @@ type HouseholdSelection {
   targetPopulation: TargetPopulationNode!
   vulnerabilityScore: Float
   final: Boolean!
-}
-
-enum HouseholdStatus {
-  ACTIVE
-  INACTIVE
 }
 
 input HouseholdUpdateDataObjectType {
@@ -1840,9 +1838,13 @@ type IndividualNode implements Node {
   createdAt: DateTime!
   updatedAt: DateTime!
   isRemoved: Boolean!
+  removedDate: DateTime
   lastSyncAt: DateTime
   version: BigInt!
-  status: IndividualStatus!
+  duplicate: Boolean!
+  duplicateDate: DateTime
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
   individualId: String!
   photo: String
   fullName: String!
@@ -1884,6 +1886,7 @@ type IndividualNode implements Node {
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
   businessArea: UserBusinessAreaNode!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
@@ -1894,6 +1897,7 @@ type IndividualNode implements Node {
   documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
   identities: [IndividualIdentityNode!]!
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  status: String
   role: String
 }
 
@@ -1967,11 +1971,6 @@ enum IndividualSelfcareDisability {
 enum IndividualSex {
   MALE
   FEMALE
-}
-
-enum IndividualStatus {
-  ACTIVE
-  INACTIVE
 }
 
 input IndividualUpdateDataObjectType {
@@ -2177,14 +2176,15 @@ type PaymentRecordNode implements Node {
   caHashId: UUID
   cashPlan: CashPlanNode
   household: HouseholdNode!
+  headOfHousehold: IndividualNode
   fullName: String!
   totalPersonsCovered: Int!
   distributionModality: String!
   targetPopulation: TargetPopulationNode!
   targetPopulationCashAssistId: String!
-  entitlementCardNumber: String!
-  entitlementCardStatus: PaymentRecordEntitlementCardStatus!
-  entitlementCardIssueDate: Date!
+  entitlementCardNumber: String
+  entitlementCardStatus: PaymentRecordEntitlementCardStatus
+  entitlementCardIssueDate: Date
   deliveryType: PaymentRecordDeliveryType!
   currency: String!
   entitlementQuantity: Float!
@@ -2361,6 +2361,7 @@ type Query {
   chartPayment(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
   sectionTotalTransferred(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
   tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): TableTotalCashTransferred
+  chartTotalTransferredCashByCountry(year: Int!): ChartDetailedDatasetsNode
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
   paymentRecordDeliveryTypeChoices: [ChoiceObject]

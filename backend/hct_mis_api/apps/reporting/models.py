@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.account.models import ChoiceArrayField
@@ -58,14 +59,14 @@ class DashboardReport(TimeStampedUUIDModel):
     FAILED = 3
     STATUSES = ((IN_PROGRESS, _("Processing")), (COMPLETED, _("Generated")), (FAILED, _("Failed")))
 
-    TOTAL_TRANSFERRED_BY_COUNTRY = 1
-    TOTAL_TRANSFERRED_BY_ADMIN_AREA = 2
-    BENEFICIARIES_REACHED = 3
-    INDIVIDUALS_REACHED = 4
-    VOLUME_BY_DELIVERY_MECHANISM = 5
-    GRIEVANCES_AND_FEEDBACK = 6
-    PROGRAMS = 7
-    PAYMENT_VERIFICATION = 8
+    TOTAL_TRANSFERRED_BY_COUNTRY = "TOTAL_TRANSFERRED_BY_COUNTRY"
+    TOTAL_TRANSFERRED_BY_ADMIN_AREA = "TOTAL_TRANSFERRED_BY_ADMIN_AREA"
+    BENEFICIARIES_REACHED = "BENEFICIARIES_REACHED"
+    INDIVIDUALS_REACHED = "INDIVIDUALS_REACHED"
+    VOLUME_BY_DELIVERY_MECHANISM = "VOLUME_BY_DELIVERY_MECHANISM"
+    GRIEVANCES_AND_FEEDBACK = "GRIEVANCES_AND_FEEDBACK"
+    PROGRAMS = "PROGRAMS"
+    PAYMENT_VERIFICATION = "PAYMENT_VERIFICATION"
     REPORT_TYPES = (
         (TOTAL_TRANSFERRED_BY_COUNTRY, _("Total transferred by country")),
         (TOTAL_TRANSFERRED_BY_ADMIN_AREA, _("Total transferred by administrative area")),
@@ -81,7 +82,7 @@ class DashboardReport(TimeStampedUUIDModel):
     file = models.FileField(blank=True, null=True)
     created_by = models.ForeignKey("account.User", related_name="dashboard_reports", on_delete=models.CASCADE)
     status = models.PositiveSmallIntegerField(choices=STATUSES, default=IN_PROGRESS)
-    report_type = ChoiceArrayField(models.PositiveSmallIntegerField(choices=REPORT_TYPES))
+    report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
 
     # filters
     year = models.PositiveSmallIntegerField(default=datetime.now().year)
