@@ -585,7 +585,7 @@ def parse_list_values_to_int(list_to_parse):
     return list(map(lambda x: int(x or 0), list_to_parse))
 
 
-def sum_lists(qs_values, list_len):
+def sum_lists_with_values(qs_values, list_len):
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
