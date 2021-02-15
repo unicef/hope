@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 from django.db import models
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
@@ -133,9 +131,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self):
-        return self.cash_plans.aggregate(
-            households=Coalesce(Sum("total_persons_covered"), 0),
-        )["households"]
+        return self.households.count()
 
     @property
     def admin_areas_log(self):
