@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, FilterSet, OrderingFilter
@@ -338,10 +338,12 @@ class Query(graphene.ObjectType):
             year,
             business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
         )
-
-        dataset = [payment_verifications.filter(status=status).count() for status in status_choices_mapping.keys()]
+        payment_verifications_amounts = payment_verifications.values("status").annotate(count=Count("status"))
+        payment_verifications_amounts_dict = {x.get('status'): x.get('count') for x in payment_verifications_amounts}
+        dataset = [payment_verifications_amounts_dict.get(status, 0) for status in status_choices_mapping.keys()]
         try:
-            dataset_percentage = [data / sum(dataset) for data in dataset]
+            all_verifications=sum(dataset)
+            dataset_percentage = [data /all_verifications  for data in dataset]
         except ZeroDivisionError:
             dataset_percentage = [0] * len(status_choices_mapping.values())
         dataset_percentage_done = [
@@ -426,32 +428,26 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
             additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
         )
-        payment_records_hh = payment_records.select_related("household").filter(
-            household__admin_area__admin_area_level__admin_level=2
+        payment_records = payment_records.select_related("household").filter(
+            household__admin_area__level=2
         )
-        transferred_money_by_admin_area = {}
-        for hh in payment_records_hh:
-            admin_area = hh.household.admin_area.title
-            quantity = hh.delivered_quantity
-            try:
-                transferred_money_by_admin_area[admin_area] += quantity
-            except KeyError:
-                transferred_money_by_admin_area[admin_area] = quantity
+        annotated_dict = payment_records.filter(~Q(household__admin_area=None)).values('household__admin_area__id',
+                                                                                       "household__admin_area__title").annotate(
+            total_cash_transferred=Sum("delivered_quantity_usd"))
 
         data = [
             {
-                "id": str(index),
-                "admin2": admin_area,
-                "totalCashTransferred": quantity,
+                "id": item.get("household__admin_area__id"),
+                "admin2": item.get("household__admin_area__title"),
+                "totalCashTransferred": item.get("total_cash_transferred"),
             }
-            for index, (admin_area, quantity) in enumerate(transferred_money_by_admin_area.items())
+            for item in annotated_dict
         ]
         return {"data": data}
 
@@ -464,9 +460,10 @@ class Query(graphene.ObjectType):
         )
         countries_and_amounts = (
             payment_records.values("business_area__name")
-            .order_by("business_area__name")
-            .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
-            .annotate(total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
+                .order_by("business_area__name")
+                .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
+                .annotate(
+                total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
         )
 
         labels = []

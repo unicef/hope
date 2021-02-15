@@ -8,32 +8,33 @@ interface PaymentVerificationChartProps {
 export const PaymentVerificationChart = ({
   data,
 }: PaymentVerificationChartProps): React.ReactElement => {
+
   const chartData = {
     labels: data?.labels,
     datasets: [
       {
         barPercentage: 0.1,
-        label: data?.datasets[0]?.label,
-        backgroundColor: '#8CD241',
-        data: data?.datasets[0]?.data,
-      },
-      {
-        barPercentage: 0.1,
-        label: data?.datasets[1]?.label,
-        backgroundColor: '#FFE9AC',
+        label: "Received",
+        backgroundColor: '#8BD241',
         data: data?.datasets[1]?.data,
       },
       {
         barPercentage: 0.1,
-        label: data?.datasets[2]?.label,
-        backgroundColor: '#FFAA1D',
+        label: "Received with Issues",
+        backgroundColor: '#FDE8AC',
+        data: data?.datasets[3]?.data,
+      },
+      {
+        barPercentage: 0.1,
+        label: "Not received",
+        backgroundColor: '#E02020',
         data: data?.datasets[2]?.data,
       },
       {
         barPercentage: 0.1,
-        label: data?.datasets[3]?.label,
-        backgroundColor: '#E02020',
-        data: data?.datasets[3]?.data,
+        label: "Not responded",
+        backgroundColor: '#C3D1D8',
+        data: data?.datasets[0]?.data,
       },
     ],
   };
@@ -43,6 +44,9 @@ export const PaymentVerificationChart = ({
     maintainAspectRatio: false,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
     tooltips: {
       mode: 'point',
