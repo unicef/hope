@@ -42,9 +42,6 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "TicketComplaintDetailsNode"
-          },
-          {
             "name": "PaymentRecordNode"
           },
           {
@@ -73,6 +70,9 @@
           },
           {
             "name": "ServiceProviderNode"
+          },
+          {
+            "name": "TicketComplaintDetailsNode"
           },
           {
             "name": "TicketSensitiveDetailsNode"
