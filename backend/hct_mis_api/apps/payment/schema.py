@@ -350,10 +350,11 @@ class Query(graphene.ObjectType):
             {"label": status, "data": [dataset_percentage_value]}
             for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
         ]
+        payment_verifications.distinct("payment_record").count()
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,
-            "households": payment_verifications.values_list("payment_record__household", flat=True).distinct().count(),
+            "households": payment_verifications.values_list("payment_record__household", flat=True).distinct("payment_record__household").count(),
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
