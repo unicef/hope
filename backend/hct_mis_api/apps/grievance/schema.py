@@ -495,6 +495,7 @@ class ChartGrievanceTicketsNode(ChartDatasetNode):
     total = graphene.Int()
     total_number_of_feedback = graphene.Int()
     total_number_of_open_feedback = graphene.Int()
+    total_number_of_open_sensitive = graphene.Int()
 
 
 class Query(graphene.ObjectType):
@@ -688,12 +689,11 @@ class Query(graphene.ObjectType):
                     grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED).count(),  # Resolved
                     grievance_tickets.filter(
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__lt=datetime.date.today(),
                         created_at__gt=days_30_from_now,
                     ).count(),  # Unresolved
                     grievance_tickets.filter(
                         ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__lt=days_30_from_now,
+                        created_at__lte=days_30_from_now,
                         created_at__gt=days_60_from_now,
                     ).count(),  # Unresolved for longer than 30 days
                     grievance_tickets.filter(
@@ -702,12 +702,16 @@ class Query(graphene.ObjectType):
                 ]
             },
         ]
+        print(datasets)
         return {
             "labels": grievance_status_labels,
             "datasets": datasets,
             "total": grievance_tickets.filter(~Q(
                 category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK) | ~Q(
                 category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)).count(),
+            "total_number_of_open_sensitive": grievance_tickets.filter(
+                Q(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
+                ~Q(status=GrievanceTicket.STATUS_CLOSED)).count(),
             "total_number_of_feedback": grievance_tickets.filter(Q(
                 category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK) | Q(
                 category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)).count(),

@@ -6,7 +6,11 @@ import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
 import { PaymentRecordTable } from '../tables/PaymentRecordTable';
-import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
+import {
+  useCashPlanQuery,
+  CashPlanNode,
+  useCashAssistUrlPrefixQuery,
+} from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
@@ -36,7 +40,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
-  const { caData } = useCashAssistUrlPrefixQuery();
+  const { data: caData } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
 
   if (loading) return <LoadingComponent />;

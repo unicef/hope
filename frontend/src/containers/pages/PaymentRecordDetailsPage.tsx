@@ -28,7 +28,7 @@ const ButtonContainer = styled.span`
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { caData } = useCashAssistUrlPrefixQuery();
+  const { data: caData } = useCashAssistUrlPrefixQuery();
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
   });
