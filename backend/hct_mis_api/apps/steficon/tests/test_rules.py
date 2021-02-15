@@ -55,7 +55,7 @@ class TestBasicRule(TestCase):
         rule.save()
         history = rule.history.first()
         self.assertTrue(history)
-        self.assertEqual(history.afte, rule.as_dict())
+        self.assertEqual(history.after, rule.as_dict())
         self.assertEqual(history.before["definition"], "score.value=1")
         self.assertEqual(history.affected_fields, ["definition"])
 
