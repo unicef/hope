@@ -33,6 +33,9 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
     cutoutPercentage: 80,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
   };
 
