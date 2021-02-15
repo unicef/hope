@@ -25,7 +25,7 @@ from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRo
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ class UserRoleInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated")
 
     list_display = (
@@ -155,7 +155,7 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
-        ctx = self.get_context(
+        ctx = self.get_common_context(
             request,
             None,
             **{
