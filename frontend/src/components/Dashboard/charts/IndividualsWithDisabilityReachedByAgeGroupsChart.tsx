@@ -41,6 +41,9 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
         {
           stacked: true,
           position: 'top',
+          ticks: {
+            stepSize: 1,
+          },
         },
       ],
       yAxes: [
