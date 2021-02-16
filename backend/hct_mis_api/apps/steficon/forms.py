@@ -10,7 +10,7 @@ from hct_mis_api.apps.steficon.config import config
 
 logger = logging.getLogger(__name__)
 try:
-    import black
+    import black2
 
     mode = black.Mode(
         line_length=80,
@@ -23,7 +23,7 @@ try:
 
 except ImportError as e:
     if config.USE_BLACK:
-        logger.error(f"Steficon is configured to use Black, bat was unable to import it: {e}")
+        logger.error(f"Steficon is configured to use Black, but was unable to import it: {e}")
 
     def format_code(code):
         return code
