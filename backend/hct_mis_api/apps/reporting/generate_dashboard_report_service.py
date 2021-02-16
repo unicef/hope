@@ -42,6 +42,7 @@ class GenerateDashboardReportContentHelpers:
         }
         if report.admin_area:
             filter_vars["household__admin_area"] = report.admin_area
+            filter_vars["household__admin_area_level__admin_level"] = 2
         if report.program:
             filter_vars["cash_plan__program"] = report.program
         if not self._is_report_global(report):
@@ -127,21 +128,21 @@ class GenerateDashboardReportContentHelpers:
         total_households = households.count()
         households_aggr = aggregate_households(households)
         # return instances for rows and totals row info
-        return instances, (
-            total_households,
-            functools.reduce(
+        return instances, {
+            "num_households": total_households,
+            "total_individuals": functools.reduce(
                 lambda a, b: a + households_aggr[b] if households_aggr[b] else a, tot_individual_count_fields, 0
             ),
-            functools.reduce(
+            "total_children": functools.reduce(
                 lambda a, b: a + households_aggr[b] if households_aggr[b] else a, tot_children_count_fields, 0
             ),
-        )
+        }
 
     @staticmethod
-    def format_beneficiaries_row(instance: dict, is_hq: bool) -> tuple:
+    def format_beneficiaries_row(instance: dict, is_totals: bool) -> tuple:
         return (
-            instance.get("business_area_code", ""),
-            instance.get("name", ""),
+            instance.get("business_area_code", "") if not is_totals else "",
+            instance.get("name", "") if not is_totals else "Total Distinct",
             instance.get("num_households", ""),
             instance.get("total_individuals", ""),
             instance.get("total_children", ""),
@@ -212,13 +213,13 @@ class GenerateDashboardReportContentHelpers:
             Household.objects.filter(payment_records__in=valid_payment_records).distinct()
         )
         # return instances for rows and totals row info
-        return instances, tuple([value for key, value in households_aggr.items()])
+        return instances, households_aggr
 
     @staticmethod
-    def format_individuals_row(instance: dict, is_hq: bool) -> tuple:
+    def format_individuals_row(instance: dict, is_totals: bool) -> tuple:
         return (
-            instance.get("business_area_code", ""),
-            instance.get("name", ""),
+            instance.get("business_area_code", "") if not is_totals else "",
+            instance.get("name", "") if not is_totals else "Total Distinct",
             instance.get("total_female_0_5", ""),
             instance.get("total_female_0_5_disabled", ""),
             instance.get("total_female_6_11", ""),
@@ -240,6 +241,65 @@ class GenerateDashboardReportContentHelpers:
             instance.get("total_male_60", ""),
             instance.get("total_male_60_disabled", ""),
         )
+
+    # @classmethod
+    # def get_volumes_by_delivery(self, report: DashboardReport):
+    #     filter_vars = self._format_filters_for_payment_records(report)
+
+    #     valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
+    #     instances = None
+    #     valid_payment_records_in_instance_filter_key = None
+    #     if self._is_report_global(report):
+    #         instances = (
+    #             BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
+    #             .distinct()
+    #             .annotate(business_area_code=F("code"))
+    #             .values("name", "id", "business_area_code")
+    #         )
+    #         valid_payment_records_in_instance_filter_key = "business_area"
+    #     else:
+    #         instances = (
+    #             Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+    #             .distinct()
+    #             .annotate(business_area_code=F("business_area__code"))
+    #             .values("id", "name", "business_area_code")
+    #         )
+    #         valid_payment_records_in_instance_filter_key = "cash_plan__program"
+
+    #     def aggregate_delivery_type(payment_records):
+    #         result = dict()
+    #         for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
+    #             label = delivery_type[1]
+    #             value = delivery_type[0]
+    #             result[value] = payment_records.filter(delivery_type=value).aggregate(Sum('delivery_quantity_usd')).get('delivered_quantity_usd__sum')
+    #         return result
+
+    #     for instance in instances:
+    #         valid_payment_records_in_instance = valid_payment_records.filter(
+    #             **{valid_payment_records_in_instance_filter_key: instance["id"]}
+    #         )
+    #         aggregated_by_delivery_type = aggregate_delivery_type(valid_payment_records_in_instance)
+    #         for key,value in aggregated_by_delivery_type.items():
+    #             # we skip all not used delivery types
+    #             if value:
+    #                 instance[key] = value
+
+    #     totals = aggregated_by_delivery_type(valid_payment_records)
+    #     return instances, tuple([value for key, value in totals.items()])
+
+    # @staticmethod
+    # def format_volumes_by_delivery_row(instance: dict, is_hq:bool):
+    #     result = [
+    #         instance.get("business_area_code", ""),
+    #         instance.get("name", ""),
+    #     ]
+    #     for choice in PaymentRecord.DELIVERY_TYPE_CHOICE:
+    #         result.append(instance.get(choice[0]))
+
+    #     return tuple(result)
+
+    # @staticmethod
+    # def
 
 
 class GenerateDashboardReportService:
@@ -444,22 +504,25 @@ class GenerateDashboardReportService:
         active_sheet.append(headers_row)
         return len(headers_row)
 
-    def _append_totals_row(self, active_sheet, report_type, totals):
-        label = "Total"
-        if report_type in [DashboardReport.BENEFICIARIES_REACHED, DashboardReport.INDIVIDUALS_REACHED]:
-            label = "Total distinct"
-        totals_row = ("", label) + totals
-        str_totals_row = self._stringify_all_values(totals_row)
-        active_sheet.append(str_totals_row)
+    # def _append_totals_row(self, active_sheet, report_type, totals):
+    #     label = "Total"
+    #     if report_type in [DashboardReport.BENEFICIARIES_REACHED, DashboardReport.INDIVIDUALS_REACHED]:
+    #         label = "Total distinct"
+    #     totals_row = ("", label) + totals
+    #     str_totals_row = self._stringify_all_values(totals_row)
+    #     active_sheet.append(str_totals_row)
 
     def _add_rows(self, active_sheet, report_type):
         get_row_methods = self.ROW_CONTENT_METHODS[report_type]
         all_instances, totals = get_row_methods[0](self.report)
         for instance in all_instances:
-            row = get_row_methods[1](instance, self.hq_or_country == self.HQ)
+            row = get_row_methods[1](instance, False)
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
-        self._append_totals_row(active_sheet, report_type, totals)
+        # append totals row
+        row = get_row_methods[1](totals, True)
+        str_row = self._stringify_all_values(row)
+        active_sheet.append(str_row)
         return len(all_instances)
 
     def generate_workbook(self) -> openpyxl.Workbook:
@@ -506,21 +569,22 @@ class GenerateDashboardReportService:
             self._send_email()
 
     def _send_email(self):
-        context = {
-            "report_type": self._report_types_to_joined_str(),
-            "created_at": self._format_date(self.report.created_at),
-            "report_url": self.report.file.url,
-        }
-        text_body = render_to_string("dashboard_report.txt", context=context)
-        html_body = render_to_string("dashboard_report.html", context=context)
-        msg = EmailMultiAlternatives(
-            subject="HOPE report generated",
-            from_email=settings.EMAIL_HOST_USER,
-            to=[self.report.created_by.email],
-            body=text_body,
-        )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
+        pass
+        # context = {
+        #     "report_type": self._report_types_to_joined_str(),
+        #     "created_at": self._format_date(self.report.created_at),
+        #     "report_url": self.report.file.url,
+        # }
+        # text_body = render_to_string("dashboard_report.txt", context=context)
+        # html_body = render_to_string("dashboard_report.html", context=context)
+        # msg = EmailMultiAlternatives(
+        #     subject="HOPE report generated",
+        #     from_email=settings.EMAIL_HOST_USER,
+        #     to=[self.report.created_by.email],
+        #     body=text_body,
+        # )
+        # msg.attach_alternative(html_body, "text/html")
+        # msg.send()
 
     def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
 
