@@ -262,7 +262,7 @@ def age_to_birth_date_query(comparision_method, args):
 
 
 def get_attr_value(name, object, default=None):
-    if isinstance(object, dict):
+    if isinstance(object, (MutableMapping, dict)):
         return object.get(name, default)
     return getattr(object, name, default)
 
@@ -528,17 +528,17 @@ def update_labels_mapping(csv_file):
         for core_field, labels in labels_mapping.items():
             old_label = (
                 json.dumps(labels["old"])
-                .replace("\\", r"\\")
-                .replace('"', r"\"")
-                .replace("(", r"\(")
-                .replace(")", r"\)")
-                .replace("[", r"\[")
-                .replace("]", r"\]")
-                .replace("?", r"\?")
-                .replace("*", r"\*")
-                .replace("$", r"\$")
-                .replace("^", r"\^")
-                .replace(".", r"\.")
+                    .replace("\\", r"\\")
+                    .replace('"', r"\"")
+                    .replace("(", r"\(")
+                    .replace(")", r"\)")
+                    .replace("[", r"\[")
+                    .replace("]", r"\]")
+                    .replace("?", r"\?")
+                    .replace("*", r"\*")
+                    .replace("$", r"\$")
+                    .replace("^", r"\^")
+                    .replace(".", r"\.")
             )
             new_label = json.dumps(labels["new"])
             new_content = re.sub(
@@ -572,7 +572,7 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+        obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
@@ -585,7 +585,7 @@ def parse_list_values_to_int(list_to_parse):
     return list(map(lambda x: int(x or 0), list_to_parse))
 
 
-def sum_lists(qs_values, list_len):
+def sum_lists_with_values(qs_values, list_len):
     data = [0] * list_len
     for values in qs_values:
         parsed_values = parse_list_values_to_int(values)
