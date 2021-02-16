@@ -1,10 +1,11 @@
 import openpyxl
 import copy
 import functools
+from itertools import chain
 from django.core.files import File
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
-from django.db.models import Sum, Count, F
+from django.db.models import Sum, Count, F, Q
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -38,13 +39,26 @@ class GenerateDashboardReportContentHelpers:
     def _format_filters_for_payment_records(self, report: DashboardReport):
         filter_vars = {
             "delivery_date__year": report.year,
-            "delivered_quantity__gt": 0,
+            "delivered_quantity_usd__gt": 0,
         }
         if report.admin_area:
             filter_vars["household__admin_area"] = report.admin_area
-            filter_vars["household__admin_area_level__admin_level"] = 2
+            filter_vars["household__admin_area__admin_area_level__admin_level"] = 2
         if report.program:
             filter_vars["cash_plan__program"] = report.program
+        if not self._is_report_global(report):
+            filter_vars["business_area"] = report.business_area
+
+        return filter_vars
+
+    @classmethod
+    def _format_filters_for_programs(self, report: DashboardReport):
+        filter_vars = {"end_date__year": report.year}
+        if report.admin_area:
+            filter_vars["admin_areas"] = report.admin_area
+            filter_vars["admin_areas__admin_area_level__admin_level"] = 2
+        if report.program:
+            filter_vars["id"] = report.program.id
         if not self._is_report_global(report):
             filter_vars["business_area"] = report.business_area
 
@@ -298,6 +312,94 @@ class GenerateDashboardReportContentHelpers:
 
         return tuple(result)
 
+    @classmethod
+    def get_programs(self, report: DashboardReport):
+        filter_vars = self._format_filters_for_programs(report)
+
+        # TODO update this when we have all delivery types
+        cash_delivery_types = [
+            PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
+            PaymentRecord.DELIVERY_TYPE_TRANSFER,
+            PaymentRecord.DELIVERY_TYPE_CASH,
+        ]
+        voucher_delivery_types = []
+
+        def get_filter_query(cash: bool, month: int):
+            if cash:
+                return Q(
+                    cash_plans__payment_records__delivery_type__in=cash_delivery_types,
+                    cash_plans__payment_records__delivery_date__month=month,
+                )
+            else:
+                return Q(
+                    cash_plans__payment_records__delivery_type__in=voucher_delivery_types,
+                    cash_plans__payment_records__delivery_date__month=month,
+                )
+
+        months_labels = self.get_all_months()
+
+        def get_annotation(index, cash=True):
+            key_label = months_labels[index]
+            label = f"{key_label}_cash" if cash else f"{key_label}_voucher"
+            return {
+                label: Sum(
+                    "cash_plans__payment_records__delivered_quantity_usd", filter=get_filter_query(cash, index + 1)
+                )
+            }
+
+        programs = (
+            Program.objects.filter(**filter_vars)
+            .annotate(
+                successful_payments=Count(
+                    "cash_plans__payment_records", filter=Q(cash_plans__payment_records__delivered_quantity_usd__gt=0)
+                )
+            )
+            .annotate(
+                unsuccessful_payments=Count(
+                    "cash_plans__payment_records", filter=Q(cash_plans__payment_records__delivered_quantity_usd=0)
+                )
+            )
+        )
+        for index in range(0, len(months_labels)):
+            programs = programs.annotate(**get_annotation(index, True))
+            programs = programs.annotate(**get_annotation(index, False))
+
+        return programs, None
+
+    @staticmethod
+    def get_all_months():
+        return [
+            "january",
+            "february",
+            "march",
+            "april",
+            "may",
+            "june",
+            "july",
+            "august",
+            "september",
+            "october",
+            "november",
+            "december",
+        ]
+
+    @classmethod
+    def format_programs_row(self, instance: Program, is_totals: bool) -> tuple:
+        result = (
+            instance.business_area.code,
+            instance.business_area.name,
+            instance.name,
+            instance.sector,
+            instance.cash_plus,
+            instance.frequency_of_payments,
+            instance.unsuccessful_payments,
+            instance.successful_payments,
+        )
+        months = self.get_all_months()
+        for month in months:
+            result += (getattr(instance, f"{month}_cash", 0), getattr(instance, f"{month}_voucher", 0))
+        return result
+
 
 class GenerateDashboardReportService:
     HQ = 1
@@ -379,30 +481,15 @@ class GenerateDashboardReportService:
                 "cash+",
                 "frequency",
                 "unsuccessful payment",
-                "January cash",
-                "January voucher",
-                "February cash",
-                "February voucher",
-                "March cash",
-                "March voucher",
-                "April cash",
-                "April voucher",
-                "May cash",
-                "May voucher",
-                "June cash",
-                "June voucher",
-                "July cash",
-                "July voucher",
-                "August cash",
-                "August voucher",
-                "September cash",
-                "September voucher",
-                "October cash",
-                "October voucher",
-                "November cash",
-                "November voucher",
-                "December cash",
-                "December voucher",
+                "successful payment",
+            )
+            + tuple(
+                chain.from_iterable(
+                    [
+                        [f"{month.capitalize()} cash", f"{month.capitalize()} voucher"]
+                        for month in GenerateDashboardReportContentHelpers.get_all_months()
+                    ]
+                )
             ),
         },
         DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: {
@@ -461,6 +548,10 @@ class GenerateDashboardReportService:
         DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
             GenerateDashboardReportContentHelpers.get_volumes_by_delivery,
             GenerateDashboardReportContentHelpers.format_volumes_by_delivery_row,
+        ),
+        DashboardReport.PROGRAMS: (
+            GenerateDashboardReportContentHelpers.get_programs,
+            GenerateDashboardReportContentHelpers.format_programs_row,
         )
         # TODO: add the rest of the methods
     }
@@ -519,9 +610,10 @@ class GenerateDashboardReportService:
             active_sheet.append(str_row)
         # append totals row
         print("RIGHT BEFORE TOTALS")
-        row = get_row_methods[1](totals, True)
-        str_row = self._stringify_all_values(row)
-        active_sheet.append(str_row)
+        if totals:
+            row = get_row_methods[1](totals, True)
+            str_row = self._stringify_all_values(row)
+            active_sheet.append(str_row)
         return len(all_instances)
 
     def generate_workbook(self) -> openpyxl.Workbook:
