@@ -3,6 +3,26 @@ from household.fixtures import HouseholdFactory
 
 from hct_mis_api.apps.steficon.models import Rule
 
+CODE = """
+class SteficonConfig:
+    name = "steficon"
+
+
+def aaaaa(a: int):
+    return 1
+
+
+s: set = {}
+d: dict = dict()
+r = range(1)
+l: list = ()
+t: tuple = []
+a: int = 1
+s: str = ""
+f: float = 1.1
+s = s.upper()
+"""
+
 
 class TestBasicRule(TestCase):
     @classmethod
@@ -35,8 +55,8 @@ class TestBasicRule(TestCase):
         rule.save()
         history = rule.history.first()
         self.assertTrue(history)
-        self.assertEqual(history.new_state, rule.as_dict())
-        self.assertEqual(history.previous_state["definition"], "score.value=1")
+        self.assertEqual(history.after, rule.as_dict())
+        self.assertEqual(history.before["definition"], "score.value=1")
         self.assertEqual(history.affected_fields, ["definition"])
 
     def test_revert(self):
