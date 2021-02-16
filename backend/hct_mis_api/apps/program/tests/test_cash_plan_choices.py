@@ -1,5 +1,5 @@
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestCashPlanChoices(APITestCase):
@@ -19,6 +19,5 @@ class TestCashPlanChoices(APITestCase):
 
     def test_status_choices_query(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_CASH_PLAN_STATUS_CHOICES,
-            context={"user": self.user},
+            request_string=self.QUERY_CASH_PLAN_STATUS_CHOICES, context={"user": self.user},
         )

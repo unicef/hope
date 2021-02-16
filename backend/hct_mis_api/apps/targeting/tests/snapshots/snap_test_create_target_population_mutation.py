@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestCreateTargetPopulationMutation::test_create_mutation 1'] = {
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_0_with_permission 1'] = {
     'data': {
         'createTargetPopulation': {
             'targetPopulation': {
@@ -34,4 +34,24 @@ snapshots['TestCreateTargetPopulationMutation::test_create_mutation 1'] = {
             }
         }
     }
+}
+
+snapshots['TestCreateTargetPopulationMutation::test_create_mutation_1_without_permission 1'] = {
+    'data': {
+        'createTargetPopulation': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'createTargetPopulation'
+            ]
+        }
+    ]
 }

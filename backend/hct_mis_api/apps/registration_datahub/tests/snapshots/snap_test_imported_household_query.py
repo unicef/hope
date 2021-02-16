@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestImportedHouseholdQuery::test_imported_household_query_all 1'] = {
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_permission 1'] = {
     'data': {
         'allImportedHouseholds': {
             'edges': [
@@ -65,7 +65,27 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all 1'] = {
     }
 }
 
-snapshots['TestImportedHouseholdQuery::test_imported_household_query_single 1'] = {
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_1_without_permission 1'] = {
+    'data': {
+        'allImportedHouseholds': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allImportedHouseholds'
+            ]
+        }
+    ]
+}
+
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_0_with_permission 1'] = {
     'data': {
         'importedHousehold': {
             'address': 'Lorem Ipsum',
@@ -73,4 +93,24 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_single 1'] 
             'size': 2
         }
     }
+}
+
+snapshots['TestImportedHouseholdQuery::test_imported_household_query_single_1_without_permission 1'] = {
+    'data': {
+        'importedHousehold': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'importedHousehold'
+            ]
+        }
+    ]
 }

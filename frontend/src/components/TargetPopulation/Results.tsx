@@ -74,7 +74,7 @@ export function Results({
   resultsData,
   totalNumOfHouseholds,
   totalNumOfIndividuals,
-}: ResultsProps) {
+}: ResultsProps): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -172,9 +172,7 @@ export function Results({
                 </SummaryBorder>
                 <SummaryBorder>
                   <LabelizedField label='Targeted Individuals'>
-                    <SummaryValue>
-                      {totalNumOfIndividuals || '0'}
-                    </SummaryValue>
+                    <SummaryValue>{totalNumOfIndividuals || '0'}</SummaryValue>
                   </LabelizedField>
                 </SummaryBorder>
               </Grid>

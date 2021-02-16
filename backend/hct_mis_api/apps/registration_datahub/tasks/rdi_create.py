@@ -1,9 +1,11 @@
 import json
 from collections import defaultdict
+from datetime import date, datetime
 from io import BytesIO
 from typing import Union
 
 import openpyxl
+from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -12,45 +14,42 @@ from django.utils import timezone
 from django_countries.fields import Country
 from openpyxl_image_loader import SheetImageLoader
 
-from core.core_fields_attributes import (
-    TYPE_INTEGER,
-    TYPE_SELECT_ONE,
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
+    TYPE_DATE,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
 )
-from core.kobo.api import KoboAPI
-from core.kobo.common import get_field_name, KOBO_FORM_INDIVIDUALS_COLUMN_NAME
-from core.models import BusinessArea
-from core.utils import (
-    get_combined_attributes,
-    serialize_flex_attributes,
-    rename_dict_keys,
-)
-from household.const import COUNTRIES_NAME_ALPHA2
-from household.models import (
-    IDENTIFICATION_TYPE_DICT,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    YES,
+from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
+from hct_mis_api.apps.household.models import (
     HEAD,
+    IDENTIFICATION_TYPE_DICT,
     NON_BENEFICIARY,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    IDENTIFICATION_TYPE_OTHER,
 )
-from registration_data.models import RegistrationDataImport
-from registration_datahub.models import (
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedAgency,
-    ImportedIndividualIdentity,
-    ImportedIndividualRoleInHousehold,
-)
-from registration_datahub.models import (
     ImportedDocument,
     ImportedDocumentType,
-)
-from registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividual,
+    ImportedIndividualIdentity,
+    ImportedIndividualRoleInHousehold,
+    RegistrationDataImportDatahub,
+    KoboImportedSubmission,
 )
-from registration_datahub.models import RegistrationDataImportDatahub
-from registration_datahub.tasks.utils import collectors_str_ids_to_list
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 
 class RdiBaseCreateTask:
@@ -58,35 +57,69 @@ class RdiBaseCreateTask:
     FLEX_FIELDS = serialize_flex_attributes()
 
     def _cast_value(self, value, header):
+        if isinstance(value, str):
+            value = value.strip()
+
         if value in (None, ""):
             return value
 
         value_type = self.COMBINED_FIELDS[header]["type"]
 
+        if value_type == TYPE_STRING:
+            if isinstance(value, float) and value.is_integer():
+                value = int(value)
+            return str(value)
+
         if value_type == TYPE_INTEGER:
             return int(value)
 
-        if value_type == TYPE_SELECT_ONE:
-            custom_cast_method = self.COMBINED_FIELDS[header].get(
-                "custom_cast_value"
-            )
+        if value_type in (TYPE_SELECT_ONE, TYPE_SELECT_MANY):
+            custom_cast_method = self.COMBINED_FIELDS[header].get("custom_cast_value")
 
             if custom_cast_method is not None:
                 return custom_cast_method(input_value=value)
 
-            choices = [
-                x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]
-            ]
-            if isinstance(value, str):
-                upper_value = value.upper()
-                if upper_value in choices:
-                    return upper_value
+            choices = [x.get("value") for x in self.COMBINED_FIELDS[header]["choices"]]
 
-            if value not in choices:
-                try:
-                    return int(value)
-                except ValueError:
-                    return str(value)
+            if value_type == TYPE_SELECT_MANY:
+                if "," in value:
+                    values = value.split(",")
+                elif ";" in value:
+                    values = value.split(";")
+                else:
+                    values = value.split(" ")
+                valid_choices = []
+                for single_choice in values:
+                    if isinstance(single_choice, str):
+                        upper_value = single_choice.upper()
+                        if upper_value in choices:
+                            valid_choices.append(upper_value)
+                            continue
+
+                    if single_choice not in choices:
+                        try:
+                            valid_choices.append(int(single_choice))
+                        except ValueError:
+                            valid_choices.append(str(single_choice))
+                return valid_choices
+            else:
+                if isinstance(value, str):
+                    upper_value = value.upper()
+                    if upper_value in choices:
+                        return upper_value
+
+                if value not in choices:
+                    try:
+                        return int(value)
+                    except ValueError:
+                        return str(value)
+
+        if value_type == TYPE_DATE:
+            if isinstance(value, (date, datetime)):
+                return value
+
+            if isinstance(value, str):
+                value = parse(value)
 
         return value
 
@@ -106,12 +139,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     identities = None
     collectors = None
 
-    def _handle_document_fields(
-        self, value, header, row_num, individual, *args, **kwargs
-    ):
+    def _handle_document_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
-
+        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -149,12 +180,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                     "value": value,
                 }
 
-    def _handle_document_photo_fields(
-        self, cell, row_num, individual, header, *args, **kwargs
-    ):
+    def _handle_document_photo_fields(self, cell, row_num, individual, header, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
-
+        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -165,14 +194,28 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if document_data:
             document_data["photo"] = file
         else:
-            suffix = (
-                "other"
-                if header.startswith("other_id")
-                else header.replace("photo", "no")
-            )
+            suffix = "other" if header.startswith("other_id") else header
             self.documents[f"individual_{row_num}_{suffix}"] = {
                 "individual": individual,
-                "photo": file.name,
+                "photo": file,
+            }
+
+    def _handle_document_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        if header.startswith("other_id"):
+            document_data = self.documents.get(f"individual_{row_num}_other")
+        else:
+            document_data = self.documents.get(f"individual_{row_num}_{header}")
+
+        if document_data:
+            document_data["issuing_country"] = Country(value)
+        else:
+            suffix = "other" if header.startswith("other_id") else header
+            self.documents[f"individual_{row_num}_{suffix}"] = {
+                "individual": individual,
+                "issuing_country": Country(value),
             }
 
     def _handle_image_field(self, cell, is_flex_field=False, *args, **kwargs):
@@ -201,35 +244,31 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
         return Point(x=float(longitude), y=float(latitude), srid=4326)
 
-    def _handle_identity_fields(
-        self, value, header, row_num, individual, *args, **kwargs
-    ):
+    def _handle_identity_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
 
-        agency = ImportedAgency.objects.get(
-            type="WFP" if header == "scope_id_no_i_c" else "UNHCR"
-        )
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
 
-        identities_data = self.identities.get(f"individual_{row_num}")
+        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
 
         if identities_data:
             identities_data["number"] = value
-            identities_data["agency"] = agency
+            identities_data["agency"] = agency_type
+        else:
+            self.identities[f"individual_{row_num}_{agency_type}"] = {
+                "individual": individual,
+                "number": value,
+                "agency": agency_type,
+            }
 
-        self.identities[f"individual_{row_num}"] = {
-            "individual": individual,
-            "number": value,
-            "agency": agency,
-        }
-
-    def _handle_identity_photo(
-        self, cell, row_num, individual, *args, **kwargs
-    ):
+    def _handle_identity_photo(self, cell, row_num, header, individual, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
 
-        identity_data = self.identities.get(f"individual_{row_num}")
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+
+        identity_data = self.identities.get(f"individual_{row_num}_{agency_type}")
 
         image = self.image_loader.get(cell.coordinate)
         file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -242,9 +281,27 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         if identity_data:
             identity_data["photo"] = file
         else:
-            self.identities[f"individual_{row_num}"] = {
+            self.identities[f"individual_{row_num}_{agency_type}"] = {
                 "individual": individual,
-                "photo": file_name,
+                "photo": file,
+                "agency": agency_type,
+            }
+
+    def _handle_identity_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
+        if value is None:
+            return
+
+        agency_type = "WFP" if "scope_id" in header else "UNHCR"
+
+        identities_data = self.identities.get(f"individual_{row_num}_{agency_type}")
+
+        if identities_data:
+            identities_data["issuing_country"] = Country(value)
+        else:
+            self.identities[f"individual_{row_num}_{agency_type}"] = {
+                "individual": individual,
+                "issuing_country": Country(value),
+                "agency": agency_type,
             }
 
     def _handle_collectors(self, value, header, individual, *args, **kwargs):
@@ -253,25 +310,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return
 
         for hh_id in list_of_ids:
-            role = (
-                ROLE_PRIMARY
-                if header == "primary_collector_id"
-                else ROLE_ALTERNATE
-            )
-            self.collectors[hh_id].append(
-                ImportedIndividualRoleInHousehold(
-                    individual=individual, role=role
-                )
-            )
+            role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
+            self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
     def _create_documents(self):
         docs_to_create = []
         for document_data in self.documents.values():
-            doc_type, is_created = ImportedDocumentType.objects.get_or_create(
-                country=Country(
-                    COUNTRIES_NAME_ALPHA2.get(self.business_area.name.title())
-                ),
-                label=document_data["name"],
+            issuing_country = document_data.get("issuing_country")
+            doc_type = ImportedDocumentType.objects.get(
+                country=issuing_country,
                 type=document_data["type"],
             )
             photo = document_data.get("photo")
@@ -290,7 +337,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _create_identities(self):
         idents_to_create = [
             ImportedIndividualIdentity(
-                agency=ident_data["agency"],
+                agency=ImportedAgency.objects.get(country=ident_data["issuing_country"], type=ident_data["agency"]),
                 individual=ident_data["individual"],
                 document_number=ident_data["number"],
             )
@@ -305,34 +352,42 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.household_id = self.households.get(hh_id).pk
                 collectors_to_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(
-            collectors_to_create
-        )
+        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_create)
 
     def _create_objects(self, sheet, registration_data_import):
         complex_fields = {
             "individuals": {
                 "birth_certificate_no_i_c": self._handle_document_fields,
                 "birth_certificate_photo_i_c": self._handle_document_photo_fields,
+                "birth_certificate_issuer_i_c": self._handle_document_issuing_country_fields,
                 "drivers_license_no_i_c": self._handle_document_fields,
                 "drivers_license_photo_i_c": self._handle_document_photo_fields,
+                "drivers_license_issuer_i_c": self._handle_document_issuing_country_fields,
                 "electoral_card_no_i_c": self._handle_document_fields,
                 "electoral_card_photo_i_c": self._handle_document_photo_fields,
+                "electoral_card_issuer_i_c": self._handle_document_issuing_country_fields,
                 "unhcr_id_no_i_c": self._handle_identity_fields,
-                "national_id_no_ic": self._handle_document_fields,
-                "national_id_photo_ic": self._handle_document_photo_fields,
+                "unhcr_id_photo_i_c": self._handle_identity_photo,
+                "unhcr_id_issuer_i_c": self._handle_identity_issuing_country_fields,
+                "national_id_no_i_c": self._handle_document_fields,
+                "national_id_photo_i_c": self._handle_document_photo_fields,
+                "national_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "national_passport_i_c": self._handle_document_fields,
                 "national_passport_photo_i_c": self._handle_document_photo_fields,
+                "national_passport_issuer_i_c": self._handle_document_issuing_country_fields,
                 "scope_id_no_i_c": self._handle_identity_fields,
+                "scope_id_photo_i_c": self._handle_identity_photo,
+                "scope_id_issuer_i_c": self._handle_identity_issuing_country_fields,
                 "other_id_type_i_c": self._handle_document_fields,
                 "other_id_no_i_c": self._handle_document_fields,
                 "other_id_photo_i_c": self._handle_document_photo_fields,
+                "other_id_issuer_i_c": self._handle_document_issuing_country_fields,
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
             },
             "households": {
-                "consent_h_c": self._handle_image_field,
+                "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
             },
         }
@@ -370,11 +425,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
                 is_not_image = current_field["type"] != "IMAGE"
 
-                is_not_required_and_empty = (
-                    not current_field.get("required")
-                    and cell.value is None
-                    and is_not_image
-                )
+                is_not_required_and_empty = not current_field.get("required") and cell.value is None and is_not_image
 
                 if is_not_required_and_empty:
                     continue
@@ -385,9 +436,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         temp_value = int(temp_value)
                     household_id = str(temp_value)
                     if sheet_title == "individuals":
-                        obj_to_create.household = self.households.get(
-                            household_id
-                        )
+                        obj_to_create.household = self.households.get(household_id)
 
                 if header in complex_fields[sheet_title]:
                     fn = complex_fields[sheet_title].get(header)
@@ -396,9 +445,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         cell=cell,
                         header=header,
                         row_num=cell.row,
-                        individual=obj_to_create
-                        if sheet_title == "individuals"
-                        else None,
+                        individual=obj_to_create if sheet_title == "individuals" else None,
+                        household=obj_to_create if sheet_title == "households" else None,
                     )
                     if value is not None:
                         setattr(
@@ -407,10 +455,12 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             value,
                         )
                 elif (
-                    hasattr(obj_to_create, combined_fields[header]["name"],)
+                    hasattr(
+                        obj_to_create,
+                        combined_fields[header]["name"],
+                    )
                     and header != "household_id"
                 ):
-
                     value = self._cast_value(cell.value, header)
                     if value in (None, ""):
                         continue
@@ -422,7 +472,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             households_to_update.append(household)
 
                     setattr(
-                        obj_to_create, combined_fields[header]["name"], value,
+                        obj_to_create,
+                        combined_fields[header]["name"],
+                        value,
                     )
                 elif header in self.FLEX_FIELDS[sheet_title]:
                     value = self._cast_value(cell.value, header)
@@ -437,9 +489,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         )
                     obj_to_create.flex_fields[header] = value
 
-            obj_to_create.last_registration_date = (
-                obj_to_create.first_registration_date
-            )
+            obj_to_create.last_registration_date = obj_to_create.first_registration_date
 
             if sheet_title == "households":
                 self.households[household_id] = obj_to_create
@@ -453,7 +503,9 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         else:
             ImportedIndividual.objects.bulk_create(self.individuals)
             ImportedHousehold.objects.bulk_update(
-                households_to_update, ["head_of_household"], 1000,
+                households_to_update,
+                ["head_of_household"],
+                1000,
             )
             self._create_documents()
             self._create_identities()
@@ -461,23 +513,18 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(
-        self, registration_data_import_id, import_data_id, business_area_id
-    ):
+    def execute(self, registration_data_import_id, import_data_id, business_area_id):
         self.households = {}
         self.documents = {}
         self.identities = {}
+        self.household_identities = {}
         self.individuals = []
         self.collectors = defaultdict(list)
-
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
-        registration_data_import.import_done = (
-            RegistrationDataImportDatahub.STARTED
-        )
+        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
-
         import_data = ImportData.objects.get(id=import_data_id)
 
         self.business_area = BusinessArea.objects.get(id=business_area_id)
@@ -490,14 +537,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             self.image_loader = SheetImageLoader(sheet)
             self._create_objects(sheet, registration_data_import)
 
-        registration_data_import.import_done = (
-            RegistrationDataImportDatahub.DONE
-        )
+        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
-
-        RegistrationDataImport.objects.filter(
-            id=registration_data_import.hct_id
-        ).update(status=RegistrationDataImport.IN_REVIEW)
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis.status = RegistrationDataImport.IN_REVIEW
+        rdi_mis.save()
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
+        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
 
 
 class RdiKoboCreateTask(RdiBaseCreateTask):
@@ -510,21 +557,29 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     DOCS_AND_IDENTITIES_FIELDS = {
         "birth_certificate_no_i_c",
         "birth_certificate_photo_i_c",
+        "birth_certificate_issuer_i_c",
         "drivers_license_no_i_c",
         "drivers_license_photo_i_c",
+        "drivers_license_issuer_i_c",
         "electoral_card_no_i_c",
         "electoral_card_photo_i_c",
+        "electoral_card_issuer_i_c",
         "unhcr_id_no_i_c",
         "unhcr_id_photo_i_c",
-        "national_id_no_ic",
-        "national_id_photo_ic",
+        "unhcr_id_issuer_i_c",
+        "national_id_no_i_c",
+        "national_id_photo_i_c",
+        "national_id_issuer_i_c",
         "national_passport_i_c",
         "national_passport_photo_i_c",
+        "national_passport_issuer_i_c",
         "scope_id_no_i_c",
         "scope_id_photo_i_c",
+        "scope_id_issuer_i_c",
         "other_id_type_i_c",
         "other_id_no_i_c",
         "other_id_photo_i_c",
+        "other_id_issuer_i_c",
     }
 
     reduced_submissions = None
@@ -553,9 +608,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         y = float(geopoint[1])
         return Point(x=x, y=y, srid=4326)
 
-    def _cast_and_assign(
-        self, value: Union[str, list], field: str, obj: object
-    ):
+    def _cast_and_assign(self, value: Union[str, list], field: str, obj: object):
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
@@ -575,9 +628,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
 
         setattr(obj, field_data_dict["name"], correct_value)
 
-    def _handle_documents_and_identities(
-        self, documents_and_identities, individual_dict
-    ):
+    def _handle_documents_and_identities(self, documents_and_identities):
         identity_fields = {
             "scope_id",
             "unhcr_id",
@@ -587,35 +638,33 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         identities = []
         for documents_dict in documents_and_identities:
             for document_name, data in documents_dict.items():
+                if ImportedIndividual.objects.filter(id=data["individual"].id).exists() is False:
+                    continue
+
                 is_identity = document_name in identity_fields
 
                 if is_identity:
                     agency = ImportedAgency.objects.get(
-                        type="WFP" if document_name == "scope_id" else "UNHCR"
+                        type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
                     )
                     identities.append(
                         ImportedIndividualIdentity(
                             agency=agency,
-                            individual=individual_dict.get(
-                                data["individual"].get_hash_key
-                            ),
+                            individual=data["individual"],
                             document_number=data["number"],
                         )
                     )
                 else:
                     type_name = document_name.upper()
+                    if type_name == "OTHER_ID":
+                        type_name = IDENTIFICATION_TYPE_OTHER
                     label = IDENTIFICATION_TYPE_DICT.get(type_name)
+                    country = Country(data["issuing_country"])
                     if label is None:
                         label = data["name"]
-                    (
-                        document_type,
-                        is_created,
-                    ) = ImportedDocumentType.objects.get_or_create(
-                        country=Country(
-                            COUNTRIES_NAME_ALPHA2.get(
-                                self.business_area.name.title()
-                            )
-                        ),
+
+                    document_type = ImportedDocumentType.objects.get(
+                        country=country,
                         label=label,
                         type=type_name,
                     )
@@ -638,21 +687,15 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for collector in collectors_list:
                 collector.individual = individuals_dict.get(hash_key)
                 collectors_to_bulk_create.append(collector)
-        ImportedIndividualRoleInHousehold.objects.bulk_create(
-            collectors_to_bulk_create
-        )
+        ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    def execute(
-        self, registration_data_import_id, import_data_id, business_area_id
-    ):
+    def execute(self, registration_data_import_id, import_data_id, business_area_id):
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
-        registration_data_import.import_done = (
-            RegistrationDataImportDatahub.STARTED
-        )
+        registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
 
         import_data = ImportData.objects.get(id=import_data_id)
@@ -669,125 +712,115 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
         for household in self.reduced_submissions:
+            submission_meta_data = get_submission_metadata(household)
+            submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
+            if submission_exists is True:
+                continue
             collectors_count = 0
-            household_obj = ImportedHousehold()
+            household_obj = ImportedHousehold(**submission_meta_data)
             self.attachments = household.get("_attachments", [])
+            registration_date = None
+            current_individuals = []
             for hh_field, hh_value in household.items():
-                self._cast_and_assign(hh_value, hh_field, household_obj)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
-                        current_individual_docs_and_identities = defaultdict(
-                            dict
-                        )
+                        current_individual_docs_and_identities = defaultdict(dict)
                         individual_obj = ImportedIndividual()
                         only_collector_flag = False
                         role = None
                         for i_field, i_value in individual.items():
                             if i_field in self.DOCS_AND_IDENTITIES_FIELDS:
-                                key = i_field.replace("_photo_i_c", "").replace(
-                                    "_no_i_c", ""
+                                key = (
+                                    i_field.replace("_photo_i_c", "")
+                                    .replace("_no_i_c", "")
+                                    .replace("_issuer_i_c", "")
+                                    .replace("_type_i_c", "")
+                                    .replace("_i_c", "")
                                 )
                                 if i_field.endswith("_type_i_c"):
                                     value_key = "name"
                                 elif i_field.endswith("_photo_i_c"):
                                     value_key = "photo"
+                                elif i_field.endswith("_issuer_i_c"):
+                                    value_key = "issuing_country"
                                 else:
                                     value_key = "number"
-                                current_individual_docs_and_identities[key][
-                                    value_key
-                                ] = i_value
-                                current_individual_docs_and_identities[key][
-                                    "individual"
-                                ] = individual_obj
-                            elif i_field == "is_only_collector":
-                                if i_value == YES:
-                                    only_collector_flag = True
-                                    collectors_count += 1
+                                current_individual_docs_and_identities[key][value_key] = i_value
+                                current_individual_docs_and_identities[key]["individual"] = individual_obj
+                            elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
+                                only_collector_flag = True
+                                collectors_count += 1
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
+                            elif i_field.endswith("_h_c"):
+                                self._cast_and_assign(i_value, i_field, household_obj)
                             else:
-                                self._cast_and_assign(
-                                    i_value, i_field, individual_obj
-                                )
-                        if (
-                            individual_obj.relationship == HEAD
-                            and only_collector_flag is False
-                        ):
-                            head_of_households_mapping[
-                                household_obj
-                            ] = individual_obj
+                                self._cast_and_assign(i_value, i_field, individual_obj)
 
-                        if only_collector_flag is True:
-                            individual_obj.relationship = NON_BENEFICIARY
+                        duplicated_object = individuals_to_create.get(individual_obj.get_hash_key)
 
-                        individual_obj.last_registration_date = (
-                            individual_obj.first_registration_date
-                        )
-                        individual_obj.registration_data_import = (
-                            registration_data_import
-                        )
-
-                        duplicated_object = individuals_to_create.get(
-                            individual_obj.get_hash_key
-                        )
-                        has_documents = (
-                            len(current_individual_docs_and_identities) > 0
-                        )
-                        if (
-                            duplicated_object is None
-                            or has_documents
-                            or only_collector_flag is False
-                        ):
-                            individuals_to_create[
-                                individual_obj.get_hash_key
-                            ] = individual_obj
-
-                        if only_collector_flag is True:
-                            individual_obj.household = None
+                        if duplicated_object is not None and only_collector_flag is True:
+                            individual_obj = duplicated_object
                         else:
-                            individual_obj.household = household_obj
+                            if individual_obj.relationship == HEAD and only_collector_flag is False:
+                                head_of_households_mapping[household_obj] = individual_obj
+
+                            individual_obj.last_registration_date = individual_obj.first_registration_date
+                            individual_obj.registration_data_import = registration_data_import
+                            individual_obj.household = household_obj if only_collector_flag is False else None
+
+                            individuals_to_create[individual_obj.get_hash_key] = individual_obj
+                            current_individuals.append(individual_obj.get_hash_key)
+                        documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
                             role_obj = ImportedIndividualRoleInHousehold(
-                                individual=duplicated_object or individual_obj,
+                                individual=individual_obj,
                                 household_id=household_obj.pk,
                                 role=role,
                             )
-                            collectors_to_create[
-                                individual_obj.get_hash_key
-                            ].append(role_obj)
+                            collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
-                        documents_and_identities_to_create.append(
-                            current_individual_docs_and_identities
-                        )
+                elif hh_field == "end_h_c":
+                    registration_date = parse(hh_value)
+                elif hh_field == "_submission_time":
+                    household_obj.kobo_submission_time = parse(hh_value)
+                else:
+                    self._cast_and_assign(hh_value, hh_field, household_obj)
 
             household_obj.size = household_obj.size - collectors_count
-            household_obj.last_registration_date = (
-                household_obj.first_registration_date
-            )
+            household_obj.first_registration_date = registration_date
+            household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
             households_to_create.append(household_obj)
+
+            for ind_hash_key in current_individuals:
+                ind = individuals_to_create[ind_hash_key]
+                ind.first_registration_date = registration_date
+                ind.last_registration_date = registration_date
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create.values())
         self._handle_collectors(collectors_to_create, individuals_to_create)
-        self._handle_documents_and_identities(
-            documents_and_identities_to_create, individuals_to_create,
-        )
+        self._handle_documents_and_identities(documents_and_identities_to_create)
 
         households_to_update = []
         for household, individual in head_of_households_mapping.items():
             household.head_of_household = individual
             households_to_update.append(household)
         ImportedHousehold.objects.bulk_update(
-            households_to_update, ["head_of_household"], 1000,
+            households_to_update,
+            ["head_of_household"],
+            1000,
         )
 
-        registration_data_import.import_done = (
-            RegistrationDataImportDatahub.DONE
-        )
+        registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
-        RegistrationDataImport.objects.filter(
-            id=registration_data_import.hct_id
-        ).update(status=RegistrationDataImport.IN_REVIEW)
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        rdi_mis.status = RegistrationDataImport.IN_REVIEW
+        rdi_mis.save()
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
+
+        DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)

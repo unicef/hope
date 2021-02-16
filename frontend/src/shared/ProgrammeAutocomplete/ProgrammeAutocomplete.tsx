@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { TextField, Paper } from '@material-ui/core';
 import styled from 'styled-components';
@@ -12,7 +12,6 @@ interface Option {
 
 export function ProgrammeAutocomplete({
   field,
-  form,
   ...otherProps
 }): React.ReactElement {
   const [open, setOpen] = useState(false);

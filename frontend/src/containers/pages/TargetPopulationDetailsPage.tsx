@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Tabs, Tab } from '@material-ui/core';
-import { TabPanel } from '../../components/TabPanel';
 import {
   useTargetPopulationQuery,
   TargetPopulationNode,
@@ -9,44 +7,35 @@ import {
 import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
 import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
 import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { isPermissionDeniedError } from '../../utils/utils';
 import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
 
-export function TargetPopulationDetailsPage() {
+export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data } = useTargetPopulationQuery({
+  const permissions = usePermissions();
+  const { data, loading, error } = useTargetPopulationQuery({
     variables: { id },
   });
   const [isEdit, setEditState] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(0);
 
-  const changeTab = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setSelectedTab(newValue);
-  };
+  if (loading) return <LoadingComponent />;
 
-  if (!data) {
-    return null;
-  }
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || permissions === null) return null;
+
   const targetPopulation = data.targetPopulation as TargetPopulationNode;
   const { status } = targetPopulation;
-  const tabs = (
-    <Tabs
-      value={selectedTab}
-      onChange={changeTab}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-      data-cy={`target-population-tabs-${selectedTab}`}
-    >
-      <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled={status === 'DRAFT'}/>
-    </Tabs>
-  );
+
   return (
     <div>
       {isEdit ? (
         <EditTargetPopulation
           targetPopulation={targetPopulation}
-          selectedTab={selectedTab}
           targetPopulationCriterias={
             targetPopulation.candidateListTargetingCriteria
           }
@@ -57,30 +46,35 @@ export function TargetPopulationDetailsPage() {
           <TargetPopulationPageHeader
             targetPopulation={targetPopulation}
             setEditState={setEditState}
-            tabs={tabs}
-            selectedTab={selectedTab}
+            canEdit={hasPermissions(PERMISSIONS.TARGETING_UPDATE, permissions)}
+            canRemove={hasPermissions(
+              PERMISSIONS.TARGETING_REMOVE,
+              permissions,
+            )}
+            canDuplicate={hasPermissions(
+              PERMISSIONS.TARGETING_DUPLICATE,
+              permissions,
+            )}
+            canLock={hasPermissions(PERMISSIONS.TARGETING_LOCK, permissions)}
+            canUnlock={hasPermissions(
+              PERMISSIONS.TARGETING_UNLOCK,
+              permissions,
+            )}
+            canSend={hasPermissions(PERMISSIONS.TARGETING_SEND, permissions)}
           />
           {(status === 'APPROVED' || status === 'FINALIZED') && (
             <TargetPopulationDetails targetPopulation={targetPopulation} />
           )}
-          <TabPanel value={selectedTab} index={0}>
-            <TargetPopulationCore
-              id={targetPopulation.id}
-              status={status}
-              candidateList={targetPopulation.candidateListTargetingCriteria}
-              targetPopulation={targetPopulation}
-            />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationCore
-              id={targetPopulation.id}
-              status={status}
-              candidateList={targetPopulation.candidateListTargetingCriteria}
-              targetPopulationList={targetPopulation.finalListTargetingCriteria}
-              selectedTab={selectedTab}
-              targetPopulation={targetPopulation}
-            />
-          </TabPanel>
+          <TargetPopulationCore
+            id={targetPopulation.id}
+            status={status}
+            candidateList={targetPopulation.candidateListTargetingCriteria}
+            targetPopulation={targetPopulation}
+            canViewHouseholdDetails={hasPermissions(
+              PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+              permissions,
+            )}
+          />
         </>
       )}
     </div>

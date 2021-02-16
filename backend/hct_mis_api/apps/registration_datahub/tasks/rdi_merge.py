@@ -1,29 +1,44 @@
 from django.db import transaction
 from django.forms import model_to_dict
 
-from core.models import AdminArea
-from household.models import (
+from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.activity_log.utils import copy_model_object
+from hct_mis_api.apps.core.models import AdminArea
+from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
+from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
+from hct_mis_api.apps.household.documents import IndividualDocument
+from hct_mis_api.apps.household.elasticsearch_utils import populate_index
+from hct_mis_api.apps.household.models import (
     Document,
     DocumentType,
     HEAD,
     IndividualIdentity,
     IndividualRoleInHousehold,
     Agency,
+    DUPLICATE,
+    NEEDS_ADJUDICATION,
 )
-from household.models import Household
-from household.models import Individual
-from registration_data.models import RegistrationDataImport
-from registration_datahub.models import (
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.household.models import Individual
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.models import (
     RegistrationDataImportDatahub,
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
+    KoboImportedSubmission,
+)
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    CheckAgainstSanctionListPreMergeTask,
 )
 
 
 class RdiMergeTask:
     HOUSEHOLD_FIELDS = (
+        "consent_sign",
         "consent",
+        "consent_sharing",
         "residence_status",
         "country_origin",
         "size",
@@ -32,23 +47,38 @@ class RdiMergeTask:
         "female_age_group_0_5_count",
         "female_age_group_6_11_count",
         "female_age_group_12_17_count",
-        "female_adults_count",
+        "female_age_group_18_59_count",
+        "female_age_group_60_count",
         "pregnant_count",
         "male_age_group_0_5_count",
         "male_age_group_6_11_count",
         "male_age_group_12_17_count",
-        "male_adults_count",
+        "male_age_group_18_59_count",
+        "male_age_group_60_count",
         "female_age_group_0_5_disabled_count",
         "female_age_group_6_11_disabled_count",
         "female_age_group_12_17_disabled_count",
-        "female_adults_disabled_count",
+        "female_age_group_18_59_disabled_count",
+        "female_age_group_60_disabled_count",
         "male_age_group_0_5_disabled_count",
         "male_age_group_6_11_disabled_count",
         "male_age_group_12_17_disabled_count",
-        "male_adults_disabled_count",
+        "male_age_group_18_59_disabled_count",
+        "male_age_group_60_disabled_count",
         "first_registration_date",
         "last_registration_date",
         "flex_fields",
+        "start",
+        "deviceid",
+        "name_enumerator",
+        "org_enumerator",
+        "org_name_enumerator",
+        "village",
+        "registration_method",
+        "collect_individual_data",
+        "currency",
+        "unhcr_id",
+        "geopoint",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -69,20 +99,33 @@ class RdiMergeTask:
         "flex_fields",
         "first_registration_date",
         "last_registration_date",
+        "deduplication_batch_status",
+        "deduplication_batch_results",
+        "observed_disability",
+        "seeing_disability",
+        "hearing_disability",
+        "physical_disability",
+        "memory_disability",
+        "selfcare_disability",
+        "comms_disability",
+        "who_answers_phone",
+        "who_answers_alt_phone",
     )
 
     def merge_admin_area(
-        self, imported_household, household,
+        self,
+        imported_household,
+        household,
     ):
         admin1 = imported_household.admin1
         admin2 = imported_household.admin2
         try:
             if admin2 is not None:
-                admin_area = AdminArea.objects.get(title=admin2)
+                admin_area = AdminArea.objects.filter(title=admin2).first()
                 household.admin_area = admin_area
                 return
             if admin1 is not None:
-                admin_area = AdminArea.objects.get(title=admin1)
+                admin_area = AdminArea.objects.filter(title=admin1).first()
                 household.admin_area = admin_area
                 return
         except AdminArea.DoesNotExist:
@@ -93,9 +136,7 @@ class RdiMergeTask:
         business_area = obj_hct.business_area
         for imported_household in imported_households:
             household = Household(
-                **model_to_dict(
-                    imported_household, fields=self.HOUSEHOLD_FIELDS
-                ),
+                **model_to_dict(imported_household, fields=self.HOUSEHOLD_FIELDS),
                 registration_data_import=obj_hct,
                 business_area=business_area,
             )
@@ -104,9 +145,7 @@ class RdiMergeTask:
 
         return households_dict
 
-    def _prepare_individual_documents_and_identities(
-        self, imported_individual, individual
-    ):
+    def _prepare_individual_documents_and_identities(self, imported_individual, individual):
         documents_to_create = []
         for imported_document in imported_individual.documents.all():
             document_type, _ = DocumentType.objects.get_or_create(
@@ -134,20 +173,20 @@ class RdiMergeTask:
 
         return documents_to_create, identities_to_create
 
-    def _prepare_individuals(
-        self, imported_individuals, households_dict, obj_hct
-    ):
+    def _prepare_individuals(self, imported_individuals, households_dict, obj_hct):
         individuals_dict = {}
         documents_to_create = []
         identities_to_create = []
         for imported_individual in imported_individuals:
-            values = model_to_dict(
-                imported_individual, fields=self.INDIVIDUAL_FIELDS
-            )
-            household = households_dict.get(imported_individual.household.id)
-
+            values = model_to_dict(imported_individual, fields=self.INDIVIDUAL_FIELDS)
+            imported_individual_household = imported_individual.household
+            household = households_dict.get(imported_individual.household.id) if imported_individual_household else None
             individual = Individual(
-                **values, household=household, registration_data_import=obj_hct
+                **values,
+                household=household,
+                business_area=obj_hct.business_area,
+                registration_data_import=obj_hct,
+                imported_individual_id=imported_individual.id,
             )
             individuals_dict[imported_individual.id] = individual
             if imported_individual.relationship == HEAD and household:
@@ -156,9 +195,7 @@ class RdiMergeTask:
             (
                 documents,
                 identities,
-            ) = self._prepare_individual_documents_and_identities(
-                imported_individual, individual
-            )
+            ) = self._prepare_individual_documents_and_identities(imported_individual, individual)
 
             documents_to_create.extend(documents)
             identities_to_create.extend(identities)
@@ -186,12 +223,12 @@ class RdiMergeTask:
         obj_hct = RegistrationDataImport.objects.get(
             id=registration_data_import_id,
         )
-        imported_households = ImportedHousehold.objects.filter(
+        old_obj_hct = copy_model_object(obj_hct)
+        imported_households = ImportedHousehold.objects.filter(registration_data_import=obj_hub)
+        imported_individuals = ImportedIndividual.objects.order_by("first_registration_date").filter(
             registration_data_import=obj_hub
         )
-        imported_individuals = ImportedIndividual.objects.filter(
-            registration_data_import=obj_hub
-        )
+
         imported_roles = ImportedIndividualRoleInHousehold.objects.filter(
             household__in=imported_households,
             individual__in=imported_individuals,
@@ -202,13 +239,9 @@ class RdiMergeTask:
             individuals_dict,
             documents_to_create,
             identities_to_create,
-        ) = self._prepare_individuals(
-            imported_individuals, households_dict, obj_hct
-        )
+        ) = self._prepare_individuals(imported_individuals, households_dict, obj_hct)
 
-        roles_to_create = self._prepare_roles(
-            imported_roles, households_dict, individuals_dict
-        )
+        roles_to_create = self._prepare_roles(imported_roles, households_dict, individuals_dict)
 
         Household.objects.bulk_create(households_dict.values())
         Individual.objects.bulk_create(individuals_dict.values())
@@ -216,5 +249,53 @@ class RdiMergeTask:
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
 
+        kobo_submissions = []
+        for imported_household in imported_households:
+            kobo_submission_uuid = imported_household.kobo_submission_uuid
+            kobo_asset_id = imported_household.kobo_asset_id
+            kobo_submission_time = imported_household.kobo_submission_time
+            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
+                submission = KoboImportedSubmission(
+                    kobo_submission_uuid=kobo_submission_uuid,
+                    kobo_asset_id=kobo_asset_id,
+                    kobo_submission_time=kobo_submission_time,
+                )
+                kobo_submissions.append(submission)
+        if kobo_submissions:
+            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
+
+        # DEDUPLICATION
+        ticket_details_to_create = []
+
+        populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
+
+        DeduplicateTask.deduplicate_individuals(registration_data_import=obj_hct)
+
+        golden_record_duplicates = Individual.objects.filter(
+            registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
+        )
+
+        ticket_details = create_needs_adjudication_tickets(
+            golden_record_duplicates, "duplicates", obj_hct.business_area
+        )
+        ticket_details_to_create.extend(ticket_details)
+
+        needs_adjudication = Individual.objects.filter(
+            registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
+        )
+
+        ticket_details = create_needs_adjudication_tickets(
+            needs_adjudication, "possible_duplicates", obj_hct.business_area
+        )
+        ticket_details_to_create.extend(ticket_details)
+
+        TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create)
+
+        # SANCTION LIST CHECK
+        CheckAgainstSanctionListPreMergeTask.execute()
+
         obj_hct.status = RegistrationDataImport.MERGED
+
         obj_hct.save()
+
+        log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)

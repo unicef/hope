@@ -2,39 +2,53 @@ import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import Moment from 'react-moment';
-import { CashPlanNode } from '../../../__generated__/graphql';
+import {
+  AllCashPlansQuery,
+  useCashPlanVerificationStatusChoicesQuery,
+} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
+  choicesToDict,
   decodeIdString,
   formatCurrency,
   paymentVerificationStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
   max-width: 200px;
 `;
 interface PaymentVerificationTableRowProps {
-  plan: CashPlanNode;
+  plan: AllCashPlansQuery['allCashPlans']['edges'][number]['node'];
+  canViewDetails: boolean;
 }
 
 export function PaymentVerificationTableRow({
   plan,
+  canViewDetails,
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
   const handleClick = (): void => {
     const path = `/${businessArea}/payment-verification/${plan.id}`;
     history.push(path);
   };
+  const {
+    data: statusChoicesData,
+  } = useCashPlanVerificationStatusChoicesQuery();
+
+  if (!statusChoicesData) return null;
+  const deliveryTypeChoicesDict = choicesToDict(
+    statusChoicesData.paymentRecordDeliveryTypeChoices,
+  );
+
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={plan.id}
     >
@@ -48,15 +62,20 @@ export function PaymentVerificationTableRow({
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>{plan.assistanceThrough}</TableCell>
-      <TableCell align='left'>{plan.deliveryType}</TableCell>
+      <TableCell align='left'>
+        {deliveryTypeChoicesDict[plan.deliveryType]}
+      </TableCell>
       <TableCell align='right'>
         {formatCurrency(plan.totalDeliveredQuantity)}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='DD/MM/YYYY'>{plan.startDate}</Moment>-
-        <Moment format='DD/MM/YYYY'>{plan.endDate}</Moment>
+        <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
+        <UniversalMoment>{plan.endDate}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>{plan.program.name}</TableCell>
+      <TableCell align='left'>
+        <UniversalMoment>{plan.updatedAt}</UniversalMoment>
+      </TableCell>
     </ClickableTableRow>
   );
 }

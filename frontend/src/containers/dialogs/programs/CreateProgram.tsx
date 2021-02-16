@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from 'react';
-import moment from 'moment';
 import { Button } from '@material-ui/core';
 import { useCreateProgramMutation } from '../../../__generated__/graphql';
 import { ProgramForm } from '../../forms/ProgramForm';
@@ -18,12 +17,14 @@ export function CreateProgram(): ReactElement {
       variables: {
         programData: {
           ...values,
-          startDate: moment(values.startDate).format('YYYY-MM-DD'),
-          endDate: moment(values.endDate).format('YYYY-MM-DD'),
+          startDate: values.startDate,
+          endDate: values.endDate,
           businessAreaSlug: businessArea,
         },
       },
-      refetchQueries: () => [{ query: ALL_PROGRAMS_QUERY }],
+      refetchQueries: () => [
+        { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
+      ],
     });
     if (!response.errors && response.data.createProgram) {
       showMessage('Programme created.', {

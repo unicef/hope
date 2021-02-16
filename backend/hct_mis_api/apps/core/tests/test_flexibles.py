@@ -1,15 +1,10 @@
 from django.conf import settings
-from django.contrib.admin import AdminSite
-from django.contrib.messages.storage.fallback import FallbackStorage
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, RequestFactory
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+from xlrd import XLRDError
 
-from core.admin import FlexibleAttributeAdmin
-from core.models import (
-    FlexibleAttribute,
-    FlexibleAttributeChoice,
-    FlexibleAttributeGroup,
-)
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeChoice, FlexibleAttributeGroup
 
 
 class MockSuperUser:
@@ -18,26 +13,9 @@ class MockSuperUser:
 
 
 class TestFlexibles(TestCase):
-    def setUp(self):
-        self.factory = RequestFactory()
-        site = AdminSite()
-        self.admin = FlexibleAttributeAdmin(FlexibleAttribute, site)
-
     def load_xls(self, name):
-        with open(
-            f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}", "rb",
-        ) as f:
-            file_upload = SimpleUploadedFile(
-                "xls_file", f.read(), content_type="text/html"
-            )
-            data = {"xls_file": file_upload}
-        request = self.factory.post(
-            "import-xls/", data=data, format="multipart"
-        )
-        setattr(request, "session", "session")
-        messages = FallbackStorage(request)
-        setattr(request, "_messages", messages)
-        return self.admin.import_xls(request)
+        task = FlexibleAttributeImporter()
+        task.import_xls(f"{settings.PROJECT_ROOT}/apps/core/tests/test_files/{name}")
 
     def test_flexible_init_update_delete(self):
         self.load_xls("flex_init.xls")
@@ -74,12 +52,8 @@ class TestFlexibles(TestCase):
             vulnerability_questions
         """
 
-        household_questions_group = FlexibleAttributeGroup.objects.get(
-            name="household_questions"
-        )
-        individual_questions_group = FlexibleAttributeGroup.objects.get(
-            name="individual_questions"
-        )
+        household_questions_group = FlexibleAttributeGroup.objects.get(name="household_questions")
+        individual_questions_group = FlexibleAttributeGroup.objects.get(name="individual_questions")
         groups_tree_dict = {
             "consent": None,
             "household_questions": None,
@@ -113,30 +87,23 @@ class TestFlexibles(TestCase):
         attrib_english_labels = [
             "Does your family host an unaccompanied child / fosterchild?",
             "Has any of your children been ill with cough and fever at any time in the last 2 weeks?",
-            "If any child was sick, When he/she had an illness with a cough, did he/she breathe faster than usual with short, rapid breaths or have difficulty breathing?",
+            "If any child was sick, When he/she had an illness with a cough, did he/she breathe "
+            "faster than usual with short, rapid breaths or have difficulty breathing?",
             "If above is Yes, did you seek advice or treatment for the illness from any source?",
             "If member is a child, does he/she ever been enrolled in school?",
             "If member is a child, does he/she currently enrolled in school",
         ]
 
-        yes_choice = FlexibleAttributeChoice.objects.get(
-            list_name="yes_no", name=1
-        )
-        no_choice = FlexibleAttributeChoice.objects.get(
-            list_name="yes_no", name=0
-        )
+        yes_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=1)
+        no_choice = FlexibleAttributeChoice.objects.get(list_name="yes_no", name=0)
 
         for name, label in zip(selected_attribs, attrib_english_labels):
             attrib = FlexibleAttribute.objects.get(name=name)
             expected_associated_with = 0 if attrib.name[-4:] == "_h_f" else 1
             self.assertEqual(attrib.label["English(EN)"], label)
             self.assertEqual(attrib.associated_with, expected_associated_with)
-            self.assertTrue(
-                yes_choice.flex_attributes.filter(id=attrib.id).exists()
-            )
-            self.assertTrue(
-                no_choice.flex_attributes.filter(id=attrib.id).exists()
-            )
+            self.assertTrue(yes_choice.flex_attributes.filter(id=attrib.id).exists())
+            self.assertTrue(no_choice.flex_attributes.filter(id=attrib.id).exists())
 
         # Test updating/deleting values
         self.load_xls("flex_updated.xls")
@@ -149,13 +116,9 @@ class TestFlexibles(TestCase):
             "household_vulnerabilities",
         ]
 
-        groups_from_db = FlexibleAttributeGroup.objects.filter(
-            name__in=deleted_groups
-        )
+        groups_from_db = FlexibleAttributeGroup.objects.filter(name__in=deleted_groups)
 
-        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(
-            name__in=deleted_groups
-        )
+        deleted_groups_from_db = FlexibleAttributeGroup.all_objects.filter(name__in=deleted_groups)
         self.assertEqual(len(groups_from_db), 0)
 
         # check if they are soft deleted
@@ -164,9 +127,7 @@ class TestFlexibles(TestCase):
         consent_group = FlexibleAttributeGroup.objects.get(name="consent")
         self.assertEqual(consent_group.label["English(EN)"], "Consent Edited")
 
-        introduction = FlexibleAttribute.objects.filter(
-            type="note", name="introduction_h_f"
-        ).exists()
+        introduction = FlexibleAttribute.objects.filter(type="note", name="introduction_h_f").exists()
         self.assertFalse(introduction)
 
     def test_flexibles_type_validation(self):
@@ -201,35 +162,32 @@ class TestFlexibles(TestCase):
             },
         )
 
-        self.load_xls("flex_update_invalid_types.xls")
+        self.assertRaises(ValidationError, self.load_xls, "flex_update_invalid_types.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 1)
         self.assertEqual(len(attribs), 1)
 
     def test_flexibles_missing_name(self):
-        response = self.load_xls("flex_field_missing_name.xls")
-        self.assertContains(response, "Name is required")
+        self.assertRaisesMessage(ValidationError, "Name is required", self.load_xls, "flex_field_missing_name.xls")
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_flexibles_missing_english_label(self):
-        response = self.load_xls("flex_field_missing_english_label.xls")
-        self.assertContains(response, "English label cannot be empty")
+        self.assertRaisesMessage(
+            ValidationError, "English label cannot be empty", self.load_xls, "flex_field_missing_english_label.xls"
+        )
         group = FlexibleAttributeGroup.objects.all()
         attribs = FlexibleAttribute.objects.all()
         self.assertEqual(len(group), 0)
         self.assertEqual(len(attribs), 0)
 
     def test_load_invalid_file(self):
-        response = self.load_xls("erd arrows.jpg")
-        self.assertContains(response, "Unsupported format, or corrupt file")
-
-    def test_choice_not_assigned_to_field(self):
-        response = self.load_xls("flex_choice_without_field.xls")
-        self.assertContains(response, "Choice is not assigned to any field")
+        self.assertRaises(
+            XLRDError, self.load_xls, "erd arrows.jpg"
+        )
 
     def test_reimport_soft_deleted_objects(self):
         self.load_xls("flex_init_valid_types.xls")

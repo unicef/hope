@@ -7,7 +7,7 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized_0_with_permission 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
@@ -23,7 +23,63 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_finalized_1_without_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
+        }
+    ]
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_residence_status_0_with_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': {
+            'edges': [
+                {
+                    'node': {
+                        'residenceStatus': 'HOST',
+                        'size': 1
+                    }
+                }
+            ],
+            'totalCount': 1
+        }
+    }
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_residence_status_1_without_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
+        }
+    ]
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_0_with_permission 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
@@ -39,13 +95,13 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_1_edit 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_1_edit_0_with_permission 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
                 {
                     'node': {
-                        'residenceStatus': 'CITIZEN',
+                        'residenceStatus': 'HOST',
                         'size': 1
                     }
                 },
@@ -61,7 +117,47 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_1_edit_1_without_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
+        }
+    ]
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_1_without_permission 1'] = {
+    'data': {
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
+        }
+    ]
+}
+
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit_0_with_permission 1'] = {
     'data': {
         'finalHouseholdsListByTargetingCriteria': {
             'edges': [
@@ -77,18 +173,22 @@ snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_b
     }
 }
 
-snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_residence_status 1'] = {
+snapshots['FinalListTargetingCriteriaQueryTestCase::test_final_households_list_by_targeting_criteria_size_2_edit_1_without_permission 1'] = {
     'data': {
-        'finalHouseholdsListByTargetingCriteria': {
-            'edges': [
+        'finalHouseholdsListByTargetingCriteria': None
+    },
+    'errors': [
+        {
+            'locations': [
                 {
-                    'node': {
-                        'residenceStatus': 'CITIZEN',
-                        'size': 1
-                    }
+                    'column': 7,
+                    'line': 3
                 }
             ],
-            'totalCount': 1
+            'message': 'Permission Denied',
+            'path': [
+                'finalHouseholdsListByTargetingCriteria'
+            ]
         }
-    }
+    ]
 }

@@ -1,35 +1,41 @@
 import random
 import time
+from decimal import Decimal
 
 from django.core.management import BaseCommand, call_command
 from django.db import transaction
 from django.db.models import Q
 
-from account.fixtures import UserFactory
-from cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
-from cash_assist_datahub.models import Session, Programme
-from core.fixtures import AdminAreaFactory, AdminAreaTypeFactory
-from core.models import BusinessArea, AdminArea
-from household.fixtures import (
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
+from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
+    GrievanceComplaintTicketWithoutExtrasFactory,
+)
+from hct_mis_api.apps.household.elasticsearch_utils import rebuild_search_index
+from hct_mis_api.apps.household.fixtures import (
     EntitlementCardFactory,
     DocumentFactory,
-    create_household,
+    create_household_for_fixtures,
 )
-from household.models import DocumentType
-from payment.fixtures import (
+from hct_mis_api.apps.household.models import DocumentType
+from hct_mis_api.apps.payment.fixtures import (
     PaymentRecordFactory,
     CashPlanPaymentVerificationFactory,
     PaymentVerificationFactory,
 )
-from program.fixtures import CashPlanFactory, ProgramFactory
-from program.models import Program
-from registration_data.fixtures import RegistrationDataImportFactory
-from registration_data.models import RegistrationDataImport
-from registration_datahub.fixtures import (
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household,
 )
-from targeting.fixtures import (
+from hct_mis_api.apps.targeting.fixtures import (
     TargetPopulationFactory,
     TargetingCriteriaRuleFactory,
     TargetingCriteriaRuleFilterFactory,
@@ -44,8 +50,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--program",
             dest="programs_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
@@ -55,8 +61,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--cash-plan",
             dest="cash_plans_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
@@ -66,13 +72,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--payment-record",
             dest="payment_record_amount",
-            const=10,
-            default=10,
+            const=3,
+            default=3,
             action="store",
             nargs="?",
             type=int,
-            help="Creates provided amount of payment records assigned to "
-            "household and cash plan.",
+            help="Creates provided amount of payment records assigned to " "household and cash plan.",
         )
         parser.add_argument(
             "--flush",
@@ -92,19 +97,7 @@ class Command(BaseCommand):
         )
 
     def _generate_admin_areas(self):
-        business_area = BusinessArea.objects.first()
-        state_area_type = AdminAreaTypeFactory(
-            name="State", business_area=business_area, admin_level=1
-        )
-        province_area_type = AdminAreaTypeFactory(
-            name="Province", business_area=business_area, admin_level=2
-        )
-        AdminAreaFactory.create_batch(
-            6, admin_area_type=state_area_type,
-        )
-        AdminAreaFactory.create_batch(
-            6, admin_area_type=province_area_type,
-        )
+        call_command("loadadminareas", "--business_area", "Afghanistan")
 
     @staticmethod
     def _generate_program_with_dependencies(options):
@@ -116,14 +109,10 @@ class Command(BaseCommand):
         program = ProgramFactory(business_area=BusinessArea.objects.first())
         program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
         targeting_criteria = TargetingCriteriaFactory()
-        rules = TargetingCriteriaRuleFactory.create_batch(
-            random.randint(1, 3), targeting_criteria=targeting_criteria
-        )
+        rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), targeting_criteria=targeting_criteria)
 
         for rule in rules:
-            TargetingCriteriaRuleFilterFactory.create_batch(
-                random.randint(1, 5), targeting_criteria_rule=rule
-            )
+            TargetingCriteriaRuleFilterFactory.create_batch(random.randint(1, 5), targeting_criteria_rule=rule)
 
         target_population = TargetPopulationFactory(
             created_by=user,
@@ -132,14 +121,15 @@ class Command(BaseCommand):
         )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
-                program=program, business_area=BusinessArea.objects.first(),
+                program=program,
+                business_area=BusinessArea.objects.first(),
             )
             cash_plan.save()
             for _ in range(payment_record_amount):
                 registration_data_import = RegistrationDataImportFactory(
                     imported_by=user, business_area=BusinessArea.objects.first()
                 )
-                household, individuals = create_household(
+                household, individuals = create_household_for_fixtures(
                     {
                         "registration_data_import": registration_data_import,
                         "business_area": BusinessArea.objects.first(),
@@ -152,11 +142,40 @@ class Command(BaseCommand):
 
                 household.programs.add(program)
 
-                PaymentRecordFactory(
+                payment_record = PaymentRecordFactory(
                     cash_plan=cash_plan,
                     household=household,
                     target_population=target_population,
+                    delivered_quantity_usd=None,
                 )
+                payment_record.delivered_quantity_usd = Decimal(
+                    cash_plan.exchange_rate * payment_record.delivered_quantity
+                ).quantize(Decimal(".01"))
+                payment_record.save()
+
+                should_create_grievance = random.choice((True, False))
+                if should_create_grievance:
+                    grievance_type = random.choice(("feedback", "sensitive", "complaint"))
+                    should_contain_payment_record = random.choice((True, False))
+
+                    switch_dict = {
+                        "feedback": lambda: GrievanceTicketFactory(
+                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title
+                        ),
+                        "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
+                            household=household,
+                            individual=random.choice(individuals),
+                            payment_record=payment_record if should_contain_payment_record else None,
+                        ),
+                        "complaint": lambda: GrievanceComplaintTicketWithoutExtrasFactory(
+                            household=household,
+                            individual=random.choice(individuals),
+                            payment_record=payment_record if should_contain_payment_record else None,
+                        ),
+                    }
+
+                    grievance_ticket = switch_dict.get(grievance_type)()
+
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
         PaymentVerificationFactory.create_batch(100)
@@ -166,15 +185,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Generating fixtures...")
         if options["flush"]:
             call_command("flush", "--noinput")
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_mis"
-            )
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_ca"
-            )
-            call_command(
-                "flush", "--noinput", database="cash_assist_datahub_erp"
-            )
+            call_command("flush", "--noinput", database="cash_assist_datahub_mis")
+            call_command("flush", "--noinput", database="cash_assist_datahub_ca")
+            call_command("flush", "--noinput", database="cash_assist_datahub_erp")
             call_command("flush", "--noinput", database="registration_datahub")
             call_command(
                 "loaddata",
@@ -188,9 +201,7 @@ class Command(BaseCommand):
             if options["noinput"]:
                 call_command("loadbusinessareas")
             else:
-                self.stdout.write(
-                    self.style.WARNING("BusinessAreas does not exist, ")
-                )
+                self.stdout.write(self.style.WARNING("BusinessAreas does not exist, "))
 
                 user_input = input("Type 'y' to generate, or 'n' to cancel: ")
 
@@ -203,9 +214,7 @@ class Command(BaseCommand):
             if options["noinput"]:
                 call_command("generatedocumenttypes")
             else:
-                self.stdout.write(
-                    self.style.WARNING("DocumentTypes does not exist, ")
-                )
+                self.stdout.write(self.style.WARNING("DocumentTypes does not exist, "))
 
                 user_input = input("Type 'y' to generate, or 'n' to cancel: ")
 
@@ -220,33 +229,29 @@ class Command(BaseCommand):
 
         # Data imports generation
 
-        for rdi in RegistrationDataImport.objects.all()[0:40]:
-            rdi_datahub = RegistrationDataImportDatahubFactory(hct_id=rdi.id)
-            for _ in range(15):
+        for rdi in RegistrationDataImport.objects.all():
+            rdi_datahub = RegistrationDataImportDatahubFactory(
+                name=rdi.name, hct_id=rdi.id, business_area_slug=rdi.business_area.slug
+            )
+            rdi.datahub_id = rdi_datahub.id
+            rdi.save()
+            for _ in range(10):
                 create_imported_household(
-                    {"registration_data_import": rdi_datahub,},
-                    {"registration_data_import": rdi_datahub,},
+                    {"registration_data_import": rdi_datahub},
+                    {"registration_data_import": rdi_datahub},
                 )
         session = Session(source=Session.SOURCE_CA, status=Session.STATUS_READY)
         session.save()
-        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(
-            10, session=session
-        )
-        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(
-            10, session=session
-        )
-        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(
-            10, session=session
-        )
+        cash_assist_datahub_fixtures.ServiceProviderFactory.create_batch(10, session=session)
+        cash_assist_datahub_fixtures.CashPlanFactory.create_batch(10, session=session)
+        cash_assist_datahub_fixtures.PaymentRecordFactory.create_batch(10, session=session)
 
-        for _ in range(10):
+        for _ in range(programs_amount):
             used_ids = list(Programme.objects.values_list("mis_id", flat=True))
             mis_id = Program.objects.filter(~Q(id__in=used_ids)).first().id
-            programme = cash_assist_datahub_fixtures.ProgrammeFactory(
-                session=session, mis_id=mis_id
-            )
+            programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
-        self.stdout.write(
-            f"Generated fixtures in {(time.time() - start_time)} seconds"
-        )
+        rebuild_search_index()
+
+        self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")

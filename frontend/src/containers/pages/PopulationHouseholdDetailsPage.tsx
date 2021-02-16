@@ -17,9 +17,14 @@ import { HouseholdVulnerabilities } from '../../components/population/HouseholdV
 import { LabelizedField } from '../../components/LabelizedField';
 import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
 import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
-import Moment from 'react-moment';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { isPermissionDeniedError } from '../../utils/utils';
+import { HouseholdCompositionTable } from '../tables/HouseholdCompositionTable';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   padding: 20px;
@@ -56,14 +61,21 @@ const SubTitle = styled(Typography)`
 export function PopulationHouseholdDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data, loading } = useHouseholdQuery({
+  const permissions = usePermissions();
+
+  const { data, loading, error } = useHouseholdQuery({
     variables: { id },
   });
   const {
     data: choicesData,
     loading: choicesLoading,
   } = useHouseholdChoiceDataQuery();
-  if (loading || choicesLoading) return null;
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || !choicesData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -77,19 +89,44 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Household ID: ${decodeIdString(id)}`}
-        breadCrumbs={breadCrumbsItems}
+        title={`Household ID: ${household.unicefId}`}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
+        withFlag={household.sanctionListPossibleMatch}
+        withTriangle={household.hasDuplicates}
       />
-      <HouseholdDetails houseHold={household as HouseholdNode} />
+      <HouseholdDetails
+        choicesData={choicesData}
+        household={household as HouseholdNode}
+      />
+      <HouseholdCompositionTable
+        household={household as HouseholdDetailedFragment}
+      />
       <Container>
         <HouseholdIndividualsTable
           choicesData={choicesData}
           household={household as HouseholdNode}
         />
-        <PaymentRecordHouseholdTable
-          openInNewTab
-          household={household as HouseholdNode}
-        />
+        {hasPermissions(
+          PERMISSIONS.PRORGRAMME_VIEW_LIST_AND_DETAILS,
+          permissions,
+        ) && (
+          <PaymentRecordHouseholdTable
+            openInNewTab
+            household={household as HouseholdNode}
+            businessArea={businessArea}
+            canViewPaymentRecordDetails={hasPermissions(
+              PERMISSIONS.PROGRAMME_VIEW_PAYMENT_RECORD_DETAILS,
+              permissions,
+            )}
+          />
+        )}
         <HouseholdVulnerabilities
           household={household as HouseholdDetailedFragment}
         />
@@ -109,11 +146,11 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
-              <LabelizedField label='Registered Date'>
+              <LabelizedField label='Registration Date'>
                 <div>
-                  <Moment format='DD/MM/YYYY'>
-                    {household.registrationDataImport.importDate}
-                  </Moment>
+                  <UniversalMoment>
+                    {household.lastRegistrationDate}
+                  </UniversalMoment>
                 </div>
               </LabelizedField>
             </Grid>
@@ -138,14 +175,16 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             </Grid>
             <Grid item xs={3}>
               <LabelizedField label='User name'>
-                <div> {household.registrationDataImport.importedBy.email}</div>
+                {household.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
           </Grid>
         </Overview>
-        <Content>
-          <UniversalActivityLogTable objectId={data.household.id} />
-        </Content>
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <Content>
+            <UniversalActivityLogTable objectId={data.household.id} />
+          </Content>
+        )}
       </Container>
     </div>
   );

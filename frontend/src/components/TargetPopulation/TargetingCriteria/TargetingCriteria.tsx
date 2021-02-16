@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Button } from '@material-ui/core';
+import { Button, Paper, Typography } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
 import { TargetCriteriaForm } from '../../../containers/forms/TargetCriteriaForm';
+import { TargetPopulationQuery } from '../../../__generated__/graphql';
 import { Criteria } from './Criteria';
+import {
+  ContentWrapper,
+  VulnerabilityScoreComponent,
+} from './VulnerabilityScoreComponent';
 
 const PaperContainer = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(3)}px
-    ${({ theme }) => theme.spacing(4)}px;
   margin: ${({ theme }) => theme.spacing(5)}px;
   border-bottom: 1px solid rgba(224, 224, 224, 1);
 `;
 
 const Title = styled.div`
-  padding-bottom: ${({ theme }) => theme.spacing(4)}px;
+  padding: ${({ theme }) => theme.spacing(3)}px
+    ${({ theme }) => theme.spacing(4)}px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
-
-const ContentWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: ${({ theme }) => theme.spacing(4)}px 0;
 `;
 
 const Divider = styled.div`
@@ -70,49 +68,48 @@ const AddCriteria = styled.div`
   }
 `;
 
-const Row = styled.div`
-  width: 100%;
-`;
-
 interface TargetingCriteriaProps {
-  selectedTab?: number;
   candidateListRules?;
-  targetPopulationRules?;
   isEdit?: boolean;
   helpers?;
+  targetPopulation?: TargetPopulationQuery['targetPopulation'];
+  selectedProgram?;
 }
 
 export function TargetingCriteria({
-  selectedTab,
   candidateListRules,
-  targetPopulationRules = [],
   isEdit = false,
   helpers,
-}: TargetingCriteriaProps) {
+  targetPopulation,
+  selectedProgram,
+}: TargetingCriteriaProps): React.ReactElement {
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const [criteriaIndex, setIndex] = useState(null);
   const [criteriaObject, setCriteria] = useState({});
-  const showAdditionalCriterias = selectedTab > 0;
-  const openModal = (criteria) => {
+  const openModal = (criteria): void => {
     setCriteria(criteria);
     setOpen(true);
   };
-  const closeModal = () => {
+  const closeModal = (): void => {
     setCriteria({});
     setIndex(null);
     return setOpen(false);
   };
-  const editCriteria = (criteria, index) => {
+  const editCriteria = (criteria, index): void => {
     setIndex(index);
     return openModal(criteria);
   };
 
-  const addCriteria = (values) => {
+  const addCriteria = (values): void => {
+    const criteria = {
+      filters: [...values.filters],
+      individualsFiltersBlocks: [...values.individualsFiltersBlocks],
+    };
     if (criteriaIndex !== null) {
-      helpers.replace(criteriaIndex, { filters: [...values.filters] });
+      helpers.replace(criteriaIndex, criteria);
     } else {
-      helpers.push({ filters: [...values.filters] });
+      helpers.push(criteria);
     }
     return closeModal();
   };
@@ -129,116 +126,59 @@ export function TargetingCriteria({
                   color='primary'
                   onClick={() => setOpen(true)}
                 >
-                  Add Criteria
+                  Add &apos;Or&apos; Filter
                 </Button>
               )}
               <TargetCriteriaForm
                 criteria={criteriaObject}
-                title='Add targeting criteria'
+                title='Add Filter'
                 open={isOpen}
                 onClose={() => closeModal()}
                 addCriteria={addCriteria}
+                shouldShowWarningForIndividualFilter={
+                  selectedProgram && !selectedProgram.individualDataNeeded
+                }
               />
             </>
           )}
         </Title>
+        <ContentWrapper>
+          {candidateListRules.length ? (
+            candidateListRules.map((criteria, index) => {
+              return (
+                //eslint-disable-next-line
+                <Fragment key={criteria.id || index}>
+                  <Criteria
+                    isEdit={isEdit}
+                    canRemove={candidateListRules.length > 1}
+                    rules={criteria.filters}
+                    individualsFiltersBlocks={
+                      criteria.individualsFiltersBlocks || []
+                    }
+                    editFunction={() => editCriteria(criteria, index)}
+                    removeFunction={() => helpers.remove(index)}
+                  />
 
-        {showAdditionalCriterias ? (
-          <>
-            <ContentWrapper>
-              {candidateListRules.length &&
-                candidateListRules.map((criteria, index) => {
-                  return (
-                    <>
-                      <Criteria
-                        //eslint-disable-next-line
-                        key={criteria.id || index}
-                        isEdit={false}
-                        canRemove={candidateListRules.length > 1}
-                        rules={criteria.filters}
-                        alternative={showAdditionalCriterias}
-                      />
-
-                      {index === candidateListRules.length - 1 ||
-                      (candidateListRules.length === 1 &&
-                        index === 0) ? null : (
-                        <Divider>
-                          <DividerLabel>Or</DividerLabel>
-                        </Divider>
-                      )}
-                    </>
-                  );
-                })}
-            </ContentWrapper>
-            <ContentWrapper>
-              {targetPopulationRules.length
-                ? targetPopulationRules.map((criteria, index) => {
-                    return (
-                      <>
-                        <Criteria
-                          //eslint-disable-next-line
-                          key={criteria.id || index}
-                          isEdit={isEdit}
-                          canRemove={targetPopulationRules.length > 1}
-                          rules={criteria.filters}
-                          editFunction={() => editCriteria(criteria, index)}
-                          removeFunction={() => helpers.remove(index)}
-                        />
-
-                        {index === targetPopulationRules.length - 1 ||
-                        (targetPopulationRules.length === 1 &&
-                          index === 0) ? null : (
-                          <Divider>
-                            <DividerLabel>Or</DividerLabel>
-                          </Divider>
-                        )}
-                      </>
-                    );
-                  })
-                : isEdit && (
-                    <AddCriteria onClick={() => setOpen(true)}>
-                      <AddCircleOutline />
-                      <p>Add Criteria</p>
-                    </AddCriteria>
+                  {index === candidateListRules.length - 1 ||
+                  (candidateListRules.length === 1 && index === 0) ? null : (
+                    <Divider>
+                      <DividerLabel>Or</DividerLabel>
+                    </Divider>
                   )}
-            </ContentWrapper>
-          </>
-        ) : (
-          <ContentWrapper>
-            {candidateListRules.length ? (
-              candidateListRules.map((criteria, index) => {
-                return (
-                  <>
-                    <Criteria
-                      //eslint-disable-next-line
-                      key={criteria.id || index}
-                      isEdit={isEdit}
-                      canRemove={candidateListRules.length > 1}
-                      rules={criteria.filters}
-                      editFunction={() => editCriteria(criteria, index)}
-                      removeFunction={() => helpers.remove(index)}
-                    />
-
-                    {index === candidateListRules.length - 1 ||
-                    (candidateListRules.length === 1 && index === 0) ? null : (
-                      <Divider>
-                        <DividerLabel>Or</DividerLabel>
-                      </Divider>
-                    )}
-                  </>
-                );
-              })
-            ) : (
-              <AddCriteria
-                onClick={() => setOpen(true)}
-                data-cy='button-target-population-add-criteria'
-              >
-                <AddCircleOutline />
-                <p>Add Criteria</p>
-              </AddCriteria>
-            )}
-          </ContentWrapper>
-        )}
+                </Fragment>
+              );
+            })
+          ) : (
+            <AddCriteria
+              onClick={() => setOpen(true)}
+              data-cy='button-target-population-add-criteria'
+            >
+              <AddCircleOutline />
+              <p>Add Filter</p>
+            </AddCriteria>
+          )}
+        </ContentWrapper>
+        <VulnerabilityScoreComponent targetPopulation={targetPopulation} />
       </PaperContainer>
     </div>
   );

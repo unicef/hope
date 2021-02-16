@@ -1,208 +1,240 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
-import { decodeIdString, paymentRecordStatusToColor } from '../../utils/utils';
+import {
+  formatCurrency,
+  paymentRecordStatusToColor,
+  verificationRecordsStatusToColor,
+} from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
-import { PaymentRecordNode } from '../../__generated__/graphql';
+import {
+  PaymentRecordNode,
+  PaymentVerificationNode,
+} from '../../__generated__/graphql';
 import { Missing } from '../Missing';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
-
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
+import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
+import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const OverviewGrid = styled(Grid)`
-  max-width: 1000px;
+const Overview = styled(Paper)`
+  margin: 20px;
+  padding: ${({ theme }) => theme.spacing(8)}px
+    ${({ theme }) => theme.spacing(11)}px;
 `;
-const PageContainer = styled.div`
+
+const TableWrapper = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  padding: ${({ theme }) => theme.spacing(5)}px;
+  padding: 20px;
+  padding-bottom: 0;
 `;
-
-const Card = styled(Paper)`
-  padding: ${({ theme }) => theme.spacing(6)}px;
+const StatusContainer = styled.div`
+  min-width: 120px;
+  max-width: 200px;
 `;
-
-const HouseholdDataContainer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(2)}px;
-`;
-const LabelizedFieldContainer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
-`;
-const EntitlementDataContainer = styled.div`
-  margin-top: ${({ theme }) => theme.spacing(6)}px;
-`;
-
-interface PaymentRecordDetailsProps {
+interface VerificationRecordDetailsProps {
   paymentRecord: PaymentRecordNode;
+  canViewActivityLog: boolean;
 }
 
 export function PaymentRecordDetails({
   paymentRecord,
-}: PaymentRecordDetailsProps): React.ReactElement {
+  canViewActivityLog,
+}: VerificationRecordDetailsProps): React.ReactElement {
+  let paymentVerification: PaymentVerificationNode = null;
+  if (paymentRecord.verifications.totalCount > 0) {
+    paymentVerification = paymentRecord.verifications.edges[0].node;
+  }
   return (
     <>
-      <Container>
+      <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>Payment Record Details</Typography>
         </Title>
-        <OverviewContainer>
-          <OverviewGrid container spacing={6}>
-            <Grid item xs={4}>
-              <LabelizedField label='status'>
+        <Grid container spacing={3}>
+          <Grid item xs={3}>
+            <LabelizedField label='STATUS'>
+              <StatusContainer>
+                <StatusBox
+                  status={paymentRecord.status}
+                  statusToColor={paymentRecordStatusToColor}
+                />
+              </StatusContainer>
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='STATUS DATE'
+              value={
+                <UniversalMoment>{paymentRecord.statusDate}</UniversalMoment>
+              }
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='REGISTRATION GROUP'>
+              <Missing />
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='TARGET POPULATION'
+              value={paymentRecord.targetPopulation.name}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='DISTRIBUTION MODALITY'
+              value={paymentRecord.distributionModality}
+            />
+          </Grid>
+        </Grid>
+      </ContainerColumnWithBorder>
+      {paymentVerification != null ? (
+        <ContainerColumnWithBorder>
+          <Title>
+            <Typography variant='h6'>Verification Details</Typography>
+          </Title>
+          <Grid container spacing={3}>
+            <Grid item xs={3}>
+              <LabelizedField label='STATUS'>
                 <StatusContainer>
                   <StatusBox
-                    status={paymentRecord.status}
-                    statusToColor={paymentRecordStatusToColor}
+                    status={paymentVerification.status}
+                    statusToColor={verificationRecordsStatusToColor}
                   />
                 </StatusContainer>
               </LabelizedField>
             </Grid>
-
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField
-                label='Status date'
-                value={moment(paymentRecord.statusDate).format('DD MMM YYYY')}
+                label='STATUS DATE'
+                value={
+                  <UniversalMoment>
+                    {paymentVerification.statusDate}
+                  </UniversalMoment>
+                }
               />
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
               <LabelizedField
-                label='Distribution Modality'
-                value={paymentRecord.distributionModality}
+                label='AMOUNT RECEIVED'
+                value={formatCurrency(paymentVerification.receivedAmount)}
               />
             </Grid>
-            <Grid item xs={4}>
-              <LabelizedField
-                label='Target Population'
-                value={paymentRecord.targetPopulation.name}
-              />
-            </Grid>
-          </OverviewGrid>
-        </OverviewContainer>
-      </Container>
-
-      <PageContainer>
-        <Grid container spacing={5}>
-          <Grid item xs={4}>
-            <Card>
-              <Typography variant='h6'>Household</Typography>
-              <HouseholdDataContainer>
-                <LabelizedFieldContainer>
-                  <LabelizedField
-                    label='household id'
-                    value={decodeIdString(paymentRecord.household.id)}
-                  />
-                </LabelizedFieldContainer>
-                <LabelizedFieldContainer>
-                  <LabelizedField
-                    label='head of household'
-                    value={paymentRecord.fullName}
-                  />
-                </LabelizedFieldContainer>
-                <LabelizedFieldContainer>
-                  <LabelizedField
-                    label='total person covered'
-                    value={paymentRecord.totalPersonsCovered}
-                  />
-                </LabelizedFieldContainer>
-              </HouseholdDataContainer>
-            </Card>
           </Grid>
-
-          <Grid item xs={8}>
-            <Card>
-              <Typography variant='h6'>Entitlement Details</Typography>
-              <EntitlementDataContainer>
-                <Grid container spacing={6}>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Entitlement quantity'
-                      value={paymentRecord.entitlementQuantity}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Currency'
-                      value={paymentRecord.currency}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Delivery type'
-                      value={paymentRecord.deliveryType}
-                    />
-                  </Grid>
-
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Delivered quantity'
-                      value={paymentRecord.deliveredQuantity}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Delivery date'
-                      value={moment(paymentRecord.deliveryDate).format(
-                        'DD MMM YYYY',
-                      )}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Missing />
-                  </Grid>
-
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Entitlement Card Number'
-                      value={paymentRecord.entitlementCardNumber}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='Entitlement Card Issue Date'
-                      value={moment(
-                        paymentRecord.entitlementCardIssueDate,
-                      ).format('DD MMM YYYY')}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <LabelizedField
-                      label='FSP'
-                      value={paymentRecord.serviceProvider.fullName}
-                    />
-                  </Grid>
-                </Grid>
-              </EntitlementDataContainer>
-            </Card>
+        </ContainerColumnWithBorder>
+      ) : null}
+      <Overview>
+        <Title>
+          <Typography variant='h6'>Household</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='HOUSEHOLD ID'
+              value={paymentRecord.household.unicefId}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='HEAD OF HOUSEHOLD'
+              value={paymentRecord.fullName}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='TOTAL PERSON COVERED'
+              value={paymentRecord.totalPersonsCovered}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='PHONE NUMBER'
+              value={paymentRecord.household.headOfHousehold.phoneNo}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='ALT. PHONE NUMBER'
+              value={paymentRecord.household.headOfHousehold.phoneNoAlternative}
+            />
           </Grid>
         </Grid>
-      </PageContainer>
+      </Overview>
+      <Overview>
+        <Title>
+          <Typography variant='h6'>Entitlement Details</Typography>
+        </Title>
+        <Grid container spacing={3}>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='ENTITLEMENT QUANTITY'
+              value={paymentRecord.entitlementQuantity}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='DELIVERED QUANTITY'
+              value={paymentRecord.deliveredQuantity}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='CURRENCY' value={paymentRecord.currency} />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='DELIVERY TYPE'
+              value={paymentRecord.deliveryType}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='DELIVERY DATE'
+              value={
+                <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
+              }
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='ENTITLEMENT CARD ID'
+              value={paymentRecord.entitlementCardNumber}
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='TRANSACTION REFERENCE ID'>
+              <Missing />
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='ENTITLEMENT CARD ISSUE DATE'
+              value={
+                <UniversalMoment>
+                  {paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
+              }
+            />
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField
+              label='FSP'
+              value={paymentRecord.serviceProvider.fullName}
+            />
+          </Grid>
+        </Grid>
+      </Overview>
+      {paymentVerification != null && canViewActivityLog ? (
+        <TableWrapper>
+          <UniversalActivityLogTable objectId={paymentVerification.id} />
+        </TableWrapper>
+      ) : null}
     </>
   );
 }

@@ -4,10 +4,16 @@ import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../../utils/utils';
+import {
+  decodeIdString,
+  isPermissionDeniedError,
+} from '../../../../utils/utils';
 import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
+import { usePermissions } from '../../../../hooks/usePermissions';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
+import { PermissionDenied } from '../../../../components/PermissionDenied';
 import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
-import { RegistrationIndividualContactDetails } from './RegistrationIndividualContactDetails';
 import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
@@ -22,20 +28,27 @@ const Container = styled.div`
 export function RegistrationIndividualDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data, loading } = useImportedIndividualQuery({
+  const permissions = usePermissions();
+  const { data, loading, error } = useImportedIndividualQuery({
     variables: {
       id,
     },
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data || permissions === null) return null;
 
   const { importedIndividual } = data;
   const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Registration Data import',
-      to: `/${businessArea}/registration-data-import/`,
-    },
+    ...(hasPermissions(PERMISSIONS.RDI_VIEW_LIST, permissions)
+      ? [
+          {
+            title: 'Registration Data import',
+            to: `/${businessArea}/registration-data-import/`,
+          },
+        ]
+      : []),
     {
       title: importedIndividual.registrationDataImport.name,
       to: `/${businessArea}/registration-data-import/${btoa(
@@ -56,7 +69,6 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
       />
       <Container>
         <RegistrationIndividualsBioData individual={importedIndividual} />
-        <RegistrationIndividualContactDetails individual={importedIndividual} />
         <RegistrationIndividualVulnerabilities
           individual={importedIndividual}
         />

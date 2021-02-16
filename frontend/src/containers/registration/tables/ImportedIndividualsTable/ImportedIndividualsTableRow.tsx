@@ -1,16 +1,21 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import moment from 'moment';
+import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
-  useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { choicesToDict, decodeIdString } from '../../../../utils/utils';
-import { Missing } from '../../../../components/Missing';
+import {
+  choicesToDict,
+  decodeIdString,
+  sexToCapitalize,
+} from '../../../../utils/utils';
+import { DedupeResults } from '../../details/DedupeResults';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
+import { Pointer } from '../../../../components/Pointer';
+import { AnonTableCell } from '../../../../components/table/AnonTableCell';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -26,22 +31,66 @@ export function ImportedIndividualsTableRow({
 
   const relationshipChoicesDict = choicesToDict(choices.relationshipChoices);
   const roleChoicesDict = choicesToDict(choices.roleChoices);
+  const deduplicationBatchDict = choicesToDict(
+    choices.deduplicationBatchStatusChoices,
+  );
+  const deduplicationGoldenRecordDict = choicesToDict(
+    choices.deduplicationGoldenRecordStatusChoices,
+  );
+
   const handleClick = (): void => {
     const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
     history.push(path);
   };
   return (
-    <ClickableTableRow hover onClick={handleClick} key={individual.id}>
-      <TableCell align='left'>{decodeIdString(individual.id)}</TableCell>
-      <TableCell align='left'>{individual.fullName}</TableCell>
+    <TableRow hover key={individual.id}>
+      <TableCell onClick={handleClick} align='left'>
+        <Pointer>{decodeIdString(individual.id)}</Pointer>
+      </TableCell>
+      <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
       <TableCell align='left'>
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
       <TableCell align='left'>
-        {moment(individual.birthDate).format('DD MMM YYYY')}
+        <UniversalMoment>{individual.birthDate}</UniversalMoment>
       </TableCell>
-      <TableCell align='left'>{individual.sex}</TableCell>
-    </ClickableTableRow>
+      <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
+      <TableCell align='left'>
+        {individual.deduplicationBatchResults.length ? (
+          <>
+            <DedupeResults
+              isInBatch
+              status={
+                deduplicationBatchDict[individual.deduplicationBatchStatus]
+              }
+              results={individual.deduplicationBatchResults}
+              individual={individual}
+            />
+          </>
+        ) : (
+          `${deduplicationBatchDict[individual.deduplicationBatchStatus]}`
+        )}
+      </TableCell>
+      <TableCell align='left'>
+        {individual.deduplicationGoldenRecordResults.length ? (
+          <DedupeResults
+            status={
+              deduplicationGoldenRecordDict[
+                individual.deduplicationGoldenRecordStatus
+              ]
+            }
+            results={individual.deduplicationGoldenRecordResults}
+            individual={individual}
+          />
+        ) : (
+          `${
+            deduplicationGoldenRecordDict[
+              individual.deduplicationGoldenRecordStatus
+            ]
+          }`
+        )}
+      </TableCell>
+    </TableRow>
   );
 }

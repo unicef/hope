@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import ArrowBackRoundedIcon from '@material-ui/icons/ArrowBackRounded';
 import { BreadCrumbs, BreadCrumbsItem } from './BreadCrumbs';
+import { Flag } from './Flag';
+import { FlagTooltip } from './FlagTooltip';
 
 const Wrapper = styled.div`
   box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
@@ -58,6 +60,8 @@ interface Props {
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
+  withFlag?: boolean;
+  withTriangle?: boolean;
 }
 
 export function PageHeader({
@@ -66,6 +70,8 @@ export function PageHeader({
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
+  withFlag = false,
+  withTriangle = false,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -79,13 +85,16 @@ export function PageHeader({
           </BackButton>
         ) : null}
         <HeaderContainer>
-        <div>
+          <div>
             {React.isValidElement(title) && hasInputComponent ? (
               <TitleWrapper>{title}</TitleWrapper>
             ) : (
               <>
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
-                <Typography variant='h5'>{title}</Typography>
+                <Typography variant='h5'>
+                  {title} {withTriangle && <FlagTooltip />}{' '}
+                  {withFlag && <Flag />}
+                </Typography>
               </>
             )}
           </div>

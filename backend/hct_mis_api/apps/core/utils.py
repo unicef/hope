@@ -1,10 +1,12 @@
-import datetime as dt
-import re
-from collections import MutableMapping
+from collections import MutableMapping, OrderedDict
+from typing import List
+import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import Q, F
-from django.template.defaultfilters import slugify
+from django.db.models import QuerySet
+
+from django_filters import OrderingFilter
+from graphql import GraphQLError
 
 
 class CaseInsensitiveTuple(tuple):
@@ -45,9 +47,16 @@ def decode_id_string(id_string):
     return b64decode(id_string).decode().split(":")[1]
 
 
-def unique_slugify(
-    instance, value, slug_field_name="slug", queryset=None, slug_separator="-"
-):
+def encode_id_base64(id_string, model_name):
+    if not id_string:
+        return
+
+    from base64 import b64encode
+
+    return b64encode(f"{model_name}Node:{str(id_string)}".encode("utf-8")).decode()
+
+
+def unique_slugify(instance, value, slug_field_name="slug", queryset=None, slug_separator="-"):
     """
     Calculates and stores a unique slug of ``value`` for an instance.
 
@@ -57,6 +66,8 @@ def unique_slugify(
     ``queryset`` usually doesn't need to be explicitly provided - it'll default
     to using the ``.all()`` queryset from the model's default manager.
     """
+    from django.template.defaultfilters import slugify
+
     slug_field = instance._meta.get_field(slug_field_name)
 
     slug = getattr(instance, slug_field.attname)
@@ -92,6 +103,8 @@ def unique_slugify(
 
 
 def _slug_strip(value, separator="-"):
+    import re
+
     """
     Cleans up a slug by removing slug separator characters that occur at the
     beginning or end of a slug.
@@ -117,6 +130,8 @@ def _slug_strip(value, separator="-"):
 
 
 def serialize_flex_attributes():
+    from django.db.models import F
+
     """
     Flexible Attributes objects to dict mapping:
         "individuals": {
@@ -160,7 +175,7 @@ def serialize_flex_attributes():
             },
         }
     """
-    from core.models import FlexibleAttribute
+    from hct_mis_api.apps.core.models import FlexibleAttribute
 
     flex_attributes = FlexibleAttribute.objects.all()
 
@@ -170,9 +185,7 @@ def serialize_flex_attributes():
     }
 
     for attr in flex_attributes:
-        associated_with = (
-            "Household" if attr.associated_with == 0 else "Individual"
-        )
+        associated_with = "Household" if attr.associated_with == 0 else "Individual"
         dict_key = associated_with.lower() + "s"
 
         result_dict[dict_key][attr.name] = {
@@ -191,9 +204,7 @@ def serialize_flex_attributes():
 
 
 def get_combined_attributes():
-    from core.core_fields_attributes import (
-        CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY,
-    )
+    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
 
     flex_attrs = serialize_flex_attributes()
     return {
@@ -205,6 +216,10 @@ def get_combined_attributes():
 
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):
+    import datetime as dt
+
+    from django.db.models import Q
+
     query_dict = {}
     this_year = dt.date.today().year
     if age_min == age_max and age_min is not None:
@@ -217,7 +232,7 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
 
 
 def age_to_birth_date_query(comparision_method, args):
-    field_name = "individuals__birth_date"
+    field_name = "birth_date"
     comparision_method_args_count = {
         "RANGE": 2,
         "NOT_IN_RANGE": 2,
@@ -228,13 +243,9 @@ def age_to_birth_date_query(comparision_method, args):
     }
     args_count = comparision_method_args_count.get(comparision_method)
     if args_count is None:
-        raise ValidationError(
-            f"Age filter query don't supports {comparision_method} type"
-        )
+        raise ValidationError(f"Age filter query don't supports {comparision_method} type")
     if len(args) != args_count:
-        raise ValidationError(
-            f"Age {comparision_method} filter query expect {args_count} arguments"
-        )
+        raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
     if comparision_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args)
     if comparision_method == "NOT_IN_RANGE":
@@ -247,9 +258,7 @@ def age_to_birth_date_query(comparision_method, args):
         return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
-    raise ValidationError(
-        f"Age filter query don't supports {comparision_method} type"
-    )
+    raise ValidationError(f"Age filter query don't supports {comparision_method} type")
 
 
 def get_attr_value(name, object, default=None):
@@ -288,3 +297,334 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
         if default != raise_attribute_error:
             return default
         raise
+
+
+def nested_dict_get(dictionary, path):
+    import functools
+
+    return functools.reduce(
+        lambda d, key: d.get(key, None) if isinstance(d, dict) else None, path.split("."), dictionary
+    )
+
+
+def get_count_and_percentage(input_list, all_items_list):
+    count = len(input_list)
+    all_items_count = len(all_items_list) or 1
+    percentage = (count / all_items_count) * 100
+    return {"count": count, "percentage": percentage}
+
+
+def encode_ids(results: List[dict], model_name: str, key: str) -> List[dict]:
+    if results:
+        for result in results:
+            result_id = result[key]
+            result[key] = encode_id_base64(result_id, model_name)
+    return results
+
+
+def to_dict(instance, fields=None, dict_fields=None):
+    from django.db.models import Model
+    from django.forms import model_to_dict
+
+    if fields is None:
+        fields = [f.name for f in instance._meta.fields]
+
+    data = model_to_dict(instance, fields)
+
+    for field in fields:
+        main_field = getattr(instance, field, "__NOT_EXIST__")
+        if main_field != "__NOT_EXIST__":
+            data[field] = main_field if issubclass(type(main_field), Model) else main_field
+
+    if dict_fields and isinstance(dict_fields, dict):
+        for main_field_key, nested_fields in dict_fields.items():
+            main_field = getattr(instance, main_field_key, "__NOT_EXIST__")
+            if main_field != "__NOT_EXIST__":
+                if hasattr(main_field, "db"):
+                    objs = main_field.all()
+                    data[main_field_key] = []
+                    multi = True
+                else:
+                    objs = [main_field]
+                    multi = False
+
+                for obj in objs:
+                    instance_data_dict = {}
+                    for nested_field in nested_fields:
+                        attrs_to_get = nested_field.split(".")
+                        value = None
+                        for attr in attrs_to_get:
+                            if value:
+                                value = getattr(value, attr, "__EMPTY_VALUE__")
+                            else:
+                                value = getattr(obj, attr, "__EMPTY_VALUE__")
+                        if value != "__EMPTY_VALUE__":
+                            instance_data_dict[attrs_to_get[-1]] = value
+                    if instance_data_dict and multi is True:
+                        data[main_field_key].append(instance_data_dict)
+                    elif multi is False:
+                        data[main_field_key] = instance_data_dict
+
+    return data
+
+
+def build_arg_dict(model_object, mapping_dict):
+    args = {}
+    for key in mapping_dict:
+        args[key] = nested_getattr(model_object, mapping_dict[key], None)
+    return args
+
+
+def build_arg_dict_from_dict(data_dict, mapping_dict):
+    args = {}
+    for key, value in mapping_dict.items():
+        args[key] = data_dict.get(value)
+    return args
+
+
+class CustomOrderingFilter(OrderingFilter):
+    def filter(self, qs, value):
+        from django.db.models.functions import Lower
+
+        from django_filters.constants import EMPTY_VALUES
+
+        if value in EMPTY_VALUES:
+            return qs
+
+        ordering = [self.get_ordering_value(param) for param in value]
+        new_ordering = []
+        for field in ordering:
+            field_name = field
+            desc = False
+            if field.startswith("-"):
+                field_name = field[1:]
+                desc = True
+            if isinstance(self.lower_dict.get(field_name), Lower):
+                lower_field = self.lower_dict.get(field_name)
+                if desc:
+                    lower_field = lower_field.desc()
+                new_ordering.append(lower_field)
+            else:
+                new_ordering.append(field)
+        return qs.order_by(*new_ordering)
+
+    def normalize_fields(self, fields):
+        """
+        Normalize the fields into an ordered map of {field name: param name}
+        """
+        from django.db.models.functions import Lower
+        from django.utils.itercompat import is_iterable
+
+        # fields is a mapping, copy into new OrderedDict
+        if isinstance(fields, dict):
+            return OrderedDict(fields)
+
+        # convert iterable of values => iterable of pairs (field name, param name)
+        assert is_iterable(fields), "'fields' must be an iterable (e.g., a list, tuple, or mapping)."
+
+        # fields is an iterable of field names
+        assert all(
+            isinstance(field, (str, Lower))
+            or is_iterable(field)
+            and len(field) == 2  # may need to be wrapped in parens
+            for field in fields
+        ), "'fields' must contain strings or (field name, param name) pairs."
+
+        new_fields = []
+        self.lower_dict = {}
+
+        for field in fields:
+            field_name = field
+            if isinstance(field, Lower):
+                field_name = field.source_expressions[0].name
+            new_fields.append(field_name)
+            self.lower_dict[field_name] = field
+
+        return OrderedDict([(f, f) if isinstance(f, (str, Lower)) else f for f in new_fields])
+
+
+def is_valid_uuid(uuid_str):
+    from uuid import UUID
+
+    try:
+        UUID(uuid_str, version=4)
+        return True
+    except ValueError:
+        return False
+
+
+def choices_to_dict(choices):
+    return {value: name for value, name in choices}
+
+
+def decode_and_get_object(encoded_id, model, required):
+    from django.shortcuts import get_object_or_404
+
+    if required is True or encoded_id is not None:
+        decoded_id = decode_id_string(encoded_id)
+        return get_object_or_404(model, id=decoded_id)
+
+
+def dict_to_camel_case(dictionary):
+    from graphene.utils.str_converters import to_camel_case
+
+    if isinstance(dictionary, dict):
+        return {to_camel_case(key): value for key, value in dictionary.items()}
+    return {}
+
+
+def to_snake_case(camel_case_string):
+    if "_" in camel_case_string:
+        return camel_case_string
+    import re
+
+    snake_case = re.sub("(?<!^)([A-Z0-9])", r"_\1", camel_case_string)
+    return snake_case[0] + snake_case[1:].lower()
+
+
+def check_concurrency_version_in_mutation(version, target):
+    if version is None:
+        return
+    from graphql import GraphQLError
+
+    if version != target.version:
+        raise GraphQLError("Someone has modified this record")
+
+
+def update_labels_mapping(csv_file):
+    """
+    WARNING! THIS FUNCTION DIRECTLY MODIFY core_fields_attributes.py
+
+    IF YOU DON'T UNDERSTAND WHAT THIS FUNCTION DO, SIMPLY DO NOT TOUCH OR USE IT
+
+    csv_file: path to csv file, 2 columns needed (field name, english label)
+    """
+    import csv
+    import json
+    import re
+
+    from django.conf import settings
+
+    from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES
+
+    with open(csv_file, newline="") as csv_file:
+        reader = csv.reader(csv_file)
+        next(reader, None)
+        fields_mapping = dict(reader)
+
+    labels_mapping = {
+        core_field_data["xlsx_field"]: {
+            "old": core_field_data["label"],
+            "new": {"English(EN)": fields_mapping.get(core_field_data["xlsx_field"], "")},
+        }
+        for core_field_data in CORE_FIELDS_ATTRIBUTES
+        if core_field_data["label"].get("English(EN)", "") != fields_mapping.get(core_field_data["xlsx_field"], "")
+    }
+
+    file_path = f"{settings.PROJECT_ROOT}/apps/core/core_fields_attributes.py"
+    with open(file_path, "r") as f:
+        content = f.read()
+        new_content = content
+        for core_field, labels in labels_mapping.items():
+            old_label = (
+                json.dumps(labels["old"])
+                .replace("\\", r"\\")
+                .replace('"', r"\"")
+                .replace("(", r"\(")
+                .replace(")", r"\)")
+                .replace("[", r"\[")
+                .replace("]", r"\]")
+                .replace("?", r"\?")
+                .replace("*", r"\*")
+                .replace("$", r"\$")
+                .replace("^", r"\^")
+                .replace(".", r"\.")
+            )
+            new_label = json.dumps(labels["new"])
+            new_content = re.sub(
+                rf"(\"label\": )({old_label}),([\S\s]*?)(\"xlsx_field\": \"{core_field}\",)",
+                rf"\1{new_label},\3\4",
+                new_content,
+                flags=re.M,
+            )
+
+    with open(file_path, "r+") as f:
+        f.truncate(0)
+
+    with open(file_path, "w") as f:
+        print(new_content, file=f, end="")
+
+
+def xlrd_rows_iterator(sheet):
+    import xlrd
+
+    for row_number in range(1, sheet.nrows):
+        row = sheet.row(row_number)
+
+        if all([cell.ctype == xlrd.XL_CELL_EMPTY for cell in row]):
+            continue
+
+        yield row
+
+
+def chart_map_choices(choices):
+    return dict(choices)
+
+
+def chart_get_filtered_qs(
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+) -> QuerySet:
+    if additional_filters is None:
+        additional_filters = {}
+    if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
+        business_area_slug_filter = {}
+    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
+
+
+def parse_list_values_to_int(list_to_parse):
+    return list(map(lambda x: int(x or 0), list_to_parse))
+
+
+def sum_lists_with_values(qs_values, list_len):
+    data = [0] * list_len
+    for values in qs_values:
+        parsed_values = parse_list_values_to_int(values)
+        for i, value in enumerate(parsed_values):
+            data[i] += value
+
+    return data
+
+
+def chart_permission_decorator(chart_resolve=None, permissions=None):
+    if chart_resolve is None:
+        return functools.partial(chart_permission_decorator, permissions=permissions)
+
+    @functools.wraps(chart_resolve)
+    def resolve_f(*args, **kwargs):
+        from hct_mis_api.apps.core.models import BusinessArea
+
+        _, resolve_info = args
+        if resolve_info.context.user.is_authenticated:
+            business_area_slug = kwargs.get("business_area_slug", "global")
+            business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
+            if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
+                return chart_resolve(*args, **kwargs)
+            raise GraphQLError("Permission Denied")
+
+    return resolve_f
+
+
+def chart_filters_decoder(filters):
+    return {filter_name: decode_id_string(value) for filter_name, value in filters.items()}
+
+
+def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
+    filter_query = {}
+    if filters.get('program') is not None:
+        filter_query.update({program_id_path: filters.get('program')})
+    if filters.get('administrative_area') is not None:
+        filter_query.update({
+            f"{administrative_area_path}__id": filters.get('administrative_area'),
+            f"{administrative_area_path}__admin_area_level__admin_level": 2
+        })
+    return filter_query

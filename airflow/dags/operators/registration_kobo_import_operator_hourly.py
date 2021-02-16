@@ -8,15 +8,21 @@ class RegistrationKoboImportHourlyOperator(DjangoOperator):
     update the status of that registration data import instance.
     """
 
-    def execute(self, context, **kwargs):
-        from core.models import BusinessArea
-        from registration_datahub.models import RegistrationDataImportDatahub
-        from registration_datahub.tasks.rdi_create import RdiKoboCreateTask
+    def try_execute(self, context, **kwargs):
+        from hct_mis_api.apps.core.models import BusinessArea
+        from hct_mis_api.apps.registration_datahub.models import (
+            RegistrationDataImportDatahub,
+        )
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
+            RdiKoboCreateTask,
+        )
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
         ).first()
 
+        if not_started_rdi is None:
+            return
         business_area = BusinessArea.objects.get(
             slug=not_started_rdi.business_area_slug
         )

@@ -1,11 +1,8 @@
 from operator import itemgetter
 from unittest import TestCase
 
-from registration_datahub.validators import KoboProjectImportDataValidator
-
 
 class TestKoboSaveValidatorsMethods(TestCase):
-
     VALID_JSON = [
         {
             "_notes": [],
@@ -17,9 +14,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_bamboo_dataset_id": "",
             "_tags": [],
             "health_questions/pregnant_member_h_c": "0",
+            "health_questions/start_h_c": "2020-04-28T17:34:22.979+02:00",
+            "health_questions/end_h_c": "2020-05-28T18:56:33.979+02:00",
             "household_questions/first_registration_date_h_c": "2020-07-18",
             "household_questions/f_0_5_disability_h_c": "0",
             "household_questions/size_h_c": "1",
+            "household_questions/country_h_c": "AFG",
             "monthly_expenditures_questions/total_expense_h_f": "0",
             "individual_questions": [
                 {
@@ -29,8 +29,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/more_information/marital_status_i_c": "married",
                     "individual_questions/individual_index": "1",
                     "individual_questions/birth_date_i_c": "1980-07-18",
+                    "individual_questions/estimated_birth_date_i_c": "0",
                     "individual_questions/relationship_i_c": "head",
-                    "individual_questions/sex_i_c": "male",
+                    "individual_questions/gender_i_c": "male",
                     "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                     "individual_questions/full_name_i_c": "Test Testowy",
                     "individual_questions/is_only_collector": "NO",
@@ -41,6 +42,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/blanket_hhsize": "NaN",
             "household_questions/f_adults_disability_h_c": "0",
             "wash_questions/score_childclothes": "5",
+            "household_questions/org_enumerator_h_c": "UNICEF",
+            "household_questions/org_name_enumerator_h_c": "Test",
+            "household_questions/name_enumerator_h_c": "Test",
+            "household_questions/consent_h_c": "0",
+            "household_questions/consent_sharing_h_c": "UNICEF",
             "household_questions/m_12_17_age_group_h_c": "0",
             "household_questions/f_adults_h_c": "0",
             "household_questions/f_12_17_disability_h_c": "0",
@@ -53,12 +59,22 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_attachments": [
                 {
                     "mimetype": "image/png",
-                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
-                    "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
+                    "download_small_url": "https://kc.humanitarianresponse.info/media/small?"
+                    "media_file=wnosal%2Fattachments%"
+                    "2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e"
+                    "%2Fsignature-17_32_52.png",
+                    "download_large_url": "https://kc.humanitarianresponse.info/media/large?media_file=wnosal%"
+                    "2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "download_url": "https://kc.humanitarianresponse.info/media/original?media_file=wnosal"
+                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "filename": "wnosal/attachments/b83407aca1d647a5bf65a3383ee761d4/"
+                    "512ca816-5cab-45a6-a676-1f47cfe7658e/signature-17_32_52.png",
                     "instance": 101804069,
-                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
+                    "download_medium_url": "https://kc.humanitarianresponse.info/media/medium?media_file=wnosal"
+                    "%2Fattachments%2Fb83407aca1d647a5bf65a3383ee761d4"
+                    "%2F512ca816-5cab-45a6-a676-1f47cfe7658e%2Fsignature-17_32_52.png",
                     "id": 34814249,
                     "xform": 549831,
                 }
@@ -76,12 +92,12 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_validation_status": {},
             "_uuid": "512ca816-5cab-45a6-a676-1f47cfe7658e",
             "household_questions/m_adults_h_c": "1",
-            "consent/consent_h_c": "signature-17_32_52.png",
+            "consent/consent_sign_h_c": "signature-17_32_52.png",
             "wash_questions/score_total": "40",
             "_submitted_by": None,
             "individual_questions_count": "1",
             "end": "2020-05-28T17:34:22.979+02:00",
-            "household_questions/f_pregnant_h_c": "0",
+            "household_questions/pregnant_h_c": "0",
             "household_questions/m_6_11_disability_h_c": "0",
             "household_questions/m_0_5_disability_h_c": "0",
             "formhub/uuid": "b83407aca1d647a5bf65a3383ee761d4",
@@ -191,7 +207,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/full_name_i_c": "Test Testowski",
                     "individual_questions/relationship_i_c": "head",
                     "individual_questions/individual_vulnerabilities/wellbeing_index/cheer_h_f": "2",
-                    "individual_questions/sex_i_c": "male",
+                    "individual_questions/gender_i_c": "male",
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "40",
                     "individual_questions/given_name_i_c": "Test",
@@ -206,7 +222,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/role_i_c": "primary",
                     "individual_questions/age": "37",
                     "individual_questions/given_name_i_c": "Tes",
-                    "individual_questions/sex_i_c": "female",
+                    "individual_questions/gender_i_c": "female",
                     "individual_questions/more_information/marital_status_i_c": "married",
                     "individual_questions/more_information/pregnant_i_f": "0",
                     "individual_questions/family_name_i_c": "Testowski",
@@ -235,7 +251,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                     "individual_questions/relationship_i_c": "son_daughter",
                     "individual_questions/individual_vulnerabilities/work_status_i_c": "0",
                     "individual_questions/estimated_birth_date_i_c": "0",
-                    "individual_questions/sex_i_c": "female",
+                    "individual_questions/gender_i_c": "female",
                     "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",
                     "individual_questions/full_name_i_c": "Tesa Testowski",
                 },
@@ -271,10 +287,15 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "__version__": "vdGkCVQKjXNwcfpwHAPYmc",
             "monthly_income_questions/total_inc_h_f": "123",
             "child_protection_questions/law_against_underage_work_h_f": "level_rarely",
-            "consent/consent_h_c": "signature-12_13_0.png",
+            "consent/consent_sign_h_c": "signature-12_13_0.png",
             "start_h_c": "2020-05-26T12:11:01.475+02:00",
             "formhub/uuid": "59f3ce8716a0487bb2f82b10a4f3e8e3",
             "household_questions/household_location/hh_geopoint_h_c": "33.760882 67.661513 0 0",
+            "household_questions/org_enumerator_h_c": "UNICEF",
+            "household_questions/org_name_enumerator_h_c": "Test",
+            "household_questions/name_enumerator_h_c": "Test",
+            "household_questions/consent_h_c": "0",
+            "household_questions/consent_sharing_h_c": "UNICEF",
             "wash_questions/Agric_tool_h_f": "4",
             "_attachments": [
                 {
@@ -317,6 +338,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
         }
     ]
 
+    def setUp(self) -> None:
+        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
+
+        self.KoboProjectImportDataValidator = KoboProjectImportDataValidator
+
     def test_image_validator(self):
         # test for valid value
         valid_attachments = [
@@ -350,8 +376,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 549819,
             }
         ]
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_h_c", valid_attachments
+        result = self.KoboProjectImportDataValidator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", valid_attachments
         )
         self.assertIsNone(result, None)
 
@@ -387,33 +413,20 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_h_c", invalid_attachments
+        result = self.KoboProjectImportDataValidator.image_validator(
+            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments
         )
-        expected = (
-            "Specified image signature-17_10_32.png for field "
-            "consent_h_c is not in attachments"
-        )
+        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_h_c", []
-        )
-        expected = (
-            "Specified image signature-17_10_32.png for field "
-            "consent_h_c is not in attachments"
-        )
+        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
+        expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.txt", "consent_h_c", []
-        )
-        expected = (
-            "Specified image signature-17_10_32.txt for field "
-            "consent_h_c is not a valid image file"
-        )
+        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
+        expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
     def test_geopoint_validator(self):
@@ -431,26 +444,25 @@ class TestKoboSaveValidatorsMethods(TestCase):
         )
         for valid_option in valid_geolocations:
             self.assertIsNone(
-                KoboProjectImportDataValidator.geopoint_validator(
-                    valid_option, "hh_geopoint_h_c",
+                self.KoboProjectImportDataValidator.geopoint_validator(
+                    valid_option,
+                    "hh_geopoint_h_c",
                 )
             )
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                KoboProjectImportDataValidator.geopoint_validator(
-                    invalid_option, "hh_geopoint_h_c",
+                self.KoboProjectImportDataValidator.geopoint_validator(
+                    invalid_option,
+                    "hh_geopoint_h_c",
                 ),
                 f"Invalid geopoint {invalid_option} for field hh_geopoint_h_c",
             )
 
     def test_date_validator(self):
         test_data = (
-            {
-                "args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"),
-                "expected": None,
-            },
-            {"args": ("2020-05-28", "birth_date_i_c"), "expected": None,},
+            {"args": ("2020-05-28T17:13:31.590+02:00", "birth_date_i_c"), "expected": None},
+            {"args": ("2020-05-28", "birth_date_i_c"), "expected": None},
             {
                 "args": ("2020-13-32T25:13:31.590+02:00", "birth_date_i_c"),
                 "expected": (
@@ -469,9 +481,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             },
         )
         for data in test_data:
-            result = KoboProjectImportDataValidator.date_validator(
-                *data["args"]
-            )
+            result = self.KoboProjectImportDataValidator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_get_field_type_error(self):
@@ -484,15 +494,11 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("size_h_c", "four", attachments),
                 "expected": {
                     "header": "size_h_c",
-                    "message": "Invalid value four of type str for field "
-                    "size_h_c of type int",
+                    "message": "Invalid value four of type str for field " "size_h_c of type int",
                 },
             },
             # STRING
-            {
-                "args": ("address_h_c", "Street 123", attachments),
-                "expected": None,
-            },
+            {"args": ("address_h_c", "Street 123", attachments), "expected": None},
             {"args": ("address_h_c", 123, attachments), "expected": None},
             # BOOL
             {"args": ("returnee_h_c", True, attachments), "expected": None},
@@ -507,26 +513,21 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "args": ("returnee_h_c", "123", attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type str for field "
-                    "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type str for field " "returnee_h_c of type bool",
                 },
             },
             {
                 "args": ("returnee_h_c", 123, attachments),
                 "expected": {
                     "header": "returnee_h_c",
-                    "message": "Invalid value 123 of type int for field "
-                    "returnee_h_c of type bool",
+                    "message": "Invalid value 123 of type int for field " "returnee_h_c of type bool",
                 },
             },
             # SELECT ONE
-            {"args": ("sex_i_c", "MALE", attachments), "expected": None},
+            {"args": ("gender_i_c", "MALE", attachments), "expected": None},
             {
-                "args": ("sex_i_c", "YES", attachments),
-                "expected": {
-                    "header": "sex_i_c",
-                    "message": "Invalid choice YES for field sex_i_c",
-                },
+                "args": ("gender_i_c", "YES", attachments),
+                "expected": {"header": "gender_i_c", "message": "Invalid choice YES for field gender_i_c"},
             },
             # DATE
             {
@@ -547,10 +548,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
             # GEOPOINT
-            {
-                "args": ("hh_geopoint_h_c", "12.123 13.123", attachments),
-                "expected": None,
-            },
+            {"args": ("hh_geopoint_h_c", "12.123 13.123", attachments), "expected": None},
             {
                 "args": (
                     "hh_geopoint_h_c",
@@ -559,168 +557,47 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
                 "expected": {
                     "header": "hh_geopoint_h_c",
-                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 "
-                    "for field hh_geopoint_h_c",
+                    "message": "Invalid geopoint GeoPoint 12.123, 32.123 " "for field hh_geopoint_h_c",
                 },
             },
             # IMAGE
             {
-                "args": ("consent_h_c", "signature-17_10_3.png", attachments),
+                "args": ("consent_sign_h_c", "signature-17_10_3.png", attachments),
                 "expected": {
-                    "header": "consent_h_c",
+                    "header": "consent_sign_h_c",
                     "message": "Specified image signature-17_10_3.png "
-                    "for field consent_h_c is not in attachments",
+                    "for field consent_sign_h_c is not in attachments",
                 },
             },
         )
 
         for data in test_data:
-            result = KoboProjectImportDataValidator._get_field_type_error(
-                *data["args"]
-            )
+            result = self.KoboProjectImportDataValidator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_validate_fields(self):
-        result = KoboProjectImportDataValidator.validate_fields(
-            self.VALID_JSON, "Afghanistan"
-        )
+        result = self.KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
         self.assertEqual(result, [])
 
-        result = KoboProjectImportDataValidator.validate_fields(
-            self.INVALID_JSON, "Afghanistan"
-        )
+        result = self.KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
 
         result.sort(key=itemgetter("header"))
 
         expected = [
+            {"header": "admin1_h_c", "message": "Invalid choice SO25 for field admin1_h_c"},
+            {"header": "admin2_h_c", "message": "Invalid choice SO2502 for field admin2_h_c"},
             {
-                "header": "admin1_h_c",
-                "message": "Invalid choice SO25 for field admin1_h_c",
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is "
+                           "required, when any document data are provided",
             },
             {
-                "header": "admin2_h_c",
-                "message": "Invalid choice SO2502 for field admin2_h_c",
+                "header": "birth_certificate_no_i_c",
+                "message": "Issuing country for birth_certificate_no_i_c is "
+                           "required, when any document data are provided",
             },
-            {
-                "header": "f_0_5_age_group_h_c",
-                "message": "Missing household required field f_0_5_age_group_h_c",
-            },
-            {
-                "header": "f_0_5_disability_h_c",
-                "message": "Missing household required field f_0_5_disability_h_c",
-            },
-            {
-                "header": "f_12_17_age_group_h_c",
-                "message": "Missing household required field f_12_17_age_group_h_c",
-            },
-            {
-                "header": "f_12_17_disability_h_c",
-                "message": "Missing household required field f_12_17_disability_h_c",
-            },
-            {
-                "header": "f_6_11_age_group_h_c",
-                "message": "Missing household required field f_6_11_age_group_h_c",
-            },
-            {
-                "header": "f_6_11_disability_h_c",
-                "message": "Missing household required field f_6_11_disability_h_c",
-            },
-            {
-                "header": "f_adults_disability_h_c",
-                "message": "Missing household required field f_adults_disability_h_c",
-            },
-            {
-                "header": "f_adults_h_c",
-                "message": "Missing household required field f_adults_h_c",
-            },
-            {
-                "header": "f_pregnant_h_c",
-                "message": "Missing household required field f_pregnant_h_c",
-            },
-            {
-                "header": "first_registration_date_h_c",
-                "message": "Missing household required field first_registration_date_h_c",
-            },
-            {
-                "header": "first_registration_date_i_c",
-                "message": "Missing individual required field first_registration_date_i_c",
-            },
-            {
-                "header": "first_registration_date_i_c",
-                "message": "Missing individual required field first_registration_date_i_c",
-            },
-            {
-                "header": "first_registration_date_i_c",
-                "message": "Missing individual required field first_registration_date_i_c",
-            },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "is_only_collector",
-                "message": "Missing individual required field is_only_collector",
-            },
-            {
-                "header": "m_0_5_age_group_h_c",
-                "message": "Missing household required field m_0_5_age_group_h_c",
-            },
-            {
-                "header": "m_0_5_disability_h_c",
-                "message": "Missing household required field m_0_5_disability_h_c",
-            },
-            {
-                "header": "m_12_17_age_group_h_c",
-                "message": "Missing household required field m_12_17_age_group_h_c",
-            },
-            {
-                "header": "m_12_17_disability_h_c",
-                "message": "Missing household required field m_12_17_disability_h_c",
-            },
-            {
-                "header": "m_6_11_age_group_h_c",
-                "message": "Missing household required field m_6_11_age_group_h_c",
-            },
-            {
-                "header": "m_6_11_disability_h_c",
-                "message": "Missing household required field m_6_11_disability_h_c",
-            },
-            {
-                "header": "m_adults_disability_h_c",
-                "message": "Missing household required field m_adults_disability_h_c",
-            },
-            {
-                "header": "m_adults_h_c",
-                "message": "Missing household required field m_adults_h_c",
-            },
-            {
-                "header": "residence_status_h_c",
-                "message": "Invalid choice host for field residence_status_h_c",
-            },
-            {
-                "header": "role_i_c",
-                "message": "Only one person can be a primary collector",
-            },
-            {
-                "header": "size_h_c",
-                "message": "Missing household required field size_h_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
-            {
-                "header": "work_status_i_c",
-                "message": "Invalid choice 0 for field work_status_i_c",
-            },
+            {"header": "role_i_c", "message": "Only one person can be a primary collector"},
+            {"header": "size_h_c", "message": "Missing household required field size_h_c"},
         ]
 
         self.assertEqual(result, expected)

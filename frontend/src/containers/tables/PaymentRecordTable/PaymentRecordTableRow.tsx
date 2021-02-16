@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import Moment from 'react-moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
@@ -12,6 +11,8 @@ import {
   formatCurrency,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
+import { UniversalMoment } from '../../../components/UniversalMoment';
+import { AnonTableCell } from '../../../components/table/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -30,7 +31,7 @@ export function PaymentRecordTableRow({
   const businessArea = useBusinessArea();
   const history = useHistory();
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment_records/${paymentRecord.id}`;
+    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
     if (openInNewTab) {
       window.open(path);
     } else {
@@ -53,7 +54,7 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{paymentRecord.fullName}</TableCell>
+      <AnonTableCell>{paymentRecord.fullName}</AnonTableCell>
       <TableCell align='left'>
         {decodeIdString(paymentRecord.household.id)}
       </TableCell>
@@ -65,7 +66,7 @@ export function PaymentRecordTableRow({
         {formatCurrency(paymentRecord.deliveredQuantity)}
       </TableCell>
       <TableCell align='right'>
-        <Moment format='DD/MM/YYYY'>{paymentRecord.deliveryDate}</Moment>
+        <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
       </TableCell>
     </ClickableTableRow>
   );

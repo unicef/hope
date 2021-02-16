@@ -1,10 +1,11 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { Table, TableRow, TableCell, TableBody } from '@material-ui/core';
-import { headCells } from './HeadCells';
+import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import { EnhancedTableHead } from '../../../../components/table/EnhancedTableHead';
-import { stableSort, getComparator } from '../../../../utils/utils';
+import { getComparator, stableSort } from '../../../../utils/utils';
+import { AllFieldsAttributesQuery } from '../../../../__generated__/graphql';
+import { headCells } from './HeadCells';
 
 const TableWrapper = styled.div`
   padding: 0;
@@ -40,61 +41,59 @@ const StyledCell = styled(TableCell)`
   width: 70%;
 `;
 
-const StyledHeaderCell = styled(TableCell)`
-  &&  {
-    border-bottom: 0;
-  }
-`;
-
 type Order = 'asc' | 'desc';
 
-export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactElement => {
+export const FlexFieldsTable = ({
+  fields,
+  selectedOption,
+  searchValue,
+  selectedFieldType,
+}): ReactElement => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
   const classes = useStyles({});
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (event, property): void => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
-  const filterTable = () => {
+  const filterTable = (): AllFieldsAttributesQuery['allFieldsAttributes'] => {
     const filters = {
       labelEn: searchValue,
-      associatedWith: selectedOption
+      associatedWith: selectedOption,
     };
-    return fields.map(field => {
-      if (!searchValue && !selectedOption) {
-        return field;
-      }
-      return {
-        ...field,
-        flexAttributes: field.flexAttributes.filter(each => {
-        //eslint-disable-next-line
-        for (const key in filters) {
-          if (each[key] === undefined || (each[key] !== filters[key] && !each[key].toLowerCase().includes(filters[key].toLowerCase()))) {
-            return false;
-          }
-        }
-        return true;
-      })
+    let filteredByFieldType = [];
+    if (selectedFieldType === 'All') {
+      filteredByFieldType = fields;
+    } else if (selectedFieldType === 'Flex field') {
+      filteredByFieldType = fields.filter((el) => el.isFlexField === true);
+    } else if (selectedFieldType === 'Core field') {
+      filteredByFieldType = fields.filter((el) => el.isFlexField === false);
     }
-    })
+    return filteredByFieldType.filter((each) => {
+      //eslint-disable-next-line
+      for (const key in filters) {
+        if (
+          each[key] === undefined ||
+          (each[key] !== filters[key] &&
+            !each[key].toLowerCase().includes(filters[key].toLowerCase()))
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
   };
-
-  const orderResults = () => {
-   return filterTable().map(each => {
-     return {
-       ...each,
-       flexAttributes: stableSort(each.flexAttributes, getComparator(order, orderBy))
-      };
-   })
-  }
+  type orderedType = () => AllFieldsAttributesQuery['allFieldsAttributes'];
+  const orderResults: orderedType = () => {
+    return stableSort(filterTable(), getComparator(order, orderBy));
+  };
 
   return (
     <TableWrapper>
-      <Table aria-label="simple table">
+      <Table aria-label='simple table'>
         <EnhancedTableHead
           classes={classes}
           order={order as Order}
@@ -105,19 +104,13 @@ export const FlexFieldsTable = ({ fields, selectedOption, searchValue }): ReactE
         />
         <TableBody>
           {orderResults().map((row) => (
-            <>
-              <TableRow key={row.id}>
-                <StyledHeaderCell>
-                  <b>{row.labelEn}</b>
-                </StyledHeaderCell>
-              </TableRow>
-              {row.flexAttributes?.map((attribute) => (
-                <TableRow key={attribute.id}>
-                  <StyledCell>{attribute.labelEn}</StyledCell>
-                  <TableCell>{attribute.associatedWith}</TableCell>
-                </TableRow>
-              ))}
-            </>
+            <TableRow key={row.id}>
+              <StyledCell>{row.labelEn}</StyledCell>
+              <TableCell>{row.associatedWith}</TableCell>
+              <TableCell>
+                {row.isFlexField ? 'Flex field' : 'Core field'}
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>

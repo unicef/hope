@@ -8,6 +8,7 @@ volumes:
   db_airflow:
   airflow:
   data_es:
+  data_es_test:
 
 services:
   proxy:
@@ -42,20 +43,22 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
+      args:
+        APP_ENV: DEV
     ports:
       - "8080:8000"
     volumes:
       - ./backend:/code/
       - backend-data:/data
-    # FIXME: I know that links are deprecated
-    links:
-      - airflow_webserver
     command: "dev"
     depends_on:
       - db
       - redis
       - cash_assist_datahub_db
       - registration_datahub_db
+      - elasticsearch
+      - elasticsearch_test
+      - airflow_webserver
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
@@ -110,6 +113,7 @@ services:
       - ./airflow/dags:/usr/local/airflow/dags
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: webserver
     logging:  #NOTE: noisy output silenced
       driver: "none"
@@ -152,6 +156,7 @@ services:
       - ./airflow/dags:/usr/local/airflow/dags
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: scheduler
     logging:  #NOTE: noisy output silenced
       driver: "none"
@@ -172,13 +177,14 @@ services:
       - ./airflow/connectors:/usr/local/airflow/connectors
       - ./backend:/usr/local/airflow/backend
       - backend-data:/usr/local/airflow/data
+      - backend-data:/data
     command: worker
 
   elasticsearch:
     image: unicef/hct-elasticsearch
     build:
-      context: .
-      dockerfile: es/Dockerfile
+      context: elasticsearch
+      dockerfile: Dockerfile
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
@@ -193,3 +199,23 @@ services:
       - data_es:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
+  elasticsearch_test:
+    image: unicef/hct-elasticsearch-test
+    build:
+      context: elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster-test
+      - cluster.initial_master_nodes=es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es_test:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200

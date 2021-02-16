@@ -14,7 +14,7 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-export function CashPlus({individual}) {
+export function CashPlus({ individual }): React.ReactElement {
   const { enrolledInNutritionProgramme, administrationOfRutf } = individual;
   return (
     <Overview>
@@ -23,10 +23,16 @@ export function CashPlus({individual}) {
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
-          <LabelizedField label='Enrolled in nutrition programme' value={enrolledInNutritionProgramme ? "YES" : "NO"} />
+          <LabelizedField
+            label='Enrolled in nutrition programme'
+            value={enrolledInNutritionProgramme ? 'YES' : 'NO'}
+          />
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Administratiion of rutf' value={administrationOfRutf ? "YES" : "NO"} />
+          <LabelizedField
+            label='Administratiion of rutf'
+            value={administrationOfRutf ? 'YES' : 'NO'}
+          />
         </Grid>
       </Grid>
     </Overview>

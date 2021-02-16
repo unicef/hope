@@ -59,7 +59,7 @@ const StyledToolbar = styled(Toolbar)`
 
 export function AppBar({ open, handleDrawerOpen }): React.ReactElement {
   const { data: meData, loading: meLoading } = useMeQuery({
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   });
   const classes = useStyles({});
   if (meLoading) {

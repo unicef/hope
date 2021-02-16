@@ -1,5 +1,5 @@
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestProgramChoices(APITestCase):
@@ -46,24 +46,20 @@ class TestProgramChoices(APITestCase):
 
     def test_status_choices_query(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_PROGRAM_STATUS_CHOICES,
-            context={"user": self.user},
+            request_string=self.QUERY_PROGRAM_STATUS_CHOICES, context={"user": self.user},
         )
 
     def test_program_frequency_of_payments_choices(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_PROGRAM_FREQUENCY_OF_PAYMENTS_CHOICES,
-            context={"user": self.user},
+            request_string=self.QUERY_PROGRAM_FREQUENCY_OF_PAYMENTS_CHOICES, context={"user": self.user},
         )
 
     def test_program_sector_choices(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_PROGRAM_SECTOR_CHOICES,
-            context={"user": self.user},
+            request_string=self.QUERY_PROGRAM_SECTOR_CHOICES, context={"user": self.user},
         )
 
     def test_program_scope_choices(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY_PROGRAM_SCOPE_CHOICES,
-            context={"user": self.user},
+            request_string=self.QUERY_PROGRAM_SCOPE_CHOICES, context={"user": self.user},
         )

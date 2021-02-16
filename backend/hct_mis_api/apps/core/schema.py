@@ -1,20 +1,13 @@
-import json
 from collections import Iterable
 from operator import itemgetter
 
 import graphene
-from auditlog.models import LogEntry
-from django.contrib.gis.db.models import GeometryField
+from constance import config
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
-from django.utils.encoding import force_text
-from django.utils.functional import Promise
 from django_filters import FilterSet, CharFilter
 from graphene import (
     String,
     DateTime,
-    Scalar,
     relay,
     ConnectionField,
     Connection,
@@ -26,28 +19,31 @@ from graphene.types.resolver import (
     dict_resolver,
 )
 from graphene_django import DjangoObjectType
-from graphene_django.converter import convert_django_field
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from account.schema import UserObjectType
-from core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES
-from core.extended_connection import ExtendedConnection
-from core.kobo.api import KoboAPI
-from core.kobo.common import reduce_assets_list, reduce_asset
-from core.models import (
+from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.filters import IntegerFilter
+from hct_mis_api.apps.core.kobo.api import KoboAPI
+from hct_mis_api.apps.core.kobo.common import reduce_assets_list, reduce_asset
+from hct_mis_api.apps.core.models import (
     AdminArea,
     BusinessArea,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
+    AdminAreaLevel,
 )
-from core.utils import decode_id_string, LazyEvalMethodsDict
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
-        field_name="admin_area_type__business_area__slug",
+        field_name="admin_area_level__business_area__slug",
+    )
+    level = IntegerFilter(
+        field_name="level",
     )
 
     class Meta:
@@ -63,60 +59,18 @@ class ChoiceObject(graphene.ObjectType):
     value = String()
 
 
-class LazyEncoder(DjangoJSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
-
-
-class JSONLazyString(Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return json.dumps(dt, cls=LazyEncoder)
-
-    @staticmethod
-    def parse_literal(node):
-        if isinstance(node, String):
-            return json.loads(node.value)
-
-    @staticmethod
-    def parse_value(value):
-        return json.loads(value)
-
-
-class LogEntryObject(DjangoObjectType):
-    timestamp = DateTime()
-    changes_display_dict = JSONLazyString()
-    actor = UserObjectType()
-
-    class Meta:
-        model = LogEntry
-        exclude_fields = ("additional_data",)
-
-
-class LogEntryObjectConnection(Connection):
-    total_count = graphene.Int()
-
-    def resolve_total_count(self, info, **kwargs):
-        return self.iterable.count()
-
-    class Meta:
-        node = LogEntryObject
-
-
 class AdminAreaNode(DjangoObjectType):
     class Meta:
         model = AdminArea
         exclude_fields = ["geom", "point"]
         filter_fields = ["title"]
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class AdminAreaTypeNode(DjangoObjectType):
+    class Meta:
+        model = AdminAreaLevel
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
@@ -150,9 +104,7 @@ class FlexibleAttributeNode(DjangoObjectType):
         return self.choices.all()
 
     def resolve_associated_with(self, info):
-        return str(
-            FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1]
-        )
+        return str(FlexibleAttribute.ASSOCIATED_WITH_CHOICES[self.associated_with][1])
 
     class Meta:
         model = FlexibleAttribute
@@ -225,7 +177,7 @@ class FieldAttributeNode(graphene.ObjectType):
             Iterable,
         ):
             return sorted(parent["choices"], key=itemgetter("value"))
-        return parent.choices.order_by("name").all()
+        return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
 
     def resolve_is_flex_field(self, info):
         if isinstance(self, FlexibleAttribute):
@@ -233,19 +185,13 @@ class FieldAttributeNode(graphene.ObjectType):
         return False
 
     def resolve_labels(parent, info):
-        return resolve_label(
-            _custom_dict_or_attr_resolver("label", None, parent, info)
-        )
+        return resolve_label(_custom_dict_or_attr_resolver("label", None, parent, info))
 
     def resolve_label_en(parent, info):
-        return _custom_dict_or_attr_resolver("label", None, parent, info)[
-            "English(EN)"
-        ]
+        return _custom_dict_or_attr_resolver("label", None, parent, info)["English(EN)"]
 
     def resolve_associated_with(self, info):
-        resolved = _custom_dict_or_attr_resolver(
-            "associated_with", None, self, info
-        )
+        resolved = _custom_dict_or_attr_resolver("associated_with", None, self, info)
         if resolved == 0:
             return "Household"
         elif resolved == 1:
@@ -264,18 +210,10 @@ class GroupAttributeNode(DjangoObjectType):
 
     class Meta:
         model = FlexibleAttributeGroup
-        fields = [
-            "id",
-            "name",
-            "label",
-            "flex_attributes",
-            "label_en"
-        ]
+        fields = ["id", "name", "label", "flex_attributes", "label_en"]
 
     def resolve_label_en(self, info):
-        return _custom_dict_or_attr_resolver("label", None, self, info)[
-            "English(EN)"
-        ]
+        return _custom_dict_or_attr_resolver("label", None, self, info)["English(EN)"]
 
     def resolve_flex_attributes(self, info):
         return self.flex_attributes.all()
@@ -303,24 +241,12 @@ class KoboAssetObjectConnection(Connection):
         node = KoboAssetObject
 
 
-class GeoJSON(graphene.Scalar):
-    @classmethod
-    def serialize(cls, value):
-        return json.loads(value.geojson)
-
-
-@convert_django_field.register(GeometryField)
-def convert_field_to_geojson(field, registry=None):
-    return graphene.Field(
-        GeoJSON, description=field.help_text, required=not field.null
-    )
-
-
 def get_fields_attr_generators(flex_field):
     if flex_field is not False:
-        yield from FlexibleAttribute.objects.all()
+        yield from FlexibleAttribute.objects.order_by("created_at")
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
+        yield from XLSX_ONLY_FIELDS
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
@@ -337,21 +263,19 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
     except AttributeError as error:
         raise GraphQLError(str(error))
 
-    return return_method(
-        assets, only_deployed=kwargs.get("only_deployed", False)
-    )
+    return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
 
 
 class Query(graphene.ObjectType):
     admin_area = relay.Node.Field(AdminAreaNode)
-    all_admin_areas = DjangoFilterConnectionField(
-        AdminAreaNode, filterset_class=AdminAreaFilter
-    )
+    all_admin_areas = DjangoFilterConnectionField(AdminAreaNode, filterset_class=AdminAreaFilter)
     all_business_areas = DjangoFilterConnectionField(BusinessAreaNode)
-    all_log_entries = ConnectionField(
-        LogEntryObjectConnection, object_id=graphene.String(required=True),
-    )
     all_fields_attributes = graphene.List(
+        FieldAttributeNode,
+        flex_field=graphene.Boolean(),
+        description="All field datatype meta.",
+    )
+    all_individual_fields_attributes = graphene.List(
         FieldAttributeNode,
         flex_field=graphene.Boolean(),
         description="All field datatype meta.",
@@ -372,26 +296,25 @@ class Query(graphene.ObjectType):
         only_deployed=graphene.Boolean(required=False),
         description="All Kobo projects/assets.",
     )
+    cash_assist_url_prefix = graphene.String()
 
-    def resolve_all_log_entries(self, info, object_id, **kwargs):
-        id = decode_id_string(object_id)
-        return LogEntry.objects.filter(~Q(action=0), object_pk=id).all()
+    def resolve_cash_assist_url_prefix(parent,info):
+        return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):
+        return get_fields_attr_generators(flex_field)
+
+    def resolve_all_individual_fields_attributes(parent, info, flex_field=None):
         return get_fields_attr_generators(flex_field)
 
     def resolve_kobo_project(self, info, uid, business_area_slug, **kwargs):
         return resolve_assets(business_area_slug=business_area_slug, uid=uid)
 
-    def resolve_all_kobo_projects(
-        self, info, business_area_slug, *args, **kwargs
-    ):
+    def resolve_all_kobo_projects(self, info, business_area_slug, *args, **kwargs):
         return resolve_assets(
             business_area_slug=business_area_slug,
             only_deployed=kwargs.get("only_deployed", False),
         )
 
     def resolve_all_groups_with_fields(self, info, **kwargs):
-        return FlexibleAttributeGroup.objects.distinct().filter(
-            flex_attributes__isnull=False
-        )
+        return FlexibleAttributeGroup.objects.distinct().filter(flex_attributes__isnull=False)

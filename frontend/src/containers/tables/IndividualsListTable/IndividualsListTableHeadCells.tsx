@@ -4,8 +4,15 @@ import { IndividualNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
+    label: '',
+    id: 'sanctionListPossibleMatch',
+    numeric: false,
+    dataCy: 'sanction-list-possible-match',
+  },
+  {
+    disablePadding: false,
     label: 'Individual ID',
-    id: 'id',
+    id: 'unicefId',
     numeric: false,
     dataCy: 'individual-id',
   },
@@ -25,6 +32,13 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
+    label: 'Relationship to HoH',
+    id: 'relationship',
+    numeric: false,
+    dataCy: 'relationship',
+  },
+  {
+    disablePadding: false,
     label: 'Age',
     id: '-birthDate',
     numeric: true,
@@ -32,14 +46,14 @@ export const headCells: HeadCell<IndividualNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Sex',
+    label: 'Gender',
     id: 'sex',
     numeric: false,
     dataCy: 'individual-sex',
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'household__admin_area__title',
     numeric: false,
     dataCy: 'individual-location',

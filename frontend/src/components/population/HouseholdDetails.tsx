@@ -1,11 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, Grid } from '@material-ui/core';
+import { Typography, Grid, Paper } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
-import { HouseholdNode } from '../../__generated__/graphql';
-import { formatCurrency } from '../../utils/utils';
+import {
+  HouseholdChoiceDataQuery,
+  HouseholdNode,
+} from '../../__generated__/graphql';
+import { choicesToDict, formatCurrency } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { MiśTheme } from '../../theme';
+import { ContentLink } from '../ContentLink';
 
 const Container = styled.div`
   display: flex;
@@ -30,88 +33,143 @@ const Overview = styled.div`
   flex-direction: row;
   width: 100%;
 `;
+const OverviewPaper = styled(Paper)`
+  margin: 20px 20px 0 20px;
+  padding: 20px ${({ theme }) => theme.spacing(11)}px;
+`;
 const Title = styled.div`
   width: 100%;
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const ContentLink = styled.a`
-  font-family: ${({ theme }: { theme: MiśTheme }) =>
-    theme.hctTypography.fontFamily};
-  color: #253b46;
-  font-size: 14px;
-  line-height: 19px;
-`;
-
 interface HouseholdDetailsProps {
-  houseHold: HouseholdNode;
+  household: HouseholdNode;
+  choicesData: HouseholdChoiceDataQuery;
 }
 export function HouseholdDetails({
-  houseHold,
+  household,
+  choicesData,
 }: HouseholdDetailsProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const residenceChoicesDict = choicesToDict(
+    choicesData.residenceStatusChoices,
+  );
   return (
-    <Container>
-      <Title>
-        <Typography variant='h6'>Details</Typography>
-      </Title>
-      <Overview>
-        <Grid container spacing={6}>
-          <Grid item xs={4}>
-            <LabelizedField label='Household Size'>
-              <div>{houseHold.size}</div>
-            </LabelizedField>
+    <>
+      <Container>
+        <Title>
+          <Typography variant='h6'>Details</Typography>
+        </Title>
+        <Overview>
+          <Grid container spacing={3}>
+            <Grid item xs={3}>
+              <LabelizedField label='Household Size'>
+                {household.size}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Residence Status'>
+                {residenceChoicesDict[household.residenceStatus]}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={6}>
+              <LabelizedField label='Head of Household'>
+                <ContentLink
+                  href={`/${businessArea}/population/individuals/${household.headOfHousehold.id}`}
+                >
+                  {household.headOfHousehold.fullName}
+                </ContentLink>
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Country'>
+                {household.country}
+              </LabelizedField>
+            </Grid>
+
+            <Grid item xs={3}>
+              <LabelizedField label='Country of Origin'>
+                {household.countryOrigin}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Address'>
+                {household.address}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Village'>
+                {household.village}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Administrative Level 1'>
+                {household.admin1?.title}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='Administrative Level 2'>
+                {household.admin2?.title}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={6}>
+              <LabelizedField label='Geolocation'>
+                {household.geopoint
+                  ? `${household.geopoint.coordinates[0]}, ${household.geopoint.coordinates[1]}`
+                  : '-'}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='UNHCR CASE ID'>
+                {household?.unhcrId}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='LENGTH OF TIME SINCE ARRIVAL'>
+                {household.flexFields?.months_displaced_h_f}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='NUMBER OF TIMES DISPLACED'>
+                {household.flexFields?.number_times_displaced_h_f}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='IS THIS A RETURNEE HOUSEHOLD?'>
+                {household.returnee ? 'Yes' : 'No'}
+              </LabelizedField>
+            </Grid>
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Country'>
-              <div>{houseHold.country || '-'}</div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Residence Status'>
-              <div>{houseHold.residenceStatus}</div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Country of Origin'>
-              <div>{houseHold.countryOrigin}</div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Head of Household'>
-              <ContentLink
-                href={`/${businessArea}/population/individuals/${houseHold.headOfHousehold.id}`}
-              >
-                {houseHold.headOfHousehold.fullName}
-              </ContentLink>
-            </LabelizedField>
-          </Grid>
+        </Overview>
+      </Container>
+      <OverviewPaper>
+        <Title>
+          <Typography variant='h6'>Benefits</Typography>
+        </Title>
+        <Grid container>
           <Grid item xs={4}>
             <LabelizedField label='Total Cash Received'>
-              <div>{formatCurrency(houseHold.totalCashReceived)}</div>
+              {formatCurrency(household.totalCashReceived)}
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>
             <LabelizedField label='PrOgRAmmE(S) ENROLLED'>
               <div>
-                {houseHold.programs.edges.map((item) => (
-                  <div>{item.node.name}</div>
-                ))}
+                {household.programs.edges.length
+                  ? household.programs.edges.map((item) => (
+                      <ContentLink
+                        key={item.node.id}
+                        href={`/${businessArea}/programs/${item.node.id}`}
+                      >
+                        {item.node.name}
+                      </ContentLink>
+                    ))
+                  : '-'}
               </div>
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Admin 1'>
-              <div>{houseHold.address || '-'}</div>
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Admin 2'>
-              <div>{houseHold.adminArea?.title || '-'}</div>
-            </LabelizedField>
-          </Grid>
         </Grid>
-      </Overview>
-    </Container>
+      </OverviewPaper>
+    </>
   );
 }
