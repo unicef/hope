@@ -1,7 +1,3 @@
-from decimal import Decimal
-
-from django.conf import settings
-from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -16,28 +12,24 @@ class FundsCommitment(models.Model):
     commitment_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=15,
-        validators=[MinValueValidator(Decimal("0.01"))],
         blank=True,
         null=True,
     )
     commitment_amount_usd = models.DecimalField(
         decimal_places=2,
         max_digits=15,
-        validators=[MinValueValidator(Decimal("0.01"))],
         blank=True,
         null=True,
     )
     total_open_amount_local = models.DecimalField(
         decimal_places=2,
         max_digits=15,
-        validators=[MinValueValidator(Decimal("0.01"))],
         blank=True,
         null=True,
     )
     total_open_amount_usd = models.DecimalField(
         decimal_places=2,
         max_digits=15,
-        validators=[MinValueValidator(Decimal("0.01"))],
         blank=True,
         null=True,
     )
