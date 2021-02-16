@@ -76,7 +76,9 @@ export function Results({
   totalNumOfIndividuals,
 }: ResultsProps): React.ReactElement {
   const { t } = useTranslation();
-
+  if (!resultsData) {
+    return null;
+  }
   return (
     <div>
       <PaperContainer>
