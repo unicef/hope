@@ -548,12 +548,9 @@ export type ChartGrievanceTicketsNode = {
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
   total?: Maybe<Scalars['Int']>,
-  totalDataChange?: Maybe<Scalars['Int']>,
-  totalSensitive?: Maybe<Scalars['Int']>,
-  totalComplaint?: Maybe<Scalars['Int']>,
-  totalNegativeFeedback?: Maybe<Scalars['Int']>,
-  totalReferral?: Maybe<Scalars['Int']>,
-  totalPositiveFeedback?: Maybe<Scalars['Int']>,
+  totalNumberOfFeedback?: Maybe<Scalars['Int']>,
+  totalNumberOfOpenFeedback?: Maybe<Scalars['Int']>,
+  totalNumberOfOpenSensitive?: Maybe<Scalars['Int']>,
 };
 
 export type ChartPaymentVerification = {
@@ -3286,7 +3283,6 @@ export type Query = {
   allHouseholds?: Maybe<HouseholdNodeConnection>,
   individual?: Maybe<IndividualNode>,
   allIndividuals?: Maybe<IndividualNodeConnection>,
-  chartAllIndividualsReached?: Maybe<ChartDatasetNode>,
   sectionHouseholdsReached?: Maybe<SectionTotalNode>,
   sectionIndividualsReached?: Maybe<SectionTotalNode>,
   sectionChildReached?: Maybe<SectionTotalNode>,
@@ -3434,7 +3430,8 @@ export type QueryAllTicketNotesArgs = {
 
 export type QueryChartGrievancesArgs = {
   businessAreaSlug: Scalars['String'],
-  year: Scalars['Int']
+  year: Scalars['Int'],
+  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -3790,14 +3787,6 @@ export type QueryAllIndividualsArgs = {
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   excludedId?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
-};
-
-
-export type QueryChartAllIndividualsReachedArgs = {
-  businessAreaSlug: Scalars['String'],
-  year: Scalars['Int'],
-  program?: Maybe<Scalars['String']>,
-  administrativeArea?: Maybe<Scalars['String']>
 };
 
 
@@ -4461,6 +4450,8 @@ export type StatsObjectType = {
   childFemale?: Maybe<Scalars['Int']>,
   adultMale?: Maybe<Scalars['Int']>,
   adultFemale?: Maybe<Scalars['Int']>,
+  allHouseholds?: Maybe<Scalars['Int']>,
+  allIndividuals?: Maybe<Scalars['Int']>,
 };
 
 export type SteficonRuleNode = Node & {
@@ -5588,7 +5579,7 @@ export type TargetPopulationDetailedFragment = (
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
   )>, program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
   )>, createdBy: Maybe<(
     { __typename?: 'UserNode' }
     & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
@@ -5656,7 +5647,7 @@ export type TargetPopulationDetailedFragment = (
     )>>> }
   )>, candidateStats: Maybe<(
     { __typename?: 'StatsObjectType' }
-    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale' | 'allHouseholds' | 'allIndividuals'>
   )>, finalStats: Maybe<(
     { __typename?: 'StatsObjectType' }
     & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
@@ -6435,7 +6426,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartGrievances: Maybe<(
     { __typename?: 'ChartGrievanceTicketsNode' }
-    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalDataChange' | 'totalSensitive' | 'totalComplaint' | 'totalNegativeFeedback' | 'totalReferral' | 'totalPositiveFeedback'>
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalNumberOfFeedback' | 'totalNumberOfOpenFeedback' | 'totalNumberOfOpenSensitive'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DatasetsNode' }
       & Pick<_DatasetsNode, 'data'>
@@ -7039,6 +7030,14 @@ export type AllUsersQuery = (
   )> }
 );
 
+export type CashAssistUrlPrefixQueryVariables = {};
+
+
+export type CashAssistUrlPrefixQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'cashAssistUrlPrefix'>
+);
+
 export type CashPlanQueryVariables = {
   id: Scalars['ID']
 };
@@ -7048,7 +7047,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
     & { verifications: (
       { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
       & { edges: Array<Maybe<(
@@ -7484,7 +7483,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
@@ -7584,7 +7583,7 @@ export type ProgramQuery = (
   { __typename?: 'Query' }
   & { program: Maybe<(
     { __typename?: 'ProgramNode' }
-    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
   )> }
 );
 
@@ -8529,6 +8528,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     endDate
     status
     caId
+    caHashId
     description
     budget
     frequencyOfPayments
@@ -8618,6 +8618,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     childFemale
     adultMale
     adultFemale
+    allHouseholds
+    allIndividuals
   }
   finalStats {
     childMale
@@ -11111,12 +11113,9 @@ export const AllChartsDocument = gql`
     }
     labels
     total
-    totalDataChange
-    totalSensitive
-    totalComplaint
-    totalNegativeFeedback
-    totalReferral
-    totalPositiveFeedback
+    totalNumberOfFeedback
+    totalNumberOfOpenFeedback
+    totalNumberOfOpenSensitive
   }
   sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
     total
@@ -12456,6 +12455,53 @@ export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHoo
 export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
 export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
 export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const CashAssistUrlPrefixDocument = gql`
+    query CashAssistUrlPrefix {
+  cashAssistUrlPrefix
+}
+    `;
+export type CashAssistUrlPrefixComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>, 'query'>;
+
+    export const CashAssistUrlPrefixComponent = (props: CashAssistUrlPrefixComponentProps) => (
+      <ApolloReactComponents.Query<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables> query={CashAssistUrlPrefixDocument} {...props} />
+    );
+    
+export type CashAssistUrlPrefixProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables> & TChildProps;
+export function withCashAssistUrlPrefix<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashAssistUrlPrefixQuery,
+  CashAssistUrlPrefixQueryVariables,
+  CashAssistUrlPrefixProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables, CashAssistUrlPrefixProps<TChildProps>>(CashAssistUrlPrefixDocument, {
+      alias: 'cashAssistUrlPrefix',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashAssistUrlPrefixQuery__
+ *
+ * To run a query within a React component, call `useCashAssistUrlPrefixQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashAssistUrlPrefixQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashAssistUrlPrefixQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashAssistUrlPrefixQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, baseOptions);
+      }
+export function useCashAssistUrlPrefixLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, baseOptions);
+        }
+export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
+export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
+export type CashAssistUrlPrefixQueryResult = ApolloReactCommon.QueryResult<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>;
 export const CashPlanDocument = gql`
     query CashPlan($id: ID!) {
   cashPlan(id: $id) {
@@ -12471,6 +12517,7 @@ export const CashPlanDocument = gql`
     dispersionDate
     assistanceThrough
     caId
+    caHashId
     dispersionDate
     verificationStatus
     bankReconciliationSuccess
@@ -13400,6 +13447,7 @@ export const PaymentRecordDocument = gql`
     status
     statusDate
     caId
+    caHashId
     household {
       id
       size
@@ -13669,6 +13717,7 @@ export const ProgramDocument = gql`
     endDate
     status
     caId
+    caHashId
     description
     budget
     frequencyOfPayments
@@ -16212,12 +16261,9 @@ export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType ext
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
   total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalDataChange?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalComplaint?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNegativeFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalReferral?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalPositiveFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfOpenFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ChartPaymentVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartPaymentVerification'] = ResolversParentTypes['ChartPaymentVerification']> = {
@@ -17193,7 +17239,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
   allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
-  chartAllIndividualsReached?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartAllIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
   sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
@@ -17563,6 +17608,8 @@ export type StatsObjectTypeResolvers<ContextType = any, ParentType extends Resol
   childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {
