@@ -49,6 +49,7 @@ export const targetPopulationDetailed = gql`
       endDate
       status
       caId
+      caHashId
       description
       budget
       frequencyOfPayments
@@ -138,6 +139,8 @@ export const targetPopulationDetailed = gql`
       childFemale
       adultMale
       adultFemale
+      allHouseholds
+      allIndividuals
     }
     finalStats {
       childMale

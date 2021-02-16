@@ -1,3 +1,5 @@
+import logging
+
 from django.db import transaction
 from django.db.models import Count
 
@@ -13,6 +15,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_payment_record_delivered_quantity_in_usd,
 )
 
+log = logging.getLogger(__name__)
 
 class PullFromDatahubTask:
     MAPPING_CASH_PLAN_DICT = {
@@ -57,6 +60,7 @@ class PullFromDatahubTask:
         "total_persons_covered": "total_persons_covered",
         "full_name": "full_name",
         "household_id": "household_mis_id",
+        "head_of_household_id": "head_of_household_mis_id",
         "ca_id": "ca_id",
         "ca_hash_id": "ca_hash_id",
         "status": "status",
@@ -82,16 +86,13 @@ class PullFromDatahubTask:
             if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
                 continue
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
-            try:
-                for session in sessions:
-                    try:
-                        self.copy_session(session)
-                    except Exception as e:
-                        session = Session.STATUS_FAILED
-                        session.save()
-                        raise e
-            except Exception:
-                pass
+            for session in sessions:
+                try:
+                    self.copy_session(session)
+                except Exception as e:
+                    session.status = Session.STATUS_FAILED
+                    session.save()
+                    log.warning(e)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
@@ -141,6 +142,8 @@ class PullFromDatahubTask:
             if not payment_record.delivered_quantity_usd:
                 payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
+            if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
+                payment_record.household.programs.add(payment_record.cash_plan.program)
 
     def copy_service_providers(self, session):
         dh_service_providers = ca_models.ServiceProvider.objects.filter(session=session)

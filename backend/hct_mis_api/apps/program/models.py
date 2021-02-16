@@ -2,8 +2,6 @@ from decimal import Decimal
 
 from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 from django.db import models
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
@@ -133,9 +131,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self):
-        return self.cash_plans.aggregate(
-            households=Coalesce(Sum("total_persons_covered"), 0),
-        )["households"]
+        return self.households.count()
 
     @property
     def admin_areas_log(self):
@@ -181,13 +177,13 @@ class CashPlan(TimeStampedUUIDModel):
     coverage_unit = models.CharField(max_length=255)
     comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
-    delivery_type = models.CharField(choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, blank=True)
+    delivery_type = models.CharField(choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, null=True)
     assistance_measurement = models.CharField(max_length=255)
     assistance_through = models.CharField(max_length=255)
-    vision_id = models.CharField(max_length=255)
-    funds_commitment = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255, null=True)
+    funds_commitment = models.CharField(max_length=255, null=True)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
-    down_payment = models.CharField(max_length=255)
+    down_payment = models.CharField(max_length=255, null=True)
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField()
     total_persons_covered_revised = models.IntegerField()
