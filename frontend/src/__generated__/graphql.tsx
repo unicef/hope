@@ -4425,6 +4425,8 @@ export type StatsObjectType = {
   childFemale?: Maybe<Scalars['Int']>,
   adultMale?: Maybe<Scalars['Int']>,
   adultFemale?: Maybe<Scalars['Int']>,
+  allHouseholds?: Maybe<Scalars['Int']>,
+  allIndividuals?: Maybe<Scalars['Int']>,
 };
 
 export type SteficonRuleNode = Node & {
@@ -5620,7 +5622,7 @@ export type TargetPopulationDetailedFragment = (
     )>>> }
   )>, candidateStats: Maybe<(
     { __typename?: 'StatsObjectType' }
-    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale' | 'allHouseholds' | 'allIndividuals'>
   )>, finalStats: Maybe<(
     { __typename?: 'StatsObjectType' }
     & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
@@ -8572,6 +8574,8 @@ export const TargetPopulationDetailedFragmentDoc = gql`
     childFemale
     adultMale
     adultFemale
+    allHouseholds
+    allIndividuals
   }
   finalStats {
     childMale
@@ -17457,6 +17461,8 @@ export type StatsObjectTypeResolvers<ContextType = any, ParentType extends Resol
   childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {

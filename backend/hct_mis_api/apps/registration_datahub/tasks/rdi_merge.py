@@ -121,11 +121,11 @@ class RdiMergeTask:
         admin2 = imported_household.admin2
         try:
             if admin2 is not None:
-                admin_area = AdminArea.objects.filter(title=admin2).first()
+                admin_area = AdminArea.objects.filter(p_code=admin2).first()
                 household.admin_area = admin_area
                 return
             if admin1 is not None:
-                admin_area = AdminArea.objects.filter(title=admin1).first()
+                admin_area = AdminArea.objects.filter(p_code=admin1).first()
                 household.admin_area = admin_area
                 return
         except AdminArea.DoesNotExist:
