@@ -2,7 +2,7 @@ import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib.postgres.fields import IntegerRangeField
+from django.contrib.postgres.fields import IntegerRangeField, CICharField
 from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.validators import (
     RangeMinValueValidator,
@@ -83,9 +83,9 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_APPROVED = "APPROVED"
     STATUS_FINALIZED = "FINALIZED"
 
-    name = models.TextField(unique=True)
-    ca_id = models.CharField(max_length=255, null=True)
-    ca_hash_id = models.CharField(max_length=255, null=True)
+    name = CICharField(unique=True, db_index=True, max_length=255)
+    ca_id = CICharField(max_length=255, null=True)
+    ca_hash_id = CICharField(max_length=255, null=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -113,11 +113,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         (STATUS_FINALIZED, _("Sent")),
     )
 
-    status = models.CharField(
-        max_length=_MAX_LEN,
-        choices=STATUS_CHOICES,
-        default=STATUS_DRAFT,
-    )
+    status = models.CharField(max_length=_MAX_LEN, choices=STATUS_CHOICES, default=STATUS_DRAFT, db_index=True)
     households = models.ManyToManyField(
         "household.Household",
         related_name="target_populations",
@@ -172,6 +168,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         help_text="""
             Flag set when TP is processed by airflow task
             """,
+        db_index=True,
     )
     steficon_rule = models.ForeignKey(
         "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations"
@@ -204,8 +201,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             return []
         return (
             self.vulnerability_score_filtered_households.filter(selections__final=True)
-                .order_by("created_at")
-                .distinct()
+            .order_by("created_at")
+            .distinct()
         )
 
     @property
@@ -304,8 +301,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             TargetPopulation.objects.filter(
                 program=self.program, steficon_rule__isnull=False, status=TargetPopulation.STATUS_FINALIZED
             )
-                .order_by("-created_at")
-                .first()
+            .order_by("-created_at")
+            .first()
         )
         if tp is None:
             return None
@@ -386,10 +383,10 @@ class TargetingCriteria(TimeStampedUUIDModel, TargetingCriteriaQueryingMixin):
         query = super().get_query()
         try:
             if (
-                    self.target_population_final
-                    and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
-                    and self.target_population_final.program is not None
-                    and self.target_population_final.program.individual_data_needed
+                self.target_population_final
+                and self.target_population_final.status != TargetPopulation.STATUS_DRAFT
+                and self.target_population_final.program is not None
+                and self.target_population_final.program.individual_data_needed
             ):
                 query &= Q(size__gt=0)
         except TargetPopulation.DoesNotExist:
