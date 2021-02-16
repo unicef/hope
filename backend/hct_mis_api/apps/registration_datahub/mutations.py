@@ -22,6 +22,7 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
+from hct_mis_api.apps.registration_datahub.celery_tasks import registration_xlsx_import_task
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     RegistrationDataImportDatahub,
@@ -105,13 +106,10 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
-        AirflowApi.start_dag(
-            dag_id="CreateRegistrationDataImportXLSX",
-            context={
-                "registration_data_import_id": str(created_obj_datahub.id),
-                "import_data_id": str(import_data_obj.id),
-                "business_area": str(business_area.id),
-            },
+        registration_xlsx_import_task.delay(
+            registration_data_import_id=str(created_obj_datahub.id),
+            import_data_id=str(import_data_obj.id),
+            business_area=str(business_area.id),
         )
 
         return RegistrationXlsxImportMutation(created_obj_hct)

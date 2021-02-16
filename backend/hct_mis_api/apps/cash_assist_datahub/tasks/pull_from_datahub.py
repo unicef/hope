@@ -17,6 +17,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
 
 log = logging.getLogger(__name__)
 
+
 class PullFromDatahubTask:
     MAPPING_CASH_PLAN_DICT = {
         "ca_id": "cash_plan_id",
