@@ -139,6 +139,8 @@ export const targetPopulationDetailed = gql`
       childFemale
       adultMale
       adultFemale
+      allHouseholds
+      allIndividuals
     }
     finalStats {
       childMale
