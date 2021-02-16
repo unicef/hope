@@ -502,6 +502,9 @@ if SENTRY_DSN:
         send_default_pii=True
     )
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"https://\w+.blob.core.windows.net$"
+]
 
 SMART_ADMIN_SECTIONS = {
     'Security': ['account',
