@@ -107,7 +107,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
           businessAreaSlug: businessArea,
           reportTypes: selected,
           year: parseInt(year, 10),
-          adminArea: filter.administrativeArea?.node.id,
+          adminArea: filter.administrativeArea?.node?.id,
           program: filter.program,
         },
       },
