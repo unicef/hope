@@ -15,7 +15,6 @@ from django.utils.translation import gettext_lazy as _
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(PROJECT_ROOT, "apps/"))
 
 # domains/hosts etc.
 DOMAIN_NAME = os.getenv("DOMAIN", "localhost")
@@ -147,7 +146,7 @@ DATABASE_APPS_MAPPING = {
     "registration_datahub": "registration_datahub",
 }
 
-DATABASE_ROUTERS = ("core.dbrouters.DbRouter",)
+DATABASE_ROUTERS = ("hct_mis_api.apps.core.dbrouters.DbRouter",)
 
 POSTGRES_SSL_MODE = os.getenv("POSTGRES_SSL_MODE", "off")
 if POSTGRES_SSL_MODE == "on":
@@ -337,17 +336,17 @@ SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = [
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 
 SOCIAL_AUTH_PIPELINE = (
-    "account.authentication.social_details",
+    "hct_mis_api.apps.account.authentication.social_details",
     "social_core.pipeline.social_auth.social_uid",
     "social_core.pipeline.social_auth.auth_allowed",
     "social_core.pipeline.social_auth.social_user",
     "social_core.pipeline.user.get_username",
-    "account.authentication.require_email",
+    "hct_mis_api.apps.account.authentication.require_email",
     "social_core.pipeline.social_auth.associate_by_email",
-    "account.authentication.create_user",
+    "hct_mis_api.apps.account.authentication.create_user",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
-    "account.authentication.user_details",
+    "hct_mis_api.apps.account.authentication.user_details",
 )
 SOCIAL_AUTH_AZUREAD_B2C_OAUTH2_USER_FIELDS = [
     "email",
@@ -364,7 +363,7 @@ SOCIAL_AUTH_SANITIZE_REDIRECTS = True
 
 LOGIN_URL = "/api/login/azuread-tenant-oauth2"
 
-TEST_RUNNER = "core.mis_test_runner.PostgresTestRunner"
+TEST_RUNNER = "hct_mis_api.apps.core.mis_test_runner.PostgresTestRunner"
 
 GRAPH_MODELS = {
     "all_applications": True,
