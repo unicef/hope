@@ -242,64 +242,61 @@ class GenerateDashboardReportContentHelpers:
             instance.get("total_male_60_disabled", ""),
         )
 
-    # @classmethod
-    # def get_volumes_by_delivery(self, report: DashboardReport):
-    #     filter_vars = self._format_filters_for_payment_records(report)
+    @classmethod
+    def get_volumes_by_delivery(self, report: DashboardReport):
+        filter_vars = self._format_filters_for_payment_records(report)
 
-    #     valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
-    #     instances = None
-    #     valid_payment_records_in_instance_filter_key = None
-    #     if self._is_report_global(report):
-    #         instances = (
-    #             BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
-    #             .distinct()
-    #             .annotate(business_area_code=F("code"))
-    #             .values("name", "id", "business_area_code")
-    #         )
-    #         valid_payment_records_in_instance_filter_key = "business_area"
-    #     else:
-    #         instances = (
-    #             Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
-    #             .distinct()
-    #             .annotate(business_area_code=F("business_area__code"))
-    #             .values("id", "name", "business_area_code")
-    #         )
-    #         valid_payment_records_in_instance_filter_key = "cash_plan__program"
+        valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
+        instances = None
+        valid_payment_records_in_instance_filter_key = None
+        if self._is_report_global(report):
+            instances = (
+                BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
+                .distinct()
+                .annotate(business_area_code=F("code"))
+                .values("name", "id", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "business_area"
+        else:
+            instances = (
+                Program.objects.filter(cash_plans__payment_records__in=valid_payment_records)
+                .distinct()
+                .annotate(business_area_code=F("business_area__code"))
+                .values("id", "name", "business_area_code")
+            )
+            valid_payment_records_in_instance_filter_key = "cash_plan__program"
 
-    #     def aggregate_delivery_type(payment_records):
-    #         result = dict()
-    #         for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
-    #             label = delivery_type[1]
-    #             value = delivery_type[0]
-    #             result[value] = payment_records.filter(delivery_type=value).aggregate(Sum('delivery_quantity_usd')).get('delivered_quantity_usd__sum')
-    #         return result
+        def aggregate_by_delivery_type(payment_records):
+            result = dict()
+            for delivery_type in PaymentRecord.DELIVERY_TYPE_CHOICE:
+                value = delivery_type[0]
+                result[value] = (
+                    payment_records.filter(delivery_type=value)
+                    .aggregate(Sum("delivered_quantity_usd"))
+                    .get("delivered_quantity_usd__sum")
+                )
+            return result
 
-    #     for instance in instances:
-    #         valid_payment_records_in_instance = valid_payment_records.filter(
-    #             **{valid_payment_records_in_instance_filter_key: instance["id"]}
-    #         )
-    #         aggregated_by_delivery_type = aggregate_delivery_type(valid_payment_records_in_instance)
-    #         for key,value in aggregated_by_delivery_type.items():
-    #             # we skip all not used delivery types
-    #             if value:
-    #                 instance[key] = value
+        for instance in instances:
+            valid_payment_records_in_instance = valid_payment_records.filter(
+                **{valid_payment_records_in_instance_filter_key: instance["id"]}
+            )
+            aggregated_by_delivery_type = aggregate_by_delivery_type(valid_payment_records_in_instance)
+            instance.update(aggregated_by_delivery_type)
 
-    #     totals = aggregated_by_delivery_type(valid_payment_records)
-    #     return instances, tuple([value for key, value in totals.items()])
+        totals = aggregate_by_delivery_type(valid_payment_records)
+        return instances, totals
 
-    # @staticmethod
-    # def format_volumes_by_delivery_row(instance: dict, is_hq:bool):
-    #     result = [
-    #         instance.get("business_area_code", ""),
-    #         instance.get("name", ""),
-    #     ]
-    #     for choice in PaymentRecord.DELIVERY_TYPE_CHOICE:
-    #         result.append(instance.get(choice[0]))
+    @staticmethod
+    def format_volumes_by_delivery_row(instance: dict, is_totals: bool):
+        result = [
+            instance.get("business_area_code", "") if not is_totals else "",
+            instance.get("name", "") if not is_totals else "Total",
+        ]
+        for choice in PaymentRecord.DELIVERY_TYPE_CHOICE:
+            result.append(instance.get(choice[0]))
 
-    #     return tuple(result)
-
-    # @staticmethod
-    # def
+        return tuple(result)
 
 
 class GenerateDashboardReportService:
@@ -417,14 +414,7 @@ class GenerateDashboardReportService:
                 "business area",
                 "programme",
             ),
-            SHARED: (
-                "Cash in envelope",
-                "cash by FSP",
-                "deposit to card",
-                "mobile money",
-                "voucher",
-                "e-voucher",
-            ),
+            SHARED: tuple([choice[1] for choice in PaymentRecord.DELIVERY_TYPE_CHOICE]),
         },
         DashboardReport.INDIVIDUALS_REACHED: {
             HQ: (
@@ -467,6 +457,10 @@ class GenerateDashboardReportService:
         DashboardReport.INDIVIDUALS_REACHED: (
             GenerateDashboardReportContentHelpers.get_individuals,
             GenerateDashboardReportContentHelpers.format_individuals_row,
+        ),
+        DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (
+            GenerateDashboardReportContentHelpers.get_volumes_by_delivery,
+            GenerateDashboardReportContentHelpers.format_volumes_by_delivery_row,
         )
         # TODO: add the rest of the methods
     }
@@ -501,6 +495,7 @@ class GenerateDashboardReportService:
 
     def _add_headers(self, active_sheet, report_type) -> int:
         headers_row = self.HEADERS[report_type][self.hq_or_country] + self.HEADERS[report_type][self.SHARED]
+        headers_row = self._stringify_all_values(headers_row)
         active_sheet.append(headers_row)
         return len(headers_row)
 
@@ -520,6 +515,7 @@ class GenerateDashboardReportService:
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
         # append totals row
+        print("RIGHT BEFORE TOTALS")
         row = get_row_methods[1](totals, True)
         str_row = self._stringify_all_values(row)
         active_sheet.append(str_row)
