@@ -10,7 +10,7 @@ from hct_mis_api.apps.steficon.config import config
 
 logger = logging.getLogger(__name__)
 try:
-    import black2
+    import black
 
     mode = black.Mode(
         line_length=80,
