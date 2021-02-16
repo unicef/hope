@@ -241,6 +241,8 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "child_female": child_female,
             "adult_male": adult_male,
             "adult_female": adult_female,
+            "all_households": households_ids.count(),
+            "all_individuals": child_male + child_female + adult_male + adult_female
         }
 
     def get_criteria_string(self):
