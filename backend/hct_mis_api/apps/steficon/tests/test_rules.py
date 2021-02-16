@@ -1,5 +1,5 @@
 from django.test import TestCase
-from household.fixtures import HouseholdFactory
+from hct_mis_api.apps.household.fixtures import HouseholdFactory
 
 from hct_mis_api.apps.steficon.models import Rule
 
