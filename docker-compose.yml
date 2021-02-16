@@ -65,16 +65,12 @@ services:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    build:
-      context: ./backend
-      dockerfile: ./Dockerfile
-      args:
-        APP_ENV: DEV
+    build: ./backend
     volumes:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery worker -l INFO"
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - db
       - redis
@@ -91,11 +87,7 @@ services:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    build:
-      context: ./backend
-      dockerfile: ./Dockerfile
-      args:
-        APP_ENV: DEV
+    build: ./backend
     volumes:
       - ./backend:/code/
       - backend-data:/data
@@ -108,6 +100,13 @@ services:
       - registration_datahub_db
       - elasticsearch
       - elasticsearch_test
+
+  celery-flower:
+    image: mher/flower
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    ports:
+      - "5555:5555"
+    restart: always
 
   db:
     image: mdillon/postgis:9.5-alpine

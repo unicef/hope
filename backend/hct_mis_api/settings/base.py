@@ -236,6 +236,7 @@ OTHER_APPS = [
     "multiselectfield",
     "mptt",
     "django_extensions",
+    "django_celery_results",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -503,7 +504,7 @@ if SENTRY_DSN:
         send_default_pii=True,
     )
 
-CELERY_BROKER_URL = f"redis://{REDIS_INSTANCE}/0"
+CELERY_BROKER_URL = f"redis://{REDIS_INSTANCE}/0",
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
