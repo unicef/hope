@@ -465,6 +465,9 @@ class GenerateDashboardReportService:
         # TODO: add the rest of the methods
     }
     META_HEADERS = ("report type", "creation date", "created by", "business area", "report year")
+    REMOVE_EMPTY_COLUMNS = {
+        DashboardReport.VOLUME_BY_DELIVERY_MECHANISM: (3, len(PaymentRecord.DELIVERY_TYPE_CHOICE) + 3)
+    }
     META_SHEET = "Meta data"
     MAX_COL_WIDTH = 75
 
@@ -538,9 +541,16 @@ class GenerateDashboardReportService:
             print("ADDED HEADERS")
             number_of_rows = self._add_rows(active_sheet, report_type)
             print("ADDED ROWS")
-            self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
-            print("ADJUTED WIDTH")
+            print("ADDED FONTS")
+            remove_empty_columns_values = self.REMOVE_EMPTY_COLUMNS.get(report_type)
+            if remove_empty_columns_values:
+                self._remove_empty_columns(
+                    active_sheet, number_of_rows + 2, remove_empty_columns_values[0], remove_empty_columns_values[1]
+                )
+            self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
+
+            print("REMOVED EMPTY")
         return self.wb
 
     def generate_report(self):
@@ -644,3 +654,15 @@ class GenerateDashboardReportService:
         return (
             f"{user.first_name} {user.last_name}" if user.first_name or user.last_name else user.email or user.username
         )
+
+    def _remove_empty_columns(self, ws, totals_row, min_col=1, max_col=2):
+        to_remove_columns = []
+        for col_idx in range(min_col, max_col):
+            col_letter = get_column_letter(col_idx)
+            if not ws[f"{col_letter}{totals_row}"].value:
+                to_remove_columns.append(col_idx)
+        columns_removed = 0
+        for column in to_remove_columns:
+            ws.delete_cols(column - columns_removed)
+            columns_removed += 1
+        return len(to_remove_columns)
