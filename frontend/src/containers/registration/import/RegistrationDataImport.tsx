@@ -11,7 +11,6 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Typography,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import { useDropzone } from 'react-dropzone';
@@ -32,10 +31,10 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import { ErrorsKobo } from './errors/KoboErrors';
-import { Errors } from './errors/PlainErrors';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
+import { ErrorsKobo } from './errors/KoboErrors';
+import { Errors } from './errors/PlainErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -52,6 +51,10 @@ const ComboBox = styled(Select)`
   & {
     min-width: 200px;
   }
+`;
+
+const StyledInputLabel = styled(InputLabel)`
+  background-color: #fff;
 `;
 const DropzoneContainer = styled.div`
   width: 100%;
@@ -102,7 +105,10 @@ function DropzoneField({ onChange, loading }): React.ReactElement {
 }
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name Upload is required'),
+  name: Yup.string()
+    .required('Title is required')
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
 });
 
 export function RegistrationDataImport(): React.ReactElement {
@@ -125,9 +131,8 @@ export function RegistrationDataImport(): React.ReactElement {
   ] = useSaveKoboImportDataMutation();
   const [
     createRegistrationKoboMutate,
-    { loading: createKoboLoading },
   ] = useCreateRegistrationKoboImportMutation();
-  const { data: koboProjectsData, error, loading } = useAllKoboProjectsQuery({
+  const { data: koboProjectsData } = useAllKoboProjectsQuery({
     variables: { businessAreaSlug: businessArea },
   });
   const { t } = useTranslation();
@@ -202,11 +207,11 @@ export function RegistrationDataImport(): React.ReactElement {
     const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
     importTypeSpecificContent = (
       <div>
-        <FormControl variant='filled' margin='dense'>
-          <InputLabel>Import from</InputLabel>
+        <FormControl variant='outlined' margin='dense'>
+          <StyledInputLabel>Import from</StyledInputLabel>
           <ComboBox
             value={koboProject}
-            variant='filled'
+            variant='outlined'
             label='Kobo Project'
             onChange={(e) => {
               setKoboProject(e.target.value);
@@ -230,7 +235,14 @@ export function RegistrationDataImport(): React.ReactElement {
       </div>
     );
   }
-
+  if (importType === 'kobo') {
+    disabled =
+      !koboImportData ||
+      (koboImportData?.saveKoboImportData?.importData?.numberOfHouseholds ===
+        0 &&
+        koboImportData?.saveKoboImportData?.importData?.numberOfIndividuals ===
+          0);
+  }
   return (
     <span>
       <Button
@@ -293,11 +305,11 @@ export function RegistrationDataImport(): React.ReactElement {
                 </DialogTitle>
               </DialogTitleWrapper>
               <DialogContent>
-                <FormControl variant='filled' margin='dense'>
-                  <InputLabel>Import from</InputLabel>
+                <FormControl variant='outlined' margin='dense'>
+                  <StyledInputLabel>Import from</StyledInputLabel>
                   <ComboBox
                     value={importType}
-                    variant='filled'
+                    variant='outlined'
                     label=''
                     onChange={(e) => setImportType(e.target.value)}
                     fullWidth
@@ -321,9 +333,9 @@ export function RegistrationDataImport(): React.ReactElement {
                 <Field
                   name='name'
                   fullWidth
-                  label='Name Upload'
+                  label='Title'
                   required
-                  variant='filled'
+                  variant='outlined'
                   component={FormikTextField}
                 />
               </DialogContent>

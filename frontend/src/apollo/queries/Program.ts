@@ -9,6 +9,7 @@ export const PROGRAM_QUERY = gql`
       endDate
       status
       caId
+      caHashId
       description
       budget
       frequencyOfPayments
@@ -19,6 +20,7 @@ export const PROGRAM_QUERY = gql`
       totalNumberOfHouseholds
       administrativeAreasOfImplementation
       individualDataNeeded
+      version
     }
   }
 `;

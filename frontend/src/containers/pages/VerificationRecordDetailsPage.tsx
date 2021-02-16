@@ -1,6 +1,5 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   PaymentVerificationNode,
   usePaymentRecordVerificationQuery,
@@ -10,52 +9,48 @@ import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
-import { decodeIdString } from '../../utils/utils';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import { decodeIdString, isPermissionDeniedError } from '../../utils/utils';
+import { VerifyManual } from '../../components/payments/VerifyManual';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = usePaymentRecordVerificationQuery({
+  const permissions = usePermissions();
+  const { data, loading, error } = usePaymentRecordVerificationQuery({
     variables: { id },
   });
   const businessArea = useBusinessArea();
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
-  if (!data) {
-    return null;
-  }
+  if (loading) return <LoadingComponent />;
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data || permissions === null) return null;
 
   const paymentVerification = data.paymentRecordVerification as PaymentVerificationNode;
+  const verification =
+    paymentVerification.paymentRecord?.cashPlan?.verifications?.edges[0].node;
   const breadCrumbsItems: BreadCrumbsItem[] = [
-    {
-      title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
-    },
-    {
-      title: `Cash Plan ${decodeIdString(
-        paymentVerification.paymentRecord.cashPlan.id,
-      )}`,
-      to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.cashPlan.id}`,
-    },
+    ...(hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
+      ? [
+          {
+            title: 'Payment Verification',
+            to: `/${businessArea}/payment-verification`,
+          },
+        ]
+      : []),
+    ...(hasPermissions(
+      PERMISSIONS.PAYMENT_VERIFICATION_VIEW_DETAILS,
+      permissions,
+    )
+      ? [
+          {
+            title: `Cash Plan ${decodeIdString(
+              paymentVerification.paymentRecord.cashPlan.id,
+            )}`,
+            to: `/${businessArea}/payment-verification/${paymentVerification.paymentRecord.cashPlan.id}`,
+          },
+        ]
+      : []),
   ];
 
   const toolbar = (
@@ -64,12 +59,23 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
         paymentVerification.paymentRecord.id,
       )}`}
       breadCrumbs={breadCrumbsItems}
-    />
+    >
+      {verification.verificationMethod === 'MANUAL' &&
+      hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
+        <VerifyManual paymentVerificationId={paymentVerification.id} />
+      ) : null}
+    </PageHeader>
   );
   return (
     <div>
       {toolbar}
-      <VerificationRecordDetails paymentVerification={paymentVerification} />
+      <VerificationRecordDetails
+        paymentVerification={paymentVerification}
+        canViewActivityLog={hasPermissions(
+          PERMISSIONS.ACTIVITY_LOG_VIEW,
+          permissions,
+        )}
+      />
     </div>
   );
 }

@@ -49,8 +49,14 @@ const MathSign = styled.img`
   vertical-align: middle;
 `;
 
-const CriteriaField = ({ field }) => {
-  console.log(field);
+const CriteriaSetBox = styled.div`
+  border: 1px solid #607cab;
+  border-radius: 3px;
+  padding: 0 ${({ theme }) => theme.spacing(2)}px;
+  margin: ${({ theme }) => theme.spacing(2)}px 0;
+`;
+
+const CriteriaField = ({ field }): React.ReactElement => {
   let fieldElement;
   switch (field.comparisionMethod) {
     case 'NOT_EQUALS':
@@ -75,13 +81,17 @@ const CriteriaField = ({ field }) => {
       fieldElement = (
         <p>
           {field.fieldAttribute.labelEn || field.fieldName}:{' '}
-          <span>
-            {field.fieldAttribute.choices.length
-              ? field.fieldAttribute.choices.find(
-                  (each) => each.value === field.arguments[0],
-                ).labelEn
-              : field.arguments[0]}
-          </span>
+          {field.fieldAttribute.type === 'BOOL' ? (
+            <span>{field.arguments[0] === 'True' ? 'Yes' : 'No'}</span>
+          ) : (
+            <span>
+              {field.fieldAttribute.choices?.length
+                ? field.fieldAttribute.choices.find(
+                    (each) => each.value === field.arguments[0],
+                  ).labelEn
+                : field.arguments[0]}
+            </span>
+          )}
         </p>
       );
       break;
@@ -143,6 +153,7 @@ const CriteriaField = ({ field }) => {
 
 interface CriteriaProps {
   rules: [TargetingCriteriaRuleObjectType];
+  individualsFiltersBlocks;
   removeFunction?;
   editFunction?;
   isEdit: boolean;
@@ -152,22 +163,32 @@ interface CriteriaProps {
 
 export function Criteria({
   rules,
-  removeFunction,
-  editFunction,
+  removeFunction = () => null,
+  editFunction = () => null,
   isEdit,
   canRemove,
-  alternative,
-}: CriteriaProps) {
+  alternative = null,
+  individualsFiltersBlocks,
+}: CriteriaProps): React.ReactElement {
   return (
     <CriteriaElement alternative={alternative} data-cy='criteria-container'>
       {rules.map((each, index) => {
         //eslint-disable-next-line
         return <CriteriaField key={index} field={each} />;
       })}
+      {individualsFiltersBlocks.map((item) => {
+        return (
+          <CriteriaSetBox>
+            {item.individualBlockFilters.map((filter) => {
+              return <CriteriaField field={filter} />;
+            })}
+          </CriteriaSetBox>
+        );
+      })}
       {isEdit && (
         <ButtonsContainer>
-          <IconButton>
-            <Edit onClick={editFunction} />
+          <IconButton onClick={editFunction}>
+            <Edit />
           </IconButton>
           {canRemove && (
             <IconButton onClick={removeFunction}>

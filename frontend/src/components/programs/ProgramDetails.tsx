@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Typography } from '@material-ui/core';
-import moment from 'moment';
 import { StatusBox } from '../StatusBox';
 import { choicesToDict, programStatusToColor } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
@@ -10,25 +9,9 @@ import {
   ProgramNode,
 } from '../../__generated__/graphql';
 import { MiśTheme } from '../../theme';
-import { Missing } from '../Missing';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import { OverviewContainer } from '../OverviewContainer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -74,7 +57,7 @@ export function ProgramDetails({
   const programSectorChoicesDict = choicesToDict(programSectorChoices);
   const programScopeChoicesDict = choicesToDict(programScopeChoices);
   return (
-    <Container data-cy='program-details-container'>
+    <ContainerColumnWithBorder data-cy='program-details-container'>
       <Title>
         <Typography variant='h6'>Programme Details</Typography>
       </Title>
@@ -93,13 +76,13 @@ export function ProgramDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='START DATE'
-              value={moment(program.startDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='END DATE'
-              value={moment(program.endDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{program.endDate}</UniversalMoment>}
             />
           </Grid>
 
@@ -156,6 +139,6 @@ export function ProgramDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-    </Container>
+    </ContainerColumnWithBorder>
   );
 }

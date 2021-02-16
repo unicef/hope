@@ -11,7 +11,6 @@ import {
   Box,
   Grid,
 } from '@material-ui/core';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -30,6 +29,8 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikEffect } from '../FormikEffect';
 import { CashPlan } from '../../apollo/queries/CashPlan';
+import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import { ButtonTooltip } from '../ButtonTooltip';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -55,23 +56,66 @@ const DialogContainer = styled.div`
 `;
 
 const initialValues = {
-  confidenceInterval: 1,
-  marginOfError: 1,
-  filterAgeMin: 0,
-  filterAgeMax: 0,
+  confidenceInterval: 95,
+  marginOfError: 5,
+  filterAgeMin: null,
+  filterAgeMax: null,
   filterSex: '',
   excludedAdminAreasFull: [],
   excludedAdminAreasRandom: [],
-
-  verificationChannel: '',
+  verificationChannel: 'MANUAL',
   rapidProFlow: '',
+  adminCheckbox: false,
+  ageCheckbox: false,
+  sexCheckbox: false,
 };
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function prepareVariables(cashPlanId, selectedTab, values, businessArea) {
+  const variables = {
+    input: {
+      cashPlanId,
+      sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
+      fullListArguments:
+        selectedTab === 0
+          ? {
+              excludedAdminAreas: values.excludedAdminAreasFull || [],
+            }
+          : null,
+      verificationChannel: values.verificationChannel,
+      rapidProArguments:
+        values.verificationChannel === 'RAPIDPRO'
+          ? {
+              flowId: values.rapidProFlow,
+            }
+          : null,
+      randomSamplingArguments:
+        selectedTab === 1
+          ? {
+              confidenceInterval: values.confidenceInterval * 0.01,
+              marginOfError: values.marginOfError * 0.01,
+              excludedAdminAreas: values.adminCheckbox
+                ? values.excludedAdminAreasRandom
+                : [],
+              age: values.ageCheckbox
+                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                : null,
+              sex: values.sexCheckbox ? values.filterSex : null,
+            }
+          : null,
+      businessAreaSlug: businessArea,
+    },
+  };
+  return variables;
+}
 
 export interface Props {
   cashPlanId: string;
+  disabled: boolean;
 }
 export function CreateVerificationPlan({
   cashPlanId,
+  disabled,
 }: Props): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -93,32 +137,12 @@ export function CreateVerificationPlan({
   });
 
   const { data: sampleSizesData, refetch } = useSampleSizeQuery({
-    variables: {
-      input: {
-        cashPlanId,
-        sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-        businessAreaSlug: businessArea,
-        fullListArguments:
-          selectedTab === 0
-            ? {
-                excludedAdminAreas: formValues.excludedAdminAreasFull,
-              }
-            : null,
-        randomSamplingArguments:
-          selectedTab === 1
-            ? {
-                confidenceInterval: formValues.confidenceInterval * 0.01,
-                marginOfError: formValues.marginOfError * 0.01,
-                excludedAdminAreas: formValues.excludedAdminAreasRandom,
-                age: {
-                  min: formValues.filterAgeMin || 0,
-                  max: formValues.filterAgeMax || 0,
-                },
-                sex: formValues.filterSex,
-              }
-            : null,
-      },
-    },
+    variables: prepareVariables(
+      cashPlanId,
+      selectedTab,
+      formValues,
+      businessArea,
+    ),
   });
 
   useEffect(() => {
@@ -129,42 +153,17 @@ export function CreateVerificationPlan({
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
-      variables: {
-        input: {
-          cashPlanId,
-          sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
-          fullListArguments:
-            selectedTab === 0
-              ? {
-                  excludedAdminAreas: values.excludedAdminAreasFull,
-                }
-              : null,
-          verificationChannel: values.verificationChannel,
-          rapidProArguments:
-            values.verificationChannel === 'RAPIDPRO'
-              ? {
-                  flowId: values.rapidProFlow,
-                }
-              : null,
-          randomSamplingArguments:
-            selectedTab === 1
-              ? {
-                  confidenceInterval: values.confidenceInterval * 0.01,
-                  marginOfError: values.marginOfError * 0.01,
-                  excludedAdminAreas: values.excludedAdminAreasRandom,
-                  age: { min: values.filterAgeMin, max: values.filterAgeMax },
-                  sex: values.filterSex,
-                }
-              : null,
-          businessAreaSlug: businessArea,
-        },
-      },
+      variables: prepareVariables(
+        cashPlanId,
+        selectedTab,
+        values,
+        businessArea,
+      ),
       refetchQueries: () => [
         { query: CashPlan, variables: { id: cashPlanId } },
       ],
     });
     setOpen(false);
-    console.log(errors);
 
     if (errors) {
       showMessage('Error while submitting');
@@ -173,30 +172,39 @@ export function CreateVerificationPlan({
     showMessage('New verification plan created.');
   };
 
-  const mappedAdminAreas =
-    data && data.allAdminAreas.edges.length
-      ? data.allAdminAreas.edges.map((el) => ({
-          value: el.node.id,
-          name: el.node.title,
-        }))
-      : [];
+  const mappedAdminAreas = data?.allAdminAreas?.edges?.length
+    ? data.allAdminAreas.edges.map((el) => ({
+        value: el.node.id,
+        name: el.node.title,
+      }))
+    : [];
 
-  const handleFormChange = (values) => {
+  const handleFormChange = (values): void => {
     setFormValues(values);
+  };
+
+  const getSampleSizePercentage = (): string => {
+    if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
+      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
+        sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100})%`;
+    }
+    return ` (0%)`;
   };
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
           <FormikEffect values={values} onChange={handleFormChange(values)} />
-          <Button
+          <ButtonTooltip
+            disabled={disabled}
             color='primary'
             variant='contained'
             onClick={() => setOpen(true)}
             data-cy='button-new-plan'
           >
             CREATE VERIFICATION PLAN
-          </Button>
+          </ButtonTooltip>
           <Dialog
             open={open}
             onClose={() => setOpen(false)}
@@ -231,13 +239,15 @@ export function CreateVerificationPlan({
                   </StyledTabs>
                 </TabsContainer>
                 <TabPanel value={selectedTab} index={0}>
-                  <Field
-                    name='excludedAdminAreasFull'
-                    choices={mappedAdminAreas}
-                    variant='filled'
-                    label='Filter Out Admin Areas'
-                    component={FormikMultiSelectField}
-                  />
+                  {mappedAdminAreas && (
+                    <Field
+                      name='excludedAdminAreasFull'
+                      choices={mappedAdminAreas}
+                      variant='outlined'
+                      label='Filter Out Administrative Level Areas'
+                      component={FormikMultiSelectField}
+                    />
+                  )}
                   <Box pt={3}>
                     <Box
                       pb={3}
@@ -246,11 +256,8 @@ export function CreateVerificationPlan({
                       fontWeight='fontWeightBold'
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
-                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount}
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'
@@ -269,7 +276,12 @@ export function CreateVerificationPlan({
                         label='RapidPro Flow'
                         style={{ width: '90%' }}
                         choices={
-                          rapidProFlows ? rapidProFlows.allRapidProFlows : []
+                          rapidProFlows
+                            ? rapidProFlows.allRapidProFlows.map((flow) => ({
+                                value: flow.id,
+                                name: flow.name,
+                              }))
+                            : []
                         }
                         component={FormikSelectField}
                       />
@@ -281,59 +293,87 @@ export function CreateVerificationPlan({
                     <Field
                       name='confidenceInterval'
                       label='Confidence Interval'
-                      min={1}
-                      max={10}
+                      min={90}
+                      max={99}
                       component={FormikSliderField}
                       suffix='%'
                     />
                     <Field
                       name='marginOfError'
                       label='Margin of Error'
-                      min={1}
-                      max={10}
+                      min={0}
+                      max={9}
                       component={FormikSliderField}
                       suffix='%'
                     />
                     <Typography variant='caption'>Cluster Filters</Typography>
                     <Box flexDirection='column' display='flex'>
-                      <Field
-                        name='excludedAdminAreasRandom'
-                        choices={mappedAdminAreas}
-                        variant='filled'
-                        label='Filter Out Admin Areas'
-                        component={FormikMultiSelectField}
-                      />
+                      <Box display='flex'>
+                        <Field
+                          name='adminCheckbox'
+                          label='Administrative Level'
+                          component={FormikCheckboxField}
+                        />
+                        <Field
+                          name='ageCheckbox'
+                          label='Age'
+                          component={FormikCheckboxField}
+                        />
+                        <Field
+                          name='sexCheckbox'
+                          label='Gender'
+                          component={FormikCheckboxField}
+                        />
+                      </Box>
+                      {values.adminCheckbox && (
+                        <Field
+                          name='excludedAdminAreasRandom'
+                          choices={mappedAdminAreas}
+                          variant='outlined'
+                          label='Filter Out Administrative Level Areas'
+                          component={FormikMultiSelectField}
+                        />
+                      )}
+
                       <Grid container>
-                        <Grid item xs={4}>
-                          <Field
-                            name='filterAgeMin'
-                            label='Age Min'
-                            type='number'
-                            color='primary'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={4}>
-                          <Field
-                            name='filterAgeMax'
-                            label='Age Max'
-                            type='number'
-                            color='primary'
-                            component={FormikTextField}
-                          />
-                        </Grid>
-                        <Grid item xs={5}>
-                          <Field
-                            name='filterSex'
-                            label='Sex'
-                            color='primary'
-                            choices={[
-                              { value: 'FEMALE', name: 'Female' },
-                              { value: 'MALE', name: 'Male' },
-                            ]}
-                            component={FormikSelectField}
-                          />
-                        </Grid>
+                        {values.ageCheckbox && (
+                          <Grid item xs={12}>
+                            <Grid container>
+                              <Grid item xs={4}>
+                                <Field
+                                  name='filterAgeMin'
+                                  label='Age Min'
+                                  type='number'
+                                  color='primary'
+                                  component={FormikTextField}
+                                />
+                              </Grid>
+                              <Grid item xs={4}>
+                                <Field
+                                  name='filterAgeMax'
+                                  label='Age Max'
+                                  type='number'
+                                  color='primary'
+                                  component={FormikTextField}
+                                />
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        )}
+                        {values.sexCheckbox && (
+                          <Grid item xs={5}>
+                            <Field
+                              name='filterSex'
+                              label='Gender'
+                              color='primary'
+                              choices={[
+                                { value: 'FEMALE', name: 'Female' },
+                                { value: 'MALE', name: 'Male' },
+                              ]}
+                              component={FormikSelectField}
+                            />
+                          </Grid>
+                        )}
                       </Grid>
                     </Box>
 
@@ -345,10 +385,7 @@ export function CreateVerificationPlan({
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
                       of {sampleSizesData?.sampleSize?.paymentRecordCount} (
-                      {(sampleSizesData?.sampleSize?.sampleSize /
-                        sampleSizesData?.sampleSize?.paymentRecordCount) *
-                        100}
-                      %)
+                      {getSampleSizePercentage()}
                     </Box>
                     <Field
                       name='verificationChannel'

@@ -10,10 +10,11 @@ export const AllCashPlans = gql`
     $orderBy: String
     $search: String
     $assistanceThrough: String
-    $deliveryType: String
-    $verificationStatus: String
+    $deliveryType: [String]
+    $verificationStatus: [String]
     $startDateGte: DateTime
     $endDateLte: DateTime
+    $businessArea: String
   ) {
     allCashPlans(
       program: $program
@@ -28,6 +29,7 @@ export const AllCashPlans = gql`
       verificationStatus: $verificationStatus
       startDate_Gte: $startDateGte
       endDate_Lte: $endDateLte
+      businessArea: $businessArea
     ) {
       pageInfo {
         hasNextPage
@@ -58,6 +60,7 @@ export const AllCashPlans = gql`
           totalDeliveredQuantity
           totalUndeliveredQuantity
           assistanceMeasurement
+          updatedAt
         }
       }
     }

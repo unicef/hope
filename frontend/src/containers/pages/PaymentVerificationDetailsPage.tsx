@@ -1,31 +1,37 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Button, Grid, Typography, Box } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import { Doughnut } from 'react-chartjs-2';
 import { useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import Moment from 'react-moment';
 import { PageHeader } from '../../components/PageHeader';
 import { LabelizedField } from '../../components/LabelizedField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { EditNewPaymentVerificationDialog } from '../../components/payments/EditNewPaymentVerificationDialog';
+import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
 import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
 import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
 import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
-import { useCashPlanQuery } from '../../__generated__/graphql';
+import {
+  useCashPlanQuery,
+  useCashPlanVerificationSamplingChoicesQuery,
+} from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
+  choicesToDict,
   decodeIdString,
+  isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
 import { StatusBox } from '../../components/StatusBox';
 import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { Missing } from '../../components/Missing';
 import { useDebounce } from '../../hooks/useDebounce';
 import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
+import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
+import { UniversalMoment } from '../../components/UniversalMoment';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;
@@ -45,8 +51,8 @@ const Title = styled.div`
 `;
 
 const ChartContainer = styled.div`
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
 `;
 
 const BorderLeftBox = styled.div`
@@ -76,73 +82,121 @@ const StatusContainer = styled.div`
 `;
 
 export function PaymentVerificationDetailsPage(): React.ReactElement {
-  const { t } = useTranslation();
+  const permissions = usePermissions();
   const businessArea = useBusinessArea();
   const [filter, setFilter] = useState({
     search: null,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const { id } = useParams();
-  const { data, loading } = useCashPlanQuery({
+  const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
-  if (loading) {
-    return <LoadingComponent />;
-  }
-  if (!data) {
-    return null;
-  }
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useCashPlanVerificationSamplingChoicesQuery();
 
+  if (loading || choicesLoading) return <LoadingComponent />;
+
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+  if (!data || !choicesData || permissions === null) return null;
+
+  const samplingChoicesDict = choicesToDict(
+    choicesData.cashPlanVerificationSamplingChoices,
+  );
   const { cashPlan } = data;
-  const verificationPlan =
-    cashPlan && cashPlan.verifications && cashPlan.verifications.edges.length
-      ? cashPlan.verifications.edges[0].node
-      : null;
+  const verificationPlan = cashPlan?.verifications?.edges?.length
+    ? cashPlan.verifications.edges[0].node
+    : null;
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Payment Verification',
-      to: `/${businessArea}/payment-verification/`,
+      to: `/${businessArea}/payment-verification`,
     },
   ];
+  const bankReconciliationSuccessPercentage =
+    (cashPlan.bankReconciliationSuccess / cashPlan.paymentRecords.totalCount) *
+    100;
+  const bankReconciliationErrorPercentage =
+    (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
+    100;
+
+  const canCreate =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
+    cashPlan.verificationStatus === 'PENDING' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length === 0;
+
+  const canEditAndActivate =
+    cashPlan.verificationStatus === 'PENDING' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length !== 0;
+
+  const canEdit =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_UPDATE, permissions) &&
+    canEditAndActivate;
+  const canActivate =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_ACTIVATE, permissions) &&
+    canEditAndActivate;
+
+  const canFinishAndDiscard =
+    cashPlan.verificationStatus === 'ACTIVE' &&
+    cashPlan.verifications &&
+    cashPlan.verifications.edges.length !== 0;
+
+  const canFinish =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_FINISH, permissions) &&
+    canFinishAndDiscard;
+  const canDiscard =
+    hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_DISCARD, permissions) &&
+    canFinishAndDiscard;
 
   const toolbar = (
     <PageHeader
       title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
-      breadCrumbs={breadCrumbsItems}
+      breadCrumbs={
+        hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
+          ? breadCrumbsItems
+          : null
+      }
     >
       <>
-        {cashPlan.verificationStatus === 'PENDING' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length === 0 && (
-            <CreateVerificationPlan cashPlanId={cashPlan.id} />
-          )}
-        {cashPlan.verificationStatus === 'PENDING' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length !== 0 && (
-            <Box display='flex'>
-              <EditNewPaymentVerificationDialog
+        {canCreate && (
+          <CreateVerificationPlan disabled={false} cashPlanId={cashPlan.id} />
+        )}
+        {(canEdit || canActivate) && (
+          <Box alignItems='center' display='flex'>
+            {canEdit && (
+              <EditVerificationPlan
+                cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
+            )}
+            {canActivate && (
               <ActivateVerificationPlan
                 cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
-            </Box>
-          )}
-        {cashPlan.verificationStatus === 'ACTIVE' &&
-          cashPlan.verifications &&
-          cashPlan.verifications.edges.length !== 0 && (
-            <Box display='flex'>
+            )}
+          </Box>
+        )}
+        {(canFinish || canDiscard) && (
+          <Box display='flex'>
+            {canFinish && (
               <FinishVerificationPlan
                 cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
+            )}
+            {canDiscard && (
               <DiscardVerificationPlan
                 cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
-            </Box>
-          )}
+            )}
+          </Box>
+        )}
       </>
     </PageHeader>
   );
@@ -170,17 +224,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 {
                   label: 'START DATE',
                   value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.startDate}</Moment>
+                    <UniversalMoment>{cashPlan.startDate}</UniversalMoment>
                   ),
                 },
                 {
                   label: 'END DATE',
-                  value: (
-                    <Moment format='DD/MM/YYYY'>{cashPlan.endDate}</Moment>
-                  ),
+                  value: <UniversalMoment>{cashPlan.endDate}</UniversalMoment>,
                 },
               ].map((el) => (
-                <Grid item xs={4}>
+                <Grid item xs={4} key={el.label}>
                   <LabelizedField label={el.label}>
                     <p>{el.value}</p>
                   </LabelizedField>
@@ -191,29 +243,37 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Grid item xs={3}>
             <BorderLeftBox>
               <Title>
-                <Typography variant='h6'>
-                  Bank reconciliation <Missing />
-                </Typography>
+                <Typography variant='h6'>Bank reconciliation</Typography>
               </Title>
               <Grid container>
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>90%</p>
+                      <p>
+                        {bankReconciliationSuccessPercentage
+                          ? bankReconciliationSuccessPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>10%</p>
+                      <p>
+                        {bankReconciliationErrorPercentage
+                          ? bankReconciliationErrorPercentage.toFixed(2)
+                          : 0}
+                        %
+                      </p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
                 <Grid item xs={6}>
                   <ChartContainer>
                     <Doughnut
-                      width={100}
-                      height={100}
+                      width={200}
+                      height={200}
                       options={{
                         maintainAspectRatio: false,
-                        cutoutPercentage: 65,
+                        cutoutPercentage: 80,
                         legend: {
                           display: false,
                         },
@@ -222,7 +282,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         labels: ['Successful', 'Erroneus'],
                         datasets: [
                           {
-                            data: [90, 10],
+                            data: [
+                              bankReconciliationSuccessPercentage.toFixed(2),
+                              bankReconciliationErrorPercentage.toFixed(2),
+                            ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
                           },
@@ -242,9 +305,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             <Typography variant='h6'>Verification Plan Details</Typography>
           </Title>
           <Grid container>
-            <Grid item xs={9}>
+            <Grid item xs={11}>
               <Grid container>
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                   <LabelizedField label='STATUS'>
                     <StatusContainer>
                       <StatusBox
@@ -255,26 +318,49 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   </LabelizedField>
                 </Grid>
                 {[
-                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
-                    label: 'RECEIVED',
-                    value: verificationPlan.receivedCount || '-',
-                  },
-                  {
-                    label: 'VERIFICATION METHOD',
-                    value: verificationPlan.verificationMethod,
+                    label: 'SAMPLING',
+                    value: samplingChoicesDict[verificationPlan.sampling],
                   },
                   {
                     label: 'RESPONDED',
                     value: verificationPlan.respondedCount || '-',
                   },
                   {
+                    label: 'RECEIVED WITH ISSUES',
+                    value: verificationPlan.receivedWithProblemsCount || '-',
+                  },
+                  {
+                    label: 'VERIFICATION METHOD',
+                    value: verificationPlan.verificationMethod,
+                  },
+                  { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
+                  {
+                    label: 'RECEIVED',
+                    value: verificationPlan.receivedCount || '-',
+                  },
+                  {
                     label: 'NOT RECEIVED',
                     value: verificationPlan.notReceivedCount || '-',
                   },
-                  { label: 'SAMPLING', value: verificationPlan.sampling },
+                  {
+                    label: 'ACTIVATION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.activationDate}
+                      </UniversalMoment>
+                    ),
+                  },
+                  {
+                    label: 'COMPLETION DATE',
+                    value: (
+                      <UniversalMoment>
+                        {verificationPlan.completionDate}
+                      </UniversalMoment>
+                    ),
+                  },
                 ].map((el) => (
-                  <Grid item xs={4}>
+                  <Grid item xs={3} key={el.label}>
                     <LabelizedField label={el.label}>
                       <p>{el.value}</p>
                     </LabelizedField>
@@ -282,47 +368,51 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 ))}
               </Grid>
             </Grid>
-            <Grid item xs={3}>
-              <Grid container>
-                <Grid item xs={6}>
-                  <Grid container direction='column'>
-                    <LabelizedField label='RECEIVED CORRECT AMOUNT'>
-                      <p>{verificationPlan.receivedCount || '-'}</p>
-                    </LabelizedField>
-                    <LabelizedField label='RECEIVED WRONG AMOUNT'>
-                      <p>{verificationPlan.receivedWithProblemsCount || '-'}</p>
-                    </LabelizedField>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <ChartContainer>
-                    <Doughnut
-                      width={100}
-                      height={100}
-                      options={{
-                        maintainAspectRatio: false,
-                        cutoutPercentage: 65,
-                        legend: {
-                          display: false,
-                        },
-                      }}
-                      data={{
-                        labels: ['CORRECT', 'WRONG'],
-                        datasets: [
-                          {
-                            data: [
-                              verificationPlan.receivedCount,
-                              verificationPlan.receivedWithProblemsCount,
-                            ],
-                            backgroundColor: ['#74C304', '#DADADA'],
-                            hoverBackgroundColor: ['#74C304', '#DADADA'],
-                          },
+            <Grid item xs={1}>
+              <ChartContainer>
+                <Doughnut
+                  width={200}
+                  height={200}
+                  options={{
+                    maintainAspectRatio: false,
+                    cutoutPercentage: 80,
+                    legend: {
+                      display: false,
+                    },
+                  }}
+                  data={{
+                    labels: [
+                      'RECEIVED',
+                      'RECEIVED WITH ISSUES',
+                      'NOT RECEIVED',
+                      'PENDING',
+                    ],
+                    datasets: [
+                      {
+                        data: [
+                          verificationPlan.receivedCount,
+                          verificationPlan.receivedWithProblemsCount,
+                          verificationPlan.notReceivedCount,
+                          verificationPlan.sampleSize -
+                            verificationPlan.respondedCount,
                         ],
-                      }}
-                    />
-                  </ChartContainer>
-                </Grid>
-              </Grid>
+                        backgroundColor: [
+                          '#31D237',
+                          '#F57F1A',
+                          '#FF0100',
+                          '#DCDCDC',
+                        ],
+                        hoverBackgroundColor: [
+                          '#31D237',
+                          '#F57F1A',
+                          '#FF0100',
+                          '#DCDCDC',
+                        ],
+                      },
+                    ],
+                  }}
+                />
+              </ChartContainer>
             </Grid>
           </Grid>
         </Container>
@@ -342,6 +432,19 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
               verificationMethod={verificationPlan.verificationMethod}
               filter={debouncedFilter}
               id={verificationPlan.id}
+              businessArea={businessArea}
+              canImport={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_IMPORT,
+                permissions,
+              )}
+              canExport={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_EXPORT,
+                permissions,
+              )}
+              canViewRecordDetails={hasPermissions(
+                PERMISSIONS.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS,
+                permissions,
+              )}
             />
           </Container>
         </>
@@ -354,15 +457,20 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           To see more details please activate Verification Plan
         </BottomTitle>
       ) : null}
-      {!cashPlan.verifications.edges.length ? (
+      {!cashPlan.verifications.edges.length &&
+      cashPlan.verificationStatus !== 'ACTIVE' ? (
         <BottomTitle>
           To see more details please create Verification Plan
         </BottomTitle>
       ) : null}
-      <TableWrapper>
-        <UniversalActivityLogTable objectId='some id' />
-      </TableWrapper>
+      {cashPlan.verifications?.edges[0]?.node?.id &&
+        hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable
+              objectId={cashPlan.verifications.edges[0].node.id}
+            />
+          </TableWrapper>
+        )}
     </>
-    //connect it later
   );
 }

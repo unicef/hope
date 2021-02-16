@@ -1,8 +1,11 @@
 # Create your models here.
 from django.db import models
+from django.utils import timezone
+from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+from concurrency.fields import IntegerVersionField
 
 
 class TimeStampedUUIDModel(UUIDModel):
@@ -13,6 +16,35 @@ class TimeStampedUUIDModel(UUIDModel):
         abstract = True
 
 
+class SoftDeletableModelWithDate(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+    is_removed = models.BooleanField(default=False)
+    removed_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+    objects = SoftDeletableManager()
+    all_objects = models.Manager()
+
+    def delete(self, using=None, soft=True, *args, **kwargs):
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.removed_date = timezone.now()
+            self.save(using=using)
+        else:
+            return super().delete(using=using, *args, **kwargs)
+
+
 class SoftDeletionTreeManager(TreeManager):
     def get_queryset(self, *args, **kwargs):
         """
@@ -20,9 +52,9 @@ class SoftDeletionTreeManager(TreeManager):
         """
         return (
             super(TreeManager, self)
-            .get_queryset(*args, **kwargs)
-            .filter(is_removed=False)
-            .order_by(self.tree_id_attr, self.left_attr)
+                .get_queryset(*args, **kwargs)
+                .filter(is_removed=False)
+                .order_by(self.tree_id_attr, self.left_attr)
         )
 
 
@@ -42,6 +74,7 @@ class SoftDeletionTreeModel(TimeStampedUUIDModel, MPTTModel):
         """
         if soft:
             self.is_removed = True
+            self.removed_date = timezone.now()
             self.save(using=using)
         else:
             return super().delete(using=using, *args, **kwargs)
@@ -56,6 +89,7 @@ class AbstractSession(models.Model):
     STATUS_PROCESSING = "PROCESSING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_FAILED = "FAILED"
+    STATUS_EMPTY = "EMPTY"
 
     source = models.CharField(
         max_length=3,
@@ -69,16 +103,63 @@ class AbstractSession(models.Model):
             (STATUS_PROCESSING, "Processing"),
             (STATUS_COMPLETED, "Completed"),
             (STATUS_FAILED, "Failed"),
+            (STATUS_EMPTY, "Empty"),
         ),
     )
     last_modified_date = models.DateTimeField(auto_now=True)
+
+    business_area = models.CharField(
+        max_length=20,
+        help_text="""Same as the business area set on program, but
+            this is set as the same value, and all other
+            models this way can get easy access to the business area
+            via the session.""",
+    )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"#{self.id} on {self.timestamp}"
+
+
+class AbstractSyncable(models.Model):
+    last_sync_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
 
 
-class AbstractSyncable(models.Model):
-    last_sync_at = models.DateTimeField(null=True)
+class SoftDeletableDefaultManagerModel(models.Model):
+    """
+    An abstract base class model with a ``is_removed`` field that
+    marks entries that are not going to be used anymore, but are
+    kept in db for any reason.
+    Default manager returns only not-removed entries.
+    """
+
+    is_removed = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+    active_objects = SoftDeletableManager()
+    objects = models.Manager()
+
+    def delete(self, using=None, soft=True, *args, **kwargs):
+        """
+        Soft delete object (set its ``is_removed`` field to True).
+        Actually delete object if setting ``soft`` to False.
+        """
+        if soft:
+            self.is_removed = True
+            self.save(using=using)
+        else:
+            return super().delete(using=using, *args, **kwargs)
+
+
+class ConcurrencyModel(models.Model):
+    version = IntegerVersionField()
 
     class Meta:
         abstract = True

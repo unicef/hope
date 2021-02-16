@@ -5,7 +5,7 @@ import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
 import django.db.models.deletion
 import model_utils.fields
-import targeting.models
+import hct_mis_api.apps.targeting.models
 import uuid
 
 
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, targeting.models.TargetingCriteriaQueryingMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaQueryingMixin),
         ),
         migrations.CreateModel(
             name='TargetingCriteriaRule',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=(models.Model, targeting.models.TargetingCriteriaRuleQueryingMixin),
+            bases=(models.Model, hct_mis_api.apps.targeting.models.TargetingCriteriaRuleQueryingMixin),
         ),
         migrations.CreateModel(
             name='TargetPopulation',

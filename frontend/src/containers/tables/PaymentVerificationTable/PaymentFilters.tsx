@@ -6,45 +6,17 @@ import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
+import { KeyboardDatePicker } from '@material-ui/pickers';
+import moment from 'moment';
 import TextField from '../../../shared/TextField';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import { KeyboardDatePicker } from '@material-ui/pickers';
 import {
   ProgramNode,
   useCashPlanVerificationStatusChoicesQuery,
 } from '../../../__generated__/graphql';
-import moment from 'moment';
+import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
 
-// import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: row;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
-
-const TextContainer = styled(TextField)`
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-  }
-  input[type='number'] {
-    -moz-appearance: textfield;
-  }
-`;
 const StyledFormControl = styled(FormControl)`
   width: 232px;
   color: #5f6368;
@@ -77,16 +49,17 @@ export function PaymentFilters({
   const {
     data: statusChoicesData,
   } = useCashPlanVerificationStatusChoicesQuery();
+
   if (!statusChoicesData) {
     return null;
   }
 
   return (
-    <Container>
+    <ContainerWithBorder>
       <Grid container spacing={3}>
-        <Grid item xs={3}>
+        <Grid item>
           <SearchTextField
-            label='Search'
+            label='Cash Plan ID'
             variant='outlined'
             margin='dense'
             onChange={(e) => handleFilterChange(e, 'search')}
@@ -99,7 +72,112 @@ export function PaymentFilters({
             }}
           />
         </Grid>
-        <Grid item xs={3}>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Status</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'verificationStatus')}
+              variant='outlined'
+              label='Status'
+              multiple
+              value={filter.verificationStatus || []}
+            >
+              {statusChoicesData.cashPlanVerificationStatusChoices.map(
+                (item) => {
+                  return (
+                    <MenuItem key={item.value} value={item.value}>
+                      {item.name}
+                    </MenuItem>
+                  );
+                },
+              )}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <SearchTextField
+            label='FSP'
+            variant='outlined'
+            margin='dense'
+            onChange={(e) => handleFilterChange(e, 'assistanceThrough')}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <AccountBalanceIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Modality</InputLabel>
+            <Select
+              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
+              // @ts-ignore
+              onChange={(e) => handleFilterChange(e, 'deliveryType')}
+              variant='outlined'
+              label='Modality'
+              value={filter.deliveryType || ''}
+              InputProps={{
+                startAdornment: (
+                  <StartInputAdornment position='start'>
+                    <MonetizationOnIcon />
+                  </StartInputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {statusChoicesData.paymentRecordDeliveryTypeChoices.map(
+                (item) => (
+                  <MenuItem key={item.name} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ),
+              )}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='Start Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({
+                ...filter,
+                startDate: moment(date).toISOString(),
+              })
+            }
+            value={filter.startDate || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item>
+          <KeyboardDatePicker
+            variant='inline'
+            disableToolbar
+            inputVariant='outlined'
+            margin='dense'
+            label='End Date'
+            autoOk
+            onChange={(date) =>
+              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
+            }
+            value={filter.endDate || null}
+            format='YYYY-MM-DD'
+            InputAdornmentProps={{ position: 'end' }}
+          />
+        </Grid>
+        <Grid item>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
@@ -128,116 +206,7 @@ export function PaymentFilters({
             </Select>
           </StyledFormControl>
         </Grid>
-        <Grid item xs={3}>
-          <SearchTextField
-            label='FSP'
-            variant='outlined'
-            margin='dense'
-            onChange={(e) => handleFilterChange(e, 'assistanceThrough')}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position='start'>
-                  <AccountBalanceIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='Start Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({
-                ...filter,
-                startDate: moment(date).toISOString(),
-              })
-            }
-            value={filter.startDate || null}
-            format='DD/MM/YYYY'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <KeyboardDatePicker
-            variant='inline'
-            disableToolbar
-            inputVariant='outlined'
-            margin='dense'
-            label='End Date'
-            autoOk
-            onChange={(date) =>
-              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
-            }
-            value={filter.endDate || null}
-            format='DD/MM/YYYY'
-            InputAdornmentProps={{ position: 'end' }}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Modality</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'deliveryType')}
-              variant='outlined'
-              label='Modality'
-              value={filter.deliveryType || ''}
-              InputProps={{
-                startAdornment: (
-                  <StartInputAdornment position='start'>
-                    <MonetizationOnIcon />
-                  </StartInputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {[
-                { name: 'Deposit to Card', id: 1 },
-                { name: 'Cash', id: 2 },
-                { name: 'Transfer', id: 3 },
-              ].map((item) => (
-                <MenuItem key={item.name} value={item.name}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <StyledFormControl variant='outlined' margin='dense'>
-            <InputLabel>Status</InputLabel>
-            <Select
-              /* eslint-disable-next-line @typescript-eslint/ban-ts-ignore */
-              // @ts-ignore
-              onChange={(e) => handleFilterChange(e, 'verificationStatus')}
-              variant='outlined'
-              label='Status'
-              value={filter.verificationStatus || ''}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-              {statusChoicesData.cashPlanVerificationStatusChoices.map(
-                (item) => {
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.name}
-                    </MenuItem>
-                  );
-                },
-              )}
-            </Select>
-          </StyledFormControl>
-        </Grid>
       </Grid>
-    </Container>
+    </ContainerWithBorder>
   );
 }

@@ -15,6 +15,7 @@ export const registrationMinimal = gql`
     }
     dataSource
     numberOfHouseholds
+    numberOfIndividuals
   }
 `;
 
@@ -22,6 +23,32 @@ export const registrationDetailed = gql`
   fragment registrationDetailed on RegistrationDataImportNode {
     ...registrationMinimal
     numberOfIndividuals
+    datahubId
+    errorMessage
+    batchDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    batchUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordUniqueCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
+    goldenRecordPossibleDuplicatesCountAndPercentage {
+      count
+      percentage
+    }
   }
 `;
 
@@ -37,6 +64,7 @@ export const importedHouseholdMinimal = gql`
     admin2
     firstRegistrationDate
     lastRegistrationDate
+    hasDuplicates
   }
 `;
 export const importedHouseholdDetailed = gql`
@@ -62,6 +90,28 @@ export const importedIndividualMinimal = gql`
     sex
     role
     relationship
+    deduplicationBatchStatus
+    deduplicationGoldenRecordStatus
+    deduplicationGoldenRecordResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+      age
+      location
+    }
+    deduplicationBatchResults {
+      hitId
+      fullName
+      score
+      proximityToScore
+      age
+      location
+    }
+    registrationDataImport {
+      id
+      hctId
+    }
   }
 `;
 
@@ -73,9 +123,11 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
+    pregnant
     documents {
       edges {
         node {
+          id
           type {
             label
           }
@@ -83,7 +135,8 @@ export const importedIndividualDetailed = gql`
         }
       }
     }
-    identities{
+    identities {
+      id
       documentNumber
       type
     }

@@ -7,6 +7,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       status
       statusDate
       caId
+      caHashId
       household {
         id
         size
@@ -26,6 +27,17 @@ export const PAYMENT_RECORD_QUERY = gql`
           name
         }
       }
+      verifications {
+        totalCount
+        edges {
+          node {
+            id
+            status
+            statusDate
+            receivedAmount
+          }
+        }
+      }
       currency
       entitlementQuantity
       deliveredQuantity
@@ -33,7 +45,60 @@ export const PAYMENT_RECORD_QUERY = gql`
       deliveryDate
       entitlementCardIssueDate
       entitlementCardNumber
-      serviceProvider{
+
+      serviceProvider {
+        id
+        fullName
+        shortName
+      }
+
+      id
+      status
+      statusDate
+      caId
+      household {
+        id
+        size
+        unicefId
+        headOfHousehold {
+          id
+          phoneNo
+          phoneNoAlternative
+        }
+      }
+      fullName
+      distributionModality
+      totalPersonsCovered
+      targetPopulation {
+        id
+        name
+      }
+      cashPlan {
+        id
+        caId
+        program {
+          id
+          name
+        }
+        verifications {
+          edges {
+            node {
+              id
+              status
+              verificationMethod
+            }
+          }
+        }
+      }
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryDate
+      deliveryDate
+      deliveryType
+      entitlementCardIssueDate
+      entitlementCardNumber
+      serviceProvider {
         id
         fullName
         shortName

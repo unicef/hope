@@ -1,19 +1,36 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
-
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { useFinishCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import {
+  useFinishCashPlanPaymentVerificationMutation,
+  useCashPlanQuery,
+} from '../../__generated__/graphql';
 import { CashPlan } from '../../apollo/queries/CashPlan';
-import { Missing } from '../Missing';
+import { LoadingComponent } from '../LoadingComponent';
 
 export interface Props {
   cashPlanVerificationId: string;
   cashPlanId: string;
 }
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const DialogContainer = styled.div`
+  width: 700px;
+`;
+
 export function FinishVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
@@ -21,6 +38,20 @@ export function FinishVerificationPlan({
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
   const [mutate] = useFinishCashPlanPaymentVerificationMutation();
+  const { id } = useParams();
+  const { data, loading } = useCashPlanQuery({
+    variables: { id },
+  });
+  if (loading) {
+    return <LoadingComponent />;
+  }
+  if (!data) {
+    return null;
+  }
+  const { cashPlan } = data;
+  const verificationPlan = cashPlan?.verifications?.edges?.length
+    ? cashPlan.verifications.edges[0].node
+    : null;
 
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
@@ -35,20 +66,35 @@ export function FinishVerificationPlan({
     }
     showMessage('Verification plan has been finished');
   };
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
 
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
+  const beneficiariesPercent = (): string => {
+    if (
+      verificationPlan?.respondedCount &&
+      verificationPlan?.sampleSize !== 0
+    ) {
+      return (
+        (verificationPlan?.respondedCount / verificationPlan?.sampleSize) *
+        100
+      ).toFixed(2);
+    }
 
-  const DialogContainer = styled.div`
-    width: 700px;
-  `;
+    return null;
+  };
+
+  const grievanceTickets = (): number => {
+    if (
+      verificationPlan?.notReceivedCount &&
+      verificationPlan?.sampleSize &&
+      verificationPlan?.respondedCount
+    ) {
+      return (
+        verificationPlan?.notReceivedCount +
+        (verificationPlan?.sampleSize - verificationPlan?.respondedCount) +
+        verificationPlan?.receivedWithProblemsCount
+      );
+    }
+    return null;
+  };
 
   return (
     <>
@@ -76,15 +122,19 @@ export function FinishVerificationPlan({
         <DialogContent>
           <DialogContainer>
             <Box p={5}>
-              <div>
-                Only <Missing /> of the beneficiaries have responded to this
-                payment verification.
-              </div>
+              {beneficiariesPercent() && (
+                <div>
+                  Only {beneficiariesPercent()}% of the beneficiaries have
+                  responded to this payment verification.
+                </div>
+              )}
               <div>Are you sure that you want to finish?</div>
-              <div>
-                Closing this verification will generate <Missing /> grievance
-                tickets.
-              </div>
+              {grievanceTickets() && (
+                <div>
+                  Closing this verification will generate {grievanceTickets()}{' '}
+                  grievance tickets.
+                </div>
+              )}
             </Box>
           </DialogContainer>
         </DialogContent>

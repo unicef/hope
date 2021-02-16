@@ -2,7 +2,11 @@ import { gql } from 'apollo-boost';
 
 export const ALL_USERS_QUERY = gql`
   query AllUsers(
-    $fullName: String
+    $search: String
+    $status: [String]
+    $partner: [String]
+    $roles: [String]
+    $businessArea: String!
     $first: Int
     $last: Int
     $after: String
@@ -10,7 +14,11 @@ export const ALL_USERS_QUERY = gql`
     $orderBy: String
   ) {
     allUsers(
-      fullName: $fullName
+      search: $search
+      status: $status
+      partner: $partner
+      roles: $roles
+      businessArea: $businessArea
       first: $first
       last: $last
       after: $after
@@ -32,6 +40,17 @@ export const ALL_USERS_QUERY = gql`
           email
           isActive
           lastLogin
+          status
+          partner
+          userRoles {
+            businessArea {
+              name
+            }
+            role {
+              name
+              permissions
+            }
+          }
         }
         cursor
       }

@@ -6,5 +6,9 @@ export const CashPlanVerificationStatusChoices = gql`
       name
       value
     }
+    paymentRecordDeliveryTypeChoices {
+      name
+      value
+    }
   }
 `;

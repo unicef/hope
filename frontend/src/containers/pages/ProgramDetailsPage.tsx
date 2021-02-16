@@ -11,6 +11,10 @@ import {
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
+import { usePermissions } from '../../hooks/usePermissions';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { isPermissionDeniedError } from '../../utils/utils';
 import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
@@ -47,23 +51,34 @@ const NoCashPlansSubTitle = styled.div`
 
 export function ProgramDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data, loading } = useProgramQuery({
+  const { data, loading, error } = useProgramQuery({
     variables: { id },
   });
   const {
     data: choices,
     loading: choicesLoading,
   } = useProgrammeChoiceDataQuery();
-  if (loading || choicesLoading) {
-    return <LoadingComponent />;
-  }
-  if (!data || !choices) {
-    return null;
-  }
+  const permissions = usePermissions();
+
+  if (loading || choicesLoading) return <LoadingComponent />;
+
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || !choices || permissions === null) return null;
+
   const program = data.program as ProgramNode;
   return (
     <div>
-      <ProgramDetailsPageHeader program={program} />
+      <ProgramDetailsPageHeader
+        program={program}
+        canActivate={hasPermissions(
+          PERMISSIONS.PROGRAMME_ACTIVATE,
+          permissions,
+        )}
+        canEdit={hasPermissions(PERMISSIONS.PROGRAMME_UPDATE, permissions)}
+        canRemove={hasPermissions(PERMISSIONS.PROGRAMME_REMOVE, permissions)}
+        canFinish={hasPermissions(PERMISSIONS.PROGRAMME_FINISH, permissions)}
+      />
       <Container>
         <ProgramDetails program={program} choices={choices} />
         {program.status === ProgramStatus.Draft ? (
@@ -81,9 +96,11 @@ export function ProgramDetailsPage(): React.ReactElement {
             <CashPlanTable program={program} />
           </TableWrapper>
         )}
-        <TableWrapper>
-          <UniversalActivityLogTable objectId={program.id} />
-        </TableWrapper>
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <TableWrapper>
+            <UniversalActivityLogTable objectId={program.id} />
+          </TableWrapper>
+        )}
       </Container>
     </div>
   );

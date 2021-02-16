@@ -1,34 +1,47 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Sum, UUIDField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
-from utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
-class PaymentRecord(TimeStampedUUIDModel):
+class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
+    STATUS_SUCCESS = "SUCCESS"
+    STATUS_PENDING = "PENDING"
+    STATUS_ERROR = "ERROR"
     STATUS_CHOICE = (
-        ("SUCCESS", _("Sucess")),
-        ("PENDING", _("Pending")),
-        ("ERROR", _("Error")),
+        (STATUS_SUCCESS, _("Success")),
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_ERROR, _("Error")),
     )
+    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
+    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
     ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        ("ACTIVE", _("Active")), ("INACTIVE", _("Inactive")),
+        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")),
+        (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
+
+    DELIVERY_TYPE_CASH = "CASH"
+    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
+    DELIVERY_TYPE_TRANSFER = "TRANSFER"
+
     DELIVERY_TYPE_CHOICE = (
-        ("CASH", _("Cash")),
-        ("DEPOSIT_TO_CARD", _("Deposit to Card")),
-        ("TRANSFER", _("Transfer")),
+        (DELIVERY_TYPE_CASH, _("Cash")),
+        (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
+        (DELIVERY_TYPE_TRANSFER, _("Transfer")),
     )
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=255,
+        choices=STATUS_CHOICE,
     )
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
     status_date = models.DateTimeField()
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
@@ -43,24 +56,42 @@ class PaymentRecord(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+    head_of_household = models.ForeignKey(
+        "household.Individual",
+        on_delete=models.CASCADE,
+        related_name="payment_records",
+        null=True
+    )
+
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
-    distribution_modality = models.CharField(max_length=255,)
+    distribution_modality = models.CharField(
+        max_length=255,
+    )
     target_population = models.ForeignKey(
         "targeting.TargetPopulation",
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
     target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(max_length=255,)
+    entitlement_card_number = models.CharField(
+        max_length=255,
+        null=True
+    )
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20,
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
+        default="ACTIVE",
+        max_length=20,
+        null=True
     )
-    entitlement_card_issue_date = models.DateField()
+    entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE, default="ACTIVE", max_length=20,
+        choices=DELIVERY_TYPE_CHOICE,
+        max_length=20,
     )
-    currency = models.CharField(max_length=4,)
+    currency = models.CharField(
+        max_length=4,
+    )
     entitlement_quantity = models.DecimalField(
         decimal_places=2,
         max_digits=12,
@@ -70,6 +101,9 @@ class PaymentRecord(TimeStampedUUIDModel):
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    delivered_quantity_usd = models.DecimalField(
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True
     )
     delivery_date = models.DateTimeField()
     service_provider = models.ForeignKey(
@@ -82,9 +116,7 @@ class PaymentRecord(TimeStampedUUIDModel):
 
 
 class ServiceProvider(TimeStampedUUIDModel):
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, unique=True)
     full_name = models.CharField(max_length=255)
     short_name = models.CharField(max_length=100)
@@ -92,7 +124,29 @@ class ServiceProvider(TimeStampedUUIDModel):
     vision_id = models.CharField(max_length=255)
 
 
-class CashPlanPaymentVerification(TimeStampedUUIDModel):
+class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "status",
+            "cash_plan",
+            "sampling",
+            "verification_method",
+            "sample_size",
+            "responded_count",
+            "received_count",
+            "not_received_count",
+            "received_with_problems_count",
+            "confidence_interval",
+            "margin_of_error",
+            "rapid_pro_flow_id",
+            "rapid_pro_flow_start_uuid",
+            "age_filter",
+            "excluded_admin_areas_filter",
+            "sex_filter",
+            "activation_date",
+            "completion_date",
+        ]
+    )
     STATUS_PENDING = "PENDING"
     STATUS_ACTIVE = "ACTIVE"
     STATUS_FINISHED = "FINISHED"
@@ -115,18 +169,14 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
         (VERIFICATION_METHOD_XLSX, "XLSX"),
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
-    )
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
         related_name="verifications",
     )
     sampling = models.CharField(max_length=50, choices=SAMPLING_CHOICES)
-    verification_method = models.CharField(
-        max_length=50, choices=VERIFICATION_METHOD_CHOICES
-    )
+    verification_method = models.CharField(max_length=50, choices=VERIFICATION_METHOD_CHOICES)
     sample_size = models.PositiveIntegerField(null=True)
     responded_count = models.PositiveIntegerField(null=True)
     received_count = models.PositiveIntegerField(null=True)
@@ -136,6 +186,15 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel):
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
+    age_filter = JSONField(null=True)
+    excluded_admin_areas_filter = JSONField(null=True)
+    sex_filter = models.CharField(null=True, max_length=10)
+    activation_date = models.DateTimeField(null=True)
+    completion_date = models.DateTimeField(null=True)
+
+    @property
+    def business_area(self):
+        return self.cash_plan.business_area
 
 
 @receiver(
@@ -148,7 +207,16 @@ def update_verification_status_in_cash_plan(sender, instance, **kwargs):
     instance.cash_plan.save()
 
 
-class PaymentVerification(TimeStampedUUIDModel):
+class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "cash_plan_payment_verification",
+            "payment_record",
+            "status",
+            "status_date",
+            "received_amount",
+        ]
+    )
     STATUS_PENDING = "PENDING"
     STATUS_RECEIVED = "RECEIVED"
     STATUS_NOT_RECEIVED = "NOT_RECEIVED"
@@ -164,12 +232,8 @@ class PaymentVerification(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         related_name="payment_record_verifications",
     )
-    payment_record = models.ForeignKey(
-        "PaymentRecord", on_delete=models.CASCADE, related_name="verifications"
-    )
-    status = models.CharField(
-        max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING
-    )
+    payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
     status_date = models.DateField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
@@ -177,3 +241,7 @@ class PaymentVerification(TimeStampedUUIDModel):
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+
+    @property
+    def business_area(self):
+        return self.cash_plan_payment_verification.cash_plan.business_area

@@ -1,17 +1,23 @@
 import React from 'react';
+import * as Yup from 'yup';
 import styled from 'styled-components';
-import { Button, Tabs, Tab } from '@material-ui/core';
-import { Formik, Form, Field } from 'formik';
+import { useParams } from 'react-router-dom';
+import { Button } from '@material-ui/core';
+import { Field, Form, Formik } from 'formik';
 import { PageHeader } from '../PageHeader';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useUpdateTpMutation } from '../../__generated__/graphql';
+import {
+  useAllProgramsQuery,
+  useUpdateTpMutation,
+} from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { TabPanel } from '../TabPanel';
+import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { getFullNodeFromEdgesById } from '../../utils/utils';
 import { CandidateListTab } from './Edit/CandidateListTab';
-import { TargetPopulationTab } from './Edit/TargetPopulationTab';
-import { TargetPopulationDetails } from './TargetPopulationDetails';
+import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;
@@ -20,25 +26,27 @@ const ButtonContainer = styled.span`
 interface EditTargetPopulationProps {
   targetPopulationCriterias?;
   cancelEdit?;
-  selectedTab?: number;
   targetPopulation?;
 }
 
 export function EditTargetPopulation({
   targetPopulationCriterias,
   cancelEdit,
-  selectedTab = 0,
   targetPopulation,
-}: EditTargetPopulationProps) {
+}: EditTargetPopulationProps): React.ReactElement {
   const initialValues = {
     id: targetPopulation.id,
     name: targetPopulation.name || '',
+    program: targetPopulation.program?.id || '',
     criterias: targetPopulationCriterias.rules || [],
-    candidateListCriterias: targetPopulation.candidateListTargetingCriteria?.rules || [],
-    targetPopulationCriterias: targetPopulation.finalListTargetingCriteria?.rules || [],
+    candidateListCriterias:
+      targetPopulation.candidateListTargetingCriteria?.rules || [],
+    targetPopulationCriterias:
+      targetPopulation.finalListTargetingCriteria?.rules || [],
   };
   const [mutate] = useUpdateTpMutation();
   const { showMessage } = useSnackbar();
+  const { id } = useParams();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -46,18 +54,13 @@ export function EditTargetPopulation({
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={selectedTab}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' disabled={selectedTab !== 0} />
-      <Tab label='Target Population' disabled={selectedTab !== 1} />
-    </Tabs>
-  );
-  const isTitleEditable = () => {
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+  });
+  const isTitleEditable = (): boolean => {
     switch (targetPopulation.status) {
       case 'APPROVED':
         return false;
@@ -65,50 +68,45 @@ export function EditTargetPopulation({
         return true;
     }
   };
-  const mapRules = (status, values) => {
-    switch(status) {
-      case 'DRAFT':
-        return values.candidateListCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-              };
-            }),
-          };
-        })
-      default:
-        return values.targetPopulationCriterias.map((rule) => {
-          return {
-            filters: rule.filters.map((each) => {
-              return {
-                comparisionMethod: each.comparisionMethod,
-                arguments: each.arguments,
-                fieldName: each.fieldName,
-                isFlexField: each.isFlexField,
-              };
-            }),
-          };
-        })
+
+  const handleValidate = (values): { candidateListCriterias?: string } => {
+    const { candidateListCriterias } = values;
+    const errors: { candidateListCriterias?: string } = {};
+    if (!candidateListCriterias.length) {
+      errors.candidateListCriterias =
+        'You need to select at least one targeting criteria';
     }
-  }
+    return errors;
+  };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+  });
+
   return (
     <Formik
       initialValues={initialValues}
+      validate={handleValidate}
+      validationSchema={validationSchema}
       onSubmit={async (values) => {
-        const { data } = await mutate({
+        await mutate({
           variables: {
             input: {
               id: values.id,
+              programId: values.program,
               ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
-              targetingCriteria: {
-                rules: mapRules(targetPopulation.status, values)
-              },
+              ...getTargetingCriteriaVariables({
+                criterias: values.candidateListCriterias,
+              }),
             },
           },
+          refetchQueries: () => [
+            {
+              query: TARGET_POPULATION_QUERY,
+              variables: {
+                id,
+              },
+            },
+          ],
         });
         cancelEdit();
         showMessage('Target Population Updated', {
@@ -117,14 +115,14 @@ export function EditTargetPopulation({
         });
       }}
     >
-      {({ submitForm, values }) => (
+      {({ values }) => (
         <Form>
           <PageHeader
             title={
               isTitleEditable() ? (
                 <Field
                   name='name'
-                  label='Programme Name'
+                  label='Enter Target Population Name'
                   type='text'
                   fullWidth
                   required
@@ -134,7 +132,6 @@ export function EditTargetPopulation({
                 values.name
               )
             }
-            tabs={tabs}
             breadCrumbs={breadCrumbsItems}
             hasInputComponent
           >
@@ -155,21 +152,30 @@ export function EditTargetPopulation({
                   variant='contained'
                   color='primary'
                   type='submit'
-                  onClick={submitForm}
-                  disabled={!values.name}
+                  disabled={
+                    values.criterias?.length +
+                      values.candidateListCriterias?.length ===
+                      0 || !values.name
+                  }
                 >
                   Save
                 </Button>
               </ButtonContainer>
             </>
           </PageHeader>
-          <TabPanel value={selectedTab} index={0}>
-            <CandidateListTab values={values} />
-          </TabPanel>
-          <TabPanel value={selectedTab} index={1}>
-            <TargetPopulationDetails targetPopulation={targetPopulation} />
-            <TargetPopulationTab values={values} selectedTab={selectedTab} />
-          </TabPanel>
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
+            program={values.program}
+          />
+          <CandidateListTab
+            values={values}
+            selectedProgram={getFullNodeFromEdgesById(
+              allProgramsData?.allPrograms?.edges,
+              values.program,
+            )}
+            businessArea={businessArea}
+          />
         </Form>
       )}
     </Formik>

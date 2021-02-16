@@ -18,34 +18,22 @@
         "name": "Node",
         "possibleTypes": [
           {
-            "name": "PaymentRecordNode"
-          },
-          {
-            "name": "BusinessAreaNode"
+            "name": "LogEntryNode"
           },
           {
             "name": "UserNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "UserBusinessAreaNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "AdminAreaTypeNode"
           },
           {
             "name": "AdminAreaNode"
           },
           {
-            "name": "ProgramNode"
-          },
-          {
-            "name": "CashPlanNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
+            "name": "HouseholdNode"
           },
           {
             "name": "IndividualNode"
@@ -54,10 +42,88 @@
             "name": "RegistrationDataImportNode"
           },
           {
-            "name": "DocumentNode"
+            "name": "PaymentRecordNode"
+          },
+          {
+            "name": "CashPlanNode"
+          },
+          {
+            "name": "ProgramNode"
+          },
+          {
+            "name": "TargetPopulationNode"
+          },
+          {
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
             "name": "ServiceProviderNode"
+          },
+          {
+            "name": "TicketComplaintDetailsNode"
+          },
+          {
+            "name": "TicketSensitiveDetailsNode"
+          },
+          {
+            "name": "TicketIndividualDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketDeleteIndividualDetailsNode"
+          },
+          {
+            "name": "TicketSystemFlaggingDetailsNode"
+          },
+          {
+            "name": "SanctionListIndividualNode"
+          },
+          {
+            "name": "SanctionListIndividualDocumentNode"
+          },
+          {
+            "name": "SanctionListIndividualNationalitiesNode"
+          },
+          {
+            "name": "SanctionListIndividualCountriesNode"
+          },
+          {
+            "name": "SanctionListIndividualAliasNameNode"
+          },
+          {
+            "name": "SanctionListIndividualDateOfBirthNode"
+          },
+          {
+            "name": "DocumentNode"
+          },
+          {
+            "name": "TicketHouseholdDataUpdateDetailsNode"
+          },
+          {
+            "name": "TicketAddIndividualDetailsNode"
+          },
+          {
+            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "TicketNoteNode"
+          },
+          {
+            "name": "TicketNeedsAdjudicationDetailsNode"
+          },
+          {
+            "name": "BusinessAreaNode"
           },
           {
             "name": "ImportedHouseholdNode"

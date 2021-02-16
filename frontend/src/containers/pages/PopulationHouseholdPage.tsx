@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import get from 'lodash/get';
 import styled from 'styled-components';
 import { PageHeader } from '../../components/PageHeader';
 import { HouseholdFilters } from '../../components/population/HouseholdFilter';
@@ -10,6 +11,10 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../__generated__/graphql';
 import { useDebounce } from '../../hooks/useDebounce';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { usePermissions } from '../../hooks/usePermissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;
@@ -23,6 +28,8 @@ export function PopulationHouseholdPage(): React.ReactElement {
   });
   const debouncedFilter = useDebounce(filter, 500);
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
   const { data, loading } = useAllProgramsQuery({
     variables: { businessArea },
   });
@@ -32,10 +39,17 @@ export function PopulationHouseholdPage(): React.ReactElement {
   } = useHouseholdChoiceDataQuery({
     variables: { businessArea },
   });
-  if (loading || choicesLoading) return null;
 
-  const { allPrograms } = data;
-  const programs = allPrograms.edges.map((edge) => edge.node);
+  if (loading || choicesLoading) return <LoadingComponent />;
+  if (permissions === null) return null;
+
+  if (!hasPermissions(PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_LIST, permissions))
+    return <PermissionDenied />;
+
+  if (!choicesData) return null;
+
+  const allPrograms = get(data, 'allPrograms.edges', []);
+  const programs = allPrograms.map((edge) => edge.node);
 
   return (
     <div>
@@ -51,6 +65,10 @@ export function PopulationHouseholdPage(): React.ReactElement {
           filter={debouncedFilter}
           businessArea={businessArea}
           choicesData={choicesData}
+          canViewDetails={hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_HOUSEHOLDS_DETAILS,
+            permissions,
+          )}
         />
       </Container>
     </div>

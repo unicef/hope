@@ -3,6 +3,7 @@ import { Order, TableComponent } from '../../components/table/TableComponent';
 import { HeadCell } from '../../components/table/EnhancedTableHead';
 import { EmptyTable } from '../../components/table/EmptyTable';
 import { columnToOrderBy } from '../../utils/utils';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];
@@ -17,6 +18,8 @@ interface UniversalTableProps<T, K> {
   defaultOrderBy?: string;
   defaultOrderDirection?: string;
   actions?: Array<ReactElement>;
+  onSelectAllClick?: (event, rows) => void;
+  numSelected?: number;
 }
 export function UniversalTable<T, K>({
   rowsPerPageOptions = [5, 10, 15],
@@ -31,6 +34,8 @@ export function UniversalTable<T, K>({
   defaultOrderBy,
   defaultOrderDirection,
   actions,
+  onSelectAllClick,
+  numSelected = 0,
 }: UniversalTableProps<T, K>): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
@@ -48,6 +53,7 @@ export function UniversalTable<T, K>({
   }
   const { data, refetch, loading, error } = query({
     variables: initVariables,
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
   });
 
@@ -57,11 +63,14 @@ export function UniversalTable<T, K>({
     }
   }, [initialVariables]);
   if (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
-  if (!data) {
+  if (!loading && !data) {
     return <EmptyTable />;
   }
+  if (!data && loading) return <LoadingComponent />;
+
   let correctTitle = title;
   if (getTitle) {
     correctTitle = getTitle(data);
@@ -97,6 +106,7 @@ export function UniversalTable<T, K>({
           variables.after = edges[edges.length - 1].cursor;
           variables.first = rowsPerPage;
         }
+
         if (orderBy) {
           variables.orderBy = columnToOrderBy(orderBy, orderDirection);
         }
@@ -126,6 +136,7 @@ export function UniversalTable<T, K>({
         }
         setOrderBy(property);
         setOrderDirection(direction);
+        setPage(0);
         refetch({
           last: undefined,
           before: undefined,
@@ -136,6 +147,8 @@ export function UniversalTable<T, K>({
       }}
       orderBy={orderBy}
       order={orderDirection as Order}
+      onSelectAllClick={onSelectAllClick}
+      numSelected={numSelected}
     />
   );
 }

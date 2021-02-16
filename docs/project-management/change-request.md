@@ -4,7 +4,199 @@ description: Change request for Iteration 4 Deliverables
 
 # Change Requests
 
+## Iteration 7
+
+
+
+### **Targeting - Details View - Columns**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75647" %}
+
+**------------------------------------------------**
+
+### Change of copy in the Targeting
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75651" %}
+
+**------------------------------------------------**
+
+### Activity log - change copy
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75639" %}
+
+**------------------------------------------------**
+
+### **Chages to PV list view**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73205" %}
+
+**------------------------------------------------**
+
+### Add fields to household details
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73178" %}
+
+**------------------------------------------------**
+
+### Ability to archive/remove a Target Population
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/60538" %}
+
+**------------------------------------------------**
+
+### Move “Programme\(s\) Enrolled” and “Total Cash Received”
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73176" %}
+
+**------------------------------------------------**
+
+### Data related to Location should be grouped together
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73177" %}
+
+**------------------------------------------------**
+
+### **Household composition**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/73180" %}
+
+**------------------------------------------------**
+
+### **Copy change**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75461" %}
+
+**------------------------------------------------**
+
+### **Change location to Administrative level 2**
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75460" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75305" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75303" %}
+
+**------------------------------------------------**
+
+### Allow local users to login
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75616" %}
+
+**------------------------------------------------**
+
+### ERP schema updates
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75526" %}
+
+{% embed url="https://unicef.visualstudio.com/ICTD-HCT-MIS/\_workitems/edit/75653/" %}
+
+**------------------------------------------------**
+
+### ERP schema - **DP** table changes **-** [link](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/74080)
+
+#### October 13th 2020
+
+1. remove: 
+   * session\_id
+   * exchange\_rate
+2. change: 
+   * document\_type to only **char\(2\)**
+   * total\_down\_payment\_amount\_local to **decimal\(15.2\)**
+   * total\_down\_payment\_amount\_usd to **decimal\(15.2\)** 
+3. add:
+
+   | id | integer\(\) autoinc |
+   | :--- | :--- |
+   | rec\_serial\_number | char\(10\) |
+   | doc\_year | integer |
+   | doc\_number | char\(10\) |
+   | doc\_item\_number | char\(03\) |
+   | doc\_reversed | CHAR\(01\) |
+   | create\_date | datetime |
+   | created\_by | char\(12\) |
+   | update\_date | datetime |
+   | updated\_by | char\(12\) |
+   | mis\_sync\_flag | bool |
+   | mis\_sync\_date | datetime |
+   | ca\_sync\_flag | bool |
+   | ca\_sync\_date | datetime |
+
+See full details: [Integration data sets - July 26 updated.xlsx](https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Modules%20-%20Components/CashAssist/Integration%20data%20sets%20-%20July%2026%20updated.xlsx?d=w8f70a71e4b074025b585d3a6190f7b8e&csf=1&web=1&e=gfhRuW)
+
+**------------------------------------------------**
+
+### ERP schema - FC table changes **-** [link](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/74079)
+
+#### October 13th 2020
+
+1. remove:
+   * session\_id
+   * exchange\_rate
+2. change: 
+   * g\_l\_account to **gl\_account**  and to **char\(10\)**
+   * document\_type to only **char\(2\)**
+   * currency\_code to **char\(5\)**
+   * commitment\_amount\_local to **decimal\(15.2\)**
+   * **commitment\_amount\_usd to decimal\(15.2\)**
+   * total\_open\_amount\_local to **decimal\(15.2\)**
+   * total\_open\_amount\_usd to **decimal\(15.2\)**
+3. add:
+
+   > | id | integer\(\) autoinc |
+   > | :--- | :--- |
+   > | rec\_serial\_number | varchar\(10\) |
+   > | document\_reference | char\(16\) |
+   > | fc\_status | char\(01\) |
+   > | create\_date | datetime |
+   > | created \_by | char\(12\) |
+   > | update\_date | datetime |
+   > | updated\_by | char\(12\) |
+   > | mis\_sync\_flag | bool |
+   > | mis\_sync\_date | datetime |
+   > | ca\_sync\_flag | bool |
+   > | ca\_sync\_date | datetime |
+
+See full details: [Integration data sets - July 26 updated.xlsx](https://unicef.sharepoint.com/:x:/r/teams/EMOPS-HCT-MIS/DocumentLibrary2/Modules%20-%20Components/CashAssist/Integration%20data%20sets%20-%20July%2026%20updated.xlsx?d=w8f70a71e4b074025b585d3a6190f7b8e&csf=1&web=1&e=gfhRuW)
+
+**------------------------------------------------**
+
+### **RDI Changes in Kobo form**
+
+**September 30th 2020**
+
+* Grouping of questions have been modified and new groups are created, please reflect on the catalog on Targeting. \(as part of previous change requests we had asked to show core fields too, it can be part of that work\)  
+* `consent_h_c`  is now a **boolean** field 
+* `child_marital_status_i_f` is **removed** 
+* `free_union` from `marital_status_i_c` is **removed**
+* Column name modifications highlighted in **yellow** in the XLSForm:
+  * `sex_i_c` is changed to `gender_i_c`
+  * `fchild_hoh_i_c`  changed to `child_hoh_h_c`  \(Female child headed household\)
+  * `child_hoh_i_c`  changed to `child_hoh_h_c`   \(Child headed household\) 
+  * Disability field changes: `observed_disability_i_fis` changed to `observed_disability_i_c` , `seeing_disability_i_f` is changed to `seeing_disability_i_c` and others 
+  * `latrine_h_f` changed to `shared_latrine_h_f` 
+  * `water_source_h_f` changed to `drinking_water_source_h_f` 
+* New fields have been added highlighted in **orange** 
+* There are some changes in choices, highlighted in **orange**
+
+{% file src="../.gitbook/assets/detailed-registration-9.29.xlsx" caption="\(Change Request\) Detailed Registration 9.29.xlsx" %}
+
+
+
 ## Iteration 6
+
+**------------------------------------------------**
+
+### BusinessArea info
+
+**August 17th 2020**
+
+\*\*\*\*[**link to ticket**](https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/68702)\*\*\*\*
+
+Add BusinessArea info to the ****Session model**.**
+
+We need to add a `mis_datahub.business_area` field to the Session model equal to the `mis_datahub.Program..business_area` field.
+
+**------------------------------------------------**
 
 ### **Target Population Updates**
 

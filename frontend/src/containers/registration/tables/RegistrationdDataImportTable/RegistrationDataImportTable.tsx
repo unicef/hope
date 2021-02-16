@@ -8,21 +8,25 @@ import {
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { decodeIdString } from '../../../../utils/utils';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { headCells } from './RegistrationDataImportTableHeadCells';
 import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 
 const TableWrapper = styled.div`
   padding: 20px;
 `;
 
-export function RegistrationDataImportTable({ filter }): ReactElement {
+export function RegistrationDataImportTable({
+  filter,
+  canViewDetails,
+}): ReactElement {
   const businessArea = useBusinessArea();
   const initialVariables = {
     // eslint-disable-next-line @typescript-eslint/camelcase
     name_Icontains: filter.search,
-    importDate:
-      filter.importDate && moment(filter.importDate).format('YYYY-MM-DD'),
+    importDate: filter.importDate
+      ? moment(filter.importDate).format('YYYY-MM-DD')
+      : null,
     // eslint-disable-next-line @typescript-eslint/camelcase
     importedBy_Id: filter.importedBy
       ? decodeIdString(filter.importedBy)
@@ -51,6 +55,7 @@ export function RegistrationDataImportTable({ filter }): ReactElement {
           <RegistrationDataImportTableRow
             key={row.id}
             registrationDataImport={row}
+            canViewDetails={canViewDetails}
           />
         )}
       />

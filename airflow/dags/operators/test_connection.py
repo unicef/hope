@@ -7,11 +7,11 @@ log = logging.getLogger(__name__)
 
 
 class TestConnectionOperator(DjangoOperator):
-    def execute(self, context):
-        from registration_datahub.fixtures import (
+    def try_execute(self, context):
+        from hct_mis_api.apps.registration_datahub.fixtures import (
             RegistrationDataImportDatahubFactory,
         )
-        from registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
 
         rdi_dh = RegistrationDataImportDatahubFactory()
 

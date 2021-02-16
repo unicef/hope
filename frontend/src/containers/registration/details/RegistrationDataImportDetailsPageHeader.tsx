@@ -8,9 +8,13 @@ import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
+import { RerunDedupe } from './RerunDedupe';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;
+  canMerge: boolean;
+  canRerunDedupe: boolean;
+  canViewList: boolean;
 }
 
 const MergeButtonContainer = styled.span`
@@ -19,16 +23,32 @@ const MergeButtonContainer = styled.span`
 
 export function RegistrationDataImportDetailsPageHeader({
   registration,
+  canMerge,
+  canRerunDedupe,
+  canViewList,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
   let buttons = null;
   // eslint-disable-next-line default-case
-  switch (registration.status) {
+  switch (registration?.status) {
     case RegistrationDataImportStatus.InReview:
       buttons = (
         <div>
-          <MergeButtonContainer>
-            <MergeRegistrationDataImportDialog registration={registration} />
-          </MergeButtonContainer>
+          {canMerge && (
+            <MergeButtonContainer>
+              <MergeRegistrationDataImportDialog registration={registration} />
+            </MergeButtonContainer>
+          )}
+        </div>
+      );
+      break;
+    case RegistrationDataImportStatus.DeduplicationFailed:
+      buttons = (
+        <div>
+          {canRerunDedupe && (
+            <MergeButtonContainer>
+              <RerunDedupe registration={registration} />
+            </MergeButtonContainer>
+          )}
         </div>
       );
       break;
@@ -42,7 +62,10 @@ export function RegistrationDataImportDetailsPageHeader({
     },
   ];
   return (
-    <PageHeader title={registration.name} breadCrumbs={breadCrumbsItems}>
+    <PageHeader
+      title={registration.name}
+      breadCrumbs={canViewList ? breadCrumbsItems : null}
+    >
       {buttons}
     </PageHeader>
   );

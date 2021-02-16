@@ -2,7 +2,7 @@ import logging
 
 from django.core.management import BaseCommand
 
-from core.admin import FlexibleAttributeImporter
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class Command(BaseCommand):
             dest="file",
             action="store",
             nargs="?",
-            default="./data/FlexibleAttributesInit.xls",
+            default="./data/FlexibleAttributesInit.xlsx",
             type=str,
             help="file",
         )

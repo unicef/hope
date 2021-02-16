@@ -1,4 +1,5 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
+import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
 import {
   AllImportedIndividualsQueryVariables,
   ImportedIndividualMinimalFragment,
@@ -13,8 +14,10 @@ interface ImportedIndividualsTableProps {
   rdiId?: string;
   household?: string;
   title?: string;
-  isOnPaper?: boolean;
+  showCheckbox?: boolean;
   rowsPerPageOptions?: number[];
+  isOnPaper?: boolean;
+  businessArea: string;
 }
 
 export function ImportedIndividualsTable({
@@ -23,35 +26,58 @@ export function ImportedIndividualsTable({
   title,
   household,
   rowsPerPageOptions = [10, 15, 20],
+  showCheckbox,
+  businessArea,
 }: ImportedIndividualsTableProps): ReactElement {
+  const [showDuplicates, setShowDuplicates] = useState(false);
+
   const initialVariables = {
     rdiId,
     household,
+    duplicatesOnly: showDuplicates,
+    businessArea,
   };
 
-  const {
-    data: choicesData,
-    loading: choicesLoading,
-  } = useHouseholdChoiceDataQuery();
+  const { data: choicesData } = useHouseholdChoiceDataQuery();
   return (
-    <UniversalTable<
-      ImportedIndividualMinimalFragment,
-      AllImportedIndividualsQueryVariables
-    >
-      title={title}
-      headCells={headCells}
-      query={useAllImportedIndividualsQuery}
-      queriedObjectName='allImportedIndividuals'
-      rowsPerPageOptions={rowsPerPageOptions}
-      initialVariables={initialVariables}
-      isOnPaper={isOnPaper}
-      renderRow={(row) => (
-        <ImportedIndividualsTableRow
-          choices={choicesData}
-          key={row.id}
-          individual={row}
-        />
+    <>
+      {showCheckbox && (
+        <Grid container justify='flex-end' spacing={3}>
+          <Grid item>
+            <Box p={3}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color='primary'
+                    checked={showDuplicates}
+                    onChange={() => setShowDuplicates(!showDuplicates)}
+                  />
+                }
+                label='Show duplicates only'
+              />
+            </Box>
+          </Grid>
+        </Grid>
       )}
-    />
+      <UniversalTable<
+        ImportedIndividualMinimalFragment,
+        AllImportedIndividualsQueryVariables
+      >
+        title={title}
+        headCells={headCells}
+        query={useAllImportedIndividualsQuery}
+        queriedObjectName='allImportedIndividuals'
+        rowsPerPageOptions={rowsPerPageOptions}
+        initialVariables={initialVariables}
+        isOnPaper={isOnPaper}
+        renderRow={(row) => (
+          <ImportedIndividualsTableRow
+            choices={choicesData}
+            key={row.id}
+            individual={row}
+          />
+        )}
+      />
+    </>
   );
 }

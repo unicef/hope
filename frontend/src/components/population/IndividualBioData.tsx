@@ -1,18 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
-import Moment from 'react-moment';
 import { LabelizedField } from '../LabelizedField';
-import { IndividualNode } from '../../__generated__/graphql';
 import {
-  decodeIdString,
+  IndividualNode,
+  useHouseholdChoiceDataQuery,
+} from '../../__generated__/graphql';
+import {
   getAgeFromDob,
   sexToCapitalize,
+  choicesToDict,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { Missing } from '../Missing';
-import { StatusBox } from '../StatusBox';
+import { LoadingComponent } from '../LoadingComponent';
+import { UniversalMoment } from '../UniversalMoment';
+import { ContentLink } from '../ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,13 +26,8 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-const ContentLink = styled.div`
-  text-decoration: underline;
-  cursor: pointer;
-`;
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
+const BorderBox = styled.div`
+  border-bottom: 1px solid #e1e1e1;
 `;
 
 interface IndividualBioDataProps {
@@ -39,7 +36,6 @@ interface IndividualBioDataProps {
 export function IndividualsBioData({
   individual,
 }: IndividualBioDataProps): React.ReactElement {
-  const history = useHistory();
   const businessArea = useBusinessArea();
 
   let age: number | null;
@@ -48,24 +44,31 @@ export function IndividualsBioData({
     age = getAgeFromDob(birthDate);
   }
 
-  const openHousehold = (): void => {
-    history.push(
-      `/${businessArea}/population/household/${individual.household.id}`,
-    );
-  };
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useHouseholdChoiceDataQuery();
 
+  if (choicesLoading) {
+    return <LoadingComponent />;
+  }
+  const relationshipChoicesDict = choicesToDict(
+    choicesData.relationshipChoices,
+  );
+  const maritalStatusChoicesDict = choicesToDict(
+    choicesData.maritalStatusChoices,
+  );
+  const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3}>
+    <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
-        <div>{edge.node.documentNumber}</div>
+        {edge.node.documentNumber}
       </LabelizedField>
     </Grid>
   ));
   const mappedIdentities = individual.identities?.map((item) => (
-    <Grid item xs={3}>
-      <LabelizedField label={`${item.type} ID`}>
-        <div>{item.number}</div>
-      </LabelizedField>
+    <Grid item xs={3} key={item.id}>
+      <LabelizedField label={`${item.type} ID`}>{item.number}</LabelizedField>
     </Grid>
   ));
 
@@ -77,78 +80,106 @@ export function IndividualsBioData({
       <Grid container spacing={6}>
         <Grid item xs={3}>
           <LabelizedField label='Full Name'>
-            <div>{individual.fullName}</div>
+            {individual.fullName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Given Name'>
-            <div>{individual.givenName}</div>
+            {individual.givenName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Middle Name'>
-            <div>{individual.middleName || '-'}</div>
+            {individual.middleName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Family Name'>
-            <div>{individual.familyName}</div>
+            {individual.familyName}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Sex'>
-            <div>{sexToCapitalize(individual.sex)}</div>
+          <LabelizedField label='Gender'>
+            {sexToCapitalize(individual.sex)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>
-            <div>{age}</div>
-          </LabelizedField>
+          <LabelizedField label='Age'>{age}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <Moment format='DD/MM/YYYY'>{birthDate}</Moment>
+            <UniversalMoment>{birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            <div>
-              {individual.estimatedBirthDate
-                ? individual.estimatedBirthDate
-                : 'No'}
-            </div>
+            {individual.estimatedBirthDate
+              ? individual.estimatedBirthDate
+              : 'No'}
           </LabelizedField>
         </Grid>
-        <Grid item xs={3}>
-          <LabelizedField label='Household ID'>
-            <ContentLink onClick={() => openHousehold()}>
-              {decodeIdString(individual.household.id)}
-            </ContentLink>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={3}>
-          <LabelizedField label='Role'>
-            <div>{individual.role}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={3}>
-          <LabelizedField label='Relationship to HOH'>
-            <div>{individual.relationship}</div>
-          </LabelizedField>
-        </Grid>
-        {mappedIndividualDocuments}
-        {mappedIdentities}
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
-            <div>{individual.maritalStatus}</div>
+            {maritalStatusChoicesDict[individual.maritalStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
-            <div>
-              <Missing />
-              {/* <div>{individual.pregnant ? 'YES' : 'NO' || '-'}</div> */}
-            </div>
+            {individual.pregnant ? 'Yes' : 'No'}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Household ID'>
+            {individual.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/population/household/${individual.household?.id}`}
+              >
+                {individual.household?.unicefId}
+              </ContentLink>
+            ) : (
+              <span>-</span>
+            )}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Role'>
+            {roleChoicesDict[individual.role]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Relationship to HOH'>
+            {relationshipChoicesDict[individual.relationship]}
+          </LabelizedField>
+        </Grid>
+        {!mappedIndividualDocuments.length &&
+        !mappedIdentities.length ? null : (
+          <Grid item xs={12}>
+            <BorderBox />
+          </Grid>
+        )}
+        {mappedIndividualDocuments}
+        {mappedIdentities}
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Phone Number'>
+            {individual.phoneNo}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Alternate Phone Number'>
+            {individual.phoneNoAlternative}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Date of last screening against sanctions list'>
+            <UniversalMoment>
+              {individual.sanctionListLastCheck}
+            </UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>

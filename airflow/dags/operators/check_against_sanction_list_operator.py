@@ -2,8 +2,8 @@ from .base import DjangoOperator
 
 
 class CheckAgainstSanctionListOperator(DjangoOperator):
-    def execute(self, context):
-        from sanction_list.tasks.check_against_sanction_list import (
+    def try_execute(self, context):
+        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
             CheckAgainstSanctionListTask,
         )
 

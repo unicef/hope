@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import moment from 'moment';
 import * as Yup from 'yup';
 import styled from 'styled-components';
 import {
@@ -10,7 +11,6 @@ import {
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
-import moment from 'moment';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import {
@@ -40,11 +40,6 @@ const DialogFooter = styled.div`
   text-align: right;
 `;
 
-const MediumLabel = styled.div`
-  width: 60%;
-  margin: 12px 0;
-`;
-
 const DateFields = styled.div`
   display: flex;
   justify-content: space-between;
@@ -62,26 +57,50 @@ const FullWidth = styled.div`
   width: 100%;
 `;
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Programme name is required'),
-  scope: Yup.string().required('CashAssist Scope is required'),
-  startDate: Yup.date().required(),
+  name: Yup.string()
+    .required('Programme name is required')
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  scope: Yup.string()
+    .required('CashAssist Scope is required')
+    .min(2, 'Too short')
+    .max(50, 'Too long'),
+  startDate: Yup.date().required('Start Date is required'),
   endDate: Yup.date()
+    .required('End Date is required')
+    .min(today, 'End Date cannot be in the past')
     .when(
       'startDate',
       (startDate, schema) =>
         startDate &&
         schema.min(
           startDate,
-          `End date have to be grater than ${moment(startDate).format(
-            'DD/MM/YYYY',
+          `End date have to be greater than ${moment(startDate).format(
+            'YYYY-MM-DD',
           )}`,
         ),
       '',
-    )
-    .required(),
-  sector: Yup.string().required('Sector is required'),
-  budget: Yup.number().min(0),
+    ),
+  sector: Yup.string()
+    .required('Sector is required')
+    .min(2, 'Too short')
+    .max(50, 'Too long'),
+  budget: Yup.number()
+    .min(0)
+    .max(99999999, 'Number is too big'),
+  administrativeAreasOfImplementation: Yup.string()
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  description: Yup.string()
+    .min(2, 'Too short')
+    .max(255, 'Too long'),
+  populationGoal: Yup.number()
+    .min(0)
+    .max(99999999, 'Number is too big'),
 });
 
 interface ProgramFormPropTypes {
@@ -94,7 +113,7 @@ interface ProgramFormPropTypes {
 }
 
 export function ProgramForm({
-  program,
+  program = null,
   onSubmit,
   renderSubmit,
   open,
@@ -115,17 +134,26 @@ export function ProgramForm({
     frequencyOfPayments: 'REGULAR',
     sector: '',
     cashPlus: false,
-    individualDataNeeded: false,
+    individualDataNeeded: 'NO',
   };
 
   if (program) {
     initialValue = selectFields(program, Object.keys(initialValue));
+    initialValue.individualDataNeeded = program.individualDataNeeded
+      ? 'YES'
+      : 'NO';
   }
   if (initialValue.budget === 0) {
     initialValue.budget = '0.00';
   }
-  // initialValue.budget =
   if (!data) return null;
+
+  const withoutIndividualDataText =
+    'This programme will use only household and/or head of household details for targeting or entitlement calculation';
+
+  const withIndividualDataText =
+    'This programme will use household member individuals’ details for targeting or entitlement calculation. Setting this flag can reduce the number of households filtered in the target population.';
+
   return (
     <DialogContainer>
       <Dialog
@@ -148,7 +176,12 @@ export function ProgramForm({
           onSubmit={(values) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);
-            return onSubmit(values);
+            if (values.individualDataNeeded === 'YES') {
+              newValues.individualDataNeeded = true;
+            } else if (values.individualDataNeeded === 'NO') {
+              newValues.individualDataNeeded = false;
+            }
+            return onSubmit(newValues);
           }}
           validationSchema={validationSchema}
         >
@@ -164,7 +197,6 @@ export function ProgramForm({
                   To create a new Programme, please complete all required fields
                   on the form below and save.
                 </DialogDescription>
-
                 <Form>
                   <Field
                     name='name'
@@ -172,16 +204,25 @@ export function ProgramForm({
                     type='text'
                     fullWidth
                     required
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
                     name='scope'
                     label='CashAssist Scope'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     required
                     choices={data.programScopeChoices}
+                    component={FormikSelectField}
+                  />
+                  <Field
+                    name='sector'
+                    label='Sector'
+                    fullWidth
+                    required
+                    variant='outlined'
+                    choices={data.programSectorChoices}
                     component={FormikSelectField}
                   />
                   <DateFields>
@@ -209,7 +250,7 @@ export function ProgramForm({
                         decoratorEnd={
                           <CalendarTodayRoundedIcon color='disabled' />
                         }
-                        minDate={values.startDate}
+                        minDate={today}
                       />
                     </DateField>
                   </DateFields>
@@ -219,16 +260,16 @@ export function ProgramForm({
                     type='text'
                     fullWidth
                     multiline
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
                     name='budget'
-                    label='Budget'
+                    label='Budget (USD)'
                     type='number'
                     fullWidth
                     precision={2}
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
@@ -242,25 +283,16 @@ export function ProgramForm({
                     label='Administrative Areas of Implementation'
                     type='text'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
                   />
                   <Field
                     name='populationGoal'
-                    label='Population goal'
+                    label='Population Goal (# of Individuals)'
                     type='number'
                     fullWidth
-                    variant='filled'
+                    variant='outlined'
                     component={FormikTextField}
-                  />
-                  <Field
-                    name='sector'
-                    label='Sector'
-                    fullWidth
-                    required
-                    variant='filled'
-                    choices={data.programSectorChoices}
-                    component={FormikSelectField}
                   />
                   <FullWidth>
                     <Field
@@ -273,18 +305,22 @@ export function ProgramForm({
                   <FullWidth>
                     <Field
                       name='individualDataNeeded'
-                      label="Will this programme use individuals’ data for targeting or entitlement calculation? Setting this flag can reduce the number of households filtered in the target population."
                       disabled={program && program.status === 'ACTIVE'}
-                      color='primary'
-                      component={FormikCheckboxField}
+                      label='Data for targeting or entitlement calculation*'
+                      choices={[
+                        {
+                          name: withoutIndividualDataText,
+                          value: 'NO',
+                        },
+                        {
+                          name: withIndividualDataText,
+                          value: 'YES',
+                        },
+                      ]}
+                      component={FormikRadioGroup}
                     />
                   </FullWidth>
                 </Form>
-                <DialogDescription>
-                  This programme will use Individuals’ data for entitlement
-                  calculation. Hope has the data on all Individuals within the
-                  targeted households and will send this to CashAssist.
-                </DialogDescription>
               </DialogContent>
               <DialogFooter>
                 <DialogActions>{renderSubmit(submitForm)}</DialogActions>

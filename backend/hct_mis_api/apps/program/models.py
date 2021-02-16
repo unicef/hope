@@ -1,21 +1,38 @@
 from decimal import Decimal
 
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
-from django.core.validators import (
-    MinValueValidator,
-    MinLengthValidator,
-    MaxLengthValidator,
-)
+from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 from django.db import models
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
+from model_utils.models import SoftDeletableModel
 
-from utils.models import TimeStampedUUIDModel, AbstractSyncable
+from hct_mis_api.apps.activity_log.utils import create_mapping_dict
+from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
+from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 
 
-class Program(TimeStampedUUIDModel, AbstractSyncable):
+class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+    ACTIVITY_LOG_MAPPING = create_mapping_dict(
+        [
+            "name",
+            "status",
+            "start_date",
+            "end_date",
+            "description",
+            "ca_id",
+            "ca_hash_id",
+            "business_area",
+            "budget",
+            "frequency_of_payments",
+            "sector",
+            "scope",
+            "cash_plus",
+            "population_goal",
+            "administrative_areas_of_implementation",
+            "individual_data_needed",
+        ],
+        {"admin_areas_log": "admin_areas"},
+    )
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
     FINISHED = "FINISHED"
@@ -35,9 +52,7 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
 
     CHILD_PROTECTION = "CHILD_PROTECTION"
     EDUCATION = "EDUCATION"
-    GENDER = "GENDER"
     HEALTH = "HEALTH"
-    HIV_AIDS = "HIV_AIDS"
     MULTI_PURPOSE = "MULTI_PURPOSE"
     NUTRITION = "NUTRITION"
     SOCIAL_POLICY = "SOCIAL_POLICY"
@@ -46,9 +61,7 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
     SECTOR_CHOICE = (
         (CHILD_PROTECTION, _("Child Protection")),
         (EDUCATION, _("Education")),
-        (GENDER, _("Gender")),
         (HEALTH, _("Health")),
-        (HIV_AIDS, _("HIV / AIDS")),
         (MULTI_PURPOSE, _("Multi Purpose")),
         (NUTRITION, _("Nutrition")),
         (SOCIAL_POLICY, _("Social Policy")),
@@ -67,7 +80,10 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    status = models.CharField(max_length=10, choices=STATUS_CHOICE,)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICE,
+    )
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.CharField(
@@ -77,28 +93,34 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.CharField(max_length=255, null=True)
     admin_areas = models.ManyToManyField(
-        "core.AdminArea", related_name="programs", blank=True,
+        "core.AdminArea",
+        related_name="programs",
+        blank=True,
     )
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
         decimal_places=2,
         max_digits=11,
         validators=[MinValueValidator(Decimal("0.00"))],
     )
     frequency_of_payments = models.CharField(
-        max_length=50, choices=FREQUENCY_OF_PAYMENTS_CHOICE,
+        max_length=50,
+        choices=FREQUENCY_OF_PAYMENTS_CHOICE,
     )
-    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE,)
-    scope = models.CharField(max_length=50, choices=SCOPE_CHOICE,)
+    sector = models.CharField(
+        max_length=50,
+        choices=SECTOR_CHOICE,
+    )
+    scope = models.CharField(
+        max_length=50,
+        choices=SCOPE_CHOICE,
+    )
     cash_plus = models.BooleanField()
     population_goal = models.PositiveIntegerField()
     administrative_areas_of_implementation = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    history = AuditlogHistoryField(pk_indexable=False)
     individual_data_needed = models.BooleanField(
         default=False,
         help_text="""
@@ -109,12 +131,18 @@ class Program(TimeStampedUUIDModel, AbstractSyncable):
 
     @property
     def total_number_of_households(self):
-        return self.cash_plans.aggregate(
-            households=Coalesce(Sum("total_persons_covered"), 0),
-        )["households"]
+        return self.households.count()
+
+    @property
+    def admin_areas_log(self):
+        ", ".join(self.admin_areas.all())
 
     class Meta:
         unique_together = ("name", "business_area")
+        verbose_name = "Programme"
+
+    def __str__(self):
+        return self.name
 
 
 class CashPlan(TimeStampedUUIDModel):
@@ -135,12 +163,10 @@ class CashPlan(TimeStampedUUIDModel):
             _("Transaction Completed with Errors"),
         ),
     )
-    business_area = models.ForeignKey(
-        "core.BusinessArea", on_delete=models.CASCADE
-    )
+    business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE,)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE)
     status_date = models.DateTimeField()
     name = models.CharField(max_length=255)
     distribution_level = models.CharField(max_length=255)
@@ -149,16 +175,15 @@ class CashPlan(TimeStampedUUIDModel):
     dispersion_date = models.DateTimeField()
     coverage_duration = models.PositiveIntegerField()
     coverage_unit = models.CharField(max_length=255)
-    comments = models.CharField(max_length=255)
-    program = models.ForeignKey(
-        "program.Program", on_delete=models.CASCADE, related_name="cash_plans"
-    )
-    delivery_type = models.CharField(max_length=255)
+    comments = models.CharField(max_length=255, null=True)
+    program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
+    delivery_type = models.CharField(choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, null=True)
     assistance_measurement = models.CharField(max_length=255)
     assistance_through = models.CharField(max_length=255)
-    vision_id = models.CharField(max_length=255)
-    funds_commitment = models.CharField(max_length=255)
-    down_payment = models.CharField(max_length=255)
+    vision_id = models.CharField(max_length=255, null=True)
+    funds_commitment = models.CharField(max_length=255, null=True)
+    exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
+    down_payment = models.CharField(max_length=255, null=True)
     validation_alerts_count = models.IntegerField()
     total_persons_covered = models.IntegerField()
     total_persons_covered_revised = models.IntegerField()
@@ -182,11 +207,23 @@ class CashPlan(TimeStampedUUIDModel):
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
     )
-    verification_status = models.CharField(max_length=200, default="PENDING")
+    verification_status = models.CharField(
+        max_length=10,
+        default=CashPlanPaymentVerification.STATUS_PENDING,
+        choices=CashPlanPaymentVerification.STATUS_CHOICES,
+    )
 
     @property
     def payment_records_count(self):
         return self.payment_records.count()
 
+    @property
+    def bank_reconciliation_success(self):
+        return self.payment_records.filter(status=PaymentRecord.STATUS_SUCCESS).count()
 
-auditlog.register(Program)
+    @property
+    def bank_reconciliation_error(self):
+        return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
+
+    class Meta:
+        verbose_name = "Cash Plan"

@@ -6,7 +6,10 @@ import { PageHeader } from '../../../components/PageHeader';
 import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { StatusBox } from '../../../components/StatusBox';
-import { targetPopulationStatusToColor, targetPopulationStatusMapping } from '../../../utils/utils';
+import {
+  targetPopulationStatusToColor,
+  targetPopulationStatusMapping,
+} from '../../../utils/utils';
 import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
 import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
 import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
@@ -26,15 +29,23 @@ const StatusWrapper = styled.div`
 export interface ProgramDetailsPageHeaderPropTypes {
   setEditState: Function;
   targetPopulation: TargetPopulationNode;
-  tabs: React.ReactElement;
-  selectedTab: number;
+  canEdit: boolean;
+  canRemove: boolean;
+  canDuplicate: boolean;
+  canLock: boolean;
+  canUnlock: boolean;
+  canSend: boolean;
 }
 
 export function TargetPopulationPageHeader({
   targetPopulation,
   setEditState,
-  tabs,
-  selectedTab,
+  canEdit,
+  canRemove,
+  canDuplicate,
+  canLock,
+  canUnlock,
+  canSend,
 }: ProgramDetailsPageHeaderPropTypes): React.ReactElement {
   const { t } = useTranslation();
   const businessArea = useBusinessArea();
@@ -52,6 +63,10 @@ export function TargetPopulationPageHeader({
         <InProgressTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
           setEditState={setEditState}
+          canDuplicate={canDuplicate}
+          canRemove={canRemove}
+          canEdit={canEdit}
+          canLock={canLock}
         />
       );
       break;
@@ -59,15 +74,18 @@ export function TargetPopulationPageHeader({
       buttons = (
         <ApprovedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
-          selectedTab={selectedTab}
-          setEditState={setEditState}
+          canDuplicate={canDuplicate}
+          canUnlock={canUnlock}
+          canSend={canSend}
         />
       );
       break;
-    default: //FINALIZED
+    default:
+      //FINALIZED
       buttons = (
         <FinalizedTargetPopulationHeaderButtons
           targetPopulation={targetPopulation}
+          canDuplicate={canDuplicate}
         />
       );
       break;
@@ -88,7 +106,6 @@ export function TargetPopulationPageHeader({
           </HeaderWrapper>
         }
         breadCrumbs={breadCrumbsItems}
-        tabs={tabs}
       >
         {buttons}
       </PageHeader>

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Tooltip } from '@material-ui/core';
-import { FileCopy, EditRounded } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import { FileCopy } from '@material-ui/icons';
+import {
+  TargetPopulationNode,
+  useUnapproveTpMutation,
+} from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
 import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
+import { useSnackbar } from '../../../hooks/useSnackBar';
 
 const IconContainer = styled.span`
   button {
@@ -23,61 +27,72 @@ const ButtonContainer = styled.span`
 
 export interface ApprovedTargetPopulationHeaderButtonsPropTypes {
   targetPopulation: TargetPopulationNode;
-  selectedTab: number;
-  setEditState: Function;
+  canUnlock: boolean;
+  canDuplicate: boolean;
+  canSend: boolean;
 }
 
 export function ApprovedTargetPopulationHeaderButtons({
   targetPopulation,
-  selectedTab,
-  setEditState,
+  canSend,
+  canDuplicate,
+  canUnlock,
 }: ApprovedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
   const [openFinalize, setOpenFinalize] = useState(false);
-  console.log(
-    'targetPopulation.program.status',
-    targetPopulation.program.status,
-  );
+  const { showMessage } = useSnackbar();
+  const [mutate] = useUnapproveTpMutation();
+
   return (
     <div>
-      <IconContainer>
-        <Button onClick={() => setOpenDuplicate(true)}>
-          <FileCopy />
-        </Button>
-      </IconContainer>
-      {selectedTab !== 0 && (
+      {canDuplicate && (
+        <IconContainer>
+          <Button onClick={() => setOpenDuplicate(true)}>
+            <FileCopy />
+          </Button>
+        </IconContainer>
+      )}
+      {canUnlock && (
         <ButtonContainer>
           <Button
-            variant='outlined'
             color='primary'
-            startIcon={<EditRounded />}
-            onClick={() => setEditState(true)}
+            variant='outlined'
+            onClick={() => {
+              mutate({
+                variables: { id: targetPopulation.id },
+              }).then(() => {
+                showMessage('Target Population Unlocked');
+              });
+            }}
+            data-cy='button-target-population-unlocked'
           >
-            Edit
+            Unlock
           </Button>
         </ButtonContainer>
       )}
-      <ButtonContainer>
-        <Tooltip
-          title={
-            targetPopulation.program.status !== 'ACTIVE'
-              ? 'Assigned programme is not ACTIVE'
-              : 'Send to cash assist'
-          }
-        >
-          <span>
-            <Button
-              variant='contained'
-              color='primary'
-              disabled={targetPopulation.program.status !== 'ACTIVE'}
-              onClick={() => setOpenFinalize(true)}
-              data-cy='button-target-population-send-to-cash-assist'
-            >
-              Send to cash assist
-            </Button>
-          </span>
-        </Tooltip>
-      </ButtonContainer>
+      {canSend && (
+        <ButtonContainer>
+          <Tooltip
+            title={
+              targetPopulation.program.status !== 'ACTIVE'
+                ? 'Assigned programme is not ACTIVE'
+                : 'Send to cash assist'
+            }
+          >
+            <span>
+              <Button
+                variant='contained'
+                color='primary'
+                disabled={targetPopulation.program.status !== 'ACTIVE'}
+                onClick={() => setOpenFinalize(true)}
+                data-cy='button-target-population-send-to-cash-assist'
+              >
+                Send to cash assist
+              </Button>
+            </span>
+          </Tooltip>
+        </ButtonContainer>
+      )}
       <DuplicateTargetPopulation
         open={openDuplicate}
         setOpen={setOpenDuplicate}

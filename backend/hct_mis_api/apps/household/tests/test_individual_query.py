@@ -1,20 +1,23 @@
-from django.core.management import call_command
+import unittest
 
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from household.fixtures import (
+from django.core.management import call_command
+from parameterized import parameterized
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
     IndividualFactory,
     HouseholdFactory,
-    create_household,
 )
-from program.fixtures import ProgramFactory
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 
 class TestIndividualQuery(APITestCase):
     ALL_INDIVIDUALS_QUERY = """
     query AllIndividuals {
-      allIndividuals {
+      allIndividuals(businessArea: "afghanistan") {
         edges {
           node {
             fullName
@@ -28,8 +31,8 @@ class TestIndividualQuery(APITestCase):
     }
     """
     ALL_INDIVIDUALS_BY_PROGRAMME_QUERY = """
-    query AllIndividuals {
-      allIndividuals(programme: "Test program TWO") {
+    query AllIndividuals($programs: [ID]) {
+      allIndividuals(programs: $programs, orderBy: "birth_date", businessArea: "afghanistan") {
         edges {
           node {
             givenName
@@ -37,7 +40,7 @@ class TestIndividualQuery(APITestCase):
             phoneNo
             birthDate
             household {
-              programs { 
+              programs {
                 edges {
                   node {
                     name
@@ -66,11 +69,14 @@ class TestIndividualQuery(APITestCase):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory()
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         program_one = ProgramFactory(
-            name="Test program ONE", business_area=BusinessArea.objects.first(),
+            name="Test program ONE",
+            business_area=self.business_area,
         )
-        program_two = ProgramFactory(
-            name="Test program TWO", business_area=BusinessArea.objects.first(),
+        self.program_two = ProgramFactory(
+            name="Test program TWO",
+            business_area=self.business_area,
         )
 
         household_one = HouseholdFactory.build()
@@ -80,7 +86,7 @@ class TestIndividualQuery(APITestCase):
         household_two.registration_data_import.imported_by.save()
         household_two.registration_data_import.save()
         household_one.programs.add(program_one)
-        household_two.programs.add(program_two)
+        household_two.programs.add(self.program_two)
 
         self.individuals_to_create = [
             {
@@ -89,6 +95,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Butler",
                 "phone_no": "(953)682-4596",
                 "birth_date": "1943-07-30",
+                "id": "ffb2576b-126f-42de-b0f5-ef889b7bc1fe",
             },
             {
                 "full_name": "Robin Ford",
@@ -96,6 +103,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Ford",
                 "phone_no": "+18663567905",
                 "birth_date": "1946-02-15",
+                "id": "8ef39244-2884-459b-ad14-8d63a6fe4a4a",
             },
             {
                 "full_name": "Timothy Perry",
@@ -103,6 +111,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Perry",
                 "phone_no": "(548)313-1700-902",
                 "birth_date": "1983-12-21",
+                "id": "badd2d2d-7ea0-46f1-bb7a-69f385bacdcd",
             },
             {
                 "full_name": "Eric Torres",
@@ -110,6 +119,7 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Torres",
                 "phone_no": "(228)231-5473",
                 "birth_date": "1973-03-23",
+                "id": "2c1a26a3-2827-4a99-9000-a88091bf017c",
             },
             {
                 "full_name": "Jenna Franklin",
@@ -117,14 +127,12 @@ class TestIndividualQuery(APITestCase):
                 "family_name": "Franklin",
                 "phone_no": "001-296-358-5428-607",
                 "birth_date": "1969-11-29",
+                "id": "0fc995cc-ea72-4319-9bfe-9c9fda3ec191",
             },
         ]
 
         self.individuals = [
-            IndividualFactory(
-                household=household_one if index % 2 else household_two,
-                **individual
-            )
+            IndividualFactory(household=household_one if index % 2 else household_two, **individual)
             for index, individual in enumerate(self.individuals_to_create)
         ]
         household_one.head_of_household = self.individuals[0]
@@ -132,23 +140,48 @@ class TestIndividualQuery(APITestCase):
         household_one.save()
         household_two.save()
 
-    def test_individual_query_all(self):
+
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    @unittest.skip("needs adjudication")
+    def test_individual_query_all(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_QUERY,
             context={"user": self.user},
         )
 
-    def test_individual_query_single(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS]),
+            ("without_permission", []),
+        ]
+    )
+    def test_individual_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.INDIVIDUAL_QUERY,
             context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(self.individuals[0].id, "Individual")
-            },
+            variables={"id": self.id_to_base64(self.individuals[0].id, "IndividualNode")},
         )
 
-    def test_individual_programme_filter(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_individual_programme_filter(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=self.ALL_INDIVIDUALS_BY_PROGRAMME_QUERY,
             context={"user": self.user},
+            variables={"programs": [self.program_two.id]},
         )

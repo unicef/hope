@@ -1,31 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Typography } from '@material-ui/core';
 import { CashPlanNode } from '../__generated__/graphql';
 import { MiśTheme } from '../theme';
 import { cashPlanStatusToColor } from '../utils/utils';
+import { useBusinessArea } from '../hooks/useBusinessArea';
 import { LabelizedField } from './LabelizedField';
 import { StatusBox } from './StatusBox';
-import { Missing } from './Missing';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
-const OverviewContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-`;
+import { UniversalMoment } from './UniversalMoment';
+import { ContainerWithBorder } from './ContainerWithBorder';
+import { OverviewContainer } from './OverviewContainer';
+import { ContentLink } from './ContentLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -58,8 +43,43 @@ interface CashPlanProps {
 export function CashPlanDetails({
   cashPlan,
 }: CashPlanProps): React.ReactElement {
+  const businessArea = useBusinessArea();
+
+  const filteredTps = (): Array<{
+    id: string;
+    name: string;
+  }> => {
+    const mappedTPs = cashPlan.paymentRecords?.edges.map((edge) => ({
+      id: edge.node.targetPopulation?.id,
+      name: edge.node.targetPopulation?.name,
+    }));
+
+    const uniques = [];
+    for (const obj of mappedTPs) {
+      if (obj && !uniques.find((el) => el?.id === obj?.id)) {
+        uniques.push(obj);
+      }
+    }
+    return uniques;
+  };
+
+  const renderTargetPopulations = ():
+    | React.ReactElement
+    | Array<React.ReactElement> => {
+    return filteredTps().length ? (
+      filteredTps().map((el) => (
+        <span key={el.id}>
+          <ContentLink href={`/${businessArea}/target-population/${el.id}`}>
+            {el.name}
+          </ContentLink>{' '}
+        </span>
+      ))
+    ) : (
+      <span>-</span>
+    );
+  };
   return (
-    <Container>
+    <ContainerWithBorder>
       <Title>
         <Typography variant='h6'>Cash Plan Details</Typography>
       </Title>
@@ -78,13 +98,13 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='plan start date'
-              value={moment(cashPlan.startDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{cashPlan?.startDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
             <LabelizedField
               label='plan end date'
-              value={moment(cashPlan.endDate).format('DD MMM YYYY')}
+              value={<UniversalMoment>{cashPlan?.endDate}</UniversalMoment>}
             />
           </Grid>
           <Grid item xs={4}>
@@ -105,7 +125,9 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='dispertion date'
-              value={moment(cashPlan.dispersionDate).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>{cashPlan?.dispersionDate}</UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -115,7 +137,10 @@ export function CashPlanDetails({
             <LabelizedField label='dp id' value={cashPlan.downPayment} />
           </Grid>
           <Grid item xs={4}>
-            <Missing />
+            <LabelizedField
+              label='Target population(s)'
+              value={renderTargetPopulations()}
+            />
           </Grid>
         </Grid>
         <NumberOfHouseHolds>
@@ -124,6 +149,6 @@ export function CashPlanDetails({
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>
-    </Container>
+    </ContainerWithBorder>
   );
 }

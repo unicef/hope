@@ -1,7 +1,7 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { PaymentVerificationNodeEdge } from '../../../__generated__/graphql';
+import { PaymentVerificationNode } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
+export const headCells: HeadCell<PaymentVerificationNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
@@ -23,19 +23,31 @@ export const headCells: HeadCell<PaymentVerificationNodeEdge>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'payment_record__household',
+    id: 'payment_record__household__unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
-    label: 'Delivered Quantity',
+    label: 'Delivered',
     id: 'payment_record__delivered_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
-    label: 'Received Amount',
-    id: 'received_amount',
+    label: 'Received',
+    id: 'receivedAmount',
     numeric: true,
+  },
+  {
+    disablePadding: false,
+    label: 'Phone #',
+    id: 'payment_record__household__head_of_household__phone_no',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Alt. Phone #',
+    id: 'payment_record__household__head_of_household__phone_no_alternative',
+    numeric: false,
   },
 ];
