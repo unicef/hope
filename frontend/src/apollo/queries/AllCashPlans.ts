@@ -24,7 +24,7 @@ export const AllCashPlans = gql`
       last: $last
       orderBy: $orderBy
       search: $search
-      assistanceThrough_Icontains: $assistanceThrough
+      assistanceThrough_Startswith: $assistanceThrough
       deliveryType: $deliveryType
       verificationStatus: $verificationStatus
       startDate_Gte: $startDateGte

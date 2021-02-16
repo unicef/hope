@@ -29,14 +29,14 @@ class LogEntryFilter(FilterSet):
         for value in values:
             if value.lower() == "system":
                 q_obj |= Q(user__isnull=True)
-            q_obj |= Q(content_type__model__icontains=value)
-            q_obj |= Q(object_id__icontains=value)
-            q_obj |= Q(action__icontains=value)
-            q_obj |= Q(object_repr__icontains=value)
-            q_obj |= Q(user__first_name__icontains=value)
-            q_obj |= Q(user__last_name__icontains=value)
-            q_obj |= Q(user__email__icontains=value)
-            q_obj |= Q(timestamp__icontains=value)
+            q_obj |= Q(content_type__model__starts_with=value)
+            q_obj |= Q(object_id__starts_with=value)
+            q_obj |= Q(action__starts_with=value)
+            q_obj |= Q(object_repr__starts_with=value)
+            q_obj |= Q(user__first_name__starts_with=value)
+            q_obj |= Q(user__last_name__starts_with=value)
+            q_obj |= Q(user__email__starts_with=value)
+            q_obj |= Q(timestamp__starts_with=value)
         return qs.filter(q_obj)
 
 

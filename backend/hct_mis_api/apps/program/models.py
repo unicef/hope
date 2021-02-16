@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -76,22 +77,16 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         (SCOPE_UNICEF, _("Unicef")),
     )
 
-    name = models.CharField(
-        max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255)],
-    )
-    status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICE,
-    )
-    start_date = models.DateField()
-    end_date = models.DateField()
+    name = CICharField(max_length=255, validators=[MinLengthValidator(3), MaxLengthValidator(255)], db_index=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
+    start_date = models.DateField(db_index=True)
+    end_date = models.DateField(db_index=True)
     description = models.CharField(
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    ca_id = models.CharField(max_length=255, null=True)
-    ca_hash_id = models.CharField(max_length=255, null=True)
+    ca_id = CICharField(max_length=255, null=True, db_index=True)
+    ca_hash_id = CICharField(max_length=255, null=True, db_index=True)
     admin_areas = models.ManyToManyField(
         "core.AdminArea",
         related_name="programs",
@@ -99,18 +94,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     budget = models.DecimalField(
-        decimal_places=2,
-        max_digits=11,
-        validators=[MinValueValidator(Decimal("0.00"))],
+        decimal_places=2, max_digits=11, validators=[MinValueValidator(Decimal("0.00"))], db_index=True
     )
     frequency_of_payments = models.CharField(
         max_length=50,
         choices=FREQUENCY_OF_PAYMENTS_CHOICE,
     )
-    sector = models.CharField(
-        max_length=50,
-        choices=SECTOR_CHOICE,
-    )
+    sector = models.CharField(max_length=50, choices=SECTOR_CHOICE, db_index=True)
     scope = models.CharField(
         max_length=50,
         choices=SCOPE_CHOICE,
@@ -166,51 +156,46 @@ class CashPlan(TimeStampedUUIDModel):
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     ca_id = models.CharField(max_length=255, null=True)
     ca_hash_id = models.UUIDField(unique=True, null=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICE)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICE, db_index=True)
     status_date = models.DateTimeField()
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
     distribution_level = models.CharField(max_length=255)
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
+    start_date = models.DateTimeField(db_index=True)
+    end_date = models.DateTimeField(db_index=True)
     dispersion_date = models.DateTimeField()
     coverage_duration = models.PositiveIntegerField()
     coverage_unit = models.CharField(max_length=255)
     comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
-    delivery_type = models.CharField(choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, null=True)
-    assistance_measurement = models.CharField(max_length=255)
-    assistance_through = models.CharField(max_length=255)
+    delivery_type = models.CharField(
+        choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, null=True, db_index=True
+    )
+    assistance_measurement = models.CharField(max_length=255, db_index=True)
+    assistance_through = models.CharField(max_length=255, db_index=True)
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
     down_payment = models.CharField(max_length=255, null=True)
     validation_alerts_count = models.IntegerField()
-    total_persons_covered = models.IntegerField()
-    total_persons_covered_revised = models.IntegerField()
+    total_persons_covered = models.IntegerField(db_index=True)
+    total_persons_covered_revised = models.IntegerField(db_index=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2,
-        max_digits=12,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
     )
     verification_status = models.CharField(
         max_length=10,
         default=CashPlanPaymentVerification.STATUS_PENDING,
         choices=CashPlanPaymentVerification.STATUS_CHOICES,
+        db_index=True,
     )
 
     @property

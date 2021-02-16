@@ -19,7 +19,7 @@ export const ALL_REGISTRATION_DATA_IMPORT_QUERY = gql`
       first: $first
       last: $last
       orderBy: $orderBy
-      name_Icontains: $name_Icontains
+      name_Startswith: $name_Icontains
       importedBy_Id: $importedBy_Id
       status: $status
       importDate: $importDate

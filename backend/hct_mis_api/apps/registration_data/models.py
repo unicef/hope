@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.fields import CICharField
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -40,13 +41,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         ("XLS", "Excel"),
         ("KOBO", "KoBo"),
     )
-    name = models.CharField(max_length=255, unique=True)
+    name = CICharField(max_length=255, unique=True, db_index=True)
     status = models.CharField(
         max_length=255,
         choices=STATUS_CHOICE,
         default=IN_REVIEW,
+        db_index=True
     )
-    import_date = models.DateTimeField(auto_now_add=True)
+    import_date = models.DateTimeField(auto_now_add=True, db_index=True)
     imported_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         related_name="registration_data_imports",
@@ -56,9 +58,9 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         max_length=255,
         choices=DATA_SOURCE_CHOICE,
     )
-    number_of_individuals = models.PositiveIntegerField()
-    number_of_households = models.PositiveIntegerField()
-    datahub_id = models.UUIDField(null=True, default=None)
+    number_of_individuals = models.PositiveIntegerField(db_index=True)
+    number_of_households = models.PositiveIntegerField(db_index=True)
+    datahub_id = models.UUIDField(null=True, default=None,db_index=True)
     error_message = models.TextField(blank=True)
 
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
