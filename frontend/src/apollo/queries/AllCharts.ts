@@ -60,12 +60,9 @@ export const Allcharts = gql`
       }
       labels
       total
-      totalDataChange
-      totalSensitive
-      totalComplaint
-      totalNegativeFeedback
-      totalReferral
-      totalPositiveFeedback
+      totalNumberOfFeedback
+      totalNumberOfOpenFeedback
+      totalNumberOfOpenSensitive
     }
     sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
       total

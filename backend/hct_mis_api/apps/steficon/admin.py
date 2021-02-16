@@ -1,10 +1,14 @@
-from admin_extra_urls.extras import ExtraUrlMixin, action
+from admin_extra_urls.api import ExtraUrlMixin, action
 from adminfilters.filters import TextFieldFilter
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
 from django.db.transaction import atomic
+from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
+
+from hct_mis_api.apps.utils.admin import SmartFieldsetMixin
 from hct_mis_api.apps.steficon.forms import RuleForm
 from hct_mis_api.apps.steficon.models import Rule, RuleCommit, MONITORED_FIELDS
 from hct_mis_api.apps.targeting.models import TargetPopulation
@@ -17,53 +21,78 @@ class RuleTestForm(forms.Form):
 
 
 @register(Rule)
-class RuleAdmin(ExtraUrlMixin, ModelAdmin):
+class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
     list_display = ("name", "version", "language", "enabled", "deprecated", "created_by", "updated_by")
     list_filter = ("language", "enabled", "deprecated")
     search_fields = ("name",)
     form = RuleForm
 
-    readonly_fields = ("updated_by",)
+    readonly_fields = ("updated_by", "created_by", "version")
     change_form_template = None
-
-    def get_context(self, request, pk=None, **kwargs):
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.object = None
-
-        context = {
-            **self.admin_site.each_context(request),
-            **kwargs,
-            "opts": opts,
-            "state_opts": RuleCommit._meta,
-            "app_label": app_label,
-        }
-        if pk:
-            self.object = self.get_object(request, pk)
-            context["rule"] = self.object
-        return context
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": (
+                    ("name", "version"),
+                    ("enabled", "deprecated"),
+                )
+            },
+        ),
+        (
+            "code",
+            {
+                "classes": ("collapse", "open"),
+                "fields": (
+                    "language",
+                    "definition",
+                ),
+            },
+        ),
+        ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
+    ]
 
     @action()
-    def _used_by(self, request, pk):
-        context = self.get_context(request, pk)
+    def used_by(self, request, pk):
+        context = self.get_common_context(request, pk, title="Used By")
         if request.method == "GET":
             context["form"] = RuleTestForm()
             return TemplateResponse(request, "admin/steficon/rule/used_by.html", context)
 
-    @action(label="changelog")
-    def chagelog(self, request, pk):
-        context = self.get_context(request, pk)
-        context["title"] = f"Rule `{context['rule']}` change history"
+    @action()
+    def changelog(self, request, pk):
+        context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
+    @action(urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"])
+    def revert(self, request, pk, state=None):
+        context = self.get_common_context(
+            request,
+            pk,
+            # title="Revert",
+            action="Revert",
+            MONITORED_FIELDS=MONITORED_FIELDS,
+        )
+        state = self.object.history.get(pk=state)
+        if request.method == "GET":
+            context["state"] = state
+            return TemplateResponse(request, "admin/steficon/rule/revert.html", context)
+        else:
+            if "_restore" in request.POST:
+                state.revert()
+            else:
+                state.revert(["definition"])
+            url = reverse("admin:steficon_rule_change", args=[self.object.id])
+            return HttpResponseRedirect(url)
+
     @action()
-    def _code(self, request, pk):
-        context = self.get_context(request, pk)
+    def diff(self, request, pk):
+        context = self.get_common_context(request, pk, action="Code history")
         state_pk = request.GET.get("state_pk")
         if state_pk:
             state = self.object.history.get(pk=state_pk)
         else:
-            state = self.object.history.latest()
+            state = self.object.history.first()
         try:
             context["prev"] = state.get_previous_by_timestamp()
         except RuleCommit.DoesNotExist:
@@ -75,13 +104,16 @@ class RuleAdmin(ExtraUrlMixin, ModelAdmin):
             context["next"] = None
 
         context["state"] = state
-        context["title"] = f"Change #{state.id} on {state.timestamp} by {state.updated_by}"
+        # context["action"] = "Code history"
+        context["title"] = (
+            f"Change #{state.version} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
+        )
 
         return TemplateResponse(request, "admin/steficon/rule/diff.html", context)
 
     @action(label="Test")
-    def _preview(self, request, pk):
-        context = self.get_context(request, pk)
+    def preview(self, request, pk):
+        context = self.get_common_context(request, pk, title="Test")
         if request.method == "GET":
             context["title"] = f"Test `{self.object.name}` against target population"
             context["form"] = RuleTestForm()
@@ -120,33 +152,3 @@ class RuleCommitAdmin(ExtraUrlMixin, ModelAdmin):
     search_fields = ("name",)
     readonly_fields = ("updated_by", "rule", "affected_fields", "version")
     change_form_template = None
-
-    def get_context(self, request, pk=None, **kwargs):
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.object = None
-
-        context = {
-            **self.admin_site.each_context(request),
-            **kwargs,
-            "opts": opts,
-            "app_label": app_label,
-        }
-        if pk:
-            self.object = self.get_object(request, pk)
-            context["state"] = self.object
-        return context
-
-    @action()
-    def revert(self, request, pk):
-        context = self.get_context(request, pk, MONITORED_FIELDS=MONITORED_FIELDS)
-        if request.method == "GET":
-            return TemplateResponse(request, "admin/steficon/RuleCommit/revert.html", context)
-
-    @action()
-    def diff(self, request, pk):
-        context = self.get_context(request, pk)
-        context["state"] = self.object
-        context["title"] = f"Change #{self.object.id} on {self.object.timestamp} by {self.object.updated_by}"
-
-        return TemplateResponse(request, "admin/steficon/RuleCommit/diff.html", context)

@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
-import { OpenInNewRounded, FileCopy } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
+import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import { FileCopy } from '@material-ui/icons';
+import {
+  TargetPopulationNode,
+  useCashAssistUrlPrefixQuery,
+} from '../../../__generated__/graphql';
 import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import { LoadingComponent } from '../../../components/LoadingComponent';
 
 const IconContainer = styled.span`
   button {
@@ -30,6 +35,9 @@ export function FinalizedTargetPopulationHeaderButtons({
   canDuplicate,
 }: FinalizedTargetPopulationHeaderButtonsPropTypes): React.ReactElement {
   const [openDuplicate, setOpenDuplicate] = useState(false);
+  const { data, loading } = useCashAssistUrlPrefixQuery();
+  if (loading) return <LoadingComponent />;
+  if (!data) return null;
   return (
     <div>
       {canDuplicate && (
@@ -43,9 +51,12 @@ export function FinalizedTargetPopulationHeaderButtons({
         <Button
           variant='contained'
           color='primary'
-          startIcon={<OpenInNewRounded />}
+          component='a'
+          disabled={!targetPopulation.caHashId}
+          href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_targetpopulation&id=/${targetPopulation.caHashId}`}
+          startIcon={<OpenInNewRoundedIcon />}
         >
-          Open in cashassist
+          Open in CashAssist
         </Button>
       </ButtonContainer>
       <DuplicateTargetPopulation
