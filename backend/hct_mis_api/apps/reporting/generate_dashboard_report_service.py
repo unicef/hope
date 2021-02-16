@@ -312,31 +312,37 @@ class GenerateDashboardReportContentHelpers:
 
         return tuple(result)
 
-    @classmethod
-    def get_programs(self, report: DashboardReport):
-        filter_vars = self._format_filters_for_programs(report)
-
-        # TODO update this when we have all delivery types
-        cash_delivery_types = [
+    @staticmethod
+    def _get_cash_delivery_types():
+        # TODO update this when have all delivery types
+        return [
             PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
             PaymentRecord.DELIVERY_TYPE_TRANSFER,
             PaymentRecord.DELIVERY_TYPE_CASH,
         ]
-        voucher_delivery_types = []
+
+    @staticmethod
+    def _get_voucher_delivery_types():
+        # TODO update this when have all delivery types
+        return []
+
+    @classmethod
+    def get_programs(self, report: DashboardReport):
+        filter_vars = self._format_filters_for_programs(report)
+
+        months_labels = self.get_all_months()
 
         def get_filter_query(cash: bool, month: int):
             if cash:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=cash_delivery_types,
+                    cash_plans__payment_records__delivery_type__in=self._get_cash_delivery_types(),
                     cash_plans__payment_records__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=voucher_delivery_types,
+                    cash_plans__payment_records__delivery_type__in=self._get_voucher_delivery_types(),
                     cash_plans__payment_records__delivery_date__month=month,
                 )
-
-        months_labels = self.get_all_months()
 
         def get_annotation(index, cash=True):
             key_label = months_labels[index]
@@ -399,6 +405,43 @@ class GenerateDashboardReportContentHelpers:
         for month in months:
             result += (getattr(instance, f"{month}_cash", 0), getattr(instance, f"{month}_voucher", 0))
         return result
+
+    @classmethod
+    def get_total_transferred_by_country(self, report: DashboardReport):
+        # only for HQ dashboard
+        business_areas = (
+            BusinessArea.objects.filter(
+                paymentrecord__delivered_quantity_usd__gt=0, paymentrecord__delivery_date__year=report.year
+            )
+            .annotate(
+                total_cash=Sum(
+                    "paymentrecord__delivered_quantity_usd",
+                    filter=Q(paymentrecord__delivery_type__in=self._get_cash_delivery_types()),
+                )
+            )
+            .annotate(
+                total_voucher=Sum(
+                    "paymentrecord__delivered_quantity_usd",
+                    filter=Q(paymentrecord__delivery_type__in=self._get_voucher_delivery_types()),
+                )
+            )
+        )
+
+        totals = business_areas.aggregate(total_cash_sum=Sum("total_cash"), total_voucher_sum=Sum("total_voucher"))
+
+        return business_areas, totals
+
+    @staticmethod
+    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool) -> tuple:
+        if is_totals:
+            return ("", "Total", instance.get("total_cash_sum", 0), instance.get("total_voucher_sum", 0))
+        else:
+            return (
+                instance.code,
+                instance.name,
+                instance.total_cash or 0,
+                instance.total_voucher or 0,
+            )
 
 
 class GenerateDashboardReportService:
@@ -552,6 +595,10 @@ class GenerateDashboardReportService:
         DashboardReport.PROGRAMS: (
             GenerateDashboardReportContentHelpers.get_programs,
             GenerateDashboardReportContentHelpers.format_programs_row,
+        ),
+        DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY: (
+            GenerateDashboardReportContentHelpers.get_total_transferred_by_country,
+            GenerateDashboardReportContentHelpers.format_total_transferred_by_country,
         )
         # TODO: add the rest of the methods
     }
