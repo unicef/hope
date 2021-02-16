@@ -4,8 +4,15 @@ import { HouseholdNode } from '../../../__generated__/graphql';
 export const headCells: HeadCell<HouseholdNode>[] = [
   {
     disablePadding: false,
-    label: 'Household ID',
-    id: 'id',
+    label: '',
+    id: 'sanctionListPossibleMatch',
+    numeric: false,
+    dataCy: 'sanction-list-possible-match',
+  },
+  {
+    disablePadding: false,
+    label: 'Household Id',
+    id: 'unicefId',
     numeric: false,
     dataCy: 'household-id',
   },
@@ -25,7 +32,7 @@ export const headCells: HeadCell<HouseholdNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'Location',
+    label: 'Administrative Level 2',
     id: 'admin_area__title',
     numeric: false,
     dataCy: 'household-location',

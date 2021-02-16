@@ -9,11 +9,15 @@ import {
   IndividualNode,
   useIndividualQuery,
 } from '../../__generated__/graphql';
-import { IndividualContactDetails } from '../../components/population/IndividualContactDetails';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
 import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { decodeIdString } from '../../utils/utils';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { isPermissionDeniedError } from '../../utils/utils';
+import { IndividualPhotoModal } from '../../components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;
@@ -27,13 +31,19 @@ const Container = styled.div`
 export function PopulationIndividualsDetailsPage(): React.ReactElement {
   const { id } = useParams();
   const businessArea = useBusinessArea();
-  const { data, loading } = useIndividualQuery({
+  const permissions = usePermissions();
+
+  const { data, loading, error } = useIndividualQuery({
     variables: {
       id,
     },
   });
 
-  if (loading) return null;
+  if (loading) return <LoadingComponent />;
+
+  if (isPermissionDeniedError(error)) return <PermissionDenied />;
+
+  if (!data || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -46,15 +56,29 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
   return (
     <div>
       <PageHeader
-        title={`Individual ID: ${decodeIdString(id)}`}
-        breadCrumbs={breadCrumbsItems}
-      />
+        title={`Individual ID: ${individual.unicefId}`}
+        breadCrumbs={
+          hasPermissions(
+            PERMISSIONS.POPULATION_VIEW_INDIVIDUALS_LIST,
+            permissions,
+          )
+            ? breadCrumbsItems
+            : null
+        }
+        withFlag={individual.sanctionListPossibleMatch}
+        withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
+      >
+        {individual.photo ? (
+          <IndividualPhotoModal individual={individual as IndividualNode} />
+        ) : null}
+      </PageHeader>
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
-        <IndividualContactDetails individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
         <CashPlus individual={individual as IndividualNode} />
-        <UniversalActivityLogTable objectId={individual.id} />
+        {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
+          <UniversalActivityLogTable objectId={individual.id} />
+        )}
       </Container>
     </div>
   );

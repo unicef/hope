@@ -1,31 +1,31 @@
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
-from household.fixtures import HouseholdFactory, IndividualFactory, create_household
-from targeting.models import (
-    TargetingCriteria,
-    TargetingCriteriaRule,
-    TargetingCriteriaRuleFilter,
-    TargetPopulation,
-)
+from django.core.management import call_command
+
+from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
 
 
 class TestTargetPopulationQuery(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        call_command("loadbusinessareas")
+        business_area = BusinessArea.objects.first()
         cls.households = []
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         cls.household_size_1_citizen = household
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "CITIZEN", },
+            {"size": 1, "residence_status": "HOST", "business_area": business_area},
         )
         household = household
         cls.households.append(household)
 
-
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "IDP", },
+            {"size": 1, "residence_status": "IDP", "business_area": business_area},
         )
         cls.household_size_1 = household
 
@@ -33,7 +33,7 @@ class TestTargetPopulationQuery(APITestCase):
         cls.household_residence_status_citizen = cls.household_size_1
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", },
+            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
         )
 
         cls.household_residence_status_refugee = household
@@ -47,25 +47,19 @@ class TestTargetPopulationQuery(APITestCase):
         targeting_criteria.save()
         rule = TargetingCriteriaRule(targeting_criteria=targeting_criteria)
         rule.save()
-        rule_filter = TargetingCriteriaRuleFilter(
-            **rule_filter, targeting_criteria_rule=rule
-        )
+        rule_filter = TargetingCriteriaRuleFilter(**rule_filter, targeting_criteria_rule=rule)
         rule_filter.save()
         return targeting_criteria
 
     def test_counts_for_draft(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
         )
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="DRAFT",
+            status=TargetPopulation.STATUS_DRAFT,
         )
         tp.save()
 
@@ -77,17 +71,13 @@ class TestTargetPopulationQuery(APITestCase):
 
     def test_counts_for_draft_changed_criteria(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [2],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
         )
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
             candidate_list_targeting_criteria=targeting_criteria,
-            status="DRAFT",
+            status=TargetPopulation.STATUS_DRAFT,
         )
         tp.save()
 
@@ -106,7 +96,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
         )
         tp.save()
         tp.households.add(self.household_size_2)
@@ -118,16 +108,12 @@ class TestTargetPopulationQuery(APITestCase):
 
     def test_counts_for_approved_with_additional_rules(self):
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {
-                "field_name": "size",
-                "arguments": [1],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "size", "arguments": [1], "comparision_method": "EQUALS"}
         )
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="APPROVED",
+            status=TargetPopulation.STATUS_APPROVED,
             candidate_list_targeting_criteria=targeting_criteria,
         )
         tp.save()
@@ -140,11 +126,7 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_individuals, 2)
 
         targeting_criteria = self.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["CITIZEN"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["HOST"], "comparision_method": "EQUALS"}
         )
         tp.final_list_targeting_criteria = targeting_criteria
         tp.save()
@@ -172,7 +154,7 @@ class TestTargetPopulationQuery(APITestCase):
         tp = TargetPopulation(
             name="target_population_size_2",
             created_by=self.user,
-            status="FINALIZED",
+            status=TargetPopulation.STATUS_FINALIZED,
         )
         tp.save()
         tp.households.add(self.household_size_2)
@@ -182,11 +164,7 @@ class TestTargetPopulationQuery(APITestCase):
         self.assertEqual(tp.final_list_total_households, 1)
         self.assertEqual(tp.final_list_total_individuals, 2)
         tp.final_list_targeting_criteria = self.get_targeting_criteria_for_rule(
-            {
-                "field_name": "residence_status",
-                "arguments": ["IDP"],
-                "comparision_method": "EQUALS",
-            }
+            {"field_name": "residence_status", "arguments": ["IDP"], "comparision_method": "EQUALS"}
         )
         tp.save()
         tp.refresh_from_db()

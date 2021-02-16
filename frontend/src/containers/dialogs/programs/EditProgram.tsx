@@ -1,5 +1,4 @@
 import React, { useState, ReactElement } from 'react';
-import moment from 'moment';
 import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
@@ -11,6 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
+import {decodeIdString} from "../../../utils/utils";
 
 interface EditProgramProps {
   program: ProgramNode;
@@ -19,13 +19,15 @@ interface EditProgramProps {
 export function EditProgram({ program }: EditProgramProps): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
+  const businessArea = useBusinessArea();
   const [mutate] = useUpdateProgramMutation({
     refetchQueries: [
       {
         query: ALL_LOG_ENTRIES_QUERY,
         variables: {
-          objectId: program.id,
+          objectId: decodeIdString(program.id),
           count: 5,
+          businessArea,
         },
       },
     ],
@@ -39,27 +41,26 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
     },
   });
-  const businessArea = useBusinessArea();
-
   const submitFormHandler = async (values): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          id: program.id,
-          ...values,
-          startDate: moment(values.startDate).format('YYYY-MM-DD'),
-          endDate: moment(values.endDate).format('YYYY-MM-DD'),
-          budget: parseFloat(values.budget).toFixed(2),
+    try {
+      const response = await mutate({
+        variables: {
+          programData: {
+            id: program.id,
+            ...values,
+            startDate: values.startDate,
+            endDate: values.endDate,
+            budget: parseFloat(values.budget).toFixed(2),
+          },
+          version: program.version,
         },
-      },
-    });
-    if (!response.errors && response.data.updateProgram) {
+      });
       showMessage('Programme edited.', {
         pathname: `/${businessArea}/programs/${response.data.updateProgram.program.id}`,
       });
       setOpen(false);
-    } else {
-      showMessage('Programme edit action failed.');
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
     }
   };
 

@@ -12,13 +12,16 @@ import { PaymentRecordTableRow } from './PaymentRecordTableRow';
 interface PaymentRecordTableProps {
   cashPlan: CashPlanNode;
   openInNewTab?: boolean;
+  businessArea: string;
 }
 export function PaymentRecordTable({
   cashPlan,
   openInNewTab = false,
+  businessArea,
 }: PaymentRecordTableProps): ReactElement {
   const initialVariables = {
     cashPlan: cashPlan.id,
+    businessArea,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>

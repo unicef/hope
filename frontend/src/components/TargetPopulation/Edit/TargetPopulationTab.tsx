@@ -1,11 +1,13 @@
 import React from 'react';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { FieldArray } from 'formik';
+import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
 import { TargetingCriteria } from '../TargetingCriteria';
 import { Results } from '../Results';
 import { useFinalHouseholdsListByTargetingCriteriaQuery } from '../../../__generated__/graphql';
+import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
-export function TargetPopulationTab({ values, selectedTab }) {
+export function TargetPopulationTab({ values }): React.ReactElement {
+  const businessArea = useBusinessArea();
   return (
     <>
       <FieldArray
@@ -14,8 +16,6 @@ export function TargetPopulationTab({ values, selectedTab }) {
           <TargetingCriteria
             helpers={arrayHelpers}
             candidateListRules={values.candidateListCriterias}
-            targetPopulationRules={values.targetPopulationCriterias}
-            selectedTab={selectedTab}
             isEdit
           />
         )}
@@ -25,6 +25,7 @@ export function TargetPopulationTab({ values, selectedTab }) {
       <TargetPopulationHouseholdTable
         variables={{
           targetPopulation: values.id,
+          businessArea,
           ...(values.targetPopulationCriterias.length && {
             targetingCriteria: {
               rules: values.targetPopulationCriterias.map((rule) => {

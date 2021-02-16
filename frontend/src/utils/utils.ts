@@ -5,7 +5,7 @@ import {
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { TARGETING_STATES } from './constants';
+import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -43,6 +43,8 @@ export function programStatusToColor(
   status: string,
 ): string {
   switch (status) {
+    case 'DRAFT':
+      return theme.hctPalette.gray;
     case 'ACTIVE':
       return theme.hctPalette.green;
     case 'FINISHED':
@@ -77,10 +79,8 @@ export function populationStatusToColor(
   switch (status) {
     case 'ACTIVE':
       return theme.hctPalette.green;
-    case 'INACTIVE':
-      return theme.hctPalette.gray;
     default:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.gray;
   }
 }
 
@@ -175,11 +175,55 @@ export function targetPopulationStatusToColor(
   }
 }
 
-export function isAuthenticated(): boolean {
-  return Boolean(localStorage.getItem('AUTHENTICATED'));
+export function userStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'INVITED':
+      return theme.hctPalette.gray;
+    case 'ACTIVE':
+      return theme.hctPalette.green;
+    case 'INACTIVE':
+      return theme.palette.error.main;
+    default:
+      return theme.palette.error.main;
+  }
 }
-export function setAuthenticated(authenticated: boolean): void {
-  localStorage.setItem('AUTHENTICATED', `${authenticated}`);
+export function grievanceTicketStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'New':
+      return theme.hctPalette.oragne;
+    case 'Assigned':
+      return theme.hctPalette.darkerBlue;
+    case 'In Progress':
+      return theme.hctPalette.green;
+    case 'On Hold':
+      return theme.palette.error.main;
+    case 'For Approval':
+      return theme.hctPalette.darkBrown;
+    case 'Closed':
+      return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
+}
+
+export function reportStatusToColor(
+  theme: typeof themeObj,
+  status: string,
+): string {
+  switch (status) {
+    case 'Generated':
+      return theme.hctPalette.green;
+    case 'Processing':
+      return theme.hctPalette.gray;
+    default:
+      return theme.palette.error.main;
+  }
 }
 
 export function selectFields(
@@ -256,108 +300,20 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
-export function getAgeFromDob(date: string): number {
-  return moment().diff(moment(date), 'years');
-}
-// TODO Marcin make Type to this function
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function formatCriteriaFilters({ filters }) {
-  return filters.map((each) => {
-    let comparisionMethod;
-    let values;
-    switch (each.fieldAttribute.type) {
-      case 'SELECT_ONE':
-        comparisionMethod = 'EQUALS';
-        values = [each.value];
-        break;
-      case 'SELECT_MANY':
-        comparisionMethod = 'CONTAINS';
-        values = [...each.value];
-        break;
-      case 'STRING':
-        comparisionMethod = 'CONTAINS';
-        values = [each.value];
-        break;
-      case 'INTEGER':
-        if (each.value.from && each.value.to) {
-          comparisionMethod = 'RANGE';
-          values = [each.value.from, each.value.to];
-        } else if (each.value.from && !each.value.to) {
-          comparisionMethod = 'GREATER_THAN';
-          values = [each.value.from];
-        } else {
-          comparisionMethod = 'LESS_THAN';
-          values = [each.value.to];
-        }
-        break;
-      default:
-        comparisionMethod = 'CONTAINS';
-    }
-    return {
-      comparisionMethod,
-      arguments: values,
-      fieldName: each.fieldName,
-      isFlexField: each.isFlexField,
-      fieldAttribute: each.fieldAttribute,
-    };
-  });
+export function formatNumber(value: number): string {
+  if (!value && value !== 0) return '';
+  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-export function mapCriteriasToInitialValues(criteria) {
-  const mappedFilters = [];
-  if (criteria.filters) {
-    criteria.filters.map((each) => {
-      switch (each.comparisionMethod) {
-        case 'RANGE':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: each.arguments[0],
-              to: each.arguments[1],
-            },
-          });
-        case 'LESS_THAN':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: '',
-              to: each.arguments[0],
-            },
-          });
-        case 'GREATER_THAN':
-          return mappedFilters.push({
-            ...each,
-            value: {
-              from: each.arguments[0],
-              to: '',
-            },
-          });
-        case 'EQUALS':
-          return mappedFilters.push({
-            ...each,
-            value: each.arguments[0],
-          });
-        case 'CONTAINS':
-          return mappedFilters.push({
-            ...each,
-            value: each.arguments,
-          });
-        default:
-          return mappedFilters.push({
-            ...each,
-          });
-      }
-    });
-  } else {
-    mappedFilters.push({ fieldName: '' });
-  }
-  return mappedFilters;
+export function getAgeFromDob(date: string): number {
+  return moment().diff(moment(date), 'years');
 }
 
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -368,7 +324,7 @@ export function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export function descendingComparator(a, b, orderBy) {
+export function descendingComparator(a, b, orderBy): number {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -378,8 +334,97 @@ export function descendingComparator(a, b, orderBy) {
   return 0;
 }
 
-export function getComparator(order, orderBy) {
+export function getComparator(
+  order,
+  orderBy,
+): (a: number, b: number) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+export function reduceChoices(choices): { [id: number]: string } {
+  return choices.reduce((previousValue, currentValue) => {
+    // eslint-disable-next-line no-param-reassign
+    previousValue[currentValue.value] = currentValue.name;
+    return previousValue;
+  }, {});
+}
+
+export function renderUserName(user): string {
+  if (!user) {
+    return '-';
+  }
+  return user?.firstName
+    ? `${user?.firstName} ${user?.lastName}`
+    : `${user?.email}`;
+}
+
+const grievanceTypeIssueTypeDict: { [id: string]: boolean | string } = {
+  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
+  [GRIEVANCE_CATEGORIES.REFERRAL]: false,
+  [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
+  [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: true,
+  [GRIEVANCE_CATEGORIES.DATA_CHANGE]: true,
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function thingForSpecificGrievanceType(
+  ticket: { category: number | string; issueType?: number | string },
+  thingDict,
+  defaultThing = null,
+  categoryWithIssueTypeDict = grievanceTypeIssueTypeDict,
+) {
+  const category = ticket.category?.toString();
+  const issueType = ticket.issueType?.toString();
+  if (!(category in thingDict)) {
+    return defaultThing;
+  }
+  const categoryThing = thingDict[category];
+  if (
+    categoryWithIssueTypeDict[category] === 'IGNORE' ||
+    (!categoryWithIssueTypeDict[category] &&
+      (issueType === null || issueType === undefined))
+  ) {
+    return categoryThing;
+  }
+  if (!(issueType in categoryThing)) {
+    return defaultThing;
+  }
+  return categoryThing[issueType];
+}
+
+export const isInvalid = (fieldname: string, errors, touched): boolean =>
+  errors[fieldname] && touched[fieldname];
+
+export const anon = (inputStr: string, shouldAnonymize: boolean): string => {
+  if (!inputStr) return null;
+  return shouldAnonymize
+    ? inputStr
+        .split(' ')
+        .map((el) => el.substring(0, 2) + '*'.repeat(3))
+        .join(' ')
+    : inputStr;
+};
+
+export const isPermissionDeniedError = (error): boolean =>
+  error?.message.includes('Permission Denied');
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const getFullNodeFromEdgesById = (edges, id) => {
+  if (!edges) return null;
+  return edges.find((edge) => edge.node.id === id)?.node || null;
+};
+
+export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
+  let textValue = value;
+  if (fieldAttribute.type === 'SELECT_ONE') {
+    textValue = fieldAttribute.choices.find((item) => item.value === value).labelEn;
+  }
+  if (fieldAttribute.type === 'SELECT_MANY') {
+    const values = fieldAttribute.choices.filter((item) => value.includes(item.value))
+    textValue = values.map((item) => item.labelEn).join(", ")
+  }
+  return textValue
 }

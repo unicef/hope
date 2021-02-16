@@ -1,35 +1,35 @@
 from django.core.management import call_command
 
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.core.base_test_case import APITestCase
 
 
 class TestMetaDataFilterType(APITestCase):
     QUERY = """
-           query AllFieldsAttributes {
-             allFieldsAttributes{
-               name
-               type
-               labels{
-                 language
-                 label
-               }
-               labelEn
-               hint
-               required
-               isFlexField
-               associatedWith
-               choices{
-                 labels {
-                   language
-                   label
-                 }
-                 labelEn
-                 value
-               }
-             }
-           }
-           """
+    query AllFieldsAttributes {
+     allFieldsAttributes{
+       name
+       type
+       labels{
+         language
+         label
+       }
+       labelEn
+       hint
+       required
+       isFlexField
+       associatedWith
+       choices{
+         labels {
+           language
+           label
+         }
+         labelEn
+         value
+       }
+     }
+    }
+    """
 
     @classmethod
     def setUpTestData(cls):

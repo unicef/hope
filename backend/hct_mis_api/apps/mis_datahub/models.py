@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from household.models import (
+from hct_mis_api.apps.household.models import (
     RELATIONSHIP_CHOICE,
     ROLE_CHOICE,
     MARITAL_STATUS_CHOICE,
@@ -9,15 +9,11 @@ from household.models import (
     RESIDENCE_STATUS_CHOICE,
     IDENTIFICATION_TYPE_CHOICE,
 )
-from utils.models import AbstractSession
+from hct_mis_api.apps.utils.models import AbstractSession
 
 
 class Session(AbstractSession):
-    business_area = models.CharField(max_length=20,
-        help_text="""Same as the business area set on program, but
-            this is set as the same value, and all other
-            models this way can get easy access to the business area
-            via the session.""")
+    pass
 
 
 class SessionModel(models.Model):
@@ -31,9 +27,7 @@ class Household(SessionModel):
     mis_id = models.UUIDField()
     unhcr_id = models.CharField(max_length=255, null=True)
     unicef_id = models.CharField(max_length=255, null=True)
-    status = models.CharField(
-        max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE"
-    )
+    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default="ACTIVE")
     household_size = models.PositiveIntegerField()
     # registration household id
     form_number = models.CharField(max_length=255, null=True)
@@ -41,9 +35,7 @@ class Household(SessionModel):
     admin1 = models.CharField(max_length=255, null=True)
     admin2 = models.CharField(max_length=255, null=True)
     country = models.CharField(null=True, max_length=3)
-    residence_status = models.CharField(
-        max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True
-    )
+    residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE, null=True)
     registration_date = models.DateField(null=True)
 
     class Meta:
@@ -65,8 +57,7 @@ class Individual(SessionModel):
     unhcr_id = models.CharField(max_length=255, null=True)
     unicef_id = models.CharField(max_length=255, null=True)
     household_mis_id = models.UUIDField(null=True)
-    status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True,)
-    national_id_number = models.CharField(max_length=255, null=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICE, null=True)
     full_name = models.CharField(max_length=255)
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
@@ -74,13 +65,10 @@ class Individual(SessionModel):
     sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
-    relationship = models.CharField(
-        max_length=255, null=True, choices=RELATIONSHIP_CHOICE,
-    )
-    marital_status = models.CharField(
-        max_length=255, choices=MARITAL_STATUS_CHOICE,
-    )
-    phone_number = models.CharField(max_length=14, null=True)
+    relationship = models.CharField(max_length=255, null=True, choices=RELATIONSHIP_CHOICE,)
+    marital_status = models.CharField(max_length=255, null=True, choices=MARITAL_STATUS_CHOICE,)
+    phone_number = models.CharField(max_length=60, null=True)
+    pregnant = models.NullBooleanField()
 
     class Meta:
         unique_together = ("session", "mis_id")
@@ -122,11 +110,7 @@ class TargetPopulationEntry(SessionModel):
     individual_mis_id = models.UUIDField(null=True)
     target_population_mis_id = models.UUIDField()
     vulnerability_score = models.DecimalField(
-        blank=True,
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.",
     )
 
     class Meta:
@@ -148,7 +132,9 @@ class Program(SessionModel):
         (SCOPE_UNICEF, _("Unicef")),
     )
     mis_id = models.UUIDField()
-    business_area = models.CharField(max_length=20) # TODO: potentially remove in future since base model has it already
+    business_area = models.CharField(
+        max_length=20
+    )  # TODO: potentially remove in future since base model has it already
     ca_id = models.CharField(max_length=255)
     ca_hash_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
@@ -182,9 +168,7 @@ class Document(SessionModel):
         (DAMAGED, _("Damaged")),
     )
 
-    status = models.CharField(
-        choices=STATUS_CHOICE, null=True, max_length=30, default=None
-    )
+    status = models.CharField(choices=STATUS_CHOICE, null=True, max_length=30, default=None)
     date_of_expiry = models.DateField(null=True, default=None)
     photo = models.ImageField(blank=True, default="")
     mis_id = models.UUIDField()

@@ -7,6 +7,7 @@ export const CashPlan = gql`
       name
       startDate
       endDate
+      updatedAt
       status
       deliveryType
       fundsCommitment
@@ -14,8 +15,11 @@ export const CashPlan = gql`
       dispersionDate
       assistanceThrough
       caId
+      caHashId
       dispersionDate
       verificationStatus
+      bankReconciliationSuccess
+      bankReconciliationError
       verifications {
         edges {
           node {
@@ -29,6 +33,17 @@ export const CashPlan = gql`
             sampling
             receivedCount
             receivedWithProblemsCount
+            rapidProFlowId
+            confidenceInterval
+            marginOfError
+            activationDate
+            completionDate
+            ageFilter {
+              min
+              max
+            }
+            excludedAdminAreasFilter
+            sexFilter
           }
         }
       }
@@ -39,6 +54,14 @@ export const CashPlan = gql`
       paymentRecords {
         totalCount
         edgeCount
+        edges {
+          node {
+            targetPopulation {
+              id
+              name
+            }
+          }
+        }
       }
     }
   }

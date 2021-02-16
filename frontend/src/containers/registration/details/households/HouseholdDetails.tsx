@@ -2,25 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import { Typography, Grid } from '@material-ui/core';
 import { LabelizedField } from '../../../../components/LabelizedField';
-import { ImportedHouseholdDetailedFragment } from '../../../../__generated__/graphql';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  align-items: center;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-
-  && > div {
-    margin: 5px;
-  }
-`;
+import {
+  HouseholdChoiceDataQuery,
+  ImportedHouseholdDetailedFragment,
+} from '../../../../__generated__/graphql';
+import { Missing } from '../../../../components/Missing';
+import { choicesToDict } from '../../../../utils/utils';
+import { useBusinessArea } from '../../../../hooks/useBusinessArea';
+import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
+import { ContentLink } from '../../../../components/ContentLink';
 
 const Overview = styled.div`
   display: flex;
@@ -34,44 +24,75 @@ const Title = styled.div`
 
 interface HouseholdDetailsProps {
   household: ImportedHouseholdDetailedFragment;
+  choicesData: HouseholdChoiceDataQuery;
 }
 export function HouseholdDetails({
   household,
+  choicesData,
 }: HouseholdDetailsProps): React.ReactElement {
+  const businessArea = useBusinessArea();
+
+  const residenceChoicesDict = choicesToDict(
+    choicesData.residenceStatusChoices,
+  );
   return (
-    <Container>
+    <ContainerColumnWithBorder>
       <Title>
         <Typography variant='h6'>Details</Typography>
       </Title>
       <Overview>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <LabelizedField label='Household Size'>
-              <div>{household.size}</div>
+              {household.size}
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
-            <LabelizedField label='Country'>
-              <div>{household.country}</div>
+          <Grid item xs={3}>
+            <LabelizedField label='Location'>
+              {household.country}
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <LabelizedField label='Residence Status'>
-              <div>{household.residenceStatus}</div>
+              {residenceChoicesDict[household.residenceStatus]}
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <LabelizedField label='Country of Origin'>
-              <div>{household.countryOrigin}</div>
+              {household.countryOrigin}
             </LabelizedField>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <LabelizedField label='Head of Household'>
-              <div>{household.headOfHousehold.fullName}</div>
+              <ContentLink
+                href={`/${businessArea}/registration-data-import/individual/${household.headOfHousehold.id}`}
+              >
+                {household.headOfHousehold.fullName}
+              </ContentLink>
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='ADMINISTRATIVE LEVEL 1'>
+              {household.admin1}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='ADMINISTRATIVE LEVEL 2'>
+              {household.admin2}
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='Total Cash Received'>
+              <Missing />
+            </LabelizedField>
+          </Grid>
+          <Grid item xs={3}>
+            <LabelizedField label='Programme (Enrolled)'>
+              <Missing />
             </LabelizedField>
           </Grid>
         </Grid>
       </Overview>
-    </Container>
+    </ContainerColumnWithBorder>
   );
 }

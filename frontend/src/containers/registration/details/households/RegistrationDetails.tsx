@@ -5,6 +5,7 @@ import Paper from '@material-ui/core/Paper';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
 import { Missing } from '../../../../components/Missing';
+import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const Title = styled.div`
   width: 100%;
@@ -45,59 +46,48 @@ export function RegistrationDetails({
       <Grid container spacing={6}>
         <Grid item xs={4}>
           <LabelizedField label='Source'>
-            <div>{registrationDataImport.dataSource}</div>
+            {registrationDataImport.dataSource}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
-          <LabelizedField label='Intake group name'>
-            <div>{registrationDataImport.name}</div>
+          <LabelizedField label='Title'>
+            {registrationDataImport.name}
           </LabelizedField>
         </Grid>
         <Grid item xs={4}>
           <LabelizedField label='Registered Date'>
-            <div>{registrationDate}</div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Number of Rooms'>
-            <div>
-              <Missing />
-            </div>
+            <UniversalMoment>{registrationDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
       </Grid>
-      <hr />
-      <Typography variant='h6'>Data Collection</Typography>
-      <Grid container spacing={6}>
-        <Grid item xs={4}>
-          <LabelizedField label='Start time'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='End time'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Device ID'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='User name'>
-            <div>
-              <Missing />
-            </div>
-          </LabelizedField>
-        </Grid>
-      </Grid>
+      {registrationDataImport.dataSource === 'XLS' ? null : (
+        <>
+          <hr />
+          <Typography variant='h6'>Data Collection</Typography>
+          <Grid container spacing={6}>
+            <Grid item xs={4}>
+              <LabelizedField label='Start time'>
+                <Missing />
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='End time'>
+                <Missing />
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='Device ID'>
+                <Missing />
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={4}>
+              <LabelizedField label='User name'>
+                <Missing />
+              </LabelizedField>
+            </Grid>
+          </Grid>
+        </>
+      )}
     </Overview>
   );
 }

@@ -1,49 +1,28 @@
-import React, { ReactElement, useState, useCallback } from 'react';
+import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import { useTranslation } from 'react-i18next';
+import { Button, Box, makeStyles, DialogTitle } from '@material-ui/core';
+import { GetApp, Publish } from '@material-ui/icons';
+import { UniversalTable } from '../UniversalTable';
 import {
   useAllPaymentVerificationsQuery,
-  PaymentVerificationNodeEdge,
+  PaymentVerificationNode,
   AllPaymentVerificationsQueryVariables,
   useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
   XlsxErrorNode,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './VerificationRecordsHeadCells';
-import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import {
-  Button,
-  Box,
-  makeStyles,
-  DialogTitle,
-  DialogContent,
-} from '@material-ui/core';
-import { GetApp, Publish } from '@material-ui/icons';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
 import { DropzoneField } from '../../../components/DropzoneField';
+import { headCells } from './VerificationRecordsHeadCells';
+import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
 import { ImportErrors } from './errors/ImportErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-`;
-
-const DialogFooter = styled.div`
-  padding: 12px 16px;
-  margin: 0;
-  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  text-align: right;
-`;
-
-const StyledDialogFooter = styled(DialogFooter)`
-  && {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
 `;
 
 const Error = styled.div`
@@ -55,14 +34,22 @@ export function VerificationRecordsTable({
   id,
   verificationMethod,
   filter,
+  canImport,
+  canExport,
+  canViewRecordDetails,
+  businessArea,
 }): ReactElement {
   const { showMessage } = useSnackbar();
   const [open, setOpenImport] = useState(false);
   const [fileToImport, setFileToImport] = useState(null);
+
   const { t } = useTranslation();
 
   const initialVariables: AllPaymentVerificationsQueryVariables = {
     cashPlanPaymentVerification: id,
+    search: filter.search,
+    status: filter.status,
+    businessArea,
   };
 
   const useStyles = makeStyles(() => ({
@@ -90,23 +77,26 @@ export function VerificationRecordsTable({
   const handleImport = async (): Promise<void> => {
     if (fileToImport) {
       try {
-        await mutate({
+        const { data, errors } = await mutate({
           variables: {
             cashPlanVerificationId: id,
             file: fileToImport,
           },
         });
-      } catch {
-        return;
+
+        if (!errors && !data?.importXlsxCashPlanVerification?.errors.length) {
+          setOpenImport(false);
+          showMessage('Your import was successful!');
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
       }
     }
-    if (!xlsxErrors?.length && !error) {
-      setOpenImport(false);
-      showMessage('Your import was successful!');
-    }
   };
+
   const exportButton =
-    verificationMethod === 'XLSX' ? (
+    verificationMethod === 'XLSX' && canExport ? (
       <Box mr={3}>
         <a
           download
@@ -126,7 +116,7 @@ export function VerificationRecordsTable({
     ) : null;
 
   const importButton =
-    verificationMethod === 'XLSX' ? (
+    verificationMethod === 'XLSX' && canImport ? (
       <Box>
         <Button
           startIcon={<Publish />}
@@ -173,7 +163,7 @@ export function VerificationRecordsTable({
   return (
     <>
       <UniversalTable<
-        PaymentVerificationNodeEdge,
+        PaymentVerificationNode,
         AllPaymentVerificationsQueryVariables
       >
         title='Verification Records'
@@ -182,7 +172,13 @@ export function VerificationRecordsTable({
         query={useAllPaymentVerificationsQuery}
         queriedObjectName='allPaymentVerifications'
         initialVariables={initialVariables}
-        renderRow={(row) => <VerificationRecordsTableRow record={row} />}
+        renderRow={(row) => (
+          <VerificationRecordsTableRow
+            key={row.id}
+            record={row}
+            canViewRecordDetails={canViewRecordDetails}
+          />
+        )}
       />
       <Dialog
         open={open}

@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 import {
   AllPaymentRecordsQueryVariables,
-  CashPlanNode,
   HouseholdNode,
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
@@ -11,16 +10,20 @@ import { headCells } from './PaymentRecordHouseholdTableHeadCells';
 import { PaymentRecordHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
 
 interface PaymentRecordTableProps {
-  cashPlan?: CashPlanNode;
   household?: HouseholdNode;
   openInNewTab?: boolean;
+  businessArea: string;
+  canViewPaymentRecordDetails: boolean;
 }
 export function PaymentRecordHouseholdTable({
   household,
   openInNewTab = false,
+  businessArea,
+  canViewPaymentRecordDetails,
 }: PaymentRecordTableProps): ReactElement {
   const initialVariables = {
     household: household?.id,
+    businessArea,
   };
   return (
     <UniversalTable<PaymentRecordNode, AllPaymentRecordsQueryVariables>
@@ -34,6 +37,7 @@ export function PaymentRecordHouseholdTable({
           key={row.id}
           paymentRecord={row}
           openInNewTab={openInNewTab}
+          canViewDetails={canViewPaymentRecordDetails}
         />
       )}
     />

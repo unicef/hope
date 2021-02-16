@@ -22,7 +22,7 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Relationship',
+    label: 'Relationship to HoH',
     id: 'relationship',
     numeric: false,
   },
@@ -34,8 +34,20 @@ export const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   },
   {
     disablePadding: false,
-    label: 'Sex',
+    label: 'Gender',
     id: 'sex',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Dedupe within Batch',
+    id: 'deduplicationBatchStatus',
+    numeric: false,
+  },
+  {
+    disablePadding: false,
+    label: 'Dedupe against Population',
+    id: 'deduplicationGoldenRecordStatus',
     numeric: false,
   },
 ];

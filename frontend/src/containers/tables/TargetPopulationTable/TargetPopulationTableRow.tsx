@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import Moment from 'react-moment';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
@@ -11,6 +10,7 @@ import {
   targetPopulationStatusToColor,
   targetPopulationStatusMapping,
 } from '../../../utils/utils';
+import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -19,9 +19,13 @@ const StatusContainer = styled.div`
 
 interface TargetPopulationTableRowProps {
   targetPopulation: TargetPopulationNode;
+  canViewDetails: boolean;
 }
 
-export function TargetPopulationTableRow({ targetPopulation }) {
+export function TargetPopulationTableRow({
+  targetPopulation,
+  canViewDetails,
+}: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -32,7 +36,7 @@ export function TargetPopulationTableRow({ targetPopulation }) {
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={targetPopulation.id}
     >
@@ -47,20 +51,20 @@ export function TargetPopulationTableRow({ targetPopulation }) {
         </StatusContainer>
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.candidateListTotalHouseholds}
+        {targetPopulation.program?.name || '-'}
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.finalListTotalHouseholds}
+        {targetPopulation.finalListTotalHouseholds || '-'}
       </TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>{targetPopulation.createdAt}</Moment>
+        <UniversalMoment>{targetPopulation.createdAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        <Moment format='MM/DD/YYYY'>{targetPopulation.lastEditedAt}</Moment>
+        <UniversalMoment>{targetPopulation.updatedAt}</UniversalMoment>
       </TableCell>
       <TableCell align='left'>
-        {targetPopulation.createdBy.firstName}{' '}
-        {targetPopulation.createdBy.lastName}
+        {targetPopulation.createdBy?.firstName}{' '}
+        {targetPopulation.createdBy?.lastName}
       </TableCell>
     </ClickableTableRow>
   );

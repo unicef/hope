@@ -16,7 +16,7 @@ export const headCells: HeadCell<CashPlanNode>[] = [
   },
   {
     disablePadding: false,
-    label: 'No. of Households',
+    label: 'Num. of Households',
     id: 'numberOfHouseholds',
     numeric: true,
   },

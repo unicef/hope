@@ -6,13 +6,20 @@ import {
   InputLabel,
   Select,
 } from '@material-ui/core';
+import get from "lodash/get";
 
 export const FormikSelectField = ({
   field,
   form,
+  multiple,
   ...otherProps
 }): React.ReactElement => {
-  const isInvalid = form.errors[field.name] && form.touched[field.name];
+  const isInvalid =
+    get(form.errors, field.name) &&
+    (get(form.touched, field.name) || form.submitCount>0);
+  const value = multiple
+    ? field.value || otherProps.value || []
+    : field.value || otherProps.value || '';
   return (
     <>
       <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>
@@ -21,7 +28,8 @@ export const FormikSelectField = ({
           {...field}
           {...otherProps}
           name={field.name}
-          value={field.value || otherProps.value}
+          multiple={multiple}
+          value={value}
           id={`textField-${field.name}`}
           error={isInvalid}
           SelectDisplayProps={{ 'data-cy': `select-${field.name}` }}
@@ -40,8 +48,8 @@ export const FormikSelectField = ({
             </MenuItem>
           ))}
         </Select>
-        {isInvalid && form.errors[field.name] && (
-          <FormHelperText error>{form.errors[field.name]}</FormHelperText>
+        {isInvalid && (
+          <FormHelperText error>{get(form.errors, field.name)}</FormHelperText>
         )}
       </FormControl>
     </>

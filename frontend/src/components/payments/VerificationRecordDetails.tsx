@@ -1,30 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  decodeIdString,
-  paymentRecordStatusToColor,
   formatCurrency,
+  paymentRecordStatusToColor,
+  verificationRecordsStatusToColor,
 } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
 import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
-
-const Container = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  background-color: #fff;
-  padding: ${({ theme }) => theme.spacing(8)}px
-    ${({ theme }) => theme.spacing(11)}px;
-  flex-direction: column;
-  border-color: #b1b1b5;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-`;
+import { UniversalMoment } from '../UniversalMoment';
+import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
@@ -49,14 +37,16 @@ const StatusContainer = styled.div`
 `;
 interface VerificationRecordDetailsProps {
   paymentVerification: PaymentVerificationNode;
+  canViewActivityLog: boolean;
 }
 
 export function VerificationRecordDetails({
   paymentVerification,
+  canViewActivityLog,
 }: VerificationRecordDetailsProps): React.ReactElement {
   return (
     <>
-      <Container>
+      <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>Payment Record Details</Typography>
         </Title>
@@ -74,9 +64,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(
-                paymentVerification.paymentRecord.statusDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -97,8 +89,8 @@ export function VerificationRecordDetails({
             />
           </Grid>
         </Grid>
-      </Container>
-      <Container>
+      </ContainerColumnWithBorder>
+      <ContainerColumnWithBorder>
         <Title>
           <Typography variant='h6'>Verification Details</Typography>
         </Title>
@@ -108,7 +100,7 @@ export function VerificationRecordDetails({
               <StatusContainer>
                 <StatusBox
                   status={paymentVerification.status}
-                  statusToColor={paymentRecordStatusToColor}
+                  statusToColor={verificationRecordsStatusToColor}
                 />
               </StatusContainer>
             </LabelizedField>
@@ -116,9 +108,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='STATUS DATE'
-              value={moment(paymentVerification.statusDate).format(
-                'DD MMM YYYY',
-              )}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.statusDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -128,7 +122,7 @@ export function VerificationRecordDetails({
             />
           </Grid>
         </Grid>
-      </Container>
+      </ContainerColumnWithBorder>
       <Overview>
         <Title>
           <Typography variant='h6'>Household</Typography>
@@ -137,9 +131,7 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='HOUSEHOLD ID'
-              value={decodeIdString(
-                paymentVerification.paymentRecord.household.id,
-              )}
+              value={paymentVerification.paymentRecord.household.unicefId}
             />
           </Grid>
           <Grid item xs={3}>
@@ -206,9 +198,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='DELIVERY DATE'
-              value={moment(
-                paymentVerification.paymentRecord.deliveryDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.deliveryDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -225,9 +219,11 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='ENTITLEMENT CARD ISSUE DATE'
-              value={moment(
-                paymentVerification.paymentRecord.entitlementCardIssueDate,
-              ).format('DD MMM YYYY')}
+              value={
+                <UniversalMoment>
+                  {paymentVerification.paymentRecord.entitlementCardIssueDate}
+                </UniversalMoment>
+              }
             />
           </Grid>
           <Grid item xs={3}>
@@ -238,9 +234,11 @@ export function VerificationRecordDetails({
           </Grid>
         </Grid>
       </Overview>
-      <TableWrapper>
-        <UniversalActivityLogTable objectId='some id' />
-      </TableWrapper>
+      {canViewActivityLog && (
+        <TableWrapper>
+          <UniversalActivityLogTable objectId={paymentVerification.id} />
+        </TableWrapper>
+      )}
     </>
   );
 }

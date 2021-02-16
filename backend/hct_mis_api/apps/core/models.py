@@ -1,18 +1,20 @@
+from decimal import Decimal
+
 import mptt
-from auditlog.models import AuditlogHistoryField
-from auditlog.registry import auditlog
-from django.contrib.gis.db.models import MultiPolygonField, PointField
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import ugettext_lazy as _
+from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
-from core.utils import unique_slugify
-from utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
+from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
 class BusinessArea(TimeStampedUUIDModel):
@@ -31,15 +33,19 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code = models.CharField(max_length=10,)
+    code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
-    kobo_token = models.CharField(max_length=255, null=True, blank=True)
+    kobo_username = models.CharField(max_length=255, null=True, blank=True)
     rapid_pro_host = models.URLField(null=True)
     rapid_pro_api_key = models.CharField(max_length=40, null=True)
-    slug = models.CharField(max_length=250, unique=True, db_index=True,)
+    slug = models.CharField(
+        max_length=250,
+        unique=True,
+        db_index=True,
+    )
     has_data_sharing_agreement = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -56,30 +62,33 @@ class BusinessArea(TimeStampedUUIDModel):
     def can_import_ocha_response_plans(self):
         return any([c.details for c in self.countries.all()])
 
+    @classmethod
+    def get_business_areas_as_choices(cls):
+        return [
+            {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
+            for business_area in cls.objects.all()
+        ]
 
-class AdminAreaType(TimeStampedUUIDModel):
+
+class AdminAreaLevel(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
 
     name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
-    display_name = models.CharField(
-        max_length=64, blank=True, null=True, verbose_name=_("Display Name")
-    )
-    admin_level = models.PositiveSmallIntegerField(
-        verbose_name=_("Admin Level")
-    )
-
+    display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
+    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
-        related_name="admin_area_types",
+        related_name="admin_area_level",
         null=True,
     )
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "AdminAreaType type"
+        verbose_name = "Admin Area Level"
         unique_together = ("business_area", "admin_level")
 
     def __str__(self):
@@ -88,12 +97,7 @@ class AdminAreaType(TimeStampedUUIDModel):
 
 class AdminAreaManager(TreeManager):
     def get_queryset(self):
-        return (
-            super(AdminAreaManager, self)
-            .get_queryset()
-            .order_by("title")
-            .select_related("admin_area_type")
-        )
+        return super(AdminAreaManager, self).get_queryset().order_by("title").select_related("admin_area_level")
 
 
 class AdminArea(MPTTModel, TimeStampedUUIDModel):
@@ -105,16 +109,24 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     related models:
         indicator.Reportable (ForeignKey): "reportable"
         core.AdminArea (ForeignKey): "self"
-        core.AdminAreaType: "type of admin area state/city"
+        core.AdminAreaLevel: "type of admin area state/city"
     """
 
-    class Meta:
-        unique_together = ("title", "admin_area_type")
-        ordering = ["title"]
-
-    objects = AdminAreaManager()
+    external_id = models.CharField(
+        help_text="An ID representing this instance in  datamart", blank=True, null=True, max_length=32
+    )
 
     title = models.CharField(max_length=255)
+
+    admin_area_level = models.ForeignKey(
+        "AdminAreaLevel",
+        verbose_name="Location Type",
+        related_name="admin_areas",
+        on_delete=models.CASCADE,
+    )
+
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="Postal Code")
+
     parent = TreeForeignKey(
         "self",
         verbose_name=_("Parent"),
@@ -124,45 +136,43 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
+    geom = models.MultiPolygonField(null=True, blank=True)
+    point = models.PointField(null=True, blank=True)
+    objects = AdminAreaManager()
 
-    admin_area_type = models.ForeignKey(
-        "AdminAreaType", on_delete=models.CASCADE, related_name="locations"
-    )
-
-    geom = MultiPolygonField(null=True, blank=True)
-    point = PointField(null=True, blank=True)
+    class Meta:
+        unique_together = ("title", "p_code")
+        ordering = ["title"]
 
     def __str__(self):
+        if self.p_code:
+            return "{} ({} {})".format(
+                self.title,
+                self.admin_area_level.name,
+                "{}: {}".format("CERD" if self.admin_area_level.name == "School" else "PCode", self.p_code or ""),
+            )
+
         return self.title
 
     @property
     def geo_point(self):
-        return (
-            self.point
-            if self.point
-            else self.geom.point_on_surface
-            if self.geom
-            else ""
-        )
+        return self.point if self.point else self.geom.point_on_surface if self.geom else ""
 
     @property
     def point_lat_long(self):
         return "Lat: {}, Long: {}".format(self.point.y, self.point.x)
 
     @classmethod
-    def get_admin_areas_as_choices(cls, admin_level):
-        return [
-            {
-                "label": {"English(EN)": admin_area.title},
-                "value": admin_area.title,
-            }
-            for admin_area in cls.objects.filter(
-                admin_area_type__admin_level=admin_level
-            )
-        ]
+    def get_admin_areas_as_choices(cls, admin_level, business_area=None):
+        queryset = cls.objects.filter(level=admin_level)
+        if business_area is not None:
+            queryset.filter(admin_area_level__business_area=business_area)
+        return [{"label": {"English(EN)": admin_area.p_code}, "value": admin_area.title} for admin_area in queryset]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
+    ASSOCIATED_WITH_HOUSEHOLD = 0
+    ASSOCIATED_WITH_INDIVIDUAL = 1
     TYPE_CHOICE = Choices(
         ("STRING", _("String")),
         ("IMAGE", _("Image")),
@@ -190,7 +200,6 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         null=True,
     )
     associated_with = models.SmallIntegerField(choices=ASSOCIATED_WITH_CHOICES)
-    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"type: {self.type}, name: {self.name}"
@@ -210,7 +219,6 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
         db_index=True,
         on_delete=models.CASCADE,
     )
-    history = AuditlogHistoryField(pk_indexable=False)
 
     def __str__(self):
         return f"name: {self.name}"
@@ -219,14 +227,12 @@ class FlexibleAttributeGroup(SoftDeletionTreeModel):
 class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ["list_name", "name"]
+        ordering = ("name",)
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     label = JSONField(default=dict)
-    flex_attributes = models.ManyToManyField(
-        "core.FlexibleAttribute", related_name="choices"
-    )
-    history = AuditlogHistoryField(pk_indexable=False)
+    flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
     def __str__(self):
         return f"list name: {self.list_name}, name: {self.name}"
@@ -235,6 +241,69 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 mptt.register(AdminArea, order_insertion_by=["title"])
 mptt.register(FlexibleAttributeGroup, order_insertion_by=["name"])
 
-auditlog.register(FlexibleAttributeChoice)
-auditlog.register(FlexibleAttributeGroup)
-auditlog.register(FlexibleAttribute)
+
+class XLSXKoboTemplateManager(models.Manager):
+    def latest_valid(self):
+        return (
+            self.get_queryset()
+                .filter(status=self.model.SUCCESSFUL)
+                .exclude(template_id__exact="")
+                .order_by("-created_at")
+                .first()
+        )
+
+
+class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
+    SUCCESSFUL = "SUCCESSFUL"
+    UNSUCCESSFUL = "UNSUCCESSFUL"
+    PROCESSING = "PROCESSING"
+    KOBO_FORM_UPLOAD_STATUS_CHOICES = (
+        (SUCCESSFUL, _("Successful")),
+        (UNSUCCESSFUL, _("Unsuccessful")),
+        (PROCESSING, _("Processing")),
+    )
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    objects = XLSXKoboTemplateManager()
+
+    file_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    file = models.FileField()
+    error_description = models.TextField(blank=True)
+    status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
+    template_id = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"{self.file_name} - {self.created_at}"
+
+
+class CountryCodeMapManager(models.Manager):
+
+    def __init__(self):
+        self._cache = {2: {}, 3: {}}
+        super().__init__()
+
+    def get_code(self, iso_code):
+        iso_code = iso_code.upper()
+        if not self._cache[2]:
+            for entry in self.all():
+                self._cache[2][entry.country.code] = entry.ca_code
+                self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
+
+        return self._cache[len(iso_code)].get(iso_code, iso_code)
+
+
+class CountryCodeMap(models.Model):
+    country = CountryField(unique=True)
+    ca_code = models.CharField(max_length=5, unique=True)
+
+    objects = CountryCodeMapManager()
+
+    class Meta:
+        ordering = ("country",)

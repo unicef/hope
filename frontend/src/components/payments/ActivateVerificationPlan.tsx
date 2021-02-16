@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
-
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -13,6 +11,22 @@ export interface Props {
   cashPlanVerificationId: string;
   cashPlanId: string;
 }
+
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const DialogContainer = styled.div`
+  width: 700px;
+`;
+
 export function ActivateVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
@@ -34,21 +48,6 @@ export function ActivateVerificationPlan({
     }
     showMessage('Verification plan has been activated.');
   };
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
-
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-
-  const DialogContainer = styled.div`
-    width: 700px;
-  `;
-
   return (
     <>
       <Box p={2}>

@@ -1,16 +1,28 @@
 import React from 'react';
+import * as Yup from 'yup';
 import styled from 'styled-components';
-import { Button, Typography, Paper, Tabs, Tab } from '@material-ui/core';
-import { Field, Form, Formik, FieldArray } from 'formik';
+import { Button, Paper, Typography } from '@material-ui/core';
+import { Field, FieldArray, Form, Formik } from 'formik';
 import { PageHeader } from '../../components/PageHeader';
 import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
 import { FormikTextField } from '../../shared/Formik/FormikTextField';
 import { Results } from '../../components/TargetPopulation/Results';
-import { useCreateTpMutation } from '../../__generated__/graphql';
+import {
+  useCreateTpMutation,
+  useAllProgramsQuery,
+} from '../../__generated__/graphql';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { CreateTable } from '../tables/TargetPopulation/Create';
+import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
+import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
+import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
+import { usePermissions } from '../../hooks/usePermissions';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import { PermissionDenied } from '../../components/PermissionDenied';
+import { getFullNodeFromEdgesById } from '../../utils/utils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -29,56 +41,51 @@ const Label = styled.p`
   color: #b1b1b5;
 `;
 
-export function CreateTargetPopulation() {
+export function CreateTargetPopulation(): React.ReactElement {
   const initialValues = {
     name: '',
     criterias: [],
+    program: null,
   };
   const [mutate] = useCreateTpMutation();
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
+  const permissions = usePermissions();
+
+  const {
+    data: allProgramsData,
+    loading: loadingPrograms,
+  } = useAllProgramsQuery({
+    variables: { businessArea, status: ['ACTIVE'] },
+  });
+
+  if (loadingPrograms) return <LoadingComponent />;
+  if (permissions === null) return null;
+  if (!hasPermissions(PERMISSIONS.TARGETING_CREATE, permissions))
+    return <PermissionDenied />;
+
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Targeting',
       to: `/${businessArea}/target-population/`,
     },
   ];
-  const tabs = (
-    <Tabs
-      value={0}
-      aria-label='tabs'
-      indicatorColor='primary'
-      textColor='primary'
-    >
-      <Tab label='Programme Population' />
-      <Tab label='Target Population' disabled />
-    </Tabs>
-  );
+  const validationSchema = Yup.object().shape({
+    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+  });
+
   return (
     <Formik
       initialValues={initialValues}
+      validationSchema={validationSchema}
       onSubmit={(values) => {
-        console.log(values)
         mutate({
           variables: {
             input: {
+              programId: values.program,
               name: values.name,
               businessAreaSlug: businessArea,
-              targetingCriteria: {
-                rules: values.criterias.map((rule) => {
-                  return {
-                    ...rule,
-                    filters: rule.filters.map((each) => {
-                      return {
-                        comparisionMethod: each.comparisionMethod,
-                        arguments: each.arguments,
-                        fieldName: each.fieldName,
-                        isFlexField: each.isFlexField,
-                      };
-                    }),
-                  };
-                }),
-              },
+              ...getTargetingCriteriaVariables(values),
             },
           },
         }).then(
@@ -107,8 +114,11 @@ export function CreateTargetPopulation() {
                 component={FormikTextField}
               />
             }
-            breadCrumbs={breadCrumbsItems}
-            tabs={tabs}
+            breadCrumbs={
+              hasPermissions(PERMISSIONS.TARGETING_VIEW_LIST, permissions)
+                ? breadCrumbsItems
+                : null
+            }
             hasInputComponent
           >
             <>
@@ -117,7 +127,7 @@ export function CreateTargetPopulation() {
                   variant='contained'
                   color='primary'
                   onClick={submitForm}
-                  disabled={!values.name || !values.criterias.length}
+                  disabled={values.criterias?.length === 0 || !values.name}
                   data-cy='button-target-population-create'
                 >
                   Save
@@ -125,35 +135,35 @@ export function CreateTargetPopulation() {
               </ButtonContainer>
             </>
           </PageHeader>
-          <FieldArray
-            name='criterias'
-            render={(arrayHelpers) => (
-              <TargetingCriteria
-                helpers={arrayHelpers}
-                candidateListRules={values.criterias}
-                isEdit
-              />
-            )}
+          <TargetPopulationProgramme
+            allPrograms={allProgramsData}
+            loading={loadingPrograms}
+            program={values.program}
           />
+          {values.program ? (
+            <FieldArray
+              name='criterias'
+              render={(arrayHelpers) => (
+                <TargetingCriteria
+                  helpers={arrayHelpers}
+                  candidateListRules={values.criterias}
+                  isEdit
+                  selectedProgram={getFullNodeFromEdgesById(
+                    allProgramsData?.allPrograms?.edges,
+                    values.program,
+                  )}
+                />
+              )}
+            />
+          ) : (
+            <TargetingCriteriaDisabled />
+          )}
           <Results />
           {values.criterias.length ? (
             <CreateTable
-              variables={{
-                targetingCriteria: {
-                  rules: values.criterias.map((rule) => {
-                    return {
-                      filters: rule.filters.map((each) => {
-                        return {
-                          comparisionMethod: each.comparisionMethod,
-                          arguments: each.arguments,
-                          fieldName: each.fieldName,
-                          isFlexField: each.isFlexField,
-                        };
-                      }),
-                    };
-                  }),
-                },
-              }}
+              variables={getTargetingCriteriaVariables(values)}
+              program={values.program}
+              businessArea={businessArea}
             />
           ) : (
             <PaperContainer>

@@ -1,27 +1,27 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from core.fixtures import AdminAreaTypeFactory, AdminAreaFactory
-from core.models import BusinessArea
-from household.fixtures import (
+import hct_mis_api.apps.mis_datahub.models as dh_models
+from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import (
     HouseholdFactory,
     IndividualFactory,
+    create_household,
 )
-from household.models import (
+from hct_mis_api.apps.household.models import (
     ROLE_PRIMARY,
     ROLE_ALTERNATE,
     Document,
     DocumentType,
     Agency,
-    HouseholdIdentity,
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
-from program.fixtures import ProgramFactory
-from registration_data.fixtures import RegistrationDataImportFactory
-from targeting.models import TargetPopulation
-import mis_datahub.models as dh_models
+from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
+from hct_mis_api.apps.program.fixtures import ProgramFactory
+from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestSendTpToDatahub(TestCase):
@@ -54,21 +54,22 @@ class TestSendTpToDatahub(TestCase):
             "final_list_targeting_criteria": None,
         }
 
-        return TargetPopulation.objects.create(**tp_nullable, **kwargs,)
+        return TargetPopulation.objects.create(
+            **tp_nullable,
+            **kwargs,
+        )
 
     @classmethod
     def setUpTestData(cls):
         cls._pre_test_commands()
 
-        business_area_with_data_sharing = BusinessArea.objects.get(
-            has_data_sharing_agreement=True
-        )
-        state_area_type = AdminAreaTypeFactory(
+        business_area_with_data_sharing = BusinessArea.objects.first()
+        state_area_type = AdminAreaLevelFactory(
             name="State",
             business_area=business_area_with_data_sharing,
             admin_level=1,
         )
-        admin_area = AdminAreaFactory(admin_area_type=state_area_type)
+        admin_area = AdminAreaFactory(admin_area_level=state_area_type)
         unhcr_agency = Agency.objects.create(type="unhcr", label="UNHCR")
         test_agency = Agency.objects.create(type="test", label="test")
 
@@ -88,10 +89,14 @@ class TestSendTpToDatahub(TestCase):
         rdi_second = RegistrationDataImportFactory()
 
         cls.household = HouseholdFactory.build(
-            size=4, registration_data_import=rdi, admin_area=admin_area,
+            size=4,
+            registration_data_import=rdi,
+            admin_area=admin_area,
         )
         cls.household_second = HouseholdFactory.build(
-            size=1, registration_data_import=rdi_second, admin_area=admin_area,
+            size=1,
+            registration_data_import=rdi_second,
+            admin_area=admin_area,
         )
         cls.second_household_head = IndividualFactory(
             household=cls.household_second,
@@ -105,12 +110,6 @@ class TestSendTpToDatahub(TestCase):
         )
         cls.household_second.head_of_household = cls.second_household_head
         cls.household_second.save()
-
-        HouseholdIdentity.objects.create(
-            agency=unhcr_agency,
-            household=cls.household_second,
-            document_number="45745745745",
-        )
 
         cls.individual_primary = IndividualFactory(
             household=cls.household,
@@ -135,7 +134,8 @@ class TestSendTpToDatahub(TestCase):
         )
 
         cls.individual_alternate = IndividualFactory(
-            household=cls.household, registration_data_import=rdi,
+            household=cls.household,
+            registration_data_import=rdi,
         )
         IndividualRoleInHousehold.objects.create(
             individual=cls.individual_alternate,
@@ -149,7 +149,8 @@ class TestSendTpToDatahub(TestCase):
         )
 
         cls.individual_no_role_first = IndividualFactory(
-            household=cls.household, registration_data_import=rdi,
+            household=cls.household,
+            registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
             agency=unhcr_agency,
@@ -158,7 +159,8 @@ class TestSendTpToDatahub(TestCase):
         )
 
         cls.individual_no_role_second = IndividualFactory(
-            household=cls.household, registration_data_import=rdi,
+            household=cls.household,
+            registration_data_import=rdi,
         )
         IndividualIdentity.objects.create(
             agency=unhcr_agency,
@@ -168,12 +170,6 @@ class TestSendTpToDatahub(TestCase):
 
         cls.household.head_of_household = cls.individual_primary
         cls.household.save()
-
-        HouseholdIdentity.objects.create(
-            agency=test_agency,
-            household=cls.household,
-            document_number="123123123",
-        )
 
         cls.target_population_first = cls._create_target_population(
             sent_to_datahub=False,
@@ -243,3 +239,48 @@ class TestSendTpToDatahub(TestCase):
         self.assertEqual(dh_individuals.count(), 1)
         self.assertEqual(dh_documents.count(), 0)
         self.assertEqual(dh_roles.count(), 1)
+
+    def test_send_two_times_household_with_different(self):
+        business_area_with_data_sharing = BusinessArea.objects.first()
+
+        program_individual_data_needed_true = ProgramFactory(
+            individual_data_needed=True,
+            business_area=business_area_with_data_sharing,
+        )
+        program_individual_data_needed_false = ProgramFactory(
+            individual_data_needed=False,
+            business_area=business_area_with_data_sharing,
+        )
+        (household, individuals) = create_household(
+            {"size": 3, "residence_status": "HOST", "business_area": business_area_with_data_sharing},
+        )
+
+        target_population_first = self._create_target_population(
+            sent_to_datahub=False,
+            name="Test TP xD",
+            program=program_individual_data_needed_false,
+            business_area=business_area_with_data_sharing,
+            status=TargetPopulation.STATUS_FINALIZED,
+        )
+        target_population_first.households.set([household])
+
+        target_population_second = self._create_target_population(
+            sent_to_datahub=False,
+            name="Test TP xD 2",
+            program=program_individual_data_needed_true,
+            business_area=business_area_with_data_sharing,
+            status=TargetPopulation.STATUS_FINALIZED,
+        )
+        target_population_second.households.set([household])
+
+        task = SendTPToDatahubTask()
+        task.send_tp(target_population_first)
+        dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
+        dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
+        self.assertEqual(dh_households_count, 1)
+        self.assertEqual(dh_individuals_count, 1)
+        task.send_tp(target_population_second)
+        dh_individuals_count = dh_models.Individual.objects.filter(household_mis_id=household.id).count()
+        dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
+        self.assertEqual(dh_households_count, 1)
+        self.assertEqual(dh_individuals_count, 3)

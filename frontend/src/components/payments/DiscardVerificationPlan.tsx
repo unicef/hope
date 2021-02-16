@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import CheckRoundedIcon from '@material-ui/icons/CheckRounded';
 import styled from 'styled-components';
 import ClearIcon from '@material-ui/icons/Clear';
 import { Dialog } from '../../containers/dialogs/Dialog';
@@ -15,6 +14,22 @@ export interface Props {
   cashPlanVerificationId: string;
   cashPlanId: string;
 }
+
+const DialogTitleWrapper = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+`;
+
+const DialogFooter = styled.div`
+  padding: 12px 16px;
+  margin: 0;
+  border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
+  text-align: right;
+`;
+
+const DialogContainer = styled.div`
+  width: 700px;
+`;
+
 export function DiscardVerificationPlan({
   cashPlanVerificationId,
   cashPlanId,
@@ -36,22 +51,6 @@ export function DiscardVerificationPlan({
     }
     showMessage('Verification plan has been discarded.');
   };
-
-  const DialogTitleWrapper = styled.div`
-    border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-  `;
-
-  const DialogFooter = styled.div`
-    padding: 12px 16px;
-    margin: 0;
-    border-top: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
-    text-align: right;
-  `;
-
-  const DialogContainer = styled.div`
-    width: 700px;
-  `;
-
   return (
     <>
       <Box p={2}>
@@ -78,10 +77,9 @@ export function DiscardVerificationPlan({
           <DialogContainer>
             <Box p={5}>
               <div>
-                Payment verification for households who have responded will not
-                be visible
+                Are you sure you would like to delete payment verification
+                records <br /> and restart the verification process?
               </div>
-              <div>or valid anymore. Are you sure?</div>
             </Box>
           </DialogContainer>
         </DialogContent>

@@ -1,8 +1,6 @@
-from django.conf import settings
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
+from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahubTask
 
 GREEN = "\033[92m"
 

@@ -7,11 +7,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import FindInPageIcon from '@material-ui/icons/FindInPage';
+import { Box } from '@material-ui/core';
 import { LoadingComponent } from '../LoadingComponent';
 import { EnhancedTableToolbar } from './EnhancedTableToolbar';
 import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
-import FindInPageIcon from '@material-ui/icons/FindInPage';
-import { Box } from '@material-ui/core';
 
 export type Order = 'asc' | 'desc';
 
@@ -79,10 +79,12 @@ interface TableComponentProps<T> {
   allowSort?: boolean;
   isOnPaper?: boolean;
   actions?: Array<React.ReactElement>;
+  onSelectAllClick?: (event, rows) => void;
+  numSelected?: number;
 }
 
 export function TableComponent<T>({
-  title,
+  title = '',
   renderRow,
   data,
   headCells,
@@ -95,10 +97,12 @@ export function TableComponent<T>({
   handleRequestSort,
   order,
   orderBy,
-  loading,
-  allowSort,
+  loading = false,
+  allowSort = true,
   isOnPaper = true,
-  actions,
+  actions = [],
+  onSelectAllClick,
+  numSelected = 0,
 }: TableComponentProps<T>): React.ReactElement {
   const classes = useStyles({});
 
@@ -108,7 +112,7 @@ export function TableComponent<T>({
   let body;
   if (loading) {
     body = (
-      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+      <TableRow style={{ height: 54 * rowsPerPage, minHeight: 54 }}>
         <TableCell colSpan={headCells.length}>
           <LoadingComponent />
         </TableCell>
@@ -116,7 +120,7 @@ export function TableComponent<T>({
     );
   } else if (!data.length) {
     body = (
-      <TableRow style={{ height: 53 * emptyRows, minHeight: 53 }}>
+      <TableRow style={{ height: 54 * emptyRows, minHeight: 54 }}>
         <TableCell colSpan={headCells.length}>
           <div className={classes.empty}>
             <FindInPageIcon className={classes.icon} fontSize='inherit' />
@@ -136,7 +140,7 @@ export function TableComponent<T>({
           return renderRow(row);
         })}
         {emptyRows > 0 && (
-          <TableRow style={{ height: 53 * emptyRows }}>
+          <TableRow style={{ height: 54 * emptyRows }}>
             <TableCell colSpan={headCells.length} />
           </TableRow>
         )}
@@ -167,6 +171,9 @@ export function TableComponent<T>({
             onRequestSort={handleRequestSort}
             rowCount={itemsCount}
             allowSort={allowSort}
+            onSelectAllClick={onSelectAllClick}
+            data={data}
+            numSelected={numSelected}
           />
           <TableBody>{body}</TableBody>
         </Table>
@@ -179,6 +186,8 @@ export function TableComponent<T>({
         page={page}
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
+        backIconButtonProps={{ ...(loading && { disabled: true }) }}
+        nextIconButtonProps={{ ...(loading && { disabled: true }) }}
       />
     </>
   );

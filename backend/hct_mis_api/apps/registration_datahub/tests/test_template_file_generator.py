@@ -1,6 +1,6 @@
 from unittest import TestCase, mock
 
-from registration_datahub.template_generator import TemplateFileGenerator
+from hct_mis_api.apps.registration_datahub.template_generator import TemplateFileGenerator
 
 
 class TestTemplateFileGenerator(TestCase):
@@ -14,12 +14,7 @@ class TestTemplateFileGenerator(TestCase):
 
     def test_handle_name_and_label_row(self):
         fields = {
-            "test": {
-                "label": {"English(EN)": "My Test Label"},
-                "required": True,
-                "type": "STRING",
-                "choices": [],
-            },
+            "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []},
             "test_h_f": {
                 "label": {"English(EN)": "Flex Test Label"},
                 "required": False,
@@ -36,7 +31,7 @@ class TestTemplateFileGenerator(TestCase):
         self.assertEqual(expected, result)
 
     @mock.patch(
-        "registration_datahub.template_generator.serialize_flex_attributes",
+        "hct_mis_api.apps.registration_datahub.template_generator.serialize_flex_attributes",
         new=lambda: {
             "households": {
                 "test_h_f": {
@@ -57,15 +52,10 @@ class TestTemplateFileGenerator(TestCase):
         },
     )
     @mock.patch.dict(
-        "core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
+        "hct_mis_api.apps.core.core_fields_attributes.CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY",
         {
             "households": {
-                "test": {
-                    "label": {"English(EN)": "My Test Label"},
-                    "required": True,
-                    "type": "STRING",
-                    "choices": [],
-                }
+                "test": {"label": {"English(EN)": "My Test Label"}, "required": True, "type": "STRING", "choices": []}
             },
             "individuals": {
                 "test2": {
@@ -86,19 +76,12 @@ class TestTemplateFileGenerator(TestCase):
             ("test", "test_h_f",),
             ("My Test Label - STRING - required", "Flex Test Label - STRING",),
         )
-        households_rows = tuple(
-            result_wb["Households"].iter_rows(values_only=True)
-        )
+        households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
 
         self.assertEqual(expected_households_rows, households_rows)
 
         expected_individuals_rows = (
-            (
-                "test2",
-                "primary_collector_id",
-                "alternate_collector_id",
-                "test_i_f",
-            ),
+            ("test2", "primary_collector_id", "alternate_collector_id", "test_i_f",),
             (
                 "My Test Label 2 - STRING",
                 "List of primary collectors ids, separated by a semicolon - LIST_OF_IDS - required",
@@ -106,8 +89,6 @@ class TestTemplateFileGenerator(TestCase):
                 "Flex Test Label 2 - STRING - required",
             ),
         )
-        individuals_rows = tuple(
-            result_wb["Individuals"].iter_rows(values_only=True)
-        )
+        individuals_rows = tuple(result_wb["Individuals"].iter_rows(values_only=True))
 
         self.assertEqual(expected_individuals_rows, individuals_rows)

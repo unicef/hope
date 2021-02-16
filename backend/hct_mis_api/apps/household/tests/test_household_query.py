@@ -1,31 +1,32 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
-from account.fixtures import UserFactory
-from core.base_test_case import APITestCase
-from core.models import BusinessArea
-from household.fixtures import HouseholdFactory, create_household
-from program.fixtures import ProgramFactory
+from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.base_test_case import APITestCase
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.program.fixtures import ProgramFactory
 
-
-class TestHouseholdQuery(APITestCase):
-    ALL_HOUSEHOLD_QUERY = """
-    query AllHouseholds{
-      allHouseholds(orderBy: "size") {
-        edges {
-          node {
-            size
-            countryOrigin
-            address
+ALL_HOUSEHOLD_QUERY = """
+      query AllHouseholds{
+        allHouseholds(orderBy: "size", businessArea: "afghanistan") {
+          edges {
+            node {
+              size
+              countryOrigin
+              address
+            }
           }
         }
       }
-    }
     """
-    ALL_HOUSEHOLD_QUERY_RANGE = """
+ALL_HOUSEHOLD_QUERY_RANGE = """
     query AllHouseholds{
       allHouseholds(
-        orderBy: "size", 
-        size: "{\\"min\\": 3, \\"max\\": 9}"
+        orderBy: "size",
+        size: "{\\"min\\": 3, \\"max\\": 9}",
+        businessArea: "afghanistan"
       ) {
         edges {
           node {
@@ -37,9 +38,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_QUERY_MIN = """
+ALL_HOUSEHOLD_QUERY_MIN = """
     query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}") {
+      allHouseholds(orderBy: "size", size: "{\\"min\\": 3}", businessArea: "afghanistan") {
         edges {
           node {
             size
@@ -50,9 +51,9 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_QUERY_MAX = """
+ALL_HOUSEHOLD_QUERY_MAX = """
     query AllHouseholds{
-      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}") {
+      allHouseholds(orderBy: "size", size: "{\\"max\\": 9}", businessArea: "afghanistan") {
         edges {
           node {
             size
@@ -63,15 +64,15 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
+ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY = """
     query AllHouseholds($programs:[ID]){
-      allHouseholds(programs: $programs) {
+      allHouseholds(programs: $programs, businessArea: "afghanistan") {
         edges {
           node {
             size
             countryOrigin
             address
-            programs { 
+            programs {
               edges {
                 node {
                   name
@@ -83,7 +84,7 @@ class TestHouseholdQuery(APITestCase):
       }
     }
     """
-    HOUSEHOLD_QUERY = """
+HOUSEHOLD_QUERY = """
     query Household($id: ID!) {
       household(id: $id) {
         size
@@ -93,26 +94,27 @@ class TestHouseholdQuery(APITestCase):
     }
     """
 
+
+class TestHouseholdQuery(APITestCase):
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
+        self.business_area = BusinessArea.objects.get(slug="afghanistan")
         family_sizes_list = (2, 4, 5, 1, 3, 11, 14)
         self.program_one = ProgramFactory(
-            name="Test program ONE", business_area=BusinessArea.objects.first(),
+            name="Test program ONE",
+            business_area=self.business_area,
         )
         self.program_two = ProgramFactory(
-            name="Test program TWO", business_area=BusinessArea.objects.first(),
+            name="Test program TWO",
+            business_area=self.business_area,
         )
 
         self.households = []
         for index, family_size in enumerate(family_sizes_list):
             (household, individuals) = create_household(
-                {
-                    "size": family_size,
-                    "address": "Lorem Ipsum",
-                    "country_origin": "PL",
-                },
+                {"size": family_size, "address": "Lorem Ipsum", "country_origin": "PL"},
             )
             if index % 2:
                 household.programs.add(self.program_one)
@@ -121,44 +123,54 @@ class TestHouseholdQuery(APITestCase):
 
             self.households.append(household)
 
-    def test_household_query_all(self):
+    @parameterized.expand(
+        [
+            ("all_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY),
+            ("all_without_permission", [], ALL_HOUSEHOLD_QUERY),
+            (
+                "all_range_with_permission",
+                [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST],
+                ALL_HOUSEHOLD_QUERY_RANGE,
+            ),
+            ("all_range_without_permission", [], ALL_HOUSEHOLD_QUERY_RANGE),
+            ("all_min_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MIN),
+            ("all_max_with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST], ALL_HOUSEHOLD_QUERY_MAX),
+        ]
+    )
+    def test_household_query_all(self, _, permissions, query_string):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY,
+            request_string=query_string,
             context={"user": self.user},
         )
 
-    def test_household_query_all_range(self):
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST]),
+            ("without_permission", []),
+        ]
+    )
+    def test_household_filter_by_programme(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_RANGE,
+            request_string=ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
+            variables={"programs": [self.id_to_base64(self.program_one.id, "ProgramNode")]},
             context={"user": self.user},
         )
 
-    def test_household_query_all_min(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MIN,
-            context={"user": self.user},
-        )
+    @parameterized.expand(
+        [
+            ("with_permission", [Permissions.POPULATION_VIEW_HOUSEHOLDS_DETAILS]),
+            ("without_permission", []),
+        ]
+    )
+    def test_household_query_single(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
 
-    def test_household_query_all_max(self):
         self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_QUERY_MAX,
+            request_string=HOUSEHOLD_QUERY,
             context={"user": self.user},
-        )
-
-    def test_household_filter_by_programme(self):
-        self.snapshot_graphql_request(
-            request_string=self.ALL_HOUSEHOLD_FILTER_PROGRAMS_QUERY,
-            variables={
-                "programs": [self.id_to_base64(self.program_one.id, "Program")]
-            },
-            context={"user": self.user},
-        )
-
-    def test_household_query_single(self):
-        self.snapshot_graphql_request(
-            request_string=self.HOUSEHOLD_QUERY,
-            context={"user": self.user},
-            variables={
-                "id": self.id_to_base64(self.households[0].id, "Household")
-            },
+            variables={"id": self.id_to_base64(self.households[0].id, "HouseholdNode")},
         )

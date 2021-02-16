@@ -1,8 +1,9 @@
 FROM node:13-alpine as dev
-
+ARG SENTRY_FRONTEND_DSN
+ENV SENTRY_FRONTEND_DSN=${SENTRY_FRONTEND_DSN}
 WORKDIR /code/
-ADD package*.json /code/
-RUN npm install
+ADD yarn.lock package.json /code/
+RUN yarn install
 ADD . /code/
 
 EXPOSE 3000

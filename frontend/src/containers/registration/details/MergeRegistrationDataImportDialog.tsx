@@ -6,7 +6,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Typography,
 } from '@material-ui/core';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';

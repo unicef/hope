@@ -1,17 +1,19 @@
 import React from 'react';
-import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../../utils/utils';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
+  canViewDetails?: boolean;
 }
 
-export function ProgrammeTableRow({ household }) {
+export function ProgrammeTableRow({
+  household,
+  canViewDetails = true,
+}): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
 
@@ -22,17 +24,20 @@ export function ProgrammeTableRow({ household }) {
   return (
     <ClickableTableRow
       hover
-      onClick={handleClick}
+      onClick={canViewDetails ? handleClick : undefined}
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
-      <TableCell align='left'>-</TableCell>
+      <TableCell align='left'>{household.unicefId}</TableCell>
       <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>
-      <TableCell align='left'>-</TableCell>
-      <TableCell align='left'>{household.address}</TableCell>
-      <TableCell align='left'>{household.adminArea?.title}</TableCell>
+      <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
+      <TableCell align='left'>
+        {household.selection?.vulnerabilityScore ||
+        household.selection?.vulnerabilityScore === 0
+          ? household.selection?.vulnerabilityScore
+          : '-'}
+      </TableCell>
     </ClickableTableRow>
   );
 }
