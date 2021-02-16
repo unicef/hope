@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from admin_extra_urls.decorators import action
 from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib import admin, messages
@@ -116,23 +118,29 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                 field = f"{gender}_age_group_{range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
+        active_individuals = hh.individuals.exclude(Q(duplicate=True)|Q(withdrawn=True))
+        ghosts_individuals = hh.individuals.filter(Q(duplicate=True)|Q(withdrawn=True))
+        all_individuals = hh.individuals.all()
         if hh.collect_individual_data:
-            # FIXME: this count() must exclude duplicates/withdrawn when this attributes
-            # will be implemented
-            if hh.individuals.count() != hh.size:
+            if active_individuals.count() != hh.size:
                 warnings.append([messages.WARNING, "HH size does not match"])
 
         else:
-            if hh.individuals.count() > 1:
+            if all_individuals.count() > 1:
                 warnings.append([messages.ERROR, "Individual data not collected but members found"])
 
         if hh.size != total_in_ranges:
             warnings.append(
                 [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
 
-        # TODO: add ghosts (duplicates, withdrawn)
+        aaaa = active_individuals.values_list('unicef_id', flat=True)
+        bbb = Household.objects.filter(unicef_id__in=aaaa)
+        if bbb.count() > len(aaaa):
+            warnings.append([messages.ERROR, "Unmarked duplicates found"])
 
         context = {
+            "active_individuals": active_individuals,
+            "ghosts_individuals": ghosts_individuals,
             "opts": Household._meta,
             "app_label": Household._meta.app_label,
             "original": hh,

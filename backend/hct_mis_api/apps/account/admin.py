@@ -25,7 +25,7 @@ from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRo
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, NeedRootMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +111,7 @@ class UserRoleInline(admin.TabularInline):
 
 
 @admin.register(User)
-class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
+class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated")
 
     list_display = (
@@ -146,32 +146,16 @@ class UserAdmin(ExtraUrlMixin, NeedRootMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
-    def get_context(self, request, pk=None, **kwargs):
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.object = None
-
-        context = {
-            **self.admin_site.each_context(request),
-            **kwargs,
-            "opts": opts,
-            "app_label": app_label,
-        }
-        if pk:
-            self.object = self.get_object(request, pk)
-            context["original"] = self.object
-        return context
-
     @action()
     def privileges(self, request, pk):
-        ctx = self.get_context(request, pk)
+        ctx = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/privileges.html", ctx)
 
     @action()
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
-        ctx = self.get_context(
+        ctx = self.get_common_context(
             request,
             None,
             **{
