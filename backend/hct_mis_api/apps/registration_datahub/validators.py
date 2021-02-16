@@ -477,6 +477,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     if document_key in identities_numbers.keys():
                         documents_dict = identities_numbers
                     documents_dict[document_key]["issuing_countries"].append(value)
+                    documents_dict[document_key]["validation_data"].append({"row_number": cell.row, "value": value})
 
                 if header.value in identities_numbers:
                     identities_numbers[header.value]["numbers"].append(value)
