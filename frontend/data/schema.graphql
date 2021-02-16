@@ -2815,6 +2815,8 @@ type StatsObjectType {
   childFemale: Int
   adultMale: Int
   adultFemale: Int
+  allHouseholds: Int
+  allIndividuals: Int
 }
 
 type SteficonRuleNode implements Node {
