@@ -1,5 +1,5 @@
 import xlrd
-from admin_extra_urls.extras import link, ExtraUrlMixin, action
+from admin_extra_urls.api import link, ExtraUrlMixin, action
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -40,28 +40,10 @@ class TestRapidproForm(forms.Form):
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
 
-    def get_context(self, request, pk=None, **kwargs):
-        opts = self.model._meta
-        app_label = opts.app_label
-        self.object = None
-
-        context = {
-            **self.admin_site.each_context(request),
-            **kwargs,
-            "opts": opts,
-            "app_label": app_label,
-        }
-        if pk:
-            self.object = self.get_object(request, pk)
-            context["business_area"] = self.object
-            context["title"] = f"Test `{self.object.name}` RapidPRO connection"
-
-        return context
-
     @action(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
-        context = self.get_context(request, pk)
-        api = RapidProAPI(context["business_area"].slug)
+        context = self.get_common_context(request, pk)
+        api = RapidProAPI(self.object.slug)
 
         if request.method == "GET":
             phone_number = request.GET.get("phone_number", None)

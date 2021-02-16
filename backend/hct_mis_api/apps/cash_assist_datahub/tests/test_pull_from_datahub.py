@@ -109,7 +109,6 @@ class TestPullDataFromDatahub(TestCase):
         dh_cash_plan1.assistance_through = "Test Bank"
         dh_cash_plan1.vision_id = "random-csh-vision-id"
         dh_cash_plan1.funds_commitment = "123"
-        dh_cash_plan1.down_payment = "100"
         dh_cash_plan1.validation_alerts_count = 0
         dh_cash_plan1.total_persons_covered = 1
         dh_cash_plan1.total_persons_covered_revised = 1
@@ -251,6 +250,8 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.transaction_reference_id, self.dh_payment_record.transaction_reference_id)
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
+
+        self.assertIn(self.household, self.program.households.all())
 
 
 class TestSessionsPullDataFromDatahub(TestCase):
