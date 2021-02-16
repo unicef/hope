@@ -208,7 +208,9 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    "django.contrib.admin",
+    # "django.contrib.admin",
+    "smart_admin.templates",
+    "smart_admin",
     "django.contrib.auth",
     "django.contrib.humanize",
     "django.contrib.contenttypes",
@@ -500,3 +502,32 @@ if SENTRY_DSN:
         release=get_full_version(),
         send_default_pii=True
     )
+
+
+SMART_ADMIN_SECTIONS = {
+    'Security': ['account',
+                 'auth'
+                 ],
+    'Rule Engine': ['steficon',
+                 ],
+    'Logs': ['admin.LogEntry',
+             ],
+    'Grievance': ['grievance'],
+    'Kobo': ['core.FlexibleAttributeChoice',
+             'core.XLSXKoboTemplate',
+             'core.FlexibleAttribute',
+             'core.FlexibleAttributeGroup',
+             ],
+    'HUBs': ['cash_assist_datahub',
+             'erp_datahub',
+             'mis_datahub',
+             'registration_datahub',
+             ],
+    'System': [
+        'social_django',
+        'constance',
+        'sites',
+    ],
+    'Other': [],
+    '_hidden_': []
+}
