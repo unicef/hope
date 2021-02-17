@@ -38,6 +38,9 @@ export const PlannedBudget = ({
     barPercentage: 0.1,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
     scales: {
       xAxes: [

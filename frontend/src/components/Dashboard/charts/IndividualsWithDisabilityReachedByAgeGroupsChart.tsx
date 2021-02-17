@@ -32,12 +32,18 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
     barPercentage: 0.1,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
     scales: {
       xAxes: [
         {
           stacked: true,
           position: 'top',
+          ticks: {
+            stepSize: 1,
+          },
         },
       ],
       yAxes: [
