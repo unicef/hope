@@ -12,7 +12,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from tempfile import NamedTemporaryFile
 
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.reporting.models import DashboardReport
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
@@ -621,6 +621,90 @@ class GenerateDashboardReportContentHelpers:
             instance.not_responded,
         )
 
+    @classmethod
+    def get_total_transferred_by_admin_area(self, report: DashboardReport):
+        # only for country dashboard
+
+        filter_vars = self._format_filters_for_payment_records(report)
+        valid_payment_records = PaymentRecord.objects.filter(**filter_vars)
+
+        admin_areas = (
+            AdminArea.objects.filter(
+                admin_area_level__admin_level=2,
+                household__payment_records__in=valid_payment_records,
+            )
+            .distinct()
+            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
+            .annotate(num_households=Count("household", distinct=True))
+        )
+
+        totals = admin_areas.aggregate(
+            total_transferred_sum=Sum("total_transferred"), num_households_sum=Sum("num_households")
+        )
+        admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
+
+        def aggregate_households(households):
+            return households.aggregate(
+                total_female_0_5=Sum("female_age_group_0_5_count"),
+                total_female_6_11=Sum("female_age_group_6_11_count"),
+                total_female_12_17=Sum("female_age_group_12_17_count"),
+                total_female_18_59=Sum("female_age_group_18_59_count"),
+                total_female_60=Sum("female_age_group_60_count"),
+                total_male_0_5=Sum("male_age_group_0_5_count"),
+                total_male_6_11=Sum("male_age_group_6_11_count"),
+                total_male_12_17=Sum("male_age_group_12_17_count"),
+                total_male_18_59=Sum("male_age_group_18_59_count"),
+                total_male_60=Sum("male_age_group_60_count"),
+            )
+
+        for admin_area in admin_areas:
+            valid_payment_records_in_instance = valid_payment_records.filter(household__admin_area=admin_area["id"])
+            households = aggregate_households(
+                Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct()
+            )
+
+            for key, value in households.items():
+                admin_area[key] = value
+
+        totals.update(
+            aggregate_households(
+                Household.objects.filter(
+                    payment_records__in=valid_payment_records, admin_area__admin_area_level__admin_level=2
+                ).distinct()
+            )
+        )
+
+        return admin_areas, totals
+
+    @staticmethod
+    def format_total_transferred_by_admin_area_row(instance, is_totals: bool, *args):
+        shared_cells = (
+            instance.get("total_female_0_5", 0),
+            instance.get("total_female_6_11", 0),
+            instance.get("total_female_12_17", 0),
+            instance.get("total_female_18_59", 0),
+            instance.get("total_female_60", 0),
+            instance.get("total_male_0_5", 0),
+            instance.get("total_male_6_11", 0),
+            instance.get("total_male_12_17", 0),
+            instance.get("total_male_18_59", 0),
+            instance.get("total_male_60", 0),
+        )
+        if is_totals:
+            return (
+                "",
+                "Total",
+                instance.get("total_transferred_sum", 0),
+                instance.get("num_households_sum", 0),
+            ) + shared_cells
+        else:
+            return (
+                instance.get("title", ""),
+                instance.get("p_code", ""),
+                instance.get("total_transferred", 0),
+                instance.get("num_households", 0),
+            ) + shared_cells
+
 
 class GenerateDashboardReportService:
     HQ = 1
@@ -783,8 +867,11 @@ class GenerateDashboardReportService:
         DashboardReport.PAYMENT_VERIFICATION: (
             GenerateDashboardReportContentHelpers.get_payment_verifications,
             GenerateDashboardReportContentHelpers.format_payment_verifications_row,
-        )
-        # TODO: add the rest of the methods
+        ),
+        DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA: (
+            GenerateDashboardReportContentHelpers.get_total_transferred_by_admin_area,
+            GenerateDashboardReportContentHelpers.format_total_transferred_by_admin_area_row,
+        ),
     }
     META_HEADERS = ("report type", "creation date", "created by", "business area", "report year")
     REMOVE_EMPTY_COLUMNS = {
