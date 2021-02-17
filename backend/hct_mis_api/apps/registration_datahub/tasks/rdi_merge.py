@@ -79,6 +79,7 @@ class RdiMergeTask:
         "currency",
         "unhcr_id",
         "geopoint",
+        "returnee",
     )
 
     INDIVIDUAL_FIELDS = (
@@ -110,6 +111,7 @@ class RdiMergeTask:
         "comms_disability",
         "who_answers_phone",
         "who_answers_alt_phone",
+        "pregnant",
     )
 
     def merge_admin_area(
