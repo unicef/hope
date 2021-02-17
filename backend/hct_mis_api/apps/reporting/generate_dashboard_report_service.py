@@ -967,12 +967,16 @@ class GenerateDashboardReportService:
     def generate_report(self):
         try:
             self.generate_workbook()
-            print(self.wb)
             with NamedTemporaryFile() as tmp:
                 self.wb.save(tmp.name)
                 tmp.seek(0)
+                file_name = (
+                    self._report_type_to_str(self.report_types[0])
+                    if len(self.report_types) == 1
+                    else "Multiple reports"
+                )
                 self.report.file.save(
-                    f"{self._report_types_to_joined_str()}-{GenerateDashboardReportContentHelpers._format_date(self.report.created_at)}.xlsx",
+                    f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
                     File(tmp),
                     save=False,
                 )
