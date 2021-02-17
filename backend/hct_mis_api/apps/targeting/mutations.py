@@ -37,6 +37,8 @@ from hct_mis_api.apps.targeting.validators import (
     UnapproveTargetPopulationValidator,
     TargetingCriteriaInputValidator,
 )
+from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
+from hct_mis_api.apps.utils.schema import Arg
 
 
 class CopyTargetPopulationInput(graphene.InputObjectType):
@@ -115,7 +117,7 @@ def from_input_to_targeting_criteria(targeting_criteria_input, program: Program)
     return targeting_criteria
 
 
-class CreateTargetPopulationMutation(PermissionMutation):
+class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -124,7 +126,7 @@ class CreateTargetPopulationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, **kwargs):
+    def processed_mutate(cls, root, info, **kwargs):
         user = info.context.user
         input = kwargs.pop("input")
         program = get_object_or_404(Program, pk=decode_id_string(input.get("program_id")))
@@ -143,12 +145,13 @@ class CreateTargetPopulationMutation(PermissionMutation):
         target_population = TargetPopulation(name=input.get("name"), created_by=user, business_area=business_area)
         target_population.candidate_list_targeting_criteria = targeting_criteria
         target_population.program = program
+        target_population.full_clean()
         target_population.save()
         log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
         return cls(target_population=target_population)
 
 
-class UpdateTargetPopulationMutation(PermissionMutation):
+class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutationMixin):
     target_population = graphene.Field(TargetPopulationNode)
 
     class Arguments:
@@ -158,7 +161,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, **kwargs):
+    def processed_mutate(cls, root, info, **kwargs):
         input = kwargs.get("input")
         id = input.get("id")
         target_population = cls.get_object(id)
@@ -204,6 +207,7 @@ class UpdateTargetPopulationMutation(PermissionMutation):
                 if target_population.final_list_targeting_criteria:
                     target_population.final_list_targeting_criteria.delete()
                 target_population.final_list_targeting_criteria = targeting_criteria
+        target_population.full_clean()
         target_population.save()
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
@@ -327,6 +331,8 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
 class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     target_population = graphene.Field(TargetPopulationNode)
 
+    validation_errors = graphene.Field(Arg)
+
     class Input:
         target_population_data = CopyTargetPopulationInput()
 
@@ -334,33 +340,38 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
     @is_authenticated
     @transaction.atomic
     def mutate_and_get_payload(cls, _root, info, **kwargs):
-        user = info.context.user
-        target_population_data = kwargs["target_population_data"]
-        name = target_population_data.pop("name")
-        target_id = utils.decode_id_string(target_population_data.pop("id"))
-        target_population = TargetPopulation.objects.get(id=target_id)
+        try:
+            user = info.context.user
+            target_population_data = kwargs["target_population_data"]
+            name = target_population_data.pop("name")
+            target_id = utils.decode_id_string(target_population_data.pop("id"))
+            target_population = TargetPopulation.objects.get(id=target_id)
 
-        cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
+            cls.has_permission(info, Permissions.TARGETING_DUPLICATE, target_population.business_area)
 
-        target_population_copy = TargetPopulation(
-            name=name,
-            created_by=user,
-            business_area=target_population.business_area,
-            status=TargetPopulation.STATUS_DRAFT,
-            candidate_list_total_households=target_population.candidate_list_total_households,
-            candidate_list_total_individuals=target_population.candidate_list_total_individuals,
-            steficon_rule=target_population.steficon_rule,
-            program=target_population.program,
-        )
-        target_population_copy.save()
-        if target_population.candidate_list_targeting_criteria:
-            target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
-                target_population.candidate_list_targeting_criteria
+            target_population_copy = TargetPopulation(
+                name=name,
+                created_by=user,
+                business_area=target_population.business_area,
+                status=TargetPopulation.STATUS_DRAFT,
+                candidate_list_total_households=target_population.candidate_list_total_households,
+                candidate_list_total_individuals=target_population.candidate_list_total_individuals,
+                steficon_rule=target_population.steficon_rule,
+                program=target_population.program,
             )
-        target_population_copy.save()
-        target_population_copy.refresh_from_db()
-        log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
-        return CopyTargetPopulationMutation(target_population_copy)
+            target_population_copy.full_clean()
+            target_population_copy.save()
+            if target_population.candidate_list_targeting_criteria:
+                target_population_copy.candidate_list_targeting_criteria = cls.copy_target_criteria(
+                    target_population.candidate_list_targeting_criteria
+                )
+            target_population_copy.full_clean()
+            target_population_copy.save()
+            target_population_copy.refresh_from_db()
+            log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
+            return CopyTargetPopulationMutation(target_population_copy)
+        except ValidationError as e:
+            return cls(validation_errors=e.message_dict)
 
     @classmethod
     def copy_target_criteria(cls, targeting_criteria):

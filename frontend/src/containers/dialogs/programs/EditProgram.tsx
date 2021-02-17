@@ -10,7 +10,8 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
-import {decodeIdString} from "../../../utils/utils";
+import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
+import { ValidationGraphQLError } from '../../../apollo/client';
 
 interface EditProgramProps {
   program: ProgramNode;
@@ -41,7 +42,7 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
     },
   });
-  const submitFormHandler = async (values): Promise<void> => {
+  const submitFormHandler = async (values, setFieldError): Promise<void> => {
     try {
       const response = await mutate({
         variables: {
@@ -60,7 +61,13 @@ export function EditProgram({ program }: EditProgramProps): ReactElement {
       });
       setOpen(false);
     } catch (e) {
-      e.graphQLErrors.map((x) => showMessage(x.message));
+      const { nonValidationErrors } = handleValidationErrors(
+        'updateProgram',
+        e,
+        setFieldError,
+        showMessage,
+      );
+      nonValidationErrors.map((x) => showMessage(x.message));
     }
   };
 
