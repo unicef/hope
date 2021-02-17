@@ -28,6 +28,9 @@ export const VolumeByDeliveryMechanism = ({
     cutoutPercentage: 80,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
   };
 

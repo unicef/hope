@@ -550,25 +550,15 @@ class Query(graphene.ObjectType):
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
         households_params = [
             "household__female_age_group_0_5_count",
-            "household__female_age_group_0_5_disabled_count",
             "household__female_age_group_6_11_count",
-            "household__female_age_group_6_11_disabled_count",
             "household__female_age_group_12_17_count",
-            "household__female_age_group_12_17_disabled_count",
             "household__female_age_group_18_59_count",
-            "household__female_age_group_18_59_disabled_count",
             "household__female_age_group_60_count",
-            "household__female_age_group_60_disabled_count",
             "household__male_age_group_0_5_count",
-            "household__male_age_group_0_5_disabled_count",
             "household__male_age_group_6_11_count",
-            "household__male_age_group_6_11_disabled_count",
             "household__male_age_group_12_17_count",
-            "household__male_age_group_12_17_disabled_count",
             "household__male_age_group_18_59_count",
-            "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_count",
-            "household__male_age_group_60_disabled_count",
         ]
 
         payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
@@ -610,7 +600,7 @@ class Query(graphene.ObjectType):
 
         payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
                                                                           chart_filters_decoder(kwargs))
-
+        #aggregate with distinct by household__id is not possible
         households_with_disability_counts = payment_records_qs.select_related('household').values_list(
             *households_params_with_disability).distinct("household__id")
 
