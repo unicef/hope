@@ -4,9 +4,9 @@ from django.shortcuts import get_object_or_404
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string
-from hct_mis_api.apps.core.airflow_api import AirflowApi
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
+from hct_mis_api.apps.reporting.celery_tasks import report_export_task
 from hct_mis_api.apps.reporting.schema import ReportNode
 from hct_mis_api.apps.reporting.models import Report
 from hct_mis_api.apps.reporting.validators import ReportValidator
@@ -66,10 +66,7 @@ class CreateReport(ReportValidator, PermissionMutation):
         if admin_areas:
             report.admin_area.set(admin_areas)
 
-        AirflowApi.start_dag(
-            dag_id="ReportExport",
-            context={"report_id": str(report.id)},
-        )
+        report_export_task.delay(report_id=str(report.id))
 
         return CreateReport(report)
 

@@ -374,8 +374,6 @@ GRAPH_MODELS = {
 
 PHONENUMBER_DEFAULT_REGION = "US"
 
-AIRFLOW_HOST = "airflow_webserver"
-
 SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org")
 
 # ELASTICSEARCH SETTINGS
