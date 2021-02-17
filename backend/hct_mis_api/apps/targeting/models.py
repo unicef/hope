@@ -9,6 +9,7 @@ from django.contrib.postgres.validators import (
     RangeMaxValueValidator,
 )
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
@@ -27,6 +28,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -83,28 +85,41 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     STATUS_APPROVED = "APPROVED"
     STATUS_FINALIZED = "FINALIZED"
 
-    name = CICharField(unique=True, db_index=True, max_length=255)
-    ca_id = CICharField(max_length=255, null=True)
-    ca_hash_id = CICharField(max_length=255, null=True)
+    name = CICharField(
+        unique=True,
+        db_index=True,
+        max_length=255,
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],
+    )
+    ca_id = CICharField(max_length=255, null=True, blank=True)
+    ca_hash_id = CICharField(max_length=255, null=True, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="target_populations",
         null=True,
     )
-    approved_at = models.DateTimeField(null=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
     approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="approved_target_populations",
         null=True,
+        blank=True,
     )
-    finalized_at = models.DateTimeField(null=True)
+    finalized_at = models.DateTimeField(null=True, blank=True)
     finalized_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name="finalized_target_populations",
         null=True,
+        blank=True,
     )
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
     STATUS_CHOICES = (
@@ -171,19 +186,13 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         db_index=True,
     )
     steficon_rule = models.ForeignKey(
-        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations"
+        "steficon.Rule", null=True, on_delete=models.PROTECT, related_name="target_populations", blank=True
     )
     vulnerability_score_min = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
     )
     vulnerability_score_max = models.DecimalField(
-        null=True,
-        decimal_places=3,
-        max_digits=6,
-        help_text="Written by a tool such as Corticon.",
+        null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.", blank=True
     )
 
     @property
@@ -242,7 +251,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             "adult_male": adult_male,
             "adult_female": adult_female,
             "all_households": households_ids.count(),
-            "all_individuals": child_male + child_female + adult_male + adult_female
+            "all_individuals": child_male + child_female + adult_male + adult_female,
         }
 
     def get_criteria_string(self):

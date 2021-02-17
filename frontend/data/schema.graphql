@@ -343,6 +343,7 @@ input CopyTargetPopulationMutationInput {
 
 type CopyTargetPopulationMutationPayload {
   targetPopulation: TargetPopulationNode
+  validationErrors: Arg
   clientMutationId: String
 }
 
@@ -397,6 +398,7 @@ type CreatePaymentVerificationMutation {
 }
 
 type CreateProgram {
+  validationErrors: Arg
   program: ProgramNode
 }
 
@@ -437,6 +439,7 @@ input CreateTargetPopulationInput {
 }
 
 type CreateTargetPopulationMutation {
+  validationErrors: Arg
   targetPopulation: TargetPopulationNode
 }
 
@@ -2551,6 +2554,7 @@ type RegistrationDeduplicationMutation {
 }
 
 type RegistrationKoboImportMutation {
+  validationErrors: Arg
   registrationDataImport: RegistrationDataImportNode
 }
 
@@ -2561,6 +2565,7 @@ input RegistrationKoboImportMutationInput {
 }
 
 type RegistrationXlsxImportMutation {
+  validationErrors: Arg
   registrationDataImport: RegistrationDataImportNode
 }
 
@@ -3250,6 +3255,7 @@ type UpdatePaymentVerificationStatusAndReceivedAmount {
 }
 
 type UpdateProgram {
+  validationErrors: Arg
   program: ProgramNode
 }
 
@@ -3280,6 +3286,7 @@ input UpdateTargetPopulationInput {
 }
 
 type UpdateTargetPopulationMutation {
+  validationErrors: Arg
   targetPopulation: TargetPopulationNode
 }
 

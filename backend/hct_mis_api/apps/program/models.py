@@ -1,8 +1,11 @@
 from decimal import Decimal
 
 from django.contrib.postgres.fields import CICharField
-from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator, \
+    ProhibitNullCharactersValidator
 from django.db import models
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
@@ -10,6 +13,7 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -77,16 +81,21 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
         (SCOPE_UNICEF, _("Unicef")),
     )
 
-    name = CICharField(max_length=255, validators=[MinLengthValidator(3), MaxLengthValidator(255)], db_index=True)
+    name = CICharField(
+        max_length=255,
+        validators=[MinLengthValidator(3), MaxLengthValidator(255), DoubleSpaceValidator, StartEndSpaceValidator, ProhibitNullCharactersValidator()],
+        db_index=True,
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
     start_date = models.DateField(db_index=True)
     end_date = models.DateField(db_index=True)
     description = models.CharField(
+        blank=True,
         max_length=255,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
-    ca_id = CICharField(max_length=255, null=True, db_index=True)
-    ca_hash_id = CICharField(max_length=255, null=True, db_index=True)
+    ca_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
+    ca_hash_id = CICharField(max_length=255, null=True, blank=True, db_index=True)
     admin_areas = models.ManyToManyField(
         "core.AdminArea",
         related_name="programs",
@@ -109,6 +118,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     population_goal = models.PositiveIntegerField()
     administrative_areas_of_implementation = models.CharField(
         max_length=255,
+        blank=True,
         validators=[MinLengthValidator(3), MaxLengthValidator(255)],
     )
     individual_data_needed = models.BooleanField(

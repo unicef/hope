@@ -1,4 +1,5 @@
 import graphene
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -14,6 +15,7 @@ from hct_mis_api.apps.program.validators import (
     ProgramValidator,
     ProgramDeletionValidator,
 )
+from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 
 class CreateProgramInput(graphene.InputObjectType):
@@ -49,7 +51,7 @@ class UpdateProgramInput(graphene.InputObjectType):
     individual_data_needed = graphene.Boolean()
 
 
-class CreateProgram(CommonValidator, PermissionMutation):
+class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -57,7 +59,7 @@ class CreateProgram(CommonValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, program_data):
+    def processed_mutate(cls, root, info, program_data):
         business_area_slug = program_data.pop("business_area_slug", None)
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         cls.has_permission(info, Permissions.PROGRAMME_CREATE, business_area)
@@ -67,16 +69,18 @@ class CreateProgram(CommonValidator, PermissionMutation):
             end_date=program_data.get("end_date"),
         )
 
-        program = Program.objects.create(
+        program = Program(
             **program_data,
             status=Program.DRAFT,
             business_area=business_area,
         )
+        program.full_clean()
+        program.save()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
         return CreateProgram(program)
 
 
-class UpdateProgram(ProgramValidator, PermissionMutation):
+class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutationMixin):
     program = graphene.Field(ProgramNode)
 
     class Arguments:
@@ -86,7 +90,7 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
     @classmethod
     @transaction.atomic
     @is_authenticated
-    def mutate(cls, root, info, program_data, **kwargs):
+    def processed_mutate(cls, root, info, program_data, **kwargs):
         program_id = decode_id_string(program_data.pop("id", None))
 
         program = Program.objects.select_for_update().get(id=program_id)
@@ -115,11 +119,11 @@ class UpdateProgram(ProgramValidator, PermissionMutation):
         for attrib, value in program_data.items():
             if hasattr(program, attrib):
                 setattr(program, attrib, value)
-
+        program.full_clean()
         program.save()
 
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_program, program)
-        return UpdateProgram(program)
+        return UpdateProgram(program=program)
 
 
 class DeleteProgram(ProgramDeletionValidator, PermissionMutation):

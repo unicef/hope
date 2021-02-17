@@ -602,6 +602,7 @@ export type CopyTargetPopulationMutationInput = {
 export type CopyTargetPopulationMutationPayload = {
    __typename?: 'CopyTargetPopulationMutationPayload',
   targetPopulation?: Maybe<TargetPopulationNode>,
+  validationErrors?: Maybe<Scalars['Arg']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -661,6 +662,7 @@ export type CreatePaymentVerificationMutation = {
 
 export type CreateProgram = {
    __typename?: 'CreateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
   program?: Maybe<ProgramNode>,
 };
 
@@ -703,6 +705,7 @@ export type CreateTargetPopulationInput = {
 
 export type CreateTargetPopulationMutation = {
    __typename?: 'CreateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
@@ -4072,6 +4075,7 @@ export type RegistrationDeduplicationMutation = {
 
 export type RegistrationKoboImportMutation = {
    __typename?: 'RegistrationKoboImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
@@ -4083,6 +4087,7 @@ export type RegistrationKoboImportMutationInput = {
 
 export type RegistrationXlsxImportMutation = {
    __typename?: 'RegistrationXlsxImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
@@ -4963,6 +4968,7 @@ export type UpdatePaymentVerificationStatusAndReceivedAmount = {
 
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
   program?: Maybe<ProgramNode>,
 };
 
@@ -4994,6 +5000,7 @@ export type UpdateTargetPopulationInput = {
 
 export type UpdateTargetPopulationMutation = {
    __typename?: 'UpdateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
@@ -5845,6 +5852,7 @@ export type CreateProgramMutation = (
   { __typename?: 'Mutations' }
   & { createProgram: Maybe<(
     { __typename?: 'CreateProgram' }
+    & Pick<CreateProgram, 'validationErrors'>
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
@@ -5893,6 +5901,7 @@ export type CreateTpMutation = (
   { __typename?: 'Mutations' }
   & { createTargetPopulation: Maybe<(
     { __typename?: 'CreateTargetPopulationMutation' }
+    & Pick<CreateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
@@ -5951,7 +5960,7 @@ export type CopyTargetPopulationMutation = (
   { __typename?: 'Mutations' }
   & { copyTargetPopulation: Maybe<(
     { __typename?: 'CopyTargetPopulationMutationPayload' }
-    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId'>
+    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId' | 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id'>
@@ -6177,6 +6186,7 @@ export type UpdateProgramMutation = (
   { __typename?: 'Mutations' }
   & { updateProgram: Maybe<(
     { __typename?: 'UpdateProgram' }
+    & Pick<UpdateProgram, 'validationErrors'>
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
@@ -6193,6 +6203,7 @@ export type UpdateTpMutation = (
   { __typename?: 'Mutations' }
   & { updateTargetPopulation: Maybe<(
     { __typename?: 'UpdateTargetPopulationMutation' }
+    & Pick<UpdateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & TargetPopulationDetailedFragment
@@ -7775,6 +7786,7 @@ export type CreateRegistrationKoboImportMutation = (
   { __typename?: 'Mutations' }
   & { registrationKoboImport: Maybe<(
     { __typename?: 'RegistrationKoboImportMutation' }
+    & Pick<RegistrationKoboImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
@@ -7791,6 +7803,7 @@ export type CreateRegistrationXlsxImportMutation = (
   { __typename?: 'Mutations' }
   & { registrationXlsxImport: Maybe<(
     { __typename?: 'RegistrationXlsxImportMutation' }
+    & Pick<RegistrationXlsxImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
@@ -9390,6 +9403,7 @@ export const CreateProgramDocument = gql`
       populationGoal
       individualDataNeeded
     }
+    validationErrors
   }
 }
     `;
@@ -9517,6 +9531,7 @@ export const CreateTpDocument = gql`
       finalListTotalHouseholds
       finalListTotalIndividuals
     }
+    validationErrors
   }
 }
     `;
@@ -9720,6 +9735,7 @@ export const CopyTargetPopulationDocument = gql`
     targetPopulation {
       id
     }
+    validationErrors
   }
 }
     `;
@@ -10432,6 +10448,7 @@ export const UpdateProgramDocument = gql`
       individualDataNeeded
       version
     }
+    validationErrors
   }
 }
     `;
@@ -10484,6 +10501,7 @@ export const UpdateTpDocument = gql`
     targetPopulation {
       ...targetPopulationDetailed
     }
+    validationErrors
   }
 }
     ${TargetPopulationDetailedFragmentDoc}`;
@@ -14256,6 +14274,7 @@ export const CreateRegistrationKoboImportDocument = gql`
       dataSource
       datahubId
     }
+    validationErrors
   }
 }
     `;
@@ -14310,6 +14329,7 @@ export const CreateRegistrationXlsxImportDocument = gql`
       dataSource
       datahubId
     }
+    validationErrors
   }
 }
     `;
@@ -16138,6 +16158,7 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
 
 export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -16163,6 +16184,7 @@ export type CreatePaymentVerificationMutationResolvers<ContextType = any, Parent
 };
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
@@ -16171,6 +16193,7 @@ export type CreateReportResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
@@ -17214,10 +17237,12 @@ export type RegistrationDeduplicationMutationResolvers<ContextType = any, Parent
 };
 
 export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
@@ -17797,10 +17822,12 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextTyp
 };
 
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
