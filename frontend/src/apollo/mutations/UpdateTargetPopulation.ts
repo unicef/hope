@@ -6,6 +6,7 @@ export const UpdateTP = gql`
       targetPopulation {
         ...targetPopulationDetailed
       }
+     validationErrors 
     }
   }
 `;
