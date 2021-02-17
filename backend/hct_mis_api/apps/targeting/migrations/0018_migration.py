@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('targeting', '0017_migration'),
+        ('steficon', '0002_migration'),
     ]
 
     operations = [
