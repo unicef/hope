@@ -16,7 +16,7 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.reporting.models import DashboardReport
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, CashPlanPaymentVerification, PaymentVerification
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -155,7 +155,7 @@ class GenerateDashboardReportContentHelpers:
         }
 
     @staticmethod
-    def format_beneficiaries_row(instance: dict, is_totals: bool, **kwargs) -> tuple:
+    def format_beneficiaries_row(instance: dict, is_totals: bool, *args) -> tuple:
         return (
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total Distinct",
@@ -232,7 +232,7 @@ class GenerateDashboardReportContentHelpers:
         return instances, households_aggr
 
     @staticmethod
-    def format_individuals_row(instance: dict, is_totals: bool, **kwargs) -> tuple:
+    def format_individuals_row(instance: dict, is_totals: bool, *args) -> tuple:
         return (
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total Distinct",
@@ -304,7 +304,7 @@ class GenerateDashboardReportContentHelpers:
         return instances, totals
 
     @staticmethod
-    def format_volumes_by_delivery_row(instance: dict, is_totals: bool, **kwargs):
+    def format_volumes_by_delivery_row(instance: dict, is_totals: bool, *args):
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total",
@@ -392,7 +392,7 @@ class GenerateDashboardReportContentHelpers:
         ]
 
     @classmethod
-    def format_programs_row(self, instance: Program, is_totals: bool, **kwargs) -> tuple:
+    def format_programs_row(self, instance: Program, is_totals: bool, *args) -> tuple:
         result = (
             instance.business_area.code,
             instance.business_area.name,
@@ -434,7 +434,7 @@ class GenerateDashboardReportContentHelpers:
         return business_areas, totals
 
     @staticmethod
-    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, **kwargs) -> tuple:
+    def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
             return ("", "Total", instance.get("total_cash_sum", 0), instance.get("total_voucher_sum", 0))
         else:
@@ -550,6 +550,76 @@ class GenerateDashboardReportContentHelpers:
                 return (instance.code, instance.name) + shared_cells
             else:
                 return (instance.code,) + shared_cells
+
+    @classmethod
+    def get_payment_verifications(self, report: DashboardReport):
+        filter_vars = {"created_at__year": report.year}
+        if report.admin_area:
+            filter_vars["cash_plan_payment_verification__cash_plan__program__admin_areas"] = report.admin_area
+        if report.program:
+            filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
+        if not self._is_report_global(report):
+            filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = report.business_area
+        valid_verifications = PaymentVerification.objects.filter(**filter_vars)
+        path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
+
+        # TODO: missing average_sampling column, figure out how to calculate it
+        programs = (
+            Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
+            .distinct()
+            .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
+            .annotate(total_households=Count("cash_plans__verifications__payment_record_verifications", distinct=True))
+            .annotate(
+                received=Count(
+                    "cash_plans__verifications__payment_record_verifications",
+                    filter=Q(
+                        cash_plans__verifications__payment_record_verifications__status=PaymentVerification.STATUS_RECEIVED
+                    ),
+                )
+            )
+            .annotate(
+                not_received=Count(
+                    "cash_plans__verifications__payment_record_verifications",
+                    filter=Q(
+                        cash_plans__verifications__payment_record_verifications__status=PaymentVerification.STATUS_NOT_RECEIVED
+                    ),
+                )
+            )
+            .annotate(
+                received_with_issues=Count(
+                    "cash_plans__verifications__payment_record_verifications",
+                    filter=Q(
+                        cash_plans__verifications__payment_record_verifications__status=PaymentVerification.STATUS_RECEIVED_WITH_ISSUES
+                    ),
+                )
+            )
+            .annotate(
+                not_responded=Count(
+                    "cash_plans__verifications__payment_record_verifications",
+                    filter=Q(
+                        cash_plans__verifications__payment_record_verifications__status=PaymentVerification.STATUS_PENDING
+                    ),
+                )
+            )
+        )
+
+        return programs, None
+
+    @staticmethod
+    def format_payment_verifications_row(instance: Program, *args):
+        return (
+            instance.business_area.code,
+            instance.business_area.name,
+            instance.name,
+            instance.total_cash_plan_verifications,
+            instance.total_households,
+            # average sampling goes here
+            "",
+            instance.received,
+            instance.not_received,
+            instance.received_with_issues,
+            instance.not_responded,
+        )
 
 
 class GenerateDashboardReportService:
@@ -709,6 +779,10 @@ class GenerateDashboardReportService:
         DashboardReport.GRIEVANCES_AND_FEEDBACK: (
             GenerateDashboardReportContentHelpers.get_grievances,
             GenerateDashboardReportContentHelpers.format_grievances_row,
+        ),
+        DashboardReport.PAYMENT_VERIFICATION: (
+            GenerateDashboardReportContentHelpers.get_payment_verifications,
+            GenerateDashboardReportContentHelpers.format_payment_verifications_row,
         )
         # TODO: add the rest of the methods
     }
