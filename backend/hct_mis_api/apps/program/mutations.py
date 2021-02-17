@@ -77,7 +77,7 @@ class CreateProgram(CommonValidator, PermissionMutation, ValidationErrorMutation
         program.full_clean()
         program.save()
         log_create(Program.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, program)
-        return CreateProgram(program)
+        return CreateProgram(program=program)
 
 
 class UpdateProgram(ProgramValidator, PermissionMutation, ValidationErrorMutationMixin):

@@ -12,9 +12,7 @@ class ValidationErrorMutationMixin(graphene.ObjectType):
         try:
             return cls.processed_mutate(root, info, **kwargs)
         except ValidationError as e:
-            print("xDDDDDDDDDDDDDD")
-            print("xDDDDDDDDDDDDDD")
-            print("xDDDDDDDDDDDDDD")
-            print("xDDDDDDDDDDDDDD")
-            print(e)
-            return cls(validation_errors=e.message_dict)
+            if hasattr(e,"error_dict"):
+                return cls(validation_errors=e.message_dict)
+            else:
+                raise
