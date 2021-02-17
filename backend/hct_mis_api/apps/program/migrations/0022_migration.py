@@ -10,6 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('program', '0021_migration'),
+        ('steficon', '0002_migration'),
     ]
 
     operations = [
