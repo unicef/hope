@@ -22,6 +22,9 @@ export const PaymentsChart = ({
     cutoutPercentage: 80,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
   };
 

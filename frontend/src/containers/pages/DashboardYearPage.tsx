@@ -61,7 +61,7 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountPlannedAndTransferredSection />
+            <TotalAmountPlannedAndTransferredSection data={data.chartTotalTransferredCashByCountry}/>
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
