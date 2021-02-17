@@ -170,7 +170,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     sent_to_datahub = models.BooleanField(
         default=False,
         help_text="""
-            Flag set when TP is processed by airflow task
+            Flag set when TP is processed by celery task
             """,
     )
     steficon_rule = models.ForeignKey(
