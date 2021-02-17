@@ -43,7 +43,8 @@ snapshots['TestCreateProgram::test_create_program_authenticated_0_with_permissio
                 'sector': 'EDUCATION',
                 'startDate': '2019-12-20',
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
