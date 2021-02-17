@@ -1,6 +1,7 @@
 import openpyxl
 import copy
 import functools
+import datetime
 from itertools import chain
 from django.core.files import File
 from openpyxl.utils import get_column_letter
@@ -17,6 +18,7 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 class GenerateDashboardReportContentHelpers:
@@ -443,6 +445,101 @@ class GenerateDashboardReportContentHelpers:
                 instance.total_voucher or 0,
             )
 
+    @classmethod
+    def get_grievances(self, report: DashboardReport):
+        filter_vars = {
+            "created_at__year": report.year,
+        }
+        if report.admin_area:
+            filter_vars["admin"] = report.admin_area.title
+        # if report.program:
+        #     filter_vars["cash_plan__program"] = report.program
+        if not self._is_report_global(report):
+            filter_vars["business_area"] = report.business_area
+
+        valid_grievances = GrievanceTicket.objects.filter(**filter_vars)
+        instances = None
+        # valid_grievances_in_instance_filter_key = ""
+        days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
+        days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
+
+        feedback_categories = [GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
+        if self._is_report_global(report):
+            instances = (
+                BusinessArea.objects.filter(tickets__in=valid_grievances)
+                .distinct()
+                .annotate(total_grievances=Count("tickets", filter=~Q(tickets__category__in=feedback_categories)))
+                .annotate(total_feedback=Count("tickets", filter=Q(tickets__category__in=feedback_categories)))
+                .annotate(total_resolved=Count("tickets", filter=Q(tickets__status=GrievanceTicket.STATUS_CLOSED)))
+                .annotate(
+                    total_unresolved_30=Count(
+                        "tickets",
+                        filter=Q(
+                            ~Q(tickets__status=GrievanceTicket.STATUS_CLOSED),
+                            tickets__created_at__gt=days_30_from_now,
+                            tickets__created_at__lte=days_60_from_now,
+                        ),
+                    )
+                )
+                .annotate(
+                    total_unresolved_60=Count(
+                        "tickets",
+                        filter=Q(
+                            ~Q(tickets__status=GrievanceTicket.STATUS_CLOSED), tickets__created_at__gt=days_60_from_now
+                        ),
+                    )
+                )
+                .annotate(
+                    total_open_sensitive=Count(
+                        "tickets",
+                        filter=Q(
+                            ~Q(tickets__status=GrievanceTicket.STATUS_CLOSED),
+                            tickets__category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+                        ),
+                    )
+                )
+            )
+
+        else:
+            # TODO figure out what to do in country report (program??)
+            pass
+        totals = instances.aggregate(
+            total_grievances_sum=Sum("total_grievances"),
+            total_feedback_sum=Sum("total_feedback"),
+            total_resolved_sum=Sum("total_resolved"),
+            total_unresolved_30_sum=Sum("total_unresolved_30"),
+            total_unresolved_60_sum=Sum("total_unresolved_60"),
+            total_open_sensitive_sum=Sum("total_open_sensitive"),
+        )
+        # for instance in instances:
+        #     valid_grievances_in_instance = valid_grievances.filter(business_area__id=instance['id'])
+        #     instance['grievance_tickets'] = vali
+        return instances, totals
+
+    @staticmethod
+    def format_grievances_row(instance, is_totals: bool):
+        if is_totals:
+            return (
+                "",
+                "Total",
+                instance.get("total_grievances_sum", 0),
+                instance.get("total_feedback_sum", 0),
+                instance.get("total_resolved_sum", 0),
+                instance.get("total_unresolved_30_sum", 0),
+                instance.get("total_unresolved_60_sum", 0),
+                instance.get("total_open_sensitive_sum", 0),
+            )
+        return (
+            instance.code,
+            instance.name,
+            instance.total_grievances,
+            instance.total_feedback,
+            instance.total_resolved,
+            instance.total_unresolved_30,
+            instance.total_unresolved_60,
+            instance.total_open_sensitive,
+        )
+
 
 class GenerateDashboardReportService:
     HQ = 1
@@ -599,6 +696,10 @@ class GenerateDashboardReportService:
         DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY: (
             GenerateDashboardReportContentHelpers.get_total_transferred_by_country,
             GenerateDashboardReportContentHelpers.format_total_transferred_by_country,
+        ),
+        DashboardReport.GRIEVANCES_AND_FEEDBACK: (
+            GenerateDashboardReportContentHelpers.get_grievances,
+            GenerateDashboardReportContentHelpers.format_grievances_row,
         )
         # TODO: add the rest of the methods
     }
