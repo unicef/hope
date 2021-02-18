@@ -104,11 +104,11 @@ class CreateDashboardReport(PermissionMutation):
 
         program_id = report_data.pop("program", None)
         admin_area_id = report_data.pop("admin_area", None)
-        if program_id:
+        if program_id and business_area.slug != "global":
             program = get_object_or_404(Program, id=decode_id_string(program_id), business_area=business_area)
             report_vars["program"] = program
 
-        if admin_area_id:
+        if admin_area_id and business_area.slug != "global":
             admin_area = get_object_or_404(AdminArea, id=decode_id_string(admin_area_id))
             report_vars["admin_area"] = admin_area
 

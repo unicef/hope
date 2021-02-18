@@ -6,10 +6,12 @@ import { ExportModal } from '../../components/Dashboard/ExportModal';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
+  const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
@@ -66,7 +68,9 @@ export function DashboardPage(): React.ReactElement {
       </PageHeader>
       {hasPermissionToView ? (
         <>
-          <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          {businessArea !== 'global' && (
+            <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          )}
           <DashboardYearPage
             selectedTab={selectedTab}
             year={years[selectedTab]}
