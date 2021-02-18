@@ -902,22 +902,21 @@ class GenerateDashboardReportService:
             self._send_email()
 
     def _send_email(self):
-        pass
-        # context = {
-        #     "report_type": self._report_types_to_joined_str(),
-        #     "created_at": self._format_date(self.report.created_at),
-        #     "report_url": self.report.file.url,
-        # }
-        # text_body = render_to_string("dashboard_report.txt", context=context)
-        # html_body = render_to_string("dashboard_report.html", context=context)
-        # msg = EmailMultiAlternatives(
-        #     subject="HOPE report generated",
-        #     from_email=settings.EMAIL_HOST_USER,
-        #     to=[self.report.created_by.email],
-        #     body=text_body,
-        # )
-        # msg.attach_alternative(html_body, "text/html")
-        # msg.send()
+        context = {
+            "report_type": self._report_types_to_joined_str(),
+            "created_at": self._format_date(self.report.created_at),
+            "report_url": self.report.file.url,
+        }
+        text_body = render_to_string("dashboard_report.txt", context=context)
+        html_body = render_to_string("dashboard_report.html", context=context)
+        msg = EmailMultiAlternatives(
+            subject="HOPE report generated",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[self.report.created_by.email],
+            body=text_body,
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send()
 
     def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
 
