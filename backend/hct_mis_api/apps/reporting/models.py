@@ -1,7 +1,9 @@
+from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.account.models import ChoiceArrayField
 
 
 class Report(TimeStampedUUIDModel):
@@ -48,3 +50,44 @@ class Report(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["-created_at", "report_type", "status", "created_by"]
+
+
+class DashboardReport(TimeStampedUUIDModel):
+    IN_PROGRESS = 1
+    COMPLETED = 2
+    FAILED = 3
+    STATUSES = ((IN_PROGRESS, _("Processing")), (COMPLETED, _("Generated")), (FAILED, _("Failed")))
+
+    TOTAL_TRANSFERRED_BY_COUNTRY = "TOTAL_TRANSFERRED_BY_COUNTRY"
+    TOTAL_TRANSFERRED_BY_ADMIN_AREA = "TOTAL_TRANSFERRED_BY_ADMIN_AREA"
+    BENEFICIARIES_REACHED = "BENEFICIARIES_REACHED"
+    INDIVIDUALS_REACHED = "INDIVIDUALS_REACHED"
+    VOLUME_BY_DELIVERY_MECHANISM = "VOLUME_BY_DELIVERY_MECHANISM"
+    GRIEVANCES_AND_FEEDBACK = "GRIEVANCES_AND_FEEDBACK"
+    PROGRAMS = "PROGRAMS"
+    PAYMENT_VERIFICATION = "PAYMENT_VERIFICATION"
+    REPORT_TYPES = (
+        (TOTAL_TRANSFERRED_BY_COUNTRY, _("Total transferred by country")),
+        (TOTAL_TRANSFERRED_BY_ADMIN_AREA, _("Total transferred by administrative area")),
+        (BENEFICIARIES_REACHED, _("Beneficiaries reached")),
+        (INDIVIDUALS_REACHED, _("Individuals reached drilldown")),
+        (VOLUME_BY_DELIVERY_MECHANISM, _("Volume by delivery mechanism")),
+        (GRIEVANCES_AND_FEEDBACK, _("Grievances and Feedback")),
+        (PROGRAMS, _("Programmes")),
+        (PAYMENT_VERIFICATION, _("Payment verification")),
+    )
+
+    business_area = models.ForeignKey("core.BusinessArea", related_name="dashboard_reports", on_delete=models.CASCADE)
+    file = models.FileField(blank=True, null=True)
+    created_by = models.ForeignKey("account.User", related_name="dashboard_reports", on_delete=models.CASCADE)
+    status = models.PositiveSmallIntegerField(choices=STATUSES, default=IN_PROGRESS)
+    report_type = ChoiceArrayField(models.CharField(choices=REPORT_TYPES, max_length=255))
+
+    # filters
+    year = models.PositiveSmallIntegerField(default=datetime.now().year)
+    program = models.ForeignKey(
+        "program.Program", on_delete=models.CASCADE, blank=True, null=True, related_name="dashboard_reports"
+    )
+    admin_area = models.ForeignKey(
+        "core.AdminArea", on_delete=models.CASCADE, blank=True, null=True, related_name="dashboard_reports"
+    )

@@ -47,7 +47,7 @@ class TargetPopulationFilter(django_filters.FilterSet):
     Loads associated entries for Households and TargetRules.
     """
 
-    name = django_filters.CharFilter(field_name="name", lookup_expr="icontains")
+    name = django_filters.CharFilter(field_name="name", lookup_expr="startswith")
     created_by_name = django_filters.CharFilter(field_name="created_by", method="filter_created_by_name")
     candidate_list_total_households_min = IntegerFilter(
         field_name="candidate_list_total_households",
@@ -199,6 +199,8 @@ class StatsObjectType(graphene.ObjectType):
     child_female = graphene.Int()
     adult_male = graphene.Int()
     adult_female = graphene.Int()
+    all_households = graphene.Int()
+    all_individuals = graphene.Int()
 
 
 class TargetPopulationNode(BaseNodePermissionMixin, DjangoObjectType):

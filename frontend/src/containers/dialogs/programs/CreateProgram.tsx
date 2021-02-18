@@ -5,34 +5,44 @@ import { ProgramForm } from '../../forms/ProgramForm';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
+import { handleValidationErrors } from '../../../utils/utils';
 
 export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);
   const { showMessage } = useSnackbar();
-  const [mutate] = useCreateProgramMutation();
   const businessArea = useBusinessArea();
+  const [mutate] = useCreateProgramMutation({
+    refetchQueries: () => [
+      { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
+    ],
+  });
 
-  const submitFormHandler = async (values): Promise<void> => {
-    const response = await mutate({
-      variables: {
-        programData: {
-          ...values,
-          startDate: values.startDate,
-          endDate: values.endDate,
-          businessAreaSlug: businessArea,
+  const submitFormHandler = async (values, setFieldError): Promise<void> => {
+    try {
+      const response = await mutate({
+        variables: {
+          programData: {
+            ...values,
+            startDate: values.startDate,
+            endDate: values.endDate,
+            businessAreaSlug: businessArea,
+          },
         },
-      },
-      refetchQueries: () => [
-        { query: ALL_PROGRAMS_QUERY, variables: { businessArea } },
-      ],
-    });
-    if (!response.errors && response.data.createProgram) {
+      });
       showMessage('Programme created.', {
         pathname: `/${businessArea}/programs/${response.data.createProgram.program.id}`,
         historyMethod: 'push',
       });
-    } else {
-      showMessage('Programme create action failed.');
+    } catch (error) {
+      const { nonValidationErrors } = handleValidationErrors(
+        'createProgram',
+        error,
+        setFieldError,
+        showMessage,
+      );
+      if (nonValidationErrors.length > 0) {
+        showMessage('Programme create action failed.');
+      }
     }
   };
 
