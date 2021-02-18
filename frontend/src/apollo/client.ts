@@ -3,8 +3,8 @@ import { createUploadLink } from 'apollo-upload-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
-import { GRAPHQL_URL } from '../config';
 import { GraphQLError } from 'graphql';
+import { GRAPHQL_URL } from '../config';
 
 export class ValidationGraphQLError extends GraphQLError {
   validationErrors;
@@ -32,7 +32,7 @@ function findValidationErrors(
   data,
   name = 'ROOT',
   errors: { [key: string]: { [fieldName: string]: string } } = {},
-) {
+): { [key: string]: { [fieldName: string]: string } } {
   if (!data) {
     return errors;
   }
