@@ -33,6 +33,7 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
+import { handleValidationErrors } from '../../../utils/utils';
 import { ErrorsKobo } from './errors/KoboErrors';
 import { Errors } from './errors/PlainErrors';
 
@@ -262,38 +263,65 @@ export function RegistrationDataImport(): React.ReactElement {
       >
         <Formik
           validationSchema={validationSchema}
-          onSubmit={async (values) => {
-            let rdiId = null;
-            if (importType === 'kobo') {
-              const { data } = await createRegistrationKoboMutate({
-                variables: {
-                  registrationDataImportData: {
-                    importDataId:
-                      koboImportData.saveKoboImportData.importData.id,
-                    name: values.name,
-                    businessAreaSlug: businessArea,
+          onSubmit={async (values, { setFieldError }) => {
+            try {
+              let rdiId = null;
+              if (importType === 'kobo') {
+                const { data } = await createRegistrationKoboMutate({
+                  variables: {
+                    registrationDataImportData: {
+                      importDataId:
+                        koboImportData.saveKoboImportData.importData.id,
+                      name: values.name,
+                      businessAreaSlug: businessArea,
+                    },
                   },
-                },
-              });
-              rdiId = data?.registrationKoboImport?.registrationDataImport?.id;
-            } else if (importType === 'excel') {
-              const { data } = await createRegistrationXlsxMutate({
-                variables: {
-                  registrationDataImportData: {
-                    importDataId:
-                      uploadData.uploadImportDataXlsxFile.importData.id,
-                    name: values.name,
-                    businessAreaSlug: businessArea,
+                });
+                rdiId =
+                  data?.registrationKoboImport?.registrationDataImport?.id;
+              } else if (importType === 'excel') {
+                const { data } = await createRegistrationXlsxMutate({
+                  variables: {
+                    registrationDataImportData: {
+                      importDataId:
+                        uploadData.uploadImportDataXlsxFile.importData.id,
+                      name: values.name,
+                      businessAreaSlug: businessArea,
+                    },
                   },
-                },
-              });
-              rdiId = data?.registrationXlsxImport?.registrationDataImport?.id;
-            }
+                });
+                rdiId =
+                  data?.registrationXlsxImport?.registrationDataImport?.id;
+              }
 
-            showMessage('Registration', {
-              pathname: `/${businessArea}/registration-data-import/${rdiId}`,
-              historyMethod: 'push',
-            });
+              showMessage('Registration', {
+                pathname: `/${businessArea}/registration-data-import/${rdiId}`,
+                historyMethod: 'push',
+              });
+            } catch (e) {
+              let nonValidationErrors;
+              if (importType === 'kobo') {
+                nonValidationErrors = handleValidationErrors(
+                  'registrationKoboImport',
+                  e,
+                  setFieldError,
+                  showMessage,
+                ).nonValidationErrors;
+              } else if (importType === 'excel') {
+                nonValidationErrors = handleValidationErrors(
+                  'registrationXlsxImport',
+                  e,
+                  setFieldError,
+                  showMessage,
+                ).nonValidationErrors;
+              }
+
+              if (nonValidationErrors.length > 0) {
+                showMessage(
+                  'Unexpected problem while creating Target Population',
+                );
+              }
+            }
           }}
           initialValues={{ name: '' }}
         >

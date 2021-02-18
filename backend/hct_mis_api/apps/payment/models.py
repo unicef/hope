@@ -57,10 +57,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     head_of_household = models.ForeignKey(
-        "household.Individual",
-        on_delete=models.CASCADE,
-        related_name="payment_records",
-        null=True
+        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
     )
 
     full_name = models.CharField(max_length=255)
@@ -74,15 +71,9 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(
-        max_length=255,
-        null=True
-    )
+    entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
-        default="ACTIVE",
-        max_length=20,
-        null=True
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
     )
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
@@ -169,7 +160,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (VERIFICATION_METHOD_XLSX, "XLSX"),
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,
