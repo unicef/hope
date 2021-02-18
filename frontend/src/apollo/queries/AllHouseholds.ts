@@ -26,7 +26,7 @@ export const AllHouseholds = gql`
       size: $familySize
       orderBy: $orderBy
       programs: $programs
-      headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains
+      headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains
       adminArea: $adminArea
       search: $search
       residenceStatus: $residenceStatus

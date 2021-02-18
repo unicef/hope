@@ -15,7 +15,10 @@ import {
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
 import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
-import { getFullNodeFromEdgesById } from '../../utils/utils';
+import {
+  getFullNodeFromEdgesById,
+  handleValidationErrors,
+} from '../../utils/utils';
 import { CandidateListTab } from './Edit/CandidateListTab';
 import { TargetPopulationProgramme } from './TargetPopulationProgramme';
 
@@ -79,7 +82,9 @@ export function EditTargetPopulation({
     return errors;
   };
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
   });
 
   return (
@@ -87,32 +92,46 @@ export function EditTargetPopulation({
       initialValues={initialValues}
       validate={handleValidate}
       validationSchema={validationSchema}
-      onSubmit={async (values) => {
-        await mutate({
-          variables: {
-            input: {
-              id: values.id,
-              programId: values.program,
-              ...(targetPopulation.status === 'DRAFT' && { name: values.name }),
-              ...getTargetingCriteriaVariables({
-                criterias: values.candidateListCriterias,
-              }),
-            },
-          },
-          refetchQueries: () => [
-            {
-              query: TARGET_POPULATION_QUERY,
-              variables: {
-                id,
+      onSubmit={async (values, { setFieldError }) => {
+        try {
+          await mutate({
+            variables: {
+              input: {
+                id: values.id,
+                programId: values.program,
+                ...(targetPopulation.status === 'DRAFT' && {
+                  name: values.name,
+                }),
+                ...getTargetingCriteriaVariables({
+                  criterias: values.candidateListCriterias,
+                }),
               },
             },
-          ],
-        });
-        cancelEdit();
-        showMessage('Target Population Updated', {
-          pathname: `/${businessArea}/target-population/${values.id}`,
-          historyMethod: 'push',
-        });
+            refetchQueries: () => [
+              {
+                query: TARGET_POPULATION_QUERY,
+                variables: {
+                  id,
+                },
+              },
+            ],
+          });
+          cancelEdit();
+          showMessage('Target Population Updated', {
+            pathname: `/${businessArea}/target-population/${values.id}`,
+            historyMethod: 'push',
+          });
+        } catch (e) {
+          const { nonValidationErrors } = handleValidationErrors(
+            'updateTargetPopulation',
+            e,
+            setFieldError,
+            showMessage,
+          );
+          if (nonValidationErrors.length > 0) {
+            showMessage('Unexpected problem while creating Target Population');
+          }
+        }
       }}
     >
       {({ values }) => (

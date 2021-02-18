@@ -30,7 +30,6 @@ export function IndividualVulnerabilities({
   individual,
 }: IndividualVulnerabilitesProps): React.ReactElement {
   const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
-  console.log(loading)
   if (loading) {
     return null;
   }
