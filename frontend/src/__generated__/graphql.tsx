@@ -370,9 +370,19 @@ export type BusinessAreaNodeEdge = {
 };
 
 export enum CashPlanDeliveryType {
+  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
+  CashByFsp = 'CASH_BY_FSP',
+  Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  Transfer = 'TRANSFER'
+  InKind = 'IN_KIND',
+  MobileMoney = 'MOBILE_MONEY',
+  Other = 'OTHER',
+  PrePaidCard = 'PRE_PAID_CARD',
+  Referral = 'REFERRAL',
+  Transfer = 'TRANSFER',
+  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
+  Voucher = 'VOUCHER'
 }
 
 export type CashPlanNode = Node & {
@@ -558,6 +568,7 @@ export type ChartPaymentVerification = {
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
   households?: Maybe<Scalars['Int']>,
+  averageSampleSize?: Maybe<Scalars['Float']>,
 };
 
 export type CheckAgainstSanctionListMutation = {
@@ -2939,9 +2950,19 @@ export type PageInfo = {
 };
 
 export enum PaymentRecordDeliveryType {
+  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
+  CashByFsp = 'CASH_BY_FSP',
+  Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  Transfer = 'TRANSFER'
+  InKind = 'IN_KIND',
+  MobileMoney = 'MOBILE_MONEY',
+  Other = 'OTHER',
+  PrePaidCard = 'PRE_PAID_CARD',
+  Referral = 'REFERRAL',
+  Transfer = 'TRANSFER',
+  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
+  Voucher = 'VOUCHER'
 }
 
 export enum PaymentRecordEntitlementCardStatus {
@@ -3024,9 +3045,9 @@ export type PaymentRecordNodeEdge = {
 };
 
 export enum PaymentRecordStatus {
-  Success = 'SUCCESS',
-  Pending = 'PENDING',
-  Error = 'ERROR'
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
+  TransactionPending = 'TRANSACTION_PENDING',
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
 }
 
 export type PaymentVerificationNode = Node & {
@@ -6417,7 +6438,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartPaymentVerification: Maybe<(
     { __typename?: 'ChartPaymentVerification' }
-    & Pick<ChartPaymentVerification, 'labels' | 'households'>
+    & Pick<ChartPaymentVerification, 'labels' | 'households' | 'averageSampleSize'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DetailedDatasetsNode' }
       & Pick<_DetailedDatasetsNode, 'label' | 'data'>
@@ -11131,6 +11152,7 @@ export const AllChartsDocument = gql`
     }
     labels
     households
+    averageSampleSize
   }
   chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
@@ -16365,6 +16387,7 @@ export type ChartPaymentVerificationResolvers<ContextType = any, ParentType exte
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
   households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  averageSampleSize?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
 };
 
 export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']> = {
