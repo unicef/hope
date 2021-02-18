@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs, Tab } from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';

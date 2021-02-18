@@ -66,7 +66,7 @@ class ProgramFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(name__icontains=value)
+            q_obj |= Q(name__startswith=value)
         return qs.filter(q_obj)
 
 
@@ -112,7 +112,7 @@ class CashPlanFilter(FilterSet):
     class Meta:
         fields = {
             "program": ["exact"],
-            "assistance_through": ["exact", "icontains"],
+            "assistance_through": ["exact", "startswith"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
             "business_area": ["exact"],
@@ -140,8 +140,8 @@ class CashPlanFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__icontains=value)
-            q_obj |= Q(ca_id__icontains=value)
+            q_obj |= Q(id__startswith=value)
+            q_obj |= Q(ca_id__startswith=value)
         return qs.filter(q_obj)
 
 
@@ -171,9 +171,9 @@ class ChartProgramFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(first_name__icontains=value)
-            q_obj |= Q(last_name__icontains=value)
-            q_obj |= Q(email__icontains=value)
+            q_obj |= Q(first_name__startswith=value)
+            q_obj |= Q(last_name__startswith=value)
+            q_obj |= Q(email__startswith=value)
         return qs.filter(q_obj)
 
 

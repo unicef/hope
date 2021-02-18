@@ -443,7 +443,7 @@
                 "defaultValue": null
               },
               {
-                "name": "fullName_Icontains",
+                "name": "fullName_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -563,7 +563,7 @@
                 "defaultValue": null
               },
               {
-                "name": "id_Icontains",
+                "name": "id_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -593,7 +593,7 @@
                 "defaultValue": null
               },
               {
-                "name": "area_Icontains",
+                "name": "area_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -2093,7 +2093,7 @@
                 "defaultValue": null
               },
               {
-                "name": "title_Icontains",
+                "name": "title_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -2790,7 +2790,7 @@
                 "defaultValue": null
               },
               {
-                "name": "assistanceThrough_Icontains",
+                "name": "assistanceThrough_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -3657,7 +3657,7 @@
                 "defaultValue": null
               },
               {
-                "name": "countryOrigin_Icontains",
+                "name": "countryOrigin_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -3677,7 +3677,7 @@
                 "defaultValue": null
               },
               {
-                "name": "address_Icontains",
+                "name": "address_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -3697,7 +3697,7 @@
                 "defaultValue": null
               },
               {
-                "name": "headOfHousehold_FullName_Icontains",
+                "name": "headOfHousehold_FullName_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -3963,7 +3963,17 @@
                 "defaultValue": null
               },
               {
-                "name": "fullName_Icontains",
+                "name": "fullName_Startswith",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "fullName_Endswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -5239,7 +5249,7 @@
                 "defaultValue": null
               },
               {
-                "name": "name_Icontains",
+                "name": "name_Startswith",
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
@@ -41072,6 +41082,18 @@
         "description": null,
         "fields": [
           {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetPopulation",
             "description": null,
             "args": [],
@@ -41170,6 +41192,18 @@
         "description": null,
         "fields": [
           {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "targetPopulation",
             "description": null,
             "args": [],
@@ -41261,6 +41295,18 @@
             "type": {
               "kind": "OBJECT",
               "name": "TargetPopulationNode",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
               "ofType": null
             },
             "isDeprecated": false,
@@ -41660,6 +41706,18 @@
         "description": null,
         "fields": [
           {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "program",
             "description": null,
             "args": [],
@@ -41837,6 +41895,18 @@
         "name": "UpdateProgram",
         "description": null,
         "fields": [
+          {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "program",
             "description": null,
@@ -42034,6 +42104,18 @@
         "description": null,
         "fields": [
           {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "registrationDataImport",
             "description": null,
             "args": [],
@@ -42097,6 +42179,18 @@
         "name": "RegistrationKoboImportMutation",
         "description": null,
         "fields": [
+          {
+            "name": "validationErrors",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "registrationDataImport",
             "description": null,
