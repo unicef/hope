@@ -83,9 +83,9 @@ class HouseholdFilter(FilterSet):
         model = Household
         fields = {
             "business_area": ["exact"],
-            "country_origin": ["exact", "icontains"],
-            "address": ["exact", "icontains"],
-            "head_of_household__full_name": ["exact", "icontains"],
+            "country_origin": ["exact", "startswith"],
+            "address": ["exact", "startswith"],
+            "head_of_household__full_name": ["exact", "startswith"],
             "size": ["range", "lte", "gte"],
             "admin_area": ["exact"],
             "target_populations": ["exact"],
@@ -116,9 +116,15 @@ class HouseholdFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(head_of_household__full_name__icontains=value)
-            q_obj |= Q(unicef_id__icontains=value)
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(head_of_household__full_name__startswith=value)
+            q_obj |= Q(head_of_household__given_name__startswith=value)
+            q_obj |= Q(head_of_household__middle_name__startswith=value)
+            q_obj |= Q(head_of_household__family_name__startswith=value)
+            q_obj |= Q(unicef_id__startswith=value)
+            q_obj |= Q(unicef_id__startswith=value)
+            q_obj |= Q(unicef_id__endswith=value)
+            q_obj |= Q(id__startswith=value)
+            q_obj |= Q(id__endswith=value)
         return qs.filter(q_obj)
 
 
@@ -141,7 +147,7 @@ class IndividualFilter(FilterSet):
             "household__id": ["exact"],
             "programs": ["exact"],
             "business_area": ["exact"],
-            "full_name": ["exact", "icontains"],
+            "full_name": ["exact", "startswith","endswith"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
@@ -166,11 +172,15 @@ class IndividualFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(household__admin_area__title__icontains=value)
-            q_obj |= Q(unicef_id__icontains=value)
-            q_obj |= Q(household__id__icontains=value)
-            q_obj |= Q(household__unicef_id=value)
-            q_obj |= Q(full_name__icontains=value)
+            q_obj |= Q(household__admin_area__title__startswith=value)
+            q_obj |= Q(unicef_id__startswith=value)
+            q_obj |= Q(unicef_id__endswith=value)
+            q_obj |= Q(household__id__startswith=value)
+            q_obj |= Q(household__unicef_id__startswith=value)
+            q_obj |= Q(full_name__startswith=value)
+            q_obj |= Q(given_name__startswith=value)
+            q_obj |= Q(middle_name__startswith=value)
+            q_obj |= Q(family_name__startswith=value)
         return qs.filter(q_obj)
 
     def filter_excluded_id(self, qs, name, value):
@@ -550,25 +560,15 @@ class Query(graphene.ObjectType):
     def resolve_chart_individuals_reached_by_age_and_gender(self, info, business_area_slug, year, **kwargs):
         households_params = [
             "household__female_age_group_0_5_count",
-            "household__female_age_group_0_5_disabled_count",
             "household__female_age_group_6_11_count",
-            "household__female_age_group_6_11_disabled_count",
             "household__female_age_group_12_17_count",
-            "household__female_age_group_12_17_disabled_count",
             "household__female_age_group_18_59_count",
-            "household__female_age_group_18_59_disabled_count",
             "household__female_age_group_60_count",
-            "household__female_age_group_60_disabled_count",
             "household__male_age_group_0_5_count",
-            "household__male_age_group_0_5_disabled_count",
             "household__male_age_group_6_11_count",
-            "household__male_age_group_6_11_disabled_count",
             "household__male_age_group_12_17_count",
-            "household__male_age_group_12_17_disabled_count",
             "household__male_age_group_18_59_count",
-            "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_count",
-            "household__male_age_group_60_disabled_count",
         ]
 
         payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
@@ -610,7 +610,7 @@ class Query(graphene.ObjectType):
 
         payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
                                                                           chart_filters_decoder(kwargs))
-
+        #aggregate with distinct by household__id is not possible
         households_with_disability_counts = payment_records_qs.select_related('household').values_list(
             *households_params_with_disability).distinct("household__id")
 

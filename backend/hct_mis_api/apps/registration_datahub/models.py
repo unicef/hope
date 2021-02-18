@@ -256,7 +256,7 @@ class RegistrationDataImportDatahub(TimeStampedUUIDModel):
 
     name = models.CharField(max_length=255, blank=True)
     import_date = models.DateTimeField(auto_now_add=True)
-    hct_id = models.UUIDField(null=True)
+    hct_id = models.UUIDField(null=True, db_index=True)
     import_data = models.OneToOneField(
         "ImportData",
         related_name="registration_data_import",
