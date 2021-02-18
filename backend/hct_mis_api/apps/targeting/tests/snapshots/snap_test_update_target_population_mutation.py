@@ -134,7 +134,8 @@ snapshots['TestUpdateTargetPopulationMutation::test_update_mutation_correct_vari
                 'finalListTotalIndividuals': None,
                 'name': 'with_permission_draft updated',
                 'status': 'DRAFT'
-            }
+            },
+            'validationErrors': None
         }
     }
 }
