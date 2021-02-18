@@ -528,17 +528,17 @@ def update_labels_mapping(csv_file):
         for core_field, labels in labels_mapping.items():
             old_label = (
                 json.dumps(labels["old"])
-                    .replace("\\", r"\\")
-                    .replace('"', r"\"")
-                    .replace("(", r"\(")
-                    .replace(")", r"\)")
-                    .replace("[", r"\[")
-                    .replace("]", r"\]")
-                    .replace("?", r"\?")
-                    .replace("*", r"\*")
-                    .replace("$", r"\$")
-                    .replace("^", r"\^")
-                    .replace(".", r"\.")
+                .replace("\\", r"\\")
+                .replace('"', r"\"")
+                .replace("(", r"\(")
+                .replace(")", r"\)")
+                .replace("[", r"\[")
+                .replace("]", r"\]")
+                .replace("?", r"\?")
+                .replace("*", r"\*")
+                .replace("$", r"\$")
+                .replace("^", r"\^")
+                .replace(".", r"\.")
             )
             new_label = json.dumps(labels["new"])
             new_content = re.sub(
@@ -572,13 +572,17 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-        obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None, year_filter_path: str = None
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
+    if year_filter_path is None:
+        year_filter = {"created_at__year": year}
+    else:
+        year_filter = {f"{year_filter_path}__year": year}
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
+    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -620,11 +624,13 @@ def chart_filters_decoder(filters):
 
 def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
-    if filters.get('program') is not None:
-        filter_query.update({program_id_path: filters.get('program')})
-    if filters.get('administrative_area') is not None:
-        filter_query.update({
-            f"{administrative_area_path}__id": filters.get('administrative_area'),
-            f"{administrative_area_path}__admin_area_level__admin_level": 2
-        })
+    if filters.get("program") is not None:
+        filter_query.update({program_id_path: filters.get("program")})
+    if filters.get("administrative_area") is not None:
+        filter_query.update(
+            {
+                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__admin_area_level__admin_level": 2,
+            }
+        )
     return filter_query
