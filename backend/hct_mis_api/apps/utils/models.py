@@ -9,8 +9,8 @@ from concurrency.fields import IntegerVersionField
 
 
 class TimeStampedUUIDModel(UUIDModel):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
         abstract = True
@@ -23,6 +23,7 @@ class SoftDeletableModelWithDate(models.Model):
     kept in db for any reason.
     Default manager returns only not-removed entries.
     """
+
     is_removed = models.BooleanField(default=False)
     removed_date = models.DateTimeField(null=True, blank=True)
 
@@ -52,9 +53,9 @@ class SoftDeletionTreeManager(TreeManager):
         """
         return (
             super(TreeManager, self)
-                .get_queryset(*args, **kwargs)
-                .filter(is_removed=False)
-                .order_by(self.tree_id_attr, self.left_attr)
+            .get_queryset(*args, **kwargs)
+            .filter(is_removed=False)
+            .order_by(self.tree_id_attr, self.left_attr)
         )
 
 

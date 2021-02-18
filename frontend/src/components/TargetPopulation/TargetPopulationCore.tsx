@@ -27,8 +27,6 @@ export function TargetPopulationCore({
 }): React.ReactElement {
   if (!candidateList) return null;
   const { rules: candidateListRules } = candidateList;
-  const totalNumOfHouseholds = targetPopulation.candidateListTotalHouseholds;
-  const totalNumOfIndividuals = targetPopulation.candidateListTotalIndividuals;
   return (
     <>
       <TargetingCriteria
@@ -38,9 +36,7 @@ export function TargetPopulationCore({
       <Results
         resultsData={targetPopulation.candidateStats}
         totalNumOfHouseholds={targetPopulation.candidateStats.allHouseholds}
-        totalNumOfIndividuals={
-          targetPopulation.candidateStats.allIndividuals
-        }
+        totalNumOfIndividuals={targetPopulation.candidateStats.allIndividuals}
       />
       {candidateListRules.length ? (
         <TargetingHouseholds

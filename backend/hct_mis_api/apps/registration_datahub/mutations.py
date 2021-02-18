@@ -7,6 +7,7 @@ import graphene
 import openpyxl
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from graphene_file_upload.scalars import Upload
 
@@ -40,8 +41,10 @@ from hct_mis_api.apps.registration_datahub.validators import (
     UploadXLSXValidator,
     KoboProjectImportDataValidator,
 )
+from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
-
+@transaction.atomic(using="default")
+@transaction.atomic(using="registration_datahub")
 def create_registration_data_import_objects(registration_data_import_data, user, data_source):
     import_data_id = decode_id_string(registration_data_import_data.pop("import_data_id"))
     import_data_obj = ImportData.objects.get(id=import_data_id)
@@ -53,7 +56,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
         import_data=import_data_obj,
         **registration_data_import_data,
     )
-    created_obj_hct = RegistrationDataImport.objects.create(
+    created_obj_hct = RegistrationDataImport(
         status=RegistrationDataImport.IMPORTING,
         imported_by=user,
         data_source=data_source,
@@ -62,6 +65,8 @@ def create_registration_data_import_objects(registration_data_import_data, user,
         business_area=business_area,
         **registration_data_import_data,
     )
+    created_obj_hct.full_clean()
+    created_obj_hct.save()
 
     created_obj_datahub.hct_id = created_obj_hct.id
     created_obj_datahub.save()
@@ -89,7 +94,7 @@ class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     business_area_slug = graphene.String()
 
 
-class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
+class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -97,7 +102,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, registration_data_import_data):
+    def processed_mutate(cls, root, info, registration_data_import_data):
         (
             created_obj_datahub,
             created_obj_hct,
@@ -116,7 +121,7 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation):
             business_area=str(business_area.id),
         )
 
-        return RegistrationXlsxImportMutation(created_obj_hct)
+        return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
 
 
 class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
@@ -153,7 +158,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
         return cls(ok=True)
 
 
-class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
+class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, ValidationErrorMutationMixin):
     registration_data_import = graphene.Field(RegistrationDataImportNode)
 
     class Arguments:
@@ -167,7 +172,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, registration_data_import_data):
+    def processed_mutate(cls, root, info, registration_data_import_data):
         cls.check_is_not_empty(registration_data_import_data.import_data_id)
 
         (
@@ -187,7 +192,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation):
             business_area=str(business_area.id),
         )
 
-        return RegistrationXlsxImportMutation(created_obj_hct)
+        return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
 
 
 class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):

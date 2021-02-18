@@ -14,6 +14,7 @@ import { useSnackbar } from '../../../hooks/useSnackBar';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { Dialog } from '../Dialog';
 import { DialogActions } from '../DialogActions';
+import { handleValidationErrors } from '../../../utils/utils';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;
@@ -70,19 +71,28 @@ export function DuplicateTargetPopulation({
       <Formik
         validationSchema={validationSchema}
         initialValues={initialValues}
-        onSubmit={async (values) => {
+        onSubmit={async (values, { setFieldError }) => {
           try {
-            await mutate({
+            const res = await mutate({
               variables: { input: { targetPopulationData: { ...values } } },
-            }).then((res) => {
-              setOpen(false);
-              return showMessage('Target Population Duplicated', {
-                pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
-                historyMethod: 'push',
-              });
+            });
+            setOpen(false);
+            showMessage('Target Population Duplicated', {
+              pathname: `/${businessArea}/target-population/${res.data.copyTargetPopulation.targetPopulation.id}`,
+              historyMethod: 'push',
             });
           } catch (e) {
-            e.graphQLErrors.map((x) => showMessage(x.message));
+            const { nonValidationErrors } = handleValidationErrors(
+              'copyTargetPopulation',
+              e,
+              setFieldError,
+              showMessage,
+            );
+            if (nonValidationErrors.length > 0) {
+              showMessage(
+                'Unexpected problem while creating Target Population',
+              );
+            }
           }
         }}
       >

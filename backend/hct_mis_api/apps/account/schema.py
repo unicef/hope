@@ -38,7 +38,7 @@ class UsersFilter(FilterSet):
     class Meta:
         model = get_user_model()
         fields = {
-            "search": ["exact", "icontains"],
+            "search": ["exact", "startswith"],
             "status": ["exact"],
             "partner": ["exact"],
             "roles": ["exact"],
@@ -52,9 +52,9 @@ class UsersFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(first_name__icontains=value)
-            q_obj |= Q(last_name__icontains=value)
-            q_obj |= Q(email__icontains=value)
+            q_obj |= Q(first_name__startswith=value)
+            q_obj |= Q(last_name__startswith=value)
+            q_obj |= Q(email__startswith=value)
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs, name, value):

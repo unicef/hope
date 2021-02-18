@@ -67,8 +67,7 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const closingConfirmationText =
-    'Are you sure you want to close the ticket ? By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found.';
+  const closingConfirmationText = 'Are you sure you want to close the ticket?';
 
   const changeState = (status): void => {
     mutate({

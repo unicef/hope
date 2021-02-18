@@ -48,7 +48,7 @@ export function DashboardYearPage({
       year: parseInt(year, 10),
       businessAreaSlug: businessArea,
       program: filter.program,
-      administrativeArea: filter.administrativeArea,
+      administrativeArea: filter.administrativeArea?.node?.id,
     },
   });
   if (loading) return <LoadingComponent />;
@@ -61,7 +61,9 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountPlannedAndTransferredSection />
+            <TotalAmountPlannedAndTransferredSection
+              data={data.chartTotalTransferredCashByCountry}
+            />
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
