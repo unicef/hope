@@ -5578,7 +5578,7 @@ export type TargetPopulationMinimalFragment = (
 
 export type TargetPopulationDetailedFragment = (
   { __typename?: 'TargetPopulationNode' }
-  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
   & { steficonRule: Maybe<(
     { __typename?: 'SteficonRuleNode' }
     & Pick<SteficonRuleNode, 'id' | 'name'>
@@ -7112,7 +7112,7 @@ export type CashPlanPaymentVerificationQuery = (
     & Pick<CashPlanPaymentVerificationNode, 'id'>
     & { cashPlan: (
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id'>
+      & Pick<CashPlanNode, 'id' | 'caHashId'>
     ) }
   )> }
 );
@@ -7558,7 +7558,7 @@ export type PaymentRecordVerificationQuery = (
     & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
       & { household: (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
@@ -8529,6 +8529,7 @@ export const TargetPopulationDetailedFragmentDoc = gql`
   candidateListTotalIndividuals
   finalListTotalHouseholds
   finalListTotalIndividuals
+  caHashId
   steficonRule {
     id
     name
@@ -12650,6 +12651,7 @@ export const CashPlanPaymentVerificationDocument = gql`
     id
     cashPlan {
       id
+      caHashId
     }
   }
 }
@@ -13647,6 +13649,7 @@ export const PaymentRecordVerificationDocument = gql`
       status
       statusDate
       caId
+      caHashId
       household {
         unicefId
         id
