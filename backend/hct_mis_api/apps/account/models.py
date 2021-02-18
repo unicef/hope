@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
@@ -13,6 +14,7 @@ from model_utils.models import UUIDModel
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 INVITED = "INVITED"
 ACTIVE = "ACTIVE"
@@ -76,7 +78,13 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
-    name = models.CharField(max_length=250, unique=True)
+    name = models.CharField(max_length=250, unique=True,       validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],)
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )

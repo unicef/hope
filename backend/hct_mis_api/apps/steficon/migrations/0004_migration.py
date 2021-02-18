@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='rule',
             name='name',
-            field=django.contrib.postgres.fields.citext.CICharField(max_length=100, unique=True, validators=[django.core.validators.ProhibitNullCharactersValidator(), hct_mis_api.apps.steficon.models.StartEndSpaceValidator(), hct_mis_api.apps.steficon.models.DoubleSpaceValidator()]),
+            field=django.contrib.postgres.fields.citext.CICharField(max_length=100, unique=True, validators=[django.core.validators.ProhibitNullCharactersValidator(), hct_mis_api.apps.steficon.models.StartEndSpaceValidator, hct_mis_api.apps.steficon.models.DoubleSpaceValidator]),
         ),
     ]
