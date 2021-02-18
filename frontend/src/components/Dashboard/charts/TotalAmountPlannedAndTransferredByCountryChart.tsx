@@ -1,10 +1,10 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {AllChartsQuery, GlobalAreaChartsQuery} from '../../../__generated__/graphql';
 
 interface TotalAmountPlannedAndTransferredByCountryChartProps {
-  data: AllChartsQuery['chartTotalTransferredCashByCountry'];
+  data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
 
 export const TotalAmountPlannedAndTransferredByCountryChart = ({
