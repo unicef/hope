@@ -6425,6 +6425,13 @@ export type AllChartsQuery = (
       { __typename?: '_TableTotalCashTransferredDataNode' }
       & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred'>
     )>>> }
+  )>, chartTotalTransferredCashByCountry: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
   )>, chartPlannedBudget: Maybe<(
     { __typename?: 'ChartDetailedDatasetsNode' }
     & Pick<ChartDetailedDatasetsNode, 'labels'>
@@ -11048,6 +11055,13 @@ export const AllChartsDocument = gql`
       admin2
       totalCashTransferred
     }
+  }
+  chartTotalTransferredCashByCountry(year: $year) {
+    datasets {
+      data
+      label
+    }
+    labels
   }
   chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
