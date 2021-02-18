@@ -30,7 +30,7 @@ from hct_mis_api.apps.core.utils import (
     chart_get_filtered_qs,
     chart_permission_decorator,
     chart_filters_decoder,
-    chart_create_filter_query
+    chart_create_filter_query,
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -199,6 +199,7 @@ class GetCashplanVerificationSampleSizeObject(graphene.ObjectType):
 
 class ChartPaymentVerification(ChartDetailedDatasetsNode):
     households = graphene.Int()
+    average_sample_size = graphene.Float()
 
 
 class Query(graphene.ObjectType):
@@ -222,24 +223,39 @@ class Query(graphene.ObjectType):
     )
 
     chart_payment_verification = graphene.Field(
-        ChartPaymentVerification, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        ChartPaymentVerification,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     chart_volume_by_delivery_mechanism = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        ChartDatasetNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     chart_payment = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        ChartDatasetNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     section_total_transferred = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     table_total_cash_transferred_by_administrative_area = graphene.Field(
-        TableTotalCashTransferred, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        TableTotalCashTransferred,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     chart_total_transferred_cash_by_country = graphene.Field(
         ChartDetailedDatasetsNode, year=graphene.Int(required=True)
@@ -342,22 +358,38 @@ class Query(graphene.ObjectType):
             business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
         )
         payment_verifications_amounts = payment_verifications.values("status").annotate(count=Count("status"))
-        payment_verifications_amounts_dict = {x.get('status'): x.get('count') for x in payment_verifications_amounts}
+        payment_verifications_amounts_dict = {x.get("status"): x.get("count") for x in payment_verifications_amounts}
         dataset = [payment_verifications_amounts_dict.get(status, 0) for status in status_choices_mapping.keys()]
         try:
-            all_verifications=sum(dataset)
-            dataset_percentage = [data /all_verifications  for data in dataset]
+            all_verifications = sum(dataset)
+            dataset_percentage = [data / all_verifications for data in dataset]
         except ZeroDivisionError:
             dataset_percentage = [0] * len(status_choices_mapping.values())
         dataset_percentage_done = [
             {"label": status, "data": [dataset_percentage_value]}
             for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
         ]
-        payment_verifications.distinct("payment_record").count()
+        samples_count = payment_verifications.distinct("payment_record").count()
+        all_payment_records_for_created_verifications = (
+            PaymentRecord.objects.filter(
+                cash_plan__in=payment_verifications.distinct("cash_plan_payment_verification__cash_plan").values_list(
+                    "cash_plan_payment_verification__cash_plan", flat=True
+                )
+            )
+            .filter(status=PaymentRecord.STATUS_SUCCESS)
+            .count()
+        )
+        if samples_count == 0 or all_payment_records_for_created_verifications == 0:
+            average_sample_size = 0
+        else:
+            print(samples_count)
+            print(all_payment_records_for_created_verifications)
+            average_sample_size = samples_count / all_payment_records_for_created_verifications
         return {
             "labels": ["Payment Verification"],
             "datasets": dataset_percentage_done,
-            "households": payment_verifications.values_list("payment_record__household", flat=True).distinct("payment_record__household").count(),
+            "households": payment_verifications.distinct("payment_record__household").count(),
+            "average_sample_size": average_sample_size,
         }
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -372,20 +404,13 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas"
+                    administrative_area_path="cash_plan__program__admin_areas",
                 )
             },
         )
-        dataset = [
-            {
-                "data": [
-                    payment_records.filter(delivery_type=delivery_type).aggregate(Sum("delivered_quantity_usd"))[
-                        "delivered_quantity_usd__sum"
-                    ]
-                    for delivery_type in delivery_type_choices_mapping.keys()
-                ]
-            }
-        ]
+        volume_by_delivery_type = payment_records.values("delivery_type").annotate(volume=Sum("delivered_quantity_usd"))
+        volume_by_delivery_type_dict = {x.get("delivery_type"): x.get("volume") for x in volume_by_delivery_type}
+        dataset = [{"data": [volume_by_delivery_type_dict.get(x, 0) for x in delivery_type_choices_mapping.keys()]}]
         return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -399,15 +424,15 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas"
+                    administrative_area_path="cash_plan__program__admin_areas",
                 )
-            }
+            },
         )
         dataset = [
             {
                 "data": [
                     payment_records.filter(delivered_quantity_usd__gt=0).count(),
-                    payment_records.filter(delivered_quantity_usd=0).count()
+                    payment_records.filter(delivered_quantity_usd=0).count(),
                 ]
             }
         ]
@@ -424,7 +449,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas"
+                    administrative_area_path="cash_plan__program__admin_areas",
                 )
             },
         )
@@ -438,12 +463,12 @@ class Query(graphene.ObjectType):
             business_area_slug_filter={"business_area__slug": business_area_slug},
             additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
         )
-        payment_records = payment_records.select_related("household").filter(
-            household__admin_area__level=2
+        payment_records = payment_records.select_related("household").filter(household__admin_area__level=2)
+        annotated_dict = (
+            payment_records.filter(~Q(household__admin_area=None))
+            .values("household__admin_area__id", "household__admin_area__title")
+            .annotate(total_cash_transferred=Sum("delivered_quantity_usd"))
         )
-        annotated_dict = payment_records.filter(~Q(household__admin_area=None)).values('household__admin_area__id',
-                                                                                       "household__admin_area__title").annotate(
-            total_cash_transferred=Sum("delivered_quantity_usd"))
 
         data = [
             {
@@ -464,10 +489,9 @@ class Query(graphene.ObjectType):
         )
         countries_and_amounts = (
             payment_records.values("business_area__name")
-                .order_by("business_area__name")
-                .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
-                .annotate(
-                total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
+            .order_by("business_area__name")
+            .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
+            .annotate(total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
         )
 
         labels = []
