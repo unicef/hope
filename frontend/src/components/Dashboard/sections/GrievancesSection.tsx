@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Grid, Typography } from '@material-ui/core';
 import { DashboardPaper } from '../DashboardPaper';
 import { GrievancesChart } from '../charts/GrievancesChart';
 import { AllChartsQuery } from '../../../__generated__/graphql';

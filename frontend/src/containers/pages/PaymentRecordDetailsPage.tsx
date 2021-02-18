@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import { Button } from '@material-ui/core';
 import {
   PaymentRecordNode,
   useCashAssistUrlPrefixQuery,
@@ -15,7 +16,6 @@ import { LoadingComponent } from '../../components/LoadingComponent';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { Button } from '@material-ui/core';
 
 const Container = styled.div`
   display: flex;

@@ -27,7 +27,7 @@ class RegistrationDataImportFilter(FilterSet):
             "imported_by__id": ["exact"],
             "import_date": ["exact"],
             "status": ["exact"],
-            "name": ["exact", "icontains"],
+            "name": ["exact", "startswith"],
             "business_area": ["exact"],
         }
 
