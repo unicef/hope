@@ -19,6 +19,7 @@ export const CREATE_PROGRAM_MUTATION = gql`
         populationGoal
         individualDataNeeded
       }
+      validationErrors
     }
   }
 `;
