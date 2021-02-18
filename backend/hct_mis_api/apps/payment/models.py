@@ -98,7 +98,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        max_length=20,
+        max_length=24,
     )
     currency = models.CharField(
         max_length=4,
