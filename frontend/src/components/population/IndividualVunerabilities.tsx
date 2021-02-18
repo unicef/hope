@@ -4,7 +4,11 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
-import { IndividualNode } from '../../__generated__/graphql';
+import {
+  IndividualNode,
+  useAllIndividualsFlexFieldsAttributesQuery
+} from '../../__generated__/graphql';
+import { getFlexFieldTextValue } from "../../utils/utils"
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -25,17 +29,32 @@ interface IndividualVulnerabilitesProps {
 export function IndividualVulnerabilities({
   individual,
 }: IndividualVulnerabilitesProps): React.ReactElement {
-  const fields = [];
-  // eslint-disable-next-line guard-for-in,no-restricted-syntax
-  for (const flexFieldKey in individual.flexFields) {
-    fields.push(
-      <LabelizedField
-        key={flexFieldKey}
-        label={flexFieldKey}
-        value={individual.flexFields[flexFieldKey]}
-      />,
-    );
+  const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
+  if (loading) {
+    return null;
   }
+  const fieldsDict = data.allIndividualsFlexFieldsAttributes.reduce(
+    (previousValue, currentValue) => {
+      // eslint-disable-next-line no-param-reassign
+      previousValue[currentValue.name] = currentValue;
+      return previousValue;
+    },
+    {},
+  );
+
+  // eslint-disable-next-line array-callback-return,consistent-return
+  const fields = Object.entries(individual.flexFields || {}).map(([key, value]: [string, string|string[]]) => {
+    const flexFieldAttribute = fieldsDict[key]
+    if (typeof flexFieldAttribute !== 'undefined') {
+      return (
+        <LabelizedField
+          key={key}
+          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+          value={getFlexFieldTextValue(key, value, flexFieldAttribute)}
+        />
+     )
+    }
+  })
   return (
     <div>
       <Overview>

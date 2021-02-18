@@ -1,9 +1,9 @@
 import xlrd
-from admin_extra_urls.extras import link, ExtraUrlMixin
-from django.contrib import admin
+from admin_extra_urls.api import link, ExtraUrlMixin, action
+from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.forms import forms
+from django import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
@@ -18,17 +18,75 @@ from hct_mis_api.apps.core.models import (
     XLSXKoboTemplate,
     AdminArea,
     AdminAreaLevel,
+    CountryCodeMap,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
+from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 
 
 class XLSImportForm(forms.Form):
     xls_file = forms.FileField()
 
 
+class TestRapidproForm(forms.Form):
+    phone_number = forms.CharField(
+        label="Phone number",
+        required=True,
+    )
+    flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
+
+
 @admin.register(BusinessArea)
-class BusinessAreaAdmin(admin.ModelAdmin):
+class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
+
+    @action(label="Test RapidPro Connection")
+    def _test_rapidpro_connection(self, request, pk):
+        context = self.get_common_context(request, pk)
+        api = RapidProAPI(self.object.slug)
+
+        if request.method == "GET":
+            phone_number = request.GET.get("phone_number", None)
+            flow_uuid = request.GET.get("flow_uuid", None)
+            flow_name = request.GET.get("flow_name", None)
+            timestamp = request.GET.get("timestamp", None)
+
+            if all([phone_number, flow_uuid, flow_name, timestamp]):
+                error, result = api.test_connection_flow_run(flow_uuid, phone_number, timestamp)
+                context["run_result"] = result
+                context["phone_number"] = phone_number
+                context["flow_uuid"] = flow_uuid
+                context["flow_name"] = flow_name
+                context["timestamp"] = timestamp
+
+                if error:
+                    messages.error(request, error)
+                else:
+                    messages.success(request, "Connection successful")
+            else:
+                context["form"] = TestRapidproForm()
+        else:
+            form = TestRapidproForm(request.POST)
+            if form.is_valid():
+                phone_number = form.cleaned_data["phone_number"]
+                flow_name = form.cleaned_data["flow_name"]
+                context["phone_number"] = phone_number
+                context["flow_name"] = flow_name
+
+                error, response = api.test_connection_start_flow(flow_name, phone_number)
+                if response:
+                    context["flow_uuid"] = response["flow"]["uuid"]
+                    context["flow_status"] = response["status"]
+                    context["timestamp"] = response["created_on"]
+
+                if error:
+                    messages.error(request, error)
+                else:
+                    messages.success(request, "Connection successful")
+
+            context["form"] = form
+
+        return TemplateResponse(request, "core/test_rapidpro.html", context)
 
 
 @admin.register(AdminArea)
@@ -37,7 +95,7 @@ class AdminAreaAdmin(admin.ModelAdmin):
 
 
 @admin.register(AdminAreaLevel)
-class AdminAreaAdmin(admin.ModelAdmin):
+class AdminAreaLevelAdmin(admin.ModelAdmin):
     list_display = ("name", "business_area")
 
 
@@ -163,3 +221,15 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
         self.has_add_permission = has_add_permission
 
         return template_response
+
+
+@admin.register(CountryCodeMap)
+class CountryCodeMapAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    list_display = ("country", "alpha2", "alpha3", "ca_code")
+    search_fields = ("country",)
+
+    def alpha2(self, obj):
+        return obj.country.countries.alpha2(obj.country.code)
+
+    def alpha3(self, obj):
+        return obj.country.countries.alpha3(obj.country.code)

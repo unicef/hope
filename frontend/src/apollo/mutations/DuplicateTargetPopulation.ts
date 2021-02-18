@@ -9,6 +9,7 @@ export const DuplicateTargetPopulation = gql`
       targetPopulation {
         id
       }
+      validationErrors
     }
   }
 `;

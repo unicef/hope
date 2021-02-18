@@ -22,7 +22,10 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
-import { getFullNodeFromEdgesById } from '../../utils/utils';
+import {
+  getFullNodeFromEdgesById,
+  handleValidationErrors,
+} from '../../utils/utils';
 
 const PaperContainer = styled(Paper)`
   display: flex;
@@ -71,34 +74,42 @@ export function CreateTargetPopulation(): React.ReactElement {
     },
   ];
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(2, 'Too short').max(255, 'Too long'),
+    name: Yup.string()
+      .min(2, 'Too short')
+      .max(255, 'Too long'),
   });
 
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        mutate({
-          variables: {
-            input: {
-              programId: values.program,
-              name: values.name,
-              businessAreaSlug: businessArea,
-              ...getTargetingCriteriaVariables(values),
+      onSubmit={async (values, { setFieldError }) => {
+        try {
+          const res = await mutate({
+            variables: {
+              input: {
+                programId: values.program,
+                name: values.name,
+                businessAreaSlug: businessArea,
+                ...getTargetingCriteriaVariables(values),
+              },
             },
-          },
-        }).then(
-          (res) => {
-            return showMessage('Target Population Created', {
-              pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
-              historyMethod: 'push',
-            });
-          },
-          () => {
-            return showMessage('Name already exist');
-          },
-        );
+          });
+          showMessage('Target Population Created', {
+            pathname: `/${businessArea}/target-population/${res.data.createTargetPopulation.targetPopulation.id}`,
+            historyMethod: 'push',
+          });
+        } catch (e) {
+          const { nonValidationErrors } = handleValidationErrors(
+            'createTargetPopulation',
+            e,
+            setFieldError,
+            showMessage,
+          );
+          if (nonValidationErrors.length > 0) {
+            showMessage('Unexpected problem while creating Target Population');
+          }
+        }
       }}
     >
       {({ submitForm, values }) => (
@@ -163,6 +174,7 @@ export function CreateTargetPopulation(): React.ReactElement {
             <CreateTable
               variables={getTargetingCriteriaVariables(values)}
               program={values.program}
+              businessArea={businessArea}
             />
           ) : (
             <PaperContainer>

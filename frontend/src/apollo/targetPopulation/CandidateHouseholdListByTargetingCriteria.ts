@@ -8,6 +8,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
     $before: String
     $last: Int
     $orderBy: String
+    $businessArea: String
   ) {
     candidateHouseholdsListByTargetingCriteria(
       targetPopulation: $targetPopulation
@@ -16,6 +17,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
       first: $first
       last: $last
       orderBy: $orderBy
+      businessArea: $businessArea
     ) {
       edges {
         node {
@@ -33,7 +35,7 @@ export const CandidateHouseholdsListByTargetingCriteria = gql`
           }
           updatedAt
           address
-          selection{
+          selection {
             vulnerabilityScore
           }
         }

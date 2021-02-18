@@ -1,8 +1,11 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
+import { Button } from '@material-ui/core';
 import {
   PaymentRecordNode,
+  useCashAssistUrlPrefixQuery,
   usePaymentRecordQuery,
 } from '../../__generated__/graphql';
 import { PageHeader } from '../../components/PageHeader';
@@ -19,9 +22,13 @@ const Container = styled.div`
   flex-direction: column;
   width: 100%;
 `;
+const ButtonContainer = styled.span`
+  margin: 0 ${({ theme }) => theme.spacing(2)}px;
+`;
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
+  const { data: caData } = useCashAssistUrlPrefixQuery();
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
   });
@@ -59,7 +66,20 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
       <PageHeader
         title={`Payment ID ${paymentRecord.caId}`}
         breadCrumbs={breadCrumbsItems}
-      />
+      >
+        <ButtonContainer>
+          <Button
+            variant='contained'
+            color='primary'
+            component='a'
+            disabled={!paymentRecord.caHashId}
+            href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_payment&id=/${paymentRecord.caHashId}`}
+            startIcon={<OpenInNewRoundedIcon />}
+          >
+            Open in CashAssist
+          </Button>
+        </ButtonContainer>
+      </PageHeader>
       <Container>
         <PaymentRecordDetails
           paymentRecord={paymentRecord}

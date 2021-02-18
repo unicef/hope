@@ -90,7 +90,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE: _("Household Data Update"),
             ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE: _("Individual Data Update"),
             ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL: _("Add Individual"),
-            ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Delete Individual"),
+            ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL: _("Withdraw Individual"),
         },
         CATEGORY_SENSITIVE_GRIEVANCE: {
             ISSUE_TYPE_DATA_BREACH: _("Data breach"),
@@ -214,6 +214,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
+        db_index=True
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

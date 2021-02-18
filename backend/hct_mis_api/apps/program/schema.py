@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When
+from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
 from django.db.models.functions import Coalesce, Lower
 from django_filters import (
     CharFilter,
@@ -21,9 +21,18 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+from hct_mis_api.apps.core.utils import (
+    to_choice_object,
+    CustomOrderingFilter,
+    chart_map_choices,
+    chart_get_filtered_qs,
+    chart_permission_decorator,
+    chart_filters_decoder,
+    chart_create_filter_query
+)
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
 
 class ProgramFilter(FilterSet):
@@ -57,7 +66,7 @@ class ProgramFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(name__icontains=value)
+            q_obj |= Q(name__startswith=value)
         return qs.filter(q_obj)
 
 
@@ -103,7 +112,7 @@ class CashPlanFilter(FilterSet):
     class Meta:
         fields = {
             "program": ["exact"],
-            "assistance_through": ["exact", "icontains"],
+            "assistance_through": ["exact", "startswith"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
             "business_area": ["exact"],
@@ -131,8 +140,8 @@ class CashPlanFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__icontains=value)
-            q_obj |= Q(ca_id__icontains=value)
+            q_obj |= Q(id__startswith=value)
+            q_obj |= Q(ca_id__startswith=value)
         return qs.filter(q_obj)
 
 
@@ -151,6 +160,23 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class ChartProgramFilter(FilterSet):
+    business_area = CharFilter(field_name="business_area__slug", required=True)
+
+    class Meta:
+        fields = ("business_area",)
+        model = Program
+
+    def search_filter(self, qs, name, value):
+        values = value.split(" ")
+        q_obj = Q()
+        for value in values:
+            q_obj |= Q(first_name__startswith=value)
+            q_obj |= Q(last_name__startswith=value)
+            q_obj |= Q(email__startswith=value)
+        return qs.filter(q_obj)
+
+
 class Query(graphene.ObjectType):
     program = relay.Node.Field(ProgramNode)
     all_programs = DjangoPermissionFilterConnectionField(
@@ -162,6 +188,17 @@ class Query(graphene.ObjectType):
             ),
         ),
     )
+    chart_programmes_by_sector = graphene.Field(
+        ChartDetailedDatasetsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+    )
+    chart_planned_budget = graphene.Field(
+        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
+        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+    )
+
     cash_plan = relay.Node.Field(CashPlanNode)
     all_cash_plans = DjangoPermissionFilterConnectionField(
         CashPlanNode,
@@ -217,3 +254,73 @@ class Query(graphene.ObjectType):
                 output_field=IntegerField(),
             )
         ).order_by("-updated_at", "custom_order")
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
+        sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
+        programs = chart_get_filtered_qs(
+            Program, year, business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={**chart_create_filter_query(filters)}
+        )
+
+        programmes_wo_cash_plus = []
+        programmes_with_cash_plus = []
+        labels = []
+
+        for sector in sector_choice_mapping.keys():
+            programs_by_sector = programs.filter(sector=sector)
+            program_wo_cash_count = programs_by_sector.filter(cash_plus=False).count()
+            program_with_cash_count = programs_by_sector.filter(cash_plus=True).count()
+            if program_wo_cash_count > 0 or program_with_cash_count > 0:
+                programmes_wo_cash_plus.append(program_wo_cash_count)
+                programmes_with_cash_plus.append(program_with_cash_count)
+                labels.append(sector_choice_mapping.get(sector))
+
+        datasets = [
+            {
+                "label": "Programmes",
+                "data": programmes_wo_cash_plus
+            },
+            {
+                "label": "Programmes with Cash+",
+                "data": programmes_with_cash_plus
+            },
+        ]
+
+        return {"labels": labels, "datasets": datasets}
+
+    @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
+    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+        filters = chart_filters_decoder(kwargs)
+        programs = chart_get_filtered_qs(
+            Program,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
+            additional_filters={"start_date__year": year, "end_date__year": year, **chart_create_filter_query(filters)},
+        ).prefetch_related("cash_plans__payment_records")
+
+        previous_transfers_data = [0] * 12
+        cash_transfers_data = [0] * 12
+        previous_sum = 0
+        for month in range(1, 13):
+            payment_records_by_delivery_month = (
+                programs.filter(
+                    cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
+                    cash_plans__payment_records__delivery_date__year=year,
+                    cash_plans__payment_records__delivery_date__month=month,
+                )
+                .values_list("cash_plans__payment_records__delivered_quantity", flat=True)
+                .distinct()
+            )
+            for quantity_delivered in payment_records_by_delivery_month:
+                cash_transfers_data[month - 1] += quantity_delivered
+                previous_sum += quantity_delivered
+            previous_transfers_data[month - 1] = previous_sum
+        labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        datasets = [
+            {"label": "Previous Transfers", "data": previous_transfers_data},
+            {"label": "Cash Assistance", "data": cash_transfers_data},
+        ]
+
+        return {"labels": labels, "datasets": datasets}
