@@ -46,12 +46,15 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const isGlobal = businessArea === 'global';
   const { data, loading } = useAllChartsQuery({
     variables: {
       year: parseInt(year, 10),
       businessAreaSlug: businessArea,
-      program: filter.program,
-      administrativeArea: filter.administrativeArea?.node?.id,
+      ...(!isGlobal && { program: filter.program }),
+      ...(!isGlobal && {
+        administrativeArea: filter.administrativeArea?.node?.id,
+      }),
     },
   });
   const [
@@ -63,10 +66,13 @@ export function DashboardYearPage({
     },
   });
   useEffect(() => {
-    loadGlobal();
+    if (isGlobal) {
+      loadGlobal();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessArea]);
-  if (businessArea === 'global') {
+
+  if (isGlobal) {
     if (loading || globalLoading) return <LoadingComponent />;
     if (!data || !globalData) return null;
   } else {
