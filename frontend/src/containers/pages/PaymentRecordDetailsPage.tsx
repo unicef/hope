@@ -73,7 +73,8 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
             color='primary'
             component='a'
             disabled={!paymentRecord.caHashId}
-            href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_payment&id=/${paymentRecord.caHashId}`}
+            target="_blank"
+            href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
             Open in CashAssist
