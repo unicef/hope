@@ -1,12 +1,13 @@
 import moment from 'moment';
+import { GraphQLError } from 'graphql';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 import { ValidationGraphQLError } from '../apollo/client';
+import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
   ['MALE', 'Male'],
@@ -433,7 +434,12 @@ export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
   return textValue;
 };
 
-export const handleValidationErrors = (fieldName,e, setFieldError,showMessage) => {
+export const handleValidationErrors = (
+  fieldName,
+  e,
+  setFieldError,
+  showMessage,
+): { nonValidationErrors: GraphQLError[] } => {
   const validationErrors = e.graphQLErrors.filter(
     (error) => error instanceof ValidationGraphQLError,
   );
@@ -444,8 +450,8 @@ export const handleValidationErrors = (fieldName,e, setFieldError,showMessage) =
     Object.entries(validationError.validationErrors[fieldName]).map(
       // eslint-disable-next-line array-callback-return
       (entry) => {
-        if(entry[0]==="__all__"){
-          showMessage((entry[1] as string[]).join('\n'))
+        if (entry[0] === '__all__') {
+          showMessage((entry[1] as string[]).join('\n'));
         }
         setFieldError(entry[0], (entry[1] as string[]).join('\n'));
       },

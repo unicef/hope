@@ -1,4 +1,4 @@
-import React, {ReactElement, useEffect} from 'react';
+import React, { ReactElement } from 'react';
 import moment from 'moment';
 import * as Yup from 'yup';
 import styled from 'styled-components';
@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-  Paper,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';

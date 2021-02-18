@@ -1,4 +1,4 @@
-import React, { useState, ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Button } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
 import {
@@ -11,7 +11,6 @@ import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
 import { useSnackbar } from '../../../hooks/useSnackBar';
 import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
 import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
-import { ValidationGraphQLError } from '../../../apollo/client';
 
 interface EditProgramProps {
   program: ProgramNode;

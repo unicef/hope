@@ -33,9 +33,9 @@ import { FormikTextField } from '../../../shared/Formik/FormikTextField';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
+import { handleValidationErrors } from '../../../utils/utils';
 import { ErrorsKobo } from './errors/KoboErrors';
 import { Errors } from './errors/PlainErrors';
-import { handleValidationErrors } from '../../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -301,14 +301,14 @@ export function RegistrationDataImport(): React.ReactElement {
             } catch (e) {
               let nonValidationErrors;
               if (importType === 'kobo') {
-                  nonValidationErrors  = handleValidationErrors(
+                nonValidationErrors = handleValidationErrors(
                   'registrationKoboImport',
                   e,
                   setFieldError,
                   showMessage,
                 ).nonValidationErrors;
-              }else if (importType === 'excel'){
-                  nonValidationErrors  = handleValidationErrors(
+              } else if (importType === 'excel') {
+                nonValidationErrors = handleValidationErrors(
                   'registrationXlsxImport',
                   e,
                   setFieldError,
