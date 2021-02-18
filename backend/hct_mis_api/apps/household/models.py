@@ -3,9 +3,10 @@ from datetime import date
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField, CICharField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -17,7 +18,12 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import (
+    AbstractSyncable,
+    TimeStampedUUIDModel,
+    ConcurrencyModel,
+    SoftDeletableModelWithDate,
+)
 
 BLANK = ""
 IDP = "IDP"
@@ -151,9 +157,11 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
-ACTIVE = "ACTIVE"
-INACTIVE = "INACTIVE"
-INDIVIDUAL_HOUSEHOLD_STATUS = ((ACTIVE, "Active"), (INACTIVE, "Inactive"))
+STATUS_ACTIVE = "ACTIVE"
+STATUS_INACTIVE = "INACTIVE"
+STATUS_WITHDRAWN = "WITHDRAWN"
+STATUS_DUPLICATE = "DUPLICATE"
+INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
 NEEDS_ADJUDICATION = "NEEDS_ADJUDICATION"
@@ -209,9 +217,10 @@ REGISTRATION_METHOD_CHOICES = (
 )
 
 
-class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
+            "withdrawn",
             "status",
             "consent_sign",
             "consent",
@@ -267,15 +276,16 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
             "unhcr_id",
         ]
     )
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    withdrawn = models.BooleanField(default=False, db_index=True)
+    withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
     consent = models.NullBooleanField()
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
-    country_origin = CountryField(blank=True)
-    country = CountryField()
-    size = models.PositiveIntegerField()
-    address = models.CharField(max_length=255, blank=True)
+    country_origin = CountryField(blank=True, db_index=True)
+    country = CountryField(db_index=True)
+    size = models.PositiveIntegerField(db_index=True)
+    address = CICharField(max_length=255, blank=True)
     """location contains lowest administrative area info"""
     admin_area = models.ForeignKey("core.AdminArea", null=True, on_delete=models.SET_NULL)
     representatives = models.ManyToManyField(
@@ -319,13 +329,13 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
         blank=True,
     )
     returnee = models.NullBooleanField()
-    flex_fields = JSONField(default=dict)
+    flex_fields = JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
     fchild_hoh = models.NullBooleanField()
     child_hoh = models.NullBooleanField()
-    unicef_id = models.CharField(max_length=250, blank=True, default=BLANK)
+    unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
     deviceid = models.CharField(max_length=250, blank=True, default=BLANK)
@@ -336,10 +346,21 @@ class Household(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Conc
     registration_method = models.CharField(max_length=250, choices=REGISTRATION_METHOD_CHOICES, default=BLANK)
     collect_individual_data = models.CharField(max_length=250, choices=YES_NO_CHOICE, default=BLANK)
     currency = models.CharField(max_length=250, choices=CURRENCY_CHOICES, default=BLANK)
-    unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK)
+    unhcr_id = models.CharField(max_length=250, blank=True, default=BLANK, db_index=True)
 
     class Meta:
         verbose_name = "Household"
+
+    @property
+    def status(self):
+        if self.withdrawn:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
 
     @property
     def admin1(self):
@@ -464,10 +485,12 @@ class IndividualRoleInHousehold(TimeStampedUUIDModel, AbstractSyncable):
         return f"{self.individual.full_name} - {self.role}"
 
 
-class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
+class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
         [
             "status",
+            "duplicate",
+            "withdrawn",
             "individual_id",
             "photo",
             "full_name",
@@ -510,37 +533,20 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
             "who_answers_alt_phone",
         ]
     )
-
-    status = models.CharField(max_length=20, choices=INDIVIDUAL_HOUSEHOLD_STATUS, default=ACTIVE)
+    duplicate = models.BooleanField(default=False, db_index=True)
+    duplicate_date = models.DateTimeField(null=True, blank=True)
+    withdrawn = models.BooleanField(default=False, db_index=True)
+    withdrawn_date = models.DateTimeField(null=True, blank=True)
     individual_id = models.CharField(max_length=255, blank=True)
     photo = models.ImageField(blank=True)
-    full_name = models.CharField(
-        max_length=255,
-        validators=[MinLengthValidator(2)],
-    )
-    given_name = models.CharField(
-        max_length=85,
-        blank=True,
-    )
-    middle_name = models.CharField(
-        max_length=85,
-        blank=True,
-    )
-    family_name = models.CharField(
-        max_length=85,
-        blank=True,
-    )
-    sex = models.CharField(
-        max_length=255,
-        choices=SEX_CHOICE,
-    )
-    birth_date = models.DateField()
+    full_name = CICharField(max_length=255, validators=[MinLengthValidator(2)], db_index=True)
+    given_name = CICharField(max_length=85, blank=True, db_index=True)
+    middle_name = CICharField(max_length=85, blank=True, db_index=True)
+    family_name = CICharField(max_length=85, blank=True, db_index=True)
+    sex = models.CharField(max_length=255, choices=SEX_CHOICE, db_index=True)
+    birth_date = models.DateField(db_index=True)
     estimated_birth_date = models.BooleanField(default=False)
-    marital_status = models.CharField(
-        max_length=255,
-        choices=MARITAL_STATUS_CHOICE,
-        default=BLANK,
-    )
+    marital_status = models.CharField(max_length=255, choices=MARITAL_STATUS_CHOICE, default=BLANK, db_index=True)
     phone_no = PhoneNumberField(blank=True)
     phone_no_alternative = PhoneNumberField(blank=True)
     relationship = models.CharField(
@@ -576,10 +582,10 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    flex_fields = JSONField(default=dict)
+    flex_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.NullBooleanField()
     administration_of_rutf = models.NullBooleanField()
-    unicef_id = models.CharField(max_length=250, blank=True)
+    unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
         default=UNIQUE,
@@ -627,6 +633,29 @@ class Individual(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Con
         values = [str(getattr(self, field)) for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
+
+    @property
+    def status(self):
+        statuses = []
+        if self.duplicate:
+            statuses.append(STATUS_DUPLICATE)
+        if self.withdrawn:
+            statuses.append(STATUS_WITHDRAWN)
+        if len(statuses) > 0:
+            return ", ".join(statuses)
+        return STATUS_ACTIVE
+
+    def withdraw(self):
+        self.withdrawn = True
+        self.withdrawn_date = timezone.now()
+        self.save()
+
+    def mark_as_duplicate(self, original_individual=None):
+        if original_individual is not None:
+            self.unicef_id = original_individual.unicef_id
+        self.duplicate = True
+        self.duplicate_date = timezone.now()
+        self.save()
 
     def __str__(self):
         return self.unicef_id

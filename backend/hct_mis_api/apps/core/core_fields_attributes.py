@@ -52,7 +52,7 @@ FIELD_TYPES_TO_INTERNAL_TYPE = {
 _INDIVIDUAL = "Individual"
 _HOUSEHOLD = "Household"
 
-FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE]
+FILTERABLE_TYPES = [TYPE_INTEGER, TYPE_STRING, TYPE_SELECT_ONE, TYPE_SELECT_MANY, TYPE_DATE, TYPE_BOOL]
 
 
 def country_generic_query(comparision_method, args, lookup):
@@ -168,7 +168,7 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "c53ea58b-e7cf-4bf3-82d0-dec41f66ef3a",
             "type": TYPE_SELECT_ONE,
             "name": "admin1",
-            "lookup": "admin1",
+            "lookup": "admin_area__p_code",
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
             "hint": "",
@@ -182,7 +182,7 @@ CORE_FIELDS_ATTRIBUTES = [
             "id": "e4eb6632-8204-44ed-b39c-fe791ded9246",
             "type": TYPE_SELECT_ONE,
             "name": "admin2",
-            "lookup": "admin2",
+            "lookup": "admin_area__p_code",
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin2_h_c}?"},
             "hint": "",

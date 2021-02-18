@@ -2,10 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import { Button } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
+import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import { PageHeader } from '../../components/PageHeader';
 import { CashPlanDetails } from '../../components/CashPlanDetails';
 import { PaymentRecordTable } from '../tables/PaymentRecordTable';
-import { useCashPlanQuery, CashPlanNode } from '../../__generated__/graphql';
+import {
+  useCashPlanQuery,
+  CashPlanNode,
+  useCashAssistUrlPrefixQuery,
+} from '../../__generated__/graphql';
 import { BreadCrumbsItem } from '../../components/BreadCrumbs';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../../components/LoadingComponent';
@@ -35,6 +40,7 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
+  const { data: caData } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
 
   if (loading) return <LoadingComponent />;
@@ -65,8 +71,15 @@ export function CashPlanDetailsPage(): React.ReactElement {
             : null
         }
       >
-        <Button variant='contained' color='primary'>
-          open in cashassist
+        <Button
+          variant='contained'
+          color='primary'
+          component='a'
+          disabled={!data.cashPlan.caHashId}
+          href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_cashplan&id=/${data.cashPlan.caHashId}`}
+          startIcon={<OpenInNewRoundedIcon />}
+        >
+          Open in CashAssist
         </Button>
       </PageHeader>
       <Container>

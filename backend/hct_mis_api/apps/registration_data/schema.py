@@ -27,7 +27,7 @@ class RegistrationDataImportFilter(FilterSet):
             "imported_by__id": ["exact"],
             "import_date": ["exact"],
             "status": ["exact"],
-            "name": ["exact", "icontains"],
+            "name": ["exact", "startswith"],
             "business_area": ["exact"],
         }
 
@@ -38,7 +38,8 @@ class RegistrationDataImportFilter(FilterSet):
             "import_date",
             "number_of_individuals",
             "number_of_households",
-            Lower("imported_by__given_name"),
+            "data_source",
+            Lower("imported_by__first_name"),
         )
     )
 

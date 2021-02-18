@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import ugettext_lazy as _
+from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from mptt.fields import TreeForeignKey
@@ -32,9 +33,7 @@ class BusinessArea(TimeStampedUUIDModel):
     </BusinessArea>
     """
 
-    code = models.CharField(
-        max_length=10,
-    )
+    code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255)
     long_name = models.CharField(max_length=255)
     region_code = models.CharField(max_length=8)
@@ -168,7 +167,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         queryset = cls.objects.filter(level=admin_level)
         if business_area is not None:
             queryset.filter(admin_area_level__business_area=business_area)
-        return [{"label": {"English(EN)": admin_area.p_code}, "value": admin_area.title} for admin_area in queryset]
+        queryset = queryset.order_by('title')
+        return [{"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code} for
+                admin_area in queryset]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
@@ -247,10 +248,10 @@ class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
         return (
             self.get_queryset()
-            .filter(status=self.model.SUCCESSFUL)
-            .exclude(template_id__exact="")
-            .order_by("-created_at")
-            .first()
+                .filter(status=self.model.SUCCESSFUL)
+                .exclude(template_id__exact="")
+                .order_by("-created_at")
+                .first()
         )
 
 
@@ -282,3 +283,29 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
 
     def __str__(self):
         return f"{self.file_name} - {self.created_at}"
+
+
+class CountryCodeMapManager(models.Manager):
+
+    def __init__(self):
+        self._cache = {2: {}, 3: {}}
+        super().__init__()
+
+    def get_code(self, iso_code):
+        iso_code = iso_code.upper()
+        if not self._cache[2]:
+            for entry in self.all():
+                self._cache[2][entry.country.code] = entry.ca_code
+                self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
+
+        return self._cache[len(iso_code)].get(iso_code, iso_code)
+
+
+class CountryCodeMap(models.Model):
+    country = CountryField(unique=True)
+    ca_code = models.CharField(max_length=5, unique=True)
+
+    objects = CountryCodeMapManager()
+
+    class Meta:
+        ordering = ("country",)

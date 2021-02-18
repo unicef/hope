@@ -104,10 +104,9 @@ class ImportDataValidator(BaseValidator):
             if not issuing_countries:
                 issuing_countries = [None] * len(values["validation_data"])
             if key == "other_id_type_i_c":
-                for name, validation_data, issuing_country in zip(
-                    values["names"], values["validation_data"], issuing_countries
+                for name, value, validation_data, issuing_country in zip(
+                    values["names"], values["numbers"], values["validation_data"], issuing_countries
                 ):
-                    value = validation_data["value"]
                     row_number = validation_data.get("row_number")
                     if not name and value:
                         error = {
@@ -135,8 +134,9 @@ class ImportDataValidator(BaseValidator):
                             error["row_number"] = row_number
                         invalid_rows.append(error)
             else:
-                for validation_data, issuing_country in zip_longest(values["validation_data"], issuing_countries):
-                    value = validation_data.get("value") if isinstance(validation_data, dict) else validation_data
+                for validation_data, value, issuing_country in zip_longest(
+                    values["validation_data"], values["numbers"], issuing_countries
+                ):
                     row_number = (
                         validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
                     )
@@ -166,11 +166,10 @@ class ImportDataValidator(BaseValidator):
             issuing_countries = values.get("issuing_countries")
             if not issuing_countries:
                 issuing_countries = [None] * len(values["validation_data"])
-            for data_dict, issuing_country in zip_longest(values["validation_data"], issuing_countries):
-                value = data_dict.get("value") if isinstance(data_dict, dict) else data_dict
-                row_number = (
-                    data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
-                )
+            for data_dict, value, issuing_country in zip_longest(
+                values["validation_data"], values["numbers"], issuing_countries
+            ):
+                row_number = data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
                 if not value and not issuing_country:
                     continue
                 elif value and not issuing_country:
@@ -461,15 +460,9 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     if header.value == "other_id_type_i_c":
                         documents_numbers["other_id_type_i_c"]["names"].append(value)
                     elif header.value == "other_id_no_i_c":
-                        documents_numbers["other_id_type_i_c"]["validation_data"].append(
-                            {"row_number": cell.row, "value": value}
-                        )
-                        documents_numbers["other_id_type_i_c"]["numbers"].append(str(value))
+                        documents_numbers["other_id_type_i_c"]["numbers"].append(str(value) if value else None)
                     else:
-                        documents_numbers[header.value]["validation_data"].append(
-                            {"row_number": cell.row, "value": value}
-                        )
-                        documents_numbers[header.value]["numbers"].append(str(value))
+                        documents_numbers[header.value]["numbers"].append(str(value) if value else None)
 
                 if header.value in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
                     document_key = cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(header.value)
@@ -479,8 +472,13 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     documents_dict[document_key]["issuing_countries"].append(value)
 
                 if header.value in identities_numbers:
-                    identities_numbers[header.value]["numbers"].append(value)
-                    identities_numbers[header.value]["validation_data"].append({"row_number": cell.row, "value": value})
+                    identities_numbers[header.value]["numbers"].append(str(value) if value else None)
+
+            for header in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
+                documents_or_identity_dict = (
+                    identities_numbers if header in identities_numbers.keys() else documents_numbers
+                )
+                documents_or_identity_dict[header]["validation_data"].append({"row_number": row[0].row})
 
         # validate head of household count
         for household_id, count in head_of_household_count.items():

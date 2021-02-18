@@ -11,6 +11,9 @@ const StyledTextField = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
+  .MuiFormHelperText-root{
+    white-space: pre-line
+  }
 `;
 
 export const FormikTextField = ({

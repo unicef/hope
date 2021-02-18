@@ -2,7 +2,7 @@ from .base import DjangoOperator
 
 
 class RegistrationXLSXImportHourlyOperator(DjangoOperator):
-    def execute(self, context, **kwargs):
+    def try_execute(self, context, **kwargs):
         from hct_mis_api.apps.core.models import BusinessArea
         from hct_mis_api.apps.registration_datahub.models import (
             RegistrationDataImportDatahub,

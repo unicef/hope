@@ -1,10 +1,12 @@
 import moment from 'moment';
+import { GraphQLError } from 'graphql';
 import { theme as themeObj } from '../theme';
 import {
   AllProgramsQuery,
   ChoiceObject,
   ProgramStatus,
 } from '../__generated__/graphql';
+import { ValidationGraphQLError } from '../apollo/client';
 import { GRIEVANCE_CATEGORIES, TARGETING_STATES } from './constants';
 
 const Gender = new Map([
@@ -79,10 +81,8 @@ export function populationStatusToColor(
   switch (status) {
     case 'ACTIVE':
       return theme.hctPalette.green;
-    case 'INACTIVE':
-      return theme.hctPalette.gray;
     default:
-      return theme.hctPalette.oragne;
+      return theme.hctPalette.gray;
   }
 }
 
@@ -226,13 +226,6 @@ export function reportStatusToColor(
     default:
       return theme.palette.error.main;
   }
-}
-
-export function isAuthenticated(): boolean {
-  return Boolean(localStorage.getItem('AUTHENTICATED'));
-}
-export function setAuthenticated(authenticated: boolean): void {
-  localStorage.setItem('AUTHENTICATED', `${authenticated}`);
 }
 
 export function selectFields(
@@ -424,4 +417,45 @@ export const isPermissionDeniedError = (error): boolean =>
 export const getFullNodeFromEdgesById = (edges, id) => {
   if (!edges) return null;
   return edges.find((edge) => edge.node.id === id)?.node || null;
+};
+
+export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
+  let textValue = value;
+  if (fieldAttribute.type === 'SELECT_ONE') {
+    textValue = fieldAttribute.choices.find((item) => item.value === value)
+      .labelEn;
+  }
+  if (fieldAttribute.type === 'SELECT_MANY') {
+    const values = fieldAttribute.choices.filter((item) =>
+      value.includes(item.value),
+    );
+    textValue = values.map((item) => item.labelEn).join(', ');
+  }
+  return textValue;
+};
+
+export const handleValidationErrors = (
+  fieldName,
+  e,
+  setFieldError,
+  showMessage,
+): { nonValidationErrors: GraphQLError[] } => {
+  const validationErrors = e.graphQLErrors.filter(
+    (error) => error instanceof ValidationGraphQLError,
+  );
+  const nonValidationErrors = e.graphQLErrors.filter(
+    (error) => !(error instanceof ValidationGraphQLError),
+  );
+  for (const validationError of validationErrors) {
+    Object.entries(validationError.validationErrors[fieldName]).map(
+      // eslint-disable-next-line array-callback-return
+      (entry) => {
+        if (entry[0] === '__all__') {
+          showMessage((entry[1] as string[]).join('\n'));
+        }
+        setFieldError(entry[0], (entry[1] as string[]).join('\n'));
+      },
+    );
+  }
+  return { nonValidationErrors };
 };
