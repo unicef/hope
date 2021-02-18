@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   DialogContent,
@@ -51,6 +51,10 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
     loading: choicesLoading,
   } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
+
+  useEffect(() => {
+    setSelected([]);
+  }, [businessArea]);
 
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
