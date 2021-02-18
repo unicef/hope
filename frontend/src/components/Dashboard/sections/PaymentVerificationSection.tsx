@@ -20,7 +20,7 @@ export const PaymentVerificationSection = ({
           contacted
         </Typography>
         <Typography variant='caption'>
-          12% average sampling <Missing />
+          {(data.averageSampleSize * 100).toFixed(0)}% average sampling
         </Typography>
       </Box>
       <PaymentVerificationChart data={data} />
