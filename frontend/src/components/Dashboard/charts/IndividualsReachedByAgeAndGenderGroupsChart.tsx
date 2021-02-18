@@ -9,6 +9,7 @@ interface IndividualsReachedByAgeAndGenderGroupsChartProps {
 export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   data,
 }: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
+  console.log('data', data);
   const chartData = {
     labels: data?.labels,
     datasets: [
@@ -32,7 +33,10 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   const options = {
     cutoutPercentage: 80,
     legend: {
-      position: 'bottom',
+      position: 'right',
+      labels: {
+        usePointStyle: true,
+      },
     },
   };
 

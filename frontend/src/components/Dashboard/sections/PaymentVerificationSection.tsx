@@ -16,7 +16,8 @@ export const PaymentVerificationSection = ({
     <DashboardPaper title='Payment Verification'>
       <Box mt={3}>
         <Typography variant='subtitle2'>
-          76520 Households contacted <Missing />
+          {data.households} {data.households === 1 ? 'Household' : 'Households'}{' '}
+          contacted
         </Typography>
         <Typography variant='caption'>
           12% average sampling <Missing />
