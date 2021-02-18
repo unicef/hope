@@ -11114,7 +11114,7 @@ export const AllChartsDocument = gql`
     }
     labels
   }
-  chartGrievances(businessAreaSlug: $businessAreaSlug, year: $year) {
+  chartGrievances(businessAreaSlug: $businessAreaSlug, year: $year, administrativeArea: $administrativeArea) {
     datasets {
       data
     }
@@ -11124,13 +11124,13 @@ export const AllChartsDocument = gql`
     totalNumberOfOpenFeedback
     totalNumberOfOpenSensitive
   }
-  sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+  sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
-  sectionIndividualsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+  sectionIndividualsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
-  sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+  sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
   chartIndividualsReachedByAgeAndGender(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
@@ -11146,10 +11146,10 @@ export const AllChartsDocument = gql`
     }
     labels
   }
-  sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year) {
+  sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
-  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year) {
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     data {
       id
       admin2
