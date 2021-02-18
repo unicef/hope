@@ -21,7 +21,7 @@ class SanctionListIndividualFilter(FilterSet):
     class Meta:
         fields = {
             "id": ["exact"],
-            "full_name": ["exact", "icontains"],
+            "full_name": ["exact", "startswith"],
             "reference_number": ["exact"],
         }
         model = SanctionListIndividual

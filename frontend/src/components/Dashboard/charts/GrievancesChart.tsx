@@ -21,6 +21,9 @@ export const GrievancesChart = ({
     cutoutPercentage: 80,
     legend: {
       position: 'bottom',
+      labels: {
+        usePointStyle: true,
+      }
     },
   };
 
