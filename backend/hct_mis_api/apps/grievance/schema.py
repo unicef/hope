@@ -98,9 +98,9 @@ class GrievanceTicketFilter(FilterSet):
 
     class Meta:
         fields = {
-            "id": ["exact", "icontains"],
+            "id": ["exact", "startswith"],
             "category": ["exact"],
-            "area": ["exact", "icontains"],
+            "area": ["exact", "startswith"],
             "assigned_to": ["exact"],
         }
         model = GrievanceTicket
@@ -138,11 +138,11 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__icontains=value)
+            q_obj |= Q(id__startswith=value)
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
-                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__icontains": value})
+                        q_obj |= Q(**{f"{ticket_type}__{field}__{lookup}__startswith": value})
 
         return qs.filter(q_obj)
 
