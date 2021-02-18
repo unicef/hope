@@ -76,7 +76,8 @@ export function CashPlanDetailsPage(): React.ReactElement {
           color='primary'
           component='a'
           disabled={!data.cashPlan.caHashId}
-          href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_cashplan&id=/${data.cashPlan.caHashId}`}
+          target="_blank"
+          href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           Open in CashAssist
