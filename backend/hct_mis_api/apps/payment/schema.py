@@ -452,6 +452,7 @@ class Query(graphene.ObjectType):
                     administrative_area_path="cash_plan__program__admin_areas",
                 )
             },
+            year_filter_path="delivery_date",
         )
         return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
