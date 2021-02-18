@@ -90,21 +90,34 @@ class CashPlan(SessionModel):
 
 
 class PaymentRecord(SessionModel):
-    STATUS_SUCCESS = "SUCCESS"
-    STATUS_PENDING = "PENDING"
-    STATUS_ERROR = "ERROR"
-    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
-    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
-    DELIVERY_TYPE_CASH = "CASH"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
-    DELIVERY_TYPE_TRANSFER = "TRANSFER"
-    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")), (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
-    )
+    DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
+    DELIVERY_TYPE_CASH = "Cash"
+    DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
+    DELIVERY_TYPE_CHEQUE = "Cheque"
+    DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
+    DELIVERY_TYPE_IN_KIND = "In Kind"
+    DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
+    DELIVERY_TYPE_OTHER = "Other"
+    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
+    DELIVERY_TYPE_REFERRAL = "Referral"
+    DELIVERY_TYPE_TRANSFER = "Transfer"
+    DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
+    DELIVERY_TYPE_VOUCHER = "Voucher"
+
     DELIVERY_TYPE_CHOICE = (
+        (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
         (DELIVERY_TYPE_CASH, _("Cash")),
+        (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
+        (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
+        (DELIVERY_TYPE_IN_KIND, _("In Kind")),
+        (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
+        (DELIVERY_TYPE_OTHER, _("Other")),
+        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
+        (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
+        (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
+        (DELIVERY_TYPE_VOUCHER, _("Voucher")),
     )
     business_area = models.CharField(max_length=20, null=True)
     status = models.CharField(max_length=255, null=True)
