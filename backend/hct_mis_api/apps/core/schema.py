@@ -49,7 +49,7 @@ class AdminAreaFilter(FilterSet):
     class Meta:
         model = AdminArea
         fields = {
-            "title": ["exact", "icontains"],
+            "title": ["exact", "startswith"],
             "business_area": ["exact"],
         }
 
@@ -176,7 +176,7 @@ class FieldAttributeNode(graphene.ObjectType):
             _custom_dict_or_attr_resolver("choices", None, parent, info),
             Iterable,
         ):
-            return sorted(parent["choices"], key=itemgetter("value"))
+            return sorted(parent["choices"], key=lambda elem: elem["label"]["English(EN)"])
         return _custom_dict_or_attr_resolver("choices", None, parent, info).order_by("name").all()
 
     def resolve_is_flex_field(self, info):
@@ -298,7 +298,7 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_cash_assist_url_prefix(self):
+    def resolve_cash_assist_url_prefix(parent,info):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):

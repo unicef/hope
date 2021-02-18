@@ -31,8 +31,8 @@ AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
 STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
 MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
 
-DEFAULT_FILE_STORAGE = "core.storage.AzureMediaStorage"
-STATICFILES_STORAGE = "core.storage.AzureStaticStorage"
+DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
+STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 if os.getenv("POSTGRES_SSL", False):
@@ -60,10 +60,6 @@ if os.getenv("POSTGRES_SSL", False):
         "sslrootcert": "/code/psql-cert.crt",
     }
 
-sentry_sdk.init(
-    dsn=os.getenv("SENTRY_DSN"),
-    integrations=[DjangoIntegration()],
-)
 
 AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
 

@@ -17,7 +17,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_PENDING = "PENDING"
     STATUS_ERROR = "ERROR"
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Sucess")),
+        (STATUS_SUCCESS, _("Success")),
         (STATUS_PENDING, _("Pending")),
         (STATUS_ERROR, _("Error")),
     )
@@ -56,6 +56,10 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         on_delete=models.CASCADE,
         related_name="payment_records",
     )
+    head_of_household = models.ForeignKey(
+        "household.Individual", on_delete=models.CASCADE, related_name="payment_records", null=True
+    )
+
     full_name = models.CharField(max_length=255)
     total_persons_covered = models.IntegerField()
     distribution_modality = models.CharField(
@@ -67,18 +71,13 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         related_name="payment_records",
     )
     target_population_cash_assist_id = models.CharField(max_length=255)
-    entitlement_card_number = models.CharField(
-        max_length=255,
-    )
+    entitlement_card_number = models.CharField(max_length=255, null=True)
     entitlement_card_status = models.CharField(
-        choices=ENTITLEMENT_CARD_STATUS_CHOICE,
-        default="ACTIVE",
-        max_length=20,
+        choices=ENTITLEMENT_CARD_STATUS_CHOICE, default="ACTIVE", max_length=20, null=True
     )
-    entitlement_card_issue_date = models.DateField()
+    entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        default="ACTIVE",
         max_length=20,
     )
     currency = models.CharField(
@@ -161,7 +160,7 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
         (VERIFICATION_METHOD_XLSX, "XLSX"),
         (VERIFICATION_METHOD_MANUAL, "MANUAL"),
     )
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True)
     cash_plan = models.ForeignKey(
         "program.CashPlan",
         on_delete=models.CASCADE,

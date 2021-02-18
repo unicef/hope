@@ -2,14 +2,13 @@ import json
 
 import graphene
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django.utils.encoding import force_text
 from django.utils.functional import Promise
-from django_filters import FilterSet, OrderingFilter, CharFilter, MultipleChoiceFilter
+from django_filters import FilterSet, CharFilter, MultipleChoiceFilter
 from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
@@ -17,9 +16,8 @@ from hct_mis_api.apps.account.models import USER_PARTNER_CHOICES, USER_STATUS_CH
 from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.schema import ChoiceObject, BusinessAreaNode
-from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter, decode_id_string
-from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.core.schema import ChoiceObject
+from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
 
 
 def permissions_resolver(user_roles):
@@ -40,7 +38,7 @@ class UsersFilter(FilterSet):
     class Meta:
         model = get_user_model()
         fields = {
-            "search": ["exact", "icontains"],
+            "search": ["exact", "startswith"],
             "status": ["exact"],
             "partner": ["exact"],
             "roles": ["exact"],
@@ -54,9 +52,9 @@ class UsersFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(first_name__icontains=value)
-            q_obj |= Q(last_name__icontains=value)
-            q_obj |= Q(email__icontains=value)
+            q_obj |= Q(first_name__startswith=value)
+            q_obj |= Q(last_name__startswith=value)
+            q_obj |= Q(email__startswith=value)
         return qs.filter(q_obj)
 
     def business_area_filter(self, qs, name, value):

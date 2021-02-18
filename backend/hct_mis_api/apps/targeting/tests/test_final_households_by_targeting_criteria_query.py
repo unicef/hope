@@ -1,4 +1,5 @@
 from django.core.management import call_command
+from parameterized import parameterized
 
 from hct_mis_api.apps.targeting.models import (
     HouseholdSelection,
@@ -8,6 +9,7 @@ from hct_mis_api.apps.targeting.models import (
     TargetPopulation,
 )
 
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
@@ -17,9 +19,10 @@ from hct_mis_api.apps.program.fixtures import ProgramFactory
 
 class FinalListTargetingCriteriaQueryTestCase(APITestCase):
     QUERY = """
-    query FinalListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType) {
+    query FinalListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $businessArea: String) {
       finalHouseholdsListByTargetingCriteria (
-        targetPopulation:$targetPopulation, targetingCriteria: $targetingCriteria
+        targetPopulation:$targetPopulation, targetingCriteria: $targetingCriteria,
+        businessArea: $businessArea
       ){
         totalCount
         edges {
@@ -47,24 +50,24 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
     def setUpTestData(cls):
         cls.households = []
         call_command("loadbusinessareas")
-        business_area = BusinessArea.objects.first()
-        program = ProgramFactory(business_area=business_area, individual_data_needed=True)
+        cls.business_area = BusinessArea.objects.first()
+        program = ProgramFactory(business_area=cls.business_area, individual_data_needed=True)
         _ = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "HOST", "business_area": business_area},
+            {"size": 1, "residence_status": "HOST", "business_area": cls.business_area},
         )
         cls.households.append(household)
         (household, individuals) = create_household(
-            {"size": 1, "residence_status": "IDP", "business_area": business_area},
+            {"size": 1, "residence_status": "IDP", "business_area": cls.business_area},
         )
         cls.household_size_1 = household
         cls.households.append(cls.household_size_1)
         cls.household_residence_status_citizen = cls.household_size_1
 
         (household, individuals) = create_household(
-            {"size": 2, "residence_status": "REFUGEE", "business_area": business_area},
+            {"size": 2, "residence_status": "REFUGEE", "business_area": cls.business_area},
         )
         cls.household_residence_status_refugee = household
         cls.households.append(cls.household_residence_status_refugee)
@@ -110,6 +113,7 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
             final=True,
             target_population=cls.target_population_size_1_finalized,
         )
+        cls.variables = {"businessArea": cls.business_area.slug}
 
     @staticmethod
     def get_targeting_criteria_for_rule(rule_filter):
@@ -121,60 +125,121 @@ class FinalListTargetingCriteriaQueryTestCase(APITestCase):
         rule_filter.save()
         return targeting_criteria
 
-    def test_final_households_list_by_targeting_criteria_size(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_by_targeting_criteria_size(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
-            variables={"targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode")},
+            context={"user": self.user},
+            variables={
+                "targetPopulation": self.id_to_base64(self.target_population_size_2.id, "TargetPopulationNode"),
+                **self.variables,
+            },
         )
 
-    def test_final_households_list_by_targeting_criteria_residence_status(
-        self,
-    ):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_by_targeting_criteria_residence_status(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
                     "TargetPopulationNode",
-                )
+                ),
+                **self.variables,
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_finalized(self):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_by_targeting_criteria_finalized(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_size_1_finalized.id,
                     "TargetPopulationNode",
-                )
+                ),
+                **self.variables,
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_size_1_edit(
-        self,
-    ):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_by_targeting_criteria_size_1_edit(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
                     "TargetPopulationNode",
                 ),
                 "targetingCriteria": self.FAMILY_SIZE_1_TARGETING_CRITERIA,
+                **self.variables,
             },
         )
 
-    def test_final_households_list_by_targeting_criteria_size_2_edit(
-        self,
-    ):
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.TARGETING_VIEW_DETAILS],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_final_households_list_by_targeting_criteria_size_2_edit(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
         self.snapshot_graphql_request(
             request_string=FinalListTargetingCriteriaQueryTestCase.QUERY,
+            context={"user": self.user},
             variables={
                 "targetPopulation": self.id_to_base64(
                     self.target_population_residence_status.id,
                     "TargetPopulationNode",
                 ),
                 "targetingCriteria": self.FAMILY_SIZE_2_TARGETING_CRITERIA,
+                **self.variables,
             },
         )

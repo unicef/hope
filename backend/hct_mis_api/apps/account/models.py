@@ -3,15 +3,18 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
 INVITED = "INVITED"
 ACTIVE = "ACTIVE"
@@ -30,7 +33,7 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
-    job_title = models.CharField(max_length=255, blank='')
+    job_title = models.CharField(max_length=255, blank="")
 
     def __str__(self):
         if self.first_name or self.last_name:
@@ -75,7 +78,13 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
-    name = models.CharField(max_length=250, unique=True)
+    name = models.CharField(max_length=250, unique=True,       validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],)
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
@@ -93,9 +102,18 @@ def pre_save_user(sender, instance, *args, **kwargs):
     instance.available_for_export = True
 
 
+@receiver(post_save, sender=get_user_model())
+def post_save_user(sender, instance, *args, **kwargs):
+    business_area = BusinessArea.objects.filter(slug="global").first()
+    role = Role.objects.filter(name="Basic User").first()
+    if business_area and role:
+        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
+
+
 class IncompatibleRoles(TimeStampedUUIDModel):
     """
-    Keeps track of what roles are incompatible: user cannot be assigned both of the roles in the same business area at the same time
+    Keeps track of what roles are incompatible:
+    user cannot be assigned both of the roles in the same business area at the same time
     """
 
     role_one = models.ForeignKey("account.Role", related_name="incompatible_roles_one", on_delete=models.CASCADE)
@@ -125,7 +143,8 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         if failing_users:
             raise ValidationError(
                 _(
-                    f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. Please fix them before creating this incompatible roles pair."
+                    f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
+                    "Please fix them before creating this incompatible roles pair."
                 )
             )
 
