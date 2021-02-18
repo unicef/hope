@@ -23,7 +23,7 @@ try:
 
 except ImportError as e:
     if config.USE_BLACK:
-        logger.error(f"Steficon is configured to use Black, but was unable to import it: {e}")
+        logger.warning(f"Steficon is configured to use Black, but was unable to import it: {e}")
 
     def format_code(code):
         return code
