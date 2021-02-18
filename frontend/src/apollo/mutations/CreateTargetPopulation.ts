@@ -11,6 +11,7 @@ export const CreateTP = gql`
         finalListTotalHouseholds
         finalListTotalIndividuals
       }
+      validationErrors
     }
   }
 `;

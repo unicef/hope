@@ -13,7 +13,7 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.reporting.models import Report
+from hct_mis_api.apps.reporting.models import Report, DashboardReport
 
 
 class ReportFilter(FilterSet):
@@ -65,9 +65,28 @@ class Query(graphene.ObjectType):
 
     report_types_choices = graphene.List(ChoiceObject)
     report_status_choices = graphene.List(ChoiceObject)
+    dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
 
     def resolve_report_types_choices(self, info, **kwargs):
         return to_choice_object(Report.REPORT_TYPES)
 
     def resolve_report_status_choices(self, info, **kwargs):
         return to_choice_object(Report.STATUSES)
+
+    def resolve_dashboard_report_types_choices(self, info, business_area_slug, **kwargs):
+        if business_area_slug == "global":
+            return to_choice_object(
+                [
+                    report_type
+                    for report_type in DashboardReport.REPORT_TYPES
+                    if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_ADMIN_AREA
+                ]
+            )
+        else:
+            return to_choice_object(
+                [
+                    report_type
+                    for report_type in DashboardReport.REPORT_TYPES
+                    if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY
+                ]
+            )
