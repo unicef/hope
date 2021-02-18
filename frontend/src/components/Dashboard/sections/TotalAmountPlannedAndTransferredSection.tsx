@@ -2,11 +2,11 @@ import React from 'react';
 import { TotalAmountPlannedAndTransferredByCountryChart } from '../charts/TotalAmountPlannedAndTransferredByCountryChart';
 import { CardTextLight } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {AllChartsQuery, GlobalAreaChartsQuery} from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 
 interface TotalAmountPlannedAndTransferredSectionProps {
-  data: AllChartsQuery['chartTotalTransferredCashByCountry'];
+  data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
 export const TotalAmountPlannedAndTransferredSection = ({
   data,
