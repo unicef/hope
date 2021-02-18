@@ -136,13 +136,6 @@ export const Allcharts = gql`
         totalCashTransferred
       }
     }
-    chartTotalTransferredCashByCountry(year: $year) {
-      datasets {
-        data
-        label
-      }
-      labels
-    }
     chartPlannedBudget(
       businessAreaSlug: $businessAreaSlug
       year: $year
