@@ -6475,13 +6475,6 @@ export type AllChartsQuery = (
       { __typename?: '_TableTotalCashTransferredDataNode' }
       & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred'>
     )>>> }
-  )>, chartTotalTransferredCashByCountry: Maybe<(
-    { __typename?: 'ChartDetailedDatasetsNode' }
-    & Pick<ChartDetailedDatasetsNode, 'labels'>
-    & { datasets: Maybe<Array<Maybe<(
-      { __typename?: '_DetailedDatasetsNode' }
-      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
-    )>>> }
   )>, chartPlannedBudget: Maybe<(
     { __typename?: 'ChartDetailedDatasetsNode' }
     & Pick<ChartDetailedDatasetsNode, 'labels'>
@@ -7172,6 +7165,23 @@ export type ExistingGrievanceTicketsQuery = (
         )> }
       )> }
     )>> }
+  )> }
+);
+
+export type GlobalAreaChartsQueryVariables = {
+  year: Scalars['Int']
+};
+
+
+export type GlobalAreaChartsQuery = (
+  { __typename?: 'Query' }
+  & { chartTotalTransferredCashByCountry: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
   )> }
 );
 
@@ -11176,13 +11186,6 @@ export const AllChartsDocument = gql`
       totalCashTransferred
     }
   }
-  chartTotalTransferredCashByCountry(year: $year) {
-    datasets {
-      data
-      label
-    }
-    labels
-  }
   chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
@@ -12840,6 +12843,60 @@ export function useExistingGrievanceTicketsLazyQuery(baseOptions?: ApolloReactHo
 export type ExistingGrievanceTicketsQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsQuery>;
 export type ExistingGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsLazyQuery>;
 export type ExistingGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>;
+export const GlobalAreaChartsDocument = gql`
+    query GlobalAreaCharts($year: Int!) {
+  chartTotalTransferredCashByCountry(year: $year) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+}
+    `;
+export type GlobalAreaChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>, 'query'> & ({ variables: GlobalAreaChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GlobalAreaChartsComponent = (props: GlobalAreaChartsComponentProps) => (
+      <ApolloReactComponents.Query<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables> query={GlobalAreaChartsDocument} {...props} />
+    );
+    
+export type GlobalAreaChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables> & TChildProps;
+export function withGlobalAreaCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GlobalAreaChartsQuery,
+  GlobalAreaChartsQueryVariables,
+  GlobalAreaChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables, GlobalAreaChartsProps<TChildProps>>(GlobalAreaChartsDocument, {
+      alias: 'globalAreaCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGlobalAreaChartsQuery__
+ *
+ * To run a query within a React component, call `useGlobalAreaChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGlobalAreaChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGlobalAreaChartsQuery({
+ *   variables: {
+ *      year: // value for 'year'
+ *   },
+ * });
+ */
+export function useGlobalAreaChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, baseOptions);
+      }
+export function useGlobalAreaChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, baseOptions);
+        }
+export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
+export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
+export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
 export const GrievanceTicketDocument = gql`
     query GrievanceTicket($id: ID!) {
   grievanceTicket(id: $id) {
