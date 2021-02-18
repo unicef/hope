@@ -602,6 +602,7 @@ export type CopyTargetPopulationMutationInput = {
 export type CopyTargetPopulationMutationPayload = {
    __typename?: 'CopyTargetPopulationMutationPayload',
   targetPopulation?: Maybe<TargetPopulationNode>,
+  validationErrors?: Maybe<Scalars['Arg']>,
   clientMutationId?: Maybe<Scalars['String']>,
 };
 
@@ -661,6 +662,7 @@ export type CreatePaymentVerificationMutation = {
 
 export type CreateProgram = {
    __typename?: 'CreateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
   program?: Maybe<ProgramNode>,
 };
 
@@ -703,6 +705,7 @@ export type CreateTargetPopulationInput = {
 
 export type CreateTargetPopulationMutation = {
    __typename?: 'CreateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
@@ -3343,7 +3346,7 @@ export type QueryAllSanctionListIndividualsArgs = {
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
   fullName?: Maybe<Scalars['String']>,
-  fullName_Icontains?: Maybe<Scalars['String']>,
+  fullName_Startswith?: Maybe<Scalars['String']>,
   referenceNumber?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -3360,10 +3363,10 @@ export type QueryAllGrievanceTicketArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   id?: Maybe<Scalars['UUID']>,
-  id_Icontains?: Maybe<Scalars['UUID']>,
+  id_Startswith?: Maybe<Scalars['UUID']>,
   category?: Maybe<Scalars['String']>,
   area?: Maybe<Scalars['String']>,
-  area_Icontains?: Maybe<Scalars['String']>,
+  area_Startswith?: Maybe<Scalars['String']>,
   assignedTo?: Maybe<Scalars['ID']>,
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
@@ -3535,7 +3538,7 @@ export type QueryAllAdminAreasArgs = {
   first?: Maybe<Scalars['Int']>,
   last?: Maybe<Scalars['Int']>,
   title?: Maybe<Scalars['String']>,
-  title_Icontains?: Maybe<Scalars['String']>,
+  title_Startswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   level?: Maybe<Scalars['Int']>
 };
@@ -3626,7 +3629,7 @@ export type QueryAllCashPlansArgs = {
   last?: Maybe<Scalars['Int']>,
   program?: Maybe<Scalars['ID']>,
   assistanceThrough?: Maybe<Scalars['String']>,
-  assistanceThrough_Icontains?: Maybe<Scalars['String']>,
+  assistanceThrough_Startswith?: Maybe<Scalars['String']>,
   startDate?: Maybe<Scalars['DateTime']>,
   startDate_Lte?: Maybe<Scalars['DateTime']>,
   startDate_Gte?: Maybe<Scalars['DateTime']>,
@@ -3718,11 +3721,11 @@ export type QueryAllHouseholdsArgs = {
   last?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   countryOrigin?: Maybe<Scalars['String']>,
-  countryOrigin_Icontains?: Maybe<Scalars['String']>,
+  countryOrigin_Startswith?: Maybe<Scalars['String']>,
   address?: Maybe<Scalars['String']>,
-  address_Icontains?: Maybe<Scalars['String']>,
+  address_Startswith?: Maybe<Scalars['String']>,
   headOfHousehold_FullName?: Maybe<Scalars['String']>,
-  headOfHousehold_FullName_Icontains?: Maybe<Scalars['String']>,
+  headOfHousehold_FullName_Startswith?: Maybe<Scalars['String']>,
   size_Range?: Maybe<Scalars['Int']>,
   size_Lte?: Maybe<Scalars['Int']>,
   size_Gte?: Maybe<Scalars['Int']>,
@@ -3752,7 +3755,8 @@ export type QueryAllIndividualsArgs = {
   programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
   businessArea?: Maybe<Scalars['String']>,
   fullName?: Maybe<Scalars['String']>,
-  fullName_Icontains?: Maybe<Scalars['String']>,
+  fullName_Startswith?: Maybe<Scalars['String']>,
+  fullName_Endswith?: Maybe<Scalars['String']>,
   sex?: Maybe<Array<Maybe<Scalars['String']>>>,
   household_AdminArea?: Maybe<Scalars['ID']>,
   age?: Maybe<Scalars['String']>,
@@ -3890,7 +3894,7 @@ export type QueryAllRegistrationDataImportsArgs = {
   importDate?: Maybe<Scalars['Date']>,
   status?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
-  name_Icontains?: Maybe<Scalars['String']>,
+  name_Startswith?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   orderBy?: Maybe<Scalars['String']>
 };
@@ -4071,6 +4075,7 @@ export type RegistrationDeduplicationMutation = {
 
 export type RegistrationKoboImportMutation = {
    __typename?: 'RegistrationKoboImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
@@ -4082,6 +4087,7 @@ export type RegistrationKoboImportMutationInput = {
 
 export type RegistrationXlsxImportMutation = {
    __typename?: 'RegistrationXlsxImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
 };
 
@@ -4962,6 +4968,7 @@ export type UpdatePaymentVerificationStatusAndReceivedAmount = {
 
 export type UpdateProgram = {
    __typename?: 'UpdateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
   program?: Maybe<ProgramNode>,
 };
 
@@ -4993,6 +5000,7 @@ export type UpdateTargetPopulationInput = {
 
 export type UpdateTargetPopulationMutation = {
    __typename?: 'UpdateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   targetPopulation?: Maybe<TargetPopulationNode>,
 };
 
@@ -5844,6 +5852,7 @@ export type CreateProgramMutation = (
   { __typename?: 'Mutations' }
   & { createProgram: Maybe<(
     { __typename?: 'CreateProgram' }
+    & Pick<CreateProgram, 'validationErrors'>
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
@@ -5892,6 +5901,7 @@ export type CreateTpMutation = (
   { __typename?: 'Mutations' }
   & { createTargetPopulation: Maybe<(
     { __typename?: 'CreateTargetPopulationMutation' }
+    & Pick<CreateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
@@ -5950,7 +5960,7 @@ export type CopyTargetPopulationMutation = (
   { __typename?: 'Mutations' }
   & { copyTargetPopulation: Maybe<(
     { __typename?: 'CopyTargetPopulationMutationPayload' }
-    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId'>
+    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId' | 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & Pick<TargetPopulationNode, 'id'>
@@ -6176,6 +6186,7 @@ export type UpdateProgramMutation = (
   { __typename?: 'Mutations' }
   & { updateProgram: Maybe<(
     { __typename?: 'UpdateProgram' }
+    & Pick<UpdateProgram, 'validationErrors'>
     & { program: Maybe<(
       { __typename?: 'ProgramNode' }
       & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
@@ -6192,6 +6203,7 @@ export type UpdateTpMutation = (
   { __typename?: 'Mutations' }
   & { updateTargetPopulation: Maybe<(
     { __typename?: 'UpdateTargetPopulationMutation' }
+    & Pick<UpdateTargetPopulationMutation, 'validationErrors'>
     & { targetPopulation: Maybe<(
       { __typename?: 'TargetPopulationNode' }
       & TargetPopulationDetailedFragment
@@ -7781,6 +7793,7 @@ export type CreateRegistrationKoboImportMutation = (
   { __typename?: 'Mutations' }
   & { registrationKoboImport: Maybe<(
     { __typename?: 'RegistrationKoboImportMutation' }
+    & Pick<RegistrationKoboImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
@@ -7797,6 +7810,7 @@ export type CreateRegistrationXlsxImportMutation = (
   { __typename?: 'Mutations' }
   & { registrationXlsxImport: Maybe<(
     { __typename?: 'RegistrationXlsxImportMutation' }
+    & Pick<RegistrationXlsxImportMutation, 'validationErrors'>
     & { registrationDataImport: Maybe<(
       { __typename?: 'RegistrationDataImportNode' }
       & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
@@ -9396,6 +9410,7 @@ export const CreateProgramDocument = gql`
       populationGoal
       individualDataNeeded
     }
+    validationErrors
   }
 }
     `;
@@ -9523,6 +9538,7 @@ export const CreateTpDocument = gql`
       finalListTotalHouseholds
       finalListTotalIndividuals
     }
+    validationErrors
   }
 }
     `;
@@ -9726,6 +9742,7 @@ export const CopyTargetPopulationDocument = gql`
     targetPopulation {
       id
     }
+    validationErrors
   }
 }
     `;
@@ -10438,6 +10455,7 @@ export const UpdateProgramDocument = gql`
       individualDataNeeded
       version
     }
+    validationErrors
   }
 }
     `;
@@ -10490,6 +10508,7 @@ export const UpdateTpDocument = gql`
     targetPopulation {
       ...targetPopulationDetailed
     }
+    validationErrors
   }
 }
     ${TargetPopulationDetailedFragmentDoc}`;
@@ -10769,7 +10788,7 @@ export type AllAddIndividualFieldsLazyQueryHookResult = ReturnType<typeof useAll
 export type AllAddIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>;
 export const AllAdminAreasDocument = gql`
     query AllAdminAreas($title: String, $businessArea: String, $level: Int, $first: Int) {
-  allAdminAreas(title_Icontains: $title, businessArea: $businessArea, first: $first, level: $level) {
+  allAdminAreas(title_Startswith: $title, businessArea: $businessArea, first: $first, level: $level) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -10894,7 +10913,7 @@ export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusine
 export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
 export const AllCashPlansDocument = gql`
     query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $assistanceThrough: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
-  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Icontains: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, assistanceThrough_Startswith: $assistanceThrough, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11284,7 +11303,7 @@ export type AllGrievanceTicketLazyQueryHookResult = ReturnType<typeof useAllGrie
 export type AllGrievanceTicketQueryResult = ApolloReactCommon.QueryResult<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>;
 export const AllHouseholdsDocument = gql`
     query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID]) {
-  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Icontains: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -11429,7 +11448,7 @@ export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<ty
 export type AllHouseholdsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>;
 export const AllIndividualsDocument = gql`
     query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Icontains: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea) {
     totalCount
     pageInfo {
       startCursor
@@ -12062,7 +12081,7 @@ export type AllReportsLazyQueryHookResult = ReturnType<typeof useAllReportsLazyQ
 export type AllReportsQueryResult = ApolloReactCommon.QueryResult<AllReportsQuery, AllReportsQueryVariables>;
 export const AllSanctionListIndividualsDocument = gql`
     query AllSanctionListIndividuals($referenceNumber: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $fullNameContains: String) {
-  allSanctionListIndividuals(fullName_Icontains: $fullNameContains, referenceNumber: $referenceNumber, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
+  allSanctionListIndividuals(fullName_Startswith: $fullNameContains, referenceNumber: $referenceNumber, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
     totalCount
     pageInfo {
       hasNextPage
@@ -14191,7 +14210,7 @@ export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboPro
 export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
 export const AllRegistrationDataImportsDocument = gql`
     query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
-  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Icontains: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
     pageInfo {
       hasNextPage
       hasPreviousPage
@@ -14269,6 +14288,7 @@ export const CreateRegistrationKoboImportDocument = gql`
       dataSource
       datahubId
     }
+    validationErrors
   }
 }
     `;
@@ -14323,6 +14343,7 @@ export const CreateRegistrationXlsxImportDocument = gql`
       dataSource
       datahubId
     }
+    validationErrors
   }
 }
     `;
@@ -16151,6 +16172,7 @@ export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends
 
 export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
@@ -16176,6 +16198,7 @@ export type CreatePaymentVerificationMutationResolvers<ContextType = any, Parent
 };
 
 export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
@@ -16184,6 +16207,7 @@ export type CreateReportResolvers<ContextType = any, ParentType extends Resolver
 };
 
 export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
@@ -17227,10 +17251,12 @@ export type RegistrationDeduplicationMutationResolvers<ContextType = any, Parent
 };
 
 export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
 export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
 };
 
@@ -17810,10 +17836,12 @@ export type UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextTyp
 };
 
 export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
 };
 
 export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
 };
 
