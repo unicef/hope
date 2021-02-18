@@ -15,7 +15,6 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.reporting.models import Report, DashboardReport
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -100,7 +99,6 @@ class Query(graphene.ObjectType):
         current_year = datetime.today().year
         years_list = [*range(current_year, current_year - 5, -1)]
         models = [
-            (Program, "end_date"),
             (PaymentRecord, "delivery_date"),
             (GrievanceTicket, "created_at"),
         ]
