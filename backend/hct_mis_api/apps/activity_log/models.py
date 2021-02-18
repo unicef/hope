@@ -52,10 +52,12 @@ class LogEntry(models.Model):
         (SOFT_DELETE, _("Soft Delete")),
     )
 
-    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, related_name="log_entries")
-    object_id = models.UUIDField(null=True)
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True, related_name="log_entries", db_index=True
+    )
+    object_id = models.UUIDField(null=True, db_index=True)
     content_object = GenericForeignKey("content_type", "object_id")
-    action = models.CharField(choices=LOG_ENTRY_ACTION_CHOICES, max_length=100, verbose_name=_("action"))
+    action = models.CharField(choices=LOG_ENTRY_ACTION_CHOICES, max_length=100, verbose_name=_("action"), db_index=True)
     object_repr = models.TextField(blank=True)
     changes = JSONField(null=True, verbose_name=_("change message"))
     user = models.ForeignKey(
@@ -68,7 +70,7 @@ class LogEntry(models.Model):
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.SET_NULL, null=True)
 
-    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"))
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("timestamp"), db_index=True)
 
     class Meta:
         get_latest_by = "timestamp"

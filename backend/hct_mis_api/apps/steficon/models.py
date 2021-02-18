@@ -8,33 +8,11 @@ from django.core.validators import ProhibitNullCharactersValidator
 from django.forms import model_to_dict
 from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
-
 from hct_mis_api.apps.steficon.interpreters import interpreters, mapping
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from hct_mis_api.apps.utils.validators import StartEndSpaceValidator, DoubleSpaceValidator
 
 MONITORED_FIELDS = ["name", "enabled", "deprecated", "language", "definition"]
-
-
-@deconstructible
-class DoubleSpaceValidator:
-    message = _("Double spaces characters are not allowed.")
-    code = "double_spaces_characters_not_allowed"
-
-    def __call__(self, value):
-        if "  " in str(value):
-            raise ValidationError(self.message, code=self.code)
-
-
-@deconstructible
-class StartEndSpaceValidator:
-    message = _("Leading or trailing spaces characters are not allowed.")
-    code = "leading_trailing_spaces_characters_not_allowed"
-
-    def __call__(self, value):
-        v = str(value)
-        if v.startswith(" ") or v.endswith(" "):
-            raise ValidationError(self.message, code=self.code)
 
 
 class Rule(TimeStampedUUIDModel):
@@ -43,7 +21,7 @@ class Rule(TimeStampedUUIDModel):
     name = CICharField(
         max_length=100,
         unique=True,
-        validators=[ProhibitNullCharactersValidator(), StartEndSpaceValidator(), DoubleSpaceValidator()],
+        validators=[ProhibitNullCharactersValidator(), StartEndSpaceValidator, DoubleSpaceValidator],
     )
     definition = models.TextField(blank=True, default="score.value=0")
     enabled = models.BooleanField(default=False)

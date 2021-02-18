@@ -3,7 +3,12 @@ from parameterized import parameterized
 
 from django.core.management import call_command
 
-from hct_mis_api.apps.targeting.models import TargetingCriteria, TargetingCriteriaRule, TargetingCriteriaRuleFilter, TargetPopulation
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteria,
+    TargetingCriteriaRule,
+    TargetingCriteriaRuleFilter,
+    TargetPopulation,
+)
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
@@ -43,6 +48,7 @@ mutation UpdateTargetPopulation($updateTargetPopulationInput: UpdateTargetPopula
         }
         }
     }
+    validationErrors
     }
 }
 """
@@ -171,6 +177,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
             candidate_list_targeting_criteria=cls.get_targeting_criteria_for_rule(
                 {"field_name": "size", "arguments": [2], "comparision_method": "EQUALS"}
             ),
+            created_by=cls.user,
             business_area=cls.business_area,
         )
         cls.draft_target_population.save()
@@ -180,6 +187,7 @@ class TestUpdateTargetPopulationMutation(APITestCase):
                 {"field_name": "size", "arguments": [1], "comparision_method": "GREATER_THAN"}
             ),
             status="APPROVED",
+            created_by=cls.user,
             business_area=cls.business_area,
         )
         cls.approved_target_population.save()
