@@ -12,6 +12,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
         status
         statusDate
         caId
+        caHashId
         household {
           unicefId
           id
