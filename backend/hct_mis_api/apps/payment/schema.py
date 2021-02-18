@@ -487,27 +487,33 @@ class Query(graphene.ObjectType):
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": "global"},
+            year_filter_path="delivery_date",
         )
+
         countries_and_amounts = (
             payment_records.values("business_area__name")
             .order_by("business_area__name")
-            .annotate(to_be_delivered=Sum("entitlement_quantity", filter=Q(status=PaymentRecord.STATUS_PENDING)))
-            .annotate(total_delivered_cash=Sum("delivered_quantity_usd", filter=Q(status=PaymentRecord.STATUS_SUCCESS)))
+            .annotate(
+                total_delivered_cash=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                )
+            )
+            .annotate(
+                total_delivered_voucher=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                )
+            )
         )
 
         labels = []
-        planned_amounts = []
         cash_transferred = []
         voucher_transferred = []
         for data_dict in countries_and_amounts:
             labels.append(data_dict.get("business_area__name"))
-            planned_amounts.append(data_dict.get("to_be_delivered"))
             cash_transferred.append(data_dict.get("total_delivered_cash"))
-            voucher_transferred.append(data_dict.get("total_delivered_voucher", 0))
+            voucher_transferred.append(data_dict.get("total_delivered_voucher"))
 
-        # TODO: use real amount when Voucher type will be added
         datasets = [
-            {"label": "Planned amount", "data": planned_amounts},
             {"label": "Actual cash transferred", "data": cash_transferred},
             {"label": "Actual voucher transferred", "data": voucher_transferred},
         ]
