@@ -22,6 +22,7 @@ export const UPDATE_PROGRAM_MUTATION = gql`
         individualDataNeeded
         version
       }
+      validationErrors
     }
   }
 `;

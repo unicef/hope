@@ -13,6 +13,7 @@ export const CREATE_REGISTRATION_DATA_IMPORT_QUERY = gql`
         dataSource
         datahubId
       }
+      validationErrors
     }
   }
 `;

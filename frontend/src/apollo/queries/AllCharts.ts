@@ -54,7 +54,11 @@ export const Allcharts = gql`
       }
       labels
     }
-    chartGrievances(businessAreaSlug: $businessAreaSlug, year: $year) {
+    chartGrievances(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      administrativeArea: $administrativeArea
+    ) {
       datasets {
         data
       }
@@ -64,16 +68,28 @@ export const Allcharts = gql`
       totalNumberOfOpenFeedback
       totalNumberOfOpenSensitive
     }
-    sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+    sectionHouseholdsReached(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       total
     }
     sectionIndividualsReached(
       businessAreaSlug: $businessAreaSlug
       year: $year
+      program: $program
+      administrativeArea: $administrativeArea
     ) {
       total
     }
-    sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year) {
+    sectionChildReached(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       total
     }
 
@@ -100,18 +116,32 @@ export const Allcharts = gql`
       }
       labels
     }
-    sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year) {
+    sectionTotalTransferred(
+      businessAreaSlug: $businessAreaSlug
+      year: $year
+      program: $program
+      administrativeArea: $administrativeArea
+    ) {
       total
     }
     tableTotalCashTransferredByAdministrativeArea(
       businessAreaSlug: $businessAreaSlug
       year: $year
+      program: $program
+      administrativeArea: $administrativeArea
     ) {
       data {
         id
         admin2
         totalCashTransferred
       }
+    }
+    chartTotalTransferredCashByCountry(year: $year) {
+      datasets {
+        data
+        label
+      }
+      labels
     }
     chartPlannedBudget(
       businessAreaSlug: $businessAreaSlug

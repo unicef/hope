@@ -24,7 +24,7 @@ export const AllIndividuals = gql`
       after: $after
       first: $first
       last: $last
-      fullName_Icontains: $fullNameContains
+      fullName_Startswith: $fullNameContains
       sex: $sex
       age: $age
       orderBy: $orderBy
