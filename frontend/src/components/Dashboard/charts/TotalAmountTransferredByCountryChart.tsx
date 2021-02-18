@@ -1,15 +1,15 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
-import {AllChartsQuery, GlobalAreaChartsQuery} from '../../../__generated__/graphql';
+import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
 
-interface TotalAmountPlannedAndTransferredByCountryChartProps {
+interface TotalAmountTransferredByCountryChartProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];
 }
 
-export const TotalAmountPlannedAndTransferredByCountryChart = ({
+export const TotalAmountTransferredByCountryChart = ({
   data,
-}: TotalAmountPlannedAndTransferredByCountryChartProps): React.ReactElement => {
+}: TotalAmountTransferredByCountryChartProps): React.ReactElement => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
   const matchDataSize = (
@@ -23,23 +23,16 @@ export const TotalAmountPlannedAndTransferredByCountryChart = ({
     datasets: [
       {
         barPercentage: 0.8,
-        label: 'Planned amount',
-        backgroundColor: '#CCDADE',
-        data: matchDataSize(data.datasets[0].data),
-        stack: 1,
-      },
-      {
-        barPercentage: 0.8,
-        label: 'Actual cash transferred',
+        label: data.datasets[0].label,
         backgroundColor: '#03867B',
-        data: matchDataSize(data.datasets[1].data),
+        data: matchDataSize(data.datasets[0].data),
         stack: 2,
       },
       {
         barPercentage: 0.8,
-        label: 'Actual voucher transferred',
+        label: data.datasets[1].label,
         backgroundColor: '#FFAA1D',
-        data: matchDataSize(data.datasets[2].data),
+        data: matchDataSize(data.datasets[1].data),
         stack: 2,
       },
     ],
@@ -51,7 +44,7 @@ export const TotalAmountPlannedAndTransferredByCountryChart = ({
       position: 'bottom',
       labels: {
         usePointStyle: true,
-      }
+      },
     },
     tooltips: {
       mode: 'point',

@@ -13,7 +13,7 @@ import { TotalNumberOfChildrenReachedSection } from '../../components/Dashboard/
 import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
 import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
 import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
-import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
+import { TotalAmountTransferredSectionByCountry } from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
 import { TotalCashTransferredByAdministrativeAreaTable } from '../../components/Dashboard/TotalCashTransferredByAdministrativeAreaTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
@@ -87,7 +87,7 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountPlannedAndTransferredSection
+            <TotalAmountTransferredSectionByCountry
               data={globalData?.chartTotalTransferredCashByCountry}
             />
             <DashboardPaper title='Number of Programmes by Sector'>
