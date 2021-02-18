@@ -462,7 +462,7 @@ class GenerateDashboardReportContentHelpers:
     def format_total_transferred_by_admin_area_row(self, instance, is_totals: bool, *args):
         fields_list = self._get_all_individual_count_fields()
 
-        shared_cells = tuple([instance.get(field_name, 0) for field_name in fields_list])
+        shared_cells = tuple([instance.get(f"{field_name}__sum", 0) for field_name in fields_list])
 
         if is_totals:
             return (
