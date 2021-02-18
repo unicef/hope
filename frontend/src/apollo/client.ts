@@ -56,7 +56,6 @@ const validationErrorMiddleware = new ApolloLink((operation, forward) => {
       return response;
     }
     const validationErrors = findValidationErrors(response?.data);
-    console.log('validationErrors', validationErrors);
     if (Object.keys(validationErrors).length > 0) {
       const error = new ValidationGraphQLError(
         JSON.stringify(validationErrors),
