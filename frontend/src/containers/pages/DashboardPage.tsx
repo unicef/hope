@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Tabs, Tab } from '@material-ui/core';
+import { Tab, Tabs } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
-import { DashboardYearPage } from './DashboardYearPage';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
+  const businessArea = useBusinessArea();
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
@@ -60,11 +62,15 @@ export function DashboardPage(): React.ReactElement {
   return (
     <>
       <PageHeader tabs={tabs} title='Dashboard'>
-        {hasPermissionToExport && <ExportModal />}
+        {hasPermissionToExport && (
+          <ExportModal filter={filter} year={years[selectedTab]} />
+        )}
       </PageHeader>
       {hasPermissionToView ? (
         <>
-          <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          {businessArea !== 'global' && (
+            <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          )}
           <DashboardYearPage
             selectedTab={selectedTab}
             year={years[selectedTab]}

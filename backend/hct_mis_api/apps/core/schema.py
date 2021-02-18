@@ -49,7 +49,7 @@ class AdminAreaFilter(FilterSet):
     class Meta:
         model = AdminArea
         fields = {
-            "title": ["exact", "icontains"],
+            "title": ["exact", "startswith"],
             "business_area": ["exact"],
         }
 

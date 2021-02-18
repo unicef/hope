@@ -1,0 +1,5 @@
+
+Dear HOPE user,
+The report you requested on {{created_at}} based on HOPE dashboard are
+ready to download.
+{{report_type}} - {{created_at}} : {{report_url}}

@@ -11,7 +11,7 @@ export const ALL_SANCTION_LIST_INDIVIDUALS_QUERY = gql`
     $fullNameContains: String
   ) {
     allSanctionListIndividuals(
-      fullName_Icontains: $fullNameContains
+      fullName_Startswith: $fullNameContains
       referenceNumber: $referenceNumber
       first: $first
       last: $last

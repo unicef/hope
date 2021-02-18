@@ -103,10 +103,13 @@ class PaymentVerificationFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__icontains=value)
-            q_obj |= Q(received_amount__icontains=value)
-            q_obj |= Q(payment_record__id__icontains=value)
-            q_obj |= Q(payment_record__household__head_of_household__full_name__icontains=value)
+            q_obj |= Q(id__startswith=value)
+            q_obj |= Q(received_amount__startswith=value)
+            q_obj |= Q(payment_record__id__startswith=value)
+            q_obj |= Q(payment_record__household__head_of_household__full_name__startswith=value)
+            q_obj |= Q(payment_record__household__head_of_household__given_name__startswith=value)
+            q_obj |= Q(payment_record__household__head_of_household__middle_name__startswith=value)
+            q_obj |= Q(payment_record__household__head_of_household__family_name__startswith=value)
         return qs.filter(q_obj)
 
 
