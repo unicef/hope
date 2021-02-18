@@ -214,6 +214,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
+        db_index=True
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

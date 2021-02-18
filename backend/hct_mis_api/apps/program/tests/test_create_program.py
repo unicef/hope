@@ -25,6 +25,7 @@ class TestCreateProgram(APITestCase):
           populationGoal
           administrativeAreasOfImplementation
         }
+        validationErrors
       }
     }
     """

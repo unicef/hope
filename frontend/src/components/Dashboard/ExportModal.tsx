@@ -15,6 +15,13 @@ import {
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
+import {
+  useDashboardReportChoiceDataQuery,
+  useCreateDashboardReportMutation,
+} from '../../__generated__/graphql';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { LoadingComponent } from '../LoadingComponent';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -31,26 +38,28 @@ const DialogContainer = styled.div`
   width: 700px;
 `;
 
-export const ExportModal = (): React.ReactElement => {
+export const ExportModal = ({ filter, year }): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selected, setSelected] = useState([]);
+  const businessArea = useBusinessArea();
+  const { showMessage } = useSnackbar();
   const numSelected = selected.length;
-  const isSelected = (name: string): boolean => selected.includes(name);
+  const isSelected = (id: string): boolean => selected.includes(id);
 
-  //TODO change line below
-  const data = [
-    { id: '1', name: 'Total Amount Transferred' },
-    { id: '2', name: 'Total Amount Planned and Transferred by Country' },
-    { id: '4', name: 'Beneficiaries Reached' },
-    { id: '5', name: 'Individuals Reached by Age and Gender Groups' },
-    { id: '6', name: 'Individuals with Disability Reached by Age Groups' },
-    { id: '7', name: 'Volume by Delivery Mechanism' },
-    { id: '8', name: 'Grievances' },
-    { id: '9', name: 'Programmes by Sector' },
-    { id: '10', name: 'Monthly Transfers' },
-    { id: '11', name: 'Payments' },
-    { id: '12', name: 'Payment Verification' },
-  ];
+  const {
+    data: choicesData,
+    loading: choicesLoading,
+  } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
+  const [mutate] = useCreateDashboardReportMutation();
+
+  if (choicesLoading) return <LoadingComponent />;
+  if (!choicesData) return null;
+
+  const data = choicesData.dashboardReportTypesChoices.map((choice) => ({
+    id: choice.value,
+    name: choice.name,
+  }));
+
   const rowCount = data.length;
 
   const onSelectAllClick = (event, rows): void => {
@@ -61,16 +70,17 @@ export const ExportModal = (): React.ReactElement => {
     }
     setSelected([]);
   };
-  const onCheckboxClick = (name): void => {
-    const selectedIndex = selected.indexOf(name);
-    const newSelected = [];
+  const onCheckboxClick = (id: string): void => {
+    const selectedIndex = selected.indexOf(id);
+    const newSelected = [...selected];
     if (selectedIndex !== -1) {
       newSelected.splice(selectedIndex, 1);
     } else {
-      newSelected.push(name);
+      newSelected.push(id);
     }
     setSelected(newSelected);
   };
+
   const renderRows = (): Array<React.ReactElement> => {
     return data.map((el) => {
       const isItemSelected = isSelected(el.id);
@@ -88,6 +98,27 @@ export const ExportModal = (): React.ReactElement => {
         </TableRow>
       );
     });
+  };
+
+  const submitFormHandler = async (): Promise<void> => {
+    const response = await mutate({
+      variables: {
+        reportData: {
+          businessAreaSlug: businessArea,
+          reportTypes: selected,
+          year: parseInt(year, 10),
+          adminArea: filter.administrativeArea?.node?.id,
+          program: filter.program,
+        },
+      },
+    });
+    if (!response.errors && response.data.createDashboardReport.success) {
+      showMessage('Report was created.');
+    } else {
+      showMessage('Report create action failed.');
+    }
+    setSelected([]);
+    setDialogOpen(false);
   };
 
   return (
@@ -150,7 +181,7 @@ export const ExportModal = (): React.ReactElement => {
               type='submit'
               color='primary'
               variant='contained'
-              onClick={() => null}
+              onClick={submitFormHandler}
               data-cy='button-submit'
             >
               Export
