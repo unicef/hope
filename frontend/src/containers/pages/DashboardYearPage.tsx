@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Grid } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
@@ -16,7 +16,10 @@ import { PaymentVerificationSection } from '../../components/Dashboard/sections/
 import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
 import { TotalCashTransferredByAdministrativeAreaTable } from '../../components/Dashboard/TotalCashTransferredByAdministrativeAreaTable';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useAllChartsQuery } from '../../__generated__/graphql';
+import {
+  useAllChartsQuery,
+  useGlobalAreaChartsLazyQuery,
+} from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 
 const PaddingContainer = styled.div`
@@ -48,11 +51,28 @@ export function DashboardYearPage({
       year: parseInt(year, 10),
       businessAreaSlug: businessArea,
       program: filter.program,
-      administrativeArea: filter.administrativeArea,
+      administrativeArea: filter.administrativeArea?.node?.id,
     },
   });
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+  const [
+    loadGlobal,
+    { data: globalData, loading: globalLoading },
+  ] = useGlobalAreaChartsLazyQuery({
+    variables: {
+      year: parseInt(year, 10),
+    },
+  });
+  useEffect(() => {
+    loadGlobal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessArea]);
+  if (businessArea === 'global') {
+    if (loading || globalLoading) return <LoadingComponent />;
+    if (!data || !globalData) return null;
+  } else {
+    if (loading) return <LoadingComponent />;
+    if (!data) return null;
+  }
   return (
     <TabPanel value={selectedTab} index={selectedTab}>
       <PaddingContainer>
@@ -61,7 +81,9 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountPlannedAndTransferredSection />
+            <TotalAmountPlannedAndTransferredSection
+              data={globalData?.chartTotalTransferredCashByCountry}
+            />
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>

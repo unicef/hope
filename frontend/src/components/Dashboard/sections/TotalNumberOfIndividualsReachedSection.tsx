@@ -70,14 +70,14 @@ export const TotalNumberOfIndividualsReachedSection = ({
           <DialogContainer>
             <Box mb={6}>
               <Title mb={2}>
-                Individuals with Disability Reached by Age Groups
+                Individuals Reached by Age and Gender Groups
               </Title>
               <IndividualsReachedByAgeAndGenderGroupsChart
                 data={chartDataIndividuals}
               />
             </Box>
             <Box>
-              <Title mb={2}>Individuals Reached by Age and Gender Groups</Title>
+              <Title mb={2}>Individuals with Disability Reached by Age Groups</Title>
               <IndividualsWithDisabilityReachedByAgeGroupsChart
                 data={chartDataIndividualsDisability}
               />

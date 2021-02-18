@@ -123,7 +123,9 @@ export function LookUpRelatedTicketsFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date).toISOString(),
+                    min: moment(date)
+                      .startOf('day')
+                      .toISOString(),
                   },
                 })
               }
@@ -146,7 +148,9 @@ export function LookUpRelatedTicketsFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date).toISOString(),
+                  max: moment(date)
+                    .endOf('day')
+                    .toISOString(),
                 },
               })
             }

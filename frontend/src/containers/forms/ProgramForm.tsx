@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-  Paper,
 } from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
 import { Field, Form, Formik } from 'formik';
@@ -105,7 +104,7 @@ const validationSchema = Yup.object().shape({
 
 interface ProgramFormPropTypes {
   program?: ProgramNode;
-  onSubmit: (values) => Promise<void>;
+  onSubmit: (values, setFieldError) => Promise<void>;
   renderSubmit: (submit: () => Promise<void>) => ReactElement;
   open: boolean;
   onClose: () => void;
@@ -136,7 +135,6 @@ export function ProgramForm({
     cashPlus: false,
     individualDataNeeded: 'NO',
   };
-
   if (program) {
     initialValue = selectFields(program, Object.keys(initialValue));
     initialValue.individualDataNeeded = program.individualDataNeeded
@@ -160,20 +158,11 @@ export function ProgramForm({
         open={open}
         onClose={onClose}
         scroll='paper'
-        PaperComponent={React.forwardRef((props, ref) => (
-          <Paper
-            {...{
-              ...props,
-              ref,
-            }}
-            data-cy='dialog-setup-new-programme'
-          />
-        ))}
         aria-labelledby='form-dialog-title'
       >
         <Formik
           initialValues={initialValue}
-          onSubmit={(values) => {
+          onSubmit={(values, { setFieldError }) => {
             const newValues = { ...values };
             newValues.budget = Number(values.budget).toFixed(2);
             if (values.individualDataNeeded === 'YES') {
@@ -181,7 +170,7 @@ export function ProgramForm({
             } else if (values.individualDataNeeded === 'NO') {
               newValues.individualDataNeeded = false;
             }
-            return onSubmit(newValues);
+            return onSubmit(newValues, setFieldError);
           }}
           validationSchema={validationSchema}
         >

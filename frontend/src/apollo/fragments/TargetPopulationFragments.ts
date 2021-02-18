@@ -29,6 +29,7 @@ export const targetPopulationDetailed = gql`
     candidateListTotalIndividuals
     finalListTotalHouseholds
     finalListTotalIndividuals
+    caHashId
     steficonRule {
       id
       name
@@ -139,6 +140,8 @@ export const targetPopulationDetailed = gql`
       childFemale
       adultMale
       adultFemale
+      allHouseholds
+      allIndividuals
     }
     finalStats {
       childMale
