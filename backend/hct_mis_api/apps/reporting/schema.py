@@ -119,12 +119,6 @@ class Query(graphene.ObjectType):
                         .values_list("year_value", flat=True)
                     )
                 )
-            print(years_list)
         years_list = list(set(years_list))
         years_list.sort(reverse=True)
         return years_list
-        # if business_area_slug == "global":
-        #     programs =
-
-        #     program_years = list(Program.objects.annotate(end_year=ExtractYear('end_date')).values_list('end_year', flat=True))
-        #     payment_record_years = list(PaymentRecord.objects.annotate(delivery_year=ExtractYear('delivery_date')).values_list('delivery_year', flat=True))
