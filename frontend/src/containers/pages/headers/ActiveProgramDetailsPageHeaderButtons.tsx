@@ -45,7 +45,8 @@ export function ActiveProgramDetailsPageHeaderButtons({
           color='primary'
           component='a'
           disabled={!program.caHashId}
-          href={`${data.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_program&id=/${program.caHashId}`}
+          target="_blank"
+          href={`${data.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_program&id=${program.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           Open in CashAssist
