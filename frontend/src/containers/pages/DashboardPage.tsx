@@ -24,7 +24,6 @@ export function DashboardPage(): React.ReactElement {
   });
   if (loading) return <LoadingComponent />;
   if (!permissions || !data) return null;
-  console.log(data);
 
   const hasPermissionToView = hasPermissions(
     PERMISSIONS.DASHBOARD_VIEW_COUNTRY,

@@ -1,6 +1,7 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { formatCurrencyWithSymbol, getPercentage } from '../../../utils/utils';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
 
 interface TotalAmountTransferredByCountryChartProps {
@@ -48,6 +49,17 @@ export const TotalAmountTransferredByCountryChart = ({
     },
     tooltips: {
       mode: 'point',
+      callbacks: {
+        label: (tooltipItem, tooltipData) => {
+          return ` ${
+            tooltipData.datasets[tooltipItem.datasetIndex].label
+          }: ${formatCurrencyWithSymbol(tooltipItem.xLabel)} (${getPercentage(
+            tooltipItem.xLabel,
+            tooltipData.datasets[0].data[tooltipItem.index] +
+              tooltipData.datasets[1].data[tooltipItem.index],
+          )})`;
+        },
+      },
     },
     scales: {
       xAxes: [
@@ -58,6 +70,15 @@ export const TotalAmountTransferredByCountryChart = ({
           },
           stacked: true,
           position: 'top',
+          ticks: {
+            beginAtZero: true,
+            callback: (value) => {
+              if (parseInt(value, 10) >= 100000) {
+                return `${value.toString().slice(0, -3)}k`;
+              }
+              return value;
+            },
+          },
         },
       ],
       yAxes: [
