@@ -296,13 +296,13 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=self._get_cash_delivery_types()),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=self._get_voucher_delivery_types()),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
                 )
             )
         )
@@ -593,20 +593,6 @@ class GenerateDashboardReportContentHelpers:
             "male_age_group_18_59_count",
             "male_age_group_60_count",
         ]
-
-    @staticmethod
-    def _get_cash_delivery_types() -> list:
-        # TODO update this when have all delivery types
-        return [
-            PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
-            PaymentRecord.DELIVERY_TYPE_TRANSFER,
-            PaymentRecord.DELIVERY_TYPE_CASH,
-        ]
-
-    @staticmethod
-    def _get_voucher_delivery_types() -> list:
-        # TODO update this when have all delivery types
-        return []
 
     @staticmethod
     def get_all_months():
