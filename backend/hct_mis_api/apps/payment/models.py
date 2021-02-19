@@ -42,6 +42,22 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
     DELIVERY_TYPE_VOUCHER = "Voucher"
 
+    DELIVERY_TYPES_IN_CASH = (
+        DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
+        DELIVERY_TYPE_CASH,
+        DELIVERY_TYPE_CASH_BY_FSP,
+        DELIVERY_TYPE_CHEQUE,
+        DELIVERY_TYPE_DEPOSIT_TO_CARD,
+        DELIVERY_TYPE_IN_KIND,
+        DELIVERY_TYPE_MOBILE_MONEY,
+        DELIVERY_TYPE_OTHER,
+        DELIVERY_TYPE_PRE_PAID_CARD,
+        DELIVERY_TYPE_REFERRAL,
+        DELIVERY_TYPE_TRANSFER,
+        DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+    )
+    DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
+
     DELIVERY_TYPE_CHOICE = (
         (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
         (DELIVERY_TYPE_CASH, _("Cash")),
@@ -98,7 +114,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        max_length=20,
+        max_length=24,
     )
     currency = models.CharField(
         max_length=4,
