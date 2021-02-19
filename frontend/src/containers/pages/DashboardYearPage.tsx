@@ -4,7 +4,7 @@ import { Grid, Box } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
-import { PlannedBudget } from '../../components/Dashboard/charts/PlannedBudget';
+import { TotalTransferredByMonth } from '../../components/Dashboard/charts/TotalTransferredByMonth';
 import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
 import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
 import { GrievancesSection } from '../../components/Dashboard/sections/GrievancesSection';
@@ -93,8 +93,10 @@ export function DashboardYearPage({
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
-            <DashboardPaper title='Planned Budget and Total Transferred to Date'>
-              <PlannedBudget data={data.chartPlannedBudget} />
+            <DashboardPaper title='Total Tranferred by Month'>
+              <TotalTransferredByMonth
+                data={data.chartTotalTransferredByMonth}
+              />
             </DashboardPaper>
             <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
               <TotalCashTransferredByAdministrativeAreaTable
