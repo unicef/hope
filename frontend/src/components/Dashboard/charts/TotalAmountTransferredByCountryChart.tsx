@@ -40,7 +40,6 @@ export const TotalAmountTransferredByCountryChart = ({
   };
 
   const options = {
-    barPercentage: 0.1,
     legend: {
       position: 'bottom',
       labels: {
@@ -68,7 +67,6 @@ export const TotalAmountTransferredByCountryChart = ({
             display: true,
             labelString: 'USD',
           },
-          stacked: true,
           position: 'top',
           ticks: {
             beginAtZero: true,
@@ -83,7 +81,7 @@ export const TotalAmountTransferredByCountryChart = ({
       ],
       yAxes: [
         {
-          stacked: true,
+          barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
           position: 'left',
         },
       ],
@@ -94,9 +92,16 @@ export const TotalAmountTransferredByCountryChart = ({
     <Box flexDirection='column'>
       <HorizontalBar data={chartData} options={options} />
       {data.labels.length <= lessDataCount || (
-        <Button color='primary' onClick={() => setShowAll(!showAll)}>
-          {showAll ? 'HIDE' : 'SHOW ALL'}
-        </Button>
+        <Box textAlign='center' mt={4} ml={2} mr={2}>
+          <Button
+            variant='outlined'
+            color='primary'
+            onClick={() => setShowAll(!showAll)}
+            fullWidth
+          >
+            {showAll ? 'HIDE' : 'SHOW ALL COUNTRIES'}
+          </Button>
+        </Box>
       )}
     </Box>
   );
