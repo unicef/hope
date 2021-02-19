@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   DialogContent,
@@ -52,6 +52,10 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
   } = useDashboardReportChoiceDataQuery({ variables: { businessArea } });
   const [mutate] = useCreateDashboardReportMutation();
 
+  useEffect(() => {
+    setSelected([]);
+  }, [businessArea]);
+
   if (choicesLoading) return <LoadingComponent />;
   if (!choicesData) return null;
 
@@ -86,7 +90,7 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
       const isItemSelected = isSelected(el.id);
       return (
         <TableRow key={el.id}>
-          <TableCell align='left'>
+          <TableCell align='left' padding='checkbox'>
             <Checkbox
               color='primary'
               onClick={() => onCheckboxClick(el.id)}
@@ -136,7 +140,6 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         onClose={() => setDialogOpen(false)}
         scroll='paper'
         aria-labelledby='form-dialog-title'
-        fullWidth
         maxWidth='md'
       >
         <DialogTitleWrapper>
@@ -144,15 +147,21 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
+            <Box mb={6}>
+              <Typography variant='body2'>
+                The filters applied on the dashboard will be used for the
+                reports.
+              </Typography>
+            </Box>
             <Box mb={2}>
               <Typography variant='subtitle2'>
-                Select types of reports to be exported
+                Select types of reports to be exported:
               </Typography>
             </Box>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>
+                  <TableCell padding='checkbox'>
                     <Checkbox
                       color='primary'
                       indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -166,10 +175,10 @@ export const ExportModal = ({ filter, year }): React.ReactElement => {
               </TableHead>
               <TableBody>{renderRows()}</TableBody>
             </Table>
-            <Box mt={2}>
+            <Box p={3} m={4} bgcolor='#F5F5F5'>
               <Typography variant='subtitle2'>
                 Upon clicking export button, report will be generated and send
-                to your email address when ready
+                to your email address when ready.
               </Typography>
             </Box>
           </DialogContainer>

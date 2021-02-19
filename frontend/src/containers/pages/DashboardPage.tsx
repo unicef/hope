@@ -8,6 +8,8 @@ import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { DashboardYearPage } from './DashboardYearPage';
+import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
@@ -17,7 +19,11 @@ export function DashboardPage(): React.ReactElement {
     program: '',
     administrativeArea: '',
   });
-  if (!permissions) return null;
+  const { data, loading } = useDashboardYearsChoiceDataQuery({
+    variables: { businessArea },
+  });
+  if (loading) return <LoadingComponent />;
+  if (!permissions || !data) return null;
 
   const hasPermissionToView = hasPermissions(
     PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
@@ -28,20 +34,7 @@ export function DashboardPage(): React.ReactElement {
     permissions,
   );
 
-  const years = [
-    '2021',
-    '2020',
-    '2019',
-    '2018',
-    '2017',
-    '2016',
-    '2015',
-    '2014',
-    '2013',
-    '2012',
-    '2011',
-    '2010',
-  ];
+  const years = data.dashboardYearsChoices;
 
   const mappedTabs = years.map((el) => <Tab key={el} label={el} />);
   const tabs = (
