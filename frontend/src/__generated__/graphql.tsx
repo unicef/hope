@@ -370,9 +370,19 @@ export type BusinessAreaNodeEdge = {
 };
 
 export enum CashPlanDeliveryType {
+  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
+  CashByFsp = 'CASH_BY_FSP',
+  Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  Transfer = 'TRANSFER'
+  InKind = 'IN_KIND',
+  MobileMoney = 'MOBILE_MONEY',
+  Other = 'OTHER',
+  PrePaidCard = 'PRE_PAID_CARD',
+  Referral = 'REFERRAL',
+  Transfer = 'TRANSFER',
+  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
+  Voucher = 'VOUCHER'
 }
 
 export type CashPlanNode = Node & {
@@ -558,6 +568,7 @@ export type ChartPaymentVerification = {
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
   households?: Maybe<Scalars['Int']>,
+  averageSampleSize?: Maybe<Scalars['Float']>,
 };
 
 export type CheckAgainstSanctionListMutation = {
@@ -2939,9 +2950,19 @@ export type PageInfo = {
 };
 
 export enum PaymentRecordDeliveryType {
+  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
   Cash = 'CASH',
+  CashByFsp = 'CASH_BY_FSP',
+  Cheque = 'CHEQUE',
   DepositToCard = 'DEPOSIT_TO_CARD',
-  Transfer = 'TRANSFER'
+  InKind = 'IN_KIND',
+  MobileMoney = 'MOBILE_MONEY',
+  Other = 'OTHER',
+  PrePaidCard = 'PRE_PAID_CARD',
+  Referral = 'REFERRAL',
+  Transfer = 'TRANSFER',
+  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
+  Voucher = 'VOUCHER'
 }
 
 export enum PaymentRecordEntitlementCardStatus {
@@ -3024,9 +3045,9 @@ export type PaymentRecordNodeEdge = {
 };
 
 export enum PaymentRecordStatus {
-  Success = 'SUCCESS',
-  Pending = 'PENDING',
-  Error = 'ERROR'
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
+  TransactionPending = 'TRANSACTION_PENDING',
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
 }
 
 export type PaymentVerificationNode = Node & {
@@ -3221,6 +3242,7 @@ export type Query = {
   reportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   reportStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   dashboardReportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  dashboardYearsChoices?: Maybe<Array<Maybe<Scalars['String']>>>,
   sanctionListIndividual?: Maybe<SanctionListIndividualNode>,
   allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>,
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -3355,6 +3377,11 @@ export type QueryAllReportsArgs = {
 
 
 export type QueryDashboardReportTypesChoicesArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryDashboardYearsChoicesArgs = {
   businessAreaSlug: Scalars['String']
 };
 
@@ -6417,7 +6444,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartPaymentVerification: Maybe<(
     { __typename?: 'ChartPaymentVerification' }
-    & Pick<ChartPaymentVerification, 'labels' | 'households'>
+    & Pick<ChartPaymentVerification, 'labels' | 'households' | 'averageSampleSize'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DetailedDatasetsNode' }
       & Pick<_DetailedDatasetsNode, 'label' | 'data'>
@@ -7121,6 +7148,16 @@ export type DashboardReportChoiceDataQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
+);
+
+export type DashboardYearsChoiceDataQueryVariables = {
+  businessArea: Scalars['String']
+};
+
+
+export type DashboardYearsChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'dashboardYearsChoices'>
 );
 
 export type ExistingGrievanceTicketsQueryVariables = {
@@ -11131,6 +11168,7 @@ export const AllChartsDocument = gql`
     }
     labels
     households
+    averageSampleSize
   }
   chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
@@ -12753,6 +12791,54 @@ export function useDashboardReportChoiceDataLazyQuery(baseOptions?: ApolloReactH
 export type DashboardReportChoiceDataQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataQuery>;
 export type DashboardReportChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataLazyQuery>;
 export type DashboardReportChoiceDataQueryResult = ApolloReactCommon.QueryResult<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>;
+export const DashboardYearsChoiceDataDocument = gql`
+    query DashboardYearsChoiceData($businessArea: String!) {
+  dashboardYearsChoices(businessAreaSlug: $businessArea)
+}
+    `;
+export type DashboardYearsChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>, 'query'> & ({ variables: DashboardYearsChoiceDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const DashboardYearsChoiceDataComponent = (props: DashboardYearsChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables> query={DashboardYearsChoiceDataDocument} {...props} />
+    );
+    
+export type DashboardYearsChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables> & TChildProps;
+export function withDashboardYearsChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DashboardYearsChoiceDataQuery,
+  DashboardYearsChoiceDataQueryVariables,
+  DashboardYearsChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables, DashboardYearsChoiceDataProps<TChildProps>>(DashboardYearsChoiceDataDocument, {
+      alias: 'dashboardYearsChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDashboardYearsChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useDashboardYearsChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardYearsChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardYearsChoiceDataQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useDashboardYearsChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, baseOptions);
+      }
+export function useDashboardYearsChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, baseOptions);
+        }
+export type DashboardYearsChoiceDataQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataQuery>;
+export type DashboardYearsChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataLazyQuery>;
+export type DashboardYearsChoiceDataQueryResult = ApolloReactCommon.QueryResult<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>;
 export const ExistingGrievanceTicketsDocument = gql`
     query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $category: String, $issueType: String, $orderBy: String) {
   existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, category: $category, issueType: $issueType, orderBy: $orderBy) {
@@ -16365,6 +16451,7 @@ export type ChartPaymentVerificationResolvers<ContextType = any, ParentType exte
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
   households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  averageSampleSize?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
 };
 
 export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']> = {
@@ -17272,6 +17359,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   reportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   reportStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   dashboardReportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, RequireFields<QueryDashboardReportTypesChoicesArgs, 'businessAreaSlug'>>,
+  dashboardYearsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>>,
   sanctionListIndividual?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType, RequireFields<QuerySanctionListIndividualArgs, 'id'>>,
   allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, QueryAllSanctionListIndividualsArgs>,
   grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
