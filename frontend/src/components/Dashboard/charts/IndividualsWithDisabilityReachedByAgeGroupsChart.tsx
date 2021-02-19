@@ -38,6 +38,7 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
     scales: {
       xAxes: [
         {
+          stacked: true,
           position: 'top',
           ticks: {
             beginAtZero: true,
@@ -54,6 +55,9 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
         {
           stacked: true,
           position: 'left',
+          gridLines: {
+            display: false,
+          },
         },
       ],
     },

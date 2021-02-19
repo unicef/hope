@@ -55,6 +55,9 @@ export const ProgrammesBySector = ({
         {
           position: 'left',
           stacked: true,
+          gridLines: {
+            display: false,
+          },
         },
       ],
     },
