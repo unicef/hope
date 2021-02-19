@@ -43,8 +43,8 @@ services:
     build:
       context: ./backend
       dockerfile: ./Dockerfile
-      args:
-        APP_ENV: DEV
+#      args:
+#        APP_ENV: DEV
     ports:
       - "8080:8000"
     volumes:
@@ -54,11 +54,11 @@ services:
     depends_on:
       - db
       - redis
-      - cash_assist_datahub_db
-      - registration_datahub_db
-      - elasticsearch
-      - elasticsearch_test
-      - airflow_webserver
+#      - cash_assist_datahub_db
+#      - registration_datahub_db
+#      - elasticsearch
+#      - elasticsearch_test
+#      - airflow_webserver
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
