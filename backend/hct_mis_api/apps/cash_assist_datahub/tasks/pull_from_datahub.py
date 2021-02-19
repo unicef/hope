@@ -14,8 +14,10 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
+from sentry_sdk import capture_exception
 
 log = logging.getLogger(__name__)
+
 
 class PullFromDatahubTask:
     MAPPING_CASH_PLAN_DICT = {
@@ -92,7 +94,8 @@ class PullFromDatahubTask:
                 except Exception as e:
                     session.status = Session.STATUS_FAILED
                     session.save()
-                    log.warning(e)
+                    capture_exception(e)
+                    log.warning(e, exc_info=True)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
