@@ -302,6 +302,26 @@ export function formatCurrency(amount: number): string {
   })} USD`;
 }
 
+export function formatCurrencyWithSymbol(
+  amount: number,
+  currency = 'USD',
+): string {
+  const amountCleared = amount || 0;
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
+    amountCleared,
+  );
+}
+
+export function getPercentage(
+  partialValue: number,
+  totalValue: number,
+): string {
+  if (!totalValue) {
+    return '0%';
+  }
+  return `${((partialValue / totalValue) * 100).toFixed(2)}%`;
+}
+
 export function formatNumber(value: number): string {
   if (!value && value !== 0) return '';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
