@@ -13,13 +13,13 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
-    STATUS_SUCCESS = "SUCCESS"
-    STATUS_PENDING = "PENDING"
-    STATUS_ERROR = "ERROR"
+    STATUS_SUCCESS = "Transaction Successful"
+    STATUS_PENDING = "Transaction Pending"
+    STATUS_ERROR = "Transaction Erroneous"
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Success")),
-        (STATUS_PENDING, _("Pending")),
-        (STATUS_ERROR, _("Error")),
+        (STATUS_SUCCESS, _("Transaction Successful")),
+        (STATUS_PENDING, _("Transaction Pending")),
+        (STATUS_ERROR, _("Transaction Erroneous")),
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -28,14 +28,50 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
-    DELIVERY_TYPE_CASH = "CASH"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
-    DELIVERY_TYPE_TRANSFER = "TRANSFER"
+    DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
+    DELIVERY_TYPE_CASH = "Cash"
+    DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
+    DELIVERY_TYPE_CHEQUE = "Cheque"
+    DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
+    DELIVERY_TYPE_IN_KIND = "In Kind"
+    DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
+    DELIVERY_TYPE_OTHER = "Other"
+    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
+    DELIVERY_TYPE_REFERRAL = "Referral"
+    DELIVERY_TYPE_TRANSFER = "Transfer"
+    DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
+    DELIVERY_TYPE_VOUCHER = "Voucher"
+
+    DELIVERY_TYPES_IN_CASH = (
+        DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
+        DELIVERY_TYPE_CASH,
+        DELIVERY_TYPE_CASH_BY_FSP,
+        DELIVERY_TYPE_CHEQUE,
+        DELIVERY_TYPE_DEPOSIT_TO_CARD,
+        DELIVERY_TYPE_IN_KIND,
+        DELIVERY_TYPE_MOBILE_MONEY,
+        DELIVERY_TYPE_OTHER,
+        DELIVERY_TYPE_PRE_PAID_CARD,
+        DELIVERY_TYPE_REFERRAL,
+        DELIVERY_TYPE_TRANSFER,
+        DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+    )
+    DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
     DELIVERY_TYPE_CHOICE = (
+        (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
         (DELIVERY_TYPE_CASH, _("Cash")),
+        (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
+        (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
+        (DELIVERY_TYPE_IN_KIND, _("In Kind")),
+        (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
+        (DELIVERY_TYPE_OTHER, _("Other")),
+        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
+        (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
+        (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
+        (DELIVERY_TYPE_VOUCHER, _("Voucher")),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status = models.CharField(
@@ -78,7 +114,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        max_length=20,
+        max_length=24,
     )
     currency = models.CharField(
         max_length=4,

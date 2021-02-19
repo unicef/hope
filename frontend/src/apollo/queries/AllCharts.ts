@@ -31,6 +31,7 @@ export const Allcharts = gql`
       }
       labels
       households
+      averageSampleSize
     }
     chartVolumeByDeliveryMechanism(
       businessAreaSlug: $businessAreaSlug
