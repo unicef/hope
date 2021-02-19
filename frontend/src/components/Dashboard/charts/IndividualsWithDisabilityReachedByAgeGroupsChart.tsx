@@ -14,13 +14,13 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
     labels,
     datasets: [
       {
-        barPercentage: 0.8,
+        barPercentage: 0.4,
         label: data?.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
         data: data?.datasets[0]?.data,
       },
       {
-        barPercentage: 0.8,
+        barPercentage: 0.4,
         label: data?.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
         data: data?.datasets[1]?.data,
@@ -29,20 +29,24 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
   };
 
   const options = {
-    barPercentage: 0.1,
     legend: {
       position: 'bottom',
       labels: {
         usePointStyle: true,
-      }
+      },
     },
     scales: {
       xAxes: [
         {
-          stacked: true,
           position: 'top',
           ticks: {
-            stepSize: 1,
+            beginAtZero: true,
+            callback: (value) => {
+              if (parseInt(value, 10) >= 100000) {
+                return `${value.toString().slice(0, -3)}k`;
+              }
+              return value;
+            },
           },
         },
       ],

@@ -558,6 +558,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_with_disabled_individual_count_fields():
         return [
+            "female_age_group_0_5_count",
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_count",
             "female_age_group_6_11_disabled_count",
