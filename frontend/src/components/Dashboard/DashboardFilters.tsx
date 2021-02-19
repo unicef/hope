@@ -29,7 +29,7 @@ const Container = styled(Paper)`
   }
 `;
 const StyledFormControl = styled(FormControl)`
-  width: 232px;
+  width: 100%;
   color: #5f6368;
   border-bottom: 0;
 `;
@@ -55,7 +55,7 @@ export const DashboardFilters = ({
   return (
     <Container>
       <Grid container alignItems='flex-end' spacing={3}>
-        <Grid item>
+        <Grid item xs={3}>
           <StyledFormControl variant='outlined' margin='dense'>
             <InputLabel>Programme</InputLabel>
             <Select
@@ -84,8 +84,9 @@ export const DashboardFilters = ({
             </Select>
           </StyledFormControl>
         </Grid>
-        <Grid item>
+        <Grid item xs={3}>
           <AdminAreasAutocomplete
+            fullWidth
             value={filter.administrativeArea}
             onChange={(e, option) => {
               if (!option) {
