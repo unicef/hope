@@ -159,9 +159,19 @@ type BusinessAreaNodeEdge {
 }
 
 enum CashPlanDeliveryType {
+  CARDLESS_CASH_WITHDRAWAL
   CASH
+  CASH_BY_FSP
+  CHEQUE
   DEPOSIT_TO_CARD
+  IN_KIND
+  MOBILE_MONEY
+  OTHER
+  PRE_PAID_CARD
+  REFERRAL
   TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
 }
 
 type CashPlanNode implements Node {
@@ -311,6 +321,7 @@ type ChartPaymentVerification {
   labels: [String]
   datasets: [_DetailedDatasetsNode]
   households: Int
+  averageSampleSize: Float
 }
 
 type CheckAgainstSanctionListMutation {
@@ -2154,9 +2165,19 @@ type PageInfo {
 }
 
 enum PaymentRecordDeliveryType {
+  CARDLESS_CASH_WITHDRAWAL
   CASH
+  CASH_BY_FSP
+  CHEQUE
   DEPOSIT_TO_CARD
+  IN_KIND
+  MOBILE_MONEY
+  OTHER
+  PRE_PAID_CARD
+  REFERRAL
   TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
 }
 
 enum PaymentRecordEntitlementCardStatus {
@@ -2212,9 +2233,9 @@ type PaymentRecordNodeEdge {
 }
 
 enum PaymentRecordStatus {
-  SUCCESS
-  PENDING
-  ERROR
+  TRANSACTION_SUCCESSFUL
+  TRANSACTION_PENDING
+  TRANSACTION_ERRONEOUS
 }
 
 type PaymentVerificationNode implements Node {
@@ -2336,6 +2357,7 @@ type Query {
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
   dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
+  dashboardYearsChoices(businessAreaSlug: String!): [String]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
