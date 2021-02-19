@@ -16,20 +16,24 @@ class CaseInsensitiveTuple(tuple):
 
 class LazyEvalMethodsDict(MutableMapping):
     def __init__(self, *args, **kwargs):
-        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
         self._dict = dict(*args, **kwargs)
+
     def __getitem__(self, k):
         v = self._dict.__getitem__(k)
-        if callable(v) and k not in self._ignored_method_fields:
+        if callable(v):
             v = v()
             self.__setitem__(k, v)
         return v
+
     def __setitem__(self, key, value):
         self._dict[key] = value
+
     def __delitem__(self, key):
         return self._dict[key]
+
     def __iter__(self):
         return iter(self._dict)
+
     def __len__(self):
         return len(self._dict)
 
@@ -255,14 +259,6 @@ def age_to_birth_date_query(comparision_method, args):
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
     raise ValidationError(f"Age filter query don't supports {comparision_method} type")
-
-
-def admin_area1_query(comparision_method, args):
-    from django.db.models import Q
-
-    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
-        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
-    )
 
 
 def get_attr_value(name, object, default=None):
@@ -576,13 +572,17 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None, year_filter_path: str = None
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
+    if year_filter_path is None:
+        year_filter = {"created_at__year": year}
+    else:
+        year_filter = {f"{year_filter_path}__year": year}
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
+    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -634,3 +634,12 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
             }
         )
     return filter_query
+
+def admin_area1_query(comparision_method, args):
+    from django.db.models import Q
+
+    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
+        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    )
+
+
