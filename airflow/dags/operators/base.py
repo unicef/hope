@@ -21,6 +21,7 @@ class DjangoOperator(BaseOperator):
     def execute(self, context, **kwargs):
         try:
             self.try_execute(context, **kwargs)
+            sentry_sdk.flush()
         except Exception as e:
             sentry_sdk.capture_exception(e)
             sentry_sdk.flush()
