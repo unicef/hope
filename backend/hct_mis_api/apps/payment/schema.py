@@ -432,6 +432,7 @@ class Query(graphene.ObjectType):
                     administrative_area_path="cash_plan__program__admin_areas",
                 )
             },
+            year_filter_path="delivery_date",
         )
         dataset = [
             {
