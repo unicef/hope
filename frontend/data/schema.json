@@ -352,6 +352,37 @@
             "deprecationReason": null
           },
           {
+            "name": "dashboardYearsChoices",
+            "description": null,
+            "args": [
+              {
+                "name": "businessAreaSlug",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "sanctionListIndividual",
             "description": null,
             "args": [

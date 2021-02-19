@@ -78,13 +78,17 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
-    name = models.CharField(max_length=250, unique=True,       validators=[
+    name = models.CharField(
+        max_length=250,
+        unique=True,
+        validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
             DoubleSpaceValidator,
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
-        ],)
+        ],
+    )
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
@@ -102,12 +106,16 @@ def pre_save_user(sender, instance, *args, **kwargs):
     instance.available_for_export = True
 
 
-@receiver(post_save, sender=get_user_model())
-def post_save_user(sender, instance, *args, **kwargs):
-    business_area = BusinessArea.objects.filter(slug="global").first()
-    role = Role.objects.filter(name="Basic User").first()
-    if business_area and role:
-        UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
+# NOTE: we can't use it together with UserRoleInlineFormSet in User admin page because it causes an error if user tries to create a
+# Basic User role in Global business area manually.
+# This signal runs before that and already adds the instance, then it still tries to create one for user's form which causes
+# duplicate error. If we really want to keep this signal we need to add a workaround in UserRoleInlineFormSet
+# @receiver(post_save, sender=get_user_model())
+# def post_save_user(sender, instance, *args, **kwargs):
+#     business_area = BusinessArea.objects.filter(slug="global").first()
+#     role = Role.objects.filter(name="Basic User").first()
+#     if business_area and role:
+#         UserRole.objects.get_or_create(business_area=business_area, user=instance, role=role)
 
 
 class IncompatibleRoles(TimeStampedUUIDModel):
