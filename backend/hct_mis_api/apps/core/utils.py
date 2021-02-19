@@ -16,24 +16,20 @@ class CaseInsensitiveTuple(tuple):
 
 class LazyEvalMethodsDict(MutableMapping):
     def __init__(self, *args, **kwargs):
+        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
         self._dict = dict(*args, **kwargs)
-
     def __getitem__(self, k):
         v = self._dict.__getitem__(k)
-        if callable(v):
+        if callable(v) and k not in self._ignored_method_fields:
             v = v()
             self.__setitem__(k, v)
         return v
-
     def __setitem__(self, key, value):
         self._dict[key] = value
-
     def __delitem__(self, key):
         return self._dict[key]
-
     def __iter__(self):
         return iter(self._dict)
-
     def __len__(self):
         return len(self._dict)
 
@@ -259,6 +255,14 @@ def age_to_birth_date_query(comparision_method, args):
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
     raise ValidationError(f"Age filter query don't supports {comparision_method} type")
+
+
+def admin_area1_query(comparision_method, args):
+    from django.db.models import Q
+
+    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
+        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    )
 
 
 def get_attr_value(name, object, default=None):
@@ -528,17 +532,17 @@ def update_labels_mapping(csv_file):
         for core_field, labels in labels_mapping.items():
             old_label = (
                 json.dumps(labels["old"])
-                    .replace("\\", r"\\")
-                    .replace('"', r"\"")
-                    .replace("(", r"\(")
-                    .replace(")", r"\)")
-                    .replace("[", r"\[")
-                    .replace("]", r"\]")
-                    .replace("?", r"\?")
-                    .replace("*", r"\*")
-                    .replace("$", r"\$")
-                    .replace("^", r"\^")
-                    .replace(".", r"\.")
+                .replace("\\", r"\\")
+                .replace('"', r"\"")
+                .replace("(", r"\(")
+                .replace(")", r"\)")
+                .replace("[", r"\[")
+                .replace("]", r"\]")
+                .replace("?", r"\?")
+                .replace("*", r"\*")
+                .replace("$", r"\$")
+                .replace("^", r"\^")
+                .replace(".", r"\.")
             )
             new_label = json.dumps(labels["new"])
             new_content = re.sub(
@@ -572,7 +576,7 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-        obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
@@ -620,11 +624,13 @@ def chart_filters_decoder(filters):
 
 def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
-    if filters.get('program') is not None:
-        filter_query.update({program_id_path: filters.get('program')})
-    if filters.get('administrative_area') is not None:
-        filter_query.update({
-            f"{administrative_area_path}__id": filters.get('administrative_area'),
-            f"{administrative_area_path}__admin_area_level__admin_level": 2
-        })
+    if filters.get("program") is not None:
+        filter_query.update({program_id_path: filters.get("program")})
+    if filters.get("administrative_area") is not None:
+        filter_query.update(
+            {
+                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__admin_area_level__admin_level": 2,
+            }
+        )
     return filter_query
