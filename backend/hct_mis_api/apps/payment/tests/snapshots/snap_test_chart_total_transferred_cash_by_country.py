@@ -13,14 +13,6 @@ snapshots['TestChartTotalTransferredCashByCountry::test_resolving_chart_0_with_p
             'datasets': [
                 {
                     'data': [
-                        300.3,
-                        300.3,
-                        300.3
-                    ],
-                    'label': 'Planned amount'
-                },
-                {
-                    'data': [
                         600.6,
                         600.6,
                         600.6
@@ -29,9 +21,9 @@ snapshots['TestChartTotalTransferredCashByCountry::test_resolving_chart_0_with_p
                 },
                 {
                     'data': [
-                        0.0,
-                        0.0,
-                        0.0
+                        300.0,
+                        300.0,
+                        300.0
                     ],
                     'label': 'Actual voucher transferred'
                 }
