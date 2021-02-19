@@ -13,13 +13,13 @@ export const ProgrammesBySector = ({
     labels: data?.labels,
     datasets: [
       {
-        barPercentage: 0.4,
+        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
         label: data?.datasets[0]?.label,
         backgroundColor: '#00A9FB',
         data: data?.datasets[0]?.data,
       },
       {
-        barPercentage: 0.4,
+        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
         label: data?.datasets[1]?.label,
         backgroundColor: '#023F90',
         data: data?.datasets[1]?.data,
@@ -28,26 +28,33 @@ export const ProgrammesBySector = ({
   };
 
   const options = {
-    barPercentage: 0.1,
     legend: {
       position: 'bottom',
       labels: {
         usePointStyle: true,
-      }
+      },
     },
     scales: {
       xAxes: [
         {
+          position: 'top',
           stacked: true,
           ticks: {
+            beginAtZero: true,
             stepSize: 1,
+            callback: (value) => {
+              if (parseInt(value, 10) >= 100000) {
+                return `${value.toString().slice(0, -3)}k`;
+              }
+              return value;
+            },
           },
         },
       ],
       yAxes: [
         {
+          position: 'left',
           stacked: true,
-          position: 'right',
         },
       ],
     },

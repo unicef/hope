@@ -268,21 +268,26 @@ class Query(graphene.ObjectType):
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
             additional_filters={**chart_create_filter_query(filters)},
-            year_filter_path="end_date",
+            year_filter_path="cash_plans__payment_records__delivery_date",
         )
 
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
         labels = []
 
-        for sector in sector_choice_mapping.keys():
-            programs_by_sector = programs.filter(sector=sector)
-            program_wo_cash_count = programs_by_sector.filter(cash_plus=False).count()
-            program_with_cash_count = programs_by_sector.filter(cash_plus=True).count()
-            if program_wo_cash_count > 0 or program_with_cash_count > 0:
-                programmes_wo_cash_plus.append(program_wo_cash_count)
-                programmes_with_cash_plus.append(program_with_cash_count)
-                labels.append(sector_choice_mapping.get(sector))
+        programmes_by_sector = (
+            programs.values("sector")
+            .order_by("sector")
+            .annotate(total_count_without_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=False)))
+            .annotate(total_count_with_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=True)))
+        )
+        labels = []
+        programmes_wo_cash_plus = []
+        programmes_with_cash_plus = []
+        for programme in programmes_by_sector:
+            labels.append(sector_choice_mapping.get(programme.get("sector")))
+            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus"))
+            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus"))
 
         datasets = [
             {"label": "Programmes", "data": programmes_wo_cash_plus},

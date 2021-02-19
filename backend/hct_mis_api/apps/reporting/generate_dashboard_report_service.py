@@ -124,18 +124,25 @@ class GenerateDashboardReportContentHelpers:
     @classmethod
     def get_programs(self, report: DashboardReport):
 
-        filter_vars = self._format_filters(report, {}, "end_date", "admin_areas", "id", "business_area")
+        filter_vars = self._format_filters(
+            report,
+            {},
+            "cash_plans__payment_records__delivery_date",
+            "admin_areas",
+            "id",
+            "business_area",
+        )
         months_labels = self.get_all_months()
 
         def get_filter_query(cash: bool, month: int):
             if cash:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=self._get_cash_delivery_types(),
+                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
                     cash_plans__payment_records__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=self._get_voucher_delivery_types(),
+                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
                     cash_plans__payment_records__delivery_date__month=month,
                 )
 
@@ -150,6 +157,7 @@ class GenerateDashboardReportContentHelpers:
 
         programs = (
             Program.objects.filter(**filter_vars)
+            .distinct()
             .annotate(
                 successful_payments=Count(
                     "cash_plans__payment_records", filter=Q(cash_plans__payment_records__delivered_quantity_usd__gt=0)
