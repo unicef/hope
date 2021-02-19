@@ -1,5 +1,7 @@
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { formatCurrencyWithSymbol, getPercentage } from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface VolumeByDeliveryMechanismProps {
@@ -38,9 +40,30 @@ export const VolumeByDeliveryMechanism = ({
       position: 'bottom',
       labels: {
         usePointStyle: true,
-      }
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: false,
+    tooltips: {
+      mode: 'point',
+      callbacks: {
+        label: (tooltipItem, tooltipData) => {
+          return ` ${
+            tooltipData.labels[tooltipItem.index]
+          }: ${formatCurrencyWithSymbol(
+            tooltipData.datasets[0].data[tooltipItem.index],
+          )} (${getPercentage(
+            tooltipData.datasets[0].data[tooltipItem.index],
+            tooltipData.datasets[0].data.reduce((acc, curr) => acc + curr, 0),
+          )})`;
+        },
+      },
     },
   };
 
-  return <Doughnut data={chartData} options={options} />;
+  return (
+    <Box mt={6} height='375px'>
+      <Doughnut data={chartData} options={options} />
+    </Box>
+  );
 };

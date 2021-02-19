@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Grid } from '@material-ui/core';
+import { Grid, Box } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
@@ -32,7 +32,7 @@ const CardTextLight = styled.div`
   text-transform: capitalize;
   color: #a4a4a4;
   font-weight: 500;
-  font-size: 12px;
+  font-size: ${(props) => (props.large ? '16px' : '12px')};
 `;
 
 interface DashboardYearPageProps {
@@ -128,8 +128,10 @@ export function DashboardYearPage({
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <DashboardPaper title='Volume by Delivery Mechanism'>
-                    <CardTextLight>IN USD</CardTextLight>
+                  <DashboardPaper title='Volume by Delivery Mechanism in USD'>
+                    <CardTextLight large>
+                      Delivery type in CashAssist
+                    </CardTextLight>
                     <VolumeByDeliveryMechanism
                       data={data.chartVolumeByDeliveryMechanism}
                     />

@@ -395,7 +395,6 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
-        delivery_type_choices_mapping = chart_map_choices(PaymentRecord.DELIVERY_TYPE_CHOICE)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
@@ -407,11 +406,17 @@ class Query(graphene.ObjectType):
                     administrative_area_path="cash_plan__program__admin_areas",
                 )
             },
+            year_filter_path="delivery_date",
         )
         volume_by_delivery_type = payment_records.values("delivery_type").annotate(volume=Sum("delivered_quantity_usd"))
-        volume_by_delivery_type_dict = {x.get("delivery_type"): x.get("volume") for x in volume_by_delivery_type}
-        dataset = [{"data": [volume_by_delivery_type_dict.get(x, 0) for x in delivery_type_choices_mapping.keys()]}]
-        return {"labels": delivery_type_choices_mapping.values(), "datasets": dataset}
+        labels = []
+        data = []
+        for volume_dict in volume_by_delivery_type:
+            if volume_dict.get("volume"):
+                labels.append(volume_dict.get("delivery_type"))
+                data.append(volume_dict.get("volume"))
+
+        return {"labels": labels, "datasets": [{"data": data}]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
