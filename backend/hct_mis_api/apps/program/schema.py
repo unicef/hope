@@ -8,7 +8,7 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
 )
-from graphene import ConnectionField, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -195,7 +195,7 @@ class Query(graphene.ObjectType):
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
     )
-    chart_planned_budget = graphene.Field(
+    chart_total_transferred_by_month = graphene.Field(
         ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
@@ -297,36 +297,53 @@ class Query(graphene.ObjectType):
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
+    def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
-        programs = chart_get_filtered_qs(
-            Program,
+        payment_records = chart_get_filtered_qs(
+            PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"start_date__year": year, "end_date__year": year, **chart_create_filter_query(filters)},
-        ).prefetch_related("cash_plans__payment_records")
-
-        previous_transfers_data = [0] * 12
-        cash_transfers_data = [0] * 12
-        previous_sum = 0
-        for month in range(1, 13):
-            payment_records_by_delivery_month = (
-                programs.filter(
-                    cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
-                    cash_plans__payment_records__delivery_date__year=year,
-                    cash_plans__payment_records__delivery_date__month=month,
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas",
                 )
-                .values_list("cash_plans__payment_records__delivered_quantity", flat=True)
-                .distinct()
-            )
-            for quantity_delivered in payment_records_by_delivery_month:
-                cash_transfers_data[month - 1] += quantity_delivered
-                previous_sum += quantity_delivered
-            previous_transfers_data[month - 1] = previous_sum
-        labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        datasets = [
-            {"label": "Previous Transfers", "data": previous_transfers_data},
-            {"label": "Cash Assistance", "data": cash_transfers_data},
-        ]
+            },
+            year_filter_path="delivery_date",
+        )
 
-        return {"labels": labels, "datasets": datasets}
+        months_and_amounts = (
+            payment_records.values("delivery_date__month")
+            .order_by("delivery_date__month")
+            .annotate(
+                total_delivered_cash=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
+                )
+            )
+            .annotate(
+                total_delivered_voucher=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                )
+            )
+        )
+        months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        previous_transfers = [0] * 12
+        cash_transfers = [0] * 12
+        voucher_transfers = [0] * 12
+
+        for data_dict in months_and_amounts:
+            month_index = data_dict.get("delivery_date__month") - 1
+            cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
+            voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
+
+        for index in range(1, len(months_labels)):
+            previous_transfers[index] = (
+                previous_transfers[index - 1] + cash_transfers[index - 1] + voucher_transfers[index - 1]
+            )
+        datasets = [
+            {"label": "Previous Transfers", "data": previous_transfers},
+            {"label": "Voucher Transferred", "data": voucher_transfers},
+            {"label": "Cash Transferred", "data": cash_transfers},
+        ]
+        return {"labels": months_labels, "datasets": datasets}
