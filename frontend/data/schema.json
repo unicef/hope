@@ -2669,7 +2669,7 @@
             "deprecationReason": null
           },
           {
-            "name": "chartPlannedBudget",
+            "name": "chartTotalTransferredByMonth",
             "description": null,
             "args": [
               {

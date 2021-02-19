@@ -136,7 +136,7 @@ export const Allcharts = gql`
         totalCashTransferred
       }
     }
-    chartPlannedBudget(
+    chartTotalTransferredByMonth(
       businessAreaSlug: $businessAreaSlug
       year: $year
       program: $program
