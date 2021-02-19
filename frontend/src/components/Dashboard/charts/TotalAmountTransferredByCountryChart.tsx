@@ -23,14 +23,14 @@ export const TotalAmountTransferredByCountryChart = ({
     labels: matchDataSize(data.labels),
     datasets: [
       {
-        barPercentage: 0.8,
+        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
         label: data.datasets[0].label,
         backgroundColor: '#03867B',
         data: matchDataSize(data.datasets[0].data),
         stack: 2,
       },
       {
-        barPercentage: 0.8,
+        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
         label: data.datasets[1].label,
         backgroundColor: '#FFAA1D',
         data: matchDataSize(data.datasets[1].data),
@@ -81,7 +81,6 @@ export const TotalAmountTransferredByCountryChart = ({
       ],
       yAxes: [
         {
-          barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
           position: 'left',
         },
       ],
@@ -91,7 +90,7 @@ export const TotalAmountTransferredByCountryChart = ({
   return (
     <Box flexDirection='column'>
       <HorizontalBar data={chartData} options={options} />
-      {data.labels.length <= lessDataCount || (
+      {data.labels.length > lessDataCount ? (
         <Box textAlign='center' mt={4} ml={2} mr={2}>
           <Button
             variant='outlined'
@@ -102,7 +101,7 @@ export const TotalAmountTransferredByCountryChart = ({
             {showAll ? 'HIDE' : 'SHOW ALL COUNTRIES'}
           </Button>
         </Box>
-      )}
+      ) : null}
     </Box>
   );
 };

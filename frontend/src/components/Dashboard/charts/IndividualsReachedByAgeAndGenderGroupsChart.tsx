@@ -1,5 +1,6 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
+import { formatNumber } from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface IndividualsReachedByAgeAndGenderGroupsChartProps {
@@ -9,7 +10,6 @@ interface IndividualsReachedByAgeAndGenderGroupsChartProps {
 export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   data,
 }: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
-  console.log('data', data);
   const chartData = {
     labels: data?.labels,
     datasets: [
