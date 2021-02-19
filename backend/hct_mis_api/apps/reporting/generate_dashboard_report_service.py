@@ -195,7 +195,7 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_unresolved_lte_30=Count(
                     "tickets",
-                    filter=Q(status_open_query, tickets__created_at__lte=days_30_from_now),
+                    filter=Q(status_open_query, tickets__created_at__gte=days_30_from_now),
                 )
             )
             .annotate(
@@ -203,15 +203,15 @@ class GenerateDashboardReportContentHelpers:
                     "tickets",
                     filter=Q(
                         status_open_query,
-                        tickets__created_at__gt=days_30_from_now,
-                        tickets__created_at__lte=days_60_from_now,
+                        tickets__created_at__lt=days_30_from_now,
+                        tickets__created_at__gte=days_60_from_now,
                     ),
                 )
             )
             .annotate(
                 total_unresolved_60=Count(
                     "tickets",
-                    filter=Q(status_open_query, tickets__created_at__gt=days_60_from_now),
+                    filter=Q(status_open_query, tickets__created_at__lt=days_60_from_now),
                 )
             )
             .annotate(

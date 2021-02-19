@@ -27797,7 +27797,7 @@
             "deprecationReason": null
           },
           {
-            "name": "total",
+            "name": "totalNumberOfGrievances",
             "description": null,
             "args": [],
             "type": {
@@ -27810,18 +27810,6 @@
           },
           {
             "name": "totalNumberOfFeedback",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalNumberOfOpenFeedback",
             "description": null,
             "args": [],
             "type": {

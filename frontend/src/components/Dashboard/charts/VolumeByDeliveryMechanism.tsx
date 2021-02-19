@@ -44,6 +44,9 @@ export const VolumeByDeliveryMechanism = ({
     },
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+      padding: 20,
+    },
     tooltips: {
       mode: 'point',
       callbacks: {
