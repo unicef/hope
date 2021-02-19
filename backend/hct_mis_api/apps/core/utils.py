@@ -634,3 +634,12 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
             }
         )
     return filter_query
+
+def admin_area1_query(comparision_method, args):
+    from django.db.models import Q
+
+    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
+        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    )
+
+

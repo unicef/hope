@@ -7,7 +7,7 @@ from pycountry import currencies
 
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query, admin_area1_query
 from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICE,
@@ -169,13 +169,15 @@ CORE_FIELDS_ATTRIBUTES = [
             "type": TYPE_SELECT_ONE,
             "name": "admin1",
             "lookup": "admin_area__p_code",
+            "get_query": admin_area1_query,
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
             "hint": "",
             "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin1_h_c",
-        }
+        },
+        ignored_method_fields=("get_query",),
     ),
     LazyEvalMethodsDict(
         {
