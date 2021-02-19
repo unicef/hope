@@ -82,6 +82,9 @@ export const TotalAmountTransferredByCountryChart = ({
       yAxes: [
         {
           position: 'left',
+          gridLines: {
+            display: false,
+          },
         },
       ],
     },
