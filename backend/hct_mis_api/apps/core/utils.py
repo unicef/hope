@@ -16,11 +16,12 @@ class CaseInsensitiveTuple(tuple):
 
 class LazyEvalMethodsDict(MutableMapping):
     def __init__(self, *args, **kwargs):
+        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
         self._dict = dict(*args, **kwargs)
 
     def __getitem__(self, k):
         v = self._dict.__getitem__(k)
-        if callable(v):
+        if callable(v) and k not in self._ignored_method_fields:
             v = v()
             self.__setitem__(k, v)
         return v
