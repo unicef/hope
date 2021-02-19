@@ -64,9 +64,8 @@ export const Allcharts = gql`
         data
       }
       labels
-      total
+      totalNumberOfGrievances
       totalNumberOfFeedback
-      totalNumberOfOpenFeedback
       totalNumberOfOpenSensitive
     }
     sectionHouseholdsReached(

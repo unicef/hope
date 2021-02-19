@@ -557,9 +557,8 @@ export type ChartGrievanceTicketsNode = {
    __typename?: 'ChartGrievanceTicketsNode',
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
-  total?: Maybe<Scalars['Int']>,
+  totalNumberOfGrievances?: Maybe<Scalars['Int']>,
   totalNumberOfFeedback?: Maybe<Scalars['Int']>,
-  totalNumberOfOpenFeedback?: Maybe<Scalars['Int']>,
   totalNumberOfOpenSensitive?: Maybe<Scalars['Int']>,
 };
 
@@ -6465,7 +6464,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartGrievances: Maybe<(
     { __typename?: 'ChartGrievanceTicketsNode' }
-    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalNumberOfFeedback' | 'totalNumberOfOpenFeedback' | 'totalNumberOfOpenSensitive'>
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'totalNumberOfGrievances' | 'totalNumberOfFeedback' | 'totalNumberOfOpenSensitive'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DatasetsNode' }
       & Pick<_DatasetsNode, 'data'>
@@ -11187,9 +11186,8 @@ export const AllChartsDocument = gql`
       data
     }
     labels
-    total
+    totalNumberOfGrievances
     totalNumberOfFeedback
-    totalNumberOfOpenFeedback
     totalNumberOfOpenSensitive
   }
   sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
@@ -16441,9 +16439,8 @@ export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType ext
 export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfGrievances?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfOpenFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 

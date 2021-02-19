@@ -311,9 +311,8 @@ type ChartDetailedDatasetsNode {
 type ChartGrievanceTicketsNode {
   labels: [String]
   datasets: [_DatasetsNode]
-  total: Int
+  totalNumberOfGrievances: Int
   totalNumberOfFeedback: Int
-  totalNumberOfOpenFeedback: Int
   totalNumberOfOpenSensitive: Int
 }
 
