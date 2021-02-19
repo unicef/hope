@@ -65,6 +65,9 @@ export const TotalTransferredByMonth = ({
       xAxes: [
         {
           stacked: true,
+          gridLines: {
+            display: false,
+          },
         },
       ],
       yAxes: [
