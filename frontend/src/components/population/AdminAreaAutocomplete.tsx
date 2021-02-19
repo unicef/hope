@@ -14,8 +14,8 @@ import {
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
-  width: 232px;
-  .MuiFormControl-marginDense {
+  width: ${(props) => (props.fullWidth ? '100%' : '232px')}
+    .MuiFormControl-marginDense {
     margin-top: 4px;
   }
 `;
@@ -24,10 +24,12 @@ export function AdminAreasAutocomplete({
   value,
   onChange,
   disabled,
+  fullWidth,
 }: {
   value;
   onChange;
   disabled?;
+  fullWidth?: boolean;
 }): React.ReactElement {
   const [open, setOpen] = React.useState(false);
   const [inputValue, onInputTextChange] = React.useState('');
@@ -53,6 +55,7 @@ export function AdminAreasAutocomplete({
   };
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
+      fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
       onChange={onChangeMiddleware}
@@ -80,7 +83,7 @@ export function AdminAreasAutocomplete({
       renderInput={(params) => (
         <TextField
           {...params}
-          label='Administrative Level 2'
+          label='Admin Level 2'
           variant='outlined'
           margin='dense'
           value={inputValue}

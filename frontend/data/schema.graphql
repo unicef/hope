@@ -2357,6 +2357,7 @@ type Query {
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
   dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
+  dashboardYearsChoices(businessAreaSlug: String!): [String]
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
