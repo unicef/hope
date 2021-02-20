@@ -1,6 +1,5 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
-import { formatNumber } from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface IndividualsReachedByAgeAndGenderGroupsChartProps {

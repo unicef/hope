@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Grid, Box } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
