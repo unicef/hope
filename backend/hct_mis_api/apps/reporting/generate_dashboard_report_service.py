@@ -457,7 +457,6 @@ class GenerateDashboardReportContentHelpers:
 
     @staticmethod
     def format_payment_verifications_row(instance: Program, *args):
-        print(instance.total_verifications_done, instance.total_payment_records)
         return (
             instance.business_area.code,
             instance.business_area.name,
