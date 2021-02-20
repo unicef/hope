@@ -356,10 +356,19 @@ class Query(graphene.ObjectType):
             PaymentVerification,
             year,
             business_area_slug_filter={"payment_record__business_area__slug": business_area_slug},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="payment_record__cash_plan__program__id",
+                    administrative_area_path="payment_record__cash_plan__program__admin_areas",
+                )
+            },
+            year_filter_path="payment_record__delivery_date",
         )
-        payment_verifications_amounts = payment_verifications.values("status").annotate(count=Count("status"))
-        payment_verifications_amounts_dict = {x.get("status"): x.get("count") for x in payment_verifications_amounts}
-        dataset = [payment_verifications_amounts_dict.get(status, 0) for status in status_choices_mapping.keys()]
+
+        verifications_by_status = payment_verifications.values("status").annotate(count=Count("status"))
+        verifications_by_status_dict = {x.get("status"): x.get("count") for x in verifications_by_status}
+        dataset = [verifications_by_status_dict.get(status, 0) for status in status_choices_mapping.keys()]
         try:
             all_verifications = sum(dataset)
             dataset_percentage = [data / all_verifications for data in dataset]
@@ -369,6 +378,7 @@ class Query(graphene.ObjectType):
             {"label": status, "data": [dataset_percentage_value]}
             for (dataset_percentage_value, status) in zip(dataset_percentage, status_choices_mapping.values())
         ]
+
         samples_count = payment_verifications.distinct("payment_record").count()
         all_payment_records_for_created_verifications = (
             PaymentRecord.objects.filter(
@@ -382,8 +392,6 @@ class Query(graphene.ObjectType):
         if samples_count == 0 or all_payment_records_for_created_verifications == 0:
             average_sample_size = 0
         else:
-            print(samples_count)
-            print(all_payment_records_for_created_verifications)
             average_sample_size = samples_count / all_payment_records_for_created_verifications
         return {
             "labels": ["Payment Verification"],

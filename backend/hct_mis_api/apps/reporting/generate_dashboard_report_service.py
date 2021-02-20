@@ -247,25 +247,30 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_payment_verifications(self, report: DashboardReport):
-        filter_vars = {"created_at__year": report.year}
+        filter_vars = {"payment_record__delivery_date__year": report.year}
         if report.admin_area:
-            filter_vars["cash_plan_payment_verification__cash_plan__program__admin_areas"] = report.admin_area
+            filter_vars["payment_record__cash_plan__program__admin_areas"] = report.admin_area
         if report.program:
-            filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
+            filter_vars["payment_record__cash_plan__program"] = report.program
         if not self._is_report_global(report):
-            filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = report.business_area
+            filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
         path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
 
         def format_status_filter(status):
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
 
-        # TODO: missing average_sampling column, figure out how to calculate it
         programs = (
             Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
             .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
-            .annotate(total_households=Count(path_to_payment_record_verifications, distinct=True))
+            .annotate(
+                total_households=Count(
+                    f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
+                )
+            )
+            .annotate(total_payment_records=Count("cash_plans__payment_records", distinct=True))
+            .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
             .annotate(
                 received=Count(
                     path_to_payment_record_verifications,
@@ -452,14 +457,16 @@ class GenerateDashboardReportContentHelpers:
 
     @staticmethod
     def format_payment_verifications_row(instance: Program, *args):
+        print(instance.total_verifications_done, instance.total_payment_records)
         return (
             instance.business_area.code,
             instance.business_area.name,
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            # average sampling goes here
-            "",
+            int((instance.total_verifications_done / instance.total_payment_records) * 100)
+            if instance.total_payment_records
+            else 0,
             instance.received,
             instance.not_received,
             instance.received_with_issues,
