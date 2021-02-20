@@ -7,9 +7,9 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { DashboardYearPage } from './DashboardYearPage';
 import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
