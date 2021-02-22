@@ -20,16 +20,6 @@ export interface HeadCell<T> {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
-      width: '100%',
-    },
-    paper: {
-      width: '100%',
-      marginBottom: theme.spacing(2),
-    },
-    table: {
-      minWidth: 750,
-    },
     visuallyHidden: {
       border: 0,
       clip: 'rect(0 0 0 0)',
@@ -57,7 +47,6 @@ const TableRowStyled = styled(TableRow)`
 `;
 
 interface EnhancedTableProps<T> {
-  classes: ReturnType<typeof useStyles>;
   onRequestSort: (
     event: React.MouseEvent<unknown>,
     property: keyof T | string,
@@ -76,7 +65,6 @@ export function EnhancedTableHead<T>(
   props: EnhancedTableProps<T>,
 ): React.ReactElement {
   const {
-    classes,
     order,
     orderBy,
     headCells,
@@ -92,6 +80,8 @@ export function EnhancedTableHead<T>(
   ) => {
     onRequestSort(event, property);
   };
+  const classes = useStyles();
+
   return (
     <TableHead>
       <TableRow>
