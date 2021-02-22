@@ -1,32 +1,81 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CardTextLight } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
-import { CountryChartsQuery } from '../../../__generated__/graphql';
+import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { TotalAmountTransferredByAdminAreaTable } from '../TotalAmountTransferredByAdminAreaTable';
+import { LoadingComponent } from '../../LoadingComponent';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
-  data: CountryChartsQuery['tableTotalCashTransferredByAdministrativeArea'];
-  handleSort;
-  order;
-  orderBy;
+  year: string;
+  filter;
 }
 export const TotalAmountTransferredSectionByAdminAreaSection = ({
-  data,
-  handleSort,
-  order,
-  orderBy,
+  year,
+  filter,
 }: TotalAmountTransferredSectionByAdminAreaSectionProps): React.ReactElement => {
   const businessArea = useBusinessArea();
-  if (businessArea === 'global') {
+
+  const [orderBy, setOrderBy] = useState('totalCashTransferred');
+  const [order, setOrder] = useState('desc');
+
+  const variables = {
+    year: parseInt(year, 10),
+    businessAreaSlug: businessArea,
+    program: filter.program,
+    administrativeArea: filter.administrativeArea?.node?.id,
+  };
+  const [
+    loadCountry,
+    {
+      data: countryData,
+      loading: countryLoading,
+      refetch: refetchAdminAreaChart,
+    },
+  ] = useCountryChartsLazyQuery({
+    variables: {
+      ...variables,
+      orderBy,
+      order,
+    },
+  });
+
+  useEffect(() => {
+    if (businessArea !== 'global') {
+      loadCountry();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessArea]);
+
+  const handleSortAdminArea = (event, property) => {
+    let direction = '';
+    if (property !== orderBy) {
+      setOrderBy(property.toString());
+      direction = order;
+    } else {
+      direction = order === 'desc' ? 'asc' : 'desc';
+      setOrder(direction);
+    }
+    const variablesRefetch = {
+      ...variables,
+      orderBy: property,
+      order: direction,
+    };
+    refetchAdminAreaChart(variablesRefetch);
+  };
+
+  if (countryLoading) return <LoadingComponent />;
+
+  if (businessArea === 'global' || !countryData) {
     return null;
   }
+
   return (
     <DashboardPaper title='Total Transferred by Administrative Area'>
       <CardTextLight>IN USD</CardTextLight>
       <TotalAmountTransferredByAdminAreaTable
-        data={data?.data}
-        handleSort={handleSort}
+        data={countryData?.tableTotalCashTransferredByAdministrativeArea?.data}
+        handleSort={handleSortAdminArea}
         order={order}
         orderBy={orderBy}
       />
