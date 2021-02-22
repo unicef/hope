@@ -14,8 +14,5 @@ dependencies:
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
   version: 12.x.x
-- name: airflow
-  repository: https://charts.bitnami.com/bitnami
-  version: 6.x.x
-digest: sha256:03bd5ce7d577549595546d5fd09baaa65169d22f06246186ae68de5f2ab97f44
-generated: "2020-09-12T14:52:11.754186+02:00"
+digest: sha256:1ec7bc8583e5f87ff11e455fc63cae908227f8c568f10a62c7516678b81f1b10
+generated: "2021-02-17T16:03:38.519345+01:00"
