@@ -49,7 +49,7 @@ export function AdminAreasAutocomplete({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedInputText]);
 
-  const onChangeMiddleware = (e, selectedValue, reason): void => {
+  const onChangeMiddleware = (e, selectedValue): void => {
     onFilterChange((filters) => ({
       ...filters,
       [name]: selectedValue || undefined,
