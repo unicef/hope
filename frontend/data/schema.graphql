@@ -2381,7 +2381,7 @@ type Query {
   chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
   chartPayment(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
   sectionTotalTransferred(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
-  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): TableTotalCashTransferred
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String, order: String, orderBy: String): TableTotalCashTransferred
   chartTotalTransferredCashByCountry(year: Int!): ChartDetailedDatasetsNode
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
@@ -3457,5 +3457,6 @@ type _DetailedDatasetsNode {
 type _TableTotalCashTransferredDataNode {
   id: String
   admin2: String
-  totalCashTransferred: String
+  totalCashTransferred: Float
+  totalHouseholds: Int
 }
