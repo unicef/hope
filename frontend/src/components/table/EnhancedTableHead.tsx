@@ -4,7 +4,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { Checkbox } from '@material-ui/core';
 
 type Order = 'asc' | 'desc';
@@ -18,7 +18,7 @@ export interface HeadCell<T> {
   dataCy?: string;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     visuallyHidden: {
       border: 0,

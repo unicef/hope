@@ -47,7 +47,7 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessArea]);
 
-  const handleSortAdminArea = (event, property) => {
+  const handleSortAdminArea = (event, property): void => {
     let direction = '';
     if (property !== orderBy) {
       setOrderBy(property.toString());
