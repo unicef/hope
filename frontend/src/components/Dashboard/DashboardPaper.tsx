@@ -3,22 +3,27 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface DashboardPaperProps {
-  title: string;
+  title?: string;
   children: React.ReactNode;
+  noMarginTop?: boolean;
+  extraPaddingLeft?: boolean;
 }
 const StyledPaper = styled(Paper)`
   padding: 20px 24px;
-  margin-top: 20px;
+  padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')}
+  margin-top: ${(props) => (props.noMarginTop ? '0' : '20px')};
   font-size: 18px;
   font-weight: normal;
 `;
 export const DashboardPaper = ({
   title,
   children,
+  noMarginTop,
+  extraPaddingLeft,
 }: DashboardPaperProps): React.ReactElement => {
   return (
-    <StyledPaper>
-      <Box mb={2}>{title}</Box>
+    <StyledPaper noMarginTop={noMarginTop} extraPaddingLeft={extraPaddingLeft}>
+      {title && <Box mb={2}>{title}</Box>}
       {children}
     </StyledPaper>
   );
