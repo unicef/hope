@@ -1,6 +1,10 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
-import { formatCurrencyWithSymbol, getPercentage } from '../../../utils/utils';
+import {
+  formatCurrencyWithSymbol,
+  formatThousands,
+  getPercentage,
+} from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface TotalTransferredByMonthProps {
@@ -80,12 +84,7 @@ export const TotalTransferredByMonth = ({
           position: 'right',
           ticks: {
             beginAtZero: true,
-            callback: (value) => {
-              if (parseInt(value, 10) >= 100000) {
-                return `${value.toString().slice(0, -3)}k`;
-              }
-              return value;
-            },
+            callback: formatThousands,
           },
         },
       ],

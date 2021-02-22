@@ -327,6 +327,14 @@ export function formatNumber(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+export function formatThousands(value: string): string {
+  if (!value) return value;
+  if (parseInt(value, 10) >= 100000) {
+    return `${value.toString().slice(0, -3)}k`;
+  }
+  return value;
+}
+
 export function getAgeFromDob(date: string): number {
   return moment().diff(moment(date), 'years');
 }
