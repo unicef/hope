@@ -124,18 +124,6 @@ export const Allcharts = gql`
     ) {
       total
     }
-    tableTotalCashTransferredByAdministrativeArea(
-      businessAreaSlug: $businessAreaSlug
-      year: $year
-      program: $program
-      administrativeArea: $administrativeArea
-    ) {
-      data {
-        id
-        admin2
-        totalCashTransferred
-      }
-    }
     chartTotalTransferredByMonth(
       businessAreaSlug: $businessAreaSlug
       year: $year

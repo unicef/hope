@@ -13,6 +13,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.utils.schema import (
@@ -256,6 +257,8 @@ class Query(graphene.ObjectType):
         year=graphene.Int(required=True),
         program=graphene.String(required=False),
         administrative_area=graphene.String(required=False),
+        order=graphene.String(required=False),
+        order_by=graphene.String(required=False),
     )
     chart_total_transferred_cash_by_country = graphene.Field(
         ChartDetailedDatasetsNode, year=graphene.Int(required=True)
@@ -472,26 +475,55 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_table_total_cash_transferred_by_administrative_area(self, info, business_area_slug, year, **kwargs):
+        if business_area_slug == "global":
+            return None
+        order = kwargs.pop("order", None)
+        order_by = kwargs.pop("order_by", None)
+        filters = chart_filters_decoder(kwargs)
         payment_records = chart_get_filtered_qs(
             PaymentRecord,
             year,
             business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"status": PaymentRecord.STATUS_SUCCESS},
+            additional_filters={
+                **chart_create_filter_query(
+                    filters,
+                    program_id_path="cash_plan__program__id",
+                    administrative_area_path="cash_plan__program__admin_areas",
+                ),
+                "delivered_quantity_usd__gt": 0,
+            },
+            year_filter_path="delivery_date",
         )
-        payment_records = payment_records.select_related("household").filter(household__admin_area__level=2)
-        annotated_dict = (
-            payment_records.filter(~Q(household__admin_area=None))
-            .values("household__admin_area__id", "household__admin_area__title")
-            .annotate(total_cash_transferred=Sum("delivered_quantity_usd"))
+
+        admin_areas = (
+            AdminArea.objects.filter(
+                admin_area_level__admin_level=2,
+                household__payment_records__in=payment_records,
+            )
+            .distinct()
+            .annotate(total_transferred=Sum("household__payment_records__delivered_quantity_usd"))
+            .annotate(num_households=Count("household", distinct=True))
         )
+
+        if order_by:
+            order_by_arg = None
+            if order_by == "admin2":
+                order_by_arg = "title"
+            elif order_by == "totalCashTransferred":
+                order_by_arg = "total_transferred"
+            elif order_by == "totalHouseholds":
+                order_by_arg = "num_households"
+            if order_by_arg:
+                admin_areas = admin_areas.order_by(f"{'-' if order == 'desc' else ''}{order_by_arg}")
 
         data = [
             {
-                "id": item.get("household__admin_area__id"),
-                "admin2": item.get("household__admin_area__title"),
-                "totalCashTransferred": item.get("total_cash_transferred"),
+                "id": item.id,
+                "admin2": item.title,
+                "total_cash_transferred": item.total_transferred,
+                "total_households": item.num_households,
             }
-            for item in annotated_dict
+            for item in admin_areas
         ]
         return {"data": data}
 
