@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       {{- include "hope.selectorLabels" . | nindent 6 }}
-      hope/service: backend
+      hope/service: celery-beat
   template:
     metadata:
     {{- with .Values.celery.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
     {{- end }}
       labels:
         {{- include "hope.selectorLabels" . | nindent 8 }}
-        hope/service: backend
+        hope/service: celery-beat
     spec:
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -28,7 +28,7 @@ spec:
       securityContext:
         {{- toYaml .Values.celery.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-backend
+        - name: {{ .Chart.Name }}-celery-beat
           command: ["celery", "-A", "hct_mis_api.apps.core.celery", "beat", "-E", "-l", "info"]
           securityContext:
             {{- toYaml .Values.celery.securityContext | nindent 12 }}
