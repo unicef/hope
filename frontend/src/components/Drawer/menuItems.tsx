@@ -16,7 +16,7 @@ import { PERMISSIONS } from '../../config/permissions';
 
 export const menuItems = [
   {
-    name: 'Country Dashboard',
+    name: 'Dashboard',
     href: '/#',
     selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
