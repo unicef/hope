@@ -1,6 +1,5 @@
 import React, { ReactElement, useState } from 'react';
 import styled from 'styled-components';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import { EnhancedTableHead } from '../../../../components/table/EnhancedTableHead';
 import { getComparator, stableSort } from '../../../../utils/utils';
