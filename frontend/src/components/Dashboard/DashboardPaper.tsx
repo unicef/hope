@@ -8,7 +8,9 @@ interface DashboardPaperProps {
   noMarginTop?: boolean;
   extraPaddingLeft?: boolean;
 }
-const StyledPaper = styled(Paper)`
+const StyledPaper = styled(({ noMarginTop, extraPaddingLeft, ...props }) => (
+  <Paper {...props} />
+))`
   padding: 20px 24px;
   padding-left: ${(props) => (props.extraPaddingLeft ? '46px' : '24px')}
   margin-top: ${(props) => (props.noMarginTop ? '0' : '20px')};
