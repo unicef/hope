@@ -678,7 +678,7 @@ def get_payments_records_with_delivered_quantity(year, business_area_slug, filte
             **chart_create_filter_query(
                 filters,
                 program_id_path="cash_plan__program__id",
-                administrative_area_path="cash_plan__program__admin_areas",
+                administrative_area_path="household__admin_area",
             ),
         },
         year_filter_path="delivery_date",
