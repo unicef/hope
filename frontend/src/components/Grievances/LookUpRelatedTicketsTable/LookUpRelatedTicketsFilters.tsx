@@ -123,9 +123,7 @@ export function LookUpRelatedTicketsFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date)
-                      .startOf('day')
-                      .toISOString(),
+                    min: moment(date).startOf('day').toISOString(),
                   },
                 })
               }
@@ -148,9 +146,7 @@ export function LookUpRelatedTicketsFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date)
-                    .endOf('day')
-                    .toISOString(),
+                  max: moment(date).endOf('day').toISOString(),
                 },
               })
             }
@@ -161,14 +157,8 @@ export function LookUpRelatedTicketsFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, admin: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, admin: option });
-            }}
+            onFilterChange={onFilterChange}
+            name='admin'
           />
         </Grid>
         <Grid container justify='flex-end'>
