@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Grid } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
@@ -18,7 +18,6 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import {
   useAllChartsQuery,
   useGlobalAreaChartsLazyQuery,
-  useCountryChartsLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { TotalAmountTransferredSectionByAdminAreaSection } from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
@@ -48,78 +47,41 @@ export function DashboardYearPage({
 }: DashboardYearPageProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const isGlobal = businessArea === 'global';
-  const [orderBy, setOrderBy] = useState('totalCashTransferred');
-  const [order, setOrder] = useState('desc');
 
   const sharedVariables = {
     year: parseInt(year, 10),
   };
-  const countryVariables = {
-    program: filter.program,
-    administrativeArea: filter.administrativeArea?.node?.id,
-  };
+
   const { data, loading } = useAllChartsQuery({
     variables: {
       ...sharedVariables,
       businessAreaSlug: businessArea,
-      ...(!isGlobal && countryVariables),
+      ...(!isGlobal && {
+        program: filter.program,
+        administrativeArea: filter.administrativeArea?.node?.id,
+      }),
     },
   });
+
   const [
     loadGlobal,
     { data: globalData, loading: globalLoading },
   ] = useGlobalAreaChartsLazyQuery({
     variables: sharedVariables,
   });
-  const [
-    loadCountry,
-    {
-      data: countryData,
-      loading: countryLoading,
-      refetch: refetchAdminAreaChart,
-    },
-  ] = useCountryChartsLazyQuery({
-    variables: {
-      ...sharedVariables,
-      businessAreaSlug: businessArea,
-      ...countryVariables,
-      orderBy,
-      order,
-    },
-  });
+
   useEffect(() => {
     if (isGlobal) {
       loadGlobal();
-    } else {
-      loadCountry();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessArea]);
-
-  const handleSortAdminArea = (event, property) => {
-    let direction = '';
-    if (property !== orderBy) {
-      setOrderBy(property.toString());
-      direction = order;
-    } else {
-      direction = order === 'desc' ? 'asc' : 'desc';
-      setOrder(direction);
-    }
-    const variablesRefetch = {
-      ...sharedVariables,
-      businessAreaSlug: businessArea,
-      ...countryVariables,
-      orderBy: property,
-      order: direction,
-    };
-    refetchAdminAreaChart(variablesRefetch);
-  };
 
   if (isGlobal) {
     if (loading || globalLoading) return <LoadingComponent />;
     if (!data || !globalData) return null;
   } else {
-    if (loading || countryLoading) return <LoadingComponent />;
+    if (loading) return <LoadingComponent />;
     if (!data) return null;
   }
   return (
@@ -142,10 +104,8 @@ export function DashboardYearPage({
               />
             </DashboardPaper>
             <TotalAmountTransferredSectionByAdminAreaSection
-              data={countryData?.tableTotalCashTransferredByAdministrativeArea}
-              handleSort={handleSortAdminArea}
-              order={order}
-              orderBy={orderBy}
+              year={year}
+              filter={filter}
             />
             <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>
