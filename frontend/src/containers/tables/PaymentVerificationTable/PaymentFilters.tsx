@@ -153,7 +153,7 @@ export function PaymentFilters({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                startDate: moment(date).toISOString(),
+                startDate: moment(date).startOf("day").toISOString(),
               })
             }
             value={filter.startDate || null}
@@ -170,7 +170,7 @@ export function PaymentFilters({
             label='End Date'
             autoOk
             onChange={(date) =>
-              onFilterChange({ ...filter, endDate: moment(date).toISOString() })
+              onFilterChange({ ...filter, endDate: moment(date).endOf("day").toISOString() })
             }
             value={filter.endDate || null}
             format='YYYY-MM-DD'
