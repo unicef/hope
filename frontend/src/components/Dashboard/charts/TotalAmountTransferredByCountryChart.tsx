@@ -1,7 +1,11 @@
 import { Box, Button } from '@material-ui/core';
 import React, { useState } from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
-import { formatCurrencyWithSymbol, getPercentage } from '../../../utils/utils';
+import {
+  formatCurrencyWithSymbol,
+  formatThousands,
+  getPercentage,
+} from '../../../utils/utils';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
 
 interface TotalAmountTransferredByCountryChartProps {
@@ -70,12 +74,7 @@ export const TotalAmountTransferredByCountryChart = ({
           position: 'top',
           ticks: {
             beginAtZero: true,
-            callback: (value) => {
-              if (parseInt(value, 10) >= 100000) {
-                return `${value.toString().slice(0, -3)}k`;
-              }
-              return value;
-            },
+            callback: formatThousands,
           },
         },
       ],

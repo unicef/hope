@@ -1,5 +1,6 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { formatThousands } from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
@@ -42,12 +43,7 @@ export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
           position: 'top',
           ticks: {
             beginAtZero: true,
-            callback: (value) => {
-              if (parseInt(value, 10) >= 100000) {
-                return `${value.toString().slice(0, -3)}k`;
-              }
-              return value;
-            },
+            callback: formatThousands,
           },
         },
       ],
