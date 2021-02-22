@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       {{- include "hope.selectorLabels" . | nindent 6 }}
-      hope/service: backend
+      hope/service: celery-flower
   template:
     metadata:
     {{- with .Values.celeryflower.podAnnotations }}
@@ -26,8 +26,8 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
       containers:
-        - name: {{ .Chart.Name }}-backend
-          command: ["celery", "flower" "-A", "hct_mis_api.apps.core.celery"]
+        - name: {{ .Chart.Name }}-celery-flower
+          command: ["celery", "flower", "-A", "hct_mis_api.apps.core.celery"]
           securityContext:
             {{- toYaml .Values.celeryflower.securityContext | nindent 12 }}
           image: "{{ .Values.celeryflower.image }}"
