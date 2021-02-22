@@ -249,7 +249,7 @@ class GenerateDashboardReportContentHelpers:
     def get_payment_verifications(self, report: DashboardReport):
         filter_vars = {"payment_record__delivery_date__year": report.year}
         if report.admin_area:
-            filter_vars["payment_record__cash_plan__program__admin_areas"] = report.admin_area
+            filter_vars["payment_record__household__admin_area"] = report.admin_area
         if report.program:
             filter_vars["payment_record__cash_plan__program"] = report.program
         if not self._is_report_global(report):

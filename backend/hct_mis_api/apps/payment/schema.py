@@ -363,7 +363,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="payment_record__cash_plan__program__id",
-                    administrative_area_path="payment_record__cash_plan__program__admin_areas",
+                    administrative_area_path="payment_record__household__admin_area",
                 )
             },
             year_filter_path="payment_record__delivery_date",
@@ -414,7 +414,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas",
+                    administrative_area_path="household__admin_area",
                 )
             },
             year_filter_path="delivery_date",
@@ -440,7 +440,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas",
+                    administrative_area_path="household__admin_area",
                 )
             },
             year_filter_path="delivery_date",
@@ -466,7 +466,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas",
+                    administrative_area_path="household__admin_area",
                 )
             },
             year_filter_path="delivery_date",
@@ -488,7 +488,7 @@ class Query(graphene.ObjectType):
                 **chart_create_filter_query(
                     filters,
                     program_id_path="cash_plan__program__id",
-                    administrative_area_path="cash_plan__program__admin_areas",
+                    administrative_area_path="household__admin_area",
                 ),
                 "delivered_quantity_usd__gt": 0,
             },
@@ -497,7 +497,7 @@ class Query(graphene.ObjectType):
 
         admin_areas = (
             AdminArea.objects.filter(
-                admin_area_level__admin_level=2,
+                level=2,
                 household__payment_records__in=payment_records,
             )
             .distinct()
