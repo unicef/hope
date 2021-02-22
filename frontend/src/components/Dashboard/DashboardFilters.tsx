@@ -87,14 +87,8 @@ export const DashboardFilters = ({
         <Grid item xs={3}>
           <AdminAreasAutocomplete
             fullWidth
-            value={filter.administrativeArea}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, administrativeArea: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, administrativeArea: option });
-            }}
+            onFilterChange={onFilterChange}
+            name='administrativeArea'
           />
         </Grid>
       </Grid>
