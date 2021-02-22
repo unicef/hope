@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tab, Tabs } from '@material-ui/core';
+import { Box, Tab, Tabs, Typography } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
@@ -10,6 +10,7 @@ import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
 import { DashboardYearPage } from './DashboardYearPage';
+import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();
@@ -17,7 +18,7 @@ export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
-    administrativeArea: '',
+    administrativeArea: undefined,
   });
   const { data, loading } = useDashboardYearsChoiceDataQuery({
     variables: { businessArea },
@@ -61,8 +62,14 @@ export function DashboardPage(): React.ReactElement {
       </PageHeader>
       {hasPermissionToView ? (
         <>
-          {businessArea !== 'global' && (
+          {businessArea !== 'global' ? (
             <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          ) : (
+            <DashboardPaper noMarginTop extraPaddingLeft>
+              <Typography variant='body2'>
+                All charts below show total numbers for the selected year.
+              </Typography>
+            </DashboardPaper>
           )}
           <DashboardYearPage
             selectedTab={selectedTab}
