@@ -133,6 +133,7 @@ class CashPlanFilter(FilterSet):
             "end_date",
             "program__name",
             "id",
+            "updated_at"
         )
     )
 
