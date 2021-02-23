@@ -14,6 +14,11 @@ export const CashPlan = gql`
       downPayment
       dispersionDate
       assistanceThrough
+      serviceProvider {
+        id
+        caId
+        fullName
+      }
       caId
       caHashId
       dispersionDate
