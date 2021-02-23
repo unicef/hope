@@ -554,14 +554,17 @@ class Query(graphene.ObjectType):
         labels = []
         cash_transferred = []
         voucher_transferred = []
+        total_transferred = []
         for data_dict in countries_and_amounts:
             labels.append(data_dict.get("business_area__name"))
-            cash_transferred.append(data_dict.get("total_delivered_cash"))
-            voucher_transferred.append(data_dict.get("total_delivered_voucher"))
+            cash_transferred.append(data_dict.get("total_delivered_cash") or 0)
+            voucher_transferred.append(data_dict.get("total_delivered_voucher") or 0)
+            total_transferred.append(cash_transferred[-1] + voucher_transferred[-1])
 
         datasets = [
             {"label": "Actual cash transferred", "data": cash_transferred},
             {"label": "Actual voucher transferred", "data": voucher_transferred},
+            {"label": "Total transferred", "data": total_transferred},
         ]
 
         return {"labels": labels, "datasets": datasets}

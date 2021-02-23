@@ -14,13 +14,15 @@ export const ProgrammesBySector = ({
     labels: data?.labels,
     datasets: [
       {
-        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
+        categoryPercentage: 0.5,
+        maxBarThickness: 20,
         label: data?.datasets[0]?.label,
         backgroundColor: '#00A9FB',
         data: data?.datasets[0]?.data,
       },
       {
-        barPercentage: data.datasets[0].data.length < 3 ? 0.2 : 0.3,
+        categoryPercentage: 0.5,
+        maxBarThickness: 20,
         label: data?.datasets[1]?.label,
         backgroundColor: '#023F90',
         data: data?.datasets[1]?.data,

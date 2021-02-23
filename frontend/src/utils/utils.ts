@@ -329,7 +329,7 @@ export function formatNumber(value: number): string {
 
 export function formatThousands(value: string): string {
   if (!value) return value;
-  if (parseInt(value, 10) >= 100000) {
+  if (parseInt(value, 10) >= 10000) {
     return `${value.toString().slice(0, -3)}k`;
   }
   return value;
