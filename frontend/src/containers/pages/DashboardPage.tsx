@@ -65,7 +65,7 @@ export function DashboardPage(): React.ReactElement {
           {businessArea !== 'global' ? (
             <DashboardFilters filter={filter} onFilterChange={setFilter} />
           ) : (
-            <DashboardPaper noMarginTop extraPaddingLeft>
+            <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
               <Typography variant='body2'>
                 All charts below show total numbers for the selected year.
               </Typography>

@@ -288,14 +288,17 @@ class Query(graphene.ObjectType):
         labels = []
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
+        programmes_total = []
         for programme in programmes_by_sector:
             labels.append(sector_choice_mapping.get(programme.get("sector")))
-            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus"))
-            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus"))
+            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus") or 0)
+            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus") or 0)
+            programmes_total.append(programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1])
 
         datasets = [
             {"label": "Programmes", "data": programmes_wo_cash_plus},
             {"label": "Programmes with Cash+", "data": programmes_with_cash_plus},
+            {"label": "Total Programmes", "data": programmes_total},
         ]
 
         return {"labels": labels, "datasets": datasets}
