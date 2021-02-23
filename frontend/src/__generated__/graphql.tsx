@@ -42,7 +42,8 @@ export type _TableTotalCashTransferredDataNode = {
    __typename?: '_TableTotalCashTransferredDataNode',
   id?: Maybe<Scalars['String']>,
   admin2?: Maybe<Scalars['String']>,
-  totalCashTransferred?: Maybe<Scalars['String']>,
+  totalCashTransferred?: Maybe<Scalars['Float']>,
+  totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
 export type ActivateCashPlanVerificationMutation = {
@@ -542,9 +543,8 @@ export type ChartGrievanceTicketsNode = {
    __typename?: 'ChartGrievanceTicketsNode',
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
-  total?: Maybe<Scalars['Int']>,
+  totalNumberOfGrievances?: Maybe<Scalars['Int']>,
   totalNumberOfFeedback?: Maybe<Scalars['Int']>,
-  totalNumberOfOpenFeedback?: Maybe<Scalars['Int']>,
   totalNumberOfOpenSensitive?: Maybe<Scalars['Int']>,
 };
 
@@ -3275,7 +3275,7 @@ export type Query = {
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
-  chartPlannedBudget?: Maybe<ChartDetailedDatasetsNode>,
+  chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>,
   cashPlan?: Maybe<CashPlanNode>,
   allCashPlans?: Maybe<CashPlanNodeConnection>,
   programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3545,7 +3545,9 @@ export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
   program?: Maybe<Scalars['String']>,
-  administrativeArea?: Maybe<Scalars['String']>
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3646,7 +3648,7 @@ export type QueryChartProgrammesBySectorArgs = {
 };
 
 
-export type QueryChartPlannedBudgetArgs = {
+export type QueryChartTotalTransferredByMonthArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
   program?: Maybe<Scalars['String']>,
@@ -6464,7 +6466,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartGrievances: Maybe<(
     { __typename?: 'ChartGrievanceTicketsNode' }
-    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalNumberOfFeedback' | 'totalNumberOfOpenFeedback' | 'totalNumberOfOpenSensitive'>
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'totalNumberOfGrievances' | 'totalNumberOfFeedback' | 'totalNumberOfOpenSensitive'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DatasetsNode' }
       & Pick<_DatasetsNode, 'data'>
@@ -6495,13 +6497,7 @@ export type AllChartsQuery = (
   )>, sectionTotalTransferred: Maybe<(
     { __typename?: 'SectionTotalNode' }
     & Pick<SectionTotalNode, 'total'>
-  )>, tableTotalCashTransferredByAdministrativeArea: Maybe<(
-    { __typename?: 'TableTotalCashTransferred' }
-    & { data: Maybe<Array<Maybe<(
-      { __typename?: '_TableTotalCashTransferredDataNode' }
-      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred'>
-    )>>> }
-  )>, chartPlannedBudget: Maybe<(
+  )>, chartTotalTransferredByMonth: Maybe<(
     { __typename?: 'ChartDetailedDatasetsNode' }
     & Pick<ChartDetailedDatasetsNode, 'labels'>
     & { datasets: Maybe<Array<Maybe<(
@@ -7136,6 +7132,27 @@ export type CashPlanPaymentVerificationQuery = (
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'caHashId'>
     ) }
+  )> }
+);
+
+export type CountryChartsQueryVariables = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type CountryChartsQuery = (
+  { __typename?: 'Query' }
+  & { tableTotalCashTransferredByAdministrativeArea: Maybe<(
+    { __typename?: 'TableTotalCashTransferred' }
+    & { data: Maybe<Array<Maybe<(
+      { __typename?: '_TableTotalCashTransferredDataNode' }
+      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred' | 'totalHouseholds'>
+    )>>> }
   )> }
 );
 
@@ -11194,9 +11211,8 @@ export const AllChartsDocument = gql`
       data
     }
     labels
-    total
+    totalNumberOfGrievances
     totalNumberOfFeedback
-    totalNumberOfOpenFeedback
     totalNumberOfOpenSensitive
   }
   sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
@@ -11224,14 +11240,7 @@ export const AllChartsDocument = gql`
   sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
-  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
-    data {
-      id
-      admin2
-      totalCashTransferred
-    }
-  }
-  chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+  chartTotalTransferredByMonth(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
       label
@@ -12752,6 +12761,66 @@ export function useCashPlanPaymentVerificationLazyQuery(baseOptions?: ApolloReac
 export type CashPlanPaymentVerificationQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationQuery>;
 export type CashPlanPaymentVerificationLazyQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationLazyQuery>;
 export type CashPlanPaymentVerificationQueryResult = ApolloReactCommon.QueryResult<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>;
+export const CountryChartsDocument = gql`
+    query CountryCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String, $order: String, $orderBy: String) {
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea, order: $order, orderBy: $orderBy) {
+    data {
+      id
+      admin2
+      totalCashTransferred
+      totalHouseholds
+    }
+  }
+}
+    `;
+export type CountryChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CountryChartsQuery, CountryChartsQueryVariables>, 'query'> & ({ variables: CountryChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CountryChartsComponent = (props: CountryChartsComponentProps) => (
+      <ApolloReactComponents.Query<CountryChartsQuery, CountryChartsQueryVariables> query={CountryChartsDocument} {...props} />
+    );
+    
+export type CountryChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<CountryChartsQuery, CountryChartsQueryVariables> & TChildProps;
+export function withCountryCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CountryChartsQuery,
+  CountryChartsQueryVariables,
+  CountryChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CountryChartsQuery, CountryChartsQueryVariables, CountryChartsProps<TChildProps>>(CountryChartsDocument, {
+      alias: 'countryCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCountryChartsQuery__
+ *
+ * To run a query within a React component, call `useCountryChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCountryChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCountryChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      year: // value for 'year'
+ *      program: // value for 'program'
+ *      administrativeArea: // value for 'administrativeArea'
+ *      order: // value for 'order'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useCountryChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+      }
+export function useCountryChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+        }
+export type CountryChartsQueryHookResult = ReturnType<typeof useCountryChartsQuery>;
+export type CountryChartsLazyQueryHookResult = ReturnType<typeof useCountryChartsLazyQuery>;
+export type CountryChartsQueryResult = ApolloReactCommon.QueryResult<CountryChartsQuery, CountryChartsQueryVariables>;
 export const DashboardReportChoiceDataDocument = gql`
     query DashboardReportChoiceData($businessArea: String!) {
   dashboardReportTypesChoices(businessAreaSlug: $businessArea) {
@@ -16229,7 +16298,8 @@ export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends
 export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalCashTransferred?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
@@ -16452,9 +16522,8 @@ export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType ext
 export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfGrievances?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfOpenFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
@@ -17418,7 +17487,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
-  chartPlannedBudget?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPlannedBudgetArgs, 'businessAreaSlug' | 'year'>>,
+  chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
