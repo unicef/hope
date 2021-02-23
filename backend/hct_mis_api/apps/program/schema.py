@@ -109,10 +109,12 @@ class CashPlanFilter(FilterSet):
         field_name="business_area__slug",
     )
 
+
     class Meta:
         fields = {
             "program": ["exact"],
             "assistance_through": ["exact", "startswith"],
+            "service_provider__full_name": ["exact", "startswith"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
             "business_area": ["exact"],
@@ -133,7 +135,8 @@ class CashPlanFilter(FilterSet):
             "end_date",
             "program__name",
             "id",
-            "updated_at"
+            "updated_at",
+            "service_provider__full_name"
         )
     )
 
@@ -154,6 +157,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
+    delivery_type = graphene.String()
 
     class Meta:
         model = CashPlan

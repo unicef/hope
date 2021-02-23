@@ -60,6 +60,9 @@
             "name": "ReportNode"
           },
           {
+            "name": "ServiceProviderNode"
+          },
+          {
             "name": "CashPlanPaymentVerificationNode"
           },
           {
@@ -67,9 +70,6 @@
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "ServiceProviderNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
