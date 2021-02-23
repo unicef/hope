@@ -98,7 +98,7 @@ export function DashboardYearPage({
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
-            <DashboardPaper title='Total Tranferred by Month'>
+            <DashboardPaper title='Total Transferred by Month'>
               <TotalTransferredByMonth
                 data={data.chartTotalTransferredByMonth}
               />
@@ -137,6 +137,7 @@ export function DashboardYearPage({
                   <DashboardPaper
                     title='Volume by Delivery Mechanism in USD'
                     noMarginTop
+                    extraPaddingTitle={false}
                   >
                     <CardTextLight large>
                       Delivery type in CashAssist

@@ -7,6 +7,7 @@ interface DashboardPaperProps {
   children: React.ReactNode;
   noMarginTop?: boolean;
   extraPaddingLeft?: boolean;
+  extraPaddingTitle?: boolean;
   color?: string;
 }
 const StyledPaper = styled(
@@ -27,6 +28,7 @@ export const DashboardPaper = ({
   children,
   noMarginTop,
   extraPaddingLeft,
+  extraPaddingTitle = true,
   color,
 }: DashboardPaperProps): React.ReactElement => {
   return (
@@ -35,7 +37,7 @@ export const DashboardPaper = ({
       extraPaddingLeft={extraPaddingLeft}
       color={color}
     >
-      {title && <Box mb={2}>{title}</Box>}
+      {title && <Box mb={extraPaddingTitle ? 6 : 2}>{title}</Box>}
       {children}
     </StyledPaper>
   );

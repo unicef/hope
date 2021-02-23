@@ -269,7 +269,12 @@ class GenerateDashboardReportContentHelpers:
                     f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
                 )
             )
-            .annotate(total_payment_records=Count("cash_plans__payment_records", distinct=True))
+            .annotate(
+                total_payment_records=Count(
+                    "cash_plans__payment_records",
+                    distinct=True,
+                )
+            )
             .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
             .annotate(
                 received=Count(
@@ -414,7 +419,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
-            return ("", "Total", instance.get("total_cash__sum", 0), instance.get("total_voucher__sum", 0))
+            return ("", "Total", instance.get("total_cash__sum") or 0, instance.get("total_voucher__sum") or 0)
         else:
             return (
                 instance.code,
