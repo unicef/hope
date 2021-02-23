@@ -664,6 +664,7 @@ class Query(graphene.ObjectType):
         datasets = [
             {"label": "with disability", "data": sum_of_with_disability},
             {"label": "without disability", "data": sum_of_without_disability},
+            {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
 

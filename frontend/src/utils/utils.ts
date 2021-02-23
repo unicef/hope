@@ -293,13 +293,16 @@ export function programCompare(
   return statusA > statusB ? 1 : -1;
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(
+  amount: number,
+  onlyNumberValue = false,
+): string {
   const amountCleared = amount || 0;
   return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} USD`;
+  })}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
