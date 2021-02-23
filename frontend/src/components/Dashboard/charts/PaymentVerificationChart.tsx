@@ -12,13 +12,13 @@ export const PaymentVerificationChart = ({
   const chartData = {
     datasets: [
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
         label: `Received - ${(data?.datasets[1]?.data[0] * 100).toFixed(0)}%`,
         backgroundColor: '#8BD241',
         data: data?.datasets[1]?.data,
       },
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
         label: `Received with Issues - ${(
           data?.datasets[3]?.data[0] * 100
         ).toFixed(0)}%`,
@@ -26,7 +26,7 @@ export const PaymentVerificationChart = ({
         data: data?.datasets[3]?.data,
       },
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
         label: `Not received - ${(data?.datasets[2]?.data[0] * 100).toFixed(
           0,
         )}%`,
@@ -34,7 +34,7 @@ export const PaymentVerificationChart = ({
         data: data?.datasets[2]?.data,
       },
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
         label: `Not responded - ${(data?.datasets[0]?.data[0] * 100).toFixed(
           0,
         )}%`,
@@ -50,7 +50,7 @@ export const PaymentVerificationChart = ({
     legend: {
       position: 'bottom',
       labels: {
-        usePointStyle: true,
+        padding: 30,
       },
     },
     tooltips: {

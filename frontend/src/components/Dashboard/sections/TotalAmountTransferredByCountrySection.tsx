@@ -1,6 +1,6 @@
 import React from 'react';
 import { TotalAmountTransferredByCountryChart } from '../charts/TotalAmountTransferredByCountryChart';
-import { CardTextLight } from '../DashboardCard';
+import { CardTextLightLarge } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
 import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -18,7 +18,7 @@ export const TotalAmountTransferredSectionByCountry = ({
   }
   return (
     <DashboardPaper title='Total Transferred by Country'>
-      <CardTextLight>IN USD</CardTextLight>
+      <CardTextLightLarge>IN USD</CardTextLightLarge>
       <TotalAmountTransferredByCountryChart data={data} />
     </DashboardPaper>
   );
