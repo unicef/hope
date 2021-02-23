@@ -12,6 +12,7 @@ export const TotalAmountTransferredSectionByCountry = ({
   data,
 }: TotalAmountTransferredSectionByCountryProps): React.ReactElement => {
   const businessArea = useBusinessArea();
+
   if (businessArea !== 'global') {
     return null;
   }

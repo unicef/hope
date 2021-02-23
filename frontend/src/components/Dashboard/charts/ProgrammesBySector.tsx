@@ -1,5 +1,6 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import { formatThousands } from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface ProgrammesBySectorProps {
@@ -13,13 +14,15 @@ export const ProgrammesBySector = ({
     labels: data?.labels,
     datasets: [
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
+        maxBarThickness: 20,
         label: data?.datasets[0]?.label,
         backgroundColor: '#00A9FB',
         data: data?.datasets[0]?.data,
       },
       {
-        barPercentage: 0.4,
+        categoryPercentage: 0.5,
+        maxBarThickness: 20,
         label: data?.datasets[1]?.label,
         backgroundColor: '#023F90',
         data: data?.datasets[1]?.data,
@@ -28,26 +31,31 @@ export const ProgrammesBySector = ({
   };
 
   const options = {
-    barPercentage: 0.1,
     legend: {
       position: 'bottom',
       labels: {
         usePointStyle: true,
-      }
+      },
     },
     scales: {
       xAxes: [
         {
+          position: 'top',
           stacked: true,
           ticks: {
+            beginAtZero: true,
             stepSize: 1,
+            callback: formatThousands,
           },
         },
       ],
       yAxes: [
         {
+          position: 'left',
           stacked: true,
-          position: 'right',
+          gridLines: {
+            display: false,
+          },
         },
       ],
     },
