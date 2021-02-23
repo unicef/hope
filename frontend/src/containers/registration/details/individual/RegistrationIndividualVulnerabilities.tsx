@@ -44,7 +44,6 @@ export function RegistrationIndividualVulnerabilities({
     {},
   );
 
-  console.log(individual);
   const fields = Object.entries(individual.flexFields || {}).map(
     // eslint-disable-next-line array-callback-return,consistent-return
     ([key, value]: [string, string | string[]]) => {
