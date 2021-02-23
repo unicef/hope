@@ -192,6 +192,9 @@ class CashPlan(TimeStampedUUIDModel):
     )
     assistance_measurement = models.CharField(max_length=255, db_index=True)
     assistance_through = models.CharField(max_length=255, db_index=True)
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider", null=True, related_name="cash_plans", on_delete=models.CASCADE
+    )
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)

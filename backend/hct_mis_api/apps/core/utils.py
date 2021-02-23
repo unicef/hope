@@ -636,6 +636,7 @@ def chart_create_filter_query(filters, program_id_path="id", administrative_area
         )
     return filter_query
 
+
 def admin_area1_query(comparision_method, args):
     from django.db.models import Q
 
@@ -644,3 +645,14 @@ def admin_area1_query(comparision_method, args):
     )
 
 
+class CaIdIterator:
+    def __init__(self, name):
+        self.name = name
+        self.last_id = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.last_id += 1
+        return f"123-21-{self.name.upper()}-{self.last_id:05d}"
