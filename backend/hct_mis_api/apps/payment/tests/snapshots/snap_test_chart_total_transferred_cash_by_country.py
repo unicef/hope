@@ -26,6 +26,14 @@ snapshots['TestChartTotalTransferredCashByCountry::test_resolving_chart_0_with_p
                         300.0
                     ],
                     'label': 'Actual voucher transferred'
+                },
+                {
+                    'data': [
+                        900.6,
+                        900.6,
+                        900.6
+                    ],
+                    'label': 'Total transferred'
                 }
             ],
             'labels': [
