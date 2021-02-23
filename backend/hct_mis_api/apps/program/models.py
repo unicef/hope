@@ -14,7 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
