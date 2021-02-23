@@ -8,6 +8,7 @@ interface DashboardPaperProps {
   noMarginTop?: boolean;
   extraPaddingLeft?: boolean;
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const StyledPaper = styled(({ noMarginTop, extraPaddingLeft, ...props }) => (
   <Paper {...props} />
 ))`
