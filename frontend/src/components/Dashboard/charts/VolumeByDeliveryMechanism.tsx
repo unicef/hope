@@ -37,15 +37,19 @@ export const VolumeByDeliveryMechanism = ({
   const options = {
     cutoutPercentage: 80,
     legend: {
-      position: 'bottom',
+      align: 'start',
       labels: {
-        usePointStyle: true,
+        boxWidth: 10,
+        padding: data?.datasets[0]?.data.length < 4 ? 30 : 15,
       },
     },
     responsive: true,
     maintainAspectRatio: false,
     layout: {
-      padding: 20,
+      padding: {
+        top: 20,
+        bottom: 0,
+      },
     },
     tooltips: {
       mode: 'point',
@@ -53,7 +57,7 @@ export const VolumeByDeliveryMechanism = ({
         label: (tooltipItem, tooltipData) => {
           return ` ${
             tooltipData.labels[tooltipItem.index]
-          }: ${formatCurrencyWithSymbol(
+          } ${formatCurrencyWithSymbol(
             tooltipData.datasets[0].data[tooltipItem.index],
           )} (${getPercentage(
             tooltipData.datasets[0].data[tooltipItem.index],

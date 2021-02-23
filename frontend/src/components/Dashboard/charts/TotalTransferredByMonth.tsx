@@ -40,9 +40,8 @@ export const TotalTransferredByMonth = ({
 
   const options = {
     legend: {
-      position: 'bottom',
       labels: {
-        usePointStyle: true,
+        padding: 40,
       },
     },
     tooltips: {

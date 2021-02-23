@@ -22,15 +22,19 @@ export const GrievancesChart = ({
   const options = {
     cutoutPercentage: 80,
     legend: {
-      position: 'bottom',
+      align: 'start',
       labels: {
-        usePointStyle: true,
+        boxWidth: 10,
+        padding: 15,
       },
     },
     responsive: true,
     maintainAspectRatio: false,
     layout: {
-      padding: 20,
+      padding: {
+        top: 20,
+        bottom: 20,
+      },
     },
     tooltips: {
       mode: 'point',

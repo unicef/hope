@@ -17,7 +17,10 @@ export const TotalAmountTransferredSectionByCountry = ({
     return null;
   }
   return (
-    <DashboardPaper title='Total Transferred by Country'>
+    <DashboardPaper
+      title='Total Transferred by Country'
+      extraPaddingTitle={false}
+    >
       <CardTextLightLarge>IN USD</CardTextLightLarge>
       <TotalAmountTransferredByCountryChart data={data} />
     </DashboardPaper>
