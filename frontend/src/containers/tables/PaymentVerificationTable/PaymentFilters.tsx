@@ -101,7 +101,7 @@ export function PaymentFilters({
             label='FSP'
             variant='outlined'
             margin='dense'
-            onChange={(e) => handleFilterChange(e, 'assistanceThrough')}
+            onChange={(e) => handleFilterChange(e, 'serviceProvider')}
             InputProps={{
               startAdornment: (
                 <InputAdornment position='start'>
