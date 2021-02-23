@@ -3,7 +3,7 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet
 
 from django_filters import OrderingFilter
 from graphql import GraphQLError
@@ -643,3 +643,16 @@ def admin_area1_query(comparision_method, args):
     return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
         Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
     )
+
+
+class CaIdIterator:
+    def __init__(self, name):
+        self.name = name
+        self.last_id = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.last_id += 1
+        return f"123-21-{self.name.upper()}-{self.last_id:05d}"

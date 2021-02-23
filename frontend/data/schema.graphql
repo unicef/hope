@@ -158,22 +158,6 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
-enum CashPlanDeliveryType {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  IN_KIND
-  MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-}
-
 type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -192,9 +176,10 @@ type CashPlanNode implements Node {
   coverageUnit: String!
   comments: String
   program: ProgramNode!
-  deliveryType: CashPlanDeliveryType
+  deliveryType: String
   assistanceMeasurement: String!
   assistanceThrough: String!
+  serviceProvider: ServiceProviderNode
   visionId: String
   fundsCommitment: String
   exchangeRate: Float
@@ -2406,7 +2391,7 @@ type Query {
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -2820,6 +2805,7 @@ type ServiceProviderNode implements Node {
   country: String!
   visionId: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
 
 type ServiceProviderNodeConnection {

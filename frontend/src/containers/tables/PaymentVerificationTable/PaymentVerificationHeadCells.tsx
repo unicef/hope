@@ -1,11 +1,11 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import { CashPlanNode } from '../../../__generated__/graphql';
+import {AllCashPlansQuery, CashPlanNode} from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<CashPlanNode>[] = [
+export const headCells: HeadCell<AllCashPlansQuery['allCashPlans']['edges'][number]['node']>[] = [
   {
     disablePadding: false,
     label: 'Cash Plan ID',
-    id: 'id',
+    id: 'caId',
     numeric: false,
   },
   {
@@ -17,7 +17,7 @@ export const headCells: HeadCell<CashPlanNode>[] = [
   {
     disablePadding: false,
     label: 'FSP',
-    id: 'assistanceThrough',
+    id: 'service_provider__full_name',
     numeric: false,
   },
   {

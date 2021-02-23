@@ -52,7 +52,7 @@ export function PaymentVerificationTableRow({
       role='checkbox'
       key={plan.id}
     >
-      <TableCell align='left'>{decodeIdString(plan.id)}</TableCell>
+      <TableCell align='left'>{plan.caId}</TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
@@ -61,7 +61,7 @@ export function PaymentVerificationTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.assistanceThrough}</TableCell>
+      <TableCell align='left'>{plan.serviceProvider?.fullName}</TableCell>
       <TableCell align='left'>
         {deliveryTypeChoicesDict[plan.deliveryType]}
       </TableCell>
