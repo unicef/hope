@@ -8054,7 +8054,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8819,6 +8819,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   estimatedBirthDate
   maritalStatus
   pregnant
+  flexFields
   documents {
     edges {
       node {
