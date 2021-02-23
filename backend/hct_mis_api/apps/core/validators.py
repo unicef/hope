@@ -15,6 +15,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_BOOL,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
+from hct_mis_api.apps.household.models import NOT_PROVIDED, RELATIONSHIP_UNKNOWN, BLANK
 
 
 class BaseValidator:
@@ -93,11 +94,9 @@ def prepare_choices_for_validation(choices_sheet):
                     cell_value = cell_value.strip().upper()
 
                 choice_value = cell_value
-            elif header_name == "label:English(EN)":
-                english_label = str(cell_value).strip()
 
         if last_list_name is not None and choice_value is not None:
-            choices_mapping[last_list_name].append({"label": {"English(EN)": english_label}, "value": choice_value})
+            choices_mapping[last_list_name].append(choice_value)
 
     return choices_mapping
 
@@ -131,9 +130,9 @@ class KoboTemplateValidator:
         "admin2_h_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
-        {"label": {"English(EN)": "None"}, "value": ""},
-        {"label": {"English(EN)": "Not provided"}, "value": "NOT_PROVIDED"},
-        {"label": {"English(EN)": "Unknown"}, "value": "UNKNOWN"},
+        BLANK,
+        NOT_PROVIDED,
+        RELATIONSHIP_UNKNOWN,
     )
     ALL_CORE_FIELDS = (
         CORE_FIELDS_ATTRIBUTES + list(KOBO_ONLY_HOUSEHOLD_FIELDS.values()) + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
@@ -214,8 +213,6 @@ class KoboTemplateValidator:
     @classmethod
     def _check_field_type(cls, core_field, core_field_from_file, field_type):
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
-            if field_type == TYPE_BOOL and core_field_from_file["type"] == TYPE_SELECT_ONE:
-                return
             return {
                 "field": core_field,
                 "message": f"Expected type: {field_type}, actual type: {core_field_from_file['type']}",
@@ -254,7 +251,7 @@ class KoboTemplateValidator:
                 )
 
         for file_choice in from_file_choices:
-            if file_choice not in from_file_choices:
+            if file_choice not in field_choices:
                 errors.append(
                     {
                         "field": core_field,
@@ -279,7 +276,7 @@ class KoboTemplateValidator:
         validation_errors = []
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
-            field_choices = field_data["choices"]
+            field_choices = [choice["value"] for choice in field_data["choices"]]
             core_field_from_file = core_fields_in_file.get(core_field)
 
             field_exists_error = cls._check_if_field_exists(core_field, core_field_from_file)
@@ -287,13 +284,16 @@ class KoboTemplateValidator:
                 validation_errors.append(field_exists_error)
                 continue
 
-            field_type_error = cls._check_field_type(core_field, core_field_from_file, field_type)
-            if field_type_error:
-                validation_errors.append(field_type_error)
-
             field_required_error = cls._check_is_field_required(core_field, core_field_from_file)
             if field_required_error:
                 validation_errors.append(field_required_error)
+
+            if field_type == TYPE_BOOL and core_field_from_file["type"] == TYPE_SELECT_ONE:
+                continue
+
+            field_type_error = cls._check_field_type(core_field, core_field_from_file, field_type)
+            if field_type_error:
+                validation_errors.append(field_type_error)
 
             field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
             if field_choices_errors:
