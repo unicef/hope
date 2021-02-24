@@ -782,7 +782,7 @@ class DeduplicateTask:
                 create_grievance_ticket_with_details(
                     documents_queryset.first().individual, document.individual, document.individual.business_area
                 )
-                document.status=Document.STATUS_INVALID
+                document.status = Document.STATUS_INVALID
             else:
                 document.status = Document.STATUS_VALID
             document.save()
