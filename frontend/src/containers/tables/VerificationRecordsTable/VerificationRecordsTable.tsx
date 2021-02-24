@@ -97,7 +97,7 @@ export function VerificationRecordsTable({
 
   const exportButton =
     verificationMethod === 'XLSX' && canExport ? (
-      <Box mr={3}>
+      <Box mr={3} key='export'>
         <a
           download
           className={classes.link}
@@ -117,7 +117,7 @@ export function VerificationRecordsTable({
 
   const importButton =
     verificationMethod === 'XLSX' && canImport ? (
-      <Box>
+      <Box key='import'>
         <Button
           startIcon={<Publish />}
           color='primary'
