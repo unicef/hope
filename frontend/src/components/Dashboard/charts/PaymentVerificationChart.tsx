@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
 import { AllChartsQuery } from '../../../__generated__/graphql';
@@ -11,28 +12,30 @@ export const PaymentVerificationChart = ({
   const chartData = {
     datasets: [
       {
-        barPercentage: 0.1,
-        label: `Received ${(data?.datasets[1]?.data[0] * 100).toFixed(0)}%`,
+        barPercentage: 0.4,
+        label: `Received - ${(data?.datasets[1]?.data[0] * 100).toFixed(0)}%`,
         backgroundColor: '#8BD241',
         data: data?.datasets[1]?.data,
       },
       {
-        barPercentage: 0.1,
-        label: `Received with Issues ${(
+        barPercentage: 0.4,
+        label: `Received with Issues - ${(
           data?.datasets[3]?.data[0] * 100
         ).toFixed(0)}%`,
         backgroundColor: '#FDE8AC',
         data: data?.datasets[3]?.data,
       },
       {
-        barPercentage: 0.1,
-        label: `Not received ${(data?.datasets[2]?.data[0] * 100).toFixed(0)}%`,
+        barPercentage: 0.4,
+        label: `Not received - ${(data?.datasets[2]?.data[0] * 100).toFixed(
+          0,
+        )}%`,
         backgroundColor: '#E02020',
         data: data?.datasets[2]?.data,
       },
       {
-        barPercentage: 0.1,
-        label: `Not responded ${(data?.datasets[0]?.data[0] * 100).toFixed(
+        barPercentage: 0.4,
+        label: `Not responded - ${(data?.datasets[0]?.data[0] * 100).toFixed(
           0,
         )}%`,
         backgroundColor: '#C3D1D8',
@@ -62,9 +65,7 @@ export const PaymentVerificationChart = ({
       xAxes: [
         {
           ticks: {
-            min: 0,
-            max: 1,
-            callback: (value) => `${(value * 100).toFixed(0)}%`,
+            callback: () => '',
           },
           gridLines: {
             display: false,
@@ -84,5 +85,9 @@ export const PaymentVerificationChart = ({
     },
   };
 
-  return <HorizontalBar data={chartData} options={options} />;
+  return (
+    <Box height='150px'>
+      <HorizontalBar data={chartData} options={options} />
+    </Box>
+  );
 };
