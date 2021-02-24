@@ -299,5 +299,5 @@ class RdiMergeTask:
         obj_hct.status = RegistrationDataImport.MERGED
 
         obj_hct.save()
-
+        DeduplicateTask.hard_deduplicate_documents(documents_to_create)
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
