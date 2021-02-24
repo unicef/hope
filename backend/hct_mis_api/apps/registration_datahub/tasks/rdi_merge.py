@@ -26,7 +26,6 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
     ImportedIndividualRoleInHousehold,
     ImportedIndividual,
-    KoboImportedSubmission,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -250,21 +249,6 @@ class RdiMergeTask:
         Document.objects.bulk_create(documents_to_create)
         IndividualIdentity.objects.bulk_create(identities_to_create)
         IndividualRoleInHousehold.objects.bulk_create(roles_to_create)
-
-        kobo_submissions = []
-        for imported_household in imported_households:
-            kobo_submission_uuid = imported_household.kobo_submission_uuid
-            kobo_asset_id = imported_household.kobo_asset_id
-            kobo_submission_time = imported_household.kobo_submission_time
-            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                submission = KoboImportedSubmission(
-                    kobo_submission_uuid=kobo_submission_uuid,
-                    kobo_asset_id=kobo_asset_id,
-                    kobo_submission_time=kobo_submission_time,
-                )
-                kobo_submissions.append(submission)
-        if kobo_submissions:
-            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
 
         # DEDUPLICATION
         ticket_details_to_create = []
