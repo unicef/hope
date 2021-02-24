@@ -24,7 +24,7 @@ export const PaymentsChart = ({
     cutoutPercentage: 80,
     legend: {
       labels: {
-        padding: 30,
+        padding: 25,
         boxWidth: 10,
       },
     },
