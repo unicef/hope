@@ -689,23 +689,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 collectors_to_bulk_create.append(collector)
         ImportedIndividualRoleInHousehold.objects.bulk_create(collectors_to_bulk_create)
 
-    @staticmethod
-    def _register_kobo_submissions(households):
-        kobo_submissions = []
-        for imported_household in households:
-            kobo_submission_uuid = imported_household.kobo_submission_uuid
-            kobo_asset_id = imported_household.kobo_asset_id
-            kobo_submission_time = imported_household.kobo_submission_time
-            if kobo_submission_uuid and kobo_asset_id and kobo_submission_time:
-                submission = KoboImportedSubmission(
-                    kobo_submission_uuid=kobo_submission_uuid,
-                    kobo_asset_id=kobo_asset_id,
-                    kobo_submission_time=kobo_submission_time,
-                )
-                kobo_submissions.append(submission)
-        if kobo_submissions:
-            KoboImportedSubmission.objects.bulk_create(kobo_submissions)
-
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
     def execute(self, registration_data_import_id, import_data_id, business_area_id):
@@ -838,10 +821,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()
-
-        registration_data_import.refresh_from_db()
-        self._register_kobo_submissions(registration_data_import.households.all())
-
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi_mis, rdi_mis)
 
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=registration_data_import)
