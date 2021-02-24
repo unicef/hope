@@ -140,6 +140,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     )
     transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
+    registration_ca_id = models.CharField(max_length=255, null=True)
 
 
 class ServiceProvider(TimeStampedUUIDModel):
