@@ -28,11 +28,9 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     encode_ids,
     to_choice_object,
-    chart_get_filtered_qs,
     sum_lists_with_values,
     chart_permission_decorator,
     chart_filters_decoder,
-    chart_create_filter_query,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -54,7 +52,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 
@@ -527,8 +525,8 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
@@ -546,8 +544,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         individuals_counts = (
             payment_records_qs.select_related("household")
@@ -566,8 +564,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
@@ -592,8 +590,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
@@ -631,8 +629,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
@@ -667,20 +665,3 @@ class Query(graphene.ObjectType):
             {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
-
-
-def get_payments_records_with_delivered_quantity(year, business_area_slug, filters):
-    return chart_get_filtered_qs(
-        PaymentRecord,
-        year,
-        business_area_slug_filter={"business_area__slug": business_area_slug},
-        additional_filters={
-            "delivered_quantity_usd__gt": 0,
-            **chart_create_filter_query(
-                filters,
-                program_id_path="cash_plan__program__id",
-                administrative_area_path="household__admin_area",
-            ),
-        },
-        year_filter_path="delivery_date",
-    )

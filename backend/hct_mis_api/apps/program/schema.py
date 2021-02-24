@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
     chart_create_filter_query,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -305,19 +306,8 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                )
-            },
-            year_filter_path="delivery_date",
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         months_and_amounts = (
