@@ -40,7 +40,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedIndividualIdentity,
 )
-
+from hct_mis_api.apps.utils.schema import Arg
 
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
@@ -118,7 +118,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = Arg()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     has_duplicates = graphene.Boolean(
@@ -151,7 +151,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = Arg()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
