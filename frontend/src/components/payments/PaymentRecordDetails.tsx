@@ -78,7 +78,7 @@ export function PaymentRecordDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='REGISTRATION GROUP'>
-              <Missing />
+              {paymentRecord.registrationCaId}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
