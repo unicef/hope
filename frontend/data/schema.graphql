@@ -1558,7 +1558,7 @@ type ImportedHouseholdNode implements Node {
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
   returnee: Boolean
-  flexFields: JSONString!
+  flexFields: Arg
   start: DateTime
   deviceid: String!
   nameEnumerator: String!
@@ -1687,7 +1687,7 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
   deduplicationBatchResults: [DeduplicationResultNode]
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
-  flexFields: JSONString!
+  flexFields: Arg
   pregnant: Boolean
   observedDisability: ImportedIndividualObservedDisability!
   seeingDisability: ImportedIndividualSeeingDisability
@@ -2199,6 +2199,7 @@ type PaymentRecordNode implements Node {
   serviceProvider: ServiceProviderNode!
   transactionReferenceId: String
   visionId: String
+  registrationCaId: String
   verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
