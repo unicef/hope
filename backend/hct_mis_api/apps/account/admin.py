@@ -229,6 +229,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         try:
                             if email in existing:
                                 user = User.objects.get(email=email)
+                                self._sync_ad_data(user)
                                 results.updated.append(user)
                             else:
                                 user_data = ms_graph.get_user_data(email=email)

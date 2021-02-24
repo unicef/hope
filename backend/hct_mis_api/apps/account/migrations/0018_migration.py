@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='ad_uuid',
-            field=models.CharField(blank=True, editable=False, max_length=255, null=True),
+            field=models.CharField(blank=True, editable=False, max_length=64, null=True, unique=True),
         ),
     ]
+
