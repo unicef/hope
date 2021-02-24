@@ -5752,6 +5752,14 @@ export type ApproveHouseholdDataChangeMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { householdDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+        & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )> }
+      )> }
     )> }
   )> }
 );
@@ -5772,6 +5780,14 @@ export type ApproveIndividualDataChangeMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { individualDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+        & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+        & { individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & IndividualDetailedFragment
+        )> }
+      )> }
     )> }
   )> }
 );
@@ -9036,10 +9052,17 @@ export const ApproveHouseholdDataChangeDocument = gql`
     grievanceTicket {
       id
       status
+      householdDataUpdateTicketDetails {
+        id
+        household {
+          ...householdDetailed
+        }
+        householdData
+      }
     }
   }
 }
-    `;
+    ${HouseholdDetailedFragmentDoc}`;
 export type ApproveHouseholdDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export type ApproveHouseholdDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>, 'mutation'>;
 
@@ -9090,10 +9113,17 @@ export const ApproveIndividualDataChangeDocument = gql`
     grievanceTicket {
       id
       status
+      individualDataUpdateTicketDetails {
+        id
+        individual {
+          ...individualDetailed
+        }
+        individualData
+      }
     }
   }
 }
-    `;
+    ${IndividualDetailedFragmentDoc}`;
 export type ApproveIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export type ApproveIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>, 'mutation'>;
 
