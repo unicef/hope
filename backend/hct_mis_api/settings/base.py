@@ -11,6 +11,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from sentry_sdk.integrations.celery import CeleryIntegration
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
@@ -496,8 +497,8 @@ if SENTRY_DSN:
         integrations=[
             DjangoIntegration(transaction_style="url"),
             sentry_logging,
+            CeleryIntegration()
             # RedisIntegration(),
-            # CeleryIntegration()
         ],
         release=get_full_version(),
         send_default_pii=True,
