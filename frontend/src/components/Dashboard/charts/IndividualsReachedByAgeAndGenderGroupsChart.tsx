@@ -9,7 +9,6 @@ interface IndividualsReachedByAgeAndGenderGroupsChartProps {
 export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   data,
 }: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
-  console.log('data', data);
   const chartData = {
     labels: data?.labels,
     datasets: [

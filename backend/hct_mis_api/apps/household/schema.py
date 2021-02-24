@@ -549,14 +549,12 @@ class Query(graphene.ObjectType):
         payment_records_qs = get_payments_records_with_delivered_quantity(
             year, business_area_slug, chart_filters_decoder(kwargs)
         )
-        ids=payment_records_qs.values_list("id", flat=True)
-        individuals_size = (
-            Household.objects.filter(payment_records__in=ids)
-            .distinct()
-            .aggregate(total_size=Sum("size"))
-            .get("total_size")
+        individuals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_individuals_params)
+            .distinct("household__id")
         )
-        return {"total": individuals_size}
+        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
@@ -620,7 +618,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_disabled_count",
         ]
-        households_params_without_disability = [
+        households_params_total = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
             "household__female_age_group_12_17_count",
@@ -642,26 +640,30 @@ class Query(graphene.ObjectType):
             .values_list(*households_params_with_disability)
             .distinct("household__id")
         )
-
-        households_without_disability_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_without_disability)
-            .distinct("household__id")
+        sum_of_with_disability = sum_lists_with_values(
+            households_with_disability_counts, len(households_params_with_disability)
         )
 
+        households_totals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_params_total)
+            .distinct("household__id")
+        )
+        sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
+
+        sum_of_without_disability = []
+
+        for i, total in enumerate(sum_of_totals):
+            if not total:
+                sum_of_without_disability.append(0)
+            elif not sum_of_with_disability[i]:
+                sum_of_without_disability.append(total)
+            else:
+                sum_of_without_disability.append(total - sum_of_with_disability[i])
+
         datasets = [
-            {
-                "label": "with disability",
-                "data": sum_lists_with_values(
-                    households_with_disability_counts, len(households_params_with_disability)
-                ),
-            },
-            {
-                "label": "without disability",
-                "data": sum_lists_with_values(
-                    households_without_disability_counts, len(households_params_without_disability)
-                ),
-            },
+            {"label": "with disability", "data": sum_of_with_disability},
+            {"label": "without disability", "data": sum_of_without_disability},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
 
@@ -676,7 +678,8 @@ def get_payments_records_with_delivered_quantity(year, business_area_slug, filte
             **chart_create_filter_query(
                 filters,
                 program_id_path="cash_plan__program__id",
-                administrative_area_path="cash_plan__program__admin_areas",
+                administrative_area_path="household__admin_area",
             ),
         },
+        year_filter_path="delivery_date",
     )
