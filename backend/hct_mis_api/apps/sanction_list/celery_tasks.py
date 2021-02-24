@@ -18,4 +18,3 @@ def check_against_sanction_list_task(uploaded_file_id, original_file_name):
         uploaded_file_id=uploaded_file_id,
         original_file_name=original_file_name,
     )
-
