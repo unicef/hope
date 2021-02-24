@@ -1,10 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as Sentry from '@sentry/react';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import Chart from 'chart.js';
 import setupInternalization from './i18n';
 import { App } from './App';
 import * as serviceWorker from './serviceWorker';
 
+Chart.plugins.unregister(ChartDataLabels);
 setupInternalization();
 if (process.env.NODE_ENV !== 'development')
   Sentry.init({

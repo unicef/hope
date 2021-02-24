@@ -124,6 +124,7 @@ export const importedIndividualDetailed = gql`
     estimatedBirthDate
     maritalStatus
     pregnant
+    flexFields
     documents {
       edges {
         node {
