@@ -10,6 +10,7 @@ from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import to_dict
+from hct_mis_api.apps.grievance.common import create_grievance_ticket_with_details
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
@@ -20,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     NOT_PROCESSED,
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
+    Document,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
@@ -768,3 +770,19 @@ class DeduplicateTask:
             log_create(
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
+
+    @classmethod
+    def hard_deduplicate_documents(cls, documents):
+        for document in documents:
+            documents_queryset = Document.objects.filter(
+                document_number=document.document_number, type=document.type, status=Document.STATUS_VALID
+            ).filter(~Q(individual=document.individual))
+            documents_count = documents_queryset.count()
+            if documents_count > 0:
+                create_grievance_ticket_with_details(
+                    documents_queryset.first().individual, document.individual, document.individual.business_area
+                )
+                document.status=Document.STATUS_INVALID
+            else:
+                document.status = Document.STATUS_VALID
+            document.save()
