@@ -7569,7 +7569,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType' | 'transactionReferenceId'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
@@ -7625,7 +7625,7 @@ export type PaymentRecordVerificationQuery = (
     & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
       & { household: (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
@@ -13812,6 +13812,7 @@ export const PaymentRecordDocument = gql`
     deliveryType
     entitlementCardIssueDate
     entitlementCardNumber
+    transactionReferenceId
     serviceProvider {
       id
       fullName
@@ -13919,6 +13920,7 @@ export const PaymentRecordVerificationDocument = gql`
       deliveryType
       entitlementCardIssueDate
       entitlementCardNumber
+      transactionReferenceId
       serviceProvider {
         id
         fullName

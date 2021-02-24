@@ -99,6 +99,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       deliveryType
       entitlementCardIssueDate
       entitlementCardNumber
+      transactionReferenceId
       serviceProvider {
         id
         fullName
