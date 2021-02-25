@@ -187,15 +187,16 @@ type CashPlanNode implements Node {
   validationAlertsCount: Int!
   totalPersonsCovered: Int!
   totalPersonsCoveredRevised: Int!
-  totalEntitledQuantity: Float!
-  totalEntitledQuantityRevised: Float!
-  totalDeliveredQuantity: Float!
-  totalUndeliveredQuantity: Float!
+  totalEntitledQuantity: Float
+  totalEntitledQuantityRevised: Float
+  totalDeliveredQuantity: Float
+  totalUndeliveredQuantity: Float
   verificationStatus: CashPlanVerificationStatus!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
+  totalNumberOfHouseholds: Int
 }
 
 type CashPlanNodeConnection {

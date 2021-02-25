@@ -40,12 +40,12 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
-  const { data: caData } = useCashAssistUrlPrefixQuery();
+  const { data: caData, loading: caPrefixLoading, } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
 
-  if (loading) return <LoadingComponent />;
+  if (loading || caPrefixLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !caData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {

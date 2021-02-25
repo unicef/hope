@@ -45,6 +45,7 @@ export const AllCashPlans = gql`
           caId
           verificationStatus
           assistanceThrough
+          totalNumberOfHouseholds
           serviceProvider {
             id
             caId
