@@ -2,7 +2,8 @@ import logging
 from collections import namedtuple
 
 from admin_extra_urls.api import ExtraUrlMixin, action
-from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter
+from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter, ChoicesFieldComboFilter
+from adminfilters.multiselect import MultipleSelectFieldListFilter, IntersectionFieldListFilter, UnionFieldListFilter
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
@@ -94,9 +95,9 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                    and not form_two.cleaned_data.get("DELETE")
-                    and form_two.cleaned_data["business_area"] == business_area
-                    and form_two.cleaned_data["role"].id in incompatible_roles
+                       and not form_two.cleaned_data.get("DELETE")
+                       and form_two.cleaned_data["business_area"] == business_area
+                       and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
@@ -113,23 +114,26 @@ class UserRoleInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated")
-
+    list_filter = (('is_staff',ChoicesFieldComboFilter),
+                   ('is_superuser', ChoicesFieldComboFilter),
+                   ('is_active', ChoicesFieldComboFilter),
+                   )
     list_display = (
         "username",
         "email",
         "first_name",
         "last_name",
-        "job_title",
-        "status",
         "is_active",
         "is_staff",
         "is_superuser",
     )
+    readonly_fields = ('ad_uuid',)
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
-            {"fields": ("first_name", "last_name", "email")},
+            {"fields": (("first_name", "last_name", "email"),
+                        'ad_uuid')},
         ),
         (
             _("Permissions"),
@@ -150,6 +154,48 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     def privileges(self, request, pk):
         ctx = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/privileges.html", ctx)
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.ms_graph = MicrosoftGraphAPI()
+
+    def _sync_ad_data(self, user):
+        if user.ad_uuid:
+            filters = {"uuid": user.ad_uuid}
+        else:
+            filters = {"email": user.email}
+        user_data = self.ms_graph.get_user_data(**filters)
+        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+        for field, value in user_args.items():
+            setattr(user, field, value or "")
+        user.save()
+
+    @action(label="Sync")
+    def sync_multi(self, request):
+        not_found = []
+        try:
+            for user in User.objects.all():
+                try:
+                    self._sync_ad_data(user)
+                except Http404 as e:
+                    not_found.append(str(user))
+            if not_found:
+                self.message_user(request, f"These users were not found: {', '.join(not_found)}",
+                                  messages.WARNING)
+            else:
+                self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+
+    @action(label="Sync")
+    def sync_single(self, request, pk):
+        try:
+            self._sync_ad_data(self.get_object(request, pk))
+            self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
 
     @action()
     def load_ad_users(self, request):
@@ -183,9 +229,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         try:
                             if email in existing:
                                 user = User.objects.get(email=email)
+                                self._sync_ad_data(user)
                                 results.updated.append(user)
                             else:
-                                user_data = ms_graph.get_user_data(email)
+                                user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
                                 user = User(**user_args)
                                 if user.first_name is None:
