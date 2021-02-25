@@ -1,8 +1,9 @@
 import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
-
-from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, OrderingFilter
+from django.db.models.functions import ExtractYear
+from django_filters import CharFilter, FilterSet, MultipleChoiceFilter, OrderingFilter, DateTimeFilter
+from datetime import datetime
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -14,12 +15,14 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
 from hct_mis_api.apps.reporting.models import Report, DashboardReport
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
 class ReportFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
-    created_from = DateFilter(field_name="created_at", lookup_expr="gte")
-    created_to = DateFilter(field_name="created_at", lookup_expr="lte")
+    created_from = DateTimeFilter(field_name="created_at", lookup_expr="gte")
+    created_to = DateTimeFilter(field_name="created_at", lookup_expr="lte")
     status = MultipleChoiceFilter(field_name="status", choices=Report.STATUSES)
     report_type = MultipleChoiceFilter(field_name="report_type", choices=Report.REPORT_TYPES)
 
@@ -66,6 +69,7 @@ class Query(graphene.ObjectType):
     report_types_choices = graphene.List(ChoiceObject)
     report_status_choices = graphene.List(ChoiceObject)
     dashboard_report_types_choices = graphene.List(ChoiceObject, business_area_slug=graphene.String(required=True))
+    dashboard_years_choices = graphene.List(graphene.String, business_area_slug=graphene.String(required=True))
 
     def resolve_report_types_choices(self, info, **kwargs):
         return to_choice_object(Report.REPORT_TYPES)
@@ -90,3 +94,36 @@ class Query(graphene.ObjectType):
                     if report_type[0] != DashboardReport.TOTAL_TRANSFERRED_BY_COUNTRY
                 ]
             )
+
+    def resolve_dashboard_years_choices(self, info, business_area_slug, **kwargs):
+        current_year = datetime.today().year
+        years_list = [*range(current_year, current_year - 5, -1)]
+        models = [
+            (PaymentRecord, "delivery_date"),
+            (GrievanceTicket, "created_at"),
+        ]
+        years_list_from_db = []
+        for (model_name, field_name) in models:
+            if business_area_slug == "global":
+                years_list_from_db.extend(
+                    list(
+                        model_name.objects.annotate(year_value=ExtractYear(field_name)).values_list(
+                            "year_value", flat=True
+                        )
+                    )
+                )
+            else:
+                years_list_from_db.extend(
+                    list(
+                        model_name.objects.filter(business_area__slug=business_area_slug)
+                        .annotate(year_value=ExtractYear(field_name))
+                        .values_list("year_value", flat=True)
+                    )
+                )
+        years_list_choices = [year for year in years_list if year in years_list_from_db]
+        years_list_choices = list(set(years_list_choices))
+        years_list_choices.sort(reverse=True)
+        if not years_list_choices:
+            # if no records in db, simply returning current year
+            return [current_year]
+        return years_list_choices

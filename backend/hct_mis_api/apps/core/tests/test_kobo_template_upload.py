@@ -49,8 +49,27 @@ class TestKoboTemplateUpload(TestCase):
         expected_errors = {
             "__all__": [
                 "Field: size_h_c - Field must be required",
-                "Field: marital_status_i_c - Choice: {'label': {'English(EN)': 'Married'}, "
-                "'value': 'MARRIED'} is not present in the file",
+                "Field: marital_status_i_c - Choice: MARRIED is not present in the file",
+                "Field: marital_status_i_c - Choice: WRONG_CHOICE is not present in HOPE",
+                "Field: currency_h_c - Choice: BOV is not present in the file",
+                "Field: currency_h_c - Choice: MRU is not present in the file",
+                "Field: currency_h_c - Choice: STN is not present in the file",
+                "Field: currency_h_c - Choice: UYW is not present in the file",
+                "Field: currency_h_c - Choice: VES is not present in the file",
+                "Field: currency_h_c - Choice: MRO is not present in HOPE",
+                "Field: currency_h_c - Choice: STD is not present in HOPE",
+                "Field: currency_h_c - Choice: VEF is not present in HOPE",
+                "Field: currency_h_c - Choice: XBA is not present in HOPE",
+                "Field: currency_h_c - Choice: XBB is not present in HOPE",
+                "Field: currency_h_c - Choice: XBC is not present in HOPE",
+                "Field: currency_h_c - Choice: XBD is not present in HOPE",
+                "Field: currency_h_c - Choice: XDR is not present in HOPE",
+                "Field: currency_h_c - Choice: XPD is not present in HOPE",
+                "Field: currency_h_c - Choice: XPT is not present in HOPE",
+                "Field: currency_h_c - Choice: XSU is not present in HOPE",
+                "Field: currency_h_c - Choice: XTS is not present in HOPE",
+                "Field: currency_h_c - Choice: XUA is not present in HOPE",
+                "Field: currency_h_c - Choice: XXX is not present in HOPE",
             ]
         }
 

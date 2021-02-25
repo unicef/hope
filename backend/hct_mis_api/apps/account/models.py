@@ -33,7 +33,8 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
-    job_title = models.CharField(max_length=255, blank="")
+    job_title = models.CharField(max_length=255, blank=True)
+    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     def __str__(self):
         if self.first_name or self.last_name:
@@ -78,13 +79,17 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
-    name = models.CharField(max_length=250, unique=True,       validators=[
+    name = models.CharField(
+        max_length=250,
+        unique=True,
+        validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
             DoubleSpaceValidator,
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
-        ],)
+        ],
+    )
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
@@ -103,7 +108,10 @@ def pre_save_user(sender, instance, *args, **kwargs):
 
 
 @receiver(post_save, sender=get_user_model())
-def post_save_user(sender, instance, *args, **kwargs):
+def post_save_user(sender, instance, created, *args, **kwargs):
+    if created is False:
+        return
+
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
