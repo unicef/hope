@@ -1,15 +1,16 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FlagIcon from '@material-ui/icons/Flag';
+import styled from 'styled-components';
 import { MiśTheme } from '../theme';
 
-const useStyles = makeStyles((theme: MiśTheme) => ({
-  warning: {
-    color: theme.hctPalette.red,
-  },
-}));
-
-export const Flag = (): React.ReactElement => {
-  const classes = useStyles();
-  return <FlagIcon className={classes.warning} />;
+const StyledFlag = styled(FlagIcon)`
+  color: ${({ theme, confirmed }) =>
+    confirmed ? 'deeppink' : theme.hctPalette.oragne};
+`;
+interface FlagProps {
+  confirmed?: boolean;
+}
+export const Flag = ({ confirmed }: FlagProps): React.ReactElement => {
+  return <StyledFlag confirmed={confirmed} />;
 };

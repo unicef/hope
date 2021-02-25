@@ -1261,6 +1261,7 @@ export type HouseholdNode = Node & {
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
+  sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
   admin1?: Maybe<AdminAreaNode>,
   admin2?: Maybe<AdminAreaNode>,
@@ -2328,6 +2329,7 @@ export type IndividualNode = Node & {
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   importedIndividualId?: Maybe<Scalars['UUID']>,
   sanctionListPossibleMatch: Scalars['Boolean'],
+  sanctionListConfirmedMatch: Scalars['Boolean'],
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -5436,7 +5438,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -5518,7 +5520,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8329,6 +8331,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   lastRegistrationDate
   status
   sanctionListPossibleMatch
+  sanctionListConfirmedMatch
   hasDuplicates
   unicefId
   flexFields
@@ -8378,6 +8381,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   sanctionListPossibleMatch
+  sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
   sanctionListLastCheck
   role
@@ -16907,6 +16911,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   admin1?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
@@ -17172,6 +17177,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,

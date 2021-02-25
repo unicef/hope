@@ -937,6 +937,7 @@ type HouseholdNode implements Node {
   totalCashReceived: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
   admin1: AdminAreaNode
   admin2: AdminAreaNode
@@ -1869,6 +1870,7 @@ type IndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
