@@ -64,9 +64,8 @@ export const Allcharts = gql`
         data
       }
       labels
-      total
+      totalNumberOfGrievances
       totalNumberOfFeedback
-      totalNumberOfOpenFeedback
       totalNumberOfOpenSensitive
     }
     sectionHouseholdsReached(
@@ -125,19 +124,7 @@ export const Allcharts = gql`
     ) {
       total
     }
-    tableTotalCashTransferredByAdministrativeArea(
-      businessAreaSlug: $businessAreaSlug
-      year: $year
-      program: $program
-      administrativeArea: $administrativeArea
-    ) {
-      data {
-        id
-        admin2
-        totalCashTransferred
-      }
-    }
-    chartPlannedBudget(
+    chartTotalTransferredByMonth(
       businessAreaSlug: $businessAreaSlug
       year: $year
       program: $program

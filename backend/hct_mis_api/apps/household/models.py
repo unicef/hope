@@ -391,6 +391,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
     @property
+    def sanction_list_confirmed_match(self):
+        return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
+
+    @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
@@ -600,6 +604,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     deduplication_batch_results = JSONField(default=dict)
     imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
+    sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.NullBooleanField()
     observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)

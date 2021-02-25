@@ -13,6 +13,13 @@ export const ApproveHouseholdDataChange = gql`
       grievanceTicket {
         id
         status
+        householdDataUpdateTicketDetails {
+          id
+          household {
+            ...householdDetailed
+          }
+          householdData
+        }
       }
     }
   }

@@ -104,9 +104,9 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'SUCCESS':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case 'PENDING':
+    case 'TRANSACTION_PENDING':
       return theme.hctPalette.oragne;
     default:
       return theme.palette.error.main;
@@ -293,13 +293,16 @@ export function programCompare(
   return statusA > statusB ? 1 : -1;
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(
+  amount: number,
+  onlyNumberValue = false,
+): string {
   const amountCleared = amount || 0;
   return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} USD`;
+  })}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
@@ -325,6 +328,14 @@ export function getPercentage(
 export function formatNumber(value: number): string {
   if (!value && value !== 0) return '';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+export function formatThousands(value: string): string {
+  if (!value) return value;
+  if (parseInt(value, 10) >= 10000) {
+    return `${value.toString().slice(0, -3)}k`;
+  }
+  return value;
 }
 
 export function getAgeFromDob(date: string): number {
@@ -442,8 +453,9 @@ export const getFullNodeFromEdgesById = (edges, id) => {
 export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
   let textValue = value;
   if (fieldAttribute.type === 'SELECT_ONE') {
-    textValue = fieldAttribute.choices.find((item) => item.value === value)
-      .labelEn;
+    textValue =
+      fieldAttribute.choices.find((item) => item.value === value)?.labelEn ||
+      value;
   }
   if (fieldAttribute.type === 'SELECT_MANY') {
     const values = fieldAttribute.choices.filter((item) =>

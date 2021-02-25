@@ -48,7 +48,8 @@ class SectionTotalNode(graphene.ObjectType):
 class _TableTotalCashTransferredDataNode(graphene.ObjectType):
     id = graphene.String()
     admin2 = graphene.String()
-    totalCashTransferred = graphene.String()
+    total_cash_transferred = graphene.Float()
+    total_households = graphene.Int()
 
 
 class TableTotalCashTransferred(graphene.ObjectType):

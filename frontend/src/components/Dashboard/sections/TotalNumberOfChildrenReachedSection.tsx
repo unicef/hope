@@ -8,6 +8,7 @@ import {
   IconContainer,
 } from '../DashboardCard';
 import { AllChartsQuery } from '../../../__generated__/graphql';
+import { formatNumber } from '../../../utils/utils';
 
 interface TotalNumberOfChildrenReachedSectionProps {
   data: AllChartsQuery['sectionChildReached'];
@@ -22,7 +23,7 @@ export const TotalNumberOfChildrenReachedSection = ({
       <CardTitle>TOTAL NUMBER OF CHILDREN REACHED</CardTitle>
       <Grid container justify='space-between' alignItems='center'>
         <Grid item>
-          <CardAmountSmaller>{data?.total}</CardAmountSmaller>
+          <CardAmountSmaller>{formatNumber(data?.total)}</CardAmountSmaller>
         </Grid>
         <Grid item>
           <IconContainer bg='#E4F7FA' color='#4CD0E0'>

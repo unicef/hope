@@ -67,6 +67,72 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
+  const getClosingConfirmationExtraText = (): string => {
+    if (ticket.category.toString() !== GRIEVANCE_CATEGORIES.DATA_CHANGE) {
+      return '';
+    }
+    let approved = 0;
+    let notApproved = 0;
+
+    const countApproved = (data): void => {
+      if (!Array.isArray(data)) return;
+      for (const value of data) {
+        if (value && !Array.isArray(value) && value.value) {
+          if (value.approve_status === true) {
+            approved += 1;
+          } else if (value.approve_status === false) {
+            notApproved += 1;
+          }
+        }
+      }
+    };
+    const arrayToCount = [];
+
+    arrayToCount.push(
+      Object.values(
+        ticket.householdDataUpdateTicketDetails?.householdData || {},
+      ),
+    );
+    arrayToCount.push(
+      Object.values(
+        ticket.householdDataUpdateTicketDetails?.householdData.flex_fields ||
+          {},
+      ),
+    );
+    arrayToCount.push(
+      Object.values(
+        ticket.individualDataUpdateTicketDetails?.individualData || {},
+      ),
+    );
+    arrayToCount.push(
+      Object.values(
+        ticket.individualDataUpdateTicketDetails?.individualData.flex_fields ||
+          {},
+      ),
+    );
+    arrayToCount.push(
+      ticket.individualDataUpdateTicketDetails?.individualData.documents || [],
+    );
+    arrayToCount.push(
+      ticket.individualDataUpdateTicketDetails?.individualData
+        .documents_to_remove || [],
+    );
+
+    arrayToCount.forEach((value) => countApproved(value));
+
+    // all changes were approved
+    if (!notApproved) return '';
+
+    // no changes were approved
+    if (!approved)
+      return `You did not approved any changes. All change requests (${notApproved}) will be automatically rejected.`;
+
+    // some changes were approved
+    return `You approved ${approved} change${
+      approved > 1 ? 's' : ''
+    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
+
   const closingConfirmationText = 'Are you sure you want to close the ticket?';
 
   const changeState = (status): void => {
@@ -236,7 +302,8 @@ export const GrievanceDetailsToolbar = ({
             )}
             {canClose && (
               <ConfirmationDialog
-                title='Confirmation'
+                title='Close ticket'
+                extraContent={getClosingConfirmationExtraText()}
                 content={closingConfirmationText}
                 continueText='close ticket'
               >

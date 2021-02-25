@@ -26,7 +26,7 @@ export function PaymentVerificationPage(): React.ReactElement {
     search: '',
     verificationStatus: null,
     program: '',
-    assistanceThrough: '',
+    serviceProvider: '',
     deliveryType: null,
     startDate: null,
     endDate: null,
