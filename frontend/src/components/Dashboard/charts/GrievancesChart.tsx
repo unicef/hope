@@ -10,12 +10,14 @@ interface GrievancesChartProps {
 export const GrievancesChart = ({
   data,
 }: GrievancesChartProps): React.ReactElement => {
+  if (!data) return null;
+
   const chartData = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         backgroundColor: ['#80CB26', '#FFE9AC', '#FFAA1D', '#E02020'],
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
       },
     ],
   };
