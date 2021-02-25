@@ -3,7 +3,7 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 
 from django_filters import OrderingFilter
 from graphql import GraphQLError

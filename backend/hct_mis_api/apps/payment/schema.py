@@ -59,17 +59,19 @@ class PaymentRecordFilter(FilterSet):
 
     order_by = CustomOrderingFilter(
         fields=(
+            "ca_id",
             "status",
             Lower("name"),
             "status_date",
             "cash_assist_id",
-            "head_of_household",
+            Lower("head_of_household__full_name"),
             "total_person_covered",
             "distribution_modality",
-            "household__id",
-            "entitlement__entitlement_quantity",
-            "entitlement__delivered_quantity",
-            "entitlement__delivery_date",
+            "household__unicef_id",
+            "household__size",
+            "entitlement_quantity",
+            "delivered_quantity_usd",
+            "delivery_date",
         )
     )
 
