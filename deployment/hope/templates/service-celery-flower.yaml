@@ -13,4 +13,4 @@ spec:
       name: http
   selector:
     {{- include "hope.selectorLabels" . | nindent 4 }}
-    hope/service: backend
+    hope/service: celery-flower
