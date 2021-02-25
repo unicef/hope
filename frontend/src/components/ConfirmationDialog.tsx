@@ -5,6 +5,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from '@material-ui/core';
 import { Dialog } from '../containers/dialogs/Dialog';
 
@@ -15,6 +16,7 @@ interface ConfirmationDialogProps {
   title?;
   content?;
   continueText?;
+  extraContent?;
 }
 export const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -78,7 +80,7 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
   };
 
   render(): React.ReactElement {
-    const { title, content, continueText } = this.props;
+    const { title, content, continueText, extraContent } = this.props;
     const { children } = this.props;
     const { open } = this.state;
     return (
@@ -86,7 +88,6 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
         {children(this.show)}
         <Dialog
           fullWidth
-          minWidth='md'
           open={open}
           onClose={() => this.hide()}
           scroll='paper'
@@ -95,7 +96,14 @@ export class ConfirmationDialog extends React.Component<ConfirmationDialogProps>
           <DialogTitleWrapper>
             <DialogTitle id='scroll-dialog-title'>{title}</DialogTitle>
           </DialogTitleWrapper>
-          <DialogContent>{content}</DialogContent>
+          <DialogContent>
+            {extraContent ? (
+              <Typography variant='body2' style={{ paddingBottom: '16px' }}>
+                {extraContent}
+              </Typography>
+            ) : null}
+            <Typography variant='body2'>{content}</Typography>
+          </DialogContent>
           <DialogFooter>
             <DialogActions>
               <Button onClick={() => this.hide()}>CANCEL</Button>

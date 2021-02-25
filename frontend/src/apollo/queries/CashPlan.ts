@@ -14,6 +14,11 @@ export const CashPlan = gql`
       downPayment
       dispersionDate
       assistanceThrough
+      serviceProvider {
+        id
+        caId
+        fullName
+      }
       caId
       caHashId
       dispersionDate
@@ -50,6 +55,7 @@ export const CashPlan = gql`
       program {
         id
         name
+        caId
       }
       paymentRecords {
         totalCount

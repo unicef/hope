@@ -158,22 +158,6 @@ type BusinessAreaNodeEdge {
   cursor: String!
 }
 
-enum CashPlanDeliveryType {
-  CARDLESS_CASH_WITHDRAWAL
-  CASH
-  CASH_BY_FSP
-  CHEQUE
-  DEPOSIT_TO_CARD
-  IN_KIND
-  MOBILE_MONEY
-  OTHER
-  PRE_PAID_CARD
-  REFERRAL
-  TRANSFER
-  TRANSFER_TO_ACCOUNT
-  VOUCHER
-}
-
 type CashPlanNode implements Node {
   id: ID!
   createdAt: DateTime!
@@ -192,9 +176,10 @@ type CashPlanNode implements Node {
   coverageUnit: String!
   comments: String
   program: ProgramNode!
-  deliveryType: CashPlanDeliveryType
+  deliveryType: String
   assistanceMeasurement: String!
   assistanceThrough: String!
+  serviceProvider: ServiceProviderNode
   visionId: String
   fundsCommitment: String
   exchangeRate: Float
@@ -311,9 +296,8 @@ type ChartDetailedDatasetsNode {
 type ChartGrievanceTicketsNode {
   labels: [String]
   datasets: [_DatasetsNode]
-  total: Int
+  totalNumberOfGrievances: Int
   totalNumberOfFeedback: Int
-  totalNumberOfOpenFeedback: Int
   totalNumberOfOpenSensitive: Int
 }
 
@@ -953,6 +937,7 @@ type HouseholdNode implements Node {
   totalCashReceived: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
   admin1: AdminAreaNode
   admin2: AdminAreaNode
@@ -1574,7 +1559,7 @@ type ImportedHouseholdNode implements Node {
   firstRegistrationDate: DateTime!
   lastRegistrationDate: DateTime!
   returnee: Boolean
-  flexFields: JSONString!
+  flexFields: Arg
   start: DateTime
   deviceid: String!
   nameEnumerator: String!
@@ -1703,7 +1688,7 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
   deduplicationBatchResults: [DeduplicationResultNode]
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
-  flexFields: JSONString!
+  flexFields: Arg
   pregnant: Boolean
   observedDisability: ImportedIndividualObservedDisability!
   seeingDisability: ImportedIndividualSeeingDisability
@@ -1885,6 +1870,7 @@ type IndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
@@ -2215,6 +2201,7 @@ type PaymentRecordNode implements Node {
   serviceProvider: ServiceProviderNode!
   transactionReferenceId: String
   visionId: String
+  registrationCaId: String
   verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
@@ -2353,7 +2340,7 @@ type Query {
   allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
-  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
+  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
   dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
@@ -2382,7 +2369,7 @@ type Query {
   chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
   chartPayment(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
   sectionTotalTransferred(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
-  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): TableTotalCashTransferred
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String, order: String, orderBy: String): TableTotalCashTransferred
   chartTotalTransferredCashByCountry(year: Int!): ChartDetailedDatasetsNode
   paymentRecordStatusChoices: [ChoiceObject]
   paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
@@ -2405,9 +2392,9 @@ type Query {
   program(id: ID!): ProgramNode
   allPrograms(before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
   chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
-  chartPlannedBudget(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
+  chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
   cashPlan(id: ID!): CashPlanNode
-  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
   programStatusChoices: [ChoiceObject]
   programFrequencyOfPaymentsChoices: [ChoiceObject]
   programSectorChoices: [ChoiceObject]
@@ -2821,6 +2808,7 @@ type ServiceProviderNode implements Node {
   country: String!
   visionId: String!
   paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
 
 type ServiceProviderNodeConnection {
@@ -3390,6 +3378,7 @@ type UserNode implements Node {
   partner: UserPartner!
   availableForExport: Boolean!
   jobTitle: String!
+  adUuid: String
   userRoles: [UserRoleNode!]!
   createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
@@ -3458,5 +3447,6 @@ type _DetailedDatasetsNode {
 type _TableTotalCashTransferredDataNode {
   id: String
   admin2: String
-  totalCashTransferred: String
+  totalCashTransferred: Float
+  totalHouseholds: Int
 }
