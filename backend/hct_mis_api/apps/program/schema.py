@@ -31,6 +31,7 @@ from hct_mis_api.apps.core.utils import (
     chart_create_filter_query,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -267,13 +268,8 @@ class Query(graphene.ObjectType):
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        programs = chart_get_filtered_qs(
-            Program,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={**chart_create_filter_query(filters)},
-            year_filter_path="cash_plans__payment_records__delivery_date",
-        )
+        valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
+        programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
 
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
@@ -288,33 +284,25 @@ class Query(graphene.ObjectType):
         labels = []
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
+        programmes_total = []
         for programme in programmes_by_sector:
             labels.append(sector_choice_mapping.get(programme.get("sector")))
-            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus"))
-            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus"))
+            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus") or 0)
+            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus") or 0)
+            programmes_total.append(programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1])
 
         datasets = [
             {"label": "Programmes", "data": programmes_wo_cash_plus},
             {"label": "Programmes with Cash+", "data": programmes_with_cash_plus},
+            {"label": "Total Programmes", "data": programmes_total},
         ]
 
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                )
-            },
-            year_filter_path="delivery_date",
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         months_and_amounts = (
