@@ -203,16 +203,16 @@ class CashPlan(TimeStampedUUIDModel):
     total_persons_covered = models.IntegerField(db_index=True)
     total_persons_covered_revised = models.IntegerField(db_index=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     verification_status = models.CharField(
         max_length=10,
