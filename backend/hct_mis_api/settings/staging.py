@@ -60,9 +60,6 @@ if os.getenv("POSTGRES_SSL", False):
         "sslrootcert": "/code/psql-cert.crt",
     }
 
-
-AIRFLOW_HOST = os.getenv("AIRFLOW_HOST", "hct-mis-airflow-web")
-
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
