@@ -9,7 +9,6 @@ import {
 } from '../../utils/utils';
 import { LabelizedField } from '../LabelizedField';
 import { PaymentVerificationNode } from '../../__generated__/graphql';
-import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
@@ -72,9 +71,10 @@ export function VerificationRecordDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='REGISTRATION GROUP'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='REGISTRATION GROUP'
+              value={paymentVerification.paymentRecord.registrationCaId}
+            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
@@ -212,9 +212,10 @@ export function VerificationRecordDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='TRANSACTION REFERENCE ID'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='TRANSACTION REFERENCE ID'
+              value={paymentVerification.paymentRecord.transactionReferenceId}
+            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
