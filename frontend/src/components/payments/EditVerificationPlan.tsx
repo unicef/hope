@@ -135,7 +135,7 @@ export function EditVerificationPlan({
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
     verificationChannel: verification.verificationMethod || null,
     rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: Boolean(verification.excludedAdminAreasFilter) || false,
+    adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
     ageCheckbox: Boolean(verification.ageFilter?.min) || false,
     sexCheckbox: Boolean(verification.sexFilter) || false,
   };
@@ -207,9 +207,11 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
+      return ` (${
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
+      })%`;
     }
     return ` (0%)`;
   };
