@@ -69,6 +69,7 @@ class PullFromDatahubTask:
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
+        "registration_ca_id": "registration_ca_id",
     }
     MAPPING_SERVICE_PROVIDER_DICT = {
         "ca_id": "ca_id",

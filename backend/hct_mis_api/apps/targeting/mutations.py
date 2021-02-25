@@ -10,12 +10,12 @@ from hct_mis_api.apps.account.permissions import PermissionMutation, PermissionR
 from hct_mis_api.apps.core import utils
 
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.mis_datahub.celery_tasks import send_target_population_task
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.steficon.interpreters import mapping
 from hct_mis_api.apps.steficon.models import Rule
@@ -315,9 +315,7 @@ class FinalizeTargetPopulationMutation(ValidatedMutation):
                 target_population=target_population,
             ).update(final=False)
         target_population.save()
-        AirflowApi.start_dag(
-            dag_id="SendTargetPopulation",
-        )
+        send_target_population_task.delay()
         log_create(
             TargetPopulation.ACTIVITY_LOG_MAPPING,
             "business_area",

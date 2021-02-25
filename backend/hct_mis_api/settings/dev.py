@@ -26,8 +26,6 @@ try:
 except ImportError:
     pass
 
-AIRFLOW_HOST = "airflow_webserver"
-
 # ELASTICSEARCH SETTINGS
 ELASTICSEARCH_DSL = {
     "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
