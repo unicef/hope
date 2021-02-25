@@ -1,7 +1,6 @@
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
-    withdraw_individual_and_reassign_roles,
     mark_as_duplicate_individual_and_reassign_roles,
 )
 from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
@@ -27,7 +26,8 @@ def close_system_flagging_ticket(grievance_ticket, info):
             individual,
         )
     else:
-        withdraw_individual_and_reassign_roles(ticket_details, individual, info)
+        individual.sanction_list_confirmed_match = True
+        individual.save()
 
 
 def _clear_deduplication_individuals_fields(individuals):
