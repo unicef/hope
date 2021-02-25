@@ -27,7 +27,7 @@ spec:
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}-celery-flower
-          command: ["celery", "flower", "-A", "hct_mis_api.apps.core.celery"]
+          command: ["celery", "flower", "--broker=redis://hope-main-redis-master:6379/0"]
           securityContext:
             {{- toYaml .Values.celeryflower.securityContext | nindent 12 }}
           image: "{{ .Values.celeryflower.image }}"

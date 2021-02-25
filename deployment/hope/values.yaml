@@ -193,7 +193,7 @@ elasticsearch:
     host: ""
 
 celery:
-  image: celery:latest
+  image: backend:latest
   replicaCount: 1
   podAnnotations: {}
   podSecurityContext: {}
