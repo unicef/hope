@@ -55,6 +55,7 @@ export const CashPlan = gql`
       program {
         id
         name
+        caId
       }
       paymentRecords {
         totalCount
