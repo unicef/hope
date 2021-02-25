@@ -336,7 +336,7 @@ class GenerateDashboardReportContentHelpers:
         valid_payment_records = self._get_payment_records_for_report(report)
         admin_areas = (
             AdminArea.objects.filter(
-                admin_area_level__admin_level=2,
+                level=2,
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
@@ -358,9 +358,7 @@ class GenerateDashboardReportContentHelpers:
 
         totals.update(
             self._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records, admin_area__admin_area_level__admin_level=2
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
         )
@@ -517,7 +515,7 @@ class GenerateDashboardReportContentHelpers:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
             filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__admin_area_level__admin_level": 2}
+                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
             )
         if program_path and report.program:
             filter_vars.update({program_path: report.program})

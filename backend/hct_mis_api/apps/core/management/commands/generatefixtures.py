@@ -175,7 +175,7 @@ class Command(BaseCommand):
                     should_contain_payment_record = random.choice((True, False))
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
-                            admin=AdminArea.objects.filter(admin_area_level__business_area=business_area)
+                            admin=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
                             .order_by("?")
                             .first()
                             .title
