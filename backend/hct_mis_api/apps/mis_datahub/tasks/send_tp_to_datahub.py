@@ -289,4 +289,6 @@ class SendTPToDatahubTask:
         return None
 
     def get_unhcr_household_id(self, household):
+        if household.unhcr_id == "":
+            return None
         return household.unhcr_id
