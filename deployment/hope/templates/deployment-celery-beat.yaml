@@ -40,7 +40,12 @@ spec:
           - configMapRef:
               name: {{ include "hope.fullname" . }}-backend
           resources:
-            {{- toYaml .Values.celery.resources | nindent 12 }}
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
       {{- with .Values.celery.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
