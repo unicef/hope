@@ -74,7 +74,7 @@ export const ReportingFilters = ({
               onChange={(date) =>
                 onFilterChange({
                   ...filter,
-                  createdFrom: date ? moment(date).format('YYYY-MM-DD') : null,
+                  createdFrom: date ? moment(date).startOf('day').toISOString() : null,
                 })
               }
               value={filter.createdFrom || null}
@@ -94,7 +94,7 @@ export const ReportingFilters = ({
             onChange={(date) =>
               onFilterChange({
                 ...filter,
-                createdTo: date ? moment(date).format('YYYY-MM-DD') : null,
+                createdTo: date ? moment(date).endOf('day').toISOString() : null,
               })
             }
             value={filter.createdTo || null}

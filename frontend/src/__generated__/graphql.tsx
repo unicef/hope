@@ -3358,8 +3358,8 @@ export type QueryAllReportsArgs = {
   reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
-  createdFrom?: Maybe<Scalars['Date']>,
-  createdTo?: Maybe<Scalars['Date']>,
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -6901,8 +6901,8 @@ export type AllReportsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
-  createdFrom?: Maybe<Scalars['Date']>,
-  createdTo?: Maybe<Scalars['Date']>,
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
   reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
   createdBy?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>
@@ -12191,7 +12191,7 @@ export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFl
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
 export const AllReportsDocument = gql`
-    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String], $createdBy: ID, $orderBy: String) {
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: DateTime, $createdTo: DateTime, $reportType: [String], $createdBy: ID, $orderBy: String) {
   allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
