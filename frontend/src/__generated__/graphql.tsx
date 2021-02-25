@@ -5239,6 +5239,7 @@ export type UserNode = Node & {
   partner: UserPartner,
   availableForExport: Scalars['Boolean'],
   jobTitle: Scalars['String'],
+  adUuid?: Maybe<Scalars['String']>,
   userRoles: Array<UserRoleNode>,
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
@@ -6827,7 +6828,7 @@ export type AllPaymentVerificationsQuery = (
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { paymentRecord: (
           { __typename?: 'PaymentRecordNode' }
-          & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
+          & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
           & { household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -7117,7 +7118,7 @@ export type CashPlanQuery = (
       )>> }
     ), program: (
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name'>
+      & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
@@ -11976,6 +11977,7 @@ export const AllPaymentVerificationsDocument = gql`
         id
         paymentRecord {
           id
+          caId
           deliveredQuantity
           household {
             unicefId
@@ -12679,6 +12681,7 @@ export const CashPlanDocument = gql`
     program {
       id
       name
+      caId
     }
     paymentRecords {
       totalCount
@@ -18337,6 +18340,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
