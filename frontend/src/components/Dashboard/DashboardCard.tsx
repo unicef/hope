@@ -11,12 +11,21 @@ export const CardTitle = styled.div`
   color: #6f6f6f;
   font-weight: 500;
   font-size: 12px;
+  letter-spacing: 1.75px;
+  padding-bottom: 5px;
 `;
 export const CardTextLight = styled.div`
   text-transform: capitalize;
   color: #a4a4a4;
   font-weight: 500;
   font-size: 12px;
+  letter-spacing: 1.75px;
+`;
+export const CardTextLightLarge = styled.div`
+  text-transform: capitalize;
+  color: #a4a4a4;
+  font-weight: 500;
+  font-size: 16px;
 `;
 export const CardAmount = styled.div`
   text-transform: capitalize;

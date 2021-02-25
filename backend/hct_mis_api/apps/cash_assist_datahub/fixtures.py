@@ -12,7 +12,6 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     Programme,
 )
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.payment.models import PaymentRecord as PaymentRecordInternal
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment import models as payment_models
 from hct_mis_api.apps.program import models as program_models
@@ -43,8 +42,8 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     full_name = factory.Faker("name")
     status_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     ca_id = factory.Faker("uuid4")
@@ -60,7 +59,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     target_population_mis_id = factory.LazyAttribute(lambda o: TargetPopulation.objects.order_by("?").first().id)
     entitlement_card_number = factory.Faker("ssn")
     entitlement_card_status = fuzzy.FuzzyChoice(
-        PaymentRecordInternal.ENTITLEMENT_CARD_STATUS_CHOICE,
+        payment_models.PaymentRecord.ENTITLEMENT_CARD_STATUS_CHOICE,
         getter=lambda c: c[0],
     )
     entitlement_card_issue_date = factory.Faker(
@@ -78,8 +77,8 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     delivered_quantity = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivery_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     service_provider_ca_id = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first().ca_id)
@@ -96,8 +95,8 @@ class CashPlanFactory(factory.DjangoModelFactory):
     cash_plan_hash_id = factory.Faker("uuid4")
     status_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     status = fuzzy.FuzzyChoice(
@@ -113,8 +112,8 @@ class CashPlanFactory(factory.DjangoModelFactory):
     distribution_level = "Registration Group"
     start_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
