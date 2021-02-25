@@ -846,7 +846,6 @@ class GenerateDashboardReportService:
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
         # append totals row
-        print("RIGHT BEFORE TOTALS")
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)
             str_row = self._stringify_all_values(row)
@@ -861,17 +860,11 @@ class GenerateDashboardReportService:
 
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
-            print("IN FOR LOOP", report_type)
             sheet_title = self._report_type_to_str(report_type)
-            print("SHEET TITLE", sheet_title)
             active_sheet = self.wb.create_sheet(sheet_title, -1)
-            print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
-            print("ADDED HEADERS")
             number_of_rows = self._add_rows(active_sheet, report_type)
-            print("ADDED ROWS")
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
-            print("ADDED FONTS")
             remove_empty_columns_values = self.REMOVE_EMPTY_COLUMNS.get(report_type)
             if remove_empty_columns_values:
                 self._remove_empty_columns(
@@ -879,7 +872,6 @@ class GenerateDashboardReportService:
                 )
             self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
 
-            print("REMOVED EMPTY")
         return self.wb
 
     def generate_report(self):
