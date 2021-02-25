@@ -268,13 +268,8 @@ class Query(graphene.ObjectType):
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        programs = chart_get_filtered_qs(
-            Program,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={**chart_create_filter_query(filters)},
-            year_filter_path="cash_plans__payment_records__delivery_date",
-        )
+        valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
+        programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
 
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
