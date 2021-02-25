@@ -2,15 +2,19 @@ from decimal import Decimal
 
 from django.contrib.postgres.fields import CICharField
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator, MinLengthValidator, MinValueValidator, \
-    ProhibitNullCharactersValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    MinValueValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
@@ -83,7 +87,13 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     name = CICharField(
         max_length=255,
-        validators=[MinLengthValidator(3), MaxLengthValidator(255), DoubleSpaceValidator, StartEndSpaceValidator, ProhibitNullCharactersValidator()],
+        validators=[
+            MinLengthValidator(3),
+            MaxLengthValidator(255),
+            DoubleSpaceValidator,
+            StartEndSpaceValidator,
+            ProhibitNullCharactersValidator(),
+        ],
         db_index=True,
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICE, db_index=True)
@@ -178,10 +188,13 @@ class CashPlan(TimeStampedUUIDModel):
     comments = models.CharField(max_length=255, null=True)
     program = models.ForeignKey("program.Program", on_delete=models.CASCADE, related_name="cash_plans")
     delivery_type = models.CharField(
-        choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=20, null=True, db_index=True
+        choices=PaymentRecord.DELIVERY_TYPE_CHOICE, max_length=24, null=True, db_index=True
     )
     assistance_measurement = models.CharField(max_length=255, db_index=True)
     assistance_through = models.CharField(max_length=255, db_index=True)
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider", null=True, related_name="cash_plans", on_delete=models.CASCADE
+    )
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
