@@ -937,6 +937,7 @@ type HouseholdNode implements Node {
   totalCashReceived: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
   admin1: AdminAreaNode
   admin2: AdminAreaNode
@@ -1869,6 +1870,7 @@ type IndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
@@ -3376,6 +3378,7 @@ type UserNode implements Node {
   partner: UserPartner!
   availableForExport: Boolean!
   jobTitle: String!
+  adUuid: String
   userRoles: [UserRoleNode!]!
   createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
