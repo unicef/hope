@@ -1,15 +1,15 @@
 import xlrd
 from admin_extra_urls.api import link, ExtraUrlMixin, action
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import ValidationError, PermissionDenied
-from django import forms
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from xlrd import XLRDError
 
-from hct_mis_api.apps.core.airflow_api import AirflowApi
+from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
 from hct_mis_api.apps.core.models import (
     BusinessArea,
     FlexibleAttribute,
@@ -206,9 +206,8 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                AirflowApi.start_dag(
-                    dag_id="UploadNewKoboTemplateAndUpdateFlexFields",
-                    context={"xlsx_kobo_template_id": str(xlsx_kobo_template_object.id)},
+                upload_new_kobo_template_and_update_flex_fields_task.delay(
+                    xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")
         else:

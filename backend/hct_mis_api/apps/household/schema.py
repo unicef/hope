@@ -272,6 +272,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
+    sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
     admin1 = graphene.Field(AdminAreaNode)
