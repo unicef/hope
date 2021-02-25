@@ -59,6 +59,7 @@ class SendTPToDatahubTask:
         "phone_number": "phone_no",
         "household_mis_id": "household.id",
         "pregnant": "pregnant",
+        "sanction_list_confirmed_match": "sanction_list_confirmed_match",
     }
     MAPPING_DOCUMENT_DICT = {
         "mis_id": "id",
@@ -288,4 +289,6 @@ class SendTPToDatahubTask:
         return None
 
     def get_unhcr_household_id(self, household):
+        if household.unhcr_id == "":
+            return None
         return household.unhcr_id

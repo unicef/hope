@@ -154,7 +154,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
+      title={`Cash Plan ${cashPlan.caId}`}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -215,7 +215,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 { label: 'PROGRAMME NAME', value: cashPlan.program.name },
                 {
                   label: 'PROGRAMME ID',
-                  value: decodeIdString(cashPlan.program.id),
+                  value: cashPlan.program?.caId,
                 },
                 {
                   label: 'PAYMENT RECORDS',
@@ -233,9 +233,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 },
               ].map((el) => (
                 <Grid item xs={4} key={el.label}>
-                  <LabelizedField label={el.label}>
-                    <p>{el.value}</p>
-                  </LabelizedField>
+                  <Box pt={2} pb={2}>
+                    <LabelizedField label={el.label}>{el.value}</LabelizedField>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
@@ -324,11 +324,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   },
                   {
                     label: 'RESPONDED',
-                    value: verificationPlan.respondedCount || '-',
+                    value: verificationPlan.respondedCount,
                   },
                   {
                     label: 'RECEIVED WITH ISSUES',
-                    value: verificationPlan.receivedWithProblemsCount || '-',
+                    value: verificationPlan.receivedWithProblemsCount,
                   },
                   {
                     label: 'VERIFICATION METHOD',
@@ -337,11 +337,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
                     label: 'RECEIVED',
-                    value: verificationPlan.receivedCount || '-',
+                    value: verificationPlan.receivedCount,
                   },
                   {
                     label: 'NOT RECEIVED',
-                    value: verificationPlan.notReceivedCount || '-',
+                    value: verificationPlan.notReceivedCount,
                   },
                   {
                     label: 'ACTIVATION DATE',
@@ -361,9 +361,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   },
                 ].map((el) => (
                   <Grid item xs={3} key={el.label}>
-                    <LabelizedField label={el.label}>
-                      <p>{el.value}</p>
-                    </LabelizedField>
+                    <Box pt={2} pb={2}>
+                      <LabelizedField label={el.label}>
+                        {el.value}
+                      </LabelizedField>
+                    </Box>
                   </Grid>
                 ))}
               </Grid>

@@ -254,7 +254,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Date",
+                  "name": "DateTime",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -264,7 +264,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Date",
+                  "name": "DateTime",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -6388,6 +6388,18 @@
             "deprecationReason": null
           },
           {
+            "name": "adUuid",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "userRoles",
             "description": null,
             "args": [],
@@ -11443,6 +11455,18 @@
             "deprecationReason": null
           },
           {
+            "name": "sanctionListConfirmedMatch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hasDuplicates",
             "description": null,
             "args": [],
@@ -12244,6 +12268,22 @@
           },
           {
             "name": "sanctionListPossibleMatch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sanctionListConfirmedMatch",
             "description": null,
             "args": [],
             "type": {
@@ -14636,6 +14676,18 @@
           },
           {
             "name": "visionId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "registrationCaId",
             "description": null,
             "args": [],
             "type": {
@@ -31284,13 +31336,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONString",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -32058,13 +32106,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONString",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

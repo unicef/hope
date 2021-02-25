@@ -69,6 +69,7 @@ class Individual(SessionModel):
     marital_status = models.CharField(max_length=255, null=True, choices=MARITAL_STATUS_CHOICE,)
     phone_number = models.CharField(max_length=60, null=True)
     pregnant = models.NullBooleanField()
+    sanction_list_confirmed_match = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("session", "mis_id")
