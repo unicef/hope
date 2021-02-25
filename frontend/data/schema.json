@@ -6388,6 +6388,18 @@
             "deprecationReason": null
           },
           {
+            "name": "adUuid",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "userRoles",
             "description": null,
             "args": [],

@@ -3376,6 +3376,7 @@ type UserNode implements Node {
   partner: UserPartner!
   availableForExport: Boolean!
   jobTitle: String!
+  adUuid: String
   userRoles: [UserRoleNode!]!
   createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
