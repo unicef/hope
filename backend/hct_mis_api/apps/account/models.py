@@ -34,6 +34,7 @@ class User(AbstractUser, UUIDModel):
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
     job_title = models.CharField(max_length=255, blank="")
+    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     def __str__(self):
         if self.first_name or self.last_name:
