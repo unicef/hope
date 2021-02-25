@@ -269,7 +269,12 @@ class GenerateDashboardReportContentHelpers:
                     f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
                 )
             )
-            .annotate(total_payment_records=Count("cash_plans__payment_records", distinct=True))
+            .annotate(
+                total_payment_records=Count(
+                    "cash_plans__payment_records",
+                    distinct=True,
+                )
+            )
             .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
             .annotate(
                 received=Count(
@@ -331,7 +336,7 @@ class GenerateDashboardReportContentHelpers:
         valid_payment_records = self._get_payment_records_for_report(report)
         admin_areas = (
             AdminArea.objects.filter(
-                admin_area_level__admin_level=2,
+                level=2,
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
@@ -353,9 +358,7 @@ class GenerateDashboardReportContentHelpers:
 
         totals.update(
             self._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records, admin_area__admin_area_level__admin_level=2
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
         )
@@ -414,7 +417,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
-            return ("", "Total", instance.get("total_cash__sum", 0), instance.get("total_voucher__sum", 0))
+            return ("", "Total", instance.get("total_cash__sum") or 0, instance.get("total_voucher__sum") or 0)
         else:
             return (
                 instance.code,
@@ -512,7 +515,7 @@ class GenerateDashboardReportContentHelpers:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
             filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__admin_area_level__admin_level": 2}
+                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
             )
         if program_path and report.program:
             filter_vars.update({program_path: report.program})
@@ -841,7 +844,6 @@ class GenerateDashboardReportService:
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
         # append totals row
-        print("RIGHT BEFORE TOTALS")
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)
             str_row = self._stringify_all_values(row)
@@ -856,17 +858,11 @@ class GenerateDashboardReportService:
 
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
-            print("IN FOR LOOP", report_type)
             sheet_title = self._report_type_to_str(report_type)
-            print("SHEET TITLE", sheet_title)
             active_sheet = self.wb.create_sheet(sheet_title, -1)
-            print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
-            print("ADDED HEADERS")
             number_of_rows = self._add_rows(active_sheet, report_type)
-            print("ADDED ROWS")
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
-            print("ADDED FONTS")
             remove_empty_columns_values = self.REMOVE_EMPTY_COLUMNS.get(report_type)
             if remove_empty_columns_values:
                 self._remove_empty_columns(
@@ -874,7 +870,6 @@ class GenerateDashboardReportService:
                 )
             self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
 
-            print("REMOVED EMPTY")
         return self.wb
 
     def generate_report(self):

@@ -48,9 +48,7 @@ export const TotalAmountTransferredByCountryChart = ({
 
   const options = {
     legend: {
-      position: 'bottom',
       labels: {
-        usePointStyle: true,
         padding: 40,
       },
     },
@@ -115,7 +113,7 @@ export const TotalAmountTransferredByCountryChart = ({
         plugins={[ChartDataLabels]}
       />
       {data.labels.length > lessDataCount ? (
-        <Box textAlign='center' mt={4} ml={2} mr={2}>
+        <Box textAlign='center' mt={4} ml={2} mr={2} letterSpacing={1.75}>
           <Button
             variant='outlined'
             color='primary'
