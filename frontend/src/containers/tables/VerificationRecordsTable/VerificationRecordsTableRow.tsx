@@ -44,7 +44,7 @@ export function VerificationRecordsTableRow({
         onClick={canViewRecordDetails ? handleClick : undefined}
         align='left'
       >
-        <Pointer>{decodeIdString(record.paymentRecord.id)}</Pointer>
+        <Pointer>{record.paymentRecord?.caId}</Pointer>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

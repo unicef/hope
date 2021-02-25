@@ -1,21 +1,18 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 7.x.x
+  version: 7.7.3
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 7.x.x
+  version: 7.7.3
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 7.x.x
+  version: 7.7.3
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 10.x.x
+  version: 10.9.0
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
-  version: 12.x.x
-- name: airflow
-  repository: https://charts.bitnami.com/bitnami
-  version: 6.x.x
-digest: sha256:03bd5ce7d577549595546d5fd09baaa65169d22f06246186ae68de5f2ab97f44
-generated: "2020-09-12T14:52:11.754186+02:00"
+  version: 12.8.2
+digest: sha256:c0827c79786c0de2dd20306d11ae17a919a692233b8f4959628da9fd3e04c480
+generated: "2021-02-22T17:06:26.412913+01:00"

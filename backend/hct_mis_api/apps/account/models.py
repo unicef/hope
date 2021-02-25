@@ -33,7 +33,7 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
-    job_title = models.CharField(max_length=255, blank="")
+    job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     def __str__(self):
