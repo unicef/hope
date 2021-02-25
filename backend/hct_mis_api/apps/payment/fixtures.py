@@ -87,6 +87,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     service_provider = factory.SubFactory(ServiceProviderFactory)
+    registration_ca_id = factory.Faker("uuid4")
 
 
 class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
@@ -135,6 +136,7 @@ class RealProgramFactory(factory.DjangoModelFactory):
         model = Program
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    ca_id = factory.Iterator(CaIdIterator("PRG"))
     name = factory.Faker(
         "sentence",
         nb_words=6,
@@ -299,6 +301,7 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+    registration_ca_id = factory.Faker("uuid4")
 
 
 def generate_real_cash_plans():
