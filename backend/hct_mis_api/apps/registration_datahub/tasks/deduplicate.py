@@ -774,10 +774,11 @@ class DeduplicateTask:
     @classmethod
     def hard_deduplicate_documents(cls, documents):
         for document in documents:
-            documents_queryset = (
-                Document.objects.filter(document_number=document.document_number, type=document.type)
-                .filter(~Q(individual=document.individual))
-                .filter(Q(status=Document.STATUS_VALID) | Q(status=Document.STATUS_PENDING))
+            documents_queryset = Document.objects.filter(
+                Q(document_number=document.document_number)
+                & Q(type=document.type)
+                & ~Q(individual=document.individual)
+                & Q(Q(status=Document.STATUS_VALID) | Q(status=Document.STATUS_PENDING))
             )
             documents_count = documents_queryset.count()
             if documents_count > 0:
