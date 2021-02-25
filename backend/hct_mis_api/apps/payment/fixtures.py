@@ -82,11 +82,12 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
     delivered_quantity_usd = factory.fuzzy.FuzzyDecimal(100.0, 10000.0)
     delivery_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     service_provider = factory.SubFactory(ServiceProviderFactory)
+    registration_ca_id = factory.Faker("uuid4")
 
 
 class CashPlanPaymentVerificationFactory(factory.DjangoModelFactory):
@@ -147,8 +148,8 @@ class RealProgramFactory(factory.DjangoModelFactory):
     )
     start_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
@@ -192,8 +193,8 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     program = factory.SubFactory(RealProgramFactory)
     status_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     status = fuzzy.FuzzyChoice(
@@ -209,8 +210,8 @@ class RealCashPlanFactory(factory.DjangoModelFactory):
     distribution_level = "Registration Group"
     start_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     end_date = factory.LazyAttribute(lambda o: o.start_date + timedelta(days=randint(60, 1000)))
@@ -258,8 +259,8 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     full_name = factory.Faker("name")
     status_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     ca_id = factory.Iterator(CaIdIterator("PR"))
@@ -294,11 +295,12 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
     delivered_quantity_usd = factory.LazyAttribute(lambda o: Decimal(randint(10, int(o.entitlement_quantity))))
     delivery_date = factory.Faker(
         "date_time_this_decade",
-        before_now=False,
-        after_now=True,
+        before_now=True,
+        after_now=False,
         tzinfo=utc,
     )
     service_provider = factory.LazyAttribute(lambda o: ServiceProvider.objects.order_by("?").first())
+    registration_ca_id = factory.Faker("uuid4")
 
 
 def generate_real_cash_plans():

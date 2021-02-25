@@ -23,9 +23,9 @@ export const PaymentsChart = ({
   const options = {
     cutoutPercentage: 80,
     legend: {
-      position: 'bottom',
       labels: {
-        usePointStyle: true,
+        padding: 25,
+        boxWidth: 10,
       },
     },
     responsive: true,

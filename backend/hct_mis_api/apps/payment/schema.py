@@ -42,7 +42,7 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import get_number_of_samples
+from hct_mis_api.apps.payment.utils import get_number_of_samples, get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan
 
 
@@ -405,19 +405,8 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_volume_by_delivery_mechanism(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                )
-            },
-            year_filter_path="delivery_date",
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         volume_by_delivery_type = payment_records.values("delivery_type").annotate(volume=Sum("delivered_quantity_usd"))
         labels = []
@@ -431,20 +420,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                )
-            },
-            year_filter_path="delivery_date",
-        )
+        payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
         dataset = [
             {
                 "data": [
@@ -457,20 +433,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_total_transferred(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                )
-            },
-            year_filter_path="delivery_date",
-        )
+        payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
         return {"total": payment_records.aggregate(Sum("delivered_quantity_usd"))["delivered_quantity_usd__sum"]}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -479,20 +442,8 @@ class Query(graphene.ObjectType):
             return None
         order = kwargs.pop("order", None)
         order_by = kwargs.pop("order_by", None)
-        filters = chart_filters_decoder(kwargs)
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={
-                **chart_create_filter_query(
-                    filters,
-                    program_id_path="cash_plan__program__id",
-                    administrative_area_path="household__admin_area",
-                ),
-                "delivered_quantity_usd__gt": 0,
-            },
-            year_filter_path="delivery_date",
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         admin_areas = (
@@ -529,12 +480,7 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_total_transferred_cash_by_country(self, info, year, **kwargs):
-        payment_records = chart_get_filtered_qs(
-            PaymentRecord,
-            year,
-            business_area_slug_filter={"business_area__slug": "global"},
-            year_filter_path="delivery_date",
-        )
+        payment_records = get_payment_records_for_dashboard(year, "global", {}, True)
 
         countries_and_amounts = (
             payment_records.values("business_area__name")

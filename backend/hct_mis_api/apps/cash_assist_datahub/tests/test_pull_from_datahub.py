@@ -251,6 +251,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.transaction_reference_id, self.dh_payment_record.transaction_reference_id)
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
+        self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
 
         self.assertIn(self.household, self.program.households.all())
 
