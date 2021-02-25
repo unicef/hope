@@ -59,6 +59,7 @@ class SendTPToDatahubTask:
         "phone_number": "phone_no",
         "household_mis_id": "household.id",
         "pregnant": "pregnant",
+        "sanction_list_confirmed_match": "sanction_list_confirmed_match",
     }
     MAPPING_DOCUMENT_DICT = {
         "mis_id": "id",

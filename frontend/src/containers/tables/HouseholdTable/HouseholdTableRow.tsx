@@ -42,7 +42,10 @@ export function HouseHoldTableRow({
     >
       <TableCell align='left'>
         {household.hasDuplicates && <FlagTooltip />}
-        {household.sanctionListPossibleMatch && <Flag />}
+        {(household.sanctionListPossibleMatch ||
+          household.sanctionListConfirmedMatch) && (
+          <Flag confirmed={household.sanctionListConfirmedMatch} />
+        )}
       </TableCell>
       <TableCell align='left'>{household.unicefId}</TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
