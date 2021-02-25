@@ -43,7 +43,7 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           readinessProbe:
             httpGet:
-              path: /api/_health
+              path: /
               port: {{ .Values.celeryflower.service.port }}
               httpHeaders:
               - name: X-Health
