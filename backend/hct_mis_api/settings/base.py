@@ -11,6 +11,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from sentry_sdk.integrations.celery import CeleryIntegration
+
+from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -207,7 +210,6 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
-    # "django.contrib.admin",
     "smart_admin.templates",
     "smart_admin",
     "django.contrib.auth",
@@ -235,6 +237,7 @@ OTHER_APPS = [
     "multiselectfield",
     "mptt",
     "django_extensions",
+    "django_celery_results",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -372,8 +375,6 @@ GRAPH_MODELS = {
 
 PHONENUMBER_DEFAULT_REGION = "US"
 
-AIRFLOW_HOST = "airflow_webserver"
-
 SANCTION_LIST_CC_MAIL = os.getenv("SANCTION_LIST_CC_MAIL", "dfam-cashassistance@unicef.org")
 
 # ELASTICSEARCH SETTINGS
@@ -493,14 +494,25 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(transaction_style='url'),
-                      sentry_logging,
-                      # RedisIntegration(),
-                      # CeleryIntegration()
-                      ],
+        integrations=[
+            DjangoIntegration(transaction_style="url"),
+            sentry_logging,
+            CeleryIntegration()
+            # RedisIntegration(),
+        ],
         release=get_full_version(),
-        send_default_pii=True
+        send_default_pii=True,
     )
+
+CELERY_BROKER_URL = f"redis://{REDIS_INSTANCE}/0",
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_INSTANCE}/0"
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 
 
 SMART_ADMIN_SECTIONS = {

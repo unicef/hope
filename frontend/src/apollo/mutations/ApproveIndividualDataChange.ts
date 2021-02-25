@@ -17,6 +17,13 @@ export const ApproveIndividualDataChange = gql`
       grievanceTicket {
         id
         status
+        individualDataUpdateTicketDetails {
+          id
+          individual {
+            ...individualDetailed
+          }
+          individualData
+        }
       }
     }
   }
