@@ -282,6 +282,9 @@ export function EditVerificationPlan({
                       of {sampleSizesData?.sampleSize?.paymentRecordCount}
                       {getSampleSizePercentage()}
                     </Box>
+                    <Box fontSize={12} color='#797979'>
+                      This option is recommended for RapidPro
+                    </Box>
                     <Field
                       name='verificationChannel'
                       label='Verification Channel'
@@ -339,12 +342,12 @@ export function EditVerificationPlan({
                         />
                         <Field
                           name='ageCheckbox'
-                          label='Age'
+                          label='Age of HoH'
                           component={FormikCheckboxField}
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Gender'
+                          label='Gender of HoH'
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -365,7 +368,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMin'
-                                  label='Age Min'
+                                  label='Minimum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -374,7 +377,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMax'
-                                  label='Age Max'
+                                  label='Maximum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}

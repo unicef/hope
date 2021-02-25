@@ -13,7 +13,6 @@ from graphene_file_upload.scalars import Upload
 
 from hct_mis_api.apps.account.permissions import Permissions, PermissionMutation
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
@@ -23,6 +22,12 @@ from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
+from hct_mis_api.apps.registration_datahub.celery_tasks import (
+    registration_xlsx_import_task,
+    merge_registration_data_import_task,
+    rdi_deduplication_task,
+    registration_kobo_import_task,
+)
 from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     RegistrationDataImportDatahub,
@@ -110,13 +115,10 @@ class RegistrationXlsxImportMutation(BaseValidator, PermissionMutation, Validati
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
-        AirflowApi.start_dag(
-            dag_id="CreateRegistrationDataImportXLSX",
-            context={
-                "registration_data_import_id": str(created_obj_datahub.id),
-                "import_data_id": str(import_data_obj.id),
-                "business_area": str(business_area.id),
-            },
+        registration_xlsx_import_task.delay(
+            registration_data_import_id=str(created_obj_datahub.id),
+            import_data_id=str(import_data_obj.id),
+            business_area=str(business_area.id),
         )
 
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
@@ -151,10 +153,7 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_rdi_obj, rdi_obj
         )
-        AirflowApi.start_dag(
-            dag_id="RegistrationDataImportDeduplication",
-            context={"registration_data_import_id": str(registration_data_import_datahub_id)},
-        )
+        rdi_deduplication_task.delay(registration_data_import_id=str(registration_data_import_datahub_id))
 
         return cls(ok=True)
 
@@ -187,13 +186,10 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, created_obj_hct
         )
-        AirflowApi.start_dag(
-            dag_id="CreateRegistrationDataImportKobo",
-            context={
-                "registration_data_import_id": str(created_obj_datahub.id),
-                "import_data_id": str(import_data_obj.id),
-                "business_area": str(business_area.id),
-            },
+        registration_kobo_import_task.delay(
+            registration_data_import_id=str(created_obj_datahub.id),
+            import_data_id=str(import_data_obj.id),
+            business_area=str(business_area.id),
         )
 
         return RegistrationXlsxImportMutation(registration_data_import=created_obj_hct)
@@ -228,10 +224,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 
         cls.validate(status=obj_hct.status)
-        AirflowApi.start_dag(
-            dag_id="MergeRegistrationImportData",
-            context={"registration_data_import_id": decode_id},
-        )
+        merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
 

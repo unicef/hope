@@ -937,6 +937,7 @@ type HouseholdNode implements Node {
   totalCashReceived: Decimal
   selection: HouseholdSelection
   sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
   hasDuplicates: Boolean
   admin1: AdminAreaNode
   admin2: AdminAreaNode
@@ -1869,6 +1870,7 @@ type IndividualNode implements Node {
   deduplicationBatchResults: [DeduplicationResultNode]
   importedIndividualId: UUID
   sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
   sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
@@ -2338,7 +2340,7 @@ type Query {
   allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
   logEntryActionChoices: [ChoiceObject]
   report(id: ID!): ReportNode
-  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: Date, createdTo: Date, orderBy: String): ReportNodeConnection
+  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
   reportTypesChoices: [ChoiceObject]
   reportStatusChoices: [ChoiceObject]
   dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
@@ -3376,6 +3378,7 @@ type UserNode implements Node {
   partner: UserPartner!
   availableForExport: Boolean!
   jobTitle: String!
+  adUuid: String
   userRoles: [UserRoleNode!]!
   createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!

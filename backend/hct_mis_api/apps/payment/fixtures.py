@@ -136,6 +136,7 @@ class RealProgramFactory(factory.DjangoModelFactory):
         model = Program
 
     business_area = factory.LazyAttribute(lambda o: BusinessArea.objects.first())
+    ca_id = factory.Iterator(CaIdIterator("PRG"))
     name = factory.Faker(
         "sentence",
         nb_words=6,

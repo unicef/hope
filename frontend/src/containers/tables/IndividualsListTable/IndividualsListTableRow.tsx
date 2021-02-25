@@ -58,7 +58,10 @@ export function IndividualsListTableRow({
         {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
           <FlagTooltip />
         )}
-        {individual.sanctionListPossibleMatch && <Flag />}
+        {(individual.sanctionListPossibleMatch ||
+          individual.sanctionListConfirmedMatch) && (
+          <Flag confirmed={individual.sanctionListConfirmedMatch} />
+        )}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
@@ -70,9 +73,7 @@ export function IndividualsListTableRow({
       </TableCell>
       <TableCell align='right'>{age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
-        {individual.household?.admin2?.title}
-      </TableCell>
+      <TableCell align='left'>{individual.household?.admin2?.title}</TableCell>
     </ClickableTableRow>
   );
 }
