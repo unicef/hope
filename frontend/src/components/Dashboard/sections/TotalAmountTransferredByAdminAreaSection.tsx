@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CardTextLight } from '../DashboardCard';
+import { CardTextLightLarge } from '../DashboardCard';
 import { DashboardPaper } from '../DashboardPaper';
 import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -71,8 +71,11 @@ export const TotalAmountTransferredSectionByAdminAreaSection = ({
   }
 
   return (
-    <DashboardPaper title='Total Transferred by Administrative Area'>
-      <CardTextLight>IN USD</CardTextLight>
+    <DashboardPaper
+      title='Total Transferred by Administrative Area'
+      extraPaddingTitle={false}
+    >
+      <CardTextLightLarge>IN USD</CardTextLightLarge>
       <TotalAmountTransferredByAdminAreaTable
         data={countryData?.tableTotalCashTransferredByAdministrativeArea?.data}
         handleSort={handleSortAdminArea}

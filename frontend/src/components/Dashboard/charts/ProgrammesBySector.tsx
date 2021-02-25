@@ -34,8 +34,11 @@ export const ProgrammesBySector = ({
     legend: {
       position: 'bottom',
       labels: {
-        usePointStyle: true,
+        padding: 40,
       },
+    },
+    tooltips: {
+      mode: 'point',
     },
     scales: {
       xAxes: [
@@ -46,6 +49,7 @@ export const ProgrammesBySector = ({
             beginAtZero: true,
             stepSize: 1,
             callback: formatThousands,
+            suggestedMax: Math.max(...data.datasets[2].data) + 1,
           },
         },
       ],
