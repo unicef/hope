@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
 import { CountryChartsQuery } from '../../__generated__/graphql';
-import { formatNumber } from '../../utils/utils';
+import { formatCurrency, formatNumber } from '../../utils/utils';
 import { EnhancedTableHead } from '../table/EnhancedTableHead';
 
 interface TotalAmountTransferredByAdminAreaTableProps {
@@ -46,7 +46,7 @@ export const TotalAmountTransferredByAdminAreaTable = ({
         <TableRow key={el.id}>
           <TableCell align='left'>{el.admin2}</TableCell>
           <TableCell align='right'>
-            {formatNumber(el.totalCashTransferred)}
+            {formatCurrency(el.totalCashTransferred, true)}
           </TableCell>
           <TableCell align='right'>
             {formatNumber(el.totalHouseholds)}

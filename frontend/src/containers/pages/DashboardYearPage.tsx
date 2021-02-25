@@ -98,7 +98,7 @@ export function DashboardYearPage({
             <DashboardPaper title='Number of Programmes by Sector'>
               <ProgrammesBySector data={data.chartProgrammesBySector} />
             </DashboardPaper>
-            <DashboardPaper title='Total Tranferred by Month'>
+            <DashboardPaper title='Total Transferred by Month'>
               <TotalTransferredByMonth
                 data={data.chartTotalTransferredByMonth}
               />
@@ -111,7 +111,7 @@ export function DashboardYearPage({
           </Grid>
           <Grid item xs={4}>
             <PadddingLeftContainer>
-              <Grid container spacing={3}>
+              <Grid container spacing={6}>
                 <Grid item xs={12}>
                   <TotalNumberOfHouseholdsReachedSection
                     data={data.sectionHouseholdsReached}
@@ -134,7 +134,11 @@ export function DashboardYearPage({
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <DashboardPaper title='Volume by Delivery Mechanism in USD'>
+                  <DashboardPaper
+                    title='Volume by Delivery Mechanism in USD'
+                    noMarginTop
+                    extraPaddingTitle={false}
+                  >
                     <CardTextLight large>
                       Delivery type in CashAssist
                     </CardTextLight>
