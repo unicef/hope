@@ -75,7 +75,10 @@ class TestKoboTemplateUpload(TestCase):
 
         self.assertEqual(form.errors, expected_errors)
 
-    @patch("hct_mis_api.apps.core.airflow_api.AirflowApi.start_dag", new=lambda *args, **kwargs: None)
+    @patch(
+        "hct_mis_api.apps.core.celery_tasks.upload_new_kobo_template_and_update_flex_fields_task.delay",
+        new=lambda *args, **kwargs: None,
+    )
     def test_upload_valid_template(self):
         request = self.prepare_request("kobo-template-valid.xlsx")
         setattr(request, "session", "session")
