@@ -119,7 +119,7 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='assistance through'
-              value={cashPlan.assistanceThrough}
+              value={cashPlan.serviceProvider?.fullName}
             />
           </Grid>
           <Grid item xs={4}>

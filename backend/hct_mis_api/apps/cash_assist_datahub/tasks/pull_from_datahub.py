@@ -14,6 +14,7 @@ from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
+from sentry_sdk import capture_exception
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ class PullFromDatahubTask:
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
+        "registration_ca_id": "registration_ca_id",
     }
     MAPPING_SERVICE_PROVIDER_DICT = {
         "ca_id": "ca_id",
@@ -93,7 +95,8 @@ class PullFromDatahubTask:
                 except Exception as e:
                     session.status = Session.STATUS_FAILED
                     session.save()
-                    log.warning(e)
+                    capture_exception(e)
+                    log.warning(e, exc_info=True)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
@@ -114,14 +117,25 @@ class PullFromDatahubTask:
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
+            self.set_cash_plan_service_provider(cash_plan_args)
             cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
             (
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
+
             if not cash_plan.exchange_rate:
                 cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
                 cash_plan.save(update_fields=["exchange_rate"])
+
+    def set_cash_plan_service_provider(self, cash_plan_args):
+        assistance_through = cash_plan_args.get("assistance_through")
+        if not assistance_through:
+            return
+        sp = ServiceProvider.objects.filter(ca_id=assistance_through).first()
+        if not sp:
+            return
+        cash_plan_args["service_provider"] = sp
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)

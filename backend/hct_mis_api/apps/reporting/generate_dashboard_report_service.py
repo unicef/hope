@@ -124,18 +124,25 @@ class GenerateDashboardReportContentHelpers:
     @classmethod
     def get_programs(self, report: DashboardReport):
 
-        filter_vars = self._format_filters(report, {}, "end_date", "admin_areas", "id", "business_area")
+        filter_vars = self._format_filters(
+            report,
+            {},
+            "cash_plans__payment_records__delivery_date",
+            "admin_areas",
+            "id",
+            "business_area",
+        )
         months_labels = self.get_all_months()
 
         def get_filter_query(cash: bool, month: int):
             if cash:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=self._get_cash_delivery_types(),
+                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH,
                     cash_plans__payment_records__delivery_date__month=month,
                 )
             else:
                 return Q(
-                    cash_plans__payment_records__delivery_type__in=self._get_voucher_delivery_types(),
+                    cash_plans__payment_records__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER,
                     cash_plans__payment_records__delivery_date__month=month,
                 )
 
@@ -150,6 +157,7 @@ class GenerateDashboardReportContentHelpers:
 
         programs = (
             Program.objects.filter(**filter_vars)
+            .distinct()
             .annotate(
                 successful_payments=Count(
                     "cash_plans__payment_records", filter=Q(cash_plans__payment_records__delivered_quantity_usd__gt=0)
@@ -195,7 +203,7 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_unresolved_lte_30=Count(
                     "tickets",
-                    filter=Q(status_open_query, tickets__created_at__lte=days_30_from_now),
+                    filter=Q(status_open_query, tickets__created_at__gte=days_30_from_now),
                 )
             )
             .annotate(
@@ -203,15 +211,15 @@ class GenerateDashboardReportContentHelpers:
                     "tickets",
                     filter=Q(
                         status_open_query,
-                        tickets__created_at__gt=days_30_from_now,
-                        tickets__created_at__lte=days_60_from_now,
+                        tickets__created_at__lt=days_30_from_now,
+                        tickets__created_at__gte=days_60_from_now,
                     ),
                 )
             )
             .annotate(
                 total_unresolved_60=Count(
                     "tickets",
-                    filter=Q(status_open_query, tickets__created_at__gt=days_60_from_now),
+                    filter=Q(status_open_query, tickets__created_at__lt=days_60_from_now),
                 )
             )
             .annotate(
@@ -239,25 +247,35 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def get_payment_verifications(self, report: DashboardReport):
-        filter_vars = {"created_at__year": report.year}
+        filter_vars = {"payment_record__delivery_date__year": report.year}
         if report.admin_area:
-            filter_vars["cash_plan_payment_verification__cash_plan__program__admin_areas"] = report.admin_area
+            filter_vars["payment_record__household__admin_area"] = report.admin_area
         if report.program:
-            filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
+            filter_vars["payment_record__cash_plan__program"] = report.program
         if not self._is_report_global(report):
-            filter_vars["cash_plan_payment_verification__cash_plan__business_area"] = report.business_area
+            filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
         path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
 
         def format_status_filter(status):
             return Q(**{f"{path_to_payment_record_verifications}__status": status})
 
-        # TODO: missing average_sampling column, figure out how to calculate it
         programs = (
             Program.objects.filter(**{f"{path_to_payment_record_verifications}__in": valid_verifications})
             .distinct()
             .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
-            .annotate(total_households=Count(path_to_payment_record_verifications, distinct=True))
+            .annotate(
+                total_households=Count(
+                    f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
+                )
+            )
+            .annotate(
+                total_payment_records=Count(
+                    "cash_plans__payment_records",
+                    distinct=True,
+                )
+            )
+            .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
             .annotate(
                 received=Count(
                     path_to_payment_record_verifications,
@@ -296,13 +314,13 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 total_cash=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=self._get_cash_delivery_types()),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH),
                 )
             )
             .annotate(
                 total_voucher=Sum(
                     "paymentrecord__delivered_quantity_usd",
-                    filter=Q(paymentrecord__delivery_type__in=self._get_voucher_delivery_types()),
+                    filter=Q(paymentrecord__delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER),
                 )
             )
         )
@@ -318,7 +336,7 @@ class GenerateDashboardReportContentHelpers:
         valid_payment_records = self._get_payment_records_for_report(report)
         admin_areas = (
             AdminArea.objects.filter(
-                admin_area_level__admin_level=2,
+                level=2,
                 household__payment_records__in=valid_payment_records,
             )
             .distinct()
@@ -340,9 +358,7 @@ class GenerateDashboardReportContentHelpers:
 
         totals.update(
             self._aggregate_instances_sum(
-                Household.objects.filter(
-                    payment_records__in=valid_payment_records, admin_area__admin_area_level__admin_level=2
-                ).distinct(),
+                Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
         )
@@ -401,7 +417,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
-            return ("", "Total", instance.get("total_cash__sum", 0), instance.get("total_voucher__sum", 0))
+            return ("", "Total", instance.get("total_cash__sum") or 0, instance.get("total_voucher__sum") or 0)
         else:
             return (
                 instance.code,
@@ -450,8 +466,9 @@ class GenerateDashboardReportContentHelpers:
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            # average sampling goes here
-            "",
+            int((instance.total_verifications_done / instance.total_payment_records) * 100)
+            if instance.total_payment_records
+            else 0,
             instance.received,
             instance.not_received,
             instance.received_with_issues,
@@ -498,7 +515,7 @@ class GenerateDashboardReportContentHelpers:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
             filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__admin_area_level__admin_level": 2}
+                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
             )
         if program_path and report.program:
             filter_vars.update({program_path: report.program})
@@ -558,6 +575,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def _get_all_with_disabled_individual_count_fields():
         return [
+            "female_age_group_0_5_count",
             "female_age_group_0_5_disabled_count",
             "female_age_group_6_11_count",
             "female_age_group_6_11_disabled_count",
@@ -593,20 +611,6 @@ class GenerateDashboardReportContentHelpers:
             "male_age_group_18_59_count",
             "male_age_group_60_count",
         ]
-
-    @staticmethod
-    def _get_cash_delivery_types() -> list:
-        # TODO update this when have all delivery types
-        return [
-            PaymentRecord.DELIVERY_TYPE_DEPOSIT_TO_CARD,
-            PaymentRecord.DELIVERY_TYPE_TRANSFER,
-            PaymentRecord.DELIVERY_TYPE_CASH,
-        ]
-
-    @staticmethod
-    def _get_voucher_delivery_types() -> list:
-        # TODO update this when have all delivery types
-        return []
 
     @staticmethod
     def get_all_months():
@@ -840,7 +844,6 @@ class GenerateDashboardReportService:
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
         # append totals row
-        print("RIGHT BEFORE TOTALS")
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)
             str_row = self._stringify_all_values(row)
@@ -855,17 +858,11 @@ class GenerateDashboardReportService:
 
         # loop through all selected report types and add sheet for each
         for report_type in self.report_types:
-            print("IN FOR LOOP", report_type)
             sheet_title = self._report_type_to_str(report_type)
-            print("SHEET TITLE", sheet_title)
             active_sheet = self.wb.create_sheet(sheet_title, -1)
-            print("CREATED ACTIVE SHEET")
             number_of_columns = self._add_headers(active_sheet, report_type)
-            print("ADDED HEADERS")
             number_of_rows = self._add_rows(active_sheet, report_type)
-            print("ADDED ROWS")
             self._add_font_style_to_sheet(active_sheet, number_of_rows + 2)
-            print("ADDED FONTS")
             remove_empty_columns_values = self.REMOVE_EMPTY_COLUMNS.get(report_type)
             if remove_empty_columns_values:
                 self._remove_empty_columns(
@@ -873,7 +870,6 @@ class GenerateDashboardReportService:
                 )
             self._adjust_column_width_from_col(active_sheet, 1, number_of_columns, 1)
 
-            print("REMOVED EMPTY")
         return self.wb
 
     def generate_report(self):
