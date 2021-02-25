@@ -9,37 +9,43 @@ interface PaymentVerificationChartProps {
 export const PaymentVerificationChart = ({
   data,
 }: PaymentVerificationChartProps): React.ReactElement => {
+  if (!data) return null;
+
   const chartData = {
     datasets: [
       {
         categoryPercentage: 0.5,
-        label: `Received - ${(data?.datasets[1]?.data[0] * 100).toFixed(0)}%`,
+        label: `Received - ${(data.datasets[1]?.data[0] * 100).toFixed(0)}%`,
         backgroundColor: '#8BD241',
-        data: data?.datasets[1]?.data,
+        data: [...data.datasets[1]?.data],
+        stack: 4,
       },
       {
         categoryPercentage: 0.5,
         label: `Received with Issues - ${(
-          data?.datasets[3]?.data[0] * 100
+          data.datasets[3]?.data[0] * 100
         ).toFixed(0)}%`,
         backgroundColor: '#FDE8AC',
-        data: data?.datasets[3]?.data,
+        data: [...data.datasets[3]?.data],
+        stack: 4,
       },
       {
         categoryPercentage: 0.5,
-        label: `Not received - ${(data?.datasets[2]?.data[0] * 100).toFixed(
+        label: `Not received - ${(data.datasets[2]?.data[0] * 100).toFixed(
           0,
         )}%`,
         backgroundColor: '#E02020',
-        data: data?.datasets[2]?.data,
+        data: [...data.datasets[2]?.data],
+        stack: 4,
       },
       {
         categoryPercentage: 0.5,
-        label: `Not responded - ${(data?.datasets[0]?.data[0] * 100).toFixed(
+        label: `Not responded - ${(data.datasets[0]?.data[0] * 100).toFixed(
           0,
         )}%`,
         backgroundColor: '#C3D1D8',
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
+        stack: 4,
       },
     ],
   };
@@ -70,7 +76,6 @@ export const PaymentVerificationChart = ({
           gridLines: {
             display: false,
           },
-          stacked: true,
         },
       ],
       yAxes: [
@@ -78,7 +83,6 @@ export const PaymentVerificationChart = ({
           gridLines: {
             display: false,
           },
-          stacked: true,
           position: 'right',
         },
       ],
