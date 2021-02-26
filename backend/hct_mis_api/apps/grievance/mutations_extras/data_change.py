@@ -1,6 +1,7 @@
 from datetime import datetime, date
 
 import graphene
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
@@ -490,10 +491,12 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
-    deduplicate_and_check_against_sanctions_list_task.delay(
-        should_populate_index=True,
-        registration_data_import_id=None,
-        individuals_ids=[str(individual.id)],
+    transaction.on_commit(
+        lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+            should_populate_index=True,
+            registration_data_import_id=None,
+            individuals_ids=[str(individual.id)],
+        )
     )
 
 
@@ -549,10 +552,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
-    deduplicate_and_check_against_sanctions_list_task.delay(
-        should_populate_index=True,
-        registration_data_import_id=None,
-        individuals_ids=[str(individual.id)],
+    transaction.on_commit(
+        lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+            should_populate_index=True,
+            registration_data_import_id=None,
+            individuals_ids=[str(individual.id)],
+        )
     )
 
 
