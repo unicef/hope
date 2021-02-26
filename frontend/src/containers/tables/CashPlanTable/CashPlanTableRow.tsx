@@ -51,7 +51,7 @@ export function CashPlanTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='right'>{cashPlan.totalPersonsCovered}</TableCell>
+      <TableCell align='right'>{cashPlan.totalNumberOfHouseholds}</TableCell>
       <TableCell align='left'>{cashPlan.assistanceMeasurement}</TableCell>
       <TableCell align='right'>
         {cashPlan.totalEntitledQuantity.toLocaleString('en-US', {

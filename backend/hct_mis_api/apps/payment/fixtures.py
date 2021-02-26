@@ -307,9 +307,15 @@ class RealPaymentRecordFactory(factory.DjangoModelFactory):
 def generate_real_cash_plans():
     if ServiceProvider.objects.count() < 3:
         ServiceProviderFactory.create_batch(3)
-    cash_plans = RealCashPlanFactory.create_batch(3)
+    program = RealProgramFactory()
+    cash_plans = RealCashPlanFactory.create_batch(3, program=program)
     for cash_plan in cash_plans:
         RealPaymentRecordFactory.create_batch(
             5,
             cash_plan=cash_plan,
         )
+    program.households.set(
+        PaymentRecord.objects.exclude(status=PaymentRecord.STATUS_ERROR)
+        .filter(cash_plan__in=cash_plans)
+        .values_list("household__id", flat=True)
+    )
