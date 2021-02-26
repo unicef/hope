@@ -310,9 +310,15 @@ export function formatCurrencyWithSymbol(
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    amountCleared,
-  );
+  // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
+  if (!currency) return formatCurrency(amountCleared, true);
+  // undefined forces to use local browser settings
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    // enable this if decided that we always want code and not a symbol
+    // currencyDisplay: 'code',
+  }).format(amountCleared);
 }
 
 export function countPercentage(
