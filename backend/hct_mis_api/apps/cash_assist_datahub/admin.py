@@ -1,11 +1,15 @@
 # Register your models here.
 from admin_extra_urls.api import action
 from admin_extra_urls.mixins import ExtraUrlMixin
-from adminfilters.filters import TextFieldFilter, AllValuesComboFilter, AllValuesRadioFilter
-from django.contrib import admin
+from adminfilters.filters import TextFieldFilter
+from django.contrib import admin, messages
 from django.contrib.admin.templatetags.admin_urls import admin_urlname
+from django.contrib.messages import DEFAULT_TAGS
 from django.template.response import TemplateResponse
 from django.urls import reverse
+
+from hct_mis_api.apps.program.models import Program as HopeProgram
+from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
@@ -40,11 +44,20 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             "original": Session.objects.get(pk=pk),
             "data": {}
         }
+        warnings = []
         for model in [PaymentRecord, CashPlan, Programme, ServiceProvider, TargetPopulation]:
             ctx["data"][model] = {"count": model.objects.filter(session=pk).count(),
                                   "meta": model._meta
                                   }
+        for prj in Programme.objects.filter(session=pk):
+            if not HopeProgram.objects.filter(id=prj.mis_id):
+                warnings.append([messages.ERROR, f"Program {prj.mis_id} not found in HOPE"])
 
+        for tp in TargetPopulation.objects.filter(session=pk):
+            if not HopeTargetPopulation.objects.filter(id=tp.mis_id):
+                warnings.append([messages.ERROR, f"TargetPopulation {tp.mis_id} not found in HOPE"])
+
+        ctx['warnings'] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
         return TemplateResponse(request, "admin/cash_assist_datahub/session/inspect.html", ctx)
 
 
