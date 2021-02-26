@@ -11,12 +11,13 @@ export const PaymentsChart = ({
   data,
 }: PaymentsChartProps): React.ReactElement => {
   if (!data) return null;
+
   const chartData = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         backgroundColor: ['#3363A5', '#FFAA1D'],
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
       },
     ],
   };
