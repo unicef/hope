@@ -18,6 +18,9 @@ export const TotalAmountTransferredByCountryChart = ({
 }: TotalAmountTransferredByCountryChartProps): React.ReactElement => {
   const lessDataCount = 5;
   const [showAll, setShowAll] = useState(false);
+
+  if (!data) return null;
+
   const matchDataSize = (
     dataToSlice: number[] | string[],
   ): number[] | string[] => {
