@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
+from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count, F
 from django.db.models.functions import Coalesce, Lower
 from django_filters import (
     CharFilter,
@@ -125,9 +125,13 @@ class CashPlanFilter(FilterSet):
         fields=(
             "ca_id",
             "status",
+            "total_number_of_hh",
+            "total_entitled_quantity",
             "verification_status",
             "total_persons_covered",
             "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "dispersion_date",
             "assistance_measurement",
             "assistance_through",
             "delivery_type",
@@ -139,6 +143,16 @@ class CashPlanFilter(FilterSet):
             "service_provider__full_name",
         )
     )
+
+    @property
+    def qs(self):
+        return super().qs.annotate(
+            total_number_of_hh=Count(
+                "payment_records__household",
+                filter=~Q(payment_records__status=PaymentRecord.STATUS_ERROR),
+                distinct=True
+            )
+        )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -158,11 +172,15 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
     delivery_type = graphene.String()
+    total_number_of_households = graphene.Int()
 
     class Meta:
         model = CashPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_total_number_of_households(self, info, **kwargs):
+        return self.total_number_of_households
 
 
 class ChartProgramFilter(FilterSet):
