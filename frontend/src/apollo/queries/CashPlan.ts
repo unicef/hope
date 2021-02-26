@@ -25,6 +25,7 @@ export const CashPlan = gql`
       verificationStatus
       bankReconciliationSuccess
       bankReconciliationError
+      totalNumberOfHouseholds
       verifications {
         edges {
           node {
