@@ -9,7 +9,9 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import Count, Q
 from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
@@ -145,7 +147,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def admin_areas_log(self):
-        ", ".join(self.admin_areas.all())
+        return ", ".join(self.admin_areas.all())
 
     class Meta:
         unique_together = ("name", "business_area")
@@ -232,6 +234,10 @@ class CashPlan(TimeStampedUUIDModel):
     @property
     def bank_reconciliation_error(self):
         return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
+
+    @cached_property
+    def total_number_of_households(self):
+        return self.payment_records.exclude(status=PaymentRecord.STATUS_ERROR).values("household").distinct().count()
 
     class Meta:
         verbose_name = "Cash Plan"
