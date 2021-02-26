@@ -315,14 +315,19 @@ export function formatCurrencyWithSymbol(
   );
 }
 
+export function countPercentage(
+  partialValue: number,
+  totalValue: number,
+): number {
+  if (!totalValue) return 0;
+  return +((partialValue / totalValue) * 100).toFixed(2);
+}
+
 export function getPercentage(
   partialValue: number,
   totalValue: number,
 ): string {
-  if (!totalValue) {
-    return '0%';
-  }
-  return `${((partialValue / totalValue) * 100).toFixed(2)}%`;
+  return `${countPercentage(partialValue, totalValue)}%`;
 }
 
 export function formatNumber(value: number): string {
