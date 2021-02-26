@@ -54,16 +54,14 @@ export function PaymentRecordTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <AnonTableCell>{paymentRecord.fullName}</AnonTableCell>
-      <TableCell align='left'>
-        {decodeIdString(paymentRecord.household.id)}
-      </TableCell>
-      <TableCell align='left'>{paymentRecord.totalPersonsCovered}</TableCell>
+      <AnonTableCell>{paymentRecord.headOfHousehold?.fullName}</AnonTableCell>
+      <TableCell align='left'>{paymentRecord.household.unicefId}</TableCell>
+      <TableCell align='left'>{paymentRecord.household.size}</TableCell>
       <TableCell align='right'>
         {formatCurrency(paymentRecord.entitlementQuantity)}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.deliveredQuantity)}
+        {formatCurrency(paymentRecord.deliveredQuantityUsd)}
       </TableCell>
       <TableCell align='right'>
         <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>

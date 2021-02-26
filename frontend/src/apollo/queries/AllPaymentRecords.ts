@@ -37,14 +37,15 @@ export const AllPaymentRecords = gql`
           statusDate
           status
           caId
-
           totalPersonsCovered
           household {
             id
+            unicefId
             size
           }
           entitlementQuantity
           deliveredQuantity
+          deliveredQuantityUsd
           deliveryDate
           cashPlan {
             id

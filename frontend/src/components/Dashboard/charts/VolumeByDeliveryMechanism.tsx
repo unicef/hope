@@ -11,8 +11,9 @@ export const VolumeByDeliveryMechanism = ({
   data,
 }: VolumeByDeliveryMechanismProps): React.ReactElement => {
   if (!data) return null;
+
   const chartData = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         backgroundColor: [
@@ -30,17 +31,18 @@ export const VolumeByDeliveryMechanism = ({
           '#FEa26D',
           '#FF723D',
         ],
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
       },
     ],
   };
+
   const options = {
     cutoutPercentage: 80,
     legend: {
       align: 'start',
       labels: {
         boxWidth: 10,
-        padding: data?.datasets[0]?.data.length < 4 ? 30 : 15,
+        padding: data.datasets[0]?.data.length < 4 ? 30 : 15,
       },
     },
     responsive: true,

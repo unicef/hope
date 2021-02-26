@@ -29,6 +29,10 @@ spec:
           backend:
             serviceName: {{ $fullName }}-backend
             servicePort: {{ .Values.backend.service.port }}
+        - path: /flower/*
+          backend: 
+            serviceName: {{ include "hope.fullname" . }}-celery-flower
+            servicePort: {{ .Values.celeryflower.service.port }}
         - path: /
           backend:
             serviceName: {{ $fullName }}-frontend

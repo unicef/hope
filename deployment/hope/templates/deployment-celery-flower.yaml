@@ -27,7 +27,9 @@ spec:
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}-celery-flower
-          command: ["celery", "flower", "--broker=redis://hope-main-redis-master:6379/0"]
+          # Temp solution with Basic Auth we will switch to Azure AD Auth
+          # TODO: Switch to Azure AD
+          command: ["celery", "flower", "--broker=redis://hope-main-redis-master:6379/0 --url_prefix=flower basic_auth=test1234:test1234"]
           securityContext:
             {{- toYaml .Values.celeryflower.securityContext | nindent 12 }}
           image: "{{ .Values.celeryflower.image }}"
@@ -43,7 +45,7 @@ spec:
               name: {{ include "hope.fullname" . }}-backend
           readinessProbe:
             httpGet:
-              path: /api/_health
+              path: /
               port: {{ .Values.celeryflower.service.port }}
               httpHeaders:
               - name: X-Health

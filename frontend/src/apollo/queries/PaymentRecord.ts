@@ -94,6 +94,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       currency
       entitlementQuantity
       deliveredQuantity
+      deliveredQuantityUsd
       deliveryDate
       deliveryDate
       deliveryType

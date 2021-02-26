@@ -43,6 +43,9 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     @action(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
         context = self.get_common_context(request, pk)
+        context["business_area"] = self.object
+        context["title"] = f"Test `{self.object.name}` RapidPRO connection"
+
         api = RapidProAPI(self.object.slug)
 
         if request.method == "GET":
