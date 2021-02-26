@@ -325,7 +325,7 @@ export function countPercentage(
   partialValue: number,
   totalValue: number,
 ): number {
-  if (!totalValue) return 0;
+  if (!totalValue || !partialValue) return 0;
   return +((partialValue / totalValue) * 100).toFixed(2);
 }
 

@@ -45,7 +45,7 @@ export const FormikRadioGroup = ({
           id={`radioGroup-${field.name}`}
         >
           {otherProps.choices.map((each) => (
-            <Box mb={3}>
+            <Box mb={3} key={each.value}>
               <FormControlLabel
                 key={each.value}
                 value={each.value}
