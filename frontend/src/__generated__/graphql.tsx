@@ -410,6 +410,7 @@ export type CashPlanNode = Node & {
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
   bankReconciliationError?: Maybe<Scalars['Int']>,
   totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  currency?: Maybe<Scalars['String']>,
 };
 
 
@@ -1957,8 +1958,8 @@ export type ImportedHouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
-  admin1: Scalars['String'],
-  admin2: Scalars['String'],
+  admin1?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Scalars['String']>,
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -6434,7 +6435,7 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { serviceProvider: Maybe<(
           { __typename?: 'ServiceProviderNode' }
           & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -11150,6 +11151,7 @@ export const AllCashPlansDocument = gql`
         dispersionDate
         assistanceMeasurement
         status
+        currency
         totalEntitledQuantity
         totalDeliveredQuantity
         totalUndeliveredQuantity
@@ -16506,6 +16508,7 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -17003,8 +17006,8 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin1?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

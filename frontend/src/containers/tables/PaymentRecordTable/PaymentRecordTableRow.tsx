@@ -9,6 +9,7 @@ import { StatusBox } from '../../../components/StatusBox';
 import {
   decodeIdString,
   formatCurrency,
+  formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
@@ -58,10 +59,13 @@ export function PaymentRecordTableRow({
       <TableCell align='left'>{paymentRecord.household.unicefId}</TableCell>
       <TableCell align='left'>{paymentRecord.household.size}</TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.entitlementQuantity)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.entitlementQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.deliveredQuantityUsd)}
+        {formatCurrencyWithSymbol(paymentRecord.deliveredQuantityUsd)}
       </TableCell>
       <TableCell align='right'>
         <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
