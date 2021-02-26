@@ -7,8 +7,6 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
-  decodeIdString,
-  formatCurrency,
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
