@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  formatCurrency,
+  formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -118,7 +118,10 @@ export function VerificationRecordDetails({
           <Grid item xs={3}>
             <LabelizedField
               label='AMOUNT RECEIVED'
-              value={formatCurrency(paymentVerification.receivedAmount)}
+              value={formatCurrencyWithSymbol(
+                paymentVerification.receivedAmount,
+                paymentVerification.paymentRecord.currency,
+              )}
             />
           </Grid>
         </Grid>

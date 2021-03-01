@@ -8,7 +8,7 @@ spec:
   type: {{ .Values.backend.service.type }}
   ports:
     - port: {{ .Values.celeryflower.service.port }}
-      targetPort: 5555
+      targetPort: {{ .Values.celeryflower.service.port }}
       protocol: TCP
       name: http
   selector:

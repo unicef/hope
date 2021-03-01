@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import {
+  Button,
+  DialogContent,
+  DialogTitle,
+  Box,
+  Typography,
+} from '@material-ui/core';
 import styled from 'styled-components';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
@@ -11,6 +17,7 @@ import {
 } from '../../__generated__/graphql';
 import { CashPlan } from '../../apollo/queries/CashPlan';
 import { LoadingComponent } from '../LoadingComponent';
+import { getPercentage } from '../../utils/utils';
 
 export interface Props {
   cashPlanVerificationId: string;
@@ -68,29 +75,23 @@ export function FinishVerificationPlan({
   };
 
   const beneficiariesPercent = (): string => {
-    if (
-      verificationPlan?.respondedCount &&
-      verificationPlan?.sampleSize !== 0
-    ) {
-      return (
-        (verificationPlan?.respondedCount / verificationPlan?.sampleSize) *
-        100
-      ).toFixed(2);
+    const responded = verificationPlan?.respondedCount || 0;
+    const sampleSize = verificationPlan?.sampleSize;
+    if (sampleSize) {
+      return getPercentage(responded, sampleSize);
     }
-
     return null;
   };
 
   const grievanceTickets = (): number => {
-    if (
-      verificationPlan?.notReceivedCount &&
-      verificationPlan?.sampleSize &&
-      verificationPlan?.respondedCount
-    ) {
+    const notReceivedCount = verificationPlan?.notReceivedCount || 0;
+    const receivedWithProblemsCount = verificationPlan?.notReceivedCount || 0;
+    const sampleSize = verificationPlan?.sampleSize;
+    const responded = verificationPlan?.respondedCount || 0;
+
+    if (sampleSize) {
       return (
-        verificationPlan?.notReceivedCount +
-        (verificationPlan?.sampleSize - verificationPlan?.respondedCount) +
-        verificationPlan?.receivedWithProblemsCount
+        notReceivedCount + receivedWithProblemsCount + (sampleSize - responded)
       );
     }
     return null;
@@ -121,19 +122,24 @@ export function FinishVerificationPlan({
         </DialogTitleWrapper>
         <DialogContent>
           <DialogContainer>
-            <Box p={5}>
+            <Box>
               {beneficiariesPercent() && (
-                <div>
-                  Only {beneficiariesPercent()}% of the beneficiaries have
+                <Typography variant='body2' style={{ marginTop: '20px' }}>
+                  Only {beneficiariesPercent()} of the beneficiaries have
                   responded to this payment verification.
-                </div>
+                </Typography>
               )}
-              <div>Are you sure that you want to finish?</div>
+              <Typography variant='body2'>
+                Are you sure that you want to finish?
+              </Typography>
               {grievanceTickets() && (
-                <div>
+                <Typography
+                  style={{ marginTop: '20px', marginBottom: '20px' }}
+                  variant='body2'
+                >
                   Closing this verification will generate {grievanceTickets()}{' '}
                   grievance tickets.
-                </div>
+                </Typography>
               )}
             </Box>
           </DialogContainer>
