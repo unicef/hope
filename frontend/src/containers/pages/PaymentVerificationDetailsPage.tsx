@@ -19,7 +19,7 @@ import {
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
   choicesToDict,
-  decodeIdString,
+  countPercentage,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
@@ -115,12 +115,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       to: `/${businessArea}/payment-verification`,
     },
   ];
-  const bankReconciliationSuccessPercentage =
-    (cashPlan.bankReconciliationSuccess / cashPlan.paymentRecords.totalCount) *
-    100;
-  const bankReconciliationErrorPercentage =
-    (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
-    100;
+  const bankReconciliationSuccessPercentage = countPercentage(
+    cashPlan.bankReconciliationSuccess,
+    cashPlan.paymentRecords.totalCount,
+  );
+
+  const bankReconciliationErrorPercentage = countPercentage(
+    cashPlan.bankReconciliationError,
+    cashPlan.paymentRecords.totalCount,
+  );
 
   const canCreate =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
@@ -249,20 +252,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>
-                        {bankReconciliationSuccessPercentage
-                          ? bankReconciliationSuccessPercentage.toFixed(2)
-                          : 0}
-                        %
-                      </p>
+                      <p>{bankReconciliationSuccessPercentage}%</p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>
-                        {bankReconciliationErrorPercentage
-                          ? bankReconciliationErrorPercentage.toFixed(2)
-                          : 0}
-                        %
-                      </p>
+                      <p>{bankReconciliationErrorPercentage}%</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -283,8 +276,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [
-                              bankReconciliationSuccessPercentage.toFixed(2),
-                              bankReconciliationErrorPercentage.toFixed(2),
+                              bankReconciliationSuccessPercentage,
+                              bankReconciliationErrorPercentage,
                             ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
@@ -421,7 +414,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       ) : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus === 'ACTIVE' ? (
+      cashPlan.verificationStatus !== 'PENDING' ? (
         <>
           <Container>
             <VerificationRecordsFilters

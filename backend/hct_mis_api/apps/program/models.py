@@ -239,5 +239,10 @@ class CashPlan(TimeStampedUUIDModel):
     def total_number_of_households(self):
         return self.payment_records.exclude(status=PaymentRecord.STATUS_ERROR).values("household").distinct().count()
 
+    @property
+    def currency(self):
+        payment_record = self.payment_records.first()
+        return payment_record.currency if payment_record else None
+
     class Meta:
         verbose_name = "Cash Plan"
