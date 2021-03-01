@@ -73,12 +73,12 @@ export function HouseholdDetails({
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='ADMINISTRATIVE LEVEL 1'>
-              {household.admin1}
+              {household.admin1Title}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
             <LabelizedField label='ADMINISTRATIVE LEVEL 2'>
-              {household.admin2}
+              {household.admin2Title}
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
