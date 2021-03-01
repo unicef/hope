@@ -8,8 +8,8 @@ export const ALL_REPORTS_QUERY = gql`
     $last: Int
     $status: [String]
     $businessArea: String!
-    $createdFrom: Date
-    $createdTo: Date
+    $createdFrom: DateTime
+    $createdTo: DateTime
     $reportType: [String]
     $createdBy: ID
     $orderBy: String

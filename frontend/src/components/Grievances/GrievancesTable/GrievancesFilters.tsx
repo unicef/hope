@@ -117,9 +117,7 @@ export function GrievancesFilters({
                   ...filter,
                   createdAtRange: {
                     ...filter.createdAtRange,
-                    min: moment(date)
-                      .set({ hour: 0, minute: 0 })
-                      .toISOString(),
+                    min: moment(date).set({ hour: 0, minute: 0 }).toISOString(),
                   },
                 })
               }
@@ -142,9 +140,7 @@ export function GrievancesFilters({
                 ...filter,
                 createdAtRange: {
                   ...filter.createdAtRange,
-                  max: moment(date)
-                    .set({ hour: 23, minute: 59 })
-                    .toISOString(),
+                  max: moment(date).set({ hour: 23, minute: 59 }).toISOString(),
                 },
               })
             }
@@ -155,14 +151,8 @@ export function GrievancesFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin || null}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, admin: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, admin: option });
-            }}
+            onFilterChange={onFilterChange}
+            name='admin'
           />
         </Grid>
       </Grid>

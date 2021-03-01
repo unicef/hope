@@ -6,9 +6,9 @@ import { Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
-  useAllIndividualsFlexFieldsAttributesQuery
+  useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { getFlexFieldTextValue } from "../../utils/utils"
+import { getFlexFieldTextValue } from '../../utils/utils';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -42,19 +42,21 @@ export function IndividualVulnerabilities({
     {},
   );
 
-  // eslint-disable-next-line array-callback-return,consistent-return
-  const fields = Object.entries(individual.flexFields || {}).map(([key, value]: [string, string|string[]]) => {
-    const flexFieldAttribute = fieldsDict[key]
-    if (typeof flexFieldAttribute !== 'undefined') {
-      return (
-        <LabelizedField
-          key={key}
-          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-          value={getFlexFieldTextValue(key, value, flexFieldAttribute)}
-        />
-     )
-    }
-  })
+  const fields = Object.entries(individual.flexFields || {}).map(
+    // eslint-disable-next-line array-callback-return,consistent-return
+    ([key, value]: [string, string | string[]]) => {
+      const flexFieldAttribute = fieldsDict[key];
+      if (typeof flexFieldAttribute !== 'undefined') {
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={getFlexFieldTextValue(key, value, flexFieldAttribute)}
+          />
+        );
+      }
+    },
+  );
   return (
     <div>
       <Overview>
