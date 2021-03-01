@@ -2,7 +2,6 @@ import React, { ReactElement } from 'react';
 import {
   AllCashPlansQuery,
   AllCashPlansQueryVariables,
-  CashPlanNode,
   useAllCashPlansQuery,
 } from '../../../__generated__/graphql';
 import { UniversalTable } from '../UniversalTable';
@@ -30,7 +29,10 @@ export function PaymentVerificationTable({
     endDateLte: filter.endDate,
   };
   return (
-    <UniversalTable<AllCashPlansQuery['allCashPlans']['edges'][number]['node'], AllCashPlansQueryVariables>
+    <UniversalTable<
+      AllCashPlansQuery['allCashPlans']['edges'][number]['node'],
+      AllCashPlansQueryVariables
+    >
       title='List of Cash Plans'
       headCells={headCells}
       query={useAllCashPlansQuery}

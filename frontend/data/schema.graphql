@@ -197,6 +197,7 @@ type CashPlanNode implements Node {
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
+  currency: String
 }
 
 type CashPlanNodeConnection {
