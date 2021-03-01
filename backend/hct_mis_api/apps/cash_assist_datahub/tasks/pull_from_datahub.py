@@ -69,6 +69,7 @@ class PullFromDatahubTask:
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
+        "registration_ca_id": "registration_ca_id",
     }
     MAPPING_SERVICE_PROVIDER_DICT = {
         "ca_id": "ca_id",
@@ -116,14 +117,25 @@ class PullFromDatahubTask:
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
+            self.set_cash_plan_service_provider(cash_plan_args)
             cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
             (
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
+
             if not cash_plan.exchange_rate:
                 cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
                 cash_plan.save(update_fields=["exchange_rate"])
+
+    def set_cash_plan_service_provider(self, cash_plan_args):
+        assistance_through = cash_plan_args.get("assistance_through")
+        if not assistance_through:
+            return
+        service_provider = ServiceProvider.objects.filter(ca_id=assistance_through).first()
+        if service_provider is None:
+            return
+        cash_plan_args["service_provider"] = service_provider
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
@@ -156,7 +168,7 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
-            (service_provider, created,) = ServiceProvider.objects.update_or_create(
+            ServiceProvider.objects.update_or_create(
                 ca_id=dh_service_provider.ca_id, defaults=service_provider_args
             )
 

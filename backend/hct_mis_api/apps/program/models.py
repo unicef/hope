@@ -9,12 +9,14 @@ from django.core.validators import (
     ProhibitNullCharactersValidator,
 )
 from django.db import models
+from django.db.models import Count, Q
 from django.utils.deconstruct import deconstructible
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
@@ -145,7 +147,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def admin_areas_log(self):
-        ", ".join(self.admin_areas.all())
+        return ", ".join(self.admin_areas.all())
 
     class Meta:
         unique_together = ("name", "business_area")
@@ -192,6 +194,9 @@ class CashPlan(TimeStampedUUIDModel):
     )
     assistance_measurement = models.CharField(max_length=255, db_index=True)
     assistance_through = models.CharField(max_length=255, db_index=True)
+    service_provider = models.ForeignKey(
+        "payment.ServiceProvider", null=True, related_name="cash_plans", on_delete=models.CASCADE
+    )
     vision_id = models.CharField(max_length=255, null=True)
     funds_commitment = models.CharField(max_length=255, null=True)
     exchange_rate = models.DecimalField(decimal_places=8, blank=True, null=True, max_digits=12)
@@ -200,16 +205,16 @@ class CashPlan(TimeStampedUUIDModel):
     total_persons_covered = models.IntegerField(db_index=True)
     total_persons_covered_revised = models.IntegerField(db_index=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True
+        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], db_index=True, null=True
     )
     verification_status = models.CharField(
         max_length=10,
@@ -229,6 +234,10 @@ class CashPlan(TimeStampedUUIDModel):
     @property
     def bank_reconciliation_error(self):
         return self.payment_records.filter(status=PaymentRecord.STATUS_ERROR).count()
+
+    @cached_property
+    def total_number_of_households(self):
+        return self.payment_records.exclude(status=PaymentRecord.STATUS_ERROR).values("household").distinct().count()
 
     class Meta:
         verbose_name = "Cash Plan"

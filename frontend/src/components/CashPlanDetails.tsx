@@ -119,7 +119,7 @@ export function CashPlanDetails({
           <Grid item xs={4}>
             <LabelizedField
               label='assistance through'
-              value={cashPlan.assistanceThrough}
+              value={cashPlan.serviceProvider?.fullName}
             />
           </Grid>
           <Grid item xs={4}>
@@ -145,7 +145,7 @@ export function CashPlanDetails({
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label='Total Number of Households'>
-            <NumberOfHouseHoldsValue>123</NumberOfHouseHoldsValue>
+            <NumberOfHouseHoldsValue>{cashPlan.totalNumberOfHouseholds}</NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>

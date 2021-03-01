@@ -431,7 +431,6 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
                 heading_household__payment_records__verifications__cash_plan_payment_verification=cashplan_payment_verification.id
             ).values_list("phone_no", flat=True)
         )
-        # TODO Uncomment when correct phone numbers in user
         flow_start_info = api.start_flow(cashplan_payment_verification.rapid_pro_flow_id, phone_numbers)
         cashplan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
 

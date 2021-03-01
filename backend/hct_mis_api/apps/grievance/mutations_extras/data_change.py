@@ -1,15 +1,16 @@
 from datetime import datetime, date
 
 import graphene
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
-from hct_mis_api.apps.core.airflow_api import AirflowApi
 from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.core.utils import to_snake_case
+from hct_mis_api.apps.grievance.celery_tasks import deduplicate_and_check_against_sanctions_list_task
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
     TicketIndividualDataUpdateDetails,
@@ -21,7 +22,8 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_add_document,
     handle_role,
     prepare_previous_documents,
-    verify_flex_fields, withdraw_individual_and_reassign_roles,
+    verify_flex_fields,
+    withdraw_individual_and_reassign_roles,
 )
 from hct_mis_api.apps.household.models import (
     Individual,
@@ -311,7 +313,7 @@ def save_individual_data_update_extras(root, info, input, grievance_ticket, extr
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
-        elif field in ('phone_no', 'phone_no_alternative'):
+        elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
@@ -364,7 +366,7 @@ def update_individual_data_update_extras(root, info, input, grievance_ticket, ex
         current_value = getattr(individual, field, None)
         if isinstance(current_value, (datetime, date)):
             current_value = current_value.isoformat()
-        elif field in ('phone_no', 'phone_no_alternative'):
+        elif field in ("phone_no", "phone_no_alternative"):
             current_value = str(current_value)
         individual_data_with_approve_status[field]["previous_value"] = current_value
 
@@ -489,13 +491,12 @@ def close_add_individual_grievance_ticket(grievance_ticket, info):
 
     Document.objects.bulk_create(documents_to_create)
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, individual)
-    AirflowApi.start_dag(
-        dag_id="DeduplicateAndCheckAgainstSanctionsList",
-        context={
-            "should_populate_index": True,
-            "registration_data_import_id": None,
-            "individuals_ids": [str(individual.id)],
-        },
+    transaction.on_commit(
+        lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+            should_populate_index=True,
+            registration_data_import_id=None,
+            individuals_ids=[str(individual.id)],
+        )
     )
 
 
@@ -551,13 +552,12 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     Document.objects.bulk_create(documents_to_create)
     Document.objects.filter(id__in=documents_to_remove).delete()
     log_create(Individual.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_individual, new_individual)
-    AirflowApi.start_dag(
-        dag_id="DeduplicateAndCheckAgainstSanctionsList",
-        context={
-            "should_populate_index": True,
-            "registration_data_import_id": None,
-            "individuals_ids": [str(individual.id)],
-        },
+    transaction.on_commit(
+        lambda: deduplicate_and_check_against_sanctions_list_task.delay(
+            should_populate_index=True,
+            registration_data_import_id=None,
+            individuals_ids=[str(individual.id)],
+        )
     )
 
 
