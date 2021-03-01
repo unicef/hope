@@ -185,43 +185,41 @@ currencies = (
 
 
 class NumberValidator(RegexValidator):
-    regex = r'[0-9]{10,}'
+    regex = r"[0-9]{10,}"
 
 
 class FundsCommitmentAddForm(forms.ModelForm):
-    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects,
-                                           to_field_name='code')
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
     currency_code = forms.ChoiceField(choices=sorted(currencies, key=lambda tup: tup[1]))
     funds_commitment_number = forms.CharField(required=True)
-    vendor_id = forms.CharField(validators=[NumberValidator,
-                                            MinLengthValidator(10)])
-    gl_account = forms.CharField(validators=[NumberValidator,
-                                             MinLengthValidator(10)])
+    vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
+    gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
 
     class Meta:
         model = FundsCommitment
-        exclude = ('update_date', 'updated_by', 'mis_sync_flag',
-                   'mis_sync_date', 'ca_sync_date', 'ca_sync_flag')
+        exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
     def clean_business_area(self):
-        return self.cleaned_data['business_area'].code
+        return self.cleaned_data["business_area"].code
 
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HOPEModelAdminBase):
     # list_display = ()
-    list_filter = ("mis_sync_date", "ca_sync_date",
-                   TextFieldFilter.factory('business_area'),
-                   )
+    list_filter = (
+        "mis_sync_date",
+        "ca_sync_date",
+        TextFieldFilter.factory("business_area"),
+    )
     date_hierarchy = "create_date"
     add_form = FundsCommitmentAddForm
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)
-        initial['created_by'] = request.user.email
-        initial['updated_by'] = request.user.email
-        initial['posting_date'] = timezone.now()
-        initial['status_date'] = timezone.now()
+        initial["created_by"] = request.user.email
+        initial["updated_by"] = request.user.email
+        initial["posting_date"] = timezone.now()
+        initial["status_date"] = timezone.now()
         return initial
 
     def get_form(self, request, obj=None, change=False, **kwargs):
@@ -232,7 +230,9 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
 
 @admin.register(DownPayment)
 class DownPaymentAdmin(HOPEModelAdminBase):
-    list_filter = ("mis_sync_date", "ca_sync_date",
-                   TextFieldFilter.factory('business_area'),
-                   )
+    list_filter = (
+        "mis_sync_date",
+        "ca_sync_date",
+        TextFieldFilter.factory("business_area"),
+    )
     date_hierarchy = "create_date"
