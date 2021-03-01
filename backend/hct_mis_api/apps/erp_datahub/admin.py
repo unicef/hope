@@ -205,7 +205,7 @@ class FundsCommitmentAddForm(forms.ModelForm):
 
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(HOPEModelAdminBase):
-    # list_display = ()
+    list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         "mis_sync_date",
         "ca_sync_date",
