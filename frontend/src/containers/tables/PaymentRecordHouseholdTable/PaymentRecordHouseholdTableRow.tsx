@@ -7,7 +7,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
 import {
-  formatCurrency,
+  formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
@@ -59,10 +59,16 @@ export function PaymentRecordHouseholdTableRow({
         {paymentRecord?.cashPlan?.program?.name}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.entitlementQuantity)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.entitlementQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.deliveredQuantity)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.deliveredQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
         <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
