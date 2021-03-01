@@ -5,7 +5,10 @@ metadata:
   labels:
     {{- include "hope.labels" . | nindent 4 }}
 data:
+  # TODO: Generate from template
   FLOWER_BROKER_API: redis://hope-main-redis-master:6379/0
+  FLOWER_BROKER: redis://hope-main-redis-master:6379/0
+  CELERY_BROKER_URL: redis://hope-main-redis-master:6379/0
 {{- range $key, $value :=  .Values.celeryflower.config }}
   {{ if eq $value "" }}
   {{ else }}
