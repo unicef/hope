@@ -1958,8 +1958,10 @@ export type ImportedHouseholdNode = Node & {
   size: Scalars['Int'],
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
-  admin1?: Maybe<Scalars['String']>,
-  admin2?: Maybe<Scalars['String']>,
+  admin1: Scalars['String'],
+  admin1Title: Scalars['String'],
+  admin2: Scalars['String'],
+  admin2Title: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -8059,7 +8061,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8800,7 +8802,9 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   }
   size
   admin1
+  admin1Title
   admin2
+  admin2Title
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
@@ -17006,8 +17010,10 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin1?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

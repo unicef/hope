@@ -1530,8 +1530,10 @@ type ImportedHouseholdNode implements Node {
   size: Int!
   address: String!
   country: String
-  admin1: String
-  admin2: String
+  admin1: String!
+  admin1Title: String!
+  admin2: String!
+  admin2Title: String!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
