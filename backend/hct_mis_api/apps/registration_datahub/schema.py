@@ -4,6 +4,7 @@ import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -21,9 +22,8 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids
+from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids, CustomOrderingFilter
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -42,6 +42,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
 )
 from hct_mis_api.apps.utils.schema import Arg
+
 
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
@@ -69,12 +70,13 @@ class ImportedHouseholdFilter(FilterSet):
         model = ImportedHousehold
         fields = ()
 
-    order_by = OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "id",
-            "head_of_household",
+            Lower("head_of_household__full_name"),
             "size",
-            "registration_date",
+            "first_registration_date",
+            "admin2_title",
         )
     )
 
@@ -126,25 +128,6 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         description="Mark household if any of individuals contains one of these statuses "
         "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
     )
-    admin1 = graphene.String()
-    admin2 = graphene.String()
-
-    @staticmethod
-    def _handle_admin_areas(p_code):
-        if not p_code:
-            return
-
-        admin_area = AdminArea.objects.filter(p_code=p_code).first()
-        if admin_area:
-            return admin_area.title
-
-    def resolve_admin1(parent, info):
-        admin1_p_code = parent.admin1
-        return ImportedHouseholdNode._handle_admin_areas(admin1_p_code)
-
-    def resolve_admin2(parent, info):
-        admin2_p_code = parent.admin2
-        return ImportedHouseholdNode._handle_admin_areas(admin2_p_code)
 
     def resolve_country(parent, info):
         return parent.country.name
