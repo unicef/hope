@@ -29,13 +29,13 @@ export const headCells: HeadCell<ImportedHouseholdMinimalFragment>[] = [
   {
     disablePadding: false,
     label: 'Administrative Level 2',
-    id: 'admin1',
+    id: 'admin2_title',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Data Collected',
-    id: 'firstRegistrationDate',
+    id: 'first_registration_date',
     numeric: false,
   },
 ];
