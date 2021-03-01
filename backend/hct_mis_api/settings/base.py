@@ -11,6 +11,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
@@ -32,6 +33,8 @@ ADMINS = (
     ("Alerts", os.getenv("ALERTS_EMAIL") or "admin@hct-mis.com"),
     ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
 )
+
+SUPERVISORS = os.getenv("SUPERVISORS", "").split(",")
 
 SITE_ID = 1
 TIME_ZONE = "UTC"
@@ -347,6 +350,7 @@ SOCIAL_AUTH_PIPELINE = (
     "hct_mis_api.apps.account.authentication.require_email",
     "social_core.pipeline.social_auth.associate_by_email",
     "hct_mis_api.apps.account.authentication.create_user",
+    "hct_mis_api.apps.account.authentication.create_admin",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "hct_mis_api.apps.account.authentication.user_details",
@@ -485,11 +489,11 @@ if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
     from sentry_sdk.integrations.logging import LoggingIntegration
+
     from hct_mis_api import get_full_version
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,  # Capture info and above as breadcrumbs
-        event_level=logging.ERROR  # Send errors as events
+        level=logging.INFO, event_level=logging.ERROR  # Capture info and above as breadcrumbs  # Send errors as events
     )
 
     sentry_sdk.init(
@@ -504,11 +508,9 @@ if SENTRY_DSN:
         send_default_pii=True,
     )
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"https://\w+.blob.core.windows.net$"
-]
+CORS_ALLOWED_ORIGIN_REGEXES = [r"https://\w+.blob.core.windows.net$"]
 
-CELERY_BROKER_URL = f"redis://{REDIS_INSTANCE}/0",
+CELERY_BROKER_URL = (f"redis://{REDIS_INSTANCE}/0",)
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -519,29 +521,31 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 
 SMART_ADMIN_SECTIONS = {
-    'Security': ['account',
-                 'auth'
-                 ],
-    'Rule Engine': ['steficon',
-                 ],
-    'Logs': ['admin.LogEntry',
-             ],
-    'Grievance': ['grievance'],
-    'Kobo': ['core.FlexibleAttributeChoice',
-             'core.XLSXKoboTemplate',
-             'core.FlexibleAttribute',
-             'core.FlexibleAttributeGroup',
-             ],
-    'HUBs': ['cash_assist_datahub',
-             'erp_datahub',
-             'mis_datahub',
-             'registration_datahub',
-             ],
-    'System': [
-        'social_django',
-        'constance',
-        'sites',
+    "Security": ["account", "auth"],
+    "Rule Engine": [
+        "steficon",
     ],
-    'Other': [],
-    '_hidden_': []
+    "Logs": [
+        "admin.LogEntry",
+    ],
+    "Grievance": ["grievance"],
+    "Kobo": [
+        "core.FlexibleAttributeChoice",
+        "core.XLSXKoboTemplate",
+        "core.FlexibleAttribute",
+        "core.FlexibleAttributeGroup",
+    ],
+    "HUBs": [
+        "cash_assist_datahub",
+        "erp_datahub",
+        "mis_datahub",
+        "registration_datahub",
+    ],
+    "System": [
+        "social_django",
+        "constance",
+        "sites",
+    ],
+    "Other": [],
+    "_hidden_": [],
 }

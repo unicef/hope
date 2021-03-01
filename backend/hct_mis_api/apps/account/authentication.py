@@ -1,12 +1,14 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+
 from social_core.exceptions import InvalidEmail
 from social_core.pipeline import social_auth
 from social_core.pipeline import user as social_core_user
 
 from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
-from hct_mis_api.apps.account.models import UserRole, Role, ACTIVE
+from hct_mis_api.apps.account.models import ACTIVE, Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
 
 logger = logging.getLogger("console")
@@ -79,3 +81,10 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         basic_user_role.save()
 
     return {"is_new": True, "user": user}
+
+
+def create_admin(strategy, details, backend, user=None, is_new=False, *args, **kwargs):
+    if user.email in settings.SUPERVISORS and is_new:
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
