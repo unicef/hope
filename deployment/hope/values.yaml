@@ -204,7 +204,7 @@ celery:
   affinity: {}
 
 celeryflower:
-  image: saxix/flower:1.2
+  image: saxix/flower:1.5
   replicaCount: 1
   podAnnotations: {}
   podSecurityContext: {}
