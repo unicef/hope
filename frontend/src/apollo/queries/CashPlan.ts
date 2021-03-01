@@ -14,12 +14,18 @@ export const CashPlan = gql`
       downPayment
       dispersionDate
       assistanceThrough
+      serviceProvider {
+        id
+        caId
+        fullName
+      }
       caId
       caHashId
       dispersionDate
       verificationStatus
       bankReconciliationSuccess
       bankReconciliationError
+      totalNumberOfHouseholds
       verifications {
         edges {
           node {
@@ -50,6 +56,7 @@ export const CashPlan = gql`
       program {
         id
         name
+        caId
       }
       paymentRecords {
         totalCount

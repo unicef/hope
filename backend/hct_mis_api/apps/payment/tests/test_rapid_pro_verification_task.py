@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
@@ -107,7 +108,7 @@ class TestRapidProVerificationTask(TestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan, household=household, target_population=target_population,
+                cash_plan=cash_plan, household=household, target_population=target_population, delivered_quantity_usd=200
             )
 
             PaymentVerificationFactory(
@@ -159,7 +160,7 @@ class TestRapidProVerificationTask(TestCase):
                             payment_record_verification.payment_record.household.head_of_household.phone_no
                         ),
                         "received": True,
-                        "received_amount": "200",
+                        "received_amount": Decimal("200"),
                     }
                 ],
             )

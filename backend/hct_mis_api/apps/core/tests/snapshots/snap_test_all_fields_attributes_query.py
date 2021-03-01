@@ -20466,164 +20466,184 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'ADB Unit of Account',
+                        'labelEn': 'Afghan afghani',
                         'labels': [
                             {
-                                'label': 'ADB Unit of Account',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XUA'
-                    },
-                    {
-                        'labelEn': 'Afghani',
-                        'labels': [
-                            {
-                                'label': 'Afghani',
+                                'label': 'Afghan afghani',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AFN'
                     },
                     {
-                        'labelEn': 'Algerian Dinar',
+                        'labelEn': 'Albanian lek',
                         'labels': [
                             {
-                                'label': 'Algerian Dinar',
+                                'label': 'Albanian lek',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ALL'
+                    },
+                    {
+                        'labelEn': 'Algerian dinar',
+                        'labels': [
+                            {
+                                'label': 'Algerian dinar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DZD'
                     },
                     {
-                        'labelEn': 'Argentine Peso',
+                        'labelEn': 'Angolan kwanza',
                         'labels': [
                             {
-                                'label': 'Argentine Peso',
+                                'label': 'Angolan kwanza',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AOA'
+                    },
+                    {
+                        'labelEn': 'Argentine peso',
+                        'labels': [
+                            {
+                                'label': 'Argentine peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ARS'
                     },
                     {
-                        'labelEn': 'Armenian Dram',
+                        'labelEn': 'Armenian dram',
                         'labels': [
                             {
-                                'label': 'Armenian Dram',
+                                'label': 'Armenian dram',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AMD'
                     },
                     {
-                        'labelEn': 'Aruban Florin',
+                        'labelEn': 'Aruban florin',
                         'labels': [
                             {
-                                'label': 'Aruban Florin',
+                                'label': 'Aruban florin',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AWG'
                     },
                     {
-                        'labelEn': 'Australian Dollar',
+                        'labelEn': 'Australian dollar',
                         'labels': [
                             {
-                                'label': 'Australian Dollar',
+                                'label': 'Australian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AUD'
                     },
                     {
-                        'labelEn': 'Azerbaijanian Manat',
+                        'labelEn': 'Azerbaijani manat',
                         'labels': [
                             {
-                                'label': 'Azerbaijanian Manat',
+                                'label': 'Azerbaijani manat',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AZN'
                     },
                     {
-                        'labelEn': 'Bahamian Dollar',
+                        'labelEn': 'Bahamian dollar',
                         'labels': [
                             {
-                                'label': 'Bahamian Dollar',
+                                'label': 'Bahamian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BSD'
                     },
                     {
-                        'labelEn': 'Bahraini Dinar',
+                        'labelEn': 'Bahraini dinar',
                         'labels': [
                             {
-                                'label': 'Bahraini Dinar',
+                                'label': 'Bahraini dinar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BHD'
                     },
                     {
-                        'labelEn': 'Baht',
+                        'labelEn': 'Bangladeshi taka',
                         'labels': [
                             {
-                                'label': 'Baht',
+                                'label': 'Bangladeshi taka',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'THB'
+                        'value': 'BDT'
                     },
                     {
-                        'labelEn': 'Balboa',
+                        'labelEn': 'Barbados dollar',
                         'labels': [
                             {
-                                'label': 'Balboa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PAB'
-                    },
-                    {
-                        'labelEn': 'Barbados Dollar',
-                        'labels': [
-                            {
-                                'label': 'Barbados Dollar',
+                                'label': 'Barbados dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BBD'
                     },
                     {
-                        'labelEn': 'Belarusian Ruble',
+                        'labelEn': 'Belarusian ruble',
                         'labels': [
                             {
-                                'label': 'Belarusian Ruble',
+                                'label': 'Belarusian ruble',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BYN'
                     },
                     {
-                        'labelEn': 'Belize Dollar',
+                        'labelEn': 'Belize dollar',
                         'labels': [
                             {
-                                'label': 'Belize Dollar',
+                                'label': 'Belize dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BZD'
                     },
                     {
-                        'labelEn': 'Bermudian Dollar',
+                        'labelEn': 'Bermudian dollar',
                         'labels': [
                             {
-                                'label': 'Bermudian Dollar',
+                                'label': 'Bermudian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BMD'
+                    },
+                    {
+                        'labelEn': 'Bhutanese ngultrum',
+                        'labels': [
+                            {
+                                'label': 'Bhutanese ngultrum',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BTN'
+                    },
+                    {
+                        'labelEn': 'Bolivian Mvdol (funds code)',
+                        'labels': [
+                            {
+                                'label': 'Bolivian Mvdol (funds code)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BOV'
                     },
                     {
                         'labelEn': 'Boliviano',
@@ -20636,360 +20656,300 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BOB'
                     },
                     {
-                        'labelEn': 'Bolívar',
+                        'labelEn': 'Bosnia and Herzegovina convertible mark',
                         'labels': [
                             {
-                                'label': 'Bolívar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VEF'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Composite Unit (EURCO)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Composite Unit (EURCO)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBA'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Monetary Unit (E.M.U.-6)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Monetary Unit (E.M.U.-6)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBB'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Unit of Account 17 (E.U.A.-17)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Unit of Account 17 (E.U.A.-17)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBD'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Unit of Account 9 (E.U.A.-9)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Unit of Account 9 (E.U.A.-9)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBC'
-                    },
-                    {
-                        'labelEn': 'Brazilian Real',
-                        'labels': [
-                            {
-                                'label': 'Brazilian Real',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BRL'
-                    },
-                    {
-                        'labelEn': 'Brunei Dollar',
-                        'labels': [
-                            {
-                                'label': 'Brunei Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BND'
-                    },
-                    {
-                        'labelEn': 'Bulgarian Lev',
-                        'labels': [
-                            {
-                                'label': 'Bulgarian Lev',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BGN'
-                    },
-                    {
-                        'labelEn': 'Burundi Franc',
-                        'labels': [
-                            {
-                                'label': 'Burundi Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BIF'
-                    },
-                    {
-                        'labelEn': 'CFA Franc BCEAO',
-                        'labels': [
-                            {
-                                'label': 'CFA Franc BCEAO',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XOF'
-                    },
-                    {
-                        'labelEn': 'CFA Franc BEAC',
-                        'labels': [
-                            {
-                                'label': 'CFA Franc BEAC',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAF'
-                    },
-                    {
-                        'labelEn': 'CFP Franc',
-                        'labels': [
-                            {
-                                'label': 'CFP Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPF'
-                    },
-                    {
-                        'labelEn': 'Cabo Verde Escudo',
-                        'labels': [
-                            {
-                                'label': 'Cabo Verde Escudo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CVE'
-                    },
-                    {
-                        'labelEn': 'Canadian Dollar',
-                        'labels': [
-                            {
-                                'label': 'Canadian Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CAD'
-                    },
-                    {
-                        'labelEn': 'Cayman Islands Dollar',
-                        'labels': [
-                            {
-                                'label': 'Cayman Islands Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KYD'
-                    },
-                    {
-                        'labelEn': 'Chilean Peso',
-                        'labels': [
-                            {
-                                'label': 'Chilean Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CLP'
-                    },
-                    {
-                        'labelEn': 'Codes specifically reserved for testing purposes',
-                        'labels': [
-                            {
-                                'label': 'Codes specifically reserved for testing purposes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XTS'
-                    },
-                    {
-                        'labelEn': 'Colombian Peso',
-                        'labels': [
-                            {
-                                'label': 'Colombian Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'COP'
-                    },
-                    {
-                        'labelEn': 'Comoro Franc',
-                        'labels': [
-                            {
-                                'label': 'Comoro Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KMF'
-                    },
-                    {
-                        'labelEn': 'Congolese Franc',
-                        'labels': [
-                            {
-                                'label': 'Congolese Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CDF'
-                    },
-                    {
-                        'labelEn': 'Convertible Mark',
-                        'labels': [
-                            {
-                                'label': 'Convertible Mark',
+                                'label': 'Bosnia and Herzegovina convertible mark',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BAM'
                     },
                     {
-                        'labelEn': 'Cordoba Oro',
+                        'labelEn': 'Botswana pula',
                         'labels': [
                             {
-                                'label': 'Cordoba Oro',
+                                'label': 'Botswana pula',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'NIO'
+                        'value': 'BWP'
                     },
                     {
-                        'labelEn': 'Costa Rican Colon',
+                        'labelEn': 'Brazilian real',
                         'labels': [
                             {
-                                'label': 'Costa Rican Colon',
+                                'label': 'Brazilian real',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BRL'
+                    },
+                    {
+                        'labelEn': 'Brunei dollar',
+                        'labels': [
+                            {
+                                'label': 'Brunei dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BND'
+                    },
+                    {
+                        'labelEn': 'Bulgarian lev',
+                        'labels': [
+                            {
+                                'label': 'Bulgarian lev',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BGN'
+                    },
+                    {
+                        'labelEn': 'Burundian franc',
+                        'labels': [
+                            {
+                                'label': 'Burundian franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BIF'
+                    },
+                    {
+                        'labelEn': 'CFA franc BCEAO',
+                        'labels': [
+                            {
+                                'label': 'CFA franc BCEAO',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XOF'
+                    },
+                    {
+                        'labelEn': 'CFA franc BEAC',
+                        'labels': [
+                            {
+                                'label': 'CFA franc BEAC',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XAF'
+                    },
+                    {
+                        'labelEn': 'CFP franc (franc Pacifique)',
+                        'labels': [
+                            {
+                                'label': 'CFP franc (franc Pacifique)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XPF'
+                    },
+                    {
+                        'labelEn': 'Cambodian riel',
+                        'labels': [
+                            {
+                                'label': 'Cambodian riel',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KHR'
+                    },
+                    {
+                        'labelEn': 'Canadian dollar',
+                        'labels': [
+                            {
+                                'label': 'Canadian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CAD'
+                    },
+                    {
+                        'labelEn': 'Cape Verdean escudo',
+                        'labels': [
+                            {
+                                'label': 'Cape Verdean escudo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CVE'
+                    },
+                    {
+                        'labelEn': 'Cayman Islands dollar',
+                        'labels': [
+                            {
+                                'label': 'Cayman Islands dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KYD'
+                    },
+                    {
+                        'labelEn': 'Chilean peso',
+                        'labels': [
+                            {
+                                'label': 'Chilean peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CLP'
+                    },
+                    {
+                        'labelEn': 'Chinese yuan',
+                        'labels': [
+                            {
+                                'label': 'Chinese yuan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CNY'
+                    },
+                    {
+                        'labelEn': 'Colombian peso',
+                        'labels': [
+                            {
+                                'label': 'Colombian peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'COP'
+                    },
+                    {
+                        'labelEn': 'Comoro franc',
+                        'labels': [
+                            {
+                                'label': 'Comoro franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KMF'
+                    },
+                    {
+                        'labelEn': 'Congolese franc',
+                        'labels': [
+                            {
+                                'label': 'Congolese franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CDF'
+                    },
+                    {
+                        'labelEn': 'Costa Rican colon',
+                        'labels': [
+                            {
+                                'label': 'Costa Rican colon',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CRC'
                     },
                     {
-                        'labelEn': 'Cuban Peso',
+                        'labelEn': 'Croatian kuna',
                         'labels': [
                             {
-                                'label': 'Cuban Peso',
+                                'label': 'Croatian kuna',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HRK'
+                    },
+                    {
+                        'labelEn': 'Cuban convertible peso',
+                        'labels': [
+                            {
+                                'label': 'Cuban convertible peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CUC'
+                    },
+                    {
+                        'labelEn': 'Cuban peso',
+                        'labels': [
+                            {
+                                'label': 'Cuban peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CUP'
                     },
                     {
-                        'labelEn': 'Czech Koruna',
+                        'labelEn': 'Czech koruna',
                         'labels': [
                             {
-                                'label': 'Czech Koruna',
+                                'label': 'Czech koruna',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CZK'
                     },
                     {
-                        'labelEn': 'Dalasi',
+                        'labelEn': 'Danish krone',
                         'labels': [
                             {
-                                'label': 'Dalasi',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GMD'
-                    },
-                    {
-                        'labelEn': 'Danish Krone',
-                        'labels': [
-                            {
-                                'label': 'Danish Krone',
+                                'label': 'Danish krone',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DKK'
                     },
                     {
-                        'labelEn': 'Denar',
+                        'labelEn': 'Djiboutian franc',
                         'labels': [
                             {
-                                'label': 'Denar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MKD'
-                    },
-                    {
-                        'labelEn': 'Djibouti Franc',
-                        'labels': [
-                            {
-                                'label': 'Djibouti Franc',
+                                'label': 'Djiboutian franc',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DJF'
                     },
                     {
-                        'labelEn': 'Dobra',
+                        'labelEn': 'Dominican peso',
                         'labels': [
                             {
-                                'label': 'Dobra',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'STD'
-                    },
-                    {
-                        'labelEn': 'Dominican Peso',
-                        'labels': [
-                            {
-                                'label': 'Dominican Peso',
+                                'label': 'Dominican peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DOP'
                     },
                     {
-                        'labelEn': 'Dong',
+                        'labelEn': 'East Caribbean dollar',
                         'labels': [
                             {
-                                'label': 'Dong',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VND'
-                    },
-                    {
-                        'labelEn': 'East Caribbean Dollar',
-                        'labels': [
-                            {
-                                'label': 'East Caribbean Dollar',
+                                'label': 'East Caribbean dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'XCD'
                     },
                     {
-                        'labelEn': 'Egyptian Pound',
+                        'labelEn': 'Egyptian pound',
                         'labels': [
                             {
-                                'label': 'Egyptian Pound',
+                                'label': 'Egyptian pound',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'EGP'
                     },
                     {
-                        'labelEn': 'El Salvador Colon',
+                        'labelEn': 'Eritrean nakfa',
                         'labels': [
                             {
-                                'label': 'El Salvador Colon',
+                                'label': 'Eritrean nakfa',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SVC'
+                        'value': 'ERN'
                     },
                     {
-                        'labelEn': 'Ethiopian Birr',
+                        'labelEn': 'Ethiopian birr',
                         'labels': [
                             {
-                                'label': 'Ethiopian Birr',
+                                'label': 'Ethiopian birr',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -21006,1164 +20966,1114 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'EUR'
                     },
                     {
-                        'labelEn': 'Falkland Islands Pound',
+                        'labelEn': 'Falkland Islands pound',
                         'labels': [
                             {
-                                'label': 'Falkland Islands Pound',
+                                'label': 'Falkland Islands pound',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'FKP'
                     },
                     {
-                        'labelEn': 'Fiji Dollar',
+                        'labelEn': 'Fiji dollar',
                         'labels': [
                             {
-                                'label': 'Fiji Dollar',
+                                'label': 'Fiji dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'FJD'
                     },
                     {
-                        'labelEn': 'Forint',
+                        'labelEn': 'Gambian dalasi',
                         'labels': [
                             {
-                                'label': 'Forint',
+                                'label': 'Gambian dalasi',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HUF'
+                        'value': 'GMD'
                     },
                     {
-                        'labelEn': 'Ghana Cedi',
+                        'labelEn': 'Georgian lari',
                         'labels': [
                             {
-                                'label': 'Ghana Cedi',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GHS'
-                    },
-                    {
-                        'labelEn': 'Gibraltar Pound',
-                        'labels': [
-                            {
-                                'label': 'Gibraltar Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GIP'
-                    },
-                    {
-                        'labelEn': 'Gold',
-                        'labels': [
-                            {
-                                'label': 'Gold',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAU'
-                    },
-                    {
-                        'labelEn': 'Gourde',
-                        'labels': [
-                            {
-                                'label': 'Gourde',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HTG'
-                    },
-                    {
-                        'labelEn': 'Guarani',
-                        'labels': [
-                            {
-                                'label': 'Guarani',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PYG'
-                    },
-                    {
-                        'labelEn': 'Guinea Franc',
-                        'labels': [
-                            {
-                                'label': 'Guinea Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GNF'
-                    },
-                    {
-                        'labelEn': 'Guyana Dollar',
-                        'labels': [
-                            {
-                                'label': 'Guyana Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GYD'
-                    },
-                    {
-                        'labelEn': 'Hong Kong Dollar',
-                        'labels': [
-                            {
-                                'label': 'Hong Kong Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HKD'
-                    },
-                    {
-                        'labelEn': 'Hryvnia',
-                        'labels': [
-                            {
-                                'label': 'Hryvnia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UAH'
-                    },
-                    {
-                        'labelEn': 'Iceland Krona',
-                        'labels': [
-                            {
-                                'label': 'Iceland Krona',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ISK'
-                    },
-                    {
-                        'labelEn': 'Indian Rupee',
-                        'labels': [
-                            {
-                                'label': 'Indian Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'INR'
-                    },
-                    {
-                        'labelEn': 'Iranian Rial',
-                        'labels': [
-                            {
-                                'label': 'Iranian Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IRR'
-                    },
-                    {
-                        'labelEn': 'Iraqi Dinar',
-                        'labels': [
-                            {
-                                'label': 'Iraqi Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IQD'
-                    },
-                    {
-                        'labelEn': 'Jamaican Dollar',
-                        'labels': [
-                            {
-                                'label': 'Jamaican Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JMD'
-                    },
-                    {
-                        'labelEn': 'Jordanian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Jordanian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JOD'
-                    },
-                    {
-                        'labelEn': 'Kenyan Shilling',
-                        'labels': [
-                            {
-                                'label': 'Kenyan Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KES'
-                    },
-                    {
-                        'labelEn': 'Kina',
-                        'labels': [
-                            {
-                                'label': 'Kina',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PGK'
-                    },
-                    {
-                        'labelEn': 'Kip',
-                        'labels': [
-                            {
-                                'label': 'Kip',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LAK'
-                    },
-                    {
-                        'labelEn': 'Kuna',
-                        'labels': [
-                            {
-                                'label': 'Kuna',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HRK'
-                    },
-                    {
-                        'labelEn': 'Kuwaiti Dinar',
-                        'labels': [
-                            {
-                                'label': 'Kuwaiti Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KWD'
-                    },
-                    {
-                        'labelEn': 'Kwanza',
-                        'labels': [
-                            {
-                                'label': 'Kwanza',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AOA'
-                    },
-                    {
-                        'labelEn': 'Kyat',
-                        'labels': [
-                            {
-                                'label': 'Kyat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MMK'
-                    },
-                    {
-                        'labelEn': 'Lari',
-                        'labels': [
-                            {
-                                'label': 'Lari',
+                                'label': 'Georgian lari',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'GEL'
                     },
                     {
-                        'labelEn': 'Lebanese Pound',
+                        'labelEn': 'Ghanaian cedi',
                         'labels': [
                             {
-                                'label': 'Lebanese Pound',
+                                'label': 'Ghanaian cedi',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LBP'
+                        'value': 'GHS'
                     },
                     {
-                        'labelEn': 'Lek',
+                        'labelEn': 'Gibraltar pound',
                         'labels': [
                             {
-                                'label': 'Lek',
+                                'label': 'Gibraltar pound',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'ALL'
+                        'value': 'GIP'
                     },
                     {
-                        'labelEn': 'Lempira',
+                        'labelEn': 'Gold (one troy ounce)',
                         'labels': [
                             {
-                                'label': 'Lempira',
+                                'label': 'Gold (one troy ounce)',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HNL'
+                        'value': 'XAU'
                     },
                     {
-                        'labelEn': 'Leone',
+                        'labelEn': 'Guatemalan quetzal',
                         'labels': [
                             {
-                                'label': 'Leone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SLL'
-                    },
-                    {
-                        'labelEn': 'Liberian Dollar',
-                        'labels': [
-                            {
-                                'label': 'Liberian Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LRD'
-                    },
-                    {
-                        'labelEn': 'Libyan Dinar',
-                        'labels': [
-                            {
-                                'label': 'Libyan Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LYD'
-                    },
-                    {
-                        'labelEn': 'Lilangeni',
-                        'labels': [
-                            {
-                                'label': 'Lilangeni',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SZL'
-                    },
-                    {
-                        'labelEn': 'Loti',
-                        'labels': [
-                            {
-                                'label': 'Loti',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LSL'
-                    },
-                    {
-                        'labelEn': 'Malagasy Ariary',
-                        'labels': [
-                            {
-                                'label': 'Malagasy Ariary',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MGA'
-                    },
-                    {
-                        'labelEn': 'Malawi Kwacha',
-                        'labels': [
-                            {
-                                'label': 'Malawi Kwacha',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MWK'
-                    },
-                    {
-                        'labelEn': 'Malaysian Ringgit',
-                        'labels': [
-                            {
-                                'label': 'Malaysian Ringgit',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MYR'
-                    },
-                    {
-                        'labelEn': 'Mauritius Rupee',
-                        'labels': [
-                            {
-                                'label': 'Mauritius Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MUR'
-                    },
-                    {
-                        'labelEn': 'Mexican Peso',
-                        'labels': [
-                            {
-                                'label': 'Mexican Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MXN'
-                    },
-                    {
-                        'labelEn': 'Moldovan Leu',
-                        'labels': [
-                            {
-                                'label': 'Moldovan Leu',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MDL'
-                    },
-                    {
-                        'labelEn': 'Moroccan Dirham',
-                        'labels': [
-                            {
-                                'label': 'Moroccan Dirham',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MAD'
-                    },
-                    {
-                        'labelEn': 'Mozambique Metical',
-                        'labels': [
-                            {
-                                'label': 'Mozambique Metical',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MZN'
-                    },
-                    {
-                        'labelEn': 'Naira',
-                        'labels': [
-                            {
-                                'label': 'Naira',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NGN'
-                    },
-                    {
-                        'labelEn': 'Nakfa',
-                        'labels': [
-                            {
-                                'label': 'Nakfa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ERN'
-                    },
-                    {
-                        'labelEn': 'Namibia Dollar',
-                        'labels': [
-                            {
-                                'label': 'Namibia Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NAD'
-                    },
-                    {
-                        'labelEn': 'Nepalese Rupee',
-                        'labels': [
-                            {
-                                'label': 'Nepalese Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NPR'
-                    },
-                    {
-                        'labelEn': 'Netherlands Antillean Guilder',
-                        'labels': [
-                            {
-                                'label': 'Netherlands Antillean Guilder',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ANG'
-                    },
-                    {
-                        'labelEn': 'New Israeli Sheqel',
-                        'labels': [
-                            {
-                                'label': 'New Israeli Sheqel',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ILS'
-                    },
-                    {
-                        'labelEn': 'New Taiwan Dollar',
-                        'labels': [
-                            {
-                                'label': 'New Taiwan Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TWD'
-                    },
-                    {
-                        'labelEn': 'New Zealand Dollar',
-                        'labels': [
-                            {
-                                'label': 'New Zealand Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NZD'
-                    },
-                    {
-                        'labelEn': 'Ngultrum',
-                        'labels': [
-                            {
-                                'label': 'Ngultrum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BTN'
-                    },
-                    {
-                        'labelEn': 'North Korean Won',
-                        'labels': [
-                            {
-                                'label': 'North Korean Won',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KPW'
-                    },
-                    {
-                        'labelEn': 'Norwegian Krone',
-                        'labels': [
-                            {
-                                'label': 'Norwegian Krone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NOK'
-                    },
-                    {
-                        'labelEn': 'Ouguiya',
-                        'labels': [
-                            {
-                                'label': 'Ouguiya',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MRO'
-                    },
-                    {
-                        'labelEn': 'Pakistan Rupee',
-                        'labels': [
-                            {
-                                'label': 'Pakistan Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PKR'
-                    },
-                    {
-                        'labelEn': 'Palladium',
-                        'labels': [
-                            {
-                                'label': 'Palladium',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPD'
-                    },
-                    {
-                        'labelEn': 'Pataca',
-                        'labels': [
-                            {
-                                'label': 'Pataca',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MOP'
-                    },
-                    {
-                        'labelEn': 'Pa’anga',
-                        'labels': [
-                            {
-                                'label': 'Pa’anga',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TOP'
-                    },
-                    {
-                        'labelEn': 'Peso Convertible',
-                        'labels': [
-                            {
-                                'label': 'Peso Convertible',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CUC'
-                    },
-                    {
-                        'labelEn': 'Peso Uruguayo',
-                        'labels': [
-                            {
-                                'label': 'Peso Uruguayo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UYU'
-                    },
-                    {
-                        'labelEn': 'Philippine Peso',
-                        'labels': [
-                            {
-                                'label': 'Philippine Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PHP'
-                    },
-                    {
-                        'labelEn': 'Platinum',
-                        'labels': [
-                            {
-                                'label': 'Platinum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPT'
-                    },
-                    {
-                        'labelEn': 'Pound Sterling',
-                        'labels': [
-                            {
-                                'label': 'Pound Sterling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GBP'
-                    },
-                    {
-                        'labelEn': 'Pula',
-                        'labels': [
-                            {
-                                'label': 'Pula',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BWP'
-                    },
-                    {
-                        'labelEn': 'Qatari Rial',
-                        'labels': [
-                            {
-                                'label': 'Qatari Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'QAR'
-                    },
-                    {
-                        'labelEn': 'Quetzal',
-                        'labels': [
-                            {
-                                'label': 'Quetzal',
+                                'label': 'Guatemalan quetzal',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'GTQ'
                     },
                     {
-                        'labelEn': 'Rand',
+                        'labelEn': 'Guinean franc',
                         'labels': [
                             {
-                                'label': 'Rand',
+                                'label': 'Guinean franc',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'ZAR'
+                        'value': 'GNF'
                     },
                     {
-                        'labelEn': 'Rial Omani',
+                        'labelEn': 'Guyanese dollar',
                         'labels': [
                             {
-                                'label': 'Rial Omani',
+                                'label': 'Guyanese dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'OMR'
+                        'value': 'GYD'
                     },
                     {
-                        'labelEn': 'Riel',
+                        'labelEn': 'Haitian gourde',
                         'labels': [
                             {
-                                'label': 'Riel',
+                                'label': 'Haitian gourde',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KHR'
+                        'value': 'HTG'
                     },
                     {
-                        'labelEn': 'Romanian Leu',
+                        'labelEn': 'Honduran lempira',
                         'labels': [
                             {
-                                'label': 'Romanian Leu',
+                                'label': 'Honduran lempira',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RON'
+                        'value': 'HNL'
                     },
                     {
-                        'labelEn': 'Rufiyaa',
+                        'labelEn': 'Hong Kong dollar',
                         'labels': [
                             {
-                                'label': 'Rufiyaa',
+                                'label': 'Hong Kong dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MVR'
+                        'value': 'HKD'
                     },
                     {
-                        'labelEn': 'Rupiah',
+                        'labelEn': 'Hungarian forint',
                         'labels': [
                             {
-                                'label': 'Rupiah',
+                                'label': 'Hungarian forint',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HUF'
+                    },
+                    {
+                        'labelEn': 'Icelandic króna',
+                        'labels': [
+                            {
+                                'label': 'Icelandic króna',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ISK'
+                    },
+                    {
+                        'labelEn': 'Indian rupee',
+                        'labels': [
+                            {
+                                'label': 'Indian rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'INR'
+                    },
+                    {
+                        'labelEn': 'Indonesian rupiah',
+                        'labels': [
+                            {
+                                'label': 'Indonesian rupiah',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IDR'
                     },
                     {
-                        'labelEn': 'Russian Ruble',
+                        'labelEn': 'Iranian rial',
                         'labels': [
                             {
-                                'label': 'Russian Ruble',
+                                'label': 'Iranian rial',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RUB'
+                        'value': 'IRR'
                     },
                     {
-                        'labelEn': 'Rwanda Franc',
+                        'labelEn': 'Iraqi dinar',
                         'labels': [
                             {
-                                'label': 'Rwanda Franc',
+                                'label': 'Iraqi dinar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RWF'
+                        'value': 'IQD'
                     },
                     {
-                        'labelEn': 'SDR (Special Drawing Right)',
+                        'labelEn': 'Israeli new shekel',
                         'labels': [
                             {
-                                'label': 'SDR (Special Drawing Right)',
+                                'label': 'Israeli new shekel',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'XDR'
+                        'value': 'ILS'
                     },
                     {
-                        'labelEn': 'Saint Helena Pound',
+                        'labelEn': 'Jamaican dollar',
                         'labels': [
                             {
-                                'label': 'Saint Helena Pound',
+                                'label': 'Jamaican dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SHP'
+                        'value': 'JMD'
                     },
                     {
-                        'labelEn': 'Saudi Riyal',
+                        'labelEn': 'Japanese yen',
                         'labels': [
                             {
-                                'label': 'Saudi Riyal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SAR'
-                    },
-                    {
-                        'labelEn': 'Serbian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Serbian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'RSD'
-                    },
-                    {
-                        'labelEn': 'Seychelles Rupee',
-                        'labels': [
-                            {
-                                'label': 'Seychelles Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SCR'
-                    },
-                    {
-                        'labelEn': 'Silver',
-                        'labels': [
-                            {
-                                'label': 'Silver',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAG'
-                    },
-                    {
-                        'labelEn': 'Singapore Dollar',
-                        'labels': [
-                            {
-                                'label': 'Singapore Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SGD'
-                    },
-                    {
-                        'labelEn': 'Sol',
-                        'labels': [
-                            {
-                                'label': 'Sol',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PEN'
-                    },
-                    {
-                        'labelEn': 'Solomon Islands Dollar',
-                        'labels': [
-                            {
-                                'label': 'Solomon Islands Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SBD'
-                    },
-                    {
-                        'labelEn': 'Som',
-                        'labels': [
-                            {
-                                'label': 'Som',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KGS'
-                    },
-                    {
-                        'labelEn': 'Somali Shilling',
-                        'labels': [
-                            {
-                                'label': 'Somali Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SOS'
-                    },
-                    {
-                        'labelEn': 'Somoni',
-                        'labels': [
-                            {
-                                'label': 'Somoni',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TJS'
-                    },
-                    {
-                        'labelEn': 'South Sudanese Pound',
-                        'labels': [
-                            {
-                                'label': 'South Sudanese Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SSP'
-                    },
-                    {
-                        'labelEn': 'Sri Lanka Rupee',
-                        'labels': [
-                            {
-                                'label': 'Sri Lanka Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LKR'
-                    },
-                    {
-                        'labelEn': 'Sucre',
-                        'labels': [
-                            {
-                                'label': 'Sucre',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XSU'
-                    },
-                    {
-                        'labelEn': 'Sudanese Pound',
-                        'labels': [
-                            {
-                                'label': 'Sudanese Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SDG'
-                    },
-                    {
-                        'labelEn': 'Surinam Dollar',
-                        'labels': [
-                            {
-                                'label': 'Surinam Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SRD'
-                    },
-                    {
-                        'labelEn': 'Swedish Krona',
-                        'labels': [
-                            {
-                                'label': 'Swedish Krona',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SEK'
-                    },
-                    {
-                        'labelEn': 'Swiss Franc',
-                        'labels': [
-                            {
-                                'label': 'Swiss Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CHF'
-                    },
-                    {
-                        'labelEn': 'Syrian Pound',
-                        'labels': [
-                            {
-                                'label': 'Syrian Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SYP'
-                    },
-                    {
-                        'labelEn': 'Taka',
-                        'labels': [
-                            {
-                                'label': 'Taka',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BDT'
-                    },
-                    {
-                        'labelEn': 'Tala',
-                        'labels': [
-                            {
-                                'label': 'Tala',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'WST'
-                    },
-                    {
-                        'labelEn': 'Tanzanian Shilling',
-                        'labels': [
-                            {
-                                'label': 'Tanzanian Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TZS'
-                    },
-                    {
-                        'labelEn': 'Tenge',
-                        'labels': [
-                            {
-                                'label': 'Tenge',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KZT'
-                    },
-                    {
-                        'labelEn': 'The codes assigned for transactions where no currency is involved',
-                        'labels': [
-                            {
-                                'label': 'The codes assigned for transactions where no currency is involved',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XXX'
-                    },
-                    {
-                        'labelEn': 'Trinidad and Tobago Dollar',
-                        'labels': [
-                            {
-                                'label': 'Trinidad and Tobago Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TTD'
-                    },
-                    {
-                        'labelEn': 'Tugrik',
-                        'labels': [
-                            {
-                                'label': 'Tugrik',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MNT'
-                    },
-                    {
-                        'labelEn': 'Tunisian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Tunisian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TND'
-                    },
-                    {
-                        'labelEn': 'Turkish Lira',
-                        'labels': [
-                            {
-                                'label': 'Turkish Lira',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TRY'
-                    },
-                    {
-                        'labelEn': 'Turkmenistan New Manat',
-                        'labels': [
-                            {
-                                'label': 'Turkmenistan New Manat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TMT'
-                    },
-                    {
-                        'labelEn': 'UAE Dirham',
-                        'labels': [
-                            {
-                                'label': 'UAE Dirham',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AED'
-                    },
-                    {
-                        'labelEn': 'US Dollar',
-                        'labels': [
-                            {
-                                'label': 'US Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'USD'
-                    },
-                    {
-                        'labelEn': 'Uganda Shilling',
-                        'labels': [
-                            {
-                                'label': 'Uganda Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UGX'
-                    },
-                    {
-                        'labelEn': 'Uzbekistan Sum',
-                        'labels': [
-                            {
-                                'label': 'Uzbekistan Sum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UZS'
-                    },
-                    {
-                        'labelEn': 'Vatu',
-                        'labels': [
-                            {
-                                'label': 'Vatu',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VUV'
-                    },
-                    {
-                        'labelEn': 'Won',
-                        'labels': [
-                            {
-                                'label': 'Won',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KRW'
-                    },
-                    {
-                        'labelEn': 'Yemeni Rial',
-                        'labels': [
-                            {
-                                'label': 'Yemeni Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'YER'
-                    },
-                    {
-                        'labelEn': 'Yen',
-                        'labels': [
-                            {
-                                'label': 'Yen',
+                                'label': 'Japanese yen',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'JPY'
                     },
                     {
-                        'labelEn': 'Yuan Renminbi',
+                        'labelEn': 'Jordanian dinar',
                         'labels': [
                             {
-                                'label': 'Yuan Renminbi',
+                                'label': 'Jordanian dinar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CNY'
+                        'value': 'JOD'
                     },
                     {
-                        'labelEn': 'Zambian Kwacha',
+                        'labelEn': 'Kazakhstani tenge',
                         'labels': [
                             {
-                                'label': 'Zambian Kwacha',
+                                'label': 'Kazakhstani tenge',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KZT'
+                    },
+                    {
+                        'labelEn': 'Kenyan shilling',
+                        'labels': [
+                            {
+                                'label': 'Kenyan shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KES'
+                    },
+                    {
+                        'labelEn': 'Kuwaiti dinar',
+                        'labels': [
+                            {
+                                'label': 'Kuwaiti dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KWD'
+                    },
+                    {
+                        'labelEn': 'Kyrgyzstani som',
+                        'labels': [
+                            {
+                                'label': 'Kyrgyzstani som',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KGS'
+                    },
+                    {
+                        'labelEn': 'Lao kip',
+                        'labels': [
+                            {
+                                'label': 'Lao kip',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LAK'
+                    },
+                    {
+                        'labelEn': 'Lebanese pound',
+                        'labels': [
+                            {
+                                'label': 'Lebanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LBP'
+                    },
+                    {
+                        'labelEn': 'Lesotho loti',
+                        'labels': [
+                            {
+                                'label': 'Lesotho loti',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LSL'
+                    },
+                    {
+                        'labelEn': 'Liberian dollar',
+                        'labels': [
+                            {
+                                'label': 'Liberian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LRD'
+                    },
+                    {
+                        'labelEn': 'Libyan dinar',
+                        'labels': [
+                            {
+                                'label': 'Libyan dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LYD'
+                    },
+                    {
+                        'labelEn': 'Macanese pataca',
+                        'labels': [
+                            {
+                                'label': 'Macanese pataca',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MOP'
+                    },
+                    {
+                        'labelEn': 'Macedonian denar',
+                        'labels': [
+                            {
+                                'label': 'Macedonian denar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MKD'
+                    },
+                    {
+                        'labelEn': 'Malagasy ariary',
+                        'labels': [
+                            {
+                                'label': 'Malagasy ariary',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MGA'
+                    },
+                    {
+                        'labelEn': 'Malawian kwacha',
+                        'labels': [
+                            {
+                                'label': 'Malawian kwacha',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MWK'
+                    },
+                    {
+                        'labelEn': 'Malaysian ringgit',
+                        'labels': [
+                            {
+                                'label': 'Malaysian ringgit',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MYR'
+                    },
+                    {
+                        'labelEn': 'Maldivian rufiyaa',
+                        'labels': [
+                            {
+                                'label': 'Maldivian rufiyaa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MVR'
+                    },
+                    {
+                        'labelEn': 'Mauritanian ouguiya',
+                        'labels': [
+                            {
+                                'label': 'Mauritanian ouguiya',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MRU'
+                    },
+                    {
+                        'labelEn': 'Mauritian rupee',
+                        'labels': [
+                            {
+                                'label': 'Mauritian rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MUR'
+                    },
+                    {
+                        'labelEn': 'Mexican peso',
+                        'labels': [
+                            {
+                                'label': 'Mexican peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MXN'
+                    },
+                    {
+                        'labelEn': 'Moldovan leu',
+                        'labels': [
+                            {
+                                'label': 'Moldovan leu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MDL'
+                    },
+                    {
+                        'labelEn': 'Mongolian tögrög',
+                        'labels': [
+                            {
+                                'label': 'Mongolian tögrög',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MNT'
+                    },
+                    {
+                        'labelEn': 'Moroccan dirham',
+                        'labels': [
+                            {
+                                'label': 'Moroccan dirham',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MAD'
+                    },
+                    {
+                        'labelEn': 'Mozambican metical',
+                        'labels': [
+                            {
+                                'label': 'Mozambican metical',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MZN'
+                    },
+                    {
+                        'labelEn': 'Myanmar kyat',
+                        'labels': [
+                            {
+                                'label': 'Myanmar kyat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MMK'
+                    },
+                    {
+                        'labelEn': 'Namibian dollar',
+                        'labels': [
+                            {
+                                'label': 'Namibian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NAD'
+                    },
+                    {
+                        'labelEn': 'Nepalese rupee',
+                        'labels': [
+                            {
+                                'label': 'Nepalese rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NPR'
+                    },
+                    {
+                        'labelEn': 'Netherlands Antillean guilder',
+                        'labels': [
+                            {
+                                'label': 'Netherlands Antillean guilder',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ANG'
+                    },
+                    {
+                        'labelEn': 'New Taiwan dollar',
+                        'labels': [
+                            {
+                                'label': 'New Taiwan dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TWD'
+                    },
+                    {
+                        'labelEn': 'New Zealand dollar',
+                        'labels': [
+                            {
+                                'label': 'New Zealand dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NZD'
+                    },
+                    {
+                        'labelEn': 'Nicaraguan córdoba',
+                        'labels': [
+                            {
+                                'label': 'Nicaraguan córdoba',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NIO'
+                    },
+                    {
+                        'labelEn': 'Nigerian naira',
+                        'labels': [
+                            {
+                                'label': 'Nigerian naira',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NGN'
+                    },
+                    {
+                        'labelEn': 'North Korean won',
+                        'labels': [
+                            {
+                                'label': 'North Korean won',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KPW'
+                    },
+                    {
+                        'labelEn': 'Norwegian krone',
+                        'labels': [
+                            {
+                                'label': 'Norwegian krone',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOK'
+                    },
+                    {
+                        'labelEn': 'Omani rial',
+                        'labels': [
+                            {
+                                'label': 'Omani rial',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OMR'
+                    },
+                    {
+                        'labelEn': 'Pakistani rupee',
+                        'labels': [
+                            {
+                                'label': 'Pakistani rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PKR'
+                    },
+                    {
+                        'labelEn': 'Panamanian balboa',
+                        'labels': [
+                            {
+                                'label': 'Panamanian balboa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PAB'
+                    },
+                    {
+                        'labelEn': 'Papua New Guinean kina',
+                        'labels': [
+                            {
+                                'label': 'Papua New Guinean kina',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PGK'
+                    },
+                    {
+                        'labelEn': 'Paraguayan guaraní',
+                        'labels': [
+                            {
+                                'label': 'Paraguayan guaraní',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PYG'
+                    },
+                    {
+                        'labelEn': 'Peruvian sol',
+                        'labels': [
+                            {
+                                'label': 'Peruvian sol',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PEN'
+                    },
+                    {
+                        'labelEn': 'Philippine peso',
+                        'labels': [
+                            {
+                                'label': 'Philippine peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PHP'
+                    },
+                    {
+                        'labelEn': 'Polish złoty',
+                        'labels': [
+                            {
+                                'label': 'Polish złoty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PLN'
+                    },
+                    {
+                        'labelEn': 'Pound sterling',
+                        'labels': [
+                            {
+                                'label': 'Pound sterling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GBP'
+                    },
+                    {
+                        'labelEn': 'Qatari riyal',
+                        'labels': [
+                            {
+                                'label': 'Qatari riyal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'QAR'
+                    },
+                    {
+                        'labelEn': 'Romanian leu',
+                        'labels': [
+                            {
+                                'label': 'Romanian leu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RON'
+                    },
+                    {
+                        'labelEn': 'Russian ruble',
+                        'labels': [
+                            {
+                                'label': 'Russian ruble',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RUB'
+                    },
+                    {
+                        'labelEn': 'Rwandan franc',
+                        'labels': [
+                            {
+                                'label': 'Rwandan franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RWF'
+                    },
+                    {
+                        'labelEn': 'Saint Helena pound',
+                        'labels': [
+                            {
+                                'label': 'Saint Helena pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SHP'
+                    },
+                    {
+                        'labelEn': 'Salvadoran colón',
+                        'labels': [
+                            {
+                                'label': 'Salvadoran colón',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SVC'
+                    },
+                    {
+                        'labelEn': 'Samoan tala',
+                        'labels': [
+                            {
+                                'label': 'Samoan tala',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'WST'
+                    },
+                    {
+                        'labelEn': 'Saudi riyal',
+                        'labels': [
+                            {
+                                'label': 'Saudi riyal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SAR'
+                    },
+                    {
+                        'labelEn': 'Serbian dinar',
+                        'labels': [
+                            {
+                                'label': 'Serbian dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RSD'
+                    },
+                    {
+                        'labelEn': 'Seychelles rupee',
+                        'labels': [
+                            {
+                                'label': 'Seychelles rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SCR'
+                    },
+                    {
+                        'labelEn': 'Sierra Leonean leone',
+                        'labels': [
+                            {
+                                'label': 'Sierra Leonean leone',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SLL'
+                    },
+                    {
+                        'labelEn': 'Silver (one troy ounce)',
+                        'labels': [
+                            {
+                                'label': 'Silver (one troy ounce)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XAG'
+                    },
+                    {
+                        'labelEn': 'Singapore dollar',
+                        'labels': [
+                            {
+                                'label': 'Singapore dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SGD'
+                    },
+                    {
+                        'labelEn': 'Solomon Islands dollar',
+                        'labels': [
+                            {
+                                'label': 'Solomon Islands dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SBD'
+                    },
+                    {
+                        'labelEn': 'Somali shilling',
+                        'labels': [
+                            {
+                                'label': 'Somali shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOS'
+                    },
+                    {
+                        'labelEn': 'South African rand',
+                        'labels': [
+                            {
+                                'label': 'South African rand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ZAR'
+                    },
+                    {
+                        'labelEn': 'South Korean won',
+                        'labels': [
+                            {
+                                'label': 'South Korean won',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KRW'
+                    },
+                    {
+                        'labelEn': 'South Sudanese pound',
+                        'labels': [
+                            {
+                                'label': 'South Sudanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SSP'
+                    },
+                    {
+                        'labelEn': 'Sri Lankan rupee',
+                        'labels': [
+                            {
+                                'label': 'Sri Lankan rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LKR'
+                    },
+                    {
+                        'labelEn': 'Sudanese pound',
+                        'labels': [
+                            {
+                                'label': 'Sudanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SDG'
+                    },
+                    {
+                        'labelEn': 'Surinamese dollar',
+                        'labels': [
+                            {
+                                'label': 'Surinamese dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SRD'
+                    },
+                    {
+                        'labelEn': 'Swazi lilangeni',
+                        'labels': [
+                            {
+                                'label': 'Swazi lilangeni',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SZL'
+                    },
+                    {
+                        'labelEn': 'Swedish krona/kronor',
+                        'labels': [
+                            {
+                                'label': 'Swedish krona/kronor',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SEK'
+                    },
+                    {
+                        'labelEn': 'Swiss franc',
+                        'labels': [
+                            {
+                                'label': 'Swiss franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CHF'
+                    },
+                    {
+                        'labelEn': 'Syrian pound',
+                        'labels': [
+                            {
+                                'label': 'Syrian pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SYP'
+                    },
+                    {
+                        'labelEn': 'São Tomé and Príncipe dobra',
+                        'labels': [
+                            {
+                                'label': 'São Tomé and Príncipe dobra',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'STN'
+                    },
+                    {
+                        'labelEn': 'Tajikistani somoni',
+                        'labels': [
+                            {
+                                'label': 'Tajikistani somoni',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TJS'
+                    },
+                    {
+                        'labelEn': 'Tanzanian shilling',
+                        'labels': [
+                            {
+                                'label': 'Tanzanian shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TZS'
+                    },
+                    {
+                        'labelEn': 'Thai baht',
+                        'labels': [
+                            {
+                                'label': 'Thai baht',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'THB'
+                    },
+                    {
+                        'labelEn': 'Tongan paʻanga',
+                        'labels': [
+                            {
+                                'label': 'Tongan paʻanga',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TOP'
+                    },
+                    {
+                        'labelEn': 'Trinidad and Tobago dollar',
+                        'labels': [
+                            {
+                                'label': 'Trinidad and Tobago dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TTD'
+                    },
+                    {
+                        'labelEn': 'Tunisian dinar',
+                        'labels': [
+                            {
+                                'label': 'Tunisian dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TND'
+                    },
+                    {
+                        'labelEn': 'Turkish lira',
+                        'labels': [
+                            {
+                                'label': 'Turkish lira',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TRY'
+                    },
+                    {
+                        'labelEn': 'Turkmenistan manat',
+                        'labels': [
+                            {
+                                'label': 'Turkmenistan manat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TMT'
+                    },
+                    {
+                        'labelEn': 'Ugandan shilling',
+                        'labels': [
+                            {
+                                'label': 'Ugandan shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UGX'
+                    },
+                    {
+                        'labelEn': 'Ukrainian hryvnia',
+                        'labels': [
+                            {
+                                'label': 'Ukrainian hryvnia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UAH'
+                    },
+                    {
+                        'labelEn': 'Unidad previsional[14]',
+                        'labels': [
+                            {
+                                'label': 'Unidad previsional[14]',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UYW'
+                    },
+                    {
+                        'labelEn': 'United Arab Emirates dirham',
+                        'labels': [
+                            {
+                                'label': 'United Arab Emirates dirham',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AED'
+                    },
+                    {
+                        'labelEn': 'United States dollar',
+                        'labels': [
+                            {
+                                'label': 'United States dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'USD'
+                    },
+                    {
+                        'labelEn': 'Uruguayan peso',
+                        'labels': [
+                            {
+                                'label': 'Uruguayan peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UYU'
+                    },
+                    {
+                        'labelEn': 'Uzbekistan som',
+                        'labels': [
+                            {
+                                'label': 'Uzbekistan som',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UZS'
+                    },
+                    {
+                        'labelEn': 'Vanuatu vatu',
+                        'labels': [
+                            {
+                                'label': 'Vanuatu vatu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VUV'
+                    },
+                    {
+                        'labelEn': 'Venezuelan bolívar soberano',
+                        'labels': [
+                            {
+                                'label': 'Venezuelan bolívar soberano',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VES'
+                    },
+                    {
+                        'labelEn': 'Vietnamese đồng',
+                        'labels': [
+                            {
+                                'label': 'Vietnamese đồng',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VND'
+                    },
+                    {
+                        'labelEn': 'Yemeni rial',
+                        'labels': [
+                            {
+                                'label': 'Yemeni rial',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'YER'
+                    },
+                    {
+                        'labelEn': 'Zambian kwacha',
+                        'labels': [
+                            {
+                                'label': 'Zambian kwacha',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ZMW'
                     },
                     {
-                        'labelEn': 'Zimbabwe Dollar',
+                        'labelEn': 'Zimbabwean dollar',
                         'labels': [
                             {
-                                'label': 'Zimbabwe Dollar',
+                                'label': 'Zimbabwean dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ZWL'
-                    },
-                    {
-                        'labelEn': 'Zloty',
-                        'labels': [
-                            {
-                                'label': 'Zloty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PLN'
                     }
                 ],
                 'hint': '',

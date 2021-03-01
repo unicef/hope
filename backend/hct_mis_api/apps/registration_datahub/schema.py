@@ -21,6 +21,7 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
+from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids
 from hct_mis_api.apps.household.models import (
@@ -40,7 +41,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedIndividualIdentity,
 )
-
+from hct_mis_api.apps.utils.schema import Arg
 
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
@@ -118,13 +119,32 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = Arg()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     has_duplicates = graphene.Boolean(
         description="Mark household if any of individuals contains one of these statuses "
         "‘Needs adjudication’, ‘Duplicate in batch’ and ‘Duplicate’"
     )
+    admin1 = graphene.String()
+    admin2 = graphene.String()
+
+    @staticmethod
+    def _handle_admin_areas(p_code):
+        if not p_code:
+            return
+
+        admin_area = AdminArea.objects.filter(p_code=p_code).first()
+        if admin_area:
+            return admin_area.title
+
+    def resolve_admin1(parent, info):
+        admin1_p_code = parent.admin1
+        return ImportedHouseholdNode._handle_admin_areas(admin1_p_code)
+
+    def resolve_admin2(parent, info):
+        admin2_p_code = parent.admin2
+        return ImportedHouseholdNode._handle_admin_areas(admin2_p_code)
 
     def resolve_country(parent, info):
         return parent.country.name
@@ -151,7 +171,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = Arg()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()

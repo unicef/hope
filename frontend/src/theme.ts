@@ -28,7 +28,7 @@ const muiTheme = createMuiTheme({
   },
 });
 
-const FONT = 'Roboto';
+export const FONT = 'Roboto';
 export const theme = {
   ...muiTheme,
   drawer: {

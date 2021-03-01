@@ -31,8 +31,9 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
-    return `You approved ${values.selected.length +
-      values.selectedFlexFields.length || 0} change${
+    return `You approved ${
+      values.selected.length + values.selectedFlexFields.length || 0
+    } change${
       values.selected.length === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
@@ -42,7 +43,7 @@ export function RequestedHouseholdDataChange({
   };
   let allApprovedCount = 0;
   const flexFields = householdData?.flex_fields || {};
-  delete householdData.flexFields;
+  delete householdData.flex_fields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(

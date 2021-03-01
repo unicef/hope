@@ -1,7 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 import React from 'react';
 import { AllChartsQuery } from '../../../__generated__/graphql';
-import { Missing } from '../../Missing';
 import { PaymentVerificationChart } from '../charts/PaymentVerificationChart';
 import { DashboardPaper } from '../DashboardPaper';
 

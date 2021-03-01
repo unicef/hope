@@ -9,7 +9,7 @@ export const AllCashPlans = gql`
     $last: Int
     $orderBy: String
     $search: String
-    $assistanceThrough: String
+    $serviceProvider: String
     $deliveryType: [String]
     $verificationStatus: [String]
     $startDateGte: DateTime
@@ -24,7 +24,7 @@ export const AllCashPlans = gql`
       last: $last
       orderBy: $orderBy
       search: $search
-      assistanceThrough_Startswith: $assistanceThrough
+      serviceProvider_FullName_Startswith: $serviceProvider
       deliveryType: $deliveryType
       verificationStatus: $verificationStatus
       startDate_Gte: $startDateGte
@@ -45,6 +45,12 @@ export const AllCashPlans = gql`
           caId
           verificationStatus
           assistanceThrough
+          totalNumberOfHouseholds
+          serviceProvider {
+            id
+            caId
+            fullName
+          }
           deliveryType
           startDate
           endDate
@@ -59,7 +65,6 @@ export const AllCashPlans = gql`
           totalEntitledQuantity
           totalDeliveredQuantity
           totalUndeliveredQuantity
-          assistanceMeasurement
           updatedAt
         }
       }
