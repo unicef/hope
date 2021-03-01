@@ -217,3 +217,9 @@ celeryflower:
   service:
     type: ClusterIP
     port: 5555
+
+  config:
+    FLOWER_URL_PREFIX: flower
+
+  secret:
+    FLOWER_BASIC_AUTH: "use-azure-devops:variables-to-set"
