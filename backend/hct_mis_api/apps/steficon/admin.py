@@ -1,4 +1,5 @@
 import logging
+
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class GenericAutocompleteMixin(AutocompleteMixin):
-    url_name = '%s:%s_%s_autocomplete'
+    url_name = "%s:%s_%s_autocomplete"
 
     def __init__(self, form_field, admin_site, attrs=None, choices=(), using=None):
         self.form_field = form_field
@@ -36,21 +37,15 @@ class GenericAutocompleteMixin(AutocompleteMixin):
         default = (None, [], 0)
         groups = [default]
         has_selected = False
-        selected_choices = {
-            str(v) for v in value
-            if str(v) not in self.empty_values
-        }
+        selected_choices = {str(v) for v in value if str(v) not in self.empty_values}
         if not self.is_required and not self.allow_multiple_selected:
-            default[1].append(self.create_option(name, '', '', False, 0))
+            default[1].append(self.create_option(name, "", "", False, 0))
         choices = (
             (obj.pk, self.choices.field.label_from_instance(obj))
             for obj in self.form_field.queryset.using(self.db).filter(pk__in=selected_choices)
         )
         for option_value, option_label in choices:
-            selected = (
-                    str(option_value) in value and
-                    (has_selected is False or self.allow_multiple_selected)
-            )
+            selected = str(option_value) in value and (has_selected is False or self.allow_multiple_selected)
             has_selected |= selected
             index = len(default[1])
             subgroup = default[1]
@@ -63,12 +58,12 @@ class GenericAutocompleteSelect(GenericAutocompleteMixin, forms.Select):
 
 
 class RuleTestForm(forms.Form):
-    target_population = forms.ModelChoiceField(queryset=TargetPopulation.objects.all().order_by('name'))
+    target_population = forms.ModelChoiceField(queryset=TargetPopulation.objects.all().order_by("name"))
 
     def __init__(self, *args, **kwargs):
-        admin_site = kwargs.pop('admin_site')
+        admin_site = kwargs.pop("admin_site")
         super().__init__(*args, **kwargs)
-        tp = self.fields['target_population']
+        tp = self.fields["target_population"]
         tp.widget = GenericAutocompleteSelect(tp, admin_site)
 
 
@@ -108,7 +103,6 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
     def used_by(self, request, pk):
         context = self.get_common_context(request, pk, title="Used By")
         if request.method == "GET":
-            # context["form"] = RuleTestForm(admin_site=self.admin_site)
             return TemplateResponse(request, "admin/steficon/rule/used_by.html", context)
 
     @action()
@@ -122,7 +116,6 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
             context = self.get_common_context(
                 request,
                 pk,
-                # title="Revert",
                 action="Revert",
                 MONITORED_FIELDS=MONITORED_FIELDS,
             )
@@ -163,7 +156,6 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
                 context["next"] = None
 
             context["state"] = state
-            # context["action"] = "Code history"
             context["title"] = (
                 f"Change #{state.version} on " f"{state.timestamp.strftime('%d, %b %Y at %H:%M')} by {state.updated_by}"
             )
@@ -177,7 +169,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
     def preview(self, request, pk):
         try:
             context = self.get_common_context(request, pk, title="Test")
-            context['media'] = self.media
+            context["media"] = self.media
             if request.method == "GET":
                 context["title"] = f"Test `{self.object.name}` against target population"
                 context["form"] = RuleTestForm(admin_site=self.admin_site)
