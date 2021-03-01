@@ -7,7 +7,7 @@ import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   decodeIdString,
-  formatCurrency,
+  formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
@@ -75,7 +75,10 @@ export function LookUpPaymentRecordTableRow({
       </TableCell>
       <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.deliveredQuantity)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.deliveredQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
         <Missing />

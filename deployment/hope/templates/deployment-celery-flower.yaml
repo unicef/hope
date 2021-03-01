@@ -27,9 +27,6 @@ spec:
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}-celery-flower
-          # Temp solution with Basic Auth we will switch to Azure AD Auth
-          # TODO: Switch to Azure AD
-          command: ["celery", "flower", "--broker=redis://hope-main-redis-master:6379/0 --url_prefix=flower basic_auth=test1234:test1234"]
           securityContext:
             {{- toYaml .Values.celeryflower.securityContext | nindent 12 }}
           image: "{{ .Values.celeryflower.image }}"
@@ -40,12 +37,16 @@ spec:
               protocol: TCP
           envFrom:
           - secretRef:
-              name: {{ include "hope.fullname" . }}-backend
+              name: {{ include "hope.fullname" . }}-celeryflower
           - configMapRef:
-              name: {{ include "hope.fullname" . }}-backend
+              name: {{ include "hope.fullname" . }}-celeryflower
+          volumeMounts:
+          - name: entrypoint
+            mountPath: /entrypoint.sh
+            subPath: entrypoint.sh
           readinessProbe:
             httpGet:
-              path: /
+              path: /_health
               port: {{ .Values.celeryflower.service.port }}
               httpHeaders:
               - name: X-Health
@@ -54,6 +55,14 @@ spec:
                 value: "kubernetes.internal"
           resources:
             {{- toYaml .Values.celeryflower.resources | nindent 12 }}
+        volumes:
+        - name: entrypoint
+          configMap:
+            name: {{ include "hope.fullname" . }}-celeryflower-entrypoint
+            defaultMode: 0777
+            items:
+              - key: entrypoint.sh
+                path: entrypoint.sh
       {{- with .Values.celeryflower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
