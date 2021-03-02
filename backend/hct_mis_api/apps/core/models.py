@@ -175,15 +175,23 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
+    STRING = "STRING"
+    IMAGE = "IMAGE"
+    INTEGER = "INTEGER"
+    DECIMAL = "DECIMAL"
+    SELECT_ONE = "SELECT_ONE"
+    SELECT_MANY = "SELECT_MANY"
+    DATETIME = "DATETIME"
+    GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
-        ("STRING", _("String")),
-        ("IMAGE", _("Image")),
-        ("INTEGER", _("Integer")),
-        ("DECIMAL", _("Decimal")),
-        ("SELECT_ONE", _("Select One")),
-        ("SELECT_MANY", _("Select Many")),
-        ("DATETIME", _("Datetime")),
-        ("GEOPOINT", _("Geopoint")),
+        (STRING, _("String")),
+        (IMAGE, _("Image")),
+        (INTEGER, _("Integer")),
+        (DECIMAL, _("Decimal")),
+        (SELECT_ONE, _("Select One")),
+        (SELECT_MANY, _("Select Many")),
+        (DATETIME, _("Datetime")),
+        (GEOPOINT, _("Geopoint")),
     )
     ASSOCIATED_WITH_CHOICES = (
         (0, _("Household")),
