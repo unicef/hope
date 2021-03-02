@@ -42,7 +42,8 @@ export type _TableTotalCashTransferredDataNode = {
    __typename?: '_TableTotalCashTransferredDataNode',
   id?: Maybe<Scalars['String']>,
   admin2?: Maybe<Scalars['String']>,
-  totalCashTransferred?: Maybe<Scalars['String']>,
+  totalCashTransferred?: Maybe<Scalars['Float']>,
+  totalHouseholds?: Maybe<Scalars['Int']>,
 };
 
 export type ActivateCashPlanVerificationMutation = {
@@ -399,15 +400,17 @@ export type CashPlanNode = Node & {
   validationAlertsCount: Scalars['Int'],
   totalPersonsCovered: Scalars['Int'],
   totalPersonsCoveredRevised: Scalars['Int'],
-  totalEntitledQuantity: Scalars['Float'],
-  totalEntitledQuantityRevised: Scalars['Float'],
-  totalDeliveredQuantity: Scalars['Float'],
-  totalUndeliveredQuantity: Scalars['Float'],
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
   verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
   bankReconciliationError?: Maybe<Scalars['Int']>,
+  totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  currency?: Maybe<Scalars['String']>,
 };
 
 
@@ -542,9 +545,8 @@ export type ChartGrievanceTicketsNode = {
    __typename?: 'ChartGrievanceTicketsNode',
   labels?: Maybe<Array<Maybe<Scalars['String']>>>,
   datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
-  total?: Maybe<Scalars['Int']>,
+  totalNumberOfGrievances?: Maybe<Scalars['Int']>,
   totalNumberOfFeedback?: Maybe<Scalars['Int']>,
-  totalNumberOfOpenFeedback?: Maybe<Scalars['Int']>,
   totalNumberOfOpenSensitive?: Maybe<Scalars['Int']>,
 };
 
@@ -1261,6 +1263,7 @@ export type HouseholdNode = Node & {
   totalCashReceived?: Maybe<Scalars['Decimal']>,
   selection?: Maybe<HouseholdSelection>,
   sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
+  sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
   hasDuplicates?: Maybe<Scalars['Boolean']>,
   admin1?: Maybe<AdminAreaNode>,
   admin2?: Maybe<AdminAreaNode>,
@@ -1956,7 +1959,9 @@ export type ImportedHouseholdNode = Node & {
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   admin1: Scalars['String'],
+  admin1Title: Scalars['String'],
   admin2: Scalars['String'],
+  admin2Title: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -1986,7 +1991,7 @@ export type ImportedHouseholdNode = Node & {
   firstRegistrationDate: Scalars['DateTime'],
   lastRegistrationDate: Scalars['DateTime'],
   returnee?: Maybe<Scalars['Boolean']>,
-  flexFields: Scalars['JSONString'],
+  flexFields?: Maybe<Scalars['Arg']>,
   start?: Maybe<Scalars['DateTime']>,
   deviceid: Scalars['String'],
   nameEnumerator: Scalars['String'],
@@ -2127,7 +2132,7 @@ export type ImportedIndividualNode = Node & {
   deduplicationGoldenRecordStatus?: Maybe<ImportedIndividualDeduplicationGoldenRecordStatus>,
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
-  flexFields: Scalars['JSONString'],
+  flexFields?: Maybe<Scalars['Arg']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability: ImportedIndividualObservedDisability,
   seeingDisability?: Maybe<ImportedIndividualSeeingDisability>,
@@ -2328,6 +2333,7 @@ export type IndividualNode = Node & {
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   importedIndividualId?: Maybe<Scalars['UUID']>,
   sanctionListPossibleMatch: Scalars['Boolean'],
+  sanctionListConfirmedMatch: Scalars['Boolean'],
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -2986,6 +2992,7 @@ export type PaymentRecordNode = Node & {
   serviceProvider: ServiceProviderNode,
   transactionReferenceId?: Maybe<Scalars['String']>,
   visionId?: Maybe<Scalars['String']>,
+  registrationCaId?: Maybe<Scalars['String']>,
   verifications: PaymentVerificationNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
   sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
@@ -3275,7 +3282,7 @@ export type Query = {
   program?: Maybe<ProgramNode>,
   allPrograms?: Maybe<ProgramNodeConnection>,
   chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
-  chartPlannedBudget?: Maybe<ChartDetailedDatasetsNode>,
+  chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>,
   cashPlan?: Maybe<CashPlanNode>,
   allCashPlans?: Maybe<CashPlanNodeConnection>,
   programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -3355,8 +3362,8 @@ export type QueryAllReportsArgs = {
   reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
-  createdFrom?: Maybe<Scalars['Date']>,
-  createdTo?: Maybe<Scalars['Date']>,
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
   orderBy?: Maybe<Scalars['String']>
 };
 
@@ -3545,7 +3552,9 @@ export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
   program?: Maybe<Scalars['String']>,
-  administrativeArea?: Maybe<Scalars['String']>
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
 };
 
 
@@ -3646,7 +3655,7 @@ export type QueryChartProgrammesBySectorArgs = {
 };
 
 
-export type QueryChartPlannedBudgetArgs = {
+export type QueryChartTotalTransferredByMonthArgs = {
   businessAreaSlug: Scalars['String'],
   year: Scalars['Int'],
   program?: Maybe<Scalars['String']>,
@@ -5236,6 +5245,7 @@ export type UserNode = Node & {
   partner: UserPartner,
   availableForExport: Scalars['Boolean'],
   jobTitle: Scalars['String'],
+  adUuid?: Maybe<Scalars['String']>,
   userRoles: Array<UserRoleNode>,
   createdTickets: GrievanceTicketNodeConnection,
   assignedTickets: GrievanceTicketNodeConnection,
@@ -5432,7 +5442,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -5514,7 +5524,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -5749,6 +5759,14 @@ export type ApproveHouseholdDataChangeMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { householdDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+        & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )> }
+      )> }
     )> }
   )> }
 );
@@ -5769,6 +5787,14 @@ export type ApproveIndividualDataChangeMutation = (
     & { grievanceTicket: Maybe<(
       { __typename?: 'GrievanceTicketNode' }
       & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { individualDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+        & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+        & { individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & IndividualDetailedFragment
+        )> }
+      )> }
     )> }
   )> }
 );
@@ -6411,7 +6437,7 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { serviceProvider: Maybe<(
           { __typename?: 'ServiceProviderNode' }
           & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -6464,7 +6490,7 @@ export type AllChartsQuery = (
     )>>> }
   )>, chartGrievances: Maybe<(
     { __typename?: 'ChartGrievanceTicketsNode' }
-    & Pick<ChartGrievanceTicketsNode, 'labels' | 'total' | 'totalNumberOfFeedback' | 'totalNumberOfOpenFeedback' | 'totalNumberOfOpenSensitive'>
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'totalNumberOfGrievances' | 'totalNumberOfFeedback' | 'totalNumberOfOpenSensitive'>
     & { datasets: Maybe<Array<Maybe<(
       { __typename?: '_DatasetsNode' }
       & Pick<_DatasetsNode, 'data'>
@@ -6495,13 +6521,7 @@ export type AllChartsQuery = (
   )>, sectionTotalTransferred: Maybe<(
     { __typename?: 'SectionTotalNode' }
     & Pick<SectionTotalNode, 'total'>
-  )>, tableTotalCashTransferredByAdministrativeArea: Maybe<(
-    { __typename?: 'TableTotalCashTransferred' }
-    & { data: Maybe<Array<Maybe<(
-      { __typename?: '_TableTotalCashTransferredDataNode' }
-      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred'>
-    )>>> }
-  )>, chartPlannedBudget: Maybe<(
+  )>, chartTotalTransferredByMonth: Maybe<(
     { __typename?: 'ChartDetailedDatasetsNode' }
     & Pick<ChartDetailedDatasetsNode, 'labels'>
     & { datasets: Maybe<Array<Maybe<(
@@ -6768,10 +6788,10 @@ export type AllPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'size'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
         ), cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
@@ -6814,7 +6834,7 @@ export type AllPaymentVerificationsQuery = (
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { paymentRecord: (
           { __typename?: 'PaymentRecordNode' }
-          & Pick<PaymentRecordNode, 'id' | 'deliveredQuantity'>
+          & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
           & { household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -6885,8 +6905,8 @@ export type AllReportsQueryVariables = {
   last?: Maybe<Scalars['Int']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
   businessArea: Scalars['String'],
-  createdFrom?: Maybe<Scalars['Date']>,
-  createdTo?: Maybe<Scalars['Date']>,
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
   reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
   createdBy?: Maybe<Scalars['ID']>,
   orderBy?: Maybe<Scalars['String']>
@@ -7085,7 +7105,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -7104,7 +7124,7 @@ export type CashPlanQuery = (
       )>> }
     ), program: (
       { __typename?: 'ProgramNode' }
-      & Pick<ProgramNode, 'id' | 'name'>
+      & Pick<ProgramNode, 'id' | 'name' | 'caId'>
     ), paymentRecords: (
       { __typename?: 'PaymentRecordNodeConnection' }
       & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
@@ -7136,6 +7156,27 @@ export type CashPlanPaymentVerificationQuery = (
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'caHashId'>
     ) }
+  )> }
+);
+
+export type CountryChartsQueryVariables = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type CountryChartsQuery = (
+  { __typename?: 'Query' }
+  & { tableTotalCashTransferredByAdministrativeArea: Maybe<(
+    { __typename?: 'TableTotalCashTransferred' }
+    & { data: Maybe<Array<Maybe<(
+      { __typename?: '_TableTotalCashTransferredDataNode' }
+      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred' | 'totalHouseholds'>
+    )>>> }
   )> }
 );
 
@@ -7551,7 +7592,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType'>
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
@@ -7607,7 +7648,7 @@ export type PaymentRecordVerificationQuery = (
     & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
-      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber'>
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
       & { household: (
         { __typename?: 'HouseholdNode' }
         & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
@@ -8020,7 +8061,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8054,7 +8095,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8294,6 +8335,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   lastRegistrationDate
   status
   sanctionListPossibleMatch
+  sanctionListConfirmedMatch
   hasDuplicates
   unicefId
   flexFields
@@ -8343,6 +8385,7 @@ export const IndividualMinimalFragmentDoc = gql`
   maritalStatus
   phoneNo
   sanctionListPossibleMatch
+  sanctionListConfirmedMatch
   deduplicationGoldenRecordStatus
   sanctionListLastCheck
   role
@@ -8759,7 +8802,9 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   }
   size
   admin1
+  admin1Title
   admin2
+  admin2Title
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
@@ -8819,6 +8864,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   estimatedBirthDate
   maritalStatus
   pregnant
+  flexFields
   documents {
     edges {
       node {
@@ -9017,10 +9063,17 @@ export const ApproveHouseholdDataChangeDocument = gql`
     grievanceTicket {
       id
       status
+      householdDataUpdateTicketDetails {
+        id
+        household {
+          ...householdDetailed
+        }
+        householdData
+      }
     }
   }
 }
-    `;
+    ${HouseholdDetailedFragmentDoc}`;
 export type ApproveHouseholdDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export type ApproveHouseholdDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>, 'mutation'>;
 
@@ -9071,10 +9124,17 @@ export const ApproveIndividualDataChangeDocument = gql`
     grievanceTicket {
       id
       status
+      individualDataUpdateTicketDetails {
+        id
+        individual {
+          ...individualDetailed
+        }
+        individualData
+      }
     }
   }
 }
-    `;
+    ${IndividualDetailedFragmentDoc}`;
 export type ApproveIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export type ApproveIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>, 'mutation'>;
 
@@ -11078,6 +11138,7 @@ export const AllCashPlansDocument = gql`
         caId
         verificationStatus
         assistanceThrough
+        totalNumberOfHouseholds
         serviceProvider {
           id
           caId
@@ -11094,6 +11155,7 @@ export const AllCashPlansDocument = gql`
         dispersionDate
         assistanceMeasurement
         status
+        currency
         totalEntitledQuantity
         totalDeliveredQuantity
         totalUndeliveredQuantity
@@ -11193,9 +11255,8 @@ export const AllChartsDocument = gql`
       data
     }
     labels
-    total
+    totalNumberOfGrievances
     totalNumberOfFeedback
-    totalNumberOfOpenFeedback
     totalNumberOfOpenSensitive
   }
   sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
@@ -11223,14 +11284,7 @@ export const AllChartsDocument = gql`
   sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     total
   }
-  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
-    data {
-      id
-      admin2
-      totalCashTransferred
-    }
-  }
-  chartPlannedBudget(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+  chartTotalTransferredByMonth(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
     datasets {
       data
       label
@@ -11850,10 +11904,12 @@ export const AllPaymentRecordsDocument = gql`
         totalPersonsCovered
         household {
           id
+          unicefId
           size
         }
         entitlementQuantity
         deliveredQuantity
+        deliveredQuantityUsd
         deliveryDate
         cashPlan {
           id
@@ -11935,6 +11991,7 @@ export const AllPaymentVerificationsDocument = gql`
         id
         paymentRecord {
           id
+          caId
           deliveredQuantity
           household {
             unicefId
@@ -12144,7 +12201,7 @@ export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFl
 export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
 export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
 export const AllReportsDocument = gql`
-    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: Date, $createdTo: Date, $reportType: [String], $createdBy: ID, $orderBy: String) {
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: DateTime, $createdTo: DateTime, $reportType: [String], $createdBy: ID, $orderBy: String) {
   allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy, orderBy: $orderBy) {
     pageInfo {
       hasNextPage
@@ -12608,6 +12665,7 @@ export const CashPlanDocument = gql`
     verificationStatus
     bankReconciliationSuccess
     bankReconciliationError
+    totalNumberOfHouseholds
     verifications {
       edges {
         node {
@@ -12638,6 +12696,7 @@ export const CashPlanDocument = gql`
     program {
       id
       name
+      caId
     }
     paymentRecords {
       totalCount
@@ -12751,6 +12810,66 @@ export function useCashPlanPaymentVerificationLazyQuery(baseOptions?: ApolloReac
 export type CashPlanPaymentVerificationQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationQuery>;
 export type CashPlanPaymentVerificationLazyQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationLazyQuery>;
 export type CashPlanPaymentVerificationQueryResult = ApolloReactCommon.QueryResult<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>;
+export const CountryChartsDocument = gql`
+    query CountryCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String, $order: String, $orderBy: String) {
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea, order: $order, orderBy: $orderBy) {
+    data {
+      id
+      admin2
+      totalCashTransferred
+      totalHouseholds
+    }
+  }
+}
+    `;
+export type CountryChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CountryChartsQuery, CountryChartsQueryVariables>, 'query'> & ({ variables: CountryChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CountryChartsComponent = (props: CountryChartsComponentProps) => (
+      <ApolloReactComponents.Query<CountryChartsQuery, CountryChartsQueryVariables> query={CountryChartsDocument} {...props} />
+    );
+    
+export type CountryChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<CountryChartsQuery, CountryChartsQueryVariables> & TChildProps;
+export function withCountryCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CountryChartsQuery,
+  CountryChartsQueryVariables,
+  CountryChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CountryChartsQuery, CountryChartsQueryVariables, CountryChartsProps<TChildProps>>(CountryChartsDocument, {
+      alias: 'countryCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCountryChartsQuery__
+ *
+ * To run a query within a React component, call `useCountryChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCountryChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCountryChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      year: // value for 'year'
+ *      program: // value for 'program'
+ *      administrativeArea: // value for 'administrativeArea'
+ *      order: // value for 'order'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useCountryChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+      }
+export function useCountryChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+        }
+export type CountryChartsQueryHookResult = ReturnType<typeof useCountryChartsQuery>;
+export type CountryChartsLazyQueryHookResult = ReturnType<typeof useCountryChartsLazyQuery>;
+export type CountryChartsQueryResult = ApolloReactCommon.QueryResult<CountryChartsQuery, CountryChartsQueryVariables>;
 export const DashboardReportChoiceDataDocument = gql`
     query DashboardReportChoiceData($businessArea: String!) {
   dashboardReportTypesChoices(businessAreaSlug: $businessArea) {
@@ -13637,6 +13756,7 @@ export const PaymentRecordDocument = gql`
     statusDate
     caId
     caHashId
+    registrationCaId
     household {
       id
       size
@@ -13735,11 +13855,13 @@ export const PaymentRecordDocument = gql`
     currency
     entitlementQuantity
     deliveredQuantity
+    deliveredQuantityUsd
     deliveryDate
     deliveryDate
     deliveryType
     entitlementCardIssueDate
     entitlementCardNumber
+    transactionReferenceId
     serviceProvider {
       id
       fullName
@@ -13804,6 +13926,7 @@ export const PaymentRecordVerificationDocument = gql`
       statusDate
       caId
       caHashId
+      registrationCaId
       household {
         unicefId
         id
@@ -13846,6 +13969,7 @@ export const PaymentRecordVerificationDocument = gql`
       deliveryType
       entitlementCardIssueDate
       entitlementCardNumber
+      transactionReferenceId
       serviceProvider {
         id
         fullName
@@ -16228,7 +16352,8 @@ export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends
 export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
   id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  totalCashTransferred?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
@@ -16377,15 +16502,17 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCoveredRevised?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalEntitledQuantityRevised?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -16451,9 +16578,8 @@ export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType ext
 export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
   labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
-  total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfGrievances?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
-  totalNumberOfOpenFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
@@ -16799,6 +16925,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
   selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   admin1?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
   admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
@@ -16884,7 +17011,9 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
@@ -16914,7 +17043,7 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
@@ -16978,7 +17107,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  flexFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<ResolversTypes['ImportedIndividualObservedDisability'], ParentType, ContextType>,
   seeingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSeeingDisability']>, ParentType, ContextType>,
@@ -17064,6 +17193,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
@@ -17273,6 +17403,7 @@ export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends Res
   serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
   transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   verifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, PaymentRecordNodeVerificationsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
   sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
@@ -17417,7 +17548,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
   allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
   chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
-  chartPlannedBudget?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartPlannedBudgetArgs, 'businessAreaSlug' | 'year'>>,
+  chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
   allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
   programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -18231,6 +18362,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
   assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,

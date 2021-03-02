@@ -431,7 +431,6 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
                 heading_household__payment_records__verifications__cash_plan_payment_verification=cashplan_payment_verification.id
             ).values_list("phone_no", flat=True)
         )
-        # TODO Uncomment when correct phone numbers in user
         flow_start_info = api.start_flow(cashplan_payment_verification.rapid_pro_flow_id, phone_numbers)
         cashplan_payment_verification.rapid_pro_flow_start_uuid = flow_start_info.get("uuid")
 
@@ -491,7 +490,7 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
             old_cashplan_payment_verification,
             cashplan_payment_verification,
         )
-        return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
+        return FinishCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
 
 class DiscardCashPlanVerificationMutation(PermissionMutation):
@@ -515,13 +514,17 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
-        cash_plan = cashplan_payment_verification.cash_plan
-        payment_records = cls.get_new_payment_records(cashplan_payment_verification)
-        for payment_record in payment_records:
-            payment_record.verifications.all().delete()
+        cashplan_payment_verification.payment_record_verifications.all().delete()
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
-        cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
-        cash_plan.save()
+        cashplan_payment_verification.responded_count = None
+        cashplan_payment_verification.received_count = None
+        cashplan_payment_verification.not_received_count = None
+        cashplan_payment_verification.received_with_problems_count = None
+        cashplan_payment_verification.activation_date = None
+        cashplan_payment_verification.rapid_pro_flow_start_uuid = ""
+        # NOTE: this already happens in post_save signal, I think it can be removed from here
+        # cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
+        # cash_plan.save()
         cashplan_payment_verification.save()
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
@@ -530,27 +533,7 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
             old_cashplan_payment_verification,
             cashplan_payment_verification,
         )
-        return DiscardCashPlanVerificationMutation(cash_plan)
-
-    @classmethod
-    def get_new_payment_records(cls, cash_plan_verification):
-        payment_records = cash_plan_verification.cash_plan.payment_records.all()
-        excluded_admin_areas = cash_plan_verification.excluded_admin_areas_filter
-        sex = cash_plan_verification.sex_filter
-        age = cash_plan_verification.age_filter
-        if excluded_admin_areas:
-            excluded_admin_areas_decoded = [decode_id_string(x) for x in excluded_admin_areas]
-            payment_records = payment_records.filter(~(Q(household__admin_area__id__in=excluded_admin_areas_decoded)))
-        if sex is not None:
-            payment_records = payment_records.filter(household__head_of_household__sex=sex)
-        if age is not None:
-            payment_records = filter_age(
-                "household__head_of_household__birth_date",
-                payment_records,
-                age.get("min"),
-                age.get("max"),
-            )
-        return payment_records
+        return DiscardCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
 
 
 class UpdatePaymentVerificationStatusAndReceivedAmount(graphene.Mutation):

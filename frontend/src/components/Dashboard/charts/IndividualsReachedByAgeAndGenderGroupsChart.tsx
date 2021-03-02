@@ -9,9 +9,10 @@ interface IndividualsReachedByAgeAndGenderGroupsChartProps {
 export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   data,
 }: IndividualsReachedByAgeAndGenderGroupsChartProps): React.ReactElement => {
-  console.log('data', data);
+  if (!data) return null;
+
   const chartData = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         backgroundColor: [
@@ -26,7 +27,7 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
           '#B1E3E0',
           '#D2E0E0',
         ],
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
       },
     ],
   };

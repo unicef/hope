@@ -14,6 +14,7 @@ DJANGO_USER_MAP = {
     "email": "mail",
     "first_name": "givenName",
     "last_name": "surname",
+    "ad_uuid": "id",
 }
 
 
@@ -50,13 +51,19 @@ class MicrosoftGraphAPI:
         json_response = response.json()
         return json_response
 
-    def get_user_data(self, email):
-        data = self.get_results(
-            f"https://graph.microsoft.com/beta/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
-        )
-        value = data.get("value")
-        if value is None:
-            raise Http404("")
-        if len(value) < 1:
-            raise Http404("")
-        return value[0]
+    def get_user_data(self, *, email=None, uuid=None):
+        try:
+            if uuid:
+                q = f"https://graph.microsoft.com/beta/users/{uuid}"
+                value = self.get_results(q)
+            elif email:
+                q = f"https://graph.microsoft.com/beta/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
+                data = self.get_results(q)
+                value = data.get("value")[0]
+            else:
+                raise ValueError("You must provide 'uuid' or 'email' argument.")
+        except (IndexError,):
+            raise Http404("User not found")
+        if not value:
+            raise Http404("User not found")
+        return value

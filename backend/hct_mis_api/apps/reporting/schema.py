@@ -2,7 +2,7 @@ import graphene
 from graphene import relay
 from graphene_django import DjangoObjectType
 from django.db.models.functions import ExtractYear
-from django_filters import CharFilter, DateFilter, FilterSet, MultipleChoiceFilter, OrderingFilter
+from django_filters import CharFilter, FilterSet, MultipleChoiceFilter, OrderingFilter, DateTimeFilter
 from datetime import datetime
 
 from hct_mis_api.apps.account.permissions import (
@@ -21,8 +21,8 @@ from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 class ReportFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
-    created_from = DateFilter(field_name="created_at", lookup_expr="gte")
-    created_to = DateFilter(field_name="created_at", lookup_expr="lte")
+    created_from = DateTimeFilter(field_name="created_at", lookup_expr="gte")
+    created_to = DateTimeFilter(field_name="created_at", lookup_expr="lte")
     status = MultipleChoiceFilter(field_name="status", choices=Report.STATUSES)
     report_type = MultipleChoiceFilter(field_name="report_type", choices=Report.REPORT_TYPES)
 

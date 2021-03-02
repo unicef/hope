@@ -69,6 +69,7 @@ class PullFromDatahubTask:
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
+        "registration_ca_id": "registration_ca_id",
     }
     MAPPING_SERVICE_PROVIDER_DICT = {
         "ca_id": "ca_id",
@@ -131,10 +132,10 @@ class PullFromDatahubTask:
         assistance_through = cash_plan_args.get("assistance_through")
         if not assistance_through:
             return
-        sp = ServiceProvider.objects.filter(ca_id=assistance_through).first()
-        if not sp:
+        service_provider = ServiceProvider.objects.filter(ca_id=assistance_through).first()
+        if service_provider is None:
             return
-        cash_plan_args["service_provider"] = sp
+        cash_plan_args["service_provider"] = service_provider
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
@@ -167,7 +168,7 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
-            (service_provider, created,) = ServiceProvider.objects.update_or_create(
+            ServiceProvider.objects.update_or_create(
                 ca_id=dh_service_provider.ca_id, defaults=service_provider_args
             )
 

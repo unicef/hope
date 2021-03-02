@@ -13,6 +13,7 @@ import {
 import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
 import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
 import { AllChartsQuery } from '../../../__generated__/graphql';
+import { formatNumber } from '../../../utils/utils';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;
@@ -48,7 +49,7 @@ export const TotalNumberOfIndividualsReachedSection = ({
         <Grid container justify='space-between' alignItems='center'>
           <Grid item>
             <CardAmountLink onClick={() => setDialogOpen(true)}>
-              {data?.total}
+              {formatNumber(data?.total)}
             </CardAmountLink>
           </Grid>
           <Grid item>
@@ -69,15 +70,15 @@ export const TotalNumberOfIndividualsReachedSection = ({
         <DialogContent>
           <DialogContainer>
             <Box mb={6}>
-              <Title mb={2}>
-                Individuals Reached by Age and Gender Groups
-              </Title>
+              <Title mb={6}>Individuals Reached by Age and Gender Groups</Title>
               <IndividualsReachedByAgeAndGenderGroupsChart
                 data={chartDataIndividuals}
               />
             </Box>
             <Box>
-              <Title mb={2}>Individuals with Disability Reached by Age Groups</Title>
+              <Title mb={6}>
+                Individuals with Disability Reached by Age Groups
+              </Title>
               <IndividualsWithDisabilityReachedByAgeGroupsChart
                 data={chartDataIndividualsDisability}
               />
