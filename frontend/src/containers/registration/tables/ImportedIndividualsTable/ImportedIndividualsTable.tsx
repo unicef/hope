@@ -9,6 +9,7 @@ import {
 import { UniversalTable } from '../../../tables/UniversalTable';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
 
 interface ImportedIndividualsTableProps {
   rdiId?: string;
@@ -38,7 +39,14 @@ export function ImportedIndividualsTable({
     businessArea,
   };
 
-  const { data: choicesData } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading } = useHouseholdChoiceDataQuery();
+
+  if (loading) return <LoadingComponent />;
+
+  if (!choicesData) {
+    return null;
+  }
+
   return (
     <>
       {showCheckbox && (
