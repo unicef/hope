@@ -30,7 +30,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     sum_lists_with_values,
     chart_permission_decorator,
-    chart_filters_decoder,
+    chart_filters_decoder, resolve_flex_fields_choices_with_correct_labels,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -303,6 +303,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
+
     @classmethod
     def check_node_permission(cls, info, object_instance):
         super().check_node_permission(info, object_instance)
@@ -391,6 +394,9 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         if parent.photo:
             return parent.photo.url
         return
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
