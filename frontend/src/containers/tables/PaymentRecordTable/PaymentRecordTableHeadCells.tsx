@@ -41,7 +41,7 @@ export const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
     label: 'Delivered Quantity',
-    id: 'delivered_quantity_usd',
+    id: 'delivered_quantity',
     numeric: true,
   },
   {
