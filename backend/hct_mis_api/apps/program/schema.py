@@ -150,7 +150,7 @@ class CashPlanFilter(FilterSet):
             total_number_of_hh=Count(
                 "payment_records__household",
                 filter=~Q(payment_records__status=PaymentRecord.STATUS_ERROR),
-                distinct=True
+                distinct=True,
             )
         )
 
@@ -173,6 +173,7 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
     bank_reconciliation_error = graphene.Int()
     delivery_type = graphene.String()
     total_number_of_households = graphene.Int()
+    currency = graphene.String(source="currency")
 
     class Meta:
         model = CashPlan
