@@ -102,6 +102,9 @@ class RdiBaseCreateTask:
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):
+                        if single_choice in choices:
+                            valid_choices.append(single_choice)
+                            continue
                         upper_value = single_choice.upper()
                         if upper_value in choices:
                             valid_choices.append(upper_value)

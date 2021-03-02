@@ -63,7 +63,10 @@ export function PaymentRecordTableRow({
         )}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrencyWithSymbol(paymentRecord.deliveredQuantityUsd)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.deliveredQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
         <UniversalMoment>{paymentRecord.deliveryDate}</UniversalMoment>
