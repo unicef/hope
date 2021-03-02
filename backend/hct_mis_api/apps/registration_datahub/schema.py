@@ -23,7 +23,13 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids, CustomOrderingFilter
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    to_choice_object,
+    encode_ids,
+    CustomOrderingFilter,
+    resolve_flex_fields_choices_with_correct_labels,
+)
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -141,6 +147,9 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
         ).exists()
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
+
     class Meta:
         model = ImportedHousehold
         filter_fields = []
@@ -176,6 +185,9 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
 
     class Meta:
         model = ImportedIndividual
