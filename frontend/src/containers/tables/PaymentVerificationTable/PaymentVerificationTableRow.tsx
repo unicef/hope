@@ -10,8 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
   choicesToDict,
-  decodeIdString,
-  formatCurrency,
+  formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
@@ -66,7 +65,7 @@ export function PaymentVerificationTableRow({
         {deliveryTypeChoicesDict[plan.deliveryType]}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity)}
+        {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}
