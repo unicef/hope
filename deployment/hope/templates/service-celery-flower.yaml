@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hope.fullname" . }}-celery-flower
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.celeryflower.service.port }}
+      targetPort: {{ .Values.celeryflower.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "hope.selectorLabels" . | nindent 4 }}
+    hope/service: celery-flower

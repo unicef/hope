@@ -15,22 +15,23 @@ interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
 export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
   data,
 }: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
-  const labels = data?.labels;
+  if (!data) return null;
+
   const chartData = {
-    labels,
+    labels: data.labels,
     datasets: [
       {
         barPercentage: 0.4,
-        label: data?.datasets[0]?.label,
+        label: data.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
         stack: 2,
       },
       {
         barPercentage: 0.4,
-        label: data?.datasets[1]?.label,
+        label: data.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
-        data: data?.datasets[1]?.data,
+        data: [...data.datasets[1]?.data],
         stack: 2,
       },
     ],

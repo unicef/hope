@@ -41,7 +41,6 @@ backend:
     STORAGE_AZURE_ACCOUNT_NAME: ""
     AZURE_CLIENT_ID: ""
     POSTGRES_SQL: ""
-    AIRFLOW_HOST: "hope-airflow"
     EMAIL_HOST: ""
     POSTGRES_SSL: ""
     KOBO_API_URL: ""
@@ -108,14 +107,12 @@ postgresql:
   postgresqlDatabase: backend-db
   postgresqlUsername: postgres
   postgresqlPassword: ""
-  postgresqlAirflowDatabase: airflow
   # Script for adding postgis
   # Don't modify
   initdbScripts:
     init_script.sh: |
       #!/bin/sh
       psql -U postgres backend-db -c "create extension if not exists postgis;"
-      psql -U postgres postgres -c "create database airflow"
 
   externalDatabase:
     host: ""
@@ -123,7 +120,6 @@ postgresql:
     port: "5432"
     user: ""
     password: ""
-    airflowName: ""
 
   image:
     tag: 10.12.0
@@ -196,51 +192,34 @@ elasticsearch:
   externalElasticsearch:
     host: ""
 
-airflow:
-  enabled: true
-  securityContext:
-    runAsUser: 0
-  postgresql:
-    enabled: false
-  baseUrl: airflow.test
-  worker:
-    command: ["airflow", "worker"]
-  scheduler:
-    command: ["airflow", "scheduler"]
-  ingress:
-    enabled: true
-    hosts:
-      - name: airflow.test
-        path: /airflow/*
-        tls: false
-        tlsSecret: "aks-unitst-tls"
-    annotations: []
-  redis:
-    enabled: false
-  airflow:
-    redis:
-      enabled: false
-    baseUrl: airflow.test
-    extraEnvVarsCM: hope-airflow-extra
-    extraEnvVarsSecret: hope-airflow-extra
-    worker:
-      command: ["airflow", "worker"]
-    scheduler:
-      command: ["airflow", "scheduler"]
-    image:
-      repository: hope/airflow
-      tag: latest
-    web:
-      extraVolumeMounts:
-        - name: entrypoint
-          mountPath: /entrypoint.sh
-          subPath: entrypoint.sh
-      extraVolumes:
-        - name: entrypoint
-          configMap:
-            name: hope-airflow-entrypoint
-            defaultMode: 0744
-            items:
-            - key: airflow-entrypoint.sh
-              path: entrypoint.sh
+celery:
+  image: backend:latest
+  replicaCount: 1
+  podAnnotations: {}
+  podSecurityContext: {}
 
+  securityContext: {}
+
+  tolerations: []
+  affinity: {}
+
+celeryflower:
+  image: saxix/flower:1.6
+  replicaCount: 1
+  podAnnotations: {}
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  tolerations: []
+  affinity: {}
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  config:
+    FLOWER_URL_PREFIX: flower
+
+  secret:
+    FLOWER_BASIC_AUTH: "use-azure-devops:variables-to-set"

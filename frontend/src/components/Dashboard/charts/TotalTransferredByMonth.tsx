@@ -14,26 +14,30 @@ export const TotalTransferredByMonth = ({
   data,
 }: TotalTransferredByMonthProps): React.ReactElement => {
   if (!data) return null;
+
   const chartdata = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         barPercentage: 0.3,
-        label: data?.datasets[0]?.label,
+        label: data.datasets[0]?.label,
         backgroundColor: '#C3D1D8',
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
+        stack: 3,
       },
       {
         barPercentage: 0.3,
-        label: data?.datasets[1]?.label,
+        label: data.datasets[1]?.label,
         backgroundColor: '#FFAA1D',
-        data: data?.datasets[1]?.data,
+        data: [...data.datasets[1]?.data],
+        stack: 3,
       },
       {
         barPercentage: 0.3,
-        label: data?.datasets[2]?.label,
+        label: data.datasets[2]?.label,
         backgroundColor: '#03867B',
-        data: data?.datasets[2]?.data,
+        data: [...data.datasets[2]?.data],
+        stack: 3,
       },
     ],
   };
@@ -67,7 +71,6 @@ export const TotalTransferredByMonth = ({
     scales: {
       xAxes: [
         {
-          stacked: true,
           gridLines: {
             display: false,
           },
@@ -79,7 +82,6 @@ export const TotalTransferredByMonth = ({
             display: true,
             labelString: 'USD',
           },
-          stacked: true,
           position: 'right',
           ticks: {
             beginAtZero: true,
