@@ -400,15 +400,17 @@ export type CashPlanNode = Node & {
   validationAlertsCount: Scalars['Int'],
   totalPersonsCovered: Scalars['Int'],
   totalPersonsCoveredRevised: Scalars['Int'],
-  totalEntitledQuantity: Scalars['Float'],
-  totalEntitledQuantityRevised: Scalars['Float'],
-  totalDeliveredQuantity: Scalars['Float'],
-  totalUndeliveredQuantity: Scalars['Float'],
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
   verificationStatus: CashPlanVerificationStatus,
   paymentRecords: PaymentRecordNodeConnection,
   verifications: CashPlanPaymentVerificationNodeConnection,
   bankReconciliationSuccess?: Maybe<Scalars['Int']>,
   bankReconciliationError?: Maybe<Scalars['Int']>,
+  totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  currency?: Maybe<Scalars['String']>,
 };
 
 
@@ -1957,7 +1959,9 @@ export type ImportedHouseholdNode = Node & {
   address: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   admin1: Scalars['String'],
+  admin1Title: Scalars['String'],
   admin2: Scalars['String'],
+  admin2Title: Scalars['String'],
   geopoint?: Maybe<Scalars['GeoJSON']>,
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
@@ -6433,7 +6437,7 @@ export type AllCashPlansQuery = (
       & Pick<CashPlanNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'CashPlanNode' }
-        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
         & { serviceProvider: Maybe<(
           { __typename?: 'ServiceProviderNode' }
           & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -6784,10 +6788,10 @@ export type AllPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate'>
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
         & { household: (
           { __typename?: 'HouseholdNode' }
-          & Pick<HouseholdNode, 'id' | 'size'>
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
         ), cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
@@ -7101,7 +7105,7 @@ export type CashPlanQuery = (
   { __typename?: 'Query' }
   & { cashPlan: Maybe<(
     { __typename?: 'CashPlanNode' }
-    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError'>
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
     & { serviceProvider: Maybe<(
       { __typename?: 'ServiceProviderNode' }
       & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
@@ -7588,7 +7592,7 @@ export type PaymentRecordQuery = (
   { __typename?: 'Query' }
   & { paymentRecord: Maybe<(
     { __typename?: 'PaymentRecordNode' }
-    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveryType' | 'transactionReferenceId'>
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
     & { household: (
       { __typename?: 'HouseholdNode' }
       & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
@@ -8057,7 +8061,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin2' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8798,7 +8802,9 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   }
   size
   admin1
+  admin1Title
   admin2
+  admin2Title
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
@@ -11132,6 +11138,7 @@ export const AllCashPlansDocument = gql`
         caId
         verificationStatus
         assistanceThrough
+        totalNumberOfHouseholds
         serviceProvider {
           id
           caId
@@ -11148,6 +11155,7 @@ export const AllCashPlansDocument = gql`
         dispersionDate
         assistanceMeasurement
         status
+        currency
         totalEntitledQuantity
         totalDeliveredQuantity
         totalUndeliveredQuantity
@@ -11896,10 +11904,12 @@ export const AllPaymentRecordsDocument = gql`
         totalPersonsCovered
         household {
           id
+          unicefId
           size
         }
         entitlementQuantity
         deliveredQuantity
+        deliveredQuantityUsd
         deliveryDate
         cashPlan {
           id
@@ -12655,6 +12665,7 @@ export const CashPlanDocument = gql`
     verificationStatus
     bankReconciliationSuccess
     bankReconciliationError
+    totalNumberOfHouseholds
     verifications {
       edges {
         node {
@@ -13844,6 +13855,7 @@ export const PaymentRecordDocument = gql`
     currency
     entitlementQuantity
     deliveredQuantity
+    deliveredQuantityUsd
     deliveryDate
     deliveryDate
     deliveryType
@@ -16490,15 +16502,17 @@ export type CashPlanNodeResolvers<ContextType = any, ParentType extends Resolver
   validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   totalPersonsCoveredRevised?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  totalEntitledQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalEntitledQuantityRevised?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalDeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
-  totalUndeliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
   verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
   bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
@@ -16997,7 +17011,9 @@ export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends
   address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
   femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,

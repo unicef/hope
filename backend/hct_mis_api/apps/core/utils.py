@@ -3,7 +3,7 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 
 from django_filters import OrderingFilter
 from graphql import GraphQLError
@@ -656,3 +656,23 @@ class CaIdIterator:
     def __next__(self):
         self.last_id += 1
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
+
+
+def resolve_flex_fields_choices_with_correct_labels(parent):
+    from hct_mis_api.apps.core.models import FlexibleAttribute
+
+    labelled_flex_fields = {**parent.flex_fields}
+    for flex_field_name, value in labelled_flex_fields.items():
+        flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
+        choices = dict(flex_field.choices.values_list("name", "label"))
+        if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
+            if isinstance(value, list):
+                new_value = [
+                    choices.get(str(current_choice_value), {}).get("English(EN)") or current_choice_value
+                    for current_choice_value in value
+                ]
+            else:
+                new_value = choices.get(str(value), {}).get("English(EN)") or value
+            labelled_flex_fields[flex_field_name] = new_value
+
+    return labelled_flex_fields

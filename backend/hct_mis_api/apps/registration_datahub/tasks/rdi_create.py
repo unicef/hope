@@ -25,7 +25,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
 from hct_mis_api.apps.household.models import (
     HEAD,
@@ -55,6 +55,17 @@ from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids
 class RdiBaseCreateTask:
     COMBINED_FIELDS = get_combined_attributes()
     FLEX_FIELDS = serialize_flex_attributes()
+
+    @staticmethod
+    def _assign_admin_areas_titles(household_obj):
+        if household_obj.admin1:
+            admin_area_level_1 = AdminArea.objects.filter(p_code=household_obj.admin1).first()
+            household_obj.admin1_title = admin_area_level_1.title if admin_area_level_1 else ""
+        if household_obj.admin2:
+            admin_area_level_2 = AdminArea.objects.filter(p_code=household_obj.admin2).first()
+            household_obj.admin2_title = admin_area_level_2.title if admin_area_level_2 else ""
+
+        return household_obj
 
     def _cast_value(self, value, header):
         if isinstance(value, str):
@@ -91,6 +102,9 @@ class RdiBaseCreateTask:
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):
+                        if single_choice in choices:
+                            valid_choices.append(single_choice)
+                            continue
                         upper_value = single_choice.upper()
                         if upper_value in choices:
                             valid_choices.append(upper_value)
@@ -492,6 +506,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             obj_to_create.last_registration_date = obj_to_create.first_registration_date
 
             if sheet_title == "households":
+                obj_to_create = self._assign_admin_areas_titles(obj_to_create)
                 self.households[household_id] = obj_to_create
             else:
                 if household_id is None:
@@ -792,6 +807,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             household_obj.first_registration_date = registration_date
             household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
+            household_obj = self._assign_admin_areas_titles(household_obj)
             households_to_create.append(household_obj)
 
             for ind_hash_key in current_individuals:

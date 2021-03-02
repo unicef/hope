@@ -4,6 +4,7 @@ import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -22,7 +23,13 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    to_choice_object,
+    encode_ids,
+    CustomOrderingFilter,
+    resolve_flex_fields_choices_with_correct_labels,
+)
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -41,6 +48,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividualIdentity,
 )
 from hct_mis_api.apps.utils.schema import Arg
+
 
 class DeduplicationResultNode(graphene.ObjectType):
     hit_id = graphene.ID()
@@ -68,12 +76,13 @@ class ImportedHouseholdFilter(FilterSet):
         model = ImportedHousehold
         fields = ()
 
-    order_by = OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "id",
-            "head_of_household",
+            Lower("head_of_household__full_name"),
             "size",
-            "registration_date",
+            "first_registration_date",
+            "admin2_title",
         )
     )
 
@@ -138,6 +147,9 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
         ).exists()
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
+
     class Meta:
         model = ImportedHousehold
         filter_fields = []
@@ -173,6 +185,9 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         key = "duplicates" if parent.deduplication_golden_record_status == DUPLICATE else "possible_duplicates"
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
 
     class Meta:
         model = ImportedIndividual
