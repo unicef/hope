@@ -7,7 +7,7 @@ import {
 } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { choicesToDict, formatCurrency } from '../../../utils/utils';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../../utils/utils';
 import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { FlagTooltip } from '../../../components/FlagTooltip';
@@ -55,7 +55,10 @@ export function HouseHoldTableRow({
         {residenceStatusChoiceDict[household.residenceStatus]}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(household.totalCashReceived)}
+        {formatCurrencyWithSymbol(
+          household.totalCashReceived,
+          household.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
         <UniversalMoment>{household.lastRegistrationDate}</UniversalMoment>

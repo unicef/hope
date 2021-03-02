@@ -1,7 +1,9 @@
 import { HeadCell } from '../../../components/table/EnhancedTableHead';
-import {AllCashPlansQuery, CashPlanNode} from '../../../__generated__/graphql';
+import { AllCashPlansQuery } from '../../../__generated__/graphql';
 
-export const headCells: HeadCell<AllCashPlansQuery['allCashPlans']['edges'][number]['node']>[] = [
+export const headCells: HeadCell<
+  AllCashPlansQuery['allCashPlans']['edges'][number]['node']
+>[] = [
   {
     disablePadding: false,
     label: 'Cash Plan ID',

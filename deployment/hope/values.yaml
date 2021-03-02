@@ -204,7 +204,7 @@ celery:
   affinity: {}
 
 celeryflower:
-  image: mher/flower:0.9.7
+  image: saxix/flower:1.6
   replicaCount: 1
   podAnnotations: {}
   podSecurityContext: {}
@@ -216,4 +216,10 @@ celeryflower:
 
   service:
     type: ClusterIP
-    port: 5555
+    port: 8000
+
+  config:
+    FLOWER_URL_PREFIX: flower
+
+  secret:
+    FLOWER_BASIC_AUTH: "use-azure-devops:variables-to-set"

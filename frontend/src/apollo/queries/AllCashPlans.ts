@@ -62,6 +62,7 @@ export const AllCashPlans = gql`
           dispersionDate
           assistanceMeasurement
           status
+          currency
           totalEntitledQuantity
           totalDeliveredQuantity
           totalUndeliveredQuantity
