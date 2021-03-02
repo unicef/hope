@@ -29,12 +29,15 @@ FRONTEND_HOST = os.getenv("HCT_MIS_FRONTEND_HOST", DOMAIN_NAME)
 ####
 # Other settings
 ####
-ADMINS = (
+ADMINS = [
     ("Alerts", os.getenv("ALERTS_EMAIL") or "admin@hct-mis.com"),
     ("Tivix", f"unicef-hct-mis+{slugify(DOMAIN_NAME)}@tivix.com"),
-)
+]
 
-SUPERVISORS = os.getenv("SUPERVISORS", "").split(",")
+# we do not need a full validation here, just handle typos
+EXTRA_ADMINS = [e for e in os.getenv("ALERTS_EMAILS", "").split(",") if "@" in e]
+ADMINS.extend([(i, i) for i in EXTRA_ADMINS])
+SUPERVISORS = [e for e in os.getenv("SUPERVISORS", "").split(",") if "@" in e]
 
 SITE_ID = 1
 TIME_ZONE = "UTC"
