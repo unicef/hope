@@ -45,6 +45,7 @@ export const AllCashPlans = gql`
           caId
           verificationStatus
           assistanceThrough
+          totalNumberOfHouseholds
           serviceProvider {
             id
             caId
@@ -61,6 +62,7 @@ export const AllCashPlans = gql`
           dispersionDate
           assistanceMeasurement
           status
+          currency
           totalEntitledQuantity
           totalDeliveredQuantity
           totalUndeliveredQuantity

@@ -8,7 +8,6 @@ import {
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
-import { Missing } from '../../../../components/Missing';
 import { getFlexFieldTextValue } from '../../../../utils/utils';
 
 const Overview = styled(Paper)`

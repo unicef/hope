@@ -10,22 +10,25 @@ export const ProgrammesBySector = ({
   data,
 }: ProgrammesBySectorProps): React.ReactElement => {
   if (!data) return null;
+
   const chartData = {
-    labels: data?.labels,
+    labels: data.labels,
     datasets: [
       {
         categoryPercentage: 0.5,
         maxBarThickness: 20,
-        label: data?.datasets[0]?.label,
+        label: data.datasets[0]?.label,
         backgroundColor: '#00A9FB',
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
+        stack: 2,
       },
       {
         categoryPercentage: 0.5,
         maxBarThickness: 20,
-        label: data?.datasets[1]?.label,
+        label: data.datasets[1]?.label,
         backgroundColor: '#023F90',
-        data: data?.datasets[1]?.data,
+        data: [...data.datasets[1]?.data],
+        stack: 2,
       },
     ],
   };
@@ -44,7 +47,6 @@ export const ProgrammesBySector = ({
       xAxes: [
         {
           position: 'top',
-          stacked: true,
           ticks: {
             beginAtZero: true,
             stepSize: 1,
@@ -56,7 +58,6 @@ export const ProgrammesBySector = ({
       yAxes: [
         {
           position: 'left',
-          stacked: true,
           gridLines: {
             display: false,
           },
