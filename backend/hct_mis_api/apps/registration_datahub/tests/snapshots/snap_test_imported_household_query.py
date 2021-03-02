@@ -15,7 +15,21 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_
                     'node': {
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
+                        'size': 1
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
                         'size': 2
+                    }
+                },
+                {
+                    'node': {
+                        'address': 'Lorem Ipsum',
+                        'countryOrigin': 'Poland',
+                        'size': 3
                     }
                 },
                 {
@@ -30,20 +44,6 @@ snapshots['TestImportedHouseholdQuery::test_imported_household_query_all_0_with_
                         'address': 'Lorem Ipsum',
                         'countryOrigin': 'Poland',
                         'size': 5
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 1
-                    }
-                },
-                {
-                    'node': {
-                        'address': 'Lorem Ipsum',
-                        'countryOrigin': 'Poland',
-                        'size': 3
                     }
                 },
                 {

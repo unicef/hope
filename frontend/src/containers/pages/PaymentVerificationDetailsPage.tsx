@@ -19,7 +19,7 @@ import {
 import { LoadingComponent } from '../../components/LoadingComponent';
 import {
   choicesToDict,
-  decodeIdString,
+  countPercentage,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
@@ -115,12 +115,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       to: `/${businessArea}/payment-verification`,
     },
   ];
-  const bankReconciliationSuccessPercentage =
-    (cashPlan.bankReconciliationSuccess / cashPlan.paymentRecords.totalCount) *
-    100;
-  const bankReconciliationErrorPercentage =
-    (cashPlan.bankReconciliationError / cashPlan.paymentRecords.totalCount) *
-    100;
+  const bankReconciliationSuccessPercentage = countPercentage(
+    cashPlan.bankReconciliationSuccess,
+    cashPlan.paymentRecords.totalCount,
+  );
+
+  const bankReconciliationErrorPercentage = countPercentage(
+    cashPlan.bankReconciliationError,
+    cashPlan.paymentRecords.totalCount,
+  );
 
   const canCreate =
     hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_CREATE, permissions) &&
@@ -154,7 +157,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Cash Plan ${decodeIdString(cashPlan.id)}`}
+      title={`Cash Plan ${cashPlan.caId}`}
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -215,7 +218,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 { label: 'PROGRAMME NAME', value: cashPlan.program.name },
                 {
                   label: 'PROGRAMME ID',
-                  value: decodeIdString(cashPlan.program.id),
+                  value: cashPlan.program?.caId,
                 },
                 {
                   label: 'PAYMENT RECORDS',
@@ -233,9 +236,9 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 },
               ].map((el) => (
                 <Grid item xs={4} key={el.label}>
-                  <LabelizedField label={el.label}>
-                    <p>{el.value}</p>
-                  </LabelizedField>
+                  <Box pt={2} pb={2}>
+                    <LabelizedField label={el.label}>{el.value}</LabelizedField>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
@@ -249,20 +252,10 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 <Grid item xs={6}>
                   <Grid container direction='column'>
                     <LabelizedField label='SUCCESSFUL'>
-                      <p>
-                        {bankReconciliationSuccessPercentage
-                          ? bankReconciliationSuccessPercentage.toFixed(2)
-                          : 0}
-                        %
-                      </p>
+                      <p>{bankReconciliationSuccessPercentage}%</p>
                     </LabelizedField>
                     <LabelizedField label='ERRONEUS'>
-                      <p>
-                        {bankReconciliationErrorPercentage
-                          ? bankReconciliationErrorPercentage.toFixed(2)
-                          : 0}
-                        %
-                      </p>
+                      <p>{bankReconciliationErrorPercentage}%</p>
                     </LabelizedField>
                   </Grid>
                 </Grid>
@@ -283,8 +276,8 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                         datasets: [
                           {
                             data: [
-                              bankReconciliationSuccessPercentage.toFixed(2),
-                              bankReconciliationErrorPercentage.toFixed(2),
+                              bankReconciliationSuccessPercentage,
+                              bankReconciliationErrorPercentage,
                             ],
                             backgroundColor: ['#00509F', '#FFAA1F'],
                             hoverBackgroundColor: ['#00509F', '#FFAA1F'],
@@ -324,11 +317,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   },
                   {
                     label: 'RESPONDED',
-                    value: verificationPlan.respondedCount || '-',
+                    value: verificationPlan.respondedCount,
                   },
                   {
                     label: 'RECEIVED WITH ISSUES',
-                    value: verificationPlan.receivedWithProblemsCount || '-',
+                    value: verificationPlan.receivedWithProblemsCount,
                   },
                   {
                     label: 'VERIFICATION METHOD',
@@ -337,11 +330,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   { label: 'SAMPLE SIZE', value: verificationPlan.sampleSize },
                   {
                     label: 'RECEIVED',
-                    value: verificationPlan.receivedCount || '-',
+                    value: verificationPlan.receivedCount,
                   },
                   {
                     label: 'NOT RECEIVED',
-                    value: verificationPlan.notReceivedCount || '-',
+                    value: verificationPlan.notReceivedCount,
                   },
                   {
                     label: 'ACTIVATION DATE',
@@ -361,9 +354,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                   },
                 ].map((el) => (
                   <Grid item xs={3} key={el.label}>
-                    <LabelizedField label={el.label}>
-                      <p>{el.value}</p>
-                    </LabelizedField>
+                    <Box pt={2} pb={2}>
+                      <LabelizedField label={el.label}>
+                        {el.value}
+                      </LabelizedField>
+                    </Box>
                   </Grid>
                 ))}
               </Grid>
@@ -419,7 +414,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
       ) : null}
       {cashPlan.verifications &&
       cashPlan.verifications.edges.length &&
-      cashPlan.verificationStatus === 'ACTIVE' ? (
+      cashPlan.verificationStatus !== 'PENDING' ? (
         <>
           <Container>
             <VerificationRecordsFilters

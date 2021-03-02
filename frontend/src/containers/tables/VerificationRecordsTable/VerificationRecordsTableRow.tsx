@@ -6,8 +6,7 @@ import { TableRow } from '@material-ui/core';
 import { PaymentVerificationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
-  decodeIdString,
-  formatCurrency,
+  formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
@@ -44,7 +43,7 @@ export function VerificationRecordsTableRow({
         onClick={canViewRecordDetails ? handleClick : undefined}
         align='left'
       >
-        <Pointer>{decodeIdString(record.paymentRecord.id)}</Pointer>
+        <Pointer>{record.paymentRecord?.caId}</Pointer>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
@@ -61,10 +60,16 @@ export function VerificationRecordsTableRow({
         {record.paymentRecord.household.unicefId}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(record.paymentRecord.deliveredQuantity)}
+        {formatCurrencyWithSymbol(
+          record.paymentRecord.deliveredQuantity,
+          record.paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(record.receivedAmount)}
+        {formatCurrencyWithSymbol(
+          record.receivedAmount,
+          record.paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='left'>
         {record.paymentRecord.household.headOfHousehold.phoneNo}

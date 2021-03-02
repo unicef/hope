@@ -145,7 +145,7 @@ export function CashPlanDetails({
         </Grid>
         <NumberOfHouseHolds>
           <LabelizedField label='Total Number of Households'>
-            <NumberOfHouseHoldsValue>123</NumberOfHouseHoldsValue>
+            <NumberOfHouseHoldsValue>{cashPlan.totalNumberOfHouseholds}</NumberOfHouseHoldsValue>
           </LabelizedField>
         </NumberOfHouseHolds>
       </OverviewContainer>

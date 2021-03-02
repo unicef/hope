@@ -254,7 +254,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Date",
+                  "name": "DateTime",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -264,7 +264,7 @@
                 "description": null,
                 "type": {
                   "kind": "SCALAR",
-                  "name": "Date",
+                  "name": "DateTime",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -1839,6 +1839,26 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "order",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -2669,7 +2689,7 @@
             "deprecationReason": null
           },
           {
-            "name": "chartPlannedBudget",
+            "name": "chartTotalTransferredByMonth",
             "description": null,
             "args": [
               {
@@ -6363,6 +6383,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "adUuid",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11423,6 +11455,18 @@
             "deprecationReason": null
           },
           {
+            "name": "sanctionListConfirmedMatch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "hasDuplicates",
             "description": null,
             "args": [],
@@ -12224,6 +12268,22 @@
           },
           {
             "name": "sanctionListPossibleMatch",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sanctionListConfirmedMatch",
             "description": null,
             "args": [],
             "type": {
@@ -14627,6 +14687,18 @@
             "deprecationReason": null
           },
           {
+            "name": "registrationCaId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "verifications",
             "description": null,
             "args": [
@@ -15260,13 +15332,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15276,13 +15344,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15292,13 +15356,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15308,13 +15368,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Float",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -15488,6 +15544,30 @@
             "type": {
               "kind": "SCALAR",
               "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalNumberOfHouseholds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "currency",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -27797,7 +27877,7 @@
             "deprecationReason": null
           },
           {
-            "name": "total",
+            "name": "totalNumberOfGrievances",
             "description": null,
             "args": [],
             "type": {
@@ -27810,18 +27890,6 @@
           },
           {
             "name": "totalNumberOfFeedback",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "totalNumberOfOpenFeedback",
             "description": null,
             "args": [],
             "type": {
@@ -28272,7 +28340,19 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "String",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "totalHouseholds",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
               "ofType": null
             },
             "isDeprecated": false,
@@ -30884,7 +30964,39 @@
             "deprecationReason": null
           },
           {
+            "name": "admin1Title",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "admin2",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "admin2Title",
             "description": null,
             "args": [],
             "type": {
@@ -31264,13 +31376,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONString",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -32038,13 +32146,9 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONString",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "Arg",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null

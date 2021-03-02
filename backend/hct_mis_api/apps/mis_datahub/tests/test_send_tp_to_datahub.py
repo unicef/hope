@@ -234,8 +234,8 @@ class TestSendTpToDatahub(TestCase):
         dh_individuals = dh_models.Individual.objects.all()
         dh_documents = dh_models.Document.objects.all()
         dh_roles = dh_models.IndividualRoleInHousehold.objects.all()
-
         self.assertEqual(dh_household.count(), 1)
+        self.assertEqual(dh_household.first().unhcr_id, None)
         self.assertEqual(dh_individuals.count(), 1)
         self.assertEqual(dh_documents.count(), 0)
         self.assertEqual(dh_roles.count(), 1)
