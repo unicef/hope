@@ -28,11 +28,9 @@ from hct_mis_api.apps.core.utils import (
     decode_id_string,
     encode_ids,
     to_choice_object,
-    chart_get_filtered_qs,
     sum_lists_with_values,
     chart_permission_decorator,
-    chart_filters_decoder,
-    chart_create_filter_query,
+    chart_filters_decoder, resolve_flex_fields_choices_with_correct_labels,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -54,7 +52,7 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 
@@ -274,6 +272,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
+    sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
     admin1 = graphene.Field(AdminAreaNode)
@@ -303,6 +302,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -392,6 +394,9 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         if parent.photo:
             return parent.photo.url
         return
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_with_correct_labels(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -527,8 +532,8 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
@@ -546,17 +551,15 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_count",
             "household__male_age_group_60_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
-        ids=payment_records_qs.values_list("id", flat=True)
-        individuals_size = (
-            Household.objects.filter(payment_records__in=ids)
-            .distinct()
-            .aggregate(total_size=Sum("size"))
-            .get("total_size")
+        individuals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_individuals_params)
+            .distinct("household__id")
         )
-        return {"total": individuals_size}
+        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
@@ -568,8 +571,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
@@ -594,8 +597,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
 
         household_child_counts = (
@@ -620,7 +623,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_disabled_count",
         ]
-        households_params_without_disability = [
+        households_params_total = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
             "household__female_age_group_12_17_count",
@@ -633,8 +636,8 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(
-            year, business_area_slug, chart_filters_decoder(kwargs)
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
         )
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
@@ -642,41 +645,30 @@ class Query(graphene.ObjectType):
             .values_list(*households_params_with_disability)
             .distinct("household__id")
         )
-
-        households_without_disability_counts = (
-            payment_records_qs.select_related("household")
-            .values_list(*households_params_without_disability)
-            .distinct("household__id")
+        sum_of_with_disability = sum_lists_with_values(
+            households_with_disability_counts, len(households_params_with_disability)
         )
 
+        households_totals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_params_total)
+            .distinct("household__id")
+        )
+        sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
+
+        sum_of_without_disability = []
+
+        for i, total in enumerate(sum_of_totals):
+            if not total:
+                sum_of_without_disability.append(0)
+            elif not sum_of_with_disability[i]:
+                sum_of_without_disability.append(total)
+            else:
+                sum_of_without_disability.append(total - sum_of_with_disability[i])
+
         datasets = [
-            {
-                "label": "with disability",
-                "data": sum_lists_with_values(
-                    households_with_disability_counts, len(households_params_with_disability)
-                ),
-            },
-            {
-                "label": "without disability",
-                "data": sum_lists_with_values(
-                    households_without_disability_counts, len(households_params_without_disability)
-                ),
-            },
+            {"label": "with disability", "data": sum_of_with_disability},
+            {"label": "without disability", "data": sum_of_without_disability},
+            {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
-
-
-def get_payments_records_with_delivered_quantity(year, business_area_slug, filters):
-    return chart_get_filtered_qs(
-        PaymentRecord,
-        year,
-        business_area_slug_filter={"business_area__slug": business_area_slug},
-        additional_filters={
-            "delivered_quantity_usd__gt": 0,
-            **chart_create_filter_query(
-                filters,
-                program_id_path="cash_plan__program__id",
-                administrative_area_path="cash_plan__program__admin_areas",
-            ),
-        },
-    )

@@ -39,7 +39,7 @@ export function ImportedHouseholdTableRow({
       <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>
-      <TableCell align='left'>{household.admin2}</TableCell>
+      <TableCell align='left'>{household.admin2Title}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{household.firstRegistrationDate}</UniversalMoment>
       </TableCell>

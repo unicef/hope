@@ -104,9 +104,9 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'SUCCESS':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case 'PENDING':
+    case 'TRANSACTION_PENDING':
       return theme.hctPalette.oragne;
     default:
       return theme.palette.error.main;
@@ -293,13 +293,16 @@ export function programCompare(
   return statusA > statusB ? 1 : -1;
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(
+  amount: number,
+  onlyNumberValue = false,
+): string {
   const amountCleared = amount || 0;
   return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} USD`;
+  })}${onlyNumberValue ? '' : ' USD'}`;
 }
 
 export function formatCurrencyWithSymbol(
@@ -307,24 +310,43 @@ export function formatCurrencyWithSymbol(
   currency = 'USD',
 ): string {
   const amountCleared = amount || 0;
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    amountCleared,
-  );
+  // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
+  if (!currency) return formatCurrency(amountCleared, true);
+  // undefined forces to use local browser settings
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    // enable this if decided that we always want code and not a symbol
+    // currencyDisplay: 'code',
+  }).format(amountCleared);
+}
+
+export function countPercentage(
+  partialValue: number,
+  totalValue: number,
+): number {
+  if (!totalValue || !partialValue) return 0;
+  return +((partialValue / totalValue) * 100).toFixed(2);
 }
 
 export function getPercentage(
   partialValue: number,
   totalValue: number,
 ): string {
-  if (!totalValue) {
-    return '0%';
-  }
-  return `${((partialValue / totalValue) * 100).toFixed(2)}%`;
+  return `${countPercentage(partialValue, totalValue)}%`;
 }
 
 export function formatNumber(value: number): string {
   if (!value && value !== 0) return '';
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+export function formatThousands(value: string): string {
+  if (!value) return value;
+  if (parseInt(value, 10) >= 10000) {
+    return `${value.toString().slice(0, -3)}k`;
+  }
+  return value;
 }
 
 export function getAgeFromDob(date: string): number {

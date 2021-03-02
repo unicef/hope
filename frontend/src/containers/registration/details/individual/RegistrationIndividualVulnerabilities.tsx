@@ -3,9 +3,12 @@ import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
-import { ImportedIndividualDetailedFragment } from '../../../../__generated__/graphql';
+import {
+  ImportedIndividualDetailedFragment,
+  useAllIndividualsFlexFieldsAttributesQuery,
+} from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
-import { Missing } from '../../../../components/Missing';
+import { getFlexFieldTextValue } from '../../../../utils/utils';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -27,6 +30,34 @@ export function RegistrationIndividualVulnerabilities({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   individual,
 }: RegistrationIndividualVulnerabilitiesProps): React.ReactElement {
+  const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
+  if (loading) {
+    return null;
+  }
+  const fieldsDict = data.allIndividualsFlexFieldsAttributes.reduce(
+    (previousValue, currentValue) => {
+      // eslint-disable-next-line no-param-reassign
+      previousValue[currentValue.name] = currentValue;
+      return previousValue;
+    },
+    {},
+  );
+
+  const fields = Object.entries(individual.flexFields || {}).map(
+    // eslint-disable-next-line array-callback-return,consistent-return
+    ([key, value]: [string, string | string[]]) => {
+      const flexFieldAttribute = fieldsDict[key];
+      if (typeof flexFieldAttribute !== 'undefined') {
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={getFlexFieldTextValue(key, value, flexFieldAttribute)}
+          />
+        );
+      }
+    },
+  );
   return (
     <Overview>
       <Title>
@@ -34,54 +65,7 @@ export function RegistrationIndividualVulnerabilities({
       </Title>
       <Grid container spacing={6}>
         <Grid item xs={4}>
-          <LabelizedField label='Disability'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Working'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Serious Illness'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Martial Status'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Age first Marriage'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Enrolled in School'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Attendance'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Type'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Years in School'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Minutes to School'>
-            <Missing />
-          </LabelizedField>
+          {fields}
         </Grid>
       </Grid>
     </Overview>

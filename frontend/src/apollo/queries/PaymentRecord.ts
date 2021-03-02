@@ -8,6 +8,7 @@ export const PAYMENT_RECORD_QUERY = gql`
       statusDate
       caId
       caHashId
+      registrationCaId
       household {
         id
         size
@@ -93,11 +94,13 @@ export const PAYMENT_RECORD_QUERY = gql`
       currency
       entitlementQuantity
       deliveredQuantity
+      deliveredQuantityUsd
       deliveryDate
       deliveryDate
       deliveryType
       entitlementCardIssueDate
       entitlementCardNumber
+      transactionReferenceId
       serviceProvider {
         id
         fullName

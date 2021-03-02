@@ -61,7 +61,9 @@ export const importedHouseholdMinimal = gql`
     }
     size
     admin1
+    admin1Title
     admin2
+    admin2Title
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
@@ -124,6 +126,7 @@ export const importedIndividualDetailed = gql`
     estimatedBirthDate
     maritalStatus
     pregnant
+    flexFields
     documents {
       edges {
         node {
