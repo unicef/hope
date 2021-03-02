@@ -197,6 +197,7 @@ type CashPlanNode implements Node {
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
   totalNumberOfHouseholds: Int
+  currency: String
 }
 
 type CashPlanNodeConnection {
@@ -1530,7 +1531,9 @@ type ImportedHouseholdNode implements Node {
   address: String!
   country: String
   admin1: String!
+  admin1Title: String!
   admin2: String!
+  admin2Title: String!
   geopoint: GeoJSON
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
