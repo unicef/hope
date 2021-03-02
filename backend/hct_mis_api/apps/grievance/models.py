@@ -214,7 +214,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True
+        db_index=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -469,6 +469,12 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )
     role_reassign_data = JSONField(default=dict)
+
+    @property
+    def has_duplicated_document(self):
+        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
+        return bool(set(documents1) & set(documents2))
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):

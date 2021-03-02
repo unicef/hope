@@ -802,6 +802,7 @@ export type DocumentNode = Node & {
   photo: Scalars['String'],
   individual: IndividualNode,
   type: DocumentTypeNode,
+  status: DocumentStatus,
 };
 
 export type DocumentNodeConnection = {
@@ -817,6 +818,12 @@ export type DocumentNodeEdge = {
   node?: Maybe<DocumentNode>,
   cursor: Scalars['String'],
 };
+
+export enum DocumentStatus {
+  Pending = 'PENDING',
+  Valid = 'VALID',
+  Invalid = 'INVALID'
+}
 
 export type DocumentTypeNode = {
    __typename?: 'DocumentTypeNode',
@@ -4862,6 +4869,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   possibleDuplicate: IndividualNode,
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
+  hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
 export type TicketNoteNode = Node & {
@@ -7386,7 +7394,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, needsAdjudicationTicketDetails: Maybe<(
       { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
-      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'roleReassignData'>
+      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'hasDuplicatedDocument' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
@@ -13248,6 +13256,7 @@ export const GrievanceTicketDocument = gql`
     }
     needsAdjudicationTicketDetails {
       id
+      hasDuplicatedDocument
       goldenRecordsIndividual {
         id
         unicefId
@@ -15821,6 +15830,7 @@ export type ResolversTypes = {
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
@@ -16154,6 +16164,7 @@ export type ResolversParentTypes = {
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
   IndividualIdentityNode: IndividualIdentityNode,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
@@ -16725,6 +16736,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
 };
 
 export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
@@ -18185,6 +18197,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TicketNoteNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNode'] = ResolversParentTypes['TicketNoteNode']> = {

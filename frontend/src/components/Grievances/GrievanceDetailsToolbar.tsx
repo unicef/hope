@@ -18,6 +18,7 @@ import {
 import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ButtonDialog } from '../ButtonDialog';
 
 const Separator = styled.div`
   width: 1px;
@@ -149,6 +150,36 @@ export const GrievanceDetailsToolbar = ({
       ],
     });
   };
+  let closeButton = (
+    <ConfirmationDialog
+      title='Close ticket'
+      extraContent={getClosingConfirmationExtraText()}
+      content={closingConfirmationText}
+      continueText='close ticket'
+    >
+      {(confirm) => (
+        <Button
+          color='primary'
+          variant='contained'
+          onClick={confirm(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
+        >
+          Close Ticket
+        </Button>
+      )}
+    </ConfirmationDialog>
+  );
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument
+  ) {
+    closeButton = (
+      <ButtonDialog
+        title="Duplicate Document Conflict"
+        buttonText='Close Ticket'
+        message='Individuals in conflict have matching identities. Please resolve before proceeding.'
+      />
+    );
+  }
   return (
     <PageHeader
       title={`Ticket #${decodeIdString(id)}`}
@@ -300,26 +331,7 @@ export const GrievanceDetailsToolbar = ({
                 </Button>
               </Box>
             )}
-            {canClose && (
-              <ConfirmationDialog
-                title='Close ticket'
-                extraContent={getClosingConfirmationExtraText()}
-                content={closingConfirmationText}
-                continueText='close ticket'
-              >
-                {(confirm) => (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={confirm(() =>
-                      changeState(GRIEVANCE_TICKET_STATES.CLOSED),
-                    )}
-                  >
-                    Close Ticket
-                  </Button>
-                )}
-              </ConfirmationDialog>
-            )}
+            {canClose && closeButton}
           </>
         )}
       </Box>
