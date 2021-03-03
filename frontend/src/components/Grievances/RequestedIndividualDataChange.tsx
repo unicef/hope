@@ -176,6 +176,7 @@ export function RequestedIndividualDataChange({
           showMessage('Changes Approved');
           const sum =
             values.selected.length +
+            values.selectedFlexFields.length +
             values.selectedDocuments.length +
             values.selectedDocumentsToRemove.length;
           setEdit(sum === 0);
