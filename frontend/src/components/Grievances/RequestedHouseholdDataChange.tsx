@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
 import {
   GrievanceTicketQuery,
@@ -58,6 +58,42 @@ export function RequestedHouseholdDataChange({
     values.selected.length &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
+  const areAllApproved = (values): boolean => {
+    const selectedCount =
+      values.selected.length + values.selectedFlexFields.length;
+    const countAll = entries.length + flexFieldsEntries.length;
+    return selectedCount === countAll;
+  };
+
+  const getApprovalButton = (values, submitForm): ReactElement => {
+    if (areAllApproved(values)) {
+      return (
+        <Button
+          onClick={submitForm}
+          variant='contained'
+          color='primary'
+          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        >
+          Approve
+        </Button>
+      );
+    }
+    return (
+      <ConfirmationDialog title='Warning' content={getConfirmationText(values)}>
+        {(confirm) => (
+          <Button
+            onClick={confirm(() => submitForm())}
+            variant='contained'
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          >
+            Approve
+          </Button>
+        )}
+      </ConfirmationDialog>
+    );
+  };
   return (
     <Formik
       initialValues={{
@@ -116,25 +152,7 @@ export function RequestedHouseholdDataChange({
                   EDIT
                 </Button>
               ) : (
-                canApproveDataChange && (
-                  <ConfirmationDialog
-                    title='Warning'
-                    content={getConfirmationText(values)}
-                  >
-                    {(confirm) => (
-                      <Button
-                        onClick={confirm(() => submitForm())}
-                        variant='contained'
-                        color='primary'
-                        disabled={
-                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                        }
-                      >
-                        Approve
-                      </Button>
-                    )}
-                  </ConfirmationDialog>
-                )
+                canApproveDataChange && getApprovalButton(values, submitForm)
               )}
             </Box>
           </Title>
