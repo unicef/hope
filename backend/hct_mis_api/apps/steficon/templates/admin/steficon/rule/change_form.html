@@ -1,9 +1,24 @@
 {% extends "admin_extra_urls/change_form.html" %}{% load engine static %}
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .object-tools a.btn.extra-link.btn-action.disabled,
+        .object-tools a.btn.extra-link.btn-href.disabled {
+            background: #ece8e8;
+            cursor: not-allowed;
+        }
+    </style>
+{% endblock %}
 {% block object-tools-items %}
     {# removes standard django buttons   #}
     {% include "admin_extra_urls/includes/change_form_buttons.html" %}
 {% endblock %}
 {% block admin_change_form_document_ready %}{{ block.super }}
+    <style>
+        a.btn-action.disabled {
+            background-color: lightgray;
+        }
+    </style>
     <script>
         window.addEventListener('load', function () {
             var fieldsets = document.querySelectorAll('fieldset.collapse.open');
