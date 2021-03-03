@@ -64,6 +64,9 @@ export const importedHouseholdMinimal = gql`
     admin1Title
     admin2
     admin2Title
+    flexFields
+    deviceid
+    start
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
