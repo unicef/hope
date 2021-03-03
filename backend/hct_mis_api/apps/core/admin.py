@@ -1,24 +1,25 @@
-import xlrd
-from admin_extra_urls.api import link, ExtraUrlMixin, action
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+
+import xlrd
+from admin_extra_urls.api import ExtraUrlMixin, button
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
 from hct_mis_api.apps.core.models import (
+    AdminArea,
+    AdminAreaLevel,
     BusinessArea,
+    CountryCodeMap,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
-    AdminArea,
-    AdminAreaLevel,
-    CountryCodeMap,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
@@ -40,7 +41,7 @@ class TestRapidproForm(forms.Form):
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
 
-    @action(label="Test RapidPro Connection")
+    @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
         context = self.get_common_context(request, pk)
         context["business_area"] = self.object
@@ -147,7 +148,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
-    @link()
+    @button()
     def download_last_valid_file(self, request):
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
