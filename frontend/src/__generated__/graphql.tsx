@@ -5706,7 +5706,17 @@ export type ActivateCashPlanPaymentVerificationMutation = (
     { __typename?: 'ActivateCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6033,7 +6043,17 @@ export type DiscardCashPlanPaymentVerificationMutation = (
     { __typename?: 'DiscardCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6098,7 +6118,17 @@ export type FinishCashPlanPaymentVerificationMutation = (
     { __typename?: 'FinishCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'completionDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6241,6 +6271,10 @@ export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = (
     & { paymentVerification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+      & { cashPlanPaymentVerification: (
+        { __typename?: 'CashPlanPaymentVerificationNode' }
+        & Pick<CashPlanPaymentVerificationNode, 'id' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount'>
+      ) }
     )> }
   )> }
 );
@@ -8908,6 +8942,16 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -9902,6 +9946,22 @@ export const DiscardCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -10110,6 +10170,16 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            completionDate
+          }
+        }
+      }
     }
   }
 }
@@ -10543,6 +10613,14 @@ export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
       id
       status
       receivedAmount
+      cashPlanPaymentVerification {
+        id
+        receivedCount
+        notReceivedCount
+        respondedCount
+        receivedCount
+        receivedWithProblemsCount
+      }
     }
   }
 }
