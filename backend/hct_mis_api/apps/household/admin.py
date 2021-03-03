@@ -8,6 +8,7 @@ from django.urls import reverse
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import (
+    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
     RelatedFieldComboFilter,
