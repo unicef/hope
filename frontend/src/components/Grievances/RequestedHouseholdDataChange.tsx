@@ -31,10 +31,10 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
-    return `You approved ${
-      values.selected.length + values.selectedFlexFields.length || 0
-    } change${
-      values.selected.length === 1 ? '' : 's'
+    const allSelected =
+      values.selected.length + values.selectedFlexFields.length || 0;
+    return `You approved ${allSelected} change${
+      allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
