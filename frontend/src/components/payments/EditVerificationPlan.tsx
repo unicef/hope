@@ -63,7 +63,6 @@ function prepareVariables(
   businessArea,
   cashPlanId = null,
 ) {
-  console.log('preparing', cashPlanId, selectedTab, values);
   return {
     input: {
       ...(!cashPlanId && {
@@ -136,8 +135,8 @@ export function EditVerificationPlan({
   const initialValues = {
     confidenceInterval: verification.confidenceInterval * 100 || 95,
     marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || null,
-    filterAgeMax: verification.ageFilter?.max || null,
+    filterAgeMin: verification.ageFilter?.min || '',
+    filterAgeMax: verification.ageFilter?.max || '',
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
