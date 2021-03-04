@@ -15,13 +15,11 @@ import {
   useFinishCashPlanPaymentVerificationMutation,
   useCashPlanQuery,
 } from '../../__generated__/graphql';
-import { CashPlan } from '../../apollo/queries/CashPlan';
 import { LoadingComponent } from '../LoadingComponent';
 import { getPercentage } from '../../utils/utils';
 
 export interface Props {
   cashPlanVerificationId: string;
-  cashPlanId: string;
 }
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -40,7 +38,6 @@ const DialogContainer = styled.div`
 
 export function FinishVerificationPlan({
   cashPlanVerificationId,
-  cashPlanId,
 }: Props): React.ReactElement {
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -63,9 +60,6 @@ export function FinishVerificationPlan({
   const finish = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { cashPlanVerificationId },
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
     });
     if (errors) {
       showMessage('Error while submitting');
@@ -85,7 +79,8 @@ export function FinishVerificationPlan({
 
   const grievanceTickets = (): number => {
     const notReceivedCount = verificationPlan?.notReceivedCount || 0;
-    const receivedWithProblemsCount = verificationPlan?.notReceivedCount || 0;
+    const receivedWithProblemsCount =
+      verificationPlan?.receivedWithProblemsCount || 0;
     const sampleSize = verificationPlan?.sampleSize;
     const responded = verificationPlan?.respondedCount || 0;
 
@@ -132,7 +127,7 @@ export function FinishVerificationPlan({
               <Typography variant='body2'>
                 Are you sure that you want to finish?
               </Typography>
-              {grievanceTickets() && (
+              {grievanceTickets() ? (
                 <Typography
                   style={{ marginTop: '20px', marginBottom: '20px' }}
                   variant='body2'
@@ -140,7 +135,7 @@ export function FinishVerificationPlan({
                   Closing this verification will generate {grievanceTickets()}{' '}
                   grievance tickets.
                 </Typography>
-              )}
+              ) : null}
             </Box>
           </DialogContainer>
         </DialogContent>
