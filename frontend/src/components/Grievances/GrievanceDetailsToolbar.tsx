@@ -170,11 +170,12 @@ export const GrievanceDetailsToolbar = ({
   );
   if (
     ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
-    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    !ticket?.needsAdjudicationTicketDetails?.selectedIndividual
   ) {
     closeButton = (
       <ButtonDialog
-        title="Duplicate Document Conflict"
+        title='Duplicate Document Conflict'
         buttonText='Close Ticket'
         message='Individuals in conflict have matching identities. Please resolve before proceeding.'
       />

@@ -110,8 +110,9 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
 
 def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info, unique_individual):
     old_individual_to_remove, removed_individual_household = reassign_roles(individual_to_remove, info, ticket_details)
-    mark_as_duplicate_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household,
-                                 unique_individual)
+    mark_as_duplicate_individual(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household, unique_individual
+    )
 
 
 def reassign_roles(individual_to_remove, info, ticket_details):
@@ -127,6 +128,7 @@ def reassign_roles(individual_to_remove, info, ticket_details):
         ROLE_ALTERNATE,
         ROLE_NO_ROLE,
     )
+
     old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
     roles_to_bulk_update = []
     for role_data in ticket_details.role_reassign_data.values():
@@ -171,8 +173,8 @@ def reassign_roles(individual_to_remove, info, ticket_details):
     else:
         removed_individual_is_head = False
     if (
-            not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-            and removed_individual_is_head
+        not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
+        and removed_individual_is_head
     ):
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
     return old_individual_to_remove, removed_individual_household
@@ -180,20 +182,25 @@ def reassign_roles(individual_to_remove, info, ticket_details):
 
 def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
     individual_to_remove.withdraw()
-    log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household)
+    log_and_withdraw_household_if_needed(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household
+    )
 
 
-def mark_as_duplicate_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household,
-                                 unique_individual):
+def mark_as_duplicate_individual(
+    individual_to_remove, info, old_individual_to_remove, removed_individual_household, unique_individual
+):
     individual_to_remove.mark_as_duplicate(unique_individual)
-    log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household)
+    log_and_withdraw_household_if_needed(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household
+    )
 
 
-def log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household):
+def log_and_withdraw_household_if_needed(
+    individual_to_remove, info, old_individual_to_remove, removed_individual_household
+):
     from hct_mis_api.apps.household.models import Individual
+
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",

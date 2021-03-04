@@ -70,7 +70,7 @@ services:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    command: "watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
       - db
       - redis

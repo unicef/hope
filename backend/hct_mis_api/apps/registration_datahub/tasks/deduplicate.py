@@ -213,6 +213,8 @@ class DeduplicateTask:
             document_type_key = "agency"
 
         for item in data:
+            print("itemitemitemitemitemitemitem")
+            print(item)
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
@@ -450,7 +452,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type"),
+            "documents": ("document_number", "type.type", "type.country"),
             "identities": ("number", "agency.type"),
             "household": (
                 "residence_status",
