@@ -6,8 +6,6 @@ resources:
       branches:
       - develop
 
-trigger: none
-
 variables:
   # ========================================================================
   #                          Mandatory variables 
@@ -15,6 +13,8 @@ variables:
   Docker.registry: "uniappsk8sdevacr"
   Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
   Kubernetes.namespace: "ictd-hope-dev"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
 
 stages:
   - stage: deploy
