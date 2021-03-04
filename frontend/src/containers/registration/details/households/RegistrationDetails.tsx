@@ -23,11 +23,15 @@ const Overview = styled(Paper)`
 interface RegistrationDetailsProps {
   hctId: string;
   registrationDate: string;
+  deviceid: string;
+  start: string;
 }
 
 export function RegistrationDetails({
   hctId,
   registrationDate,
+  deviceid,
+  start,
 }: RegistrationDetailsProps): React.ReactElement {
   const { data } = useRegistrationDataImportQuery({
     variables: {
@@ -67,22 +71,22 @@ export function RegistrationDetails({
           <Grid container spacing={6}>
             <Grid item xs={4}>
               <LabelizedField label='Start time'>
-                <Missing />
+                <UniversalMoment>{start}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='End time'>
-                <Missing />
+                <UniversalMoment>{registrationDate}</UniversalMoment>
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='Device ID'>
-                <Missing />
+                {deviceid}
               </LabelizedField>
             </Grid>
             <Grid item xs={4}>
               <LabelizedField label='User name'>
-                <Missing />
+                {`${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`}
               </LabelizedField>
             </Grid>
           </Grid>

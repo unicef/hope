@@ -81,16 +81,6 @@ export function HouseholdDetails({
               {household.admin2Title}
             </LabelizedField>
           </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label='Total Cash Received'>
-              <Missing />
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label='Programme (Enrolled)'>
-              <Missing />
-            </LabelizedField>
-          </Grid>
         </Grid>
       </Overview>
     </ContainerColumnWithBorder>
