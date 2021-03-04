@@ -6,6 +6,7 @@ resources:
       branches:
       - develop
 
+trigger: none
 
 variables:
   # ========================================================================
