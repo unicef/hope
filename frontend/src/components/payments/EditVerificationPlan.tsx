@@ -20,9 +20,9 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import {
   useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
-  useSampleSizeQuery,
   useEditCashPlanPaymentVerificationMutation,
   useCashPlanQuery,
+  useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -61,10 +61,14 @@ function prepareVariables(
   selectedTab,
   values,
   businessArea,
+  cashPlanId = null,
 ) {
   return {
     input: {
-      cashPlanPaymentVerificationId: cashPlanVerificationId,
+      ...(!cashPlanId && {
+        cashPlanPaymentVerificationId: cashPlanVerificationId,
+      }),
+      ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -88,7 +92,10 @@ function prepareVariables(
                 ? values.excludedAdminAreasRandom
                 : [],
               age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                ? {
+                    min: values.filterAgeMin || null,
+                    max: values.filterAgeMax || null,
+                  }
                 : null,
               sex: values.sexCheckbox ? values.filterSex : null,
             }
@@ -128,15 +135,18 @@ export function EditVerificationPlan({
   const initialValues = {
     confidenceInterval: verification.confidenceInterval * 100 || 95,
     marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || null,
-    filterAgeMax: verification.ageFilter?.max || null,
+    filterAgeMin: verification.ageFilter?.min || '',
+    filterAgeMax: verification.ageFilter?.max || '',
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
     verificationChannel: verification.verificationMethod || null,
     rapidProFlow: verification.rapidProFlowId || null,
     adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
-    ageCheckbox: Boolean(verification.ageFilter?.min) || false,
+    ageCheckbox:
+      Boolean(verification.ageFilter?.min) ||
+      Boolean(verification.ageFilter?.max) ||
+      false,
     sexCheckbox: Boolean(verification.sexFilter) || false,
   };
 
@@ -153,25 +163,21 @@ export function EditVerificationPlan({
       businessArea,
     },
   });
-  const variablesForSampleSizeQuery = prepareVariables(
-    cashPlanVerificationId,
-    selectedTab,
-    formValues,
-    businessArea,
-  );
-  delete variablesForSampleSizeQuery.input.cashPlanPaymentVerificationId;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  variablesForSampleSizeQuery.input.cashPlanId = cashPlanId;
-  const { data: sampleSizesData, refetch } = useSampleSizeQuery({
-    variables: variablesForSampleSizeQuery,
+
+  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
+    variables: prepareVariables(
+      cashPlanVerificationId,
+      selectedTab,
+      formValues,
+      businessArea,
+      cashPlanId,
+    ),
   });
 
   useEffect(() => {
-    if (formValues) {
-      refetch();
-    }
-  }, [refetch, formValues, sampleSizesData]);
+    loadSampleSize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValues]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -219,7 +225,10 @@ export function EditVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
-          <FormikEffect values={values} onChange={handleFormChange(values)} />
+          <FormikEffect
+            values={values}
+            onChange={() => handleFormChange(values)}
+          />
           <Button
             color='primary'
             variant='contained'
