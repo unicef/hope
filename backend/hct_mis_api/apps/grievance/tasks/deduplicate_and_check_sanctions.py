@@ -4,7 +4,7 @@ from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
 from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
-from hct_mis_api.apps.household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION
+from hct_mis_api.apps.household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, Document
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
@@ -42,3 +42,4 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
         TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create)
 
         CheckAgainstSanctionListPreMergeTask.execute()
+        DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))
