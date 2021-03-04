@@ -8095,7 +8095,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8839,6 +8839,9 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   admin1Title
   admin2
   admin2Title
+  flexFields
+  deviceid
+  start
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
