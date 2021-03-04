@@ -1,4 +1,5 @@
 trigger:
+resources:
   pipelines:
   - pipeline: CI.DEV
     source: HOPE DEV
@@ -6,8 +7,6 @@ trigger:
       branches:
       - develop
 
-resources:
-  - repo: self
 
 variables:
   # ========================================================================
