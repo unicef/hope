@@ -446,7 +446,9 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["document_number", "type"], condition=Q(Q(is_removed=False)&Q(status='VALID')), name="unique_if_not_removed_and_valid"
+                fields=["document_number", "type"],
+                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                name="unique_if_not_removed_and_valid",
             )
         ]
 
@@ -666,6 +668,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
+        for document in self.documents.all():
+            document.status = Document.STATUS_INVALID
+            document.save()
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
