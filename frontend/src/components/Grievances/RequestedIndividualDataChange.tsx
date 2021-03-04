@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
 import mapKeys from 'lodash/mapKeys';
 import camelCase from 'lodash/camelCase';
@@ -36,10 +36,10 @@ export function RequestedIndividualDataChange({
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
   let allApprovedCount = 0;
-  const documents = individualData?.documents;
-  const documentsToRemove = individualData.documents_to_remove;
-  const flexFields = individualData.flex_fields;
-  delete individualData.flex_field;
+  const documents = individualData?.documents || [];
+  const documentsToRemove = individualData.documents_to_remove || [];
+  const flexFields = individualData.flex_fields || {};
+  delete individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
@@ -81,6 +81,47 @@ export function RequestedIndividualDataChange({
     allChangesLength &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
+  const areAllApproved = (allSelected): boolean => {
+    const countAll =
+      entries.length +
+      entriesFlexFields.length +
+      documents.length +
+      documentsToRemove.length;
+    return allSelected === countAll;
+  };
+
+  const getApprovalButton = (allSelected, submitForm): ReactElement => {
+    if (areAllApproved(allSelected)) {
+      return (
+        <Button
+          onClick={submitForm}
+          variant='contained'
+          color='primary'
+          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        >
+          Approve
+        </Button>
+      );
+    }
+    return (
+      <ConfirmationDialog
+        title='Warning'
+        content={getConfirmationText(allSelected)}
+      >
+        {(confirm) => (
+          <Button
+            onClick={confirm(() => submitForm())}
+            variant='contained'
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          >
+            Approve
+          </Button>
+        )}
+      </ConfirmationDialog>
+    );
+  };
 
   return (
     <Formik
@@ -135,6 +176,7 @@ export function RequestedIndividualDataChange({
           showMessage('Changes Approved');
           const sum =
             values.selected.length +
+            values.selectedFlexFields.length +
             values.selectedDocuments.length +
             values.selectedDocumentsToRemove.length;
           setEdit(sum === 0);
@@ -146,6 +188,7 @@ export function RequestedIndividualDataChange({
       {({ submitForm, setFieldValue, values }) => {
         const allChangesLength =
           values.selected.length +
+          values.selectedFlexFields.length +
           values.selectedDocuments.length +
           values.selectedDocumentsToRemove.length;
 
@@ -164,26 +207,8 @@ export function RequestedIndividualDataChange({
                     EDIT
                   </Button>
                 ) : (
-                  canApproveDataChange && (
-                    <ConfirmationDialog
-                      title='Warning'
-                      content={getConfirmationText(allChangesLength)}
-                    >
-                      {(confirm) => (
-                        <Button
-                          onClick={confirm(() => submitForm())}
-                          variant='contained'
-                          color='primary'
-                          disabled={
-                            ticket.status !==
-                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                          }
-                        >
-                          Approve
-                        </Button>
-                      )}
-                    </ConfirmationDialog>
-                  )
+                  canApproveDataChange &&
+                  getApprovalButton(allChangesLength, submitForm)
                 )}
               </Box>
             </Title>
