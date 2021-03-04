@@ -663,16 +663,19 @@ def resolve_flex_fields_choices_with_correct_labels(parent):
 
     labelled_flex_fields = {**parent.flex_fields}
     for flex_field_name, value in labelled_flex_fields.items():
-        flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
-        choices = dict(flex_field.choices.values_list("name", "label"))
-        if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-            if isinstance(value, list):
-                new_value = [
-                    choices.get(str(current_choice_value), {}).get("English(EN)") or current_choice_value
-                    for current_choice_value in value
-                ]
-            else:
-                new_value = choices.get(str(value), {}).get("English(EN)") or value
-            labelled_flex_fields[flex_field_name] = new_value
+        try:
+            flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
+            choices = dict(flex_field.choices.values_list("name", "label"))
+            if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
+                if isinstance(value, list):
+                    new_value = [
+                        choices.get(str(current_choice_value), {}).get("English(EN)") or current_choice_value
+                        for current_choice_value in value
+                    ]
+                else:
+                    new_value = choices.get(str(value), {}).get("English(EN)") or value
+                labelled_flex_fields[flex_field_name] = new_value
+        except FlexibleAttribute.DoesNotExist:
+            pass
 
     return labelled_flex_fields
