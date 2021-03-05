@@ -514,7 +514,6 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
 
         if cashplan_payment_verification.status != CashPlanPaymentVerification.STATUS_ACTIVE:
             raise GraphQLError("You can discard only ACTIVE verification")
-        cashplan_payment_verification.payment_record_verifications.all().delete()
         cashplan_payment_verification.status = CashPlanPaymentVerification.STATUS_PENDING
         cashplan_payment_verification.responded_count = None
         cashplan_payment_verification.received_count = None
@@ -522,10 +521,18 @@ class DiscardCashPlanVerificationMutation(PermissionMutation):
         cashplan_payment_verification.received_with_problems_count = None
         cashplan_payment_verification.activation_date = None
         cashplan_payment_verification.rapid_pro_flow_start_uuid = ""
-        # NOTE: this already happens in post_save signal, I think it can be removed from here
-        # cash_plan.verification_status = CashPlanPaymentVerification.STATUS_PENDING
-        # cash_plan.save()
         cashplan_payment_verification.save()
+
+        # payment verifications to reset
+        payment_record_verifications = cashplan_payment_verification.payment_record_verifications.all()
+        for payment_record_verification in payment_record_verifications:
+            payment_record_verification.status_date = timezone.now()
+            payment_record_verification.status = PaymentVerification.STATUS_PENDING
+            payment_record_verification.received_amount = None
+        PaymentVerification.objects.bulk_update(
+            payment_record_verifications, ["status_date", "status", "received_amount"]
+        )
+
         log_create(
             CashPlanPaymentVerification.ACTIVITY_LOG_MAPPING,
             "business_area",
