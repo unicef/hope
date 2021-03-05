@@ -2052,13 +2052,6 @@ export enum ImportedHouseholdResidenceStatus {
   NonHost = 'NON_HOST'
 }
 
-export enum ImportedIndividualCommsDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum ImportedIndividualDeduplicationBatchStatus {
   SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
@@ -2071,13 +2064,6 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   Duplicate = 'DUPLICATE',
   NeedsAdjudication = 'NEEDS_ADJUDICATION',
   NotProcessed = 'NOT_PROCESSED'
-}
-
-export enum ImportedIndividualHearingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export type ImportedIndividualIdentityNode = {
@@ -2095,13 +2081,6 @@ export enum ImportedIndividualMaritalStatus {
   Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
-}
-
-export enum ImportedIndividualMemoryDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export type ImportedIndividualNode = Node & {
@@ -2134,13 +2113,13 @@ export type ImportedIndividualNode = Node & {
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   flexFields?: Maybe<Scalars['Arg']>,
   pregnant?: Maybe<Scalars['Boolean']>,
-  observedDisability: ImportedIndividualObservedDisability,
-  seeingDisability?: Maybe<ImportedIndividualSeeingDisability>,
-  hearingDisability?: Maybe<ImportedIndividualHearingDisability>,
-  physicalDisability?: Maybe<ImportedIndividualPhysicalDisability>,
-  memoryDisability?: Maybe<ImportedIndividualMemoryDisability>,
-  selfcareDisability?: Maybe<ImportedIndividualSelfcareDisability>,
-  commsDisability?: Maybe<ImportedIndividualCommsDisability>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
@@ -2171,37 +2150,6 @@ export type ImportedIndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum ImportedIndividualObservedDisability {
-  None = 'NONE',
-  Seeing = 'SEEING',
-  Hearing = 'HEARING',
-  Walking = 'WALKING',
-  Memory = 'MEMORY',
-  SelfCare = 'SELF_CARE',
-  Communicating = 'COMMUNICATING'
-}
-
-export enum ImportedIndividualPhysicalDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum ImportedIndividualSeeingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum ImportedIndividualSelfcareDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum ImportedIndividualSex {
   Male = 'MALE',
   Female = 'FEMALE'
@@ -2218,13 +2166,6 @@ export type ImportXlsxCashPlanVerification = {
   cashPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
-
-export enum IndividualCommsDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
 
 export type IndividualDataChangeApproveMutation = {
    __typename?: 'IndividualDataChangeApproveMutation',
@@ -2260,13 +2201,6 @@ export type IndividualDocumentObjectType = {
   number: Scalars['String'],
 };
 
-export enum IndividualHearingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export type IndividualIdentityNode = {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
@@ -2282,13 +2216,6 @@ export enum IndividualMaritalStatus {
   Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
-}
-
-export enum IndividualMemoryDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export type IndividualNode = Node & {
@@ -2337,12 +2264,12 @@ export type IndividualNode = Node & {
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
-  seeingDisability?: Maybe<IndividualSeeingDisability>,
-  hearingDisability?: Maybe<IndividualHearingDisability>,
-  physicalDisability?: Maybe<IndividualPhysicalDisability>,
-  memoryDisability?: Maybe<IndividualMemoryDisability>,
-  selfcareDisability?: Maybe<IndividualSelfcareDisability>,
-  commsDisability?: Maybe<IndividualCommsDisability>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
   businessArea: UserBusinessAreaNode,
@@ -2441,13 +2368,6 @@ export type IndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum IndividualPhysicalDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum IndividualRelationship {
   Unknown = 'UNKNOWN',
   NonBeneficiary = 'NON_BENEFICIARY',
@@ -2481,20 +2401,6 @@ export enum IndividualRoleInHouseholdRole {
   Primary = 'PRIMARY',
   Alternate = 'ALTERNATE',
   NoRole = 'NO_ROLE'
-}
-
-export enum IndividualSeeingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum IndividualSelfcareDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export enum IndividualSex {
@@ -3312,6 +3218,8 @@ export type Query = {
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  observedDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   me?: Maybe<UserNode>,
@@ -7536,6 +7444,12 @@ export type HouseholdChoiceDataQuery = (
   )>>>, deduplicationGoldenRecordStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, observedDisabilityChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, severityOfDisabilityChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
 );
 
@@ -8129,7 +8043,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8902,6 +8816,14 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   maritalStatus
   pregnant
   flexFields
+  observedDisability
+  seeingDisability
+  hearingDisability
+  physicalDisability
+  memoryDisability
+  selfcareDisability
+  commsDisability
+  disability
   documents {
     edges {
       node {
@@ -13589,6 +13511,14 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  observedDisabilityChoices {
+    name
+    value
+  }
+  severityOfDisabilityChoices {
+    name
+    value
+  }
 }
     `;
 export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
@@ -15805,12 +15735,6 @@ export type ResolversTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
@@ -15986,13 +15910,6 @@ export type ResolversTypes = {
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
-  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
-  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
-  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
-  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
-  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
-  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -16138,12 +16055,6 @@ export type ResolversParentTypes = {
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   PaymentRecordNode: PaymentRecordNode,
@@ -16319,13 +16230,6 @@ export type ResolversParentTypes = {
   ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
-  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
-  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
-  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
-  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
-  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
-  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -17190,13 +17094,13 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  observedDisability?: Resolver<ResolversTypes['ImportedIndividualObservedDisability'], ParentType, ContextType>,
-  seeingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSeeingDisability']>, ParentType, ContextType>,
-  hearingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualHearingDisability']>, ParentType, ContextType>,
-  physicalDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualPhysicalDisability']>, ParentType, ContextType>,
-  memoryDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualMemoryDisability']>, ParentType, ContextType>,
-  selfcareDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSelfcareDisability']>, ParentType, ContextType>,
-  commsDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualCommsDisability']>, ParentType, ContextType>,
+  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
@@ -17278,12 +17182,12 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  seeingDisability?: Resolver<Maybe<ResolversTypes['IndividualSeeingDisability']>, ParentType, ContextType>,
-  hearingDisability?: Resolver<Maybe<ResolversTypes['IndividualHearingDisability']>, ParentType, ContextType>,
-  physicalDisability?: Resolver<Maybe<ResolversTypes['IndividualPhysicalDisability']>, ParentType, ContextType>,
-  memoryDisability?: Resolver<Maybe<ResolversTypes['IndividualMemoryDisability']>, ParentType, ContextType>,
-  selfcareDisability?: Resolver<Maybe<ResolversTypes['IndividualSelfcareDisability']>, ParentType, ContextType>,
-  commsDisability?: Resolver<Maybe<ResolversTypes['IndividualCommsDisability']>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
@@ -17659,6 +17563,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
