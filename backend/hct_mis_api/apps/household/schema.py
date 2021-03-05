@@ -1,7 +1,6 @@
+import graphene
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
-
-import graphene
 from django_filters import (
     CharFilter,
     FilterSet,
@@ -11,7 +10,6 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -30,7 +28,9 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     sum_lists_with_values,
     chart_permission_decorator,
-    chart_filters_decoder, resolve_flex_fields_choices_with_correct_labels,
+    chart_filters_decoder,
+    resolve_flex_fields_choices_with_correct_labels,
+    get_model_choices_fields,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -50,10 +50,13 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    DISABILITY_CHOICE,
+    SEVERITY_OF_DISABILITY_CHOICES,
 )
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
+from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
 
 INDIVIDUALS_CHART_LABELS = [
@@ -404,7 +407,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -433,6 +436,17 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            Individual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+            ],
+        )
 
 
 class Query(graphene.ObjectType):
@@ -492,6 +506,8 @@ class Query(graphene.ObjectType):
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
+    observed_disability_choices = graphene.List(ChoiceObject)
+    severity_of_disability_choices = graphene.List(ChoiceObject)
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
@@ -530,6 +546,12 @@ class Query(graphene.ObjectType):
     def resolve_countries_choices(self, info, **kwargs):
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
+    def resolve_severity_of_disability_choices(self, info, **kwargs):
+        return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
+
+    def resolve_observed_disability_choices(self, info, **kwargs):
+        return to_choice_object(DISABILITY_CHOICE)
+
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
         payment_records_qs = get_payment_records_for_dashboard(
@@ -556,8 +578,8 @@ class Query(graphene.ObjectType):
         )
         individuals_counts = (
             payment_records_qs.select_related("household")
-            .values_list(*households_individuals_params)
-            .distinct("household__id")
+                .values_list(*households_individuals_params)
+                .distinct("household__id")
         )
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
@@ -577,8 +599,8 @@ class Query(graphene.ObjectType):
 
         household_child_counts = (
             payment_records_qs.select_related("household")
-            .values_list(*households_child_params)
-            .distinct("household__id")
+                .values_list(*households_child_params)
+                .distinct("household__id")
         )
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
@@ -642,8 +664,8 @@ class Query(graphene.ObjectType):
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
             payment_records_qs.select_related("household")
-            .values_list(*households_params_with_disability)
-            .distinct("household__id")
+                .values_list(*households_params_with_disability)
+                .distinct("household__id")
         )
         sum_of_with_disability = sum_lists_with_values(
             households_with_disability_counts, len(households_params_with_disability)
@@ -651,8 +673,8 @@ class Query(graphene.ObjectType):
 
         households_totals_counts = (
             payment_records_qs.select_related("household")
-            .values_list(*households_params_total)
-            .distinct("household__id")
+                .values_list(*households_params_total)
+                .distinct("household__id")
         )
         sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
 
