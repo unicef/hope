@@ -3,7 +3,7 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet
 
 from django_filters import OrderingFilter
 from graphql import GraphQLError
@@ -679,3 +679,14 @@ def resolve_flex_fields_choices_with_correct_labels(parent):
             pass
 
     return labelled_flex_fields
+
+
+def get_model_choices_fields(model, excluded=None):
+    if excluded is None:
+        excluded = []
+
+    return [
+        field.name
+        for field in model._meta.get_fields()
+        if getattr(field, "choices", None) and field.name not in excluded
+    ]
