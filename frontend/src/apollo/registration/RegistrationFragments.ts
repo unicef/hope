@@ -130,6 +130,14 @@ export const importedIndividualDetailed = gql`
     maritalStatus
     pregnant
     flexFields
+    observedDisability
+    seeingDisability
+    hearingDisability
+    physicalDisability
+    memoryDisability
+    selfcareDisability
+    commsDisability
+    disability
     documents {
       edges {
         node {
