@@ -6,7 +6,6 @@ import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
 } from '../../../../__generated__/graphql';
-import { Missing } from '../../../../components/Missing';
 import { choicesToDict } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
