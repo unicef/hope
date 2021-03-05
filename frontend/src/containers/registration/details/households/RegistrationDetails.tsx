@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import { LabelizedField } from '../../../../components/LabelizedField';
 import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
-import { Missing } from '../../../../components/Missing';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 
 const Title = styled.div`
