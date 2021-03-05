@@ -197,6 +197,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
     FLEX_FIELDS = serialize_flex_attributes()
     ALL_FIELDS = get_combined_attributes()
+    household_ids = []
 
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
@@ -428,24 +429,28 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             # openpyxl keeps iterating on empty rows so need to omit empty rows
             if not any([cell.value for cell in row]):
                 continue
-
+            row_number = 0
             for cell, header in zip(row, first_row):
                 current_field = combined_fields.get(header.value)
                 if not current_field:
                     continue
 
+                row_number = cell.row
+
+                value = cell.value
+                if isinstance(value, float) and value.is_integer():
+                    value = int(value)
+
                 if header.value == "household_id":
-                    current_household_id = cell.value
+                    current_household_id = value
+                    if sheet.title == "Households":
+                        cls.household_ids.append(value)
 
                 if header.value == "relationship_i_c" and cell.value == "HEAD":
                     head_of_household_count[current_household_id] += 1
 
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
-
-                value = cell.value
-                if isinstance(value, float) and value.is_integer():
-                    value = int(value)
 
                 if fn(value, header.value, cell) is False:
                     message = (
@@ -474,6 +479,10 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                 if header.value in identities_numbers:
                     identities_numbers[header.value]["numbers"].append(str(value) if value else None)
 
+            if current_household_id and current_household_id not in cls.household_ids:
+                message = f"Sheet: Individuals, There is no household with provided id: {current_household_id}"
+                invalid_rows.append({"row_number": row_number, "header": "relationship_i_c", "message": message})
+
             for header in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.values():
                 documents_or_identity_dict = (
                     identities_numbers if header in identities_numbers.keys() else documents_numbers
@@ -483,12 +492,11 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         # validate head of household count
         for household_id, count in head_of_household_count.items():
             if count == 0:
-                message = f"Sheet: Individuals, Household with id: {household_id}, " "has to have a head of household"
+                message = f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
                 invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
             elif count > 1:
                 message = (
-                    "Sheet: Individuals, There are multiple head of "
-                    f"households for household with id: {household_id}"
+                    f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                 )
                 invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
