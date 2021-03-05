@@ -1,6 +1,6 @@
 resources:
   pipelines:
-  - pipeline: CI.DEV
+  - pipeline: pipelineci
     source: HOPE DEV
     trigger: 
       branches:
