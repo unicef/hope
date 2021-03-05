@@ -237,7 +237,8 @@ class CashPlan(TimeStampedUUIDModel):
 
     @cached_property
     def total_number_of_households(self):
-        return self.payment_records.exclude(status=PaymentRecord.STATUS_ERROR).values("household").distinct().count()
+        # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
+        return self.payment_records.count()
 
     @property
     def currency(self):
