@@ -29,6 +29,7 @@ from hct_mis_api.apps.core.utils import (
     encode_ids,
     CustomOrderingFilter,
     resolve_flex_fields_choices_with_correct_labels,
+    get_model_choices_fields,
 )
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
@@ -169,6 +170,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     relationship = graphene.String()
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    observed_disability = graphene.List(graphene.String)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -194,6 +196,17 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            ImportedIndividual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+            ],
+        )
 
 
 class RegistrationDataImportDatahubNode(DjangoObjectType):
