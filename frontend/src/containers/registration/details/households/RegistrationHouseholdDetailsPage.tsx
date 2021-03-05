@@ -85,6 +85,8 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={importedHousehold.firstRegistrationDate}
+          deviceid={importedHousehold.deviceid}
+          start={importedHousehold.start}
         />
       </Container>
     </div>

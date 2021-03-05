@@ -25,6 +25,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      volumes:
+      - configMap:
+          defaultMode: 511
+          name: {{ include "hope.fullname" . }}-celeryflower-entrypoint
+        name: entrypoint
       containers:
         - name: {{ .Chart.Name }}-celery-flower
           securityContext:
@@ -55,14 +60,6 @@ spec:
                 value: "kubernetes.internal"
           resources:
             {{- toYaml .Values.celeryflower.resources | nindent 12 }}
-        volumes:
-        - name: entrypoint
-          configMap:
-            name: {{ include "hope.fullname" . }}-celeryflower-entrypoint
-            defaultMode: 0777
-            items:
-              - key: entrypoint.sh
-                path: entrypoint.sh
       {{- with .Values.celeryflower.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
