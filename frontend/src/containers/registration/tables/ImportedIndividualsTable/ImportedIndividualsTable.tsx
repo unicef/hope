@@ -7,9 +7,9 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
 
 interface ImportedIndividualsTableProps {
   rdiId?: string;
