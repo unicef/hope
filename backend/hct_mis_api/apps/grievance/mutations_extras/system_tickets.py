@@ -4,6 +4,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     mark_as_duplicate_individual_and_reassign_roles,
 )
 from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH, Document
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 def close_system_flagging_ticket(grievance_ticket, info):
@@ -36,8 +37,8 @@ def _clear_deduplication_individuals_fields(individuals):
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
-
-    Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_VALID)
+    DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
+    # Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_VALID)
     Individual.objects.bulk_update(
         individuals,
         [
