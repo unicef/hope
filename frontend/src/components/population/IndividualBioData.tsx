@@ -59,6 +59,12 @@ export function IndividualsBioData({
     choicesData.maritalStatusChoices,
   );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
+  );
+  const severityOfDisabilityChoicesDict = choicesToDict(
+    choicesData.severityOfDisabilityChoices,
+  );
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
@@ -149,6 +155,46 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Relationship to HOH'>
             {relationshipChoicesDict[individual.relationship]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Observed disabilities'>
+            {individual.observedDisability
+              .map((choice) => observedDisabilityChoicesDict[choice])
+              .join(', ')}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Seeing disability severity'>
+            {severityOfDisabilityChoicesDict[individual.seeingDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Hearing disability severity'>
+            {severityOfDisabilityChoicesDict[individual.hearingDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Physical disability severity'>
+            {severityOfDisabilityChoicesDict[individual.physicalDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Remembering or concentrating disability severity'>
+            {severityOfDisabilityChoicesDict[individual.memoryDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Self-care disability severity'>
+            {severityOfDisabilityChoicesDict[individual.selfcareDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Communicating disability severity'>
+            {severityOfDisabilityChoicesDict[individual.commsDisability]}
           </LabelizedField>
         </Grid>
         {!mappedIndividualDocuments.length &&
