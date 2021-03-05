@@ -136,7 +136,7 @@ export const GrievanceTicket = gql`
       }
       needsAdjudicationTicketDetails {
         id
-
+        hasDuplicatedDocument
         goldenRecordsIndividual {
           id
           unicefId
