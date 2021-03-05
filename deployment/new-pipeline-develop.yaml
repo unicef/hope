@@ -2,9 +2,6 @@ resources:
   pipelines:
   - pipeline: pipelineci
     source: HOPE DEV
-    trigger: 
-      branches:
-      - develop
 
 variables:
   # ========================================================================
