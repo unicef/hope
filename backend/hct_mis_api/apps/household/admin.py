@@ -37,7 +37,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type", "individual")
+    list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
 
@@ -118,8 +118,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                 field = f"{gender}_age_group_{range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True)|Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True)|Q(withdrawn=True))
+        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
+        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
         all_individuals = hh.individuals.all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
@@ -131,9 +131,10 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         if hh.size != total_in_ranges:
             warnings.append(
-                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
+                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"]
+            )
 
-        aaaa = active_individuals.values_list('unicef_id', flat=True)
+        aaaa = active_individuals.values_list("unicef_id", flat=True)
         bbb = Household.objects.filter(unicef_id__in=aaaa)
         if bbb.count() > len(aaaa):
             warnings.append([messages.ERROR, "Unmarked duplicates found"])
@@ -177,7 +178,15 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             None,
             {
                 "fields": (
-                    ("full_name", "withdrawn", "withdrawn_date", "duplicate", "duplicate_date", "is_removed", "removed_date"),
+                    (
+                        "full_name",
+                        "withdrawn",
+                        "withdrawn_date",
+                        "duplicate",
+                        "duplicate_date",
+                        "is_removed",
+                        "removed_date",
+                    ),
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),

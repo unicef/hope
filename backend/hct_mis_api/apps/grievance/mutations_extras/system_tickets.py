@@ -3,7 +3,8 @@ from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     mark_as_duplicate_individual_and_reassign_roles,
 )
-from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
+from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH, Document
+from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 def close_system_flagging_ticket(grievance_ticket, info):
@@ -36,6 +37,7 @@ def _clear_deduplication_individuals_fields(individuals):
         individual.deduplication_batch_status = UNIQUE_IN_BATCH
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
+    DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
     Individual.objects.bulk_update(
         individuals,
         [
@@ -60,7 +62,7 @@ def close_needs_adjudication_ticket(grievance_ticket, info):
     else:
         individual_to_remove = ticket_details.selected_individual
         unique_individuals = [individual for individual in both_individuals if individual.id != individual_to_remove.id]
-        _clear_deduplication_individuals_fields(unique_individuals)
         mark_as_duplicate_individual_and_reassign_roles(
             ticket_details, individual_to_remove, info, unique_individuals[0]
         )
+        _clear_deduplication_individuals_fields(unique_individuals)
