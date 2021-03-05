@@ -38,7 +38,6 @@ def _clear_deduplication_individuals_fields(individuals):
         individual.deduplication_golden_record_results = {}
         individual.deduplication_batch_results = {}
     DeduplicateTask.hard_deduplicate_documents(individual.documents.all())
-    # Document.objects.filter(individual__in=individuals).update(status=Document.STATUS_VALID)
     Individual.objects.bulk_update(
         individuals,
         [
