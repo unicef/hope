@@ -67,6 +67,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
   } = useMeQuery();
   const { data, loading, error } = useGrievanceTicketQuery({
     variables: { id },
+    fetchPolicy: 'network-only',
   });
   const businessArea = useBusinessArea();
   const {

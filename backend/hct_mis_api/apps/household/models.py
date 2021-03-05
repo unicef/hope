@@ -426,10 +426,12 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
     STATUS_PENDING = "PENDING"
     STATUS_VALID = "VALID"
+    STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
     STATUS_INVALID = "INVALID"
     STATUS_CHOICES = (
         (STATUS_PENDING, _("Pending")),
         (STATUS_VALID, _("Valid")),
+        (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
         (STATUS_INVALID, _("Invalid")),
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)

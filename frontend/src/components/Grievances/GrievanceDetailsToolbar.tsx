@@ -177,7 +177,7 @@ export const GrievanceDetailsToolbar = ({
       <ButtonDialog
         title='Duplicate Document Conflict'
         buttonText='Close Ticket'
-        message='Individuals in conflict have matching identities. Please resolve before proceeding.'
+        message='The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.'
       />
     );
   }

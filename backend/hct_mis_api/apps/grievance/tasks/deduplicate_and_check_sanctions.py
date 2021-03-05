@@ -27,19 +27,14 @@ class DeduplicateAndCheckAgainstSanctionsListTask:
             populate_index(individuals, IndividualDocument)
 
         DeduplicateTask.deduplicate_individuals_from_other_source(individuals=individuals)
-        ticket_details_to_create = []
 
         golden_record_duplicates = individuals.filter(deduplication_golden_record_status=DUPLICATE)
 
-        ticket_details = create_needs_adjudication_tickets(golden_record_duplicates, "duplicates", business_area)
-        ticket_details_to_create.extend(ticket_details)
+        create_needs_adjudication_tickets(golden_record_duplicates, "duplicates", business_area)
 
         needs_adjudication = individuals.filter(deduplication_golden_record_status=NEEDS_ADJUDICATION)
 
-        ticket_details = create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
-        ticket_details_to_create.extend(ticket_details)
-
-        TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create)
+        create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", business_area)
 
         CheckAgainstSanctionListPreMergeTask.execute()
         DeduplicateTask.hard_deduplicate_documents(Document.objects.filter(individual_id__in=individuals_ids))

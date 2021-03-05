@@ -213,8 +213,6 @@ class DeduplicateTask:
             document_type_key = "agency"
 
         for item in data:
-            print("itemitemitemitemitemitemitem")
-            print(item)
             doc_number = item.get("document_number") or item.get("number")
             doc_type = item.get(document_type_key)
             if doc_number and doc_type:
@@ -775,7 +773,10 @@ class DeduplicateTask:
 
     @classmethod
     def hard_deduplicate_documents(cls, documents):
+        batch_document_strings = [f"{d.type}--{d.document_number}" for d in documents]
+        batch_document_strings = [d for d in batch_document_strings if batch_document_strings.count(d) > 1]
         for document in documents:
+            document_string = f"{document.type}--{document.document_number}"
             documents_queryset = Document.objects.filter(
                 Q(document_number=document.document_number)
                 & Q(type=document.type)
@@ -787,7 +788,9 @@ class DeduplicateTask:
                 create_grievance_ticket_with_details(
                     documents_queryset.first().individual, document.individual, document.individual.business_area
                 )
-                document.status = Document.STATUS_INVALID
+                document.status = Document.STATUS_NEED_INVESTIGATION
             else:
                 document.status = Document.STATUS_VALID
+            if document_string in batch_document_strings:
+                document.status = Document.STATUS_NEED_INVESTIGATION
             document.save()
