@@ -451,6 +451,8 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 
 
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
+    has_duplicated_document = graphene.Boolean()
+
     class Meta:
         model = TicketNeedsAdjudicationDetails
         exclude = ("ticket",)
