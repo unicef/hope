@@ -8,7 +8,6 @@ from django.urls import reverse
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import (
-    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
     RelatedFieldComboFilter,
@@ -37,7 +36,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type", "individual")
+    list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
 
