@@ -528,6 +528,7 @@ type DocumentNode implements Node {
   photo: String!
   individual: IndividualNode!
   type: DocumentTypeNode!
+  status: DocumentStatus!
 }
 
 type DocumentNodeConnection {
@@ -540,6 +541,12 @@ type DocumentNodeConnection {
 type DocumentNodeEdge {
   node: DocumentNode
   cursor: String!
+}
+
+enum DocumentStatus {
+  PENDING
+  VALID
+  INVALID
 }
 
 type DocumentTypeNode {
@@ -3051,6 +3058,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   possibleDuplicate: IndividualNode!
   selectedIndividual: IndividualNode
   roleReassignData: JSONString!
+  hasDuplicatedDocument: Boolean
 }
 
 type TicketNoteNode implements Node {
