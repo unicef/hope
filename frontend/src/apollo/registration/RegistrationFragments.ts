@@ -64,6 +64,9 @@ export const importedHouseholdMinimal = gql`
     admin1Title
     admin2
     admin2Title
+    flexFields
+    deviceid
+    start
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
@@ -127,6 +130,14 @@ export const importedIndividualDetailed = gql`
     maritalStatus
     pregnant
     flexFields
+    observedDisability
+    seeingDisability
+    hearingDisability
+    physicalDisability
+    memoryDisability
+    selfcareDisability
+    commsDisability
+    disability
     documents {
       edges {
         node {

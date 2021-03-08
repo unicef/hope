@@ -26,5 +26,13 @@ export const HouseholdChoiceData = gql`
       name
       value
     }
+    observedDisabilityChoices {
+      name
+      value
+    }
+    severityOfDisabilityChoices {
+      name
+      value
+    }
   }
 `;
