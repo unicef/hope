@@ -1,13 +1,15 @@
+trigger: none
 resources:
   pipelines:
   - pipeline: pipelineci
-    source: HOPE DEV
+    source: "[CI] HOPE"
+
 
 variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Docker.registry: "uniappsk8sdevacr"
+  Docker.registry: "uniappsk8shopedev"
   Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
   Kubernetes.namespace: "ictd-hope-dev"
   Docker.backend.repository: "hope-backend"
@@ -18,10 +20,10 @@ stages:
     displayName: DEPLOY
     jobs:
       - job: deploy_hope
-        displayName: "[HOPE]"
+        displayName: "[HOPE] Deployment"
         steps:
           - task: HelmDeploy@0
-            displayName: "[HOPE] Update Chart dependencies"
+            displayName: "Update Chart dependencies"
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
@@ -29,7 +31,7 @@ stages:
               updatedependency: true
               chartPath: '**/deployment/hope'
           - task: HelmDeploy@0
-            displayName: "[HOPE] DEPLOY"
+            displayName: "DEPLOY"
             inputs:
               connectionType: 'Kubernetes Service Connection'
               kubernetesServiceConnection: $(Kubernetes.serviceConnection)
