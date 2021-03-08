@@ -19,8 +19,8 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.registry: "uniappsk8shopedev"
-
+  Docker.registry: "ICTD-HOPE-DEV-ACR"
+  Docker.repository: "uniappsk8shopedev" 
 stages:
   - stage: build_and_push
     displayName: BUILD and PUSH
@@ -33,8 +33,8 @@ stages:
             inputs:
               command: buildAndPush
               dockerfile: $(Docker.backend.filePath)
-              repository: $(Docker.backend.repository)
-              containerRegistry: $(Docker.registry)
+              repository: $(Docker.repository)/$(Docker.backend.repository)
+              containerRegistry: $(Docker.repository)
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
@@ -48,7 +48,7 @@ stages:
             inputs:
               command: build
               dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
+              repository: $(Docker.repository)/$(Docker.frontend.repository)
               arguments: --build-arg SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
               containerRegistry: $(Docker.registry)
               tags: |
