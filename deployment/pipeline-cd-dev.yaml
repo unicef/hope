@@ -1,4 +1,4 @@
-trigger: none
+# trigger: none
 resources:
   pipelines:
   - pipeline: ci-hope
