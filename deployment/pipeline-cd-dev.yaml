@@ -3,6 +3,10 @@ resources:
   pipelines:
   - pipeline: pipelineci
     source: "[CI] HOPE"
+    trigger: 
+      branches:
+      - develop
+      - ops/*
 
 
 variables:
