@@ -5,9 +5,8 @@ resources:
     source: ci-hope
     trigger: 
       branches:
-        include:
-          - develop
-          - ops/*
+      - develop
+      - ops/*
 
 
 variables:
