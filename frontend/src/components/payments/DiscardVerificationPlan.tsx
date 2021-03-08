@@ -8,11 +8,9 @@ import { ErrorButtonContained } from '../ErrorButtonContained';
 import { ErrorButton } from '../ErrorButton';
 import { useSnackbar } from '../../hooks/useSnackBar';
 import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
-import { CashPlan } from '../../apollo/queries/CashPlan';
 
 export interface Props {
   cashPlanVerificationId: string;
-  cashPlanId: string;
 }
 
 const DialogTitleWrapper = styled.div`
@@ -32,7 +30,6 @@ const DialogContainer = styled.div`
 
 export function DiscardVerificationPlan({
   cashPlanVerificationId,
-  cashPlanId,
 }: Props): React.ReactElement {
   const [finishDialogOpen, setFinishDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -41,9 +38,6 @@ export function DiscardVerificationPlan({
   const discard = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { cashPlanVerificationId },
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
     });
     if (errors) {
       showMessage('Error while submitting');

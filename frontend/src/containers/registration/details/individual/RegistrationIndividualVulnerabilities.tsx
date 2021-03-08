@@ -64,9 +64,11 @@ export function RegistrationIndividualVulnerabilities({
         <Typography variant='h6'>Vulnerabilities</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={4}>
-          {fields}
-        </Grid>
+          {fields.map((field) => (
+            <Grid item xs={4}>
+              {field}
+            </Grid>
+          ))}
       </Grid>
     </Overview>
   );

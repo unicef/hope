@@ -5,11 +5,9 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
-import { CashPlan } from '../../apollo/queries/CashPlan';
 
 export interface Props {
   cashPlanVerificationId: string;
-  cashPlanId: string;
 }
 
 const DialogTitleWrapper = styled.div`
@@ -29,7 +27,6 @@ const DialogContainer = styled.div`
 
 export function ActivateVerificationPlan({
   cashPlanVerificationId,
-  cashPlanId,
 }: Props): React.ReactElement {
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
@@ -38,9 +35,6 @@ export function ActivateVerificationPlan({
   const activate = async (): Promise<void> => {
     const { errors } = await mutate({
       variables: { cashPlanVerificationId },
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
     });
     if (errors) {
       showMessage('Error while submitting');

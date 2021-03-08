@@ -267,7 +267,6 @@ class RdiMergeTask:
             KoboImportedSubmission.objects.bulk_create(kobo_submissions)
 
         # DEDUPLICATION
-        ticket_details_to_create = []
 
         populate_index(Individual.objects.filter(registration_data_import=obj_hct), IndividualDocument)
 
@@ -277,21 +276,17 @@ class RdiMergeTask:
             registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
         )
 
-        ticket_details = create_needs_adjudication_tickets(
+        create_needs_adjudication_tickets(
             golden_record_duplicates, "duplicates", obj_hct.business_area
         )
-        ticket_details_to_create.extend(ticket_details)
 
         needs_adjudication = Individual.objects.filter(
             registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
 
-        ticket_details = create_needs_adjudication_tickets(
+        create_needs_adjudication_tickets(
             needs_adjudication, "possible_duplicates", obj_hct.business_area
         )
-        ticket_details_to_create.extend(ticket_details)
-
-        TicketNeedsAdjudicationDetails.objects.bulk_create(ticket_details_to_create)
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()
@@ -299,5 +294,5 @@ class RdiMergeTask:
         obj_hct.status = RegistrationDataImport.MERGED
 
         obj_hct.save()
-
+        DeduplicateTask.hard_deduplicate_documents(documents_to_create)
         log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
