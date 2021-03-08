@@ -34,7 +34,7 @@ stages:
               command: buildAndPush
               dockerfile: $(Docker.backend.filePath)
               repository: $(Docker.repository)/$(Docker.backend.repository)
-              containerRegistry: $(Docker.repository)
+              containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
@@ -60,7 +60,7 @@ stages:
             inputs:
               command: push
               dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
+              repository: $(Docker.repository)/$(Docker.frontend.repository)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
