@@ -3,10 +3,7 @@ resources:
   pipelines:
   - pipeline: ci-hope
     source: ci-hope
-    trigger: 
-      branches:
-      - develop
-      - ops/*
+
 
 
 variables:
