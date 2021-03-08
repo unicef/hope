@@ -1,9 +1,13 @@
-# trigger: none
+trigger: none
 resources:
   pipelines:
   - pipeline: ci-hope
     source: ci-hope
-
+    trigger: 
+      branches:
+        include:
+          - develop
+          - ops/*
 
 
 variables:
