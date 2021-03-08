@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import {AnonTableCell} from "../../../../components/table/AnonTableCell";
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -29,7 +30,7 @@ export function ProgrammeTableRow({
       key={household.id}
     >
       <TableCell align='left'>{household.unicefId}</TableCell>
-      <TableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</TableCell>
+      <AnonTableCell align='left'>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>
       <TableCell align='left'>
