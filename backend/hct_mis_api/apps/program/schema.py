@@ -146,13 +146,7 @@ class CashPlanFilter(FilterSet):
 
     @property
     def qs(self):
-        return super().qs.annotate(
-            total_number_of_hh=Count(
-                "payment_records__household",
-                filter=~Q(payment_records__status=PaymentRecord.STATUS_ERROR),
-                distinct=True,
-            )
-        )
+        return super().qs.annotate(total_number_of_hh=Count("payment_records"))
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")

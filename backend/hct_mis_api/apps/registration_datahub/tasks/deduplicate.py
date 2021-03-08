@@ -10,6 +10,7 @@ from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.utils import to_dict
+from hct_mis_api.apps.grievance.common import create_grievance_ticket_with_details
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
@@ -20,6 +21,7 @@ from hct_mis_api.apps.household.models import (
     NOT_PROCESSED,
     DUPLICATE_IN_BATCH,
     UNIQUE_IN_BATCH,
+    Document,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
@@ -448,7 +450,7 @@ class DeduplicateTask:
             "birth_date",
         )
         dict_fields = {
-            "documents": ("document_number", "type.type"),
+            "documents": ("document_number", "type.type", "type.country"),
             "identities": ("number", "agency.type"),
             "household": (
                 "residence_status",
@@ -768,3 +770,27 @@ class DeduplicateTask:
             log_create(
                 RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_rdi, registration_data_import
             )
+
+    @classmethod
+    def hard_deduplicate_documents(cls, documents):
+        batch_document_strings = [f"{d.type}--{d.document_number}" for d in documents]
+        batch_document_strings = [d for d in batch_document_strings if batch_document_strings.count(d) > 1]
+        for document in documents:
+            document_string = f"{document.type}--{document.document_number}"
+            documents_queryset = Document.objects.filter(
+                Q(document_number=document.document_number)
+                & Q(type=document.type)
+                & ~Q(individual=document.individual)
+                & Q(Q(status=Document.STATUS_VALID) | Q(status=Document.STATUS_PENDING))
+            )
+            documents_count = documents_queryset.count()
+            if documents_count > 0:
+                create_grievance_ticket_with_details(
+                    documents_queryset.first().individual, document.individual, document.individual.business_area
+                )
+                document.status = Document.STATUS_NEED_INVESTIGATION
+            else:
+                document.status = Document.STATUS_VALID
+            if document_string in batch_document_strings:
+                document.status = Document.STATUS_NEED_INVESTIGATION
+            document.save()
