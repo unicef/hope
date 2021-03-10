@@ -241,9 +241,13 @@ class ImportedDocumentNode(DjangoObjectType):
 
 class ImportedIndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = ImportedIndividualIdentity
