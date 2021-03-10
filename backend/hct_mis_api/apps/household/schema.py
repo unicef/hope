@@ -357,20 +357,6 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
 
-
-def image_as_base64(image_file, format='png'):
-    """
-    :param `image_file` for the complete path of image.
-    :param `format` is format for image, eg: `png` or `jpg`.
-    """
-    if not os.path.isfile(image_file):
-        return None
-
-    encoded_string = ''
-    with open(image_file, 'rb') as img_f:
-        encoded_string = base64.b64encode(img_f.read())
-    return 'data:image/%s;base64,%s' % (format, encoded_string)
-
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
