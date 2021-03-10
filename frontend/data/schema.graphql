@@ -1641,6 +1641,7 @@ type ImportedIndividualIdentityNode {
   individual: ImportedIndividualNode!
   documentNumber: String!
   type: String
+  country: String
 }
 
 enum ImportedIndividualMaritalStatus {
@@ -1751,6 +1752,7 @@ type IndividualIdentityNode {
   individual: IndividualNode!
   number: String!
   type: String
+  country: String
 }
 
 enum IndividualMaritalStatus {
