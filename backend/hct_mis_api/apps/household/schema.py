@@ -1,3 +1,6 @@
+import base64
+import os
+
 import graphene
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
@@ -353,7 +356,6 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
-
 
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
