@@ -128,6 +128,7 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
+    workStatus
     pregnant
     flexFields
     observedDisability
@@ -144,6 +145,7 @@ export const importedIndividualDetailed = gql`
           id
           type {
             label
+            country
           }
           documentNumber
         }

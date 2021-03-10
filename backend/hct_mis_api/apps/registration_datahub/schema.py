@@ -205,6 +205,8 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "memory_disability",
                 "selfcare_disability",
                 "comms_disability",
+                "work_status",
+                "collect_individual_data",
             ],
         )
 

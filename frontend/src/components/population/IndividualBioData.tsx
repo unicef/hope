@@ -58,6 +58,7 @@ export function IndividualsBioData({
   const maritalStatusChoicesDict = choicesToDict(
     choicesData.maritalStatusChoices,
   );
+  const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const observedDisabilityChoicesDict = choicesToDict(
     choicesData.observedDisabilityChoices,
@@ -69,6 +70,13 @@ export function IndividualsBioData({
     <Grid item xs={3} key={edge.node.id}>
       <LabelizedField label={edge.node.type.label}>
         {edge.node.documentNumber}
+      </LabelizedField>
+    </Grid>
+  ));
+  const mappedIndividualDocumentsIssuers = individual.documents?.edges?.map((edge) => (
+    <Grid item xs={3} key={`${edge.node.id}-${edge.node.type.country}`}>
+      <LabelizedField label={`${edge.node.type.label} ISSUER`}>
+        {edge.node.type.country}
       </LabelizedField>
     </Grid>
   ));
@@ -127,6 +135,11 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
             {maritalStatusChoicesDict[individual.maritalStatus]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Work Status'>
+            {workStatusChoicesDict[individual.workStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -205,6 +218,13 @@ export function IndividualsBioData({
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
+        {!mappedIndividualDocumentsIssuers.length &&
+        !mappedIdentities.length ? null : (
+            <Grid item xs={12}>
+              <BorderBox />
+            </Grid>
+        )}
+        {mappedIndividualDocumentsIssuers}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>
