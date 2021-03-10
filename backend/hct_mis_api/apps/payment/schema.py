@@ -188,7 +188,7 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
-
+    is_manually_editable = graphene.Boolean()
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)
