@@ -546,6 +546,7 @@ type DocumentNodeEdge {
 enum DocumentStatus {
   PENDING
   VALID
+  NEED_INVESTIGATION
   INVALID
 }
 
