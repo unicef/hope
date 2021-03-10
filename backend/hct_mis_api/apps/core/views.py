@@ -54,5 +54,5 @@ def trigger_error(request):
 def download_dashboard_report(request, report_id):
     report = get_object_or_404(DashboardReport, id=report_id)
     if not request.user.has_permission(Permissions.DASHBOARD_EXPORT.name, report.business_area):
-        raise PermissionDenied("Permission Denied: User does not have correct permission.")
+        raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
     return redirect(report.file.url)
