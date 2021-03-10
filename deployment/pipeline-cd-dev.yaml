@@ -13,11 +13,11 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Docker.registry: "uniappsk8shopedev"
   Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
   Kubernetes.namespace: "ictd-hope-dev"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
+  Docker.registry: "uniappsakshopedev.azurecr.io"
 
 stages:
   - stage: deploy
@@ -51,8 +51,8 @@ stages:
               overrideValues: "
                 global.env=staging,\
                 global.storageClass=default,\
-                backend.image=uniappsk8shopedev.azurecr.io/uniappsk8shopedev/$(Docker.backend.repository):$(Build.SourceVersion),\
-                celery.image=uniappsk8shopedev.azurecr.io/uniappsk8shopedev/$(Docker.backend.repository):$(Build.SourceVersion),\
+                backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
+                celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\
@@ -67,7 +67,7 @@ stages:
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\
-                frontend.image=uniappsk8shopedev.azurecr.io/uniappsk8shopedev/$(Docker.frontend.repository):$(Build.SourceVersion),\
+                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
