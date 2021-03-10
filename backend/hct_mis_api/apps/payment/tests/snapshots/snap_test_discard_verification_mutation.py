@@ -19,6 +19,56 @@ snapshots['TestDiscardVerificationMutation::test_discard_active_0_with_permissio
                             'node': {
                                 'paymentRecordVerifications': {
                                     'edges': [
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        },
+                                        {
+                                            'node': {
+                                                'status': 'PENDING'
+                                            }
+                                        }
                                     ]
                                 },
                                 'status': 'PENDING'
