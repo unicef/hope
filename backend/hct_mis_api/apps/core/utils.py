@@ -669,7 +669,7 @@ def resolve_flex_fields_choices_with_correct_labels(parent):
             if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
                 if isinstance(value, list):
                     new_value = [
-                        choices.get(str(current_choice_value), {}).get("English(EN)") or current_choice_value
+                        f"{choices.get(str(current_choice_value.strip()), {}).get('English(EN)') or current_choice_value}, "
                         for current_choice_value in value
                     ]
                 else:
