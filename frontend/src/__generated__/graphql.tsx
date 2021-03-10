@@ -2080,6 +2080,7 @@ export type ImportedIndividualIdentityNode = {
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum ImportedIndividualMaritalStatus {
@@ -2209,6 +2210,7 @@ export type IndividualIdentityNode = {
   individual: IndividualNode,
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualMaritalStatus {
@@ -5484,7 +5486,7 @@ export type IndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'number' | 'type'>
+    & Pick<IndividualIdentityNode, 'number' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
@@ -8060,7 +8062,7 @@ export type ImportedIndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type'>
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -8518,6 +8520,7 @@ export const IndividualDetailedFragmentDoc = gql`
   identities {
     number
     type
+    country
   }
   household {
     status
@@ -8842,6 +8845,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     id
     documentNumber
     type
+    country
   }
   role
   relationship
@@ -17070,6 +17074,7 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
@@ -17142,6 +17147,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
