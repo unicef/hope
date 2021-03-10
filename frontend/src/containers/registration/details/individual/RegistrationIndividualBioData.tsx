@@ -90,6 +90,13 @@ export function RegistrationIndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
+  const mappedIdentitiesIssuers = individual.identities?.map((item) => (
+    <Grid item xs={3}>
+      <LabelizedField label={`${item.type} ID ISSUER`}>
+        {item.country}
+      </LabelizedField>
+    </Grid>
+  ));
 
   return (
     <Overview>
@@ -220,12 +227,13 @@ export function RegistrationIndividualsBioData({
         {mappedIndividualDocuments}
         {mappedIdentities}
         {!mappedIndividualDocumentsIssuers.length &&
-        !mappedIdentities.length ? null : (
+        !mappedIdentitiesIssuers.length ? null : (
           <Grid item xs={12}>
             <BorderBox />
           </Grid>
         )}
         {mappedIndividualDocumentsIssuers}
+        {mappedIdentitiesIssuers}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>
