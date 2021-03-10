@@ -240,6 +240,7 @@ OTHER_APPS = [
     "mptt",
     "django_extensions",
     "django_celery_results",
+    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
