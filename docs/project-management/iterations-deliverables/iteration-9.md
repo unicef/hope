@@ -1,7 +1,5 @@
 # Iteration 9
 
-
-
 ## **Overview**
 
 **The goal of Iteration 9 is to ensure critical bug fixes are resolved and necessary DevOps functions are implemented prior to the Pilot Launch to the Central African Republic \(CAR\). Also, Tivix will provide focused support during the CAR Pilot Release events and help maintain a backlog of enhancements and fixes to prioritize in future releases.**
