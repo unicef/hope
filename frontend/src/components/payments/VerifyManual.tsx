@@ -32,9 +32,11 @@ const DialogContainer = styled.div`
 
 export interface Props {
   paymentVerificationId: string;
+  enabled:boolean;
 }
 export function VerifyManual({
   paymentVerificationId,
+  enabled
 }: Props): React.ReactElement {
   const [VerifyManualDialogOpen, setVerifyManualDialogOpen] = useState(false);
   const { showMessage } = useSnackbar();
@@ -81,6 +83,7 @@ export function VerifyManual({
               variant='contained'
               onClick={() => setVerifyManualDialogOpen(true)}
               data-cy='button-ed-plan'
+              disabled={!enabled}
             >
               Verify
             </Button>
