@@ -6,8 +6,6 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
-
-from django_sysinfo.views import http_basic_login, sysinfo
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
@@ -45,7 +43,10 @@ urlpatterns = [
         "api/download-sanction-template",
         hct_mis_api.apps.sanction_list.views.download_sanction_template,
     ),
-    path("api/info/", http_basic_login(sysinfo), name="sys-info"),
+    path(
+        "api/dashboard-report/<uuid:report_id>",
+        hct_mis_api.apps.core.views.download_dashboard_report,name="dashboard_report"
+    ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
