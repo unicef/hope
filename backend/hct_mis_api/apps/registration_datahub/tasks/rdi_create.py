@@ -102,10 +102,11 @@ class RdiBaseCreateTask:
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):
-                        if single_choice in choices:
-                            valid_choices.append(single_choice)
+                        without_trailing_whitespace = single_choice.strip()
+                        if without_trailing_whitespace in choices:
+                            valid_choices.append(without_trailing_whitespace)
                             continue
-                        upper_value = single_choice.upper()
+                        upper_value = without_trailing_whitespace.upper()
                         if upper_value in choices:
                             valid_choices.append(upper_value)
                             continue
@@ -118,7 +119,11 @@ class RdiBaseCreateTask:
                 return valid_choices
             else:
                 if isinstance(value, str):
-                    upper_value = value.upper()
+                    without_trailing_whitespace = value.strip()
+                    if without_trailing_whitespace in choices:
+                        return without_trailing_whitespace
+
+                    upper_value = without_trailing_whitespace.upper()
                     if upper_value in choices:
                         return upper_value
 
