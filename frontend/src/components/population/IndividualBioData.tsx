@@ -58,6 +58,7 @@ export function IndividualsBioData({
   const maritalStatusChoicesDict = choicesToDict(
     choicesData.maritalStatusChoices,
   );
+  const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const observedDisabilityChoicesDict = choicesToDict(
     choicesData.observedDisabilityChoices,
@@ -72,9 +73,23 @@ export function IndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
+  const mappedIndividualDocumentsIssuers = individual.documents?.edges?.map((edge) => (
+    <Grid item xs={3} key={`${edge.node.id}-${edge.node.type.country}`}>
+      <LabelizedField label={`${edge.node.type.label} ISSUER`}>
+        {edge.node.type.country}
+      </LabelizedField>
+    </Grid>
+  ));
   const mappedIdentities = individual.identities?.map((item) => (
     <Grid item xs={3} key={item.id}>
       <LabelizedField label={`${item.type} ID`}>{item.number}</LabelizedField>
+    </Grid>
+  ));
+  const mappedIdentitiesIssuers = individual.identities?.map((item) => (
+    <Grid item xs={3}>
+      <LabelizedField label={`${item.type} ID ISSUER`}>
+        {item.country}
+      </LabelizedField>
     </Grid>
   ));
 
@@ -127,6 +142,11 @@ export function IndividualsBioData({
         <Grid item xs={3}>
           <LabelizedField label='Marital Status'>
             {maritalStatusChoicesDict[individual.maritalStatus]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Work Status'>
+            {workStatusChoicesDict[individual.workStatus]}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -205,6 +225,14 @@ export function IndividualsBioData({
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
+        {!mappedIndividualDocumentsIssuers.length &&
+        !mappedIdentitiesIssuers.length ? null : (
+            <Grid item xs={12}>
+              <BorderBox />
+            </Grid>
+        )}
+        {mappedIndividualDocumentsIssuers}
+        {mappedIdentitiesIssuers}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>

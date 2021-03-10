@@ -822,6 +822,7 @@ export type DocumentNodeEdge = {
 export enum DocumentStatus {
   Pending = 'PENDING',
   Valid = 'VALID',
+  NeedInvestigation = 'NEED_INVESTIGATION',
   Invalid = 'INVALID'
 }
 
@@ -2079,6 +2080,7 @@ export type ImportedIndividualIdentityNode = {
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum ImportedIndividualMaritalStatus {
@@ -2111,7 +2113,7 @@ export type ImportedIndividualNode = Node & {
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<ImportedIndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   deduplicationBatchStatus?: Maybe<ImportedIndividualDeduplicationBatchStatus>,
@@ -2162,12 +2164,6 @@ export enum ImportedIndividualSex {
   Female = 'FEMALE'
 }
 
-export enum ImportedIndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
-}
-
 export type ImportXlsxCashPlanVerification = {
    __typename?: 'ImportXlsxCashPlanVerification',
   cashPlan?: Maybe<CashPlanNode>,
@@ -2214,6 +2210,7 @@ export type IndividualIdentityNode = {
   individual: IndividualNode,
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualMaritalStatus {
@@ -2254,7 +2251,7 @@ export type IndividualNode = Node & {
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<IndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
@@ -2447,12 +2444,6 @@ export type IndividualUpdateDataObjectType = {
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
-
-export enum IndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
-}
 
 export type IssueTypeExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
@@ -3221,6 +3212,7 @@ export type Query = {
   residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  workStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -5494,7 +5486,7 @@ export type IndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'number' | 'type'>
+    & Pick<IndividualIdentityNode, 'number' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
@@ -7446,6 +7438,9 @@ export type HouseholdChoiceDataQuery = (
   )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, workStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -8051,7 +8046,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8061,13 +8056,13 @@ export type ImportedIndividualDetailedFragment = (
         & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
-          & Pick<ImportedDocumentTypeNode, 'label'>
+          & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
         ) }
       )> }
     )>> }
   ), identities: Array<(
     { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type'>
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -8525,6 +8520,7 @@ export const IndividualDetailedFragmentDoc = gql`
   identities {
     number
     type
+    country
   }
   household {
     status
@@ -8822,6 +8818,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   middleName
   estimatedBirthDate
   maritalStatus
+  workStatus
   pregnant
   flexFields
   observedDisability
@@ -8838,6 +8835,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
         id
         type {
           label
+          country
         }
         documentNumber
       }
@@ -8847,6 +8845,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     id
     documentNumber
     type
+    country
   }
   role
   relationship
@@ -13512,6 +13511,10 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  workStatusChoices {
+    name
+    value
+  }
   deduplicationBatchStatusChoices {
     name
     value
@@ -15739,7 +15742,6 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
@@ -15917,7 +15919,6 @@ export type ResolversTypes = {
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
@@ -16060,7 +16061,6 @@ export type ResolversParentTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: CountAndPercentageNode,
   Float: Scalars['Float'],
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
@@ -16238,7 +16238,6 @@ export type ResolversParentTypes = {
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
@@ -17075,6 +17074,7 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
@@ -17097,7 +17097,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
@@ -17147,6 +17147,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
@@ -17177,7 +17178,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['IndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
@@ -17571,6 +17572,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  workStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,

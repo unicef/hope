@@ -51,7 +51,7 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     DISABILITY_CHOICE,
-    SEVERITY_OF_DISABILITY_CHOICES,
+    SEVERITY_OF_DISABILITY_CHOICES, WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -200,9 +200,13 @@ class DocumentTypeNode(DjangoObjectType):
 
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = IndividualIdentity
@@ -445,6 +449,8 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
                 "memory_disability",
                 "selfcare_disability",
                 "comms_disability",
+                "work_status",
+                "collect_individual_data",
             ],
         )
 
@@ -502,6 +508,7 @@ class Query(graphene.ObjectType):
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
+    work_status_choices = graphene.List(ChoiceObject)
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
@@ -551,6 +558,9 @@ class Query(graphene.ObjectType):
 
     def resolve_observed_disability_choices(self, info, **kwargs):
         return to_choice_object(DISABILITY_CHOICE)
+
+    def resolve_work_status_choices(self, info, **kwargs):
+        return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
