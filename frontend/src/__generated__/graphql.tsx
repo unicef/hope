@@ -2965,9 +2965,10 @@ export type PaymentVerificationNode = Node & {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
   paymentRecord: PaymentRecordNode,
   status: PaymentVerificationStatus,
-  statusDate?: Maybe<Scalars['Date']>,
+  statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
   ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
+  isManuallyEditable?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -7625,7 +7626,7 @@ export type PaymentRecordVerificationQuery = (
   { __typename?: 'Query' }
   & { paymentRecordVerification: Maybe<(
     { __typename?: 'PaymentVerificationNode' }
-    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
@@ -14023,6 +14024,7 @@ export const PaymentRecordVerificationDocument = gql`
     status
     statusDate
     receivedAmount
+    isManuallyEditable
     paymentRecord {
       id
       status
@@ -17509,9 +17511,10 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
   paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
+  isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type PaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']> = {
