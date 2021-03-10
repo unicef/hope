@@ -42,7 +42,7 @@
 * **Tivix to provide support, within normal working hours \(approximately 9am-6pm CEST\), to tackle critical issues during the Pilot Launch events.**
 * **Prioritized “Adjustments” from Pilot Learning Session \(1-week\).**
 
-**Enhancements:**
+### **Enhancements:**
 
 * **If time / budget available - work on prioritized and approved tasks that are critical and detailed in full within Azure DevOps Tool.**
 
