@@ -37,8 +37,8 @@
 * **New “Training” Environment \(Sandbox\) setup**
 * **New “Production” Environment setup**
 * **Pilot Launch Support**
-* **Tivix to provide support, within normal working hours \(approximately 9am-6pm CEST\), to tackle critical issues during the Pilot Launch events.**
-* **Prioritized “Adjustments” from Pilot Learning Session \(1-week\).**
+  * **Tivix to provide support, within normal working hours \(approximately 9am-6pm CEST\), to tackle critical issues during the Pilot Launch events.**
+  * **Prioritized “Adjustments” from Pilot Learning Session \(1-week\).**
 
 ### **Enhancements:**
 
