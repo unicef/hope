@@ -7,6 +7,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
       status
       statusDate
       receivedAmount
+      isManuallyEditable
       paymentRecord {
         id
         status
