@@ -21,13 +21,8 @@ const StyledImage = styled.img`
   max-height: 100%;
 `;
 
-interface IndividualPhotoModalProps {
-  individual: IndividualNode;
-}
+export const IndividualPhotoModal = (): React.ReactElement => {
 
-export const IndividualPhotoModal = ({
-  individual,
-}: IndividualPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <>
