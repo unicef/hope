@@ -7469,6 +7469,29 @@ export type IndividualQuery = (
   )> }
 );
 
+export type IndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'DocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'DocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'DocumentNode' }
+          & Pick<DocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
 export type LookUpPaymentRecordsQueryVariables = {
   cashPlan?: Maybe<Scalars['ID']>,
   household?: Maybe<Scalars['ID']>,
@@ -13625,6 +13648,65 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const IndividualPhotosDocument = gql`
+    query IndividualPhotos($id: ID!) {
+  individual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type IndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>, 'query'> & ({ variables: IndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualPhotosComponent = (props: IndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<IndividualPhotosQuery, IndividualPhotosQueryVariables> query={IndividualPhotosDocument} {...props} />
+    );
+    
+export type IndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualPhotosQuery, IndividualPhotosQueryVariables> & TChildProps;
+export function withIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualPhotosQuery,
+  IndividualPhotosQueryVariables,
+  IndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualPhotosQuery, IndividualPhotosQueryVariables, IndividualPhotosProps<TChildProps>>(IndividualPhotosDocument, {
+      alias: 'individualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+      }
+export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+        }
+export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
+export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
+export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
