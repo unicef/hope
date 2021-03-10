@@ -155,6 +155,7 @@ export const importedIndividualDetailed = gql`
       id
       documentNumber
       type
+      country
     }
     role
     relationship
