@@ -2141,9 +2141,10 @@ type PaymentVerificationNode implements Node {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
-  statusDate: Date
+  statusDate: DateTime
   receivedAmount: Float
   ticketDetails(before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  isManuallyEditable: Boolean
 }
 
 type PaymentVerificationNodeConnection {
