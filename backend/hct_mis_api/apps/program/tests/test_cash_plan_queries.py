@@ -5,7 +5,7 @@ from django.core.management import call_command
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
-from hct_mis_api.apps.cash_assist_datahub.models import PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.core.base_test_case import APITestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
