@@ -546,6 +546,7 @@ type DocumentNodeEdge {
 enum DocumentStatus {
   PENDING
   VALID
+  NEED_INVESTIGATION
   INVALID
 }
 
@@ -1640,6 +1641,7 @@ type ImportedIndividualIdentityNode {
   individual: ImportedIndividualNode!
   documentNumber: String!
   type: String
+  country: String
 }
 
 enum ImportedIndividualMaritalStatus {
@@ -1671,7 +1673,7 @@ type ImportedIndividualNode implements Node {
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: Boolean!
-  workStatus: ImportedIndividualWorkStatus
+  workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   deduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus
@@ -1712,12 +1714,6 @@ enum ImportedIndividualSex {
   FEMALE
 }
 
-enum ImportedIndividualWorkStatus {
-  A_1
-  A_0
-  NOT_PROVIDED
-}
-
 type IndividualDataChangeApproveMutation {
   grievanceTicket: GrievanceTicketNode
 }
@@ -1756,6 +1752,7 @@ type IndividualIdentityNode {
   individual: IndividualNode!
   number: String!
   type: String
+  country: String
 }
 
 enum IndividualMaritalStatus {
@@ -1795,7 +1792,7 @@ type IndividualNode implements Node {
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
   disability: Boolean!
-  workStatus: IndividualWorkStatus
+  workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   flexFields: FlexFieldsScalar
@@ -1918,12 +1915,6 @@ input IndividualUpdateDataObjectType {
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
   flexFields: Arg
-}
-
-enum IndividualWorkStatus {
-  A_1
-  A_0
-  NOT_PROVIDED
 }
 
 input IssueTypeExtrasInput {
@@ -2150,9 +2141,10 @@ type PaymentVerificationNode implements Node {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
-  statusDate: Date
+  statusDate: DateTime
   receivedAmount: Float
   ticketDetails(before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  isManuallyEditable: Boolean
 }
 
 type PaymentVerificationNodeConnection {
@@ -2335,6 +2327,7 @@ type Query {
   residenceStatusChoices: [ChoiceObject]
   sexChoices: [ChoiceObject]
   maritalStatusChoices: [ChoiceObject]
+  workStatusChoices: [ChoiceObject]
   relationshipChoices: [ChoiceObject]
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]

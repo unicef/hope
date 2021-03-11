@@ -44,12 +44,12 @@ or **generatefixtures** will ask if you want to load business areas.
 
 accepts the arguments:
 
-- **--program** - Create provided amount of programs, default is 10
-- **--cash-plan** - Create provided amount of cash plans for one program, default is 10
-- **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
-- **--noinput** - Suppresses all user prompts
+* **--program** - Create provided amount of programs, default is 10
+* **--cash-plan** - Create provided amount of cash plans for one program, default is 10
+* **--payment-record** - Create provided amount of payment records assigned to household and cash plan, default is 10
+* **--noinput** - Suppresses all user prompts
 
-**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList_XML.xml
+**loadbusinessareas** - load businessareas defined in XML file backend/data/GetBusinessAreaList\_XML.xml
 
 **migratealldb** - our custom command to migrate all databases specified in settings
 
@@ -65,7 +65,7 @@ for backend we are using _Django's TestCase_ and snapshottest.
 
 For snapshottest we are using our custom class **APITestCase**, use it if your test should use snapshots. Check existing tests to see how we are using it.
 
-We are keeping tests in &lt;app_name&gt;/tests/ and creating separate files for each test case.
+We are keeping tests in &lt;app\_name&gt;/tests/ and creating separate files for each test case.
 
 to run all tests use:
 
@@ -89,7 +89,7 @@ Example for running single test method in TestCase.
 
 More information can be found here:
 
-{% embed url="https://docs.djangoproject.com/en/3.0/topics/testing/overview/" %}
+{% embed url="https://docs.djangoproject.com/en/3.0/topics/testing/overview/" caption="" %}
 
 [https://github.com/syrusakbary/snapshottest](https://github.com/syrusakbary/snapshottest)
 
@@ -105,11 +105,12 @@ Below represents approximately strategy we hope to follow. We may or may not use
 
 The following are the code branches and their CI / CD usage.
 
-| Branch               | Auto-deployed? | Cloud environment                                                      | Airflow UI                                                      |
-| :------------------- | :------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| develop              | yes            | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) | [https://dev-af.unitst.org](%20%20%20https://dev-af.unitst.org) |
-| staging              | yes            | https://staging-hct.unitst.org/                                        | [https://stg-af.unitst.org](https://stg-af.unitst.org)          |
-| master               | no             | ?                                                                      |                                                                 |
-| feature/\* or bug/\* | no             | n/a                                                                    |                                                                 |
+| Branch | Auto-deployed? | Cloud environment | Airflow UI |
+| :--- | :--- | :--- | :--- |
+| develop | yes | [https://dev-hct.unitst.org/](https://dev-hct.unitst.org/afghanistan/) | [https://dev-af.unitst.org](https://github.com/unicef/hct-mis/tree/ae764be9c9518105b72bdfe481f0a65f79dd538a/README.md) |
+| staging | yes | [https://staging-hct.unitst.org/](https://staging-hct.unitst.org/) | [https://stg-af.unitst.org](https://stg-af.unitst.org) |
+| master | no | ? |  |
+| feature/\* or bug/\* | no | n/a |  |
 
 In the future hotfix branches might be made as well which merge directly to master potentially. A UAT environment that mirrors the stability of production \(master branch\) might be necessary as well. If strictly following an agile methodology, it may or may not be necessary, but a UAT env mirroring production might be helpful for production focused hot fix testing.
+

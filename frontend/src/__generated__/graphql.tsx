@@ -822,6 +822,7 @@ export type DocumentNodeEdge = {
 export enum DocumentStatus {
   Pending = 'PENDING',
   Valid = 'VALID',
+  NeedInvestigation = 'NEED_INVESTIGATION',
   Invalid = 'INVALID'
 }
 
@@ -2079,6 +2080,7 @@ export type ImportedIndividualIdentityNode = {
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum ImportedIndividualMaritalStatus {
@@ -2111,7 +2113,7 @@ export type ImportedIndividualNode = Node & {
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<ImportedIndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   deduplicationBatchStatus?: Maybe<ImportedIndividualDeduplicationBatchStatus>,
@@ -2162,12 +2164,6 @@ export enum ImportedIndividualSex {
   Female = 'FEMALE'
 }
 
-export enum ImportedIndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
-}
-
 export type ImportXlsxCashPlanVerification = {
    __typename?: 'ImportXlsxCashPlanVerification',
   cashPlan?: Maybe<CashPlanNode>,
@@ -2214,6 +2210,7 @@ export type IndividualIdentityNode = {
   individual: IndividualNode,
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualMaritalStatus {
@@ -2254,7 +2251,7 @@ export type IndividualNode = Node & {
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<IndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
@@ -2447,12 +2444,6 @@ export type IndividualUpdateDataObjectType = {
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
-
-export enum IndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
-}
 
 export type IssueTypeExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
@@ -2964,9 +2955,10 @@ export type PaymentVerificationNode = Node & {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
   paymentRecord: PaymentRecordNode,
   status: PaymentVerificationStatus,
-  statusDate?: Maybe<Scalars['Date']>,
+  statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
   ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
+  isManuallyEditable?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3221,6 +3213,7 @@ export type Query = {
   residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  workStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -5494,7 +5487,7 @@ export type IndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'number' | 'type'>
+    & Pick<IndividualIdentityNode, 'number' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
@@ -7446,6 +7439,9 @@ export type HouseholdChoiceDataQuery = (
   )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, workStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
@@ -7471,6 +7467,29 @@ export type IndividualQuery = (
   & { individual: Maybe<(
     { __typename?: 'IndividualNode' }
     & IndividualDetailedFragment
+  )> }
+);
+
+export type IndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'DocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'DocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'DocumentNode' }
+          & Pick<DocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -7601,7 +7620,7 @@ export type PaymentRecordVerificationQuery = (
   { __typename?: 'Query' }
   & { paymentRecordVerification: Maybe<(
     { __typename?: 'PaymentVerificationNode' }
-    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
@@ -8051,7 +8070,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8061,13 +8080,13 @@ export type ImportedIndividualDetailedFragment = (
         & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
-          & Pick<ImportedDocumentTypeNode, 'label'>
+          & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
         ) }
       )> }
     )>> }
   ), identities: Array<(
     { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type'>
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -8525,6 +8544,7 @@ export const IndividualDetailedFragmentDoc = gql`
   identities {
     number
     type
+    country
   }
   household {
     status
@@ -8822,6 +8842,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   middleName
   estimatedBirthDate
   maritalStatus
+  workStatus
   pregnant
   flexFields
   observedDisability
@@ -8838,6 +8859,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
         id
         type {
           label
+          country
         }
         documentNumber
       }
@@ -8847,6 +8869,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     id
     documentNumber
     type
+    country
   }
   role
   relationship
@@ -13512,6 +13535,10 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  workStatusChoices {
+    name
+    value
+  }
   deduplicationBatchStatusChoices {
     name
     value
@@ -13622,6 +13649,65 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const IndividualPhotosDocument = gql`
+    query IndividualPhotos($id: ID!) {
+  individual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type IndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>, 'query'> & ({ variables: IndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualPhotosComponent = (props: IndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<IndividualPhotosQuery, IndividualPhotosQueryVariables> query={IndividualPhotosDocument} {...props} />
+    );
+    
+export type IndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualPhotosQuery, IndividualPhotosQueryVariables> & TChildProps;
+export function withIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualPhotosQuery,
+  IndividualPhotosQueryVariables,
+  IndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualPhotosQuery, IndividualPhotosQueryVariables, IndividualPhotosProps<TChildProps>>(IndividualPhotosDocument, {
+      alias: 'individualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+      }
+export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+        }
+export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
+export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
+export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
@@ -13940,6 +14026,7 @@ export const PaymentRecordVerificationDocument = gql`
     status
     statusDate
     receivedAmount
+    isManuallyEditable
     paymentRecord {
       id
       status
@@ -15739,7 +15826,6 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
@@ -15917,7 +16003,6 @@ export type ResolversTypes = {
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
@@ -16060,7 +16145,6 @@ export type ResolversParentTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: CountAndPercentageNode,
   Float: Scalars['Float'],
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
@@ -16238,7 +16322,6 @@ export type ResolversParentTypes = {
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
@@ -17075,6 +17158,7 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
@@ -17097,7 +17181,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
@@ -17147,6 +17231,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
@@ -17177,7 +17262,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['IndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
@@ -17426,9 +17511,10 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
   paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
+  isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type PaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']> = {
@@ -17571,6 +17657,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  workStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
