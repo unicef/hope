@@ -669,6 +669,8 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             raise GraphQLError(
                 f"You can only update status of payment verification for {CashPlanPaymentVerification.STATUS_ACTIVE} cash plan verification"
             )
+        if not payment_verification.is_manually_editable:
+            raise GraphQLError("You can only edit payment verification in first 10 minutes")
         delivered_amount = payment_verification.payment_record.delivered_quantity
 
         if received is None and received_amount is not None and received_amount == 0:
@@ -683,6 +685,7 @@ class UpdatePaymentVerificationReceivedAndReceivedAmount(PermissionMutation):
             raise GraphQLError(f"If received_amount({received_amount}) is not 0, you should set received to YES")
 
         payment_verification.status = from_received_to_status(received, received_amount, delivered_amount)
+        payment_verification.status_date = timezone.now()
         payment_verification.received_amount = received_amount
         payment_verification.save()
         cashplan_payment_verification = payment_verification.cash_plan_payment_verification

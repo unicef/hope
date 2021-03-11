@@ -3,7 +3,10 @@ import copy
 import functools
 import datetime
 from itertools import chain
+
+from django.contrib.sites.models import Site
 from django.core.files import File
+from django.urls import reverse
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
 from django.db.models import Sum, Count, F, Q
@@ -514,9 +517,7 @@ class GenerateDashboardReportContentHelpers:
         if date_path:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
-            filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
-            )
+            filter_vars.update({admin_area_path: report.admin_area, f"{admin_area_path}__level": 2})
         if program_path and report.program:
             filter_vars.update({program_path: report.program})
         if not self._is_report_global(report) and business_area_path:
@@ -898,10 +899,12 @@ class GenerateDashboardReportService:
             self._send_email()
 
     def _send_email(self):
+        path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
+        protocol ="http" if settings.IS_DEV else 'https'
         context = {
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),
-            "report_url": self.report.file.url,
+            "report_url": f"{protocol}://{Site.objects.first()}{path}",
         }
         text_body = render_to_string("dashboard_report.txt", context=context)
         html_body = render_to_string("dashboard_report.html", context=context)

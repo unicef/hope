@@ -104,6 +104,7 @@ export const individualDetailed = gql`
     identities {
       number
       type
+      country
     }
     household {
       status
