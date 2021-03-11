@@ -25,7 +25,7 @@ class DatamartAPI:
 
     def _features_to_multi_polygon(self, geometry):
         if geometry is None:
-            raise ValidationError("There should be geometry in the feature")
+            return None
         geometry_type = geometry.get("type")
         if geometry_type != "MultiPolygon":
             raise ValidationError("Geometry type should be MultiPolygon")
