@@ -97,7 +97,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
-                backend_image=$(Docker.repository).azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+                backend_image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
