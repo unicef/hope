@@ -18,7 +18,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-backend-release
           command: ["/bin/sh"]
-          args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py migratealldb"]
+          args: ["-c", "python3 /code/manage.py upgrade"]
           securityContext:
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
           image: "{{ .Values.backend.image }}"
@@ -54,9 +54,9 @@ spec:
         - name: {{ .Chart.Name }}-backend-release
           command: ["/bin/sh"]
           {{- if .Values.global.init }}
-          args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py init"]
+          args: ["-c", "python3 /code/manage.py upgrade"]
           {{- else }}
-          args: ["-c", "python3 /code/manage.py collectstatic --noinput && python3 /code/manage.py migratealldb"]
+          args: ["-c", "python3 /code/manage.py upgrade"]
           {{- end }}
           securityContext:
             {{- toYaml .Values.backend.securityContext | nindent 12 }}
