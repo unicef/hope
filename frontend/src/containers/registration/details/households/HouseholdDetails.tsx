@@ -47,7 +47,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='Location'>
+            <LabelizedField label='Country'>
               {household.country}
             </LabelizedField>
           </Grid>
