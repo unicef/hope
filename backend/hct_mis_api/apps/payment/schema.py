@@ -189,6 +189,7 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
     is_manually_editable = graphene.Boolean()
+
     class Meta:
         model = PaymentVerification
         interfaces = (relay.Node,)
@@ -422,12 +423,18 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs)
+        ).aggregate(
+            successful=Count("id", filter=~Q(status=PaymentRecord.STATUS_ERROR)),
+            unsuccessful=Count("id", filter=Q(status=PaymentRecord.STATUS_ERROR)),
+        )
+
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivered_quantity_usd__gt=0).count(),
-                    payment_records.filter(delivered_quantity_usd=0).count(),
+                    payment_records.get("successful", 0),
+                    payment_records.get("unsuccessful", 0),
                 ]
             }
         ]
