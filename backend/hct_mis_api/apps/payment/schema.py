@@ -392,7 +392,7 @@ class Query(graphene.ObjectType):
                     "cash_plan_payment_verification__cash_plan", flat=True
                 )
             )
-            .filter(status=PaymentRecord.STATUS_SUCCESS)
+            .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
             .count()
         )
         if samples_count == 0 or all_payment_records_for_created_verifications == 0:
