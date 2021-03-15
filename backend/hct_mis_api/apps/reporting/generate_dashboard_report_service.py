@@ -19,7 +19,7 @@ from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.reporting.models import DashboardReport
 from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification, CashPlanPaymentVerification
 from hct_mis_api.apps.account.models import User
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -269,13 +269,25 @@ class GenerateDashboardReportContentHelpers:
             .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
             .annotate(
                 total_households=Count(
-                    f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
+                    f"{path_to_payment_record_verifications}__payment_record__household",
+                    distinct=True,
                 )
             )
             .annotate(
                 total_payment_records=Count(
                     "cash_plans__payment_records",
                     distinct=True,
+                )
+            )
+            .annotate(
+                all_possible_payment_records=Count(
+                    "cash_plans__payment_records",
+                    distinct=True,
+                    filter=Q(
+                        cash_plans__verifications__isnull=False,
+                        cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
+                        cash_plans__payment_records__delivered_quantity__gt=0,
+                    ),
                 )
             )
             .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
@@ -300,6 +312,7 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 not_responded=Count(
                     path_to_payment_record_verifications,
+                    distinct=True,
                     filter=format_status_filter(PaymentVerification.STATUS_PENDING),
                 )
             )
@@ -349,6 +362,7 @@ class GenerateDashboardReportContentHelpers:
 
         totals = admin_areas.aggregate(Sum("total_transferred"), Sum("num_households"))
         admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
+
         individual_count_fields = self._get_all_individual_count_fields()
 
         for admin_area in admin_areas:
@@ -469,7 +483,7 @@ class GenerateDashboardReportContentHelpers:
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            int((instance.total_verifications_done / instance.total_payment_records) * 100)
+            round((instance.total_verifications_done / instance.all_possible_payment_records) * 100)
             if instance.total_payment_records
             else 0,
             instance.received,
@@ -843,7 +857,7 @@ class GenerateDashboardReportService:
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)
             str_row = self._stringify_all_values(row)
-            active_sheet.append(str_row)
+            # active_sheet.append(str_row)
         # append totals row
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)
@@ -900,7 +914,7 @@ class GenerateDashboardReportService:
 
     def _send_email(self):
         path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
-        protocol ="http" if settings.IS_DEV else 'https'
+        protocol = "http" if settings.IS_DEV else "https"
         context = {
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),
@@ -967,7 +981,10 @@ class GenerateDashboardReportService:
     def _stringify_all_values(self, row: tuple) -> tuple:
         str_row = []
         for value in row:
-            str_row.append(str(value if value is not None else ""))
+            if isinstance(value,(str,int,float)):
+                str_row.append(value )
+            else:
+                str_row.append(str(value if value is not None else ""))
         return tuple(str_row)
 
     def _format_date(self, date) -> str:
