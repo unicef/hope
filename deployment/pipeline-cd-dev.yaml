@@ -47,6 +47,7 @@ stages:
               install: true
               waitForExecution: false
               failOnStderr: false
+              valueFile: '**/deployment/aks-values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
                 global.env=staging,\
