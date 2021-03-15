@@ -1,7 +1,5 @@
 # Iteration 9
 
-
-
 ## **Overview**
 
 **The goal of Iteration 9 is to ensure critical bug fixes are resolved and necessary DevOps functions are implemented prior to the Pilot Launch to the Central African Republic \(CAR\). Also, Tivix will provide focused support during the CAR Pilot Release events and help maintain a backlog of enhancements and fixes to prioritize in future releases.**
@@ -39,10 +37,10 @@
 * **New “Training” Environment \(Sandbox\) setup**
 * **New “Production” Environment setup**
 * **Pilot Launch Support**
-* **Tivix to provide support, within normal working hours \(approximately 9am-6pm CEST\), to tackle critical issues during the Pilot Launch events.**
-* **Prioritized “Adjustments” from Pilot Learning Session \(1-week\).**
+  * **Tivix to provide support, within normal working hours \(approximately 9am-6pm CEST\), to tackle critical issues during the Pilot Launch events.**
+  * **Prioritized “Adjustments” from Pilot Learning Session \(1-week\).**
 
-**Enhancements:**
+### **Enhancements:**
 
 * **If time / budget available - work on prioritized and approved tasks that are critical and detailed in full within Azure DevOps Tool.**
 
