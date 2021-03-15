@@ -18,6 +18,7 @@ variables:
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
+  Docker.elastics.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.repository: "uniappsk8shopedev" 
@@ -73,6 +74,7 @@ stages:
         displayName: "[DJANGO TEST]"
         variables:
           backend_image: $(Docker.repository).azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+          elastic_image: $(Docker.repository).azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"

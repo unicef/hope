@@ -81,7 +81,6 @@ services:
       - elasticsearch_test
 
   elasticsearch_test:
-    image: unicef/hct-elasticsearch-test
     build:
       context: elasticsearch
       dockerfile: Dockerfile
