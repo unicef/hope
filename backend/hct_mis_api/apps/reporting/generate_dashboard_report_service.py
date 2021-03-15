@@ -857,6 +857,7 @@ class GenerateDashboardReportService:
         for instance in all_instances:
             row = get_row_methods[1](instance, False, is_hq_report)
             str_row = self._stringify_all_values(row)
+            active_sheet.append(str_row)
             # active_sheet.append(str_row)
         # append totals row
         if totals:
