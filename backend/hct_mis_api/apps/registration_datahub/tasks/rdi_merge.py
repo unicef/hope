@@ -112,6 +112,7 @@ class RdiMergeTask:
         "who_answers_phone",
         "who_answers_alt_phone",
         "pregnant",
+        "work_status",
     )
 
     def merge_admin_area(
