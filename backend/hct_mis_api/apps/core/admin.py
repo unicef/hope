@@ -1,3 +1,5 @@
+import logging
+
 import xlrd
 from admin_extra_urls.api import link, ExtraUrlMixin, action
 from django import forms
@@ -22,6 +24,8 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+
+logger = logging.getLogger(__name__)
 
 
 class XLSImportForm(forms.Form):
@@ -160,6 +164,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     def add_view(self, request, form_url="", extra_context=None):
         if not self.has_add_permission(request):
+            logger.error("The user did not have permission to do that")
             raise PermissionDenied
 
         opts = self.model._meta
@@ -190,8 +195,10 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
                     form.add_error(field=None, error=errors)
             except ValidationError as validation_error:
+                logger.exception(validation_error)
                 form.add_error("xls_file", validation_error)
             except XLRDError as file_error:
+                logger.exception(file_error)
                 form.add_error("xls_file", file_error)
 
             if form.is_valid():

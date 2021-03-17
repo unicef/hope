@@ -1,5 +1,7 @@
-from functools import partial
+import logging
+from collections import OrderedDict
 from enum import unique, auto, Enum
+from functools import partial
 
 from django.core.exceptions import PermissionDenied
 from graphene import Mutation
@@ -8,9 +10,10 @@ from graphene.types.argument import to_arguments
 from graphene_django import DjangoConnectionField
 from graphene_django.filter.utils import get_filtering_args_from_filterset, get_filterset_class
 from graphql import GraphQLError
-from collections import OrderedDict
 
 from hct_mis_api.apps.core.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 @unique
@@ -192,12 +195,13 @@ class BaseNodePermissionMixin:
     def check_node_permission(cls, info, object_instance):
         business_area = object_instance.business_area
         if not any((perm.has_permission(info, business_area=business_area) for perm in cls.permission_classes)):
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
     @classmethod
-    def get_node(cls, info, id):
+    def get_node(cls, info, object_id):
         try:
-            object_instance = cls._meta.model.objects.get(pk=id)  # type: ignore
+            object_instance = cls._meta.model.objects.get(pk=object_id)  # type: ignore
             cls.check_node_permission(info, object_instance)
         except cls._meta.model.DoesNotExist:  # type: ignore
             object_instance = None
@@ -222,6 +226,7 @@ class BaseNodePermissionMixin:
             or (is_creator and user.has_permission(creator_permission, business_area))
             or (is_owner and user.has_permission(owner_permission, business_area))
         ):
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
 
@@ -274,6 +279,7 @@ class DjangoPermissionFilterConnectionField(DjangoConnectionField):
     def resolve_queryset(cls, connection, iterable, info, args, filtering_args, filterset_class, permission_classes):
         filter_kwargs = {k: v for k, v in args.items() if k in filtering_args}
         if not any((perm.has_permission(info, **filter_kwargs) for perm in permission_classes)):
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
         if "permissions" in filtering_args:
             filter_kwargs["permissions"] = info.context.user.permissions_in_business_area(
@@ -349,8 +355,10 @@ class BaseMutationPermissionMixin:
         if not raise_error:
             return False
         if not_authenticated:
+            logger.error("Permission Denied: User is not authenticated.")
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         else:
+            logger.error("Permission Denied: User does not have correct permission.")
             raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
 

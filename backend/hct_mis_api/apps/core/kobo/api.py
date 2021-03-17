@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from io import BytesIO
@@ -10,6 +11,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.kobo.common import filter_by_owner
 from hct_mis_api.apps.core.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -60,13 +63,18 @@ class KoboAPI:
         token = settings.KOBO_MASTER_API_TOKEN
 
         if not token:
+            logger.error("KOBO Token is not set")
             raise TokenNotProvided("Token is not set")
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
     def _handle_request(self, url) -> dict:
         response = self._client.get(url=url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _post_request(self, url, data=None, files=None) -> requests.Response:
@@ -114,10 +122,12 @@ class KoboAPI:
             else:
                 return response_dict, asset_uid
 
+        logger.error("Fetching import data took too long")
         raise RetryError("Fetching import data took too long")
 
     def get_all_projects_data(self) -> list:
         if not self.business_area:
+            logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")
         projects_url = self._get_url("assets")
 
@@ -137,6 +147,10 @@ class KoboAPI:
 
     def get_attached_file(self, url: str) -> BytesIO:
         response = self._client.get(url=url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         file = BytesIO(response.content)
         return file

@@ -10,7 +10,7 @@ from hct_mis_api.apps.sanction_list.models import (
 @admin.register(SanctionListIndividual)
 class SanctionListIndividualAdmin(HOPEModelAdminBase):
     list_display = ("full_name", "listed_on", "un_list_type", "reference_number")
-    search_fields = ("full_name", )
+    search_fields = ("full_name",)
 
 
 @admin.register(SanctionListIndividualDocument)

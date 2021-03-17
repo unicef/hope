@@ -15,7 +15,7 @@ from adminfilters.filters import TextFieldFilter
 from hct_mis_api.apps.steficon.forms import RuleForm
 from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.utils.admin import SmartFieldsetMixin
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 logger = logging.getLogger(__name__)
 

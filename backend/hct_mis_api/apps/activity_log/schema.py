@@ -23,6 +23,7 @@ class LogEntryFilter(FilterSet):
     class Meta:
         model = LogEntry
         fields = ("object_id",)
+
     def search_filter(self, qs, name, value):
         values = value.split(" ")
         q_obj = Q()

@@ -8,6 +8,7 @@ class AzureMediaStorage(AzureStorage):
     azure_container = "media"
     expiration_secs = 30
 
+
 class AzureStaticStorage(AzureStorage):
     account_name = settings.AZURE_ACCOUNT_NAME
     account_key = settings.AZURE_ACCOUNT_KEY

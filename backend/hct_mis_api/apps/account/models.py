@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -15,6 +17,8 @@ from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+
+logger = logging.getLogger(__name__)
 
 INVITED = "INVITED"
 ACTIVE = "ACTIVE"
@@ -138,6 +142,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
     def clean(self):
         super().clean()
         if self.role_one == self.role_two:
+            logger.error(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
@@ -149,6 +154,10 @@ class IncompatibleRoles(TimeStampedUUIDModel):
                     failing_users.add(userrole.user.email)
 
         if failing_users:
+            logger.error(
+                f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
+                "Please fix them before creating this incompatible roles pair."
+            )
             raise ValidationError(
                 _(
                     f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
@@ -161,4 +170,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
+            logger.error(
+                f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
+            )
             raise ValidationError(_("This combination of roles already exists as incompatible pair."))
