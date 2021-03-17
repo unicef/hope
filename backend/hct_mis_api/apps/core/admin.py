@@ -199,14 +199,15 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     file_name=xls_file.name,
                     uploaded_by=request.user,
                     file=xls_file,
-                    status=XLSXKoboTemplate.PROCESSING,
+                    status=XLSXKoboTemplate.UPLOADED,
                 )
                 self.message_user(
                     request,
                     "Core field validation successful, running KoBo Template upload task..., "
-                    "Import status will change after task completion",
+                    "Import stat"
+                    "us will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task.delay(
+                upload_new_kobo_template_and_update_flex_fields_task.run(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")

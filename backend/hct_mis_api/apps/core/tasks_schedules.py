@@ -17,6 +17,10 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.payment.celery_tasks.get_sync_run_rapid_pro_task",
         "schedule": crontab(minute="*/20"),
     },
+    "check_periodically_connection_failed_tasks": {
+        "task": "hct_mis_api.apps.core.celery_tasks.check_periodically_connection_failed_tasks",
+        "schedule": crontab(minute="*/1"),
+    },
     # "registration_kobo_import_hourly_task": {
     #     "task": "hct_mis_api.apps.registration_datahub.celery_tasks.registration_kobo_import_hourly_task",
     #     "schedule": crontab(minute=0, hour="*/1"),
