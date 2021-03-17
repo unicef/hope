@@ -1,8 +1,11 @@
-from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
-from hct_mis_api.apps.core.kobo.api import KoboAPI
+import logging
 from io import BytesIO
 
+from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
+from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
+
+logger = logging.getLogger(__name__)
 
 
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
@@ -43,12 +46,10 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 flex_fields_task = FlexibleAttributeImporter()
                 flex_fields_task.import_xls(xlsx_kobo_template_object.file)
 
-            self._save_message_status_template_id(
-                xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid
-            )
-
+            self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
         except Exception as e:
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
             )
+            logger.exception(e)
             raise e

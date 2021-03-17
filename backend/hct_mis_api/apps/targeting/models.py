@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -29,6 +30,8 @@ from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+
+logger = logging.getLogger(__name__)
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -565,16 +568,22 @@ class TargetingCriteriaFilterMixin:
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
         args_count = comparision_attribute.get("arguments")
         if self.arguments is None:
+            logger.error(f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments")
             raise ValidationError(
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
+                logger.error(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
                 raise ValidationError(
                     f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
                 )
         elif args_count != args_input_count:
+            logger.error(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments gets {args_input_count}"
+            )
             raise ValidationError(
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
@@ -593,6 +602,7 @@ class TargetingCriteriaFilterMixin:
         core_fields = self.get_core_fields()
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
+            logger.error(f"There are no Core Field Attributes associated with this fieldName {self.field_name}")
             raise ValidationError(
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
@@ -602,9 +612,13 @@ class TargetingCriteriaFilterMixin:
             return get_query(self.comparision_method, self.arguments)
         lookup = core_field_attr.get("lookup")
         if not lookup:
+            logger.error(
+                f"Core Field Attributes associated with this fieldName {self.field_name}"
+                " doesn't have get_query method or lookup field"
+            )
             raise ValidationError(
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
-                f" doesn't have get_query method or lookup field"
+                " doesn't have get_query method or lookup field"
             )
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(
@@ -615,6 +629,7 @@ class TargetingCriteriaFilterMixin:
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
+            logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
             raise ValidationError(
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )

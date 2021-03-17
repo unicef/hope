@@ -1,19 +1,18 @@
-from django.db.models import Q
-
 from admin_extra_urls.decorators import action
 from admin_extra_urls.mixins import ExtraUrlMixin
-from django.contrib import admin, messages
 from adminfilters.filters import (
     TextFieldFilter,
     RelatedFieldComboFilter,
-    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
 )
+from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
     Household,
@@ -27,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     HEAD,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(Agency)

@@ -39,9 +39,7 @@ def registration_kobo_import_hourly_task():
 
     if not_started_rdi is None:
         return
-    business_area = BusinessArea.objects.get(
-        slug=not_started_rdi.business_area_slug
-    )
+    business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
 
     RdiKoboCreateTask().execute(
         registration_data_import_id=str(not_started_rdi.id),
@@ -66,9 +64,7 @@ def registration_xlsx_import_hourly_task():
     if not_started_rdi is None:
         return
 
-    business_area = BusinessArea.objects.get(
-        slug=not_started_rdi.business_area_slug
-    )
+    business_area = BusinessArea.objects.get(slug=not_started_rdi.business_area_slug)
 
     RdiXlsxCreateTask().execute(
         registration_data_import_id=str(not_started_rdi.id),

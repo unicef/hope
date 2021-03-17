@@ -86,7 +86,10 @@ class TestRapidProVerificationTask(TestCase):
             candidate_list_targeting_criteria=targeting_criteria,
             business_area=BusinessArea.objects.first(),
         )
-        cash_plan = CashPlanFactory.build(program=program, business_area=BusinessArea.objects.first(),)
+        cash_plan = CashPlanFactory.build(
+            program=program,
+            business_area=BusinessArea.objects.first(),
+        )
         cash_plan.save()
         cash_plan_payment_verification = CashPlanPaymentVerificationFactory(
             status=CashPlanPaymentVerification.STATUS_ACTIVE,
@@ -108,7 +111,10 @@ class TestRapidProVerificationTask(TestCase):
             household.programs.add(program)
 
             payment_record = PaymentRecordFactory(
-                cash_plan=cash_plan, household=household, target_population=target_population, delivered_quantity_usd=200
+                cash_plan=cash_plan,
+                household=household,
+                target_population=target_population,
+                delivered_quantity_usd=200,
             )
 
             PaymentVerificationFactory(
@@ -135,7 +141,8 @@ class TestRapidProVerificationTask(TestCase):
             api = RapidProAPI("afghanistan")
             mapped_dict = api.get_mapped_flow_runs(uuid.uuid4())
             self.assertEqual(
-                mapped_dict, [],
+                mapped_dict,
+                [],
             )
 
     @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
@@ -176,7 +183,8 @@ class TestRapidProVerificationTask(TestCase):
             .first()
         )
         self.assertEqual(
-            payment_record_verification.status, PaymentVerification.STATUS_PENDING,
+            payment_record_verification.status,
+            PaymentVerification.STATUS_PENDING,
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
@@ -191,7 +199,8 @@ class TestRapidProVerificationTask(TestCase):
             mock.assert_called()
             payment_record_verification.refresh_from_db()
             self.assertEqual(
-                payment_record_verification.status, PaymentVerification.STATUS_NOT_RECEIVED,
+                payment_record_verification.status,
+                PaymentVerification.STATUS_NOT_RECEIVED,
             )
 
     @patch("hct_mis_api.apps.payment.rapid_pro.api.RapidProAPI.__init__")
@@ -205,7 +214,8 @@ class TestRapidProVerificationTask(TestCase):
             .first()
         )
         self.assertEqual(
-            payment_record_verification.status, PaymentVerification.STATUS_PENDING,
+            payment_record_verification.status,
+            PaymentVerification.STATUS_PENDING,
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
@@ -221,7 +231,8 @@ class TestRapidProVerificationTask(TestCase):
             mock.assert_called()
             payment_record_verification.refresh_from_db()
             self.assertEqual(
-                payment_record_verification.status, PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
+                payment_record_verification.status,
+                PaymentVerification.STATUS_RECEIVED_WITH_ISSUES,
             )
             self.assertEqual(
                 payment_record_verification.received_amount,
@@ -239,7 +250,8 @@ class TestRapidProVerificationTask(TestCase):
             .first()
         )
         self.assertEqual(
-            payment_record_verification.status, PaymentVerification.STATUS_PENDING,
+            payment_record_verification.status,
+            PaymentVerification.STATUS_PENDING,
         )
         fake_data_to_return_from_rapid_pro_api = [
             {
@@ -255,7 +267,8 @@ class TestRapidProVerificationTask(TestCase):
             mock.assert_called()
             payment_record_verification.refresh_from_db()
             self.assertEqual(
-                payment_record_verification.status, PaymentVerification.STATUS_RECEIVED,
+                payment_record_verification.status,
+                PaymentVerification.STATUS_RECEIVED,
             )
             self.assertEqual(
                 payment_record_verification.received_amount,

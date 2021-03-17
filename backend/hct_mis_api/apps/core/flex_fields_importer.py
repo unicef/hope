@@ -1,15 +1,24 @@
+import logging
 from collections import defaultdict
 from os.path import isfile
 
 import xlrd
 from django.core.exceptions import ValidationError
-from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
 
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_STRING, TYPE_INTEGER, TYPE_DECIMAL, TYPE_DATE, TYPE_IMAGE, \
-    TYPE_SELECT_ONE, TYPE_SELECT_MANY
+from hct_mis_api.apps.core.core_fields_attributes import (
+    TYPE_STRING,
+    TYPE_INTEGER,
+    TYPE_DECIMAL,
+    TYPE_DATE,
+    TYPE_IMAGE,
+    TYPE_SELECT_ONE,
+    TYPE_SELECT_MANY,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
+
+logger = logging.getLogger(__name__)
 
 
 class FlexibleAttributeImporter:
@@ -85,8 +94,10 @@ class FlexibleAttributeImporter:
                             field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
                         )
                         if is_empty_and_not_index_field and is_core_or_flex_field:
+                            logger.error(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                             raise ValidationError(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                     if object_type_to_add == "choice" and not value:
+                        logger.error(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
                         raise ValidationError(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
 
                 self.json_fields_to_create[label].update({language: cleared_value if value else ""})
@@ -102,6 +113,7 @@ class FlexibleAttributeImporter:
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: Type is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Type is required")
                 choice_key = value.split(" ")[0]
 
@@ -114,8 +126,10 @@ class FlexibleAttributeImporter:
                 ) and not value
 
                 if is_attribute_name_empty:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Name is required")
                 if is_choice_list_name_empty:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                 self.object_fields_to_create[header_name] = value if value else ""
 
@@ -299,6 +313,9 @@ class FlexibleAttributeImporter:
 
                 if obj:
                     if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
+                        logger.error(
+                            f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
+                        )
                         raise ValidationError(
                             f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
                         )

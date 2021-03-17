@@ -3,7 +3,6 @@ from collections import namedtuple
 
 from admin_extra_urls.api import ExtraUrlMixin, action
 from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter, ChoicesFieldComboFilter
-from adminfilters.multiselect import MultipleSelectFieldListFilter, IntersectionFieldListFilter, UnionFieldListFilter
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
@@ -66,6 +65,9 @@ class UserRoleAdminForm(ModelForm):
         if self.instance.id:
             incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
         if incompatible_userroles.exists():
+            logger.error(
+                f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+            )
             raise ValidationError(
                 {
                     "role": _(
@@ -95,9 +97,9 @@ class UserRoleInlineFormSet(BaseInlineFormSet):
                     form_two.cleaned_data["role"].name
                     for form_two in self.forms
                     if form_two.cleaned_data
-                       and not form_two.cleaned_data.get("DELETE")
-                       and form_two.cleaned_data["business_area"] == business_area
-                       and form_two.cleaned_data["role"].id in incompatible_roles
+                    and not form_two.cleaned_data.get("DELETE")
+                    and form_two.cleaned_data["business_area"] == business_area
+                    and form_two.cleaned_data["role"].id in incompatible_roles
                 ]
                 if error_forms:
                     if "role" not in form._errors:
@@ -114,10 +116,11 @@ class UserRoleInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated")
-    list_filter = (('is_staff',ChoicesFieldComboFilter),
-                   ('is_superuser', ChoicesFieldComboFilter),
-                   ('is_active', ChoicesFieldComboFilter),
-                   )
+    list_filter = (
+        ("is_staff", ChoicesFieldComboFilter),
+        ("is_superuser", ChoicesFieldComboFilter),
+        ("is_active", ChoicesFieldComboFilter),
+    )
     list_display = (
         "username",
         "email",
@@ -127,13 +130,12 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         "is_staff",
         "is_superuser",
     )
-    readonly_fields = ('ad_uuid',)
+    readonly_fields = ("ad_uuid",)
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
-            {"fields": (("first_name", "last_name", "email"),
-                        'ad_uuid')},
+            {"fields": (("first_name", "last_name", "email"), "ad_uuid")},
         ),
         (
             _("Permissions"),
@@ -177,11 +179,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             for user in User.objects.all():
                 try:
                     self._sync_ad_data(user)
-                except Http404 as e:
+                except Http404:
                     not_found.append(str(user))
             if not_found:
-                self.message_user(request, f"These users were not found: {', '.join(not_found)}",
-                                  messages.WARNING)
+                self.message_user(request, f"These users were not found: {', '.join(not_found)}", messages.WARNING)
             else:
                 self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
         except Exception as e:
@@ -315,6 +316,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
                 Q(role_one=self.value()) | Q(role_two=self.value()),
             )
         except (ValueError, ValidationError) as e:
+            logger.exception(e)
             raise IncorrectLookupParameters(e)
 
 

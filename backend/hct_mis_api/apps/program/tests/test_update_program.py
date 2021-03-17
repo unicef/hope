@@ -38,7 +38,7 @@ class TestUpdateProgram(APITestCase):
                     "name": "updated name",
                     "status": Program.ACTIVE,
                 },
-                "version": self.program.version
+                "version": self.program.version,
             },
         )
 
@@ -68,7 +68,7 @@ class TestUpdateProgram(APITestCase):
                     "name": "updated name",
                     "status": Program.ACTIVE,
                 },
-                "version": self.program.version
+                "version": self.program.version,
             },
         )
 
