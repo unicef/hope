@@ -2,7 +2,6 @@ import json
 import logging
 
 from constance import config
-from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket

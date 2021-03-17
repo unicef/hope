@@ -1,8 +1,10 @@
-import traceback
+import logging
 
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentVerification
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import from_received_to_status, calculate_counts
+
+logger = logging.getLogger(__name__)
 
 
 class CheckRapidProVerificationTask:
@@ -15,7 +17,7 @@ class CheckRapidProVerificationTask:
             try:
                 self._verify_cashplan_payment_verification(cashplan_payment_verification)
             except Exception as e:
-                print(traceback.format_exc())
+                logger.exception(e)
 
     def _verify_cashplan_payment_verification(self, cashplan_payment_verification):
         payment_record_verifications = cashplan_payment_verification.payment_record_verifications.prefetch_related(

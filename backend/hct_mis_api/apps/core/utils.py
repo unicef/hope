@@ -1,12 +1,14 @@
+import functools
+import logging
 from collections import MutableMapping, OrderedDict
 from typing import List
-import functools
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-
 from django_filters import OrderingFilter
 from graphql import GraphQLError
+
+logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
@@ -244,8 +246,10 @@ def age_to_birth_date_query(comparision_method, args):
     }
     args_count = comparision_method_args_count.get(comparision_method)
     if args_count is None:
+        logger.error(f"Age filter query don't supports {comparision_method} type")
         raise ValidationError(f"Age filter query don't supports {comparision_method} type")
     if len(args) != args_count:
+        logger.error(f"Age {comparision_method} filter query expect {args_count} arguments")
         raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
     if comparision_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args)
@@ -259,6 +263,7 @@ def age_to_birth_date_query(comparision_method, args):
         return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
+    logger.error(f"Age filter query don't supports {comparision_method} type")
     raise ValidationError(f"Age filter query don't supports {comparision_method} type")
 
 
@@ -294,9 +299,10 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
 
     try:
         return functools.reduce(getattr, attr.split("."), obj)
-    except AttributeError:
+    except AttributeError as e:
         if default != raise_attribute_error:
             return default
+        logger.exception(e)
         raise
 
 
@@ -489,6 +495,7 @@ def check_concurrency_version_in_mutation(version, target):
     from graphql import GraphQLError
 
     if version != target.version:
+        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
         raise GraphQLError("Someone has modified this record")
 
 
@@ -614,6 +621,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
     return resolve_f

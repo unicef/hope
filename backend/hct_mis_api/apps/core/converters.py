@@ -1,11 +1,11 @@
 import json
 
 import graphene
+from concurrency.fields import IntegerVersionField
 from django.contrib.gis.db.models import GeometryField
 from django.forms import MultipleChoiceField
 from graphene_django.converter import convert_django_field
 from graphene_django.forms.converter import convert_form_field
-from concurrency.fields import IntegerVersionField
 
 from hct_mis_api.apps.core.scalars import BigInt
 

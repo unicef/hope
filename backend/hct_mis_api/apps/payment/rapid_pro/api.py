@@ -1,3 +1,4 @@
+import logging
 from decimal import Decimal
 
 import requests
@@ -6,6 +7,8 @@ from django.conf import settings
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Individual
+
+logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -31,6 +34,7 @@ class RapidProAPI:
         if not self.url:
             self.url = settings.RAPID_PRO_URL
         if not token:
+            logger.error(f"Token is not set for this business area, business_area={business_area.name}")
             raise TokenNotProvided("Token is not set for this business area.")
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
@@ -39,12 +43,20 @@ class RapidProAPI:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
         response = self._client.get(url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _handle_post_request(self, url, data) -> dict:
         response = self._client.post(url=f"{self._get_url()}{url}", data=data)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _get_url(self):
@@ -141,6 +153,7 @@ class RapidProAPI:
             response = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
+            logger.exception(e)
             return str(e), None
 
     def test_connection_flow_run(self, flow_uuid, phone_number, timestamp=None):
@@ -173,4 +186,5 @@ class RapidProAPI:
                 "flow_start_status": flow_start_status,
             }
         except Exception as e:
+            logger.exception(e)
             return str(e), None

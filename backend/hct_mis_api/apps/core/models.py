@@ -1,10 +1,7 @@
-from decimal import Decimal
-
 import mptt
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -167,9 +164,11 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         queryset = cls.objects.filter(level=admin_level)
         if business_area is not None:
             queryset.filter(admin_area_level__business_area=business_area)
-        queryset = queryset.order_by('title')
-        return [{"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code} for
-                admin_area in queryset]
+        queryset = queryset.order_by("title")
+        return [
+            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            for admin_area in queryset
+        ]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
@@ -256,10 +255,10 @@ class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
         return (
             self.get_queryset()
-                .filter(status=self.model.SUCCESSFUL)
-                .exclude(template_id__exact="")
-                .order_by("-created_at")
-                .first()
+            .filter(status=self.model.SUCCESSFUL)
+            .exclude(template_id__exact="")
+            .order_by("-created_at")
+            .first()
         )
 
 
@@ -294,7 +293,6 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
 
 
 class CountryCodeMapManager(models.Manager):
-
     def __init__(self):
         self._cache = {2: {}, 3: {}}
         super().__init__()

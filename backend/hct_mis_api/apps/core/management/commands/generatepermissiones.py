@@ -1,17 +1,7 @@
 from django.core.management import BaseCommand
 from django.db import transaction
-from django_countries.data import COUNTRIES
 
 from hct_mis_api.apps.account.models import UserPermission
-from hct_mis_api.apps.household.models import (
-    DocumentType,
-    IDENTIFICATION_TYPE_CHOICE,
-    Agency,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    ImportedDocumentType as RDHDocumentType,
-    ImportedAgency,
-)
 
 
 class Command(BaseCommand):

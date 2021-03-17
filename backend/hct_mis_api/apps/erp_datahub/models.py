@@ -41,9 +41,7 @@ class FundsCommitment(models.Model):
     create_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     created_by = models.CharField(max_length=20, null=True, blank=True, default="")
     update_date = models.DateTimeField(null=True, blank=True)
-    updated_by = models.CharField(max_length=20, blank=True,
-                                  null=True,
-                                  default="")
+    updated_by = models.CharField(max_length=20, blank=True, null=True, default="")
     mis_sync_flag = models.BooleanField(null=True, blank=True, default=False)
     mis_sync_date = models.DateTimeField(blank=True, null=True)
     ca_sync_flag = models.BooleanField(blank=True, null=True, default=False)
@@ -75,13 +73,9 @@ class DownPayment(models.Model):
     doc_number = models.CharField(max_length=10, blank=True, null=True)
     doc_item_number = models.CharField(max_length=3, null=True)
     create_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
-    created_by = models.CharField(max_length=20,
-                                  blank=True, null=True,
-                                  default="")
+    created_by = models.CharField(max_length=20, blank=True, null=True, default="")
     update_date = models.DateTimeField(blank=True, null=True)
-    updated_by = models.CharField(max_length=20,
-                                  blank=True, null=True,
-                                  default="")
+    updated_by = models.CharField(max_length=20, blank=True, null=True, default="")
     mis_sync_flag = models.BooleanField(default=False, blank=True, null=True)
     mis_sync_date = models.DateTimeField(blank=True, null=True)
     ca_sync_flag = models.BooleanField(default=False, blank=True, null=True)
