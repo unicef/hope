@@ -1,5 +1,7 @@
 import logging
 
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import TextFieldFilter
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
@@ -8,14 +10,11 @@ from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_urls.api import ExtraUrlMixin, button
-from adminfilters.filters import TextFieldFilter
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.steficon.forms import RuleForm
 from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.utils.admin import SmartFieldsetMixin
 
 logger = logging.getLogger(__name__)
 

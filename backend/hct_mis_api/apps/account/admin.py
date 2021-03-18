@@ -1,6 +1,12 @@
 import logging
 from collections import namedtuple
 
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    ForeignKeyFieldFilter,
+    RelatedFieldComboFilter,
+)
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
@@ -15,18 +21,6 @@ from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-
-from admin_extra_urls.api import ExtraUrlMixin, button
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    ForeignKeyFieldFilter,
-    RelatedFieldComboFilter,
-)
-from adminfilters.multiselect import (
-    IntersectionFieldListFilter,
-    MultipleSelectFieldListFilter,
-    UnionFieldListFilter,
-)
 from requests import HTTPError
 
 from hct_mis_api.apps.account.microsoft_graph import (
@@ -82,6 +76,9 @@ class UserRoleAdminForm(ModelForm):
         if self.instance.id:
             incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
         if incompatible_userroles.exists():
+            logger.error(
+                f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+            )
             raise ValidationError(
                 {
                     "role": _(
@@ -193,7 +190,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             for user in User.objects.all():
                 try:
                     self._sync_ad_data(user)
-                except Http404 as e:
+                except Http404:
                     not_found.append(str(user))
             if not_found:
                 self.message_user(request, f"These users were not found: {', '.join(not_found)}", messages.WARNING)
@@ -330,6 +327,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
                 Q(role_one=self.value()) | Q(role_two=self.value()),
             )
         except (ValueError, ValidationError) as e:
+            logger.exception(e)
             raise IncorrectLookupParameters(e)
 
 

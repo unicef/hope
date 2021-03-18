@@ -1,5 +1,5 @@
+import logging
 from collections import Iterable
-from operator import itemgetter
 
 import graphene
 from constance import config
@@ -36,6 +36,8 @@ from hct_mis_api.apps.core.models import (
     AdminAreaLevel,
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
+
+logger = logging.getLogger(__name__)
 
 
 class AdminAreaFilter(FilterSet):
@@ -259,8 +261,10 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
     try:
         assets = method
     except ObjectDoesNotExist:
+        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.")
     except AttributeError as error:
+        logger.exception(error)
         raise GraphQLError(str(error))
 
     return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
@@ -298,7 +302,7 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_cash_assist_url_prefix(parent,info):
+    def resolve_cash_assist_url_prefix(parent, info):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):

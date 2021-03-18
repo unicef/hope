@@ -96,7 +96,7 @@ class PullFromDatahubTask:
                     session.status = Session.STATUS_FAILED
                     session.save()
                     capture_exception(e)
-                    log.warning(e, exc_info=True)
+                    log.exception(e)
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
@@ -168,9 +168,7 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
-            ServiceProvider.objects.update_or_create(
-                ca_id=dh_service_provider.ca_id, defaults=service_provider_args
-            )
+            ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)

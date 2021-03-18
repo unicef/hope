@@ -1,7 +1,6 @@
 from django.db import transaction
 
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
-from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import Individual, DUPLICATE, NEEDS_ADJUDICATION, Document

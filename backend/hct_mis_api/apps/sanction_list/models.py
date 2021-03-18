@@ -64,31 +64,49 @@ class SanctionListIndividualDocument(TimeStampedUUIDModel):
     date_of_issue = models.CharField(max_length=255, blank=True, null=True, default="")
     issuing_country = CountryField(blank=True, default="")
     note = models.CharField(max_length=255, blank=True, default="")
-    individual = models.ForeignKey("SanctionListIndividual", on_delete=models.CASCADE, related_name="documents",)
+    individual = models.ForeignKey(
+        "SanctionListIndividual",
+        on_delete=models.CASCADE,
+        related_name="documents",
+    )
 
 
 class SanctionListIndividualNationalities(TimeStampedUUIDModel):
     nationality = CountryField()
-    individual = models.ForeignKey("SanctionListIndividual", on_delete=models.CASCADE, related_name="nationalities",)
+    individual = models.ForeignKey(
+        "SanctionListIndividual",
+        on_delete=models.CASCADE,
+        related_name="nationalities",
+    )
 
 
 class SanctionListIndividualCountries(TimeStampedUUIDModel):
     country = CountryField()
-    individual = models.ForeignKey("SanctionListIndividual", on_delete=models.CASCADE, related_name="countries",)
+    individual = models.ForeignKey(
+        "SanctionListIndividual",
+        on_delete=models.CASCADE,
+        related_name="countries",
+    )
 
 
 class SanctionListIndividualAliasName(TimeStampedUUIDModel):
     name = models.CharField(max_length=255)
-    individual = models.ForeignKey("SanctionListIndividual", on_delete=models.CASCADE, related_name="alias_names",)
+    individual = models.ForeignKey(
+        "SanctionListIndividual",
+        on_delete=models.CASCADE,
+        related_name="alias_names",
+    )
 
 
 class SanctionListIndividualDateOfBirth(TimeStampedUUIDModel):
     date = models.DateField()
-    individual = models.ForeignKey("SanctionListIndividual", on_delete=models.CASCADE, related_name="dates_of_birth",)
+    individual = models.ForeignKey(
+        "SanctionListIndividual",
+        on_delete=models.CASCADE,
+        related_name="dates_of_birth",
+    )
 
 
 class UploadedXLSXFile(TimeStampedUUIDModel):
     file = models.FileField()
     associated_email = models.EmailField()
-
-
