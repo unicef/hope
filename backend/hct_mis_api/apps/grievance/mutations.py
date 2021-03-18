@@ -1,3 +1,5 @@
+import logging
+
 import graphene
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -5,14 +7,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
 
-from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
+from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.schema import BusinessAreaNode
 from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case, check_concurrency_version_in_mutation
-from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     save_data_change_extras,
@@ -46,6 +48,8 @@ from hct_mis_api.apps.household.models import (
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+
+logger = logging.getLogger(__name__)
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -280,7 +284,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         arg = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
-        check_concurrency_version_in_mutation(kwargs.get('version'), grievance_ticket)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
         cls.has_creator_or_owner_permission(
             info,
@@ -293,6 +297,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            logger.error("Grievance Ticket on status Closed is not editable")
             raise GraphQLError("Grievance Ticket on status Closed is not editable")
 
         if grievance_ticket.issue_type:
@@ -346,7 +351,6 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         else:
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
-
 
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
@@ -510,6 +514,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
+            logger.error("New status is incorrect")
             raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
@@ -754,12 +759,14 @@ class ReassignRoleMutation(graphene.Mutation):
     @classmethod
     def verify_role_choices(cls, role):
         if role not in [ROLE_PRIMARY, ROLE_ALTERNATE, HEAD]:
+            logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
             raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
+                logger.error("This individual is not a head of provided household")
                 raise GraphQLError("This individual is not a head of provided household")
         else:
             get_object_or_404(IndividualRoleInHousehold, individual=current_individual, household=household, role=role)
@@ -843,6 +850,7 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
         ticket_details = grievance_ticket.ticket_details
 
         if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
+            logger.error("The selected individual is not valid, must be one of those attached to the ticket")
             raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
         ticket_details.selected_individual = selected_individual

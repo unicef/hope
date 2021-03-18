@@ -1,10 +1,7 @@
-from decimal import Decimal
-
 import mptt
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
