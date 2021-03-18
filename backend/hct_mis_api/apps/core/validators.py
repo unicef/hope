@@ -113,6 +113,9 @@ class KoboTemplateValidator:
         "date": TYPE_DATE,
         "select_multiple": TYPE_SELECT_MANY,
         "geopoint": TYPE_GEOPOINT,
+        "start": TYPE_STRING,
+        "end": TYPE_STRING,
+        "deviceid": TYPE_STRING,
     }
     EXPECTED_REQUIRED_FIELDS = (
         "country_h_c"

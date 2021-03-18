@@ -60,18 +60,18 @@ services:
   celery_worker:
     stdin_open: true
     tty: true
-    image: unicef/hct-mis-celery-worker
+    image: unicef/hct-mis-backend
     env_file:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    build: ./backend
     volumes:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    command: "watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info"
     depends_on:
+      - backend
       - db
       - redis
       - cash_assist_datahub_db
@@ -82,18 +82,18 @@ services:
   celery-beat:
     stdin_open: true
     tty: true
-    image: unicef/hct-mis-celery-beat
+    image: unicef/hct-mis-backend
     env_file:
       - .env
     environment:
       - REDIS_INSTANCE=redis:6379
-    build: ./backend
     volumes:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO"
+    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     depends_on:
+      - backend
       - db
       - redis
       - cash_assist_datahub_db
@@ -102,11 +102,17 @@ services:
       - elasticsearch_test
 
   celery-flower:
-    image: mher/flower
+    image: saxix/flower:1.6
     command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    environment:
+      - FLOWER_AUTH_PROVIDER=""
+      - FLOWER_DEBUG="1"
+      - FLOWER_ADDRESS=0.0.0.0
     ports:
       - "5555:5555"
     restart: always
+    depends_on:
+      - redis
 
   db:
     image: mdillon/postgis:9.5-alpine

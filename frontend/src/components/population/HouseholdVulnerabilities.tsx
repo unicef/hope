@@ -4,11 +4,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
-import {
-  HouseholdDetailedFragment,
-  useAllHouseholdsFlexFieldsAttributesQuery
-} from '../../__generated__/graphql';
-import { getFlexFieldTextValue } from "../../utils/utils"
+import { HouseholdDetailedFragment } from '../../__generated__/graphql';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,32 +20,24 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-interface HouseholdVulnerabilities {
+interface HouseholdVulnerabilitiesProps {
   household: HouseholdDetailedFragment;
 }
 
-export function HouseholdVulnerabilities({ household }): React.ReactElement {
-  const { data, loading } = useAllHouseholdsFlexFieldsAttributesQuery();
-  if (loading) {
-    return null;
-  }
-  const fieldsDict = data.allHouseholdsFlexFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
-  );
-  const fields = Object.entries(household.flexFields || {}).map(([key, value]: [string, string|string[]]) => {
-    return (
+export function HouseholdVulnerabilities({
+  household,
+}: HouseholdVulnerabilitiesProps): React.ReactElement {
+  const fields = Object.entries(household.flexFields || {}).map(
+    ([key, value]: [string, string | string[]]) => {
+      return (
         <LabelizedField
           key={key}
           label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
-          value={getFlexFieldTextValue(key, value, fieldsDict[key])}
+          value={value}
         />
-      )
-  })
+      );
+    },
+  );
 
   return (
     <div>
@@ -58,9 +46,11 @@ export function HouseholdVulnerabilities({ household }): React.ReactElement {
           <Typography variant='h6'>Vulnerabilities</Typography>
         </Title>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
-            {fields}
-          </Grid>
+          {fields.map((field) => (
+            <Grid item xs={4}>
+              {field}
+            </Grid>
+          ))}
         </Grid>
       </Overview>
     </div>
