@@ -107,7 +107,6 @@ class KoboAPI:
 
         attempts = 5
         while attempts >= 0:
-            # raise requests.exceptions.HTTPError()
             response_dict = self._handle_request(url)
             import_status = response_dict.get("status")
             if import_status == "processing":
