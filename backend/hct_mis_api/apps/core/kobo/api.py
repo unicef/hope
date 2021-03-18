@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from io import BytesIO
@@ -10,6 +11,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.kobo.common import filter_by_owner
 from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
+
+logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -88,7 +91,11 @@ class KoboAPI:
         }
         if not template_id:
             asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
-            asset_response.raise_for_status()
+            try:
+                asset_response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                logger.exception(e)
+                raise
             asset_response_dict = asset_response.json()
             asset_uid = asset_response_dict.get("uid")
         else:
