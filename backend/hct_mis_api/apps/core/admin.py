@@ -1,9 +1,11 @@
+import logging
+
 import xlrd
-from admin_extra_urls.api import link, ExtraUrlMixin, action
+from admin_extra_urls.api import ExtraUrlMixin, button
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
@@ -11,17 +13,19 @@ from xlrd import XLRDError
 
 from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
 from hct_mis_api.apps.core.models import (
+    AdminArea,
+    AdminAreaLevel,
     BusinessArea,
+    CountryCodeMap,
     FlexibleAttribute,
     FlexibleAttributeChoice,
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
-    AdminArea,
-    AdminAreaLevel,
-    CountryCodeMap,
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+
+logger = logging.getLogger(__name__)
 
 
 class XLSImportForm(forms.Form):
@@ -40,7 +44,7 @@ class TestRapidproForm(forms.Form):
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
 
-    @action(label="Test RapidPro Connection")
+    @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
         context = self.get_common_context(request, pk)
         context["business_area"] = self.object
@@ -147,7 +151,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             return XLSImportForm
         return super().get_form(request, obj, change, **kwargs)
 
-    @link()
+    @button()
     def download_last_valid_file(self, request):
         latest_valid_import = self.model.objects.latest_valid()
         if latest_valid_import:
@@ -158,7 +162,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             level=ERROR,
         )
 
-    @action(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
+    @button(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
     def rerun_kobo_import(self, request, pk):
         xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
         upload_new_kobo_template_and_update_flex_fields_task.run(
@@ -168,6 +172,7 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
     def add_view(self, request, form_url="", extra_context=None):
         if not self.has_add_permission(request):
+            logger.error("The user did not have permission to do that")
             raise PermissionDenied
 
         opts = self.model._meta
@@ -198,8 +203,10 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     errors = [f"Field: {error['field']} - {error['message']}" for error in validation_errors]
                     form.add_error(field=None, error=errors)
             except ValidationError as validation_error:
+                logger.exception(validation_error)
                 form.add_error("xls_file", validation_error)
             except XLRDError as file_error:
+                logger.exception(file_error)
                 form.add_error("xls_file", file_error)
 
             if form.is_valid():

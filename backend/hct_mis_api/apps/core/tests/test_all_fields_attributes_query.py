@@ -39,5 +39,6 @@ class TestMetaDataFilterType(APITestCase):
 
     def test_core_meta_type_query(self):
         self.snapshot_graphql_request(
-            request_string=self.QUERY, context={"user": self.user},
+            request_string=self.QUERY,
+            context={"user": self.user},
         )

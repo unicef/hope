@@ -1,4 +1,5 @@
 import graphene
+import logging
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -39,6 +40,8 @@ from hct_mis_api.apps.targeting.validators import (
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 from hct_mis_api.apps.utils.schema import Arg
+
+logger = logging.getLogger(__name__)
 
 
 class CopyTargetPopulationInput(graphene.InputObjectType):
@@ -134,6 +137,7 @@ class CreateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         cls.has_permission(info, Permissions.TARGETING_CREATE, program.business_area)
 
         if program.status != Program.ACTIVE:
+            logger.error("Only Active program can be assigned to Targeting")
             raise ValidationError("Only Active program can be assigned to Targeting")
 
         targeting_criteria_input = input.get("targeting_criteria")
@@ -177,6 +181,9 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
         if target_population.status != TargetPopulation.STATUS_APPROVED and (
             vulnerability_score_min is not None or vulnerability_score_max is not None
         ):
+            logger.error(
+                "You can only set vulnerability_score_min and vulnerability_score_max on APPROVED Target Population"
+            )
             raise ValidationError(
                 "You can only set vulnerability_score_min and vulnerability_score_max on APPROVED Target Population"
             )
@@ -186,8 +193,10 @@ class UpdateTargetPopulationMutation(PermissionMutation, ValidationErrorMutation
             target_population.vulnerability_score_max = vulnerability_score_max
 
         if target_population.status == TargetPopulation.STATUS_APPROVED and name:
+            logger.error("Name can't be changed when Target Population is in APPROVED status")
             raise ValidationError("Name can't be changed when Target Population is in APPROVED status")
         if target_population.status == TargetPopulation.STATUS_FINALIZED:
+            logger.error("Finalized Target Population can't be changed")
             raise ValidationError("Finalized Target Population can't be changed")
         if name:
             target_population.name = name
@@ -366,9 +375,12 @@ class CopyTargetPopulationMutation(PermissionRelayMutation, TargetValidator):
             target_population_copy.full_clean()
             target_population_copy.save()
             target_population_copy.refresh_from_db()
-            log_create(TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population)
+            log_create(
+                TargetPopulation.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, None, target_population
+            )
             return CopyTargetPopulationMutation(target_population_copy)
         except ValidationError as e:
+            logger.exception(e)
             return cls(validation_errors=e.message_dict)
 
     @classmethod
@@ -452,9 +464,11 @@ class SetSteficonRuleOnTargetPopulationMutation(PermissionRelayMutation, TargetV
                 target_population.allowed_steficon_rule is not None
                 and steficon_rule_id != target_population.allowed_steficon_rule.id
             ):
+                logger.error("You can't change steficon rule for this Target Population")
                 raise GraphQLError("You can't change steficon rule for this Target Population")
             steficon_rule = get_object_or_404(Rule, id=steficon_rule_id)
             if not steficon_rule.enabled or steficon_rule.deprecated:
+                logger.error("This steficon rule is not enabled or is deprecated.")
                 raise GraphQLError("This steficon rule is not enabled or is deprecated.")
             target_population.steficon_rule = steficon_rule
             target_population.save()

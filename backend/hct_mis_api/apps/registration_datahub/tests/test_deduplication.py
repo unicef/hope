@@ -19,7 +19,12 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household_and_individuals,
 )
-from hct_mis_api.apps.registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, ImportData, ImportedIndividual
+from hct_mis_api.apps.registration_datahub.models import (
+    DUPLICATE_IN_BATCH,
+    UNIQUE_IN_BATCH,
+    ImportData,
+    ImportedIndividual,
+)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
