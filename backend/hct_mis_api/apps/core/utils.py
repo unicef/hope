@@ -267,10 +267,10 @@ def age_to_birth_date_query(comparision_method, args):
     raise ValidationError(f"Age filter query don't supports {comparision_method} type")
 
 
-def get_attr_value(name, object, default=None):
-    if isinstance(object, (MutableMapping, dict)):
-        return object.get(name, default)
-    return getattr(object, name, default)
+def get_attr_value(name, obj, default=None):
+    if isinstance(obj, (MutableMapping, dict)):
+        return obj.get(name, default)
+    return getattr(obj, name, default)
 
 
 def to_choice_object(choices):

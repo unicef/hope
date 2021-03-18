@@ -7,8 +7,6 @@ from django.contrib.messages import DEFAULT_TAGS
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
-from hct_mis_api.apps.program.models import Program as HopeProgram
-from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
