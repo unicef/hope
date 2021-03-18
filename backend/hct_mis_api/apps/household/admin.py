@@ -1,33 +1,32 @@
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
 from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin
-from adminfilters.filters import (
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-    RelatedFieldComboFilter,
-    TextFieldFilter,
-)
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
-    HEAD,
-    ROLE_ALTERNATE,
-    ROLE_PRIMARY,
-    Agency,
-    Document,
-    DocumentType,
     Household,
     Individual,
-    IndividualIdentity,
+    DocumentType,
+    Document,
+    Agency,
     IndividualRoleInHousehold,
+    IndividualIdentity,
+    ROLE_PRIMARY,
+    ROLE_ALTERNATE,
+    HEAD,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(Agency)
@@ -114,8 +113,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for range in ["0_5", "6_11", "12_17", "18_59", "60"]:
-                field = f"{gender}_age_group_{range}_count"
+            for num_range in ["0_5", "6_11", "12_17", "18_59", "60"]:
+                field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
         active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))

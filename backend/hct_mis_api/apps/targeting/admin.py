@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib import admin, messages
 
-# Register your models here.
 from django.core.validators import MinValueValidator
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse

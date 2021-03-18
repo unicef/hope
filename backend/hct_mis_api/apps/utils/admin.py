@@ -1,9 +1,5 @@
-# Register your models here.
 from django.contrib import admin
-from django.db import models
-from django.contrib.admin.utils import flatten
-from smart_admin.mixins import (FieldsetMixin as SmartFieldsetMixin,
-                                DisplayAllMixin as SmartDisplayAllMixin)
+from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 
 class HOPEModelAdminBase(SmartDisplayAllMixin, admin.ModelAdmin):

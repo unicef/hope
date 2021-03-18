@@ -2,6 +2,7 @@ import copy
 import datetime
 import functools
 import io
+import logging
 from itertools import chain
 
 import openpyxl
@@ -22,6 +23,8 @@ from hct_mis_api.apps.household.models import Household
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.reporting.models import DashboardReport
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateDashboardReportContentHelpers:
@@ -896,7 +899,7 @@ class GenerateDashboardReportService:
             )
             self.report.status = DashboardReport.COMPLETED
         except Exception as e:
-            print("ERROR", e)
+            logger.exception(e)
             self.report.status = DashboardReport.FAILED
         self.report.save()
 

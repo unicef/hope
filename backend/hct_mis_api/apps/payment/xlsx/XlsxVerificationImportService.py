@@ -91,7 +91,13 @@ class XlsxVerificationImportService:
         column = 0
         for header in headers_row:
             if column >= len(accepted_headers):
-                self.errors.append(("Payment Verifications", header.coordinate, f"Unexpected header {header.value}",))
+                self.errors.append(
+                    (
+                        "Payment Verifications",
+                        header.coordinate,
+                        f"Unexpected header {header.value}",
+                    )
+                )
             elif header.value != accepted_headers[column]:
                 self.errors.append(
                     (

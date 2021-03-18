@@ -16,15 +16,16 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 @admin.register(GrievanceTicket)
 class GrievanceTicketAdmin(HOPEModelAdminBase):
-    list_display = ('created_at', 'created_by', 'assigned_to', 'status', 'category')
-    raw_id_fields = ('created_by', 'assigned_to')
-    list_filter = (('status', ChoicesFieldComboFilter),
-                   ('category', ChoicesFieldComboFilter),
-                   ('business_area', RelatedFieldComboFilter),
-                   TextFieldFilter.factory('created_by__username__istartswith'),
-                   TextFieldFilter.factory('assigned_to__username__istartswith'),
-                   'updated_at',
-                   )
+    list_display = ("created_at", "created_by", "assigned_to", "status", "category")
+    raw_id_fields = ("created_by", "assigned_to")
+    list_filter = (
+        ("status", ChoicesFieldComboFilter),
+        ("category", ChoicesFieldComboFilter),
+        ("business_area", RelatedFieldComboFilter),
+        TextFieldFilter.factory("created_by__username__istartswith"),
+        TextFieldFilter.factory("assigned_to__username__istartswith"),
+        "updated_at",
+    )
 
 
 @admin.register(TicketNote)

@@ -69,7 +69,7 @@ class PaymentRecordFactory(factory.DjangoModelFactory):
         tzinfo=utc,
     )
     delivery_type = fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        payment_models.PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
     currency = factory.Faker("currency_code")
@@ -130,7 +130,7 @@ class CashPlanFactory(factory.DjangoModelFactory):
         ext_word_list=None,
     )
     delivery_type = fuzzy.FuzzyChoice(
-        PaymentRecord.DELIVERY_TYPE_CHOICE,
+        payment_models.PaymentRecord.DELIVERY_TYPE_CHOICE,
         getter=lambda c: c[0],
     )
     assistance_measurement = factory.Faker("currency_name")
