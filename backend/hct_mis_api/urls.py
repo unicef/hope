@@ -47,6 +47,7 @@ urlpatterns = [
         "api/dashboard-report/<uuid:report_id>",
         hct_mis_api.apps.core.views.download_dashboard_report,
         name="dashboard_report",
-    ),] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    ),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns += staticfiles_urlpatterns()
