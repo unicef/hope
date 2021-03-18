@@ -1,4 +1,4 @@
-from admin_extra_urls.api import action
+from admin_extra_urls.api import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import TextFieldFilter
 from django.contrib import admin, messages
@@ -12,12 +12,14 @@ from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopu
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan,
-    Session,
-    TargetPopulation,
+    PaymentRecord,
     Programme,
     ServiceProvider,
-    PaymentRecord,
+    Session,
+    TargetPopulation,
 )
+from hct_mis_api.apps.program.models import Program as HopeProgram
+from hct_mis_api.apps.targeting.models import TargetPopulation as HopeTargetPopulation
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -28,7 +30,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
     ordering = ("timestamp",)
 
-    @action()
+    @button()
     def inspect(self, request, pk):
         opts = self.model._meta
         ctx = {
@@ -78,7 +80,7 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
         TextFieldFilter.factory("business_area"),
     )
 
-    @action()
+    @button()
     def inspect(self, request, pk):
         opts = self.model._meta
         payment_record: PaymentRecord = PaymentRecord.objects.get(pk=pk)
@@ -95,7 +97,7 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
             "data": {},
         }
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.household.models import Individual, Household
+        from hct_mis_api.apps.household.models import Household, Individual
 
         # ba = BusinessArea.objects.get(code=payment_record.business_area)
         for field_name, model, rk in [
