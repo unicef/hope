@@ -1,5 +1,5 @@
 import graphene
-from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count, F
+from django.db.models import Case, IntegerField, Q, Sum, Value, When, Count
 from django.db.models.functions import Coalesce, Lower
 from django_filters import (
     CharFilter,
@@ -17,7 +17,6 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
     Permissions,
 )
-
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -25,10 +24,8 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     CustomOrderingFilter,
     chart_map_choices,
-    chart_get_filtered_qs,
     chart_permission_decorator,
     chart_filters_decoder,
-    chart_create_filter_query,
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
@@ -60,8 +57,18 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "households_count", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
+
+    @property
+    def qs(self):
+        return super().qs.annotate(
+            total_hh_count=Count(
+                "cash_plans__payment_records__household",
+                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
+                distinct=True,
+            )
+        )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -146,13 +153,7 @@ class CashPlanFilter(FilterSet):
 
     @property
     def qs(self):
-        return super().qs.annotate(
-            total_number_of_hh=Count(
-                "payment_records__household",
-                filter=~Q(payment_records__status=PaymentRecord.STATUS_ERROR),
-                distinct=True,
-            )
-        )
+        return super().qs.annotate(total_number_of_hh=Count("payment_records"))
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")

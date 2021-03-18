@@ -6,7 +6,6 @@ import {
   HouseholdChoiceDataQuery,
   ImportedHouseholdDetailedFragment,
 } from '../../../../__generated__/graphql';
-import { Missing } from '../../../../components/Missing';
 import { choicesToDict } from '../../../../utils/utils';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
@@ -48,7 +47,7 @@ export function HouseholdDetails({
             </LabelizedField>
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='Location'>
+            <LabelizedField label='Country'>
               {household.country}
             </LabelizedField>
           </Grid>
@@ -79,16 +78,6 @@ export function HouseholdDetails({
           <Grid item xs={3}>
             <LabelizedField label='ADMINISTRATIVE LEVEL 2'>
               {household.admin2Title}
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label='Total Cash Received'>
-              <Missing />
-            </LabelizedField>
-          </Grid>
-          <Grid item xs={3}>
-            <LabelizedField label='Programme (Enrolled)'>
-              <Missing />
             </LabelizedField>
           </Grid>
         </Grid>
