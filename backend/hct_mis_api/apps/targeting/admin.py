@@ -1,5 +1,3 @@
-from admin_extra_urls.api import ExtraUrlMixin, action
-from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter, TextFieldFilter
 from django import forms
 from django.contrib import admin, messages
 
@@ -8,8 +6,18 @@ from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
+
 from hct_mis_api.apps.steficon.models import Rule
-from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.targeting.models import (
+    HouseholdSelection,
+    TargetPopulation,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -45,13 +53,13 @@ class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         "candidate_list_targeting_criteria",
     )
 
-    @action()
+    @button()
     def selection(self, request, pk):
         obj = self.get_object(request, pk)
         url = reverse("admin:targeting_householdselection_changelist")
         return HttpResponseRedirect(f"{url}?target_population|id={obj.id}")
 
-    @action()
+    @button()
     def test_steficon(self, request, pk):
         context = self.get_common_context(request, pk)
         if request.method == "GET":

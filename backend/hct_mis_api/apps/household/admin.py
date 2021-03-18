@@ -1,10 +1,11 @@
-from admin_extra_urls.decorators import action
+from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import (
-    TextFieldFilter,
-    RelatedFieldComboFilter,
+    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
 )
 from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
@@ -86,13 +87,13 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
-    @action()
+    @button()
     def sanity_check(self, request, pk):
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
@@ -206,7 +207,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
