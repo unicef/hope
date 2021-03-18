@@ -180,7 +180,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     DECIMAL = "DECIMAL"
     SELECT_ONE = "SELECT_ONE"
     SELECT_MANY = "SELECT_MANY"
-    DATETIME = "DATETIME"
+    DATE = "DATE"
     GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
         (STRING, _("String")),
@@ -189,7 +189,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         (DECIMAL, _("Decimal")),
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
-        (DATETIME, _("Datetime")),
+        (DATE, _("Date")),
         (GEOPOINT, _("Geopoint")),
     )
     ASSOCIATED_WITH_CHOICES = (
