@@ -1,11 +1,11 @@
 # Create your models here.
+from concurrency.fields import IntegerVersionField
 from django.db import models
 from django.utils import timezone
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-from concurrency.fields import IntegerVersionField
 
 
 class TimeStampedUUIDModel(UUIDModel):

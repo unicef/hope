@@ -5,8 +5,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict

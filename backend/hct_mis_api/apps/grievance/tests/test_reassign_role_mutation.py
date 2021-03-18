@@ -40,7 +40,11 @@ class TestRoleReassignMutation(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area, )
+        area_type = AdminAreaLevelFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
         self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
@@ -71,7 +75,9 @@ class TestRoleReassignMutation(APITestCase):
         self.individual.refresh_from_db()
 
         self.role = IndividualRoleInHousehold.objects.create(
-            household=self.household, individual=self.individual, role=ROLE_PRIMARY,
+            household=self.household,
+            individual=self.individual,
+            role=ROLE_PRIMARY,
         )
 
         self.grievance_ticket = GrievanceTicketFactory(
@@ -83,7 +89,9 @@ class TestRoleReassignMutation(APITestCase):
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketDeleteIndividualDetailsFactory(
-            ticket=self.grievance_ticket, individual=self.individual, approve_status=True,
+            ticket=self.grievance_ticket,
+            individual=self.individual,
+            approve_status=True,
         )
 
     def test_role_reassignment(self):
@@ -94,7 +102,9 @@ class TestRoleReassignMutation(APITestCase):
             "role": ROLE_PRIMARY,
         }
         self.graphql_request(
-            request_string=self.REASSIGN_ROLE_MUTATION, context={"user": self.user}, variables=variables,
+            request_string=self.REASSIGN_ROLE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
         )
 
         self.grievance_ticket.refresh_from_db()
