@@ -58,8 +58,8 @@ class APITestCase(SnapshotTestTestCase):
         DocumentType.objects.bulk_create(document_types, ignore_conflicts=True)
 
     @staticmethod
-    def id_to_base64(id, name):
-        return base64.b64encode(f"{name}:{str(id)}".encode("utf-8")).decode()
+    def id_to_base64(object_id, name):
+        return base64.b64encode(f"{name}:{str(object_id)}".encode("utf-8")).decode()
 
     @staticmethod
     def __set_context_files(context, files):

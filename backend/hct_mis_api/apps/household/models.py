@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date
 
@@ -215,6 +216,8 @@ REGISTRATION_METHOD_CHOICES = (
     (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -443,6 +446,7 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
+                logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:

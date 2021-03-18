@@ -1,9 +1,7 @@
-import json
 import logging
 from time import sleep
 
 from constance import config
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
 from django_countries.fields import Country
 from elasticsearch_dsl import connections

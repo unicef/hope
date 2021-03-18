@@ -13,15 +13,9 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.filters import filter_age
+from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.utils.schema import (
-    ChartDatasetNode,
-    ChartDetailedDatasetsNode,
-    SectionTotalNode,
-    TableTotalCashTransferred,
-)
 from hct_mis_api.apps.core.utils import (
     to_choice_object,
     decode_id_string,
@@ -44,6 +38,12 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import get_number_of_samples, get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    SectionTotalNode,
+    TableTotalCashTransferred,
+)
 
 
 class PaymentRecordFilter(FilterSet):

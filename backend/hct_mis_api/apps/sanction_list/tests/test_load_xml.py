@@ -39,7 +39,8 @@ class TestLoadXML(TestCase):
         self.assertEqual(test_doc.type_of_document, "Test Doc Type")
 
         self.assertIn(
-            "KP", updated_individual.nationalities.values_list("nationality", flat=True),
+            "KP",
+            updated_individual.nationalities.values_list("nationality", flat=True),
         )
 
         task = LoadSanctionListXMLTask(file_path=f"{main_test_files_path}/updated2-consolidated.xml")

@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -10,6 +12,8 @@ from graphql.utils import schema_printer
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.reporting.models import DashboardReport
+
+logger = logging.getLogger(__name__)
 
 
 def homepage(request):
@@ -54,5 +58,6 @@ def trigger_error(request):
 def download_dashboard_report(request, report_id):
     report = get_object_or_404(DashboardReport, id=report_id)
     if not request.user.has_permission(Permissions.DASHBOARD_EXPORT.name, report.business_area):
+        logger.error("Permission Denied: You need dashboard export permission to access this file")
         raise PermissionDenied("Permission Denied: You need dashboard export permission to access this file")
     return redirect(report.file.url)

@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date
 
@@ -6,7 +7,6 @@ from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from django_countries.fields import CountryField
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -44,6 +44,8 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (UNIQUE_IN_BATCH, "Unique in batch"),
     (NOT_PROCESSED, "Not Processed"),
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ImportedHousehold(TimeStampedUUIDModel):
@@ -329,6 +331,7 @@ class ImportedDocument(TimeStampedUUIDModel):
 
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
+                logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
 

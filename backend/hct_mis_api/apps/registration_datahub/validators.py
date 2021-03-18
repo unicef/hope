@@ -59,7 +59,7 @@ class XLSXValidator(BaseValidator):
         # Checking only extensions is not enough,
         # loading workbook to check if it is in fact true .xlsx file
         try:
-            wb = load_workbook(xlsx_file, data_only=True)
+            load_workbook(xlsx_file, data_only=True)
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
@@ -520,7 +520,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         # Checking only extensions is not enough,
         # loading workbook to check if it is in fact true .xlsx file
         try:
-            wb = load_workbook(xlsx_file, data_only=True)
+            load_workbook(xlsx_file, data_only=True)
         except BadZipfile:
             return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
 
