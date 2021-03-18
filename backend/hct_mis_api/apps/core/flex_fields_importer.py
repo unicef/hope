@@ -25,13 +25,18 @@ class FlexibleAttributeImporter:
     TYPE_CHOICE_MAP = {
         "note": TYPE_STRING,
         "image": TYPE_IMAGE,
-        "calculate": TYPE_STRING,
         "select_one": TYPE_SELECT_ONE,
         "text": TYPE_STRING,
         "integer": TYPE_INTEGER,
         "decimal": TYPE_DECIMAL,
         "date": TYPE_DATE,
         "select_multiple": TYPE_SELECT_MANY,
+    }
+    CALCULATE_TYPE_CHOICE_MAP = {
+        "text": TYPE_STRING,
+        "integer": TYPE_INTEGER,
+        "decimal": TYPE_DECIMAL,
+        "date": TYPE_DATE,
     }
 
     # Constants for xls import
@@ -116,8 +121,9 @@ class FlexibleAttributeImporter:
                     logger.error(f"Survey Sheet: Row {row_number + 1}: Type is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Type is required")
                 choice_key = value.split(" ")[0]
-
-                if choice_key in self.TYPE_CHOICE_MAP.keys():
+                if choice_key == "calculate":
+                    self.object_fields_to_create["type"] = "calculate"
+                elif choice_key in self.TYPE_CHOICE_MAP.keys():
                     self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
                 is_attribute_name_empty = header_name == "name" and value in (None, "")
@@ -132,6 +138,32 @@ class FlexibleAttributeImporter:
                     logger.error(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                 self.object_fields_to_create[header_name] = value if value else ""
+
+        is_valid_calculate_field_and_header_is_calculate_field_type = (
+            object_type_to_add == "attribute"
+            and header_name == "calculated_result_field_type"
+            and row[0].value == "calculate"
+            and any(self.object_fields_to_create["name"].endswith(i) for i in self.FLEX_FIELD_SUFFIXES)
+        )
+        if is_valid_calculate_field_and_header_is_calculate_field_type:
+            choice_key = value.strip() if value and isinstance(value, str) else None
+            if choice_key is None:
+                validation_error_message = (
+                    f"Survey Sheet: Row {row_number + 1}: "
+                    f"Calculated result field type must be provided for calculate type fields"
+                )
+                logger.error(validation_error_message)
+                raise ValidationError(validation_error_message)
+            elif choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
+                validation_error_message = (
+                    f"Survey Sheet: Row {row_number + 1}: "
+                    f"Invalid type: {choice_key} for calculate field, valid choices are "
+                    f"{', '.join(self.CALCULATE_TYPE_CHOICE_MAP.keys())}"
+                )
+                logger.error(validation_error_message)
+                raise ValidationError(validation_error_message)
+            else:
+                self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
     def _can_add_row(self, row):
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
@@ -317,7 +349,7 @@ class FlexibleAttributeImporter:
                             f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
                         )
                         raise ValidationError(
-                            f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
+                            f"Survey Sheet: Row {row_number + 1}: Type of the attribute cannot be changed!"
                         )
                     obj.type = self.object_fields_to_create["type"]
                     obj.name = self.object_fields_to_create["name"]
