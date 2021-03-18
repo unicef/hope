@@ -1,31 +1,31 @@
-from django.db.models import Q
-
-from admin_extra_urls.decorators import action
-from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib import admin, messages
-from adminfilters.filters import (
-    TextFieldFilter,
-    RelatedFieldComboFilter,
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-)
 from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.filters import (
+    AllValuesComboFilter,
+    ChoicesFieldComboFilter,
+    MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
+
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
+    Document,
+    DocumentType,
     Household,
     Individual,
-    DocumentType,
-    Document,
-    Agency,
-    IndividualRoleInHousehold,
     IndividualIdentity,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    HEAD,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
 
@@ -87,13 +87,13 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
-    @action()
+    @button()
     def sanity_check(self, request, pk):
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
@@ -207,7 +207,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
