@@ -79,7 +79,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
             self.assertTrue(False)
         except ValidationError:
             self.assertTrue(True)
-    
+
     @freeze_time("2020-10-10")
     def test_rule_filter_age_equal(self):
         rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="EQUALS", field_name="age", arguments=[50])
@@ -90,31 +90,39 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_not_equal(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="NOT_EQUALS", field_name="age", arguments=[50])
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="NOT_EQUALS", field_name="age", arguments=[50]
+        )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query)
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
-    
+
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_49(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="RANGE", field_name="age", arguments=[1, 49])
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="RANGE", field_name="age", arguments=[1, 49]
+        )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
-    
+
     @freeze_time("2020-10-10")
     def test_rule_filter_age_range_1_50(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="RANGE", field_name="age", arguments=[1, 50])
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="RANGE", field_name="age", arguments=[1, 50]
+        )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 4)
         self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
-    
+
     @freeze_time("2020-10-10")
     def test_rule_filter_age_gt_40(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="GREATER_THAN", field_name="age", arguments=[40])
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="GREATER_THAN", field_name="age", arguments=[40]
+        )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 1)
@@ -122,7 +130,9 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
 
     @freeze_time("2020-10-10")
     def test_rule_filter_age_lt_40(self):
-        rule_filter = TargetingIndividualBlockRuleFilter(comparision_method="LESS_THAN", field_name="age", arguments=[40])
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="LESS_THAN", field_name="age", arguments=[40]
+        )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()
         self.assertEqual(queryset.count(), 3)

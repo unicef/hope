@@ -1,10 +1,9 @@
 import datetime
 import random
 
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management import BaseCommand
-
-from dateutil.relativedelta import relativedelta
 from faker import Faker
 from openpyxl.drawing.image import Image
 

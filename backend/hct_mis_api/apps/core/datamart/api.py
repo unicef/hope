@@ -1,9 +1,13 @@
+import logging
+
 import requests
 from django.conf import settings
 from django.contrib.gis.geos import Point, MultiPolygon, Polygon
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel
+
+logger = logging.getLogger(__name__)
 
 
 class DatamartAPI:
@@ -28,9 +32,8 @@ class DatamartAPI:
             return None
         geometry_type = geometry.get("type")
         if geometry_type != "MultiPolygon":
+            logger.error("Geometry type should be MultiPolygon")
             raise ValidationError("Geometry type should be MultiPolygon")
-        # gg=geometry.get("coordinates")
-        # import ipdb;ipdb.set_trace()
         return MultiPolygon([Polygon(polygon) for polygon in geometry.get("coordinates")[0]])
 
     def generate_admin_areas(self, locations, business_area):
@@ -76,7 +79,6 @@ class DatamartAPI:
 
         for _, admin_area_level in admin_area_level_dict.items():
             admin_area_level.save()
-        # AdminArea.objects.bulk_create(admin_areas_to_create)
         for admin_area in admin_areas_to_create:
             self.recursive_save(admin_area)
         AdminArea.objects.rebuild()
@@ -91,7 +93,11 @@ class DatamartAPI:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
         response = self._client.get(url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _get_paginated_results(self, url) -> list:
@@ -105,7 +111,11 @@ class DatamartAPI:
 
     def _handle_post_request(self, url, data) -> dict:
         response = self._client.post(url=f"{self._get_url()}{url}", data=data)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _get_url(self):

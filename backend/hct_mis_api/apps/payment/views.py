@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -9,6 +11,8 @@ from hct_mis_api.apps.core.utils import decode_id_string
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationExportService import XlsxVerificationExportService
 
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def download_cash_plan_payment_verification(request, verification_id):
@@ -18,6 +22,7 @@ def download_cash_plan_payment_verification(request, verification_id):
     if not request.user.has_permission(
         Permissions.PAYMENT_VERIFICATION_EXPORT.value, cash_plan_payment_verification.business_area
     ):
+        logger.error("Permission Denied: User does not have correct permission.")
         raise PermissionDenied("Permission Denied: User does not have correct permission.")
 
     mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
