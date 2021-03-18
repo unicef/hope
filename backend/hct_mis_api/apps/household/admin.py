@@ -1,19 +1,18 @@
-from django.db.models import Q
-
-from admin_extra_urls.decorators import action
+from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
-from django.contrib import admin, messages
 from adminfilters.filters import (
-    TextFieldFilter,
-    RelatedFieldComboFilter,
-    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
 )
+from django.contrib import admin, messages
 from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
     Household,
@@ -27,7 +26,7 @@ from hct_mis_api.apps.household.models import (
     ROLE_ALTERNATE,
     HEAD,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(Agency)
@@ -87,13 +86,13 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
-    @action()
+    @button()
     def sanity_check(self, request, pk):
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
@@ -114,8 +113,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for range in ["0_5", "6_11", "12_17", "18_59", "60"]:
-                field = f"{gender}_age_group_{range}_count"
+            for num_range in ["0_5", "6_11", "12_17", "18_59", "60"]:
+                field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
         active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
@@ -207,7 +206,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")

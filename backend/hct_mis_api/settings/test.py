@@ -31,11 +31,19 @@ LOGGING = {
     "loggers": {
         "": {"handlers": ["default"], "level": "DEBUG", "propagate": True},
         "registration_datahub.tasks.deduplicate": {"handlers": ["default"], "level": "INFO", "propagate": True},
-        "sanction_list.tasks.check_against_sanction_list_pre_merge": {"handlers": ["default"], "level": "INFO", "propagate": True},
+        "sanction_list.tasks.check_against_sanction_list_pre_merge": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": True,
+        },
         "graphql": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
         "elasticsearch": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
         "elasticsearch-dsl-django": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
-        "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
+        "hct_mis_api.apps.registration_datahub.tasks.deduplicate": {
+            "handlers": ["default"],
+            "level": "CRITICAL",
+            "propagate": True,
+        },
         "hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields": {"handlers": ["default"], "level": "CRITICAL", "propagate": True},
     },
 }

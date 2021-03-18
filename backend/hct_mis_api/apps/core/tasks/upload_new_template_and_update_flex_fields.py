@@ -1,12 +1,11 @@
 import logging
 from datetime import datetime
+from io import BytesIO
 
 import requests
 
 from hct_mis_api.apps.core.flex_fields_importer import FlexibleAttributeImporter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from io import BytesIO
-
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
@@ -76,4 +75,5 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
             )
-            raise
+            logger.exception(e)
+            raise e

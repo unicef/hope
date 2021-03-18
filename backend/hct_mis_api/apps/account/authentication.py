@@ -9,7 +9,7 @@ from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import UserRole, Role, ACTIVE
 from hct_mis_api.apps.core.models import BusinessArea
 
-logger = logging.getLogger("console")
+logger = logging.getLogger(__name__)
 
 
 def social_details(backend, details, response, *args, **kwargs):
@@ -47,14 +47,13 @@ def require_email(strategy, details, user=None, is_new=False, *args, **kwargs):
     if user and user.email:
         return
     elif is_new and not details.get("email"):
+        logger.error("Email couldn't be validated")
         raise InvalidEmail(strategy)
 
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
     if user:
         return {"is_new": False}
-
-    fullname = details["fullname"].split(" ")
 
     user = get_user_model().objects.create(
         email=details["email"],
@@ -64,7 +63,7 @@ def create_user(strategy, details, backend, user=None, *args, **kwargs):
         status=ACTIVE,
     )
     ms_graph = MicrosoftGraphAPI()
-    user_data = ms_graph.get_user_data(details["email"])
+    user_data = ms_graph.get_user_data(email=details["email"])
     business_area_code = user_data.get("extension_f4805b4021f643d0aa596e1367d432f1_unicefBusinessAreaCode")
     job_title = user_data.get("jobTitle")
     if job_title is not None:

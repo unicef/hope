@@ -46,7 +46,9 @@ def arguments_resolver(obj):
 
 
 class TargetingCriteriaRuleFilterFactory(factory.DjangoModelFactory):
-    field_name = factory.fuzzy.FuzzyChoice([ "size", "residence_status"],)
+    field_name = factory.fuzzy.FuzzyChoice(
+        ["size", "residence_status"],
+    )
     comparision_method = factory.LazyAttribute(comparision_method_resolver)
     arguments = factory.LazyAttribute(arguments_resolver)
 
@@ -68,7 +70,12 @@ class TargetPopulationFactory(factory.DjangoModelFactory):
     class Meta:
         model = TargetPopulation
 
-    name = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None,)
+    name = factory.Faker(
+        "sentence",
+        nb_words=6,
+        variable_nb_words=True,
+        ext_word_list=None,
+    )
     created_by = factory.SubFactory(UserFactory)
     created_at = factory.Faker("date_time_this_decade", before_now=False, after_now=True)
     updated_at = factory.LazyAttribute(lambda t: t.created_at + dt.timedelta(days=random.randint(60, 1000)))
