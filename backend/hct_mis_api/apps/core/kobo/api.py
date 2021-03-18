@@ -10,7 +10,9 @@ from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.kobo.common import filter_by_owner
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
+
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +87,7 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_template_from_file(self, bytes_io_file, template_id=""):
+    def create_template_from_file(self, bytes_io_file, xlsx_kobo_template_object, template_id=""):
         data = {
             "name": "Untitled",
             "asset_type": "template",
@@ -96,6 +98,11 @@ class KoboAPI:
         }
         if not template_id:
             asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
+            try:
+                asset_response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                logger.exception(e)
+                raise
             asset_response_dict = asset_response.json()
             asset_uid = asset_response_dict.get("uid")
         else:
@@ -117,8 +124,10 @@ class KoboAPI:
             response_dict = self._handle_request(url)
             import_status = response_dict.get("status")
             if import_status == "processing":
+                xlsx_kobo_template_object.status = XLSXKoboTemplate.PROCESSING
+                xlsx_kobo_template_object.save()
                 attempts -= 1
-                time.sleep(0.3)
+                time.sleep(1)
             else:
                 return response_dict, asset_uid
 
