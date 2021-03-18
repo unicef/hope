@@ -12,6 +12,11 @@ from hct_mis_api.apps.core.models import XLSXKoboTemplate
 logger = logging.getLogger(__name__)
 
 
+class KoboRetriableError(Exception):
+    def __init__(self, xlsx_kobo_template_object):
+        self.xlsx_kobo_template_object = xlsx_kobo_template_object
+
+
 class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
     def _save_message_status_template_id(self, xlsx_kobo_template_object, message, status, template_id=""):
         xlsx_kobo_template_object.error_description = message
@@ -66,8 +71,9 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
                 if xlsx_kobo_template_object.first_connection_failed_time is None:
                     xlsx_kobo_template_object.first_connection_failed_time = datetime.now()
                 xlsx_kobo_template_object.save()
+                raise KoboRetriableError(xlsx_kobo_template_object)
         except Exception as e:
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
             )
-            raise e
+            raise
