@@ -57,11 +57,11 @@ class TestSettingTypesForCalculateFields(TestCase):
             self.load_xls_file(file_name)
 
             expected_flex_fields = [
-                ("introduction_h_f", "STRING"),
-                ("this_is_date_i_f", "DATE"),
-                ("this_is_decimal_h_f", "DECIMAL"),
-                ("this_is_integer_i_f", "INTEGER"),
-                ("this_is_text_h_f", "STRING"),
+                ("introduction_h_f", TYPE_STRING),
+                ("this_is_date_i_f", TYPE_DATE),
+                ("this_is_decimal_h_f", TYPE_DECIMAL),
+                ("this_is_integer_i_f", TYPE_INTEGER),
+                ("this_is_text_h_f", TYPE_STRING),
             ]
             created_flex_fields = list(FlexibleAttribute.objects.order_by("name").values_list("name", "type"))
             self.assertEqual(created_flex_fields, expected_flex_fields)
