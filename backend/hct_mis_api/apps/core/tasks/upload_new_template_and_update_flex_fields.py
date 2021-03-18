@@ -56,10 +56,16 @@ class UploadNewKoboTemplateAndUpdateFlexFieldsTask:
             self._save_message_status_template_id(xlsx_kobo_template_object, "", XLSXKoboTemplate.SUCCESSFUL, asset_uid)
         except requests.exceptions.RequestException as e:
             logger.exception("Import template to Kobo Exception")
-            xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
-            if xlsx_kobo_template_object.first_connection_failed_time is None:
-                xlsx_kobo_template_object.first_connection_failed_time = datetime.now()
-            xlsx_kobo_template_object.save()
+            if e.response is not None and 400 <= e.response.status_code < 500:
+                self._save_message_status_template_id(
+                    xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id
+                )
+            else:
+                xlsx_kobo_template_object.status = XLSXKoboTemplate.CONNECTION_FAILED
+                xlsx_kobo_template_object.message = str(e)
+                if xlsx_kobo_template_object.first_connection_failed_time is None:
+                    xlsx_kobo_template_object.first_connection_failed_time = datetime.now()
+                xlsx_kobo_template_object.save()
         except Exception as e:
             self._save_message_status_template_id(
                 xlsx_kobo_template_object, str(e), XLSXKoboTemplate.UNSUCCESSFUL, template_id

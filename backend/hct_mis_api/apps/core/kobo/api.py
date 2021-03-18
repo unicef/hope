@@ -77,7 +77,7 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_template_from_file(self, bytes_io_file,xlsx_kobo_template_object, template_id=""):
+    def create_template_from_file(self, bytes_io_file, xlsx_kobo_template_object, template_id=""):
         data = {
             "name": "Untitled",
             "asset_type": "template",
