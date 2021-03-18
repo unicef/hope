@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from xlrd import XLRDError
@@ -162,6 +162,14 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
             level=ERROR,
         )
 
+    @button(label="Rerun KOBO Import", visible=lambda o: o is not None and o.status != XLSXKoboTemplate.SUCCESSFUL)
+    def rerun_kobo_import(self, request, pk):
+        xlsx_kobo_template_object = get_object_or_404(XLSXKoboTemplate, pk=pk)
+        upload_new_kobo_template_and_update_flex_fields_task.run(
+            xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
+        )
+        return redirect(".")
+
     def add_view(self, request, form_url="", extra_context=None):
         if not self.has_add_permission(request):
             logger.error("The user did not have permission to do that")
@@ -206,14 +214,14 @@ class XLSXKoboTemplateAdmin(ExtraUrlMixin, admin.ModelAdmin):
                     file_name=xls_file.name,
                     uploaded_by=request.user,
                     file=xls_file,
-                    status=XLSXKoboTemplate.PROCESSING,
+                    status=XLSXKoboTemplate.UPLOADED,
                 )
                 self.message_user(
                     request,
                     "Core field validation successful, running KoBo Template upload task..., "
                     "Import status will change after task completion",
                 )
-                upload_new_kobo_template_and_update_flex_fields_task.delay(
+                upload_new_kobo_template_and_update_flex_fields_task.run(
                     xlsx_kobo_template_id=str(xlsx_kobo_template_object.id)
                 )
                 return redirect("..")
