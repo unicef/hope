@@ -1,4 +1,4 @@
-from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from adminfilters.filters import TextFieldFilter
 from django.contrib import admin
 
 from hct_mis_api.apps.registration_datahub.models import (
