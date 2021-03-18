@@ -1,7 +1,6 @@
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import (
-    AllValuesComboFilter,
     ChoicesFieldComboFilter,
     MaxMinFilter,
     RelatedFieldComboFilter,
@@ -114,8 +113,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for range in ["0_5", "6_11", "12_17", "18_59", "60"]:
-                field = f"{gender}_age_group_{range}_count"
+            for num_range in ["0_5", "6_11", "12_17", "18_59", "60"]:
+                field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
         active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
