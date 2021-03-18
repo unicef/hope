@@ -19,11 +19,15 @@ def check_periodically_connection_failed_tasks():
     from hct_mis_api.apps.core.models import XLSXKoboTemplate
 
     one_day_earlier_time = datetime.now() - timedelta(days=1)
+    XLSXKoboTemplate.objects.filter(
+        first_connection_failed_time__lte=one_day_earlier_time, status=XLSXKoboTemplate.CONNECTION_FAILED
+    ).update(status=XLSXKoboTemplate.UNSUCCESSFUL)
     template = (
         XLSXKoboTemplate.objects.filter(
             first_connection_failed_time__gt=one_day_earlier_time, status=XLSXKoboTemplate.CONNECTION_FAILED
         )
-        .order_by("created_at")
+        .order_by("-created_at")
         .first()
     )
-    UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=template.id)
+    if template is not None:
+        UploadNewKoboTemplateAndUpdateFlexFieldsTask().execute(xlsx_kobo_template_id=template.id)
