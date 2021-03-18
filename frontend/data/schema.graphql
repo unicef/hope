@@ -528,6 +528,7 @@ type DocumentNode implements Node {
   photo: String!
   individual: IndividualNode!
   type: DocumentTypeNode!
+  status: DocumentStatus!
 }
 
 type DocumentNodeConnection {
@@ -540,6 +541,13 @@ type DocumentNodeConnection {
 type DocumentNodeEdge {
   node: DocumentNode
   cursor: String!
+}
+
+enum DocumentStatus {
+  PENDING
+  VALID
+  NEED_INVESTIGATION
+  INVALID
 }
 
 type DocumentTypeNode {
@@ -1614,13 +1622,6 @@ enum ImportedHouseholdResidenceStatus {
   NON_HOST
 }
 
-enum ImportedIndividualCommsDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
 enum ImportedIndividualDeduplicationBatchStatus {
   SIMILAR_IN_BATCH
   DUPLICATE_IN_BATCH
@@ -1635,18 +1636,12 @@ enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NOT_PROCESSED
 }
 
-enum ImportedIndividualHearingDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
 type ImportedIndividualIdentityNode {
   id: ID!
   individual: ImportedIndividualNode!
   documentNumber: String!
   type: String
+  country: String
 }
 
 enum ImportedIndividualMaritalStatus {
@@ -1656,13 +1651,6 @@ enum ImportedIndividualMaritalStatus {
   WIDOWED
   DIVORCED
   SEPARATED
-}
-
-enum ImportedIndividualMemoryDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
 }
 
 type ImportedIndividualNode implements Node {
@@ -1685,7 +1673,7 @@ type ImportedIndividualNode implements Node {
   household: ImportedHouseholdNode
   registrationDataImport: RegistrationDataImportDatahubNode!
   disability: Boolean!
-  workStatus: ImportedIndividualWorkStatus
+  workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   deduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus
@@ -1694,13 +1682,13 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
   flexFields: Arg
   pregnant: Boolean
-  observedDisability: ImportedIndividualObservedDisability!
-  seeingDisability: ImportedIndividualSeeingDisability
-  hearingDisability: ImportedIndividualHearingDisability
-  physicalDisability: ImportedIndividualPhysicalDisability
-  memoryDisability: ImportedIndividualMemoryDisability
-  selfcareDisability: ImportedIndividualSelfcareDisability
-  commsDisability: ImportedIndividualCommsDisability
+  observedDisability: [String]
+  seeingDisability: String!
+  hearingDisability: String!
+  physicalDisability: String!
+  memoryDisability: String!
+  selfcareDisability: String!
+  commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
   importedhousehold: ImportedHouseholdNode
@@ -1721,53 +1709,9 @@ type ImportedIndividualNodeEdge {
   cursor: String!
 }
 
-enum ImportedIndividualObservedDisability {
-  NONE
-  SEEING
-  HEARING
-  WALKING
-  MEMORY
-  SELF_CARE
-  COMMUNICATING
-}
-
-enum ImportedIndividualPhysicalDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
-enum ImportedIndividualSeeingDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
-enum ImportedIndividualSelfcareDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
 enum ImportedIndividualSex {
   MALE
   FEMALE
-}
-
-enum ImportedIndividualWorkStatus {
-  A_1
-  A_0
-  NOT_PROVIDED
-}
-
-enum IndividualCommsDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
 }
 
 type IndividualDataChangeApproveMutation {
@@ -1803,18 +1747,12 @@ input IndividualDocumentObjectType {
   number: String!
 }
 
-enum IndividualHearingDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
 type IndividualIdentityNode {
   id: ID!
   individual: IndividualNode!
   number: String!
   type: String
+  country: String
 }
 
 enum IndividualMaritalStatus {
@@ -1824,13 +1762,6 @@ enum IndividualMaritalStatus {
   WIDOWED
   DIVORCED
   SEPARATED
-}
-
-enum IndividualMemoryDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
 }
 
 type IndividualNode implements Node {
@@ -1861,7 +1792,7 @@ type IndividualNode implements Node {
   household: HouseholdNode
   registrationDataImport: RegistrationDataImportNode
   disability: Boolean!
-  workStatus: IndividualWorkStatus
+  workStatus: String!
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   flexFields: FlexFieldsScalar
@@ -1878,12 +1809,12 @@ type IndividualNode implements Node {
   sanctionListLastCheck: DateTime
   pregnant: Boolean
   observedDisability: [String]
-  seeingDisability: IndividualSeeingDisability
-  hearingDisability: IndividualHearingDisability
-  physicalDisability: IndividualPhysicalDisability
-  memoryDisability: IndividualMemoryDisability
-  selfcareDisability: IndividualSelfcareDisability
-  commsDisability: IndividualCommsDisability
+  seeingDisability: String!
+  hearingDisability: String!
+  physicalDisability: String!
+  memoryDisability: String!
+  selfcareDisability: String!
+  commsDisability: String!
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
   businessArea: UserBusinessAreaNode!
@@ -1912,13 +1843,6 @@ type IndividualNodeConnection {
 type IndividualNodeEdge {
   node: IndividualNode
   cursor: String!
-}
-
-enum IndividualPhysicalDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
 }
 
 enum IndividualRelationship {
@@ -1953,20 +1877,6 @@ enum IndividualRoleInHouseholdRole {
   PRIMARY
   ALTERNATE
   NO_ROLE
-}
-
-enum IndividualSeeingDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
-}
-
-enum IndividualSelfcareDisability {
-  A_
-  SOME_DIFFICULTY
-  LOT_DIFFICULTY
-  CANNOT_DO
 }
 
 enum IndividualSex {
@@ -2005,12 +1915,6 @@ input IndividualUpdateDataObjectType {
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
   flexFields: Arg
-}
-
-enum IndividualWorkStatus {
-  A_1
-  A_0
-  NOT_PROVIDED
 }
 
 input IssueTypeExtrasInput {
@@ -2237,9 +2141,10 @@ type PaymentVerificationNode implements Node {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
   paymentRecord: PaymentRecordNode!
   status: PaymentVerificationStatus!
-  statusDate: Date
+  statusDate: DateTime
   receivedAmount: Float
   ticketDetails(before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  isManuallyEditable: Boolean
 }
 
 type PaymentVerificationNodeConnection {
@@ -2422,10 +2327,13 @@ type Query {
   residenceStatusChoices: [ChoiceObject]
   sexChoices: [ChoiceObject]
   maritalStatusChoices: [ChoiceObject]
+  workStatusChoices: [ChoiceObject]
   relationshipChoices: [ChoiceObject]
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
+  observedDisabilityChoices: [ChoiceObject]
+  severityOfDisabilityChoices: [ChoiceObject]
   allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
   allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
   me: UserNode
@@ -3143,6 +3051,7 @@ type TicketNeedsAdjudicationDetailsNode implements Node {
   possibleDuplicate: IndividualNode!
   selectedIndividual: IndividualNode
   roleReassignData: JSONString!
+  hasDuplicatedDocument: Boolean
 }
 
 type TicketNoteNode implements Node {

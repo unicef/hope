@@ -1,31 +1,31 @@
-from django.db.models import Q
-
-from admin_extra_urls.decorators import action
-from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib import admin, messages
-from adminfilters.filters import (
-    TextFieldFilter,
-    RelatedFieldComboFilter,
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-)
 from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.filters import (
+    AllValuesComboFilter,
+    ChoicesFieldComboFilter,
+    MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
+
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
+    Document,
+    DocumentType,
     Household,
     Individual,
-    DocumentType,
-    Document,
-    Agency,
-    IndividualRoleInHousehold,
     IndividualIdentity,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    HEAD,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
 
@@ -37,7 +37,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type", "individual")
+    list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
 
@@ -87,13 +87,13 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
-    @action()
+    @button()
     def sanity_check(self, request, pk):
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
@@ -118,8 +118,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                 field = f"{gender}_age_group_{range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True)|Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True)|Q(withdrawn=True))
+        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
+        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
         all_individuals = hh.individuals.all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
@@ -131,9 +131,10 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         if hh.size != total_in_ranges:
             warnings.append(
-                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
+                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"]
+            )
 
-        aaaa = active_individuals.values_list('unicef_id', flat=True)
+        aaaa = active_individuals.values_list("unicef_id", flat=True)
         bbb = Household.objects.filter(unicef_id__in=aaaa)
         if bbb.count() > len(aaaa):
             warnings.append([messages.ERROR, "Unmarked duplicates found"])
@@ -177,7 +178,15 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             None,
             {
                 "fields": (
-                    ("full_name", "withdrawn", "withdrawn_date", "duplicate", "duplicate_date", "is_removed", "removed_date"),
+                    (
+                        "full_name",
+                        "withdrawn",
+                        "withdrawn_date",
+                        "duplicate",
+                        "duplicate_date",
+                        "is_removed",
+                        "removed_date",
+                    ),
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
@@ -198,7 +207,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")

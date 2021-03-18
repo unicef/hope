@@ -3,7 +3,7 @@ from typing import List
 import functools
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet, F
+from django.db.models import QuerySet
 
 from django_filters import OrderingFilter
 from graphql import GraphQLError
@@ -663,16 +663,30 @@ def resolve_flex_fields_choices_with_correct_labels(parent):
 
     labelled_flex_fields = {**parent.flex_fields}
     for flex_field_name, value in labelled_flex_fields.items():
-        flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
-        choices = dict(flex_field.choices.values_list("name", "label"))
-        if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-            if isinstance(value, list):
-                new_value = [
-                    choices.get(str(current_choice_value), {}).get("English(EN)") or current_choice_value
-                    for current_choice_value in value
-                ]
-            else:
-                new_value = choices.get(str(value), {}).get("English(EN)") or value
-            labelled_flex_fields[flex_field_name] = new_value
+        try:
+            flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
+            choices = dict(flex_field.choices.values_list("name", "label"))
+            if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
+                if isinstance(value, list):
+                    new_value = [
+                        f"{choices.get(str(current_choice_value.strip()), {}).get('English(EN)') or current_choice_value}, "
+                        for current_choice_value in value
+                    ]
+                else:
+                    new_value = choices.get(str(value), {}).get("English(EN)") or value
+                labelled_flex_fields[flex_field_name] = new_value
+        except FlexibleAttribute.DoesNotExist:
+            pass
 
     return labelled_flex_fields
+
+
+def get_model_choices_fields(model, excluded=None):
+    if excluded is None:
+        excluded = []
+
+    return [
+        field.name
+        for field in model._meta.get_fields()
+        if getattr(field, "choices", None) and field.name not in excluded
+    ]
