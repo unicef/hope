@@ -1,5 +1,9 @@
+import logging
+
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
+
+logger = logging.getLogger(__name__)
 
 
 def handle_role(role, household, individual):
@@ -27,6 +31,7 @@ def handle_add_document(document, individual):
 
     document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
     if document_already_exists:
+        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
     return Document(document_number=number, individual=individual, type=document_type)
@@ -61,9 +66,11 @@ def verify_required_arguments(input_data, field_name, options):
             continue
         for required in value.get("required"):
             if nested_dict_get(input_data, required) is None:
+                logger.error(f"You have to provide {required} in {key}")
                 raise GraphQLError(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
             if nested_dict_get(input_data, not_allowed) is not None:
+                logger.error(f"You can't provide {not_allowed} in {key}")
                 raise GraphQLError(f"You can't provide {not_allowed} in {key}")
 
 
@@ -81,6 +88,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
+        logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
@@ -88,18 +96,22 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
     for name, value in flex_fields_to_verify.items():
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
+            logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
         field_choices = set(f.get("value") for f in flex_field["choices"])
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
+            logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")
 
         if field_type == TYPE_SELECT_ONE and value not in field_choices:
+            logger.error(f"invalid value: {value} for a field {name}")
             raise ValueError(f"invalid value: {value} for a field {name}")
 
         if field_type == TYPE_SELECT_MANY:
             values = set(value)
             if values.issubset(field_choices) is False:
+                logger.error(f"invalid value: {value} for a field {name}")
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
@@ -164,6 +176,7 @@ def reassign_roles(individual_to_remove, info, ticket_details):
             role.individual = new_individual
             roles_to_bulk_update.append(role)
     if len(roles_to_bulk_update) != individual_to_remove.households_and_roles.exclude(role=ROLE_NO_ROLE).count():
+        logger.error("Ticket cannot be closed not all roles has been reassigned")
         raise GraphQLError("Ticket cannot be closed not all roles has been reassigned")
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
@@ -176,6 +189,7 @@ def reassign_roles(individual_to_remove, info, ticket_details):
         not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
         and removed_individual_is_head
     ):
+        logger.error("Ticket cannot be closed head of household has not been reassigned")
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
     return old_individual_to_remove, removed_individual_household
 

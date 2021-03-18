@@ -46,5 +46,6 @@ class RuleForm(forms.ModelForm):
             try:
                 self.cleaned_data["definition"] = format_code(code)
             except Exception as e:
+                logger.exception(e)
                 raise ValidationError({"definition": str(e)})
         return self.cleaned_data

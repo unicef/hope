@@ -20,7 +20,9 @@ from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividualAliasName,
     SanctionListIndividualDateOfBirth,
 )
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    CheckAgainstSanctionListPreMergeTask,
+)
 
 
 class LoadSanctionListXMLTask:

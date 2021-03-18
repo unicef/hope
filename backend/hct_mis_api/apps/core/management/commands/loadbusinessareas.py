@@ -50,7 +50,8 @@ class Command(BaseCommand):
                     region_code=business_area_tag.find("REGION_CODE").text,
                     region_name=business_area_tag.find("REGION_NAME").text,
                     has_data_sharing_agreement=True,
-                ))
+                ),
+            )
         BusinessArea.objects.get_or_create(
             code="GLOBAL",
             defaults=dict(
@@ -59,6 +60,6 @@ class Command(BaseCommand):
                 region_code="GLOBAL",
                 region_name="GLOBAL",
                 has_data_sharing_agreement=True,
-            )
+            ),
         )
         logger.debug(f"Imported business areas from {file}")

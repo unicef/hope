@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from functools import reduce
 
@@ -23,6 +24,8 @@ from hct_mis_api.apps.household.models import (
     YES_NO_CHOICE,
     BLANK,
 )
+
+logger = logging.getLogger(__name__)
 
 TYPE_ID = "ID"
 TYPE_INTEGER = "INTEGER"
@@ -62,6 +65,7 @@ def country_generic_query(comparision_method, args, lookup):
         return query
     elif comparision_method == "NOT_EQUALS":
         return ~query
+    logger.error(f"Country filter query does not support {comparision_method} type")
     raise ValidationError(f"Country filter query does not support {comparision_method} type")
 
 

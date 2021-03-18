@@ -1,3 +1,4 @@
+import logging
 from django.db import transaction
 from django.forms import model_to_dict
 
@@ -5,7 +6,6 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.grievance.common import create_needs_adjudication_tickets
-from hct_mis_api.apps.grievance.models import TicketNeedsAdjudicationDetails
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
@@ -32,6 +32,8 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
     CheckAgainstSanctionListPreMergeTask,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RdiMergeTask:
@@ -131,8 +133,8 @@ class RdiMergeTask:
                 admin_area = AdminArea.objects.filter(p_code=admin1).first()
                 household.admin_area = admin_area
                 return
-        except AdminArea.DoesNotExist:
-            print("does not exist")
+        except AdminArea.DoesNotExist as e:
+            logger.exception(e)
 
     def _prepare_households(self, imported_households, obj_hct):
         households_dict = {}
@@ -277,17 +279,13 @@ class RdiMergeTask:
             registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
         )
 
-        create_needs_adjudication_tickets(
-            golden_record_duplicates, "duplicates", obj_hct.business_area
-        )
+        create_needs_adjudication_tickets(golden_record_duplicates, "duplicates", obj_hct.business_area)
 
         needs_adjudication = Individual.objects.filter(
             registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
         )
 
-        create_needs_adjudication_tickets(
-            needs_adjudication, "possible_duplicates", obj_hct.business_area
-        )
+        create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", obj_hct.business_area)
 
         # SANCTION LIST CHECK
         CheckAgainstSanctionListPreMergeTask.execute()
