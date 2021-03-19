@@ -12,7 +12,6 @@ from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 from django_countries.fields import Country
-from openpyxl_image_loader import SheetImageLoader
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -26,7 +25,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
+from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes, \
+    SheetImageLoader
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,

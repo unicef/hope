@@ -44,7 +44,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         import_data = ImportData.objects.create(
-            file="test_file/new_reg_data_import.xlsx",
+            file="test_file/x.xlsx",
             number_of_households=10,
             number_of_individuals=100,
         )
