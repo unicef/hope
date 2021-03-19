@@ -13,7 +13,6 @@ import pycountry
 from dateutil import parser
 from django.core import validators as django_core_validators
 from openpyxl import load_workbook
-from openpyxl_image_loader import SheetImageLoader
 
 from hct_mis_api.apps.core.core_fields_attributes import (
     COLLECTORS_FIELDS,
@@ -26,7 +25,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
+from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes, SheetImageLoader
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
@@ -301,10 +300,12 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                 else:
                     selected_choices = value.split(" ")
             else:
-                selected_choices = value
+                selected_choices = [value]
             for choice in selected_choices:
                 if isinstance(choice, str):
                     choice = choice.strip()
+                    if choice not in choices or choice.upper() not in choices:
+                        return False
                 if choice not in choices:
                     return False
             return True
