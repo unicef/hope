@@ -4,7 +4,8 @@ from unittest import TestCase, mock
 import openpyxl
 from django.conf import settings
 from django.core.management import call_command
-from openpyxl_image_loader import SheetImageLoader
+
+from hct_mis_api.apps.core.utils import SheetImageLoader
 
 
 class TestXLSXValidatorsMethods(TestCase):
