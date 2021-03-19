@@ -13,6 +13,79 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'Repatriate',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': 'Population rapatriée – Personnes qui sont retournées chez elles, ou sont en cours de retours après avoir passée plusieurs semaines dans un pays étranger.',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Repatriate',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'repatriated'
+                    },
+                    {
+                        'labelEn': 'Returnee',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': 'Population retournée – Personnes qui sont retournées dans leurs zone d’origine après avoir passée plusieurs semaines dans une autre region de la RCA',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Returnee',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'returnee'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Other Residence Status',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Autres statut de résidence',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Other Residence Status',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'specific_residence_h_f',
+                'required': True,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
@@ -72,7 +145,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -83,7 +156,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -94,7 +167,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -105,7 +178,312 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Is the spouse present dureing the current registration',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Est ce que le conjoint du collecteur est présent lors de l'enregistrement?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Is the spouse present dureing the current registration',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'spouse_present_primary_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "What is the first name of ${full_name_i_c} 's mother?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de la mère de l'individu collecteur?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "What is the first name of ${full_name_i_c} 's mother?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_mother_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "What is the first name of ${full_name_i_c} 's grandmother?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de la grand-mère de l'individu collecteur?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "What is the first name of ${full_name_i_c} 's grandmother?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_grandmother_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the village of origin of ${full_name_i_c}?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Quel est le village d’origine\xa0du collecteur?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the village of origin of ${full_name_i_c}?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_origin_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'How many children did ${full_name_i_c} have in total, including those who do not reside in the household and / or those who died.',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien d’enfants le collecteur a-t-il eu au total, incluant ceux qui ne resident pas dans le ménage et/ou ceux qui sont décédés.',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'How many children did ${full_name_i_c} have in total, including those who do not reside in the household and / or those who died.',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_children_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the first name of the eldest child of ${full_name_i_c} (girl or boy)?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de l'enfant ainé du collecteur (fille ou garçon)?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the first name of the eldest child of ${full_name_i_c} (girl or boy)?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_oldest_child_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the first name of the youngest child of ${full_name_i_c} (girl or boy)?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de l'enfant cadet du collecteur (fille ou garçon)?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the first name of the youngest child of ${full_name_i_c} (girl or boy)?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_youngest_child_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'How many children of ${full_name_i_c} are currently in primary school?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien d’enfants du collecteur sont actuellement à l’école primaire\xa0?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'How many children of ${full_name_i_c} are currently in primary school?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_children_school_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "How many closed rooms are there in ${full_name_i_c} 's house?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien de pièces fermées y a-t-il dans la maison du collecteur?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "How many closed rooms are there in ${full_name_i_c} 's house?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_rooms_house_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'At no time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'At no time',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Some of the time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -116,7 +494,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -127,7 +505,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -138,7 +516,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -149,7 +527,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -160,7 +538,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -171,7 +549,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -182,7 +560,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -193,7 +571,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -206,7 +584,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. I have felt cheerful and in good spirits',
+                'labelEn': 'I have felt cheerful and in good spirits',
                 'labels': [
                     {
                         'label': '',
@@ -217,7 +595,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. I have felt cheerful and in good spirits',
+                        'label': 'I have felt cheerful and in good spirits',
                         'language': 'English(EN)'
                     },
                     {
@@ -233,7 +611,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -244,7 +622,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -255,7 +633,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -266,7 +644,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -277,7 +655,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -288,7 +666,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -299,7 +677,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -310,7 +688,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -321,7 +699,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -332,7 +710,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -343,7 +721,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -354,7 +732,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -367,7 +745,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. I have felt relaxed and calm',
+                'labelEn': 'I have felt relaxed and calm',
                 'labels': [
                     {
                         'label': '',
@@ -378,7 +756,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. I have felt relaxed and calm',
+                        'label': 'I have felt relaxed and calm',
                         'language': 'English(EN)'
                     },
                     {
@@ -394,7 +772,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -405,7 +783,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -416,7 +794,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -427,7 +805,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -438,7 +816,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -449,7 +827,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -460,7 +838,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -471,7 +849,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -482,7 +860,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -493,7 +871,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -504,7 +882,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -515,7 +893,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -528,7 +906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. I have felt active and vigorous',
+                'labelEn': 'I have felt active and vigorous',
                 'labels': [
                     {
                         'label': '',
@@ -539,7 +917,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. I have felt active and vigorous',
+                        'label': 'I have felt active and vigorous',
                         'language': 'English(EN)'
                     },
                     {
@@ -555,7 +933,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -566,7 +944,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -577,7 +955,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -588,7 +966,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -599,7 +977,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -610,7 +988,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -621,7 +999,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -632,7 +1010,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -643,7 +1021,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -654,7 +1032,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -665,7 +1043,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -676,7 +1054,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -689,7 +1067,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. I woke up feeling fresh and rested',
+                'labelEn': 'I woke up feeling fresh and rested',
                 'labels': [
                     {
                         'label': '',
@@ -700,7 +1078,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. I woke up feeling fresh and rested',
+                        'label': 'I woke up feeling fresh and rested',
                         'language': 'English(EN)'
                     },
                     {
@@ -716,7 +1094,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -727,7 +1105,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -738,7 +1116,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -749,7 +1127,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -760,7 +1138,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -771,7 +1149,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -782,7 +1160,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -793,7 +1171,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -804,7 +1182,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -815,7 +1193,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -826,7 +1204,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -837,7 +1215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -850,7 +1228,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. My daily life has been filled with things that interest me',
+                'labelEn': 'My daily life has been filled with things that interest me',
                 'labels': [
                     {
                         'label': '',
@@ -861,7 +1239,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. My daily life has been filled with things that interest me',
+                        'label': 'My daily life has been filled with things that interest me',
                         'language': 'English(EN)'
                     },
                     {
@@ -900,7 +1278,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'wellbeing_index_i_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Individual',
@@ -1054,7 +1432,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If the individual is a child, does he/she currently enrolled in school',
+                'labelEn': 'If the individual is a child, does he/she currently enrolled in school?',
                 'labels': [
                     {
                         'label': '',
@@ -1065,7 +1443,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If the individual is a child, does he/she currently enrolled in school',
+                        'label': 'If the individual is a child, does he/she currently enrolled in school?',
                         'language': 'English(EN)'
                     },
                     {
@@ -1264,6 +1642,79 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'school_type_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'primary',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'primary',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'primary'
+                    },
+                    {
+                        'labelEn': 'secondary',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'secondary',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'secondary'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'At what level is the child attending?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'At what level is the child attending?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'school_level_i_f',
                 'required': False,
                 'type': 'SELECT_ONE'
             },
@@ -1806,7 +2257,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'What is the average daily income of the child',
+                'labelEn': 'What is the average daily income of the child?',
                 'labels': [
                     {
                         'label': '',
@@ -1817,7 +2268,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'What is the average daily income of the child',
+                        'label': 'What is the average daily income of the child?',
                         'language': 'English(EN)'
                     },
                     {
@@ -1908,7 +2359,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If one or both have passed away, what is the reason of their death',
+                'labelEn': 'If one or both have passed away, what is the reason of their death?',
                 'labels': [
                     {
                         'label': '',
@@ -1919,7 +2370,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If one or both have passed away, what is the reason of their death',
+                        'label': 'If one or both have passed away, what is the reason of their death?',
                         'language': 'English(EN)'
                     },
                     {
@@ -2105,6 +2556,108 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'muac_i_f',
                 'required': False,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Picture of the measured arm circumference',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Prenez une photo de la mesure du périmètre brachial',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Picture of the measured arm circumference',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'arm_picture_i_f',
+                'required': True,
+                'type': 'IMAGE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Does the child participate in a nutritional programme?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "L'enfant participe-t-il a un traitement nutritionnel?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Does the child participate in a nutritional programme?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'mas_treatment_i_f',
+                'required': True,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Household',
@@ -2733,7 +3286,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If other, specify',
+                'labelEn': 'If other, please specify',
                 'labels': [
                     {
                         'label': '',
@@ -2744,7 +3297,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If other, specify',
+                        'label': 'If other, please specify',
                         'language': 'English(EN)'
                     },
                     {
@@ -3095,7 +3648,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Packaged water (bottled water, sachets_',
+                        'labelEn': 'Packaged water (bottled water, sachets, …)',
                         'labels': [
                             {
                                 'label': '',
@@ -3106,7 +3659,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Packaged water (bottled water, sachets_',
+                                'label': 'Packaged water (bottled water, sachets, …)',
                                 'language': 'English(EN)'
                             },
                             {
@@ -3373,7 +3926,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Packaged water (bottled water, sachets_',
+                        'labelEn': 'Packaged water (bottled water, sachets, …)',
                         'labels': [
                             {
                                 'label': '',
@@ -3384,7 +3937,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Packaged water (bottled water, sachets_',
+                                'label': 'Packaged water (bottled water, sachets, …)',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4068,7 +4621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_liter_yesterday_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -4149,7 +4702,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Do you have odor, taste color in the water?',
+                'labelEn': 'Do you have odor, taste or color in the water?',
                 'labels': [
                     {
                         'label': '',
@@ -4160,7 +4713,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Do you have odor, taste color in the water?',
+                        'label': 'Do you have odor, taste or color in the water?',
                         'language': 'English(EN)'
                     },
                     {
@@ -4339,7 +4892,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Does your latrine have door, light, ventilation?',
+                'labelEn': 'Does your latrine have a door, light and ventilation?',
                 'labels': [
                     {
                         'label': '',
@@ -4350,7 +4903,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Does your latrine have door, light, ventilation?',
+                        'label': 'Does your latrine have a door, light and ventilation?',
                         'language': 'English(EN)'
                     },
                     {
@@ -4746,7 +5299,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'no_disposal'
                     },
                     {
-                        'labelEn': 'Yes. Bags',
+                        'labelEn': 'Yes - Bags',
                         'labels': [
                             {
                                 'label': '',
@@ -4757,7 +5310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes. Bags',
+                                'label': 'Yes - Bags',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4768,7 +5321,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'yes_bags'
                     },
                     {
-                        'labelEn': 'Yes. Bins',
+                        'labelEn': 'Yes - Bins',
                         'labels': [
                             {
                                 'label': '',
@@ -4779,7 +5332,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes. Bins',
+                                'label': 'Yes - Bins',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4914,6 +5467,28 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
+                        'labelEn': 'Ashes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Ashes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'ashes'
+                    },
+                    {
                         'labelEn': 'Hand washing facilities',
                         'labels': [
                             {
@@ -4934,6 +5509,28 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'hand_washing'
+                    },
+                    {
+                        'labelEn': 'None available',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'None available',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'none_available'
                     },
                     {
                         'labelEn': 'Soap',
@@ -4958,7 +5555,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'soap_material'
                     }
                 ],
-                'hint': "{'English(EN)': ''}",
+                'hint': "{'English(EN)': 'Select all that apply'}",
                 'isFlexField': True,
                 'labelEn': 'What hygiene materials are available for the family?',
                 'labels': [
@@ -4981,7 +5578,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'hygiene_materials_h_f',
                 'required': False,
-                'type': 'SELECT_ONE'
+                'type': 'SELECT_MANY'
             },
             {
                 'associatedWith': 'Household',
@@ -5076,7 +5673,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'If the sheets are in bad state but still usable, count 0.5 (1/2) a piece.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of blankets/sheets.',
+                'labelEn': 'Number of blankets/sheets',
                 'labels': [
                     {
                         'label': '',
@@ -5087,7 +5684,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of blankets/sheets.',
+                        'label': 'Number of blankets/sheets',
                         'language': 'English(EN)'
                     },
                     {
@@ -5105,7 +5702,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'Count the number of 5 litre or more saucepans as 1 piece.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of Cooking pots.',
+                'labelEn': 'Number of Cooking pots',
                 'labels': [
                     {
                         'label': '',
@@ -5116,7 +5713,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of Cooking pots.',
+                        'label': 'Number of Cooking pots',
                         'language': 'English(EN)'
                     },
                     {
@@ -5134,7 +5731,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'Count the number of locally-made or imported ploughing tools.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of ploughing tools.',
+                'labelEn': 'Number of ploughing tools',
                 'labels': [
                     {
                         'label': '',
@@ -5145,7 +5742,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of ploughing tools.',
+                        'label': 'Number of ploughing tools',
                         'language': 'English(EN)'
                     },
                     {
@@ -5163,7 +5760,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '{\'English(EN)\': "Put \'-1\', if no women is present 1 complete set = 0.5 up ( eg Blouse/t-shirt)and 0.5 down (loincloths/skirts).The clothes of the mother or main woman in the household AND those of the oldest school aged girls in the house should be counted"}',
                 'isFlexField': True,
-                'labelEn': "Number of complete women's clothes.",
+                'labelEn': "Number of complete women's clothes",
                 'labels': [
                     {
                         'label': '',
@@ -5174,7 +5771,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': "Number of complete women's clothes.",
+                        'label': "Number of complete women's clothes",
                         'language': 'English(EN)'
                     },
                     {
@@ -5192,7 +5789,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '{\'English(EN)\': "Put \'-1\', if there is no child. Take the youngest children of school going age. 0.5 for each upper piece of clothing and 0.5 for each lower piece of clothing"}',
                 'isFlexField': True,
-                'labelEn': "Number of complete children's clothes.",
+                'labelEn': "Number of complete children's clothes",
                 'labels': [
                     {
                         'label': '',
@@ -5203,7 +5800,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': "Number of complete children's clothes.",
+                        'label': "Number of complete children's clothes",
                         'language': 'English(EN)'
                     },
                     {
@@ -5242,7 +5839,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'score_NFI_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -6194,6 +6791,145 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
+                'labelEn': 'It is okay when a child gets hit at school by his teacher for misbehaving.',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'It is okay when a child gets hit at school by his teacher for misbehaving.',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'ok_teacher_hit_child_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Always',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Always',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_always'
+                    },
+                    {
+                        'labelEn': 'Most of the time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Most of the time',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_mostly'
+                    },
+                    {
+                        'labelEn': 'Never',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Never',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_never'
+                    },
+                    {
+                        'labelEn': 'Rarely',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Rarely',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_rarely'
+                    },
+                    {
+                        'labelEn': 'Sometimes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Sometimes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_sometimes'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
                 'labelEn': 'If someone hurts my child or something bad happens to them, it is not their fault.',
                 'labels': [
                     {
@@ -6951,7 +7687,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'cereals_tuber_score_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -6980,7 +7716,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'FCS_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -7543,7 +8279,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                'labelEn': 'Pulses, nuts & seeds: beans, chickpeas, lentils',
                 'labels': [
                     {
                         'label': '',
@@ -7554,7 +8290,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                        'label': 'Pulses, nuts & seeds: beans, chickpeas, lentils',
                         'language': 'English(EN)'
                     },
                     {
@@ -7885,7 +8621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'hdds_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -8728,7 +9464,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Is there any drug addict in the family?',
+                'labelEn': 'Are there any drug addicts in the family?',
                 'labels': [
                     {
                         'label': '',
@@ -8739,7 +9475,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Is there any drug addict in the family?',
+                        'label': 'Are there any drug addicts in the family?',
                         'language': 'English(EN)'
                     },
                     {
@@ -8755,7 +9491,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -8766,7 +9502,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8777,7 +9513,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -8788,7 +9524,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8799,7 +9535,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -8810,7 +9546,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8821,7 +9557,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -8832,7 +9568,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8845,7 +9581,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                'labelEn': 'Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
                 'labels': [
                     {
                         'label': '',
@@ -8856,7 +9592,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                        'label': 'Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
                         'language': 'English(EN)'
                     },
                     {
@@ -8872,7 +9608,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -8883,7 +9619,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8894,7 +9630,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -8905,7 +9641,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8916,7 +9652,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -8927,7 +9663,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8938,7 +9674,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -8949,7 +9685,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8962,7 +9698,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.2 Purchased food on credit or borrowed food',
+                'labelEn': 'Purchased food on credit or borrowed food',
                 'labels': [
                     {
                         'label': '',
@@ -8973,7 +9709,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.2 Purchased food on credit or borrowed food',
+                        'label': 'Purchased food on credit or borrowed food',
                         'language': 'English(EN)'
                     },
                     {
@@ -8989,7 +9725,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9000,7 +9736,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9011,7 +9747,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9022,7 +9758,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9033,7 +9769,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9044,7 +9780,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9055,7 +9791,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9066,7 +9802,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9079,7 +9815,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.3 Reduced essential non food expenditure such as education/health',
+                'labelEn': 'Reduced essential non food expenditure such as education/health',
                 'labels': [
                     {
                         'label': '',
@@ -9090,7 +9826,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.3 Reduced essential non food expenditure such as education/health',
+                        'label': 'Reduced essential non food expenditure such as education/health',
                         'language': 'English(EN)'
                     },
                     {
@@ -9106,7 +9842,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9117,7 +9853,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9128,7 +9864,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9139,7 +9875,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9150,7 +9886,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9161,7 +9897,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9172,7 +9908,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9183,7 +9919,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9196,7 +9932,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.4 Spent Savings',
+                'labelEn': 'Spent Savings',
                 'labels': [
                     {
                         'label': '',
@@ -9207,7 +9943,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.4 Spent Savings',
+                        'label': 'Spent Savings',
                         'language': 'English(EN)'
                     },
                     {
@@ -9223,7 +9959,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9234,7 +9970,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9245,7 +9981,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9256,7 +9992,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9267,7 +10003,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9278,7 +10014,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9289,7 +10025,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9300,7 +10036,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9313,7 +10049,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.5 Borrowed Money',
+                'labelEn': 'Borrowed Money',
                 'labels': [
                     {
                         'label': '',
@@ -9324,7 +10060,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.5 Borrowed Money',
+                        'label': 'Borrowed Money',
                         'language': 'English(EN)'
                     },
                     {
@@ -9340,7 +10076,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9351,7 +10087,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9362,7 +10098,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9373,7 +10109,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9384,7 +10120,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9395,7 +10131,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9406,7 +10142,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9417,7 +10153,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9430,7 +10166,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                'labelEn': 'Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
                 'labels': [
                     {
                         'label': '',
@@ -9441,7 +10177,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                        'label': 'Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
                         'language': 'English(EN)'
                     },
                     {
@@ -9457,7 +10193,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9468,7 +10204,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9479,7 +10215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9490,7 +10226,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9501,7 +10237,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9512,7 +10248,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9523,7 +10259,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9534,7 +10270,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9547,7 +10283,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                'labelEn': 'Consumed seed stocks that were to be held/saved for next season',
                 'labels': [
                     {
                         'label': '',
@@ -9558,7 +10294,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                        'label': 'Consumed seed stocks that were to be held/saved for next season',
                         'language': 'English(EN)'
                     },
                     {
@@ -9574,7 +10310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9585,7 +10321,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9596,7 +10332,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9607,7 +10343,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9618,7 +10354,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9629,7 +10365,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9640,7 +10376,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9651,7 +10387,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9664,7 +10400,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.8 Withdrew children from school',
+                'labelEn': 'Withdrew children from school',
                 'labels': [
                     {
                         'label': '',
@@ -9675,7 +10411,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.8 Withdrew children from school',
+                        'label': 'Withdrew children from school',
                         'language': 'English(EN)'
                     },
                     {
@@ -9691,7 +10427,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9702,7 +10438,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9713,7 +10449,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9724,7 +10460,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9735,7 +10471,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9746,7 +10482,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9757,7 +10493,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9768,7 +10504,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9781,7 +10517,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.9 Sold house or land',
+                'labelEn': 'Sold house or land',
                 'labels': [
                     {
                         'label': '',
@@ -9792,7 +10528,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.9 Sold house or land',
+                        'label': 'Sold house or land',
                         'language': 'English(EN)'
                     },
                     {
@@ -9808,7 +10544,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9819,7 +10555,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9830,7 +10566,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9841,7 +10577,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9852,7 +10588,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9863,7 +10599,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9874,7 +10610,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9885,7 +10621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9898,7 +10634,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                'labelEn': 'Changed accommodation location or type in order to reduce rental expenditure',
                 'labels': [
                     {
                         'label': '',
@@ -9909,7 +10645,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                        'label': 'Changed accommodation location or type in order to reduce rental expenditure',
                         'language': 'English(EN)'
                     },
                     {
@@ -9925,7 +10661,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9936,7 +10672,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9947,7 +10683,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9958,7 +10694,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9969,7 +10705,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9980,7 +10716,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9991,7 +10727,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10002,7 +10738,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10015,7 +10751,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                'labelEn': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
                 'labels': [
                     {
                         'label': '',
@@ -10026,7 +10762,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                        'label': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
                         'language': 'English(EN)'
                     },
                     {
@@ -10042,7 +10778,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10053,7 +10789,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10064,7 +10800,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10075,7 +10811,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10086,7 +10822,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10097,7 +10833,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10108,7 +10844,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10119,7 +10855,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10132,7 +10868,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.12 Sent children (under 18) family members to beg',
+                'labelEn': 'Sent children (under 18) family members to beg',
                 'labels': [
                     {
                         'label': '',
@@ -10143,7 +10879,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.12 Sent children (under 18) family members to beg',
+                        'label': 'Sent children (under 18) family members to beg',
                         'language': 'English(EN)'
                     },
                     {
@@ -10159,7 +10895,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10170,7 +10906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10181,7 +10917,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10192,7 +10928,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10203,7 +10939,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10214,7 +10950,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10225,7 +10961,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10236,7 +10972,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10249,7 +10985,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.13 Sent adult family members to beg',
+                'labelEn': 'Sent adult family members to beg',
                 'labels': [
                     {
                         'label': '',
@@ -10260,7 +10996,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.13 Sent adult family members to beg',
+                        'label': 'Sent adult family members to beg',
                         'language': 'English(EN)'
                     },
                     {
@@ -10276,7 +11012,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10287,7 +11023,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10298,7 +11034,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10309,7 +11045,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10320,7 +11056,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10331,7 +11067,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10342,7 +11078,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10353,7 +11089,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10366,7 +11102,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.14 Sold last female animals',
+                'labelEn': 'Sold last female animals',
                 'labels': [
                     {
                         'label': '',
@@ -10377,7 +11113,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.14 Sold last female animals',
+                        'label': 'Sold last female animals',
                         'language': 'English(EN)'
                     },
                     {
@@ -10393,7 +11129,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10404,7 +11140,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10415,7 +11151,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10426,7 +11162,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10437,7 +11173,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10448,7 +11184,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10459,7 +11195,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10470,7 +11206,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10483,7 +11219,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.15 Married Child for financial purposes',
+                'labelEn': 'Married Child for financial purposes',
                 'labels': [
                     {
                         'label': '',
@@ -10494,7 +11230,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.15 Married Child for financial purposes',
+                        'label': 'Married Child for financial purposes',
                         'language': 'English(EN)'
                     },
                     {
@@ -10503,6 +11239,240 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'coping_strategy_child_marriage_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': 'Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Consumed wild food',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Consommé des aliments sauvages',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Consumed wild food',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_wild_food_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': 'Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Spent one or more days without eating',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Passé un ou plusieurs jours sans manger',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Spent one or more days without eating',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_days_eating_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
             },
@@ -10541,7 +11511,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. Rely on less preferred and less expensive foods',
+                'labelEn': 'Rely on less preferred and less expensive foods',
                 'labels': [
                     {
                         'label': '',
@@ -10552,7 +11522,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. Rely on less preferred and less expensive foods',
+                        'label': 'Rely on less preferred and less expensive foods',
                         'language': 'English(EN)'
                     },
                     {
@@ -10570,7 +11540,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. Borrow food or rely on help from friends or relatives',
+                'labelEn': 'Borrow food or rely on help from friends or relatives',
                 'labels': [
                     {
                         'label': '',
@@ -10581,7 +11551,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. Borrow food or rely on help from friends or relatives',
+                        'label': 'Borrow food or rely on help from friends or relatives',
                         'language': 'English(EN)'
                     },
                     {
@@ -10599,7 +11569,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. Limit portion size at mealtime',
+                'labelEn': 'Limit portion size at mealtime',
                 'labels': [
                     {
                         'label': '',
@@ -10610,7 +11580,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. Limit portion size at mealtime',
+                        'label': 'Limit portion size at mealtime',
                         'language': 'English(EN)'
                     },
                     {
@@ -10628,7 +11598,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. Restrict consumption by adults in order for small children to eat',
+                'labelEn': 'Restrict consumption by adults in order for small children to eat',
                 'labels': [
                     {
                         'label': '',
@@ -10639,7 +11609,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. Restrict consumption by adults in order for small children to eat',
+                        'label': 'Restrict consumption by adults in order for small children to eat',
                         'language': 'English(EN)'
                     },
                     {
@@ -10657,7 +11627,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. Reduce number of meals eaten in a day',
+                'labelEn': 'Reduce number of meals eaten in a day',
                 'labels': [
                     {
                         'label': '',
@@ -10668,7 +11638,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. Reduce number of meals eaten in a day',
+                        'label': 'Reduce number of meals eaten in a day',
                         'language': 'English(EN)'
                     },
                     {
@@ -10707,7 +11677,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'RCSI_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -11200,7 +12170,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_expense_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -11229,7 +12199,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_expense_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -11237,7 +12207,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
+                'labelEn': 'Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
                 'labels': [
                     {
                         'label': '',
@@ -11248,7 +12218,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
+                        'label': 'Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
                         'language': 'English(EN)'
                     },
                     {
@@ -11405,7 +12375,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. Profit from rental property you own',
+                'labelEn': 'Profit from rental property you own',
                 'labels': [
                     {
                         'label': '',
@@ -11416,7 +12386,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. Profit from rental property you own',
+                        'label': 'Profit from rental property you own',
                         'language': 'English(EN)'
                     },
                     {
@@ -11573,7 +12543,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. Domestic service job in someone else’s house',
+                'labelEn': 'Domestic service job in someone else’s house',
                 'labels': [
                     {
                         'label': '',
@@ -11584,7 +12554,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. Domestic service job in someone else’s house',
+                        'label': 'Domestic service job in someone else’s house',
                         'language': 'English(EN)'
                     },
                     {
@@ -11741,7 +12711,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
+                'labelEn': 'Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
                 'labels': [
                     {
                         'label': '',
@@ -11752,7 +12722,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
+                        'label': 'Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
                         'language': 'English(EN)'
                     },
                     {
@@ -11909,7 +12879,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. Selling of your own agricultural production',
+                'labelEn': 'Selling of your own agricultural production',
                 'labels': [
                     {
                         'label': '',
@@ -11920,7 +12890,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. Selling of your own agricultural production',
+                        'label': 'Selling of your own agricultural production',
                         'language': 'English(EN)'
                     },
                     {
@@ -12077,7 +13047,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '6. End of service payment',
+                'labelEn': 'End of service payment',
                 'labels': [
                     {
                         'label': '',
@@ -12088,7 +13058,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '6. End of service payment',
+                        'label': 'End of service payment',
                         'language': 'English(EN)'
                     },
                     {
@@ -12245,7 +13215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '7. Remittances from family (abroad or employed elsewhere)',
+                'labelEn': 'Remittances from family (abroad or employed elsewhere)',
                 'labels': [
                     {
                         'label': '',
@@ -12256,7 +13226,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '7. Remittances from family (abroad or employed elsewhere)',
+                        'label': 'Remittances from family (abroad or employed elsewhere)',
                         'language': 'English(EN)'
                     },
                     {
@@ -12413,7 +13383,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '8. Gift from family/friend/other person',
+                'labelEn': 'Gift from family/friend/other person',
                 'labels': [
                     {
                         'label': '',
@@ -12424,7 +13394,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '8. Gift from family/friend/other person',
+                        'label': 'Gift from family/friend/other person',
                         'language': 'English(EN)'
                     },
                     {
@@ -12581,7 +13551,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '9. Micro-credit',
+                'labelEn': 'Micro-credit',
                 'labels': [
                     {
                         'label': '',
@@ -12592,7 +13562,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '9. Micro-credit',
+                        'label': 'Micro-credit',
                         'language': 'English(EN)'
                     },
                     {
@@ -12749,7 +13719,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '10. UNICEF child cash grant',
+                'labelEn': 'UNICEF child cash grant',
                 'labels': [
                     {
                         'label': '',
@@ -12760,7 +13730,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '10. UNICEF child cash grant',
+                        'label': 'UNICEF child cash grant',
                         'language': 'English(EN)'
                     },
                     {
@@ -12917,7 +13887,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '11. UNHCR cash transfer',
+                'labelEn': 'UNHCR cash transfer',
                 'labels': [
                     {
                         'label': '',
@@ -12928,7 +13898,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '11. UNHCR cash transfer',
+                        'label': 'UNHCR cash transfer',
                         'language': 'English(EN)'
                     },
                     {
@@ -13085,7 +14055,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '12. WFP assistance',
+                'labelEn': 'WFP assistance',
                 'labels': [
                     {
                         'label': '',
@@ -13096,7 +14066,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '12. WFP assistance',
+                        'label': 'WFP assistance',
                         'language': 'English(EN)'
                     },
                     {
@@ -13253,7 +14223,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '13. Cash transfer from an NGO, CBOs , or religious organization',
+                'labelEn': 'Cash transfer from an NGO, CBOs , or religious organization',
                 'labels': [
                     {
                         'label': '',
@@ -13264,7 +14234,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '13. Cash transfer from an NGO, CBOs , or religious organization',
+                        'label': 'Cash transfer from an NGO, CBOs , or religious organization',
                         'language': 'English(EN)'
                     },
                     {
@@ -13421,7 +14391,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '14. Cash transfer from government',
+                'labelEn': 'Cash transfer from government',
                 'labels': [
                     {
                         'label': '',
@@ -13432,7 +14402,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '14. Cash transfer from government',
+                        'label': 'Cash transfer from government',
                         'language': 'English(EN)'
                     },
                     {
@@ -13589,7 +14559,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '15. Loan (family, friend)',
+                'labelEn': 'Loan (family, friend)',
                 'labels': [
                     {
                         'label': '',
@@ -13600,7 +14570,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '15. Loan (family, friend)',
+                        'label': 'Loan (family, friend)',
                         'language': 'English(EN)'
                     },
                     {
@@ -13757,7 +14727,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '16. Loan (bank, other financial institution or organization)',
+                'labelEn': 'Loan (bank, other financial institution or organization)',
                 'labels': [
                     {
                         'label': '',
@@ -13768,7 +14738,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '16. Loan (bank, other financial institution or organization)',
+                        'label': 'Loan (bank, other financial institution or organization)',
                         'language': 'English(EN)'
                     },
                     {
@@ -13925,7 +14895,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '17. Sale of assets (including livestock, land)',
+                'labelEn': 'Sale of assets (including livestock, land)',
                 'labels': [
                     {
                         'label': '',
@@ -13936,7 +14906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '17. Sale of assets (including livestock, land)',
+                        'label': 'Sale of assets (including livestock, land)',
                         'language': 'English(EN)'
                     },
                     {
@@ -14093,7 +15063,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '18. Income (or goods) from household enterprise (profit or otherwise)',
+                'labelEn': 'Income (or goods) from household enterprise (profit or otherwise)',
                 'labels': [
                     {
                         'label': '',
@@ -14104,7 +15074,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '18. Income (or goods) from household enterprise (profit or otherwise)',
+                        'label': 'Income (or goods) from household enterprise (profit or otherwise)',
                         'language': 'English(EN)'
                     },
                     {
@@ -14261,7 +15231,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '19. Any other source?',
+                'labelEn': 'Any other source?',
                 'labels': [
                     {
                         'label': '',
@@ -14272,7 +15242,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '19. Any other source?',
+                        'label': 'Any other source?',
                         'language': 'English(EN)'
                     },
                     {
@@ -14479,7 +15449,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_inc_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -14508,7 +15478,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_income_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',

@@ -1,8 +1,12 @@
 import functools
+import io
+import itertools
 import logging
+import string
 from collections import MutableMapping, OrderedDict
 from typing import List
 
+from PIL import Image
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django_filters import OrderingFilter
@@ -195,6 +199,7 @@ def serialize_flex_attributes():
             "id": attr.id,
             "type": attr.type,
             "name": attr.name,
+            "xlsx_field": attr.name,
             "lookup": attr.name,
             "required": attr.required,
             "label": attr.label,
@@ -698,3 +703,36 @@ def get_model_choices_fields(model, excluded=None):
         for field in model._meta.get_fields()
         if getattr(field, "choices", None) and field.name not in excluded
     ]
+
+
+class SheetImageLoader:
+    """Loads all images in a sheet"""
+
+    _images = {}
+
+    def __init__(self, sheet):
+        # Holds an array of A-ZZ
+        col_holder = list(
+            itertools.chain(
+                string.ascii_uppercase,
+                ("".join(pair) for pair in itertools.product(string.ascii_uppercase, repeat=2)),
+            )
+        )
+        """Loads all sheet images"""
+        sheet_images = sheet._images
+        for image in sheet_images:
+            row = image.anchor._from.row + 1
+            col = col_holder[image.anchor._from.col]
+            self._images[f"{col}{row}"] = image._data
+
+    def image_in(self, cell):
+        """Checks if there's an image in specified cell"""
+        return cell in self._images
+
+    def get(self, cell):
+        """Retrieves image data from a cell"""
+        if cell not in self._images:
+            raise ValueError("Cell {} doesn't contain an image".format(cell))
+        else:
+            image = io.BytesIO(self._images[cell]())
+            return Image.open(image)
