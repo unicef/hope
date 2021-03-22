@@ -18,7 +18,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery,
+  useAllAddIndividualFieldsQuery, useAllEditHouseholdFieldsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -46,6 +46,7 @@ import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
 } from '../../config/permissions';
+import {useArrayToDict} from "../../hooks/useArrayToDict";
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -115,12 +116,26 @@ export function EditGrievancePage(): React.ReactElement {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
+  const individualFieldsDict = useArrayToDict(
+    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    'name',
+    '*',
+  );
+  const householdFieldsDict = useArrayToDict(
+    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    'name',
+    '*',
+  );
   if (
     userDataLoading ||
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
+    householdFieldsLoading||
     currentUserDataLoading
   )
     return <LoadingComponent />;
@@ -130,7 +145,10 @@ export function EditGrievancePage(): React.ReactElement {
     !userData ||
     !ticketData ||
     !currentUserData ||
-    permissions === null
+    permissions === null ||
+    !householdFieldsData ||
+    !householdFieldsDict ||
+    !individualFieldsDict
   )
     return null;
 
@@ -223,7 +241,7 @@ export function EditGrievancePage(): React.ReactElement {
           changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
-      validate={(values) => validate(values, allAddIndividualFieldsData)}
+      validate={(values) =>  validate(values, allAddIndividualFieldsData,individualFieldsDict,householdFieldsDict)}
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
