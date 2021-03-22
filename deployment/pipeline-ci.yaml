@@ -22,6 +22,11 @@ variables:
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.repository: "uniappsk8shopedev" 
+  ${{ if ne(variables['Build.SourceBranchName'], 'staging') }}:
+    Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
+  ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
+    Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
+
 stages:
   - stage: build_and_push
     displayName: BUILD and PUSH
@@ -50,7 +55,7 @@ stages:
               command: build
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              arguments: --build-arg SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
+              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.dsn)
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)

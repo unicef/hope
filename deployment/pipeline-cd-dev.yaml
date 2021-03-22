@@ -3,7 +3,7 @@ pr: none
 resources:
   pipelines:
   - pipeline: ci-hope
-    source: '[CI] HOPE DEV'
+    source: '[CI] HOPE'
     trigger: 
       branches:
       - develop
