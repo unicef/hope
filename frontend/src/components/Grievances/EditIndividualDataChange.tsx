@@ -21,6 +21,7 @@ import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
+import {FormikBoolFieldGrievances} from "./FormikBoolFieldGrievances";
 
 const Title = styled.div`
   width: 100%;
@@ -96,7 +97,8 @@ export const EditIndividualDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
-        component: FormikCheckboxField,
+        component: FormikBoolFieldGrievances,
+        required: field.required,
       };
       break;
     default:
@@ -254,7 +256,7 @@ export const EditIndividualDataChange = ({
       values.individualDataUpdateFields.length === 0
     ) {
       setFieldValue('individualDataUpdateFields', [
-        { fieldName: null, fieldValue: '' },
+        { fieldName: null, fieldValue: null },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
