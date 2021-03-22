@@ -5,7 +5,6 @@ import os
 import xmlrunner
 from django.conf import settings
 from django.db import connections
-
 from snapshottest.django import TestRunner
 
 
@@ -152,13 +151,13 @@ class PostgresTestRunner(TestRunner):
 
     def get_test_runner_kwargs(self):
         # We use separate verbosity setting for our runner
-        verbosity = getattr(settings, 'TEST_OUTPUT_VERBOSE', 1)
+        verbosity = getattr(settings, "TEST_OUTPUT_VERBOSE", 1)
         if isinstance(verbosity, bool):
             verbosity = (1, 2)[verbosity]
         verbosity = verbosity  # not self.verbosity
 
-        output_dir = getattr(settings, 'TEST_OUTPUT_DIR', '.')
-        single_file = getattr(settings, 'TEST_OUTPUT_FILE_NAME', None)
+        output_dir = getattr(settings, "TEST_OUTPUT_DIR", ".")
+        single_file = getattr(settings, "TEST_OUTPUT_FILE_NAME", None)
 
         # For single file case we are able to create file here
         # But for multiple files case files will be created inside runner/results
@@ -168,11 +167,11 @@ class PostgresTestRunner(TestRunner):
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             file_path = os.path.join(output_dir, single_file)
-            output = open(file_path, 'wb')
+            output = open(file_path, "wb")
 
         return dict(
             verbosity=verbosity,
-            descriptions=getattr(settings, 'TEST_OUTPUT_DESCRIPTIONS', False),
+            descriptions=getattr(settings, "TEST_OUTPUT_DESCRIPTIONS", False),
             failfast=self.failfast,
             resultclass=self.get_resultclass(),
             output=output,
@@ -182,8 +181,8 @@ class PostgresTestRunner(TestRunner):
         runner_kwargs = self.get_test_runner_kwargs()
         runner = self.test_runner(**runner_kwargs)
         results = runner.run(suite)
-        if hasattr(runner_kwargs['output'], 'close'):
-            runner_kwargs['output'].close()
+        if hasattr(runner_kwargs["output"], "close"):
+            runner_kwargs["output"].close()
         return results
 
     def teardown_databases(self, old_config, **kwargs):

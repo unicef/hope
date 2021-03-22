@@ -43,6 +43,7 @@ export const AllPaymentRecords = gql`
             unicefId
             size
           }
+          currency
           entitlementQuantity
           deliveredQuantity
           deliveredQuantityUsd

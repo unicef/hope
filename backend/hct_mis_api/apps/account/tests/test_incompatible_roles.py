@@ -1,10 +1,10 @@
-from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.test import TestCase
 
+from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, UserRole
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.account.fixtures import UserFactory
 
 
 class IncompatibleRolesTest(TestCase):

@@ -59,8 +59,12 @@ class TestGrievanceModelValidation(TestCase):
         grievance_ticket_2 = GrievanceTicket(**self.base_model_data, **self.invalid_model_2_data)
 
         self.assertRaisesMessage(
-            ValidationError, "{'issue_type': ['Invalid issue type for selected category']}", grievance_ticket_1.save,
+            ValidationError,
+            "{'issue_type': ['Invalid issue type for selected category']}",
+            grievance_ticket_1.save,
         )
         self.assertRaisesMessage(
-            ValidationError, "{'issue_type': ['Invalid issue type for selected category']}", grievance_ticket_2.save,
+            ValidationError,
+            "{'issue_type': ['Invalid issue type for selected category']}",
+            grievance_ticket_2.save,
         )

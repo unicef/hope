@@ -1,9 +1,13 @@
+import logging
+
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.forms import Form, CharField, ChoiceField, Textarea, ModelChoiceField
+from django.forms import Form, CharField, Textarea, ModelChoiceField
 
 from hct_mis_api.apps.account.models import Role
 from hct_mis_api.apps.core.models import BusinessArea
+
+logger = logging.getLogger(__name__)
 
 
 class LoadUsersForm(Form):
@@ -19,5 +23,6 @@ class LoadUsersForm(Form):
             except ValidationError:
                 errors.append(e)
         if errors:
+            logger.error("Invalid emails %s" % ", ".join(errors))
             raise ValidationError("Invalid emails %s" % ", ".join(errors))
         return self.cleaned_data["emails"]

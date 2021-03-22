@@ -72,13 +72,13 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         }
                     ],
@@ -119,13 +119,13 @@ snapshots['TestUnapproveTargetPopulationMutation::test_unapprove_target_populati
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         }
                     ],
@@ -182,13 +182,13 @@ snapshots['TestFinalizeTargetPopulationMutation::test_finalize_target_population
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 1
+                                'size': 2
                             }
                         },
                         {
                             'node': {
                                 'residenceStatus': 'HOST',
-                                'size': 2
+                                'size': 1
                             }
                         }
                     ],
