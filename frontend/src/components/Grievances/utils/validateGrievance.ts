@@ -5,14 +5,20 @@ import {
 } from '../../../utils/constants';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
+export function isEmpty(value) {
+  console.log('isEmpty', value === undefined || value === null || value === '');
+  return value === undefined || value === null || value === '';
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function validate(
   values,
   allAddIndividualFieldsData: AllAddIndividualFieldsQuery,
+  individualFieldsDict,
+  householdFieldsDict,
 ) {
   const category = values.category?.toString();
   const issueType = values.issueType?.toString();
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const errors: { [id: string]: any } = {};
   if (category === GRIEVANCE_CATEGORIES.DATA_CHANGE) {
@@ -28,8 +34,7 @@ export function validate(
       if (
         //xD
         values.selectedHousehold &&
-        (!values.householdDataUpdateFields?.[0]?.fieldName ||
-          !values.householdDataUpdateFields?.[0]?.fieldValue)
+        !values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         errors.householdDataUpdateFields = 'Household Data Change is Required';
       }
@@ -38,9 +43,10 @@ export function validate(
         values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
+          const { required } = householdFieldsDict[el.fieldName];
           if (el.fieldValue === 0) {
             delete errors.householdDataUpdateFields;
-          } else if (!el.fieldName || !el.fieldValue) {
+          } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
             errors.householdDataUpdateFields =
               'Field and field value are required';
           }
@@ -58,8 +64,7 @@ export function validate(
       }
       if (
         values.selectedIndividual &&
-        (!values.individualDataUpdateFields[0]?.fieldName ||
-          !values.individualDataUpdateFields[0]?.fieldValue) &&
+        !values.individualDataUpdateFields[0]?.fieldName &&
         !values.individualDataUpdateFieldsDocuments?.length &&
         !values.individualDataUpdateDocumentsToRemove?.length
       ) {
@@ -71,9 +76,10 @@ export function validate(
         values.individualDataUpdateFields[0]?.fieldName
       ) {
         values.individualDataUpdateFields.forEach((el) => {
+          const { required } = individualFieldsDict[el.fieldName];
           if (el.fieldValue === 0) {
             delete errors.individualDataUpdateFields;
-          } else if (!el.fieldName || !el.fieldValue) {
+          } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
             errors.individualDataUpdateFields =
               'Field and field value are required';
           }
