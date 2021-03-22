@@ -1,6 +1,3 @@
-import base64
-import os
-
 import graphene
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
@@ -54,13 +51,19 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
     DISABILITY_CHOICE,
-    SEVERITY_OF_DISABILITY_CHOICES, WORK_STATUS_CHOICE,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    WORK_STATUS_CHOICE,
 )
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
 from hct_mis_api.apps.targeting.models import HouseholdSelection
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    SectionTotalNode,
+    FlexFieldsScalar,
+)
 
 INDIVIDUALS_CHART_LABELS = [
     "Females 0-5",
@@ -223,27 +226,6 @@ class DocumentNode(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class FlexFieldsScalar(graphene.Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return dt
-
-    @staticmethod
-    def parse_literal(node):
-        return node
-
-    @staticmethod
-    def parse_value(value):
-        return value
-
-
 class ExtendedHouseHoldConnection(graphene.Connection):
     class Meta:
         abstract = True
@@ -357,6 +339,7 @@ class IndividualRoleInHouseholdNode(DjangoObjectType):
     class Meta:
         model = IndividualRoleInHousehold
 
+
 class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (
         hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS),
@@ -413,7 +396,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -590,8 +573,8 @@ class Query(graphene.ObjectType):
         )
         individuals_counts = (
             payment_records_qs.select_related("household")
-                .values_list(*households_individuals_params)
-                .distinct("household__id")
+            .values_list(*households_individuals_params)
+            .distinct("household__id")
         )
         return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
@@ -611,8 +594,8 @@ class Query(graphene.ObjectType):
 
         household_child_counts = (
             payment_records_qs.select_related("household")
-                .values_list(*households_child_params)
-                .distinct("household__id")
+            .values_list(*households_child_params)
+            .distinct("household__id")
         )
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
@@ -676,8 +659,8 @@ class Query(graphene.ObjectType):
         # aggregate with distinct by household__id is not possible
         households_with_disability_counts = (
             payment_records_qs.select_related("household")
-                .values_list(*households_params_with_disability)
-                .distinct("household__id")
+            .values_list(*households_params_with_disability)
+            .distinct("household__id")
         )
         sum_of_with_disability = sum_lists_with_values(
             households_with_disability_counts, len(households_params_with_disability)
@@ -685,8 +668,8 @@ class Query(graphene.ObjectType):
 
         households_totals_counts = (
             payment_records_qs.select_related("household")
-                .values_list(*households_params_total)
-                .distinct("household__id")
+            .values_list(*households_params_total)
+            .distinct("household__id")
         )
         sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
 

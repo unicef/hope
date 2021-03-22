@@ -28,6 +28,7 @@ class Interpreter:
         try:
             self.execute(hh=Household.objects.first())
         except Exception as e:
+            logger.exception(e)
             raise ValidationError(e)
 
 
@@ -85,6 +86,7 @@ class PythonExec(Interpreter):
             if forbidden in self.init_string:
                 errors.append("Code contains an invalid statement '%s'" % forbidden)
         if errors:
+            logger.error(errors)
             raise ValidationError(errors)
         try:
             self.execute(hh=Household.objects.first())
@@ -92,6 +94,7 @@ class PythonExec(Interpreter):
             logger.exception(e)
             tb = traceback.format_exc(limit=-1)
             msg = tb.split('<code>", ')[-1]
+            logger.error(mark_safe(msg))
             raise ValidationError(mark_safe(msg))
 
 

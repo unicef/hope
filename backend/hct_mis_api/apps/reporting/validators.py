@@ -1,8 +1,11 @@
-from django.core.exceptions import ValidationError
+import logging
 
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.validators import CommonValidator
 from hct_mis_api.apps.reporting.models import Report
+
+logger = logging.getLogger(__name__)
 
 
 class ReportValidator(CommonValidator):
@@ -22,6 +25,7 @@ class ReportValidator(CommonValidator):
         report_data = kwargs.get("report_data")
         report_type = report_data.get("report_type")
         if report_type not in dict(Report.REPORT_TYPES):
+            logger.error("Wrong report type")
             raise ValidationError("Wrong report type")
         if "admin_area" not in ReportValidator.VALID_FILTERS[report_type]:
             report_data.pop("admin_area", None)

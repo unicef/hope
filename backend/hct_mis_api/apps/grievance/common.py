@@ -1,10 +1,14 @@
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area):
     from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 
-    details_already_exists = TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED).filter(
-        golden_records_individual__in=(main_individual, possible_duplicate),
-        possible_duplicate__in=(main_individual, possible_duplicate),
-    ).exists()
+    details_already_exists = (
+        TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
+        .filter(
+            golden_records_individual__in=(main_individual, possible_duplicate),
+            possible_duplicate__in=(main_individual, possible_duplicate),
+        )
+        .exists()
+    )
 
     if details_already_exists is True:
         return None, None

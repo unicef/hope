@@ -68,7 +68,7 @@ class DashboardReport(TimeStampedUUIDModel):
     PAYMENT_VERIFICATION = "PAYMENT_VERIFICATION"
     REPORT_TYPES = (
         (TOTAL_TRANSFERRED_BY_COUNTRY, _("Total transferred by country")),
-        (TOTAL_TRANSFERRED_BY_ADMIN_AREA, _("Total transferred by administrative area")),
+        (TOTAL_TRANSFERRED_BY_ADMIN_AREA, _("Total transferred by admin area")),
         (BENEFICIARIES_REACHED, _("Beneficiaries reached")),
         (INDIVIDUALS_REACHED, _("Individuals reached drilldown")),
         (VOLUME_BY_DELIVERY_MECHANISM, _("Volume by delivery mechanism")),

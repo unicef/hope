@@ -1,12 +1,18 @@
+import functools
+import io
+import itertools
+import logging
+import string
 from collections import MutableMapping, OrderedDict
 from typing import List
-import functools
 
+from PIL import Image
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-
 from django_filters import OrderingFilter
 from graphql import GraphQLError
+
+logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
@@ -193,6 +199,7 @@ def serialize_flex_attributes():
             "id": attr.id,
             "type": attr.type,
             "name": attr.name,
+            "xlsx_field": attr.name,
             "lookup": attr.name,
             "required": attr.required,
             "label": attr.label,
@@ -244,8 +251,10 @@ def age_to_birth_date_query(comparision_method, args):
     }
     args_count = comparision_method_args_count.get(comparision_method)
     if args_count is None:
+        logger.error(f"Age filter query don't supports {comparision_method} type")
         raise ValidationError(f"Age filter query don't supports {comparision_method} type")
     if len(args) != args_count:
+        logger.error(f"Age {comparision_method} filter query expect {args_count} arguments")
         raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
     if comparision_method == "RANGE":
         return age_to_birth_date_range_query(field_name, *args)
@@ -259,13 +268,14 @@ def age_to_birth_date_query(comparision_method, args):
         return age_to_birth_date_range_query(field_name, args[0], None)
     if comparision_method == "LESS_THAN":
         return age_to_birth_date_range_query(field_name, None, args[0])
+    logger.error(f"Age filter query don't supports {comparision_method} type")
     raise ValidationError(f"Age filter query don't supports {comparision_method} type")
 
 
-def get_attr_value(name, object, default=None):
-    if isinstance(object, (MutableMapping, dict)):
-        return object.get(name, default)
-    return getattr(object, name, default)
+def get_attr_value(name, obj, default=None):
+    if isinstance(obj, (MutableMapping, dict)):
+        return obj.get(name, default)
+    return getattr(obj, name, default)
 
 
 def to_choice_object(choices):
@@ -294,9 +304,10 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
 
     try:
         return functools.reduce(getattr, attr.split("."), obj)
-    except AttributeError:
+    except AttributeError as e:
         if default != raise_attribute_error:
             return default
+        logger.exception(e)
         raise
 
 
@@ -489,6 +500,7 @@ def check_concurrency_version_in_mutation(version, target):
     from graphql import GraphQLError
 
     if version != target.version:
+        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
         raise GraphQLError("Someone has modified this record")
 
 
@@ -614,6 +626,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
     return resolve_f
@@ -690,3 +703,36 @@ def get_model_choices_fields(model, excluded=None):
         for field in model._meta.get_fields()
         if getattr(field, "choices", None) and field.name not in excluded
     ]
+
+
+class SheetImageLoader:
+    """Loads all images in a sheet"""
+
+    _images = {}
+
+    def __init__(self, sheet):
+        # Holds an array of A-ZZ
+        col_holder = list(
+            itertools.chain(
+                string.ascii_uppercase,
+                ("".join(pair) for pair in itertools.product(string.ascii_uppercase, repeat=2)),
+            )
+        )
+        """Loads all sheet images"""
+        sheet_images = sheet._images
+        for image in sheet_images:
+            row = image.anchor._from.row + 1
+            col = col_holder[image.anchor._from.col]
+            self._images[f"{col}{row}"] = image._data
+
+    def image_in(self, cell):
+        """Checks if there's an image in specified cell"""
+        return cell in self._images
+
+    def get(self, cell):
+        """Retrieves image data from a cell"""
+        if cell not in self._images:
+            raise ValueError("Cell {} doesn't contain an image".format(cell))
+        else:
+            image = io.BytesIO(self._images[cell]())
+            return Image.open(image)

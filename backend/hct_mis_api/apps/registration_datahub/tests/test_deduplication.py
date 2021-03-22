@@ -19,7 +19,12 @@ from hct_mis_api.apps.registration_datahub.fixtures import (
     RegistrationDataImportDatahubFactory,
     create_imported_household_and_individuals,
 )
-from hct_mis_api.apps.registration_datahub.models import DUPLICATE_IN_BATCH, UNIQUE_IN_BATCH, ImportData, ImportedIndividual
+from hct_mis_api.apps.registration_datahub.models import (
+    DUPLICATE_IN_BATCH,
+    UNIQUE_IN_BATCH,
+    ImportData,
+    ImportedIndividual,
+)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
@@ -39,7 +44,7 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         import_data = ImportData.objects.create(
-            file="test_file/new_reg_data_import.xlsx",
+            file="test_file/x.xlsx",
             number_of_households=10,
             number_of_individuals=100,
         )

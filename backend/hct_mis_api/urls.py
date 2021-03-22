@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import path, include
+from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 from graphene_file_upload.django import FileUploadGraphQLView
 
@@ -13,11 +13,11 @@ import hct_mis_api.apps.payment.views
 import hct_mis_api.apps.registration_datahub.views
 import hct_mis_api.apps.sanction_list.views
 from hct_mis_api.apps.core.views import (
+    call_command_view,
     homepage,
+    logout_view,
     schema,
     trigger_error,
-    logout_view,
-    call_command_view,
 )
 
 urlpatterns = [
@@ -45,7 +45,8 @@ urlpatterns = [
     ),
     path(
         "api/dashboard-report/<uuid:report_id>",
-        hct_mis_api.apps.core.views.download_dashboard_report,name="dashboard_report"
+        hct_mis_api.apps.core.views.download_dashboard_report,
+        name="dashboard_report",
     ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

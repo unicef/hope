@@ -41,14 +41,20 @@ def save_sensitive_grievance_extras(root, info, input, grievance_ticket, extras,
             ticket.linked_tickets.set(linked_tickets)
 
             TicketSensitiveDetails.objects.create(
-                individual=individual, household=household, payment_record=payment_record, ticket=ticket,
+                individual=individual,
+                household=household,
+                payment_record=payment_record,
+                ticket=ticket,
             )
 
             ticket.refresh_from_db()
             grievance_tickets_to_return.append(ticket)
     else:
         TicketSensitiveDetails.objects.create(
-            individual=individual, household=household, payment_record=None, ticket=grievance_ticket,
+            individual=individual,
+            household=household,
+            payment_record=None,
+            ticket=grievance_ticket,
         )
         grievance_ticket.refresh_from_db()
         grievance_tickets_to_return = [grievance_ticket]
