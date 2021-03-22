@@ -7,7 +7,6 @@ resources:
     trigger: 
       branches:
       - staging
-      - ops/*
 
 
 variables:
