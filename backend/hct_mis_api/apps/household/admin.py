@@ -1,3 +1,10 @@
+from django.contrib import admin, messages
+from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
+
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.filters import (
@@ -6,25 +13,19 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
-from django.contrib import admin, messages
-from django.contrib.messages import DEFAULT_TAGS
-from django.db.models import Q
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
+    Document,
+    DocumentType,
     Household,
     Individual,
-    DocumentType,
-    Document,
-    Agency,
-    IndividualRoleInHousehold,
     IndividualIdentity,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    HEAD,
+    IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -80,6 +81,19 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                     "org_enumerator",
                     "org_name_enumerator",
                     "name_enumerator",
+                ),
+            },
+        ),
+        (
+            "Dates",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "last_sync_at",
+                    "created_at",
+                    "updated_at",
+                    "removed_date",
+                    "withdrawn_date",
                 ),
             },
         ),
@@ -170,6 +184,8 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", RelatedFieldComboFilter),
+        "updated_at",
+        "last_sync_at",
     )
     raw_id_fields = ("household", "registration_data_import", "business_area")
     fieldsets = [
@@ -180,16 +196,27 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                     (
                         "full_name",
                         "withdrawn",
-                        "withdrawn_date",
                         "duplicate",
-                        "duplicate_date",
                         "is_removed",
-                        "removed_date",
                     ),
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
                 )
+            },
+        ),
+        (
+            "Dates",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "last_sync_at",
+                    "created_at",
+                    "updated_at",
+                    "removed_date",
+                    "withdrawn_date",
+                    "duplicate_date",
+                ),
             },
         ),
         (
