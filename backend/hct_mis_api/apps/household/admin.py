@@ -27,7 +27,10 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+)
 
 
 @admin.register(Agency)
@@ -48,7 +51,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "country",
@@ -65,6 +68,7 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         "org_enumerator",
         "last_registration_date",
     )
+    readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
     fieldsets = [
@@ -89,9 +93,8 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             {
                 "classes": ("collapse",),
                 "fields": (
+                    ("created_at", "updated_at"),
                     "last_sync_at",
-                    "created_at",
-                    "updated_at",
                     "removed_date",
                     "withdrawn_date",
                 ),
@@ -167,7 +170,7 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(Individual)
-class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "given_name",
@@ -178,6 +181,9 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         "birth_date",
     )
     search_fields = ("family_name",)
+    readonly_fields = ("created_at", "updated_at")
+    exclude = ("created_at", "updated_at")
+
     list_filter = (
         TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
         TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
@@ -210,9 +216,8 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             {
                 "classes": ("collapse",),
                 "fields": (
+                    ("created_at", "updated_at"),
                     "last_sync_at",
-                    "created_at",
-                    "updated_at",
                     "removed_date",
                     "withdrawn_date",
                     "duplicate_date",
@@ -241,7 +246,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("individual_id", "household_id", "role")
     list_filter = ("role",)
     raw_id_fields = (
