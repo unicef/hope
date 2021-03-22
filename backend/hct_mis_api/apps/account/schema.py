@@ -178,7 +178,6 @@ class Query(graphene.ObjectType):
 
     def resolve_me(self, info, **kwargs):
         if not info.context.user.is_authenticated:
-            logger.error(f"Permission Denied: User {info.context.user.email} is not authenticated.")
             raise PermissionDenied("Permission Denied: User is not authenticated.")
         return info.context.user
 
