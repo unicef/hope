@@ -3,7 +3,7 @@ pr: none
 resources:
   pipelines:
   - pipeline: ci-hope
-    source: '[CI] HOPE DEV'
+    source: '[CI] HOPE'
     trigger: 
       branches:
       - staging
@@ -14,7 +14,7 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-dev-1614134848610"
+  Kubernetes.serviceConnection: "ICTD-HOPE-AKS-DEV-uni-apps-aks-hope-dev-ictd-hope-stg-1614134886590"
   Kubernetes.namespace: "ictd-hope-stg"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
