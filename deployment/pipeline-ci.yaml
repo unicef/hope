@@ -23,9 +23,9 @@ variables:
   Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.repository: "uniappsk8shopedev" 
   ${{ if ne(variables['Build.SourceBranchName'], 'staging') }}:
-    Sentry.frontend.dsn: : $(DEV_SENTRY_FRONTEND_DSN)
+    Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
-    Sentry.frontend.dsn: : $(STG_SENTRY_FRONTEND_DSN)
+    Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
 
 stages:
   - stage: build_and_push
