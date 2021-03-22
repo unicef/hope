@@ -7,14 +7,15 @@ class BigInt(graphene.Scalar):
     that supports Integers bigger than a signed
     32-bit integer.
     """
+
     @classmethod
     def parse_value(cls, value):
         return int(value)
-    
+
     @classmethod
     def serialize(cls, value):
         return int(value)
-    
+
     @staticmethod
     def parse_literal(node):
         return int(node.value)

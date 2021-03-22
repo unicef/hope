@@ -1,7 +1,8 @@
 from django.core.management import BaseCommand
 from django.db.models import Q
-from hct_mis_api.apps.account.permissions import Permissions
+
 from hct_mis_api.apps.account.models import Role, IncompatibleRoles
+from hct_mis_api.apps.account.permissions import Permissions
 
 
 class Command(BaseCommand):

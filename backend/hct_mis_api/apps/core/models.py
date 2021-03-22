@@ -1,10 +1,7 @@
-from decimal import Decimal
-
 import mptt
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
@@ -39,8 +36,8 @@ class BusinessArea(TimeStampedUUIDModel):
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
-    rapid_pro_host = models.URLField(null=True)
-    rapid_pro_api_key = models.CharField(max_length=40, null=True)
+    rapid_pro_host = models.URLField(null=True, blank=True)
+    rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(
         max_length=250,
         unique=True,
@@ -167,9 +164,11 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         queryset = cls.objects.filter(level=admin_level)
         if business_area is not None:
             queryset.filter(admin_area_level__business_area=business_area)
-        queryset = queryset.order_by('title')
-        return [{"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code} for
-                admin_area in queryset]
+        queryset = queryset.order_by("title")
+        return [
+            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            for admin_area in queryset
+        ]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
@@ -181,7 +180,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     DECIMAL = "DECIMAL"
     SELECT_ONE = "SELECT_ONE"
     SELECT_MANY = "SELECT_MANY"
-    DATETIME = "DATETIME"
+    DATE = "DATE"
     GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
         (STRING, _("String")),
@@ -190,7 +189,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
         (DECIMAL, _("Decimal")),
         (SELECT_ONE, _("Select One")),
         (SELECT_MANY, _("Select Many")),
-        (DATETIME, _("Datetime")),
+        (DATE, _("Date")),
         (GEOPOINT, _("Geopoint")),
     )
     ASSOCIATED_WITH_CHOICES = (
@@ -256,21 +255,25 @@ class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
         return (
             self.get_queryset()
-                .filter(status=self.model.SUCCESSFUL)
-                .exclude(template_id__exact="")
-                .order_by("-created_at")
-                .first()
+            .filter(status=self.model.SUCCESSFUL)
+            .exclude(template_id__exact="")
+            .order_by("-created_at")
+            .first()
         )
 
 
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     SUCCESSFUL = "SUCCESSFUL"
+    UPLOADED = "UPLOADED"
     UNSUCCESSFUL = "UNSUCCESSFUL"
     PROCESSING = "PROCESSING"
+    CONNECTION_FAILED = "CONNECTION_FAILED"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
         (SUCCESSFUL, _("Successful")),
+        (UPLOADED, _("Successful")),
         (UNSUCCESSFUL, _("Unsuccessful")),
         (PROCESSING, _("Processing")),
+        (CONNECTION_FAILED, _("Connection failed")),
     )
 
     class Meta:
@@ -288,13 +291,13 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     error_description = models.TextField(blank=True)
     status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
     template_id = models.CharField(max_length=200, blank=True)
+    first_connection_failed_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.file_name} - {self.created_at}"
 
 
 class CountryCodeMapManager(models.Manager):
-
     def __init__(self):
         self._cache = {2: {}, 3: {}}
         super().__init__()

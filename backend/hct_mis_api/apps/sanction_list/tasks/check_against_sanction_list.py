@@ -126,7 +126,9 @@ class CheckAgainstSanctionListTask:
             body=text_body,
         )
         msg.attach(
-            f"{subject}.xlsx", attachment, "application/vnd.ms-excel",
+            f"{subject}.xlsx",
+            attachment,
+            "application/vnd.ms-excel",
         )
         msg.attach_alternative(html_body, "text/html")
         msg.send()

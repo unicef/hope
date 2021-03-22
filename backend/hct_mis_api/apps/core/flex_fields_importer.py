@@ -1,28 +1,42 @@
+import logging
 from collections import defaultdict
 from os.path import isfile
 
 import xlrd
 from django.core.exceptions import ValidationError
-from django.core.files import File
 from django.db import transaction
 from django.utils.html import strip_tags
 
-from hct_mis_api.apps.core.core_fields_attributes import TYPE_STRING, TYPE_INTEGER, TYPE_DECIMAL, TYPE_DATE, TYPE_IMAGE, \
-    TYPE_SELECT_ONE, TYPE_SELECT_MANY
+from hct_mis_api.apps.core.core_fields_attributes import (
+    TYPE_STRING,
+    TYPE_INTEGER,
+    TYPE_DECIMAL,
+    TYPE_DATE,
+    TYPE_IMAGE,
+    TYPE_SELECT_ONE,
+    TYPE_SELECT_MANY,
+)
 from hct_mis_api.apps.core.models import FlexibleAttribute, FlexibleAttributeGroup, FlexibleAttributeChoice
+
+logger = logging.getLogger(__name__)
 
 
 class FlexibleAttributeImporter:
     TYPE_CHOICE_MAP = {
         "note": TYPE_STRING,
         "image": TYPE_IMAGE,
-        "calculate": TYPE_STRING,
         "select_one": TYPE_SELECT_ONE,
         "text": TYPE_STRING,
         "integer": TYPE_INTEGER,
         "decimal": TYPE_DECIMAL,
         "date": TYPE_DATE,
         "select_multiple": TYPE_SELECT_MANY,
+    }
+    CALCULATE_TYPE_CHOICE_MAP = {
+        "text": TYPE_STRING,
+        "integer": TYPE_INTEGER,
+        "decimal": TYPE_DECIMAL,
+        "date": TYPE_DATE,
     }
 
     # Constants for xls import
@@ -85,8 +99,10 @@ class FlexibleAttributeImporter:
                             field_suffix in self.CORE_FIELD_SUFFIXES or field_suffix in self.FLEX_FIELD_SUFFIXES
                         )
                         if is_empty_and_not_index_field and is_core_or_flex_field:
+                            logger.error(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                             raise ValidationError(f"Survey Sheet: Row {row_number + 1}: English label cannot be empty")
                     if object_type_to_add == "choice" and not value:
+                        logger.error(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
                         raise ValidationError(f"Choices Sheet: Row {row_number + 1}: English label cannot be empty")
 
                 self.json_fields_to_create[label].update({language: cleared_value if value else ""})
@@ -102,10 +118,12 @@ class FlexibleAttributeImporter:
         if header_name in model_fields:
             if header_name == "type":
                 if not value:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: Type is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Type is required")
                 choice_key = value.split(" ")[0]
-
-                if choice_key in self.TYPE_CHOICE_MAP.keys():
+                if choice_key == "calculate":
+                    self.object_fields_to_create["type"] = "calculate"
+                elif choice_key in self.TYPE_CHOICE_MAP.keys():
                     self.object_fields_to_create["type"] = self.TYPE_CHOICE_MAP.get(choice_key)
             else:
                 is_attribute_name_empty = header_name == "name" and value in (None, "")
@@ -114,10 +132,38 @@ class FlexibleAttributeImporter:
                 ) and not value
 
                 if is_attribute_name_empty:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: Name is required")
                 if is_choice_list_name_empty:
+                    logger.error(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                     raise ValidationError(f"Survey Sheet: Row {row_number + 1}: List Name is required")
                 self.object_fields_to_create[header_name] = value if value else ""
+
+        is_valid_calculate_field_and_header_is_calculate_field_type = (
+            object_type_to_add == "attribute"
+            and header_name == "calculated_result_field_type"
+            and row[0].value == "calculate"
+            and any(self.object_fields_to_create["name"].endswith(i) for i in self.FLEX_FIELD_SUFFIXES)
+        )
+        if is_valid_calculate_field_and_header_is_calculate_field_type:
+            choice_key = value.strip() if value and isinstance(value, str) else None
+            if choice_key is None:
+                validation_error_message = (
+                    f"Survey Sheet: Row {row_number + 1}: "
+                    f"Calculated result field type must be provided for calculate type fields"
+                )
+                logger.error(validation_error_message)
+                raise ValidationError(validation_error_message)
+            elif choice_key not in self.CALCULATE_TYPE_CHOICE_MAP.keys():
+                validation_error_message = (
+                    f"Survey Sheet: Row {row_number + 1}: "
+                    f"Invalid type: {choice_key} for calculate field, valid choices are "
+                    f"{', '.join(self.CALCULATE_TYPE_CHOICE_MAP.keys())}"
+                )
+                logger.error(validation_error_message)
+                raise ValidationError(validation_error_message)
+            else:
+                self.object_fields_to_create["type"] = self.CALCULATE_TYPE_CHOICE_MAP[choice_key]
 
     def _can_add_row(self, row):
         is_core_field = any(row[1].value.endswith(i) for i in self.CORE_FIELD_SUFFIXES) and not row[0].value.endswith(
@@ -299,8 +345,11 @@ class FlexibleAttributeImporter:
 
                 if obj:
                     if obj.type != self.object_fields_to_create["type"] and not obj.is_removed:
-                        raise ValidationError(
+                        logger.error(
                             f"Survey Sheet: Row {row_number + 1}: Type of the " f"attribute cannot be changed!"
+                        )
+                        raise ValidationError(
+                            f"Survey Sheet: Row {row_number + 1}: Type of the attribute cannot be changed!"
                         )
                     obj.type = self.object_fields_to_create["type"]
                     obj.name = self.object_fields_to_create["name"]

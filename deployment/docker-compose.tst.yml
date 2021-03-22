@@ -62,7 +62,7 @@ services:
   celery_worker:
     stdin_open: true
     tty: true
-    image: unicef/hct-mis-celery-worker
+    image: ${backend_image}
     env_file:
       - .env
     environment:
@@ -81,7 +81,6 @@ services:
       - elasticsearch_test
 
   elasticsearch_test:
-    image: unicef/hct-elasticsearch-test
     build:
       context: elasticsearch
       dockerfile: Dockerfile

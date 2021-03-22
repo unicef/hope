@@ -93,19 +93,9 @@ class RuleCommit(models.Model):
         return f"Commit #{self.id} of {self.rule}"
 
     @atomic
-    def revert(self, fields=MONITORED_FIELDS):
+    def revert(self, fields=None):
+        if fields is None:
+            fields = MONITORED_FIELDS
         for field in fields:
             setattr(self.rule, field, self.before[field])
         self.rule.save()
-
-    # def diff_with_current(self):
-    #     data1 = self.rule.as_dict()
-    #     data2 = Rule(**self.af).as_dict()
-    #     diff = set(data1.items()).symmetric_difference(data2.items())
-    #     return dict(diff)
-    #
-    # def diff_with_sta(self):
-    #     data1 = Rule(**self.previous_state).as_dict()
-    #     data2 = Rule(**self.new_state).as_dict()
-    #     diff = set(data1.items()).symmetric_difference(data2.items())
-    #     return dict(diff)

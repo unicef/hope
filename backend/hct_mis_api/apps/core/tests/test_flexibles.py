@@ -185,9 +185,7 @@ class TestFlexibles(TestCase):
         self.assertEqual(len(attribs), 0)
 
     def test_load_invalid_file(self):
-        self.assertRaises(
-            XLRDError, self.load_xls, "erd arrows.jpg"
-        )
+        self.assertRaises(XLRDError, self.load_xls, "erd arrows.jpg")
 
     def test_reimport_soft_deleted_objects(self):
         self.load_xls("flex_init_valid_types.xls")

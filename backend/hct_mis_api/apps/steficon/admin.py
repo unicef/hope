@@ -1,5 +1,7 @@
 import logging
 
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import TextFieldFilter
 from django import forms
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
@@ -8,14 +10,11 @@ from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_urls.api import ExtraUrlMixin, action
-from adminfilters.filters import TextFieldFilter
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.steficon.forms import RuleForm
 from hct_mis_api.apps.steficon.models import MONITORED_FIELDS, Rule, RuleCommit
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from hct_mis_api.apps.utils.admin import SmartFieldsetMixin
 
 logger = logging.getLogger(__name__)
 
@@ -99,18 +98,18 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def used_by(self, request, pk):
         context = self.get_common_context(request, pk, title="Used By")
         if request.method == "GET":
             return TemplateResponse(request, "admin/steficon/rule/used_by.html", context)
 
-    @action()
+    @button()
     def changelog(self, request, pk):
         context = self.get_common_context(request, pk, title="Changelog", state_opts=RuleCommit._meta)
         return TemplateResponse(request, "admin/steficon/rule/changelog.html", context)
 
-    @action(urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"])
+    @button(urls=[r"^aaa/(?P<pk>.*)/(?P<state>.*)/$", r"^bbb/(?P<pk>.*)/$"])
     def revert(self, request, pk, state=None):
         try:
             context = self.get_common_context(
@@ -136,7 +135,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
             self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @action()
+    @button()
     def diff(self, request, pk):
         try:
             context = self.get_common_context(request, pk, action="Code history")
@@ -165,7 +164,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
             self.message_user(request, str(e), messages.ERROR)
             return HttpResponseRedirect(reverse("admin:index"))
 
-    @action(label="Test")
+    @button(label="Test")
     def preview(self, request, pk):
         try:
             context = self.get_common_context(request, pk, title="Test")
@@ -185,7 +184,7 @@ class RuleAdmin(ExtraUrlMixin, SmartFieldsetMixin, ModelAdmin):
                     entries = context["target_population"].selections.all()[:100]
                     if entries:
                         for tp in entries:
-                            value = context["rule"].execute(hh=tp.household)
+                            value = context["original"].execute(hh=tp.household)
                             tp.vulnerability_score = value
                             elements.append(tp)
                         self.message_user(request, "%s scores calculated" % len(elements))

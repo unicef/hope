@@ -5,9 +5,16 @@ from django_countries.fields import Country
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals, DocumentFactory
-from hct_mis_api.apps.household.models import Individual, DocumentType, IDENTIFICATION_TYPE_CHOICE, IDENTIFICATION_TYPE_NATIONAL_ID
+from hct_mis_api.apps.household.models import (
+    Individual,
+    DocumentType,
+    IDENTIFICATION_TYPE_CHOICE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+)
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import CheckAgainstSanctionListPreMergeTask
+from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list_pre_merge import (
+    CheckAgainstSanctionListPreMergeTask,
+)
 from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTask
 
 

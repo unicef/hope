@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from hct_mis_api.apps.payment.models import PaymentRecord as InternalPaymentRecord
 from hct_mis_api.apps.utils.models import AbstractSession
 
 
@@ -116,35 +117,6 @@ class CashPlan(SessionModel):
 
 
 class PaymentRecord(SessionModel):
-    DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
-    DELIVERY_TYPE_CASH = "Cash"
-    DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
-    DELIVERY_TYPE_CHEQUE = "Cheque"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
-    DELIVERY_TYPE_IN_KIND = "In Kind"
-    DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
-    DELIVERY_TYPE_OTHER = "Other"
-    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
-    DELIVERY_TYPE_REFERRAL = "Referral"
-    DELIVERY_TYPE_TRANSFER = "Transfer"
-    DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
-    DELIVERY_TYPE_VOUCHER = "Voucher"
-
-    DELIVERY_TYPE_CHOICE = (
-        (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
-        (DELIVERY_TYPE_CASH, _("Cash")),
-        (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
-        (DELIVERY_TYPE_CHEQUE, _("Cheque")),
-        (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
-        (DELIVERY_TYPE_IN_KIND, _("In Kind")),
-        (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
-        (DELIVERY_TYPE_OTHER, _("Other")),
-        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
-        (DELIVERY_TYPE_REFERRAL, _("Referral")),
-        (DELIVERY_TYPE_TRANSFER, _("Transfer")),
-        (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
-        (DELIVERY_TYPE_VOUCHER, _("Voucher")),
-    )
     business_area = models.CharField(max_length=20, null=True)
     status = models.CharField(max_length=255, null=True)
     status_date = models.DateTimeField(null=True)
@@ -164,8 +136,8 @@ class PaymentRecord(SessionModel):
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE,
-        default=DELIVERY_TYPE_CASH,
+        choices=InternalPaymentRecord.DELIVERY_TYPE_CHOICE,
+        default=InternalPaymentRecord.DELIVERY_TYPE_CASH,
         max_length=24,
         null=True,
     )
