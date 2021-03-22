@@ -1,11 +1,15 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - staging
-  paths:
-    exclude:
-    -  docs/*
+  # ========================================================================
+  #                          DEPRECATED
+  # ========================================================================
+trigger: none
+# trigger:
+#   batch: true
+#   branches:
+#     include:
+#     - staging
+#   paths:
+#     exclude:
+#     -  docs/*
 pr: none
 resources:
   - repo: self
