@@ -270,8 +270,7 @@ class SendTPToDatahubTask:
 
     def should_send_individual(self, individual, household):
         is_not_synced = individual.last_sync_at is None or individual.last_sync_at <= individual.updated_at
-        is_allowed_to_share = household.business_area.has_data_sharing_agreement
-        return is_not_synced and is_allowed_to_share
+        return is_not_synced
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)

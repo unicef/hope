@@ -15,6 +15,7 @@ import {
 import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { DocumentField } from './DocumentField';
+import {FormikBoolFieldGrievances} from "./FormikBoolFieldGrievances";
 
 const Title = styled.div`
   width: 100%;
@@ -78,8 +79,8 @@ export const AddIndividualDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
-        initValue: field.required ? false : null,
-        component: FormikCheckboxField,
+        component: FormikBoolFieldGrievances,
+        required: field.required,
       };
       break;
     default:
