@@ -55,11 +55,16 @@ export function RegistrationIndividualDetailsPage(): React.ReactElement {
         `RegistrationDataImportNode:${importedIndividual.registrationDataImport.hctId}`,
       )}`,
     },
-    {
-      title: `HOUSEHOLD ID: ${decodeIdString(importedIndividual.household.id)}`,
-      to: `/${businessArea}/registration-data-import/household/${importedIndividual.household.id}`,
-    },
   ];
+
+  if (importedIndividual?.household?.id) {
+    breadCrumbsItems.push({
+      title: `HOUSEHOLD ID: ${decodeIdString(
+        importedIndividual?.household?.id,
+      )}`,
+      to: `/${businessArea}/registration-data-import/household/${importedIndividual?.household?.id}`,
+    });
+  }
 
   return (
     <div>
