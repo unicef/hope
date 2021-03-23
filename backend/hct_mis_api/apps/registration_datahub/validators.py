@@ -666,26 +666,43 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
 
 class KoboProjectImportDataValidator(ImportDataValidator):
-    CORE_FIELDS: dict = core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
-    FLEX_FIELDS: dict = serialize_flex_attributes()
-    ALL_FIELDS = get_combined_attributes()
 
-    EXPECTED_HOUSEHOLDS_CORE_FIELDS = {
-        field["xlsx_field"] for field in CORE_FIELDS["households"].values() if field["required"]
-    }
-    EXPECTED_HOUSEHOLDS_FLEX_FIELDS = {
-        field["xlsx_field"] for field in FLEX_FIELDS["households"].values() if field["required"]
-    }
 
-    EXPECTED_INDIVIDUALS_CORE_FIELDS = {
-        field["xlsx_field"] for field in CORE_FIELDS["individuals"].values() if field["required"]
+    @classmethod
+    def get_core_fields(cls):
+        return core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
+    @classmethod
+    def get_flex_fields(cls):
+        return serialize_flex_attributes()
+    @classmethod
+    def get_all_fields(cls):
+        return get_combined_attributes()
+    @classmethod
+    def get_expected_household_core_fields(cls):
+        return {
+        field["xlsx_field"] for field in cls.get_core_fields()["households"].values() if field["required"]
     }
-    EXPECTED_INDIVIDUALS_FLEX_FIELDS = {
-        field["xlsx_field"] for field in FLEX_FIELDS["individuals"].values() if field["required"]
+    @classmethod
+    def get_expected_households_flex_fields(cls):
+        return {
+        field["xlsx_field"] for field in cls.get_flex_fields()["households"].values() if field["required"]
     }
-
-    EXPECTED_HOUSEHOLD_FIELDS = EXPECTED_HOUSEHOLDS_CORE_FIELDS.union(EXPECTED_HOUSEHOLDS_FLEX_FIELDS)
-    EXPECTED_INDIVIDUALS_FIELDS = EXPECTED_INDIVIDUALS_CORE_FIELDS.union(EXPECTED_INDIVIDUALS_FLEX_FIELDS)
+    @classmethod
+    def get_expected_individuals_core_fields(cls):
+        return {
+        field["xlsx_field"] for field in cls.get_core_fields()["individuals"].values() if field["required"]
+    }
+    @classmethod
+    def get_expected_individuals_flex_fields(cls):
+        return {
+        field["xlsx_field"] for field in cls.get_flex_fields()["individuals"].values() if field["required"]
+    }
+    @classmethod
+    def get_expected_household_fields(cls):
+        return cls.get_expected_household_core_fields().union(cls.get_expected_households_flex_fields())
+    @classmethod
+    def get_expected_individuals_fields(cls):
+        return cls.get_expected_individuals_core_fields().union(cls.get_expected_individuals_flex_fields())
 
     @classmethod
     def standard_type_validator(cls, value: str, field: str, field_type: str):
@@ -781,7 +798,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
     def choice_validator(cls, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         message = f"Invalid choice {value} for field {field}"
 
-        field = cls.ALL_FIELDS.get(field)
+        field = cls.get_all_fields().get(field)
         if not value:
             return message
 
@@ -823,7 +840,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
     @classmethod
     def _get_field_type_error(cls, field: str, value: Union[str, list], attachments: list) -> Union[dict, None]:
-        field_dict = cls.ALL_FIELDS.get(field)
+        field_dict = cls.get_all_fields().get(field)
         if field_dict is None:
             return
 
@@ -917,14 +934,14 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             head_of_hh_counter = 0
             primary_collector_counter = 0
             alternate_collector_counter = 0
-            expected_hh_fields = {*cls.EXPECTED_HOUSEHOLD_FIELDS, *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
+            expected_hh_fields = {*cls.get_expected_household_fields(), *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
             attachments = household.get("_attachments", [])
             for hh_field, hh_value in household.items():
                 expected_hh_fields.discard(hh_field)
                 if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                     for individual in hh_value:
                         expected_i_fields = {
-                            *cls.EXPECTED_INDIVIDUALS_FIELDS,
+                            *cls.get_expected_individuals_fields(),
                             *KOBO_ONLY_INDIVIDUAL_FIELDS,
                         }
                         current_individual_docs_and_identities = defaultdict(dict)
