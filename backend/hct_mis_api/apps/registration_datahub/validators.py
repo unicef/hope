@@ -26,13 +26,19 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes, SheetImageLoader
+from hct_mis_api.apps.core.utils import (
+    get_combined_attributes,
+    rename_dict_keys,
+    serialize_flex_attributes,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.household.models import ROLE_ALTERNATE, ROLE_PRIMARY
 from hct_mis_api.apps.registration_datahub.models import KoboImportedSubmission
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 logger = logging.getLogger(__name__)
+
 
 class XLSXValidator(BaseValidator):
     @classmethod
@@ -59,8 +65,11 @@ class XLSXValidator(BaseValidator):
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
                 return [
-                    {"row_number": 1, "header": f"{xlsx_file.name}",
-                     "message": "Only .xlsx files are accepted for import"}
+                    {
+                        "row_number": 1,
+                        "header": f"{xlsx_file.name}",
+                        "message": "Only .xlsx files are accepted for import",
+                    }
                 ]
 
             # Checking only extensions is not enough,
@@ -120,7 +129,7 @@ class ImportDataValidator(BaseValidator):
                     issuing_countries = [None] * len(values["validation_data"])
                 if key == "other_id_type_i_c":
                     for name, value, validation_data, issuing_country in zip(
-                            values["names"], values["numbers"], values["validation_data"], issuing_countries
+                        values["names"], values["numbers"], values["validation_data"], issuing_countries
                     ):
                         row_number = validation_data.get("row_number")
                         if not name and value:
@@ -143,14 +152,14 @@ class ImportDataValidator(BaseValidator):
                             error = {
                                 "header": key,
                                 "message": "Issuing country for other_id_no_i_c is required, "
-                                           "when any document data are provided",
+                                "when any document data are provided",
                             }
                             if is_xlsx is True:
                                 error["row_number"] = row_number
                             invalid_rows.append(error)
                 else:
                     for validation_data, value, issuing_country in zip_longest(
-                            values["validation_data"], values["numbers"], issuing_countries
+                        values["validation_data"], values["numbers"], issuing_countries
                     ):
                         row_number = (
                             validation_data.get("row_number") if isinstance(validation_data, dict) else validation_data
@@ -186,7 +195,7 @@ class ImportDataValidator(BaseValidator):
                 if not issuing_countries:
                     issuing_countries = [None] * len(values["validation_data"])
                 for data_dict, value, issuing_country in zip_longest(
-                        values["validation_data"], values["numbers"], issuing_countries
+                    values["validation_data"], values["numbers"], issuing_countries
                 ):
                     row_number = data_dict.get("row_number") if isinstance(data_dict, dict) else data_dict
                     if not value and not issuing_country:
@@ -214,36 +223,47 @@ class ImportDataValidator(BaseValidator):
             raise
 
 
+def lazy_default_get(dict_object, key, lazy_default):
+    if key not in dict_object:
+        raise
+        return lazy_default()
+    return dict_object.get(key)
+
+
 class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     household_ids = []
 
     @classmethod
     def get_core_fields(cls):
+        print("get_core_fields")
         try:
             return CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_flex_fields(cls):
+        print("get_flex_fields")
         try:
             return serialize_flex_attributes()
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_all_fields(cls):
+        print("get_all_fields")
         try:
             return get_combined_attributes()
         except Exception as e:
             logger.exception(e)
             raise
 
-
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
         try:
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return True
             if value is None:
                 return True
@@ -254,7 +274,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def integer_validator(cls, value, header, *args, **kwargs):
         try:
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return False
 
             if value is None:
@@ -273,7 +293,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def float_validator(cls, value, header, *args, **kwargs):
         try:
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return False
             if value is None:
                 return True
@@ -286,7 +306,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def geolocation_validator(cls, value, header, *args, **kwargs):
         try:
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return False
             if value is None:
                 return True
@@ -300,7 +320,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def date_validator(cls, value, header, *args, **kwargs):
         try:
-            if cls.integer_validator(value, header):
+            if cls.integer_validator(value, header, *args, **kwargs):
                 return False
 
             if isinstance(value, datetime):
@@ -319,7 +339,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def phone_validator(cls, value, header, *args, **kwargs):
         try:
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return False
             if value is None:
                 return True
@@ -336,18 +356,19 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
         try:
-            field = cls.get_all_fields().get(header)
+            all_fields = lazy_default_get(kwargs, "all_fields", cls.get_all_fields)
+            field = all_fields.get(header)
             if field is None:
                 return False
 
-            if not cls.required_validator(value, header):
+            if not cls.required_validator(value, header, *args, **kwargs):
                 return False
             if value is None:
                 return True
 
             choices = [x.get("value") for x in field["choices"]]
 
-            choice_type = cls.get_all_fields()[header]["type"]
+            choice_type = all_fields[header]["type"]
 
             if choice_type == TYPE_SELECT_ONE:
                 if isinstance(value, str):
@@ -393,10 +414,11 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def bool_validator(cls, value, header, *args, **kwargs):
         try:
+            all_fields = lazy_default_get(kwargs, "all_fields", cls.get_all_fields)
             if isinstance(value, bool):
                 return True
 
-            if cls.get_all_fields()[header]["required"] is False and (value is None or value == ""):
+            if all_fields[header]["required"] is False and (value is None or value == ""):
                 return True
             if type(value) is str:
                 value = value.capitalize()
@@ -410,7 +432,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def required_validator(cls, value, header, *args, **kwargs):
         try:
-            is_required = cls.get_all_fields()[header]["required"]
+            all_fields = lazy_default_get(kwargs, "all_fields", cls.get_all_fields)
+            is_required = all_fields[header]["required"]
             is_not_empty = cls.not_empty_validator(value)
 
             if is_required:
@@ -424,7 +447,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     @classmethod
     def image_validator(cls, value, header, cell, *args, **kwargs):
         try:
-            if cls.required_validator(value, header):
+            if cls.required_validator(value, header, *args, **kwargs):
                 return True
             return cls.image_loader.image_in(cell.coordinate)
         except Exception as e:
@@ -432,7 +455,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             raise
 
     @classmethod
-    def rows_validator(cls, sheet):
+    def rows_validator(cls, sheet, all_fields):
         try:
             first_row = sheet[1]
             combined_fields = {
@@ -540,7 +563,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     field_type = current_field["type"]
                     fn = switch_dict.get(field_type)
 
-                    if fn(value, header.value, cell) is False:
+                    if fn(value, header.value, cell, all_fields=all_fields) is False:
                         message = (
                             f"Sheet: {sheet.title}, Unexpected value: "
                             f"{value} for type "
@@ -583,9 +606,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     message = f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
                     invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
                 elif count > 1:
-                    message = (
-                        f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
-                    )
+                    message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
                     invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
             invalid_doc_rows = []
@@ -606,8 +627,11 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             file_suffix = Path(xlsx_file.name).suffix
             if file_suffix != ".xlsx":
                 return [
-                    {"row_number": 1, "header": f"{xlsx_file.name}",
-                     "message": "Only .xlsx files are accepted for import"}
+                    {
+                        "row_number": 1,
+                        "header": f"{xlsx_file.name}",
+                        "message": "Only .xlsx files are accepted for import",
+                    }
                 ]
 
             # Checking only extensions is not enough,
@@ -670,8 +694,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             cls.BUSINESS_AREA_SLUG = kwargs.get("business_area_slug")
             business_area_name = BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG).name
             cls.BUSINESS_AREA_CODE = pycountry.countries.get(name=business_area_name).alpha_2
-
-            return cls.rows_validator(household_sheet)
+            all_fields = cls.get_all_fields()
+            return cls.rows_validator(household_sheet, all_fields)
         except Exception as e:
             logger.exception(e)
             raise
@@ -687,8 +711,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             cls.BUSINESS_AREA_SLUG = kwargs.get("business_area_slug")
             business_area_name = BusinessArea.objects.get(slug=cls.BUSINESS_AREA_SLUG).name
             cls.BUSINESS_AREA_CODE = pycountry.countries.get(name=business_area_name).alpha_2
-
-            return cls.rows_validator(individuals_sheet)
+            all_fields = cls.get_all_fields()
+            return cls.rows_validator(individuals_sheet, all_fields)
         except Exception as e:
             logger.exception(e)
             raise
@@ -766,7 +790,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                     alternate_collectors_data = {c.row: c for c in individuals_sheet[cell.column_letter][2:] if c.value}
 
             errors.extend(
-                cls.collector_column_validator("primary_collector_id", primary_collectors_data, household_ids))
+                cls.collector_column_validator("primary_collector_id", primary_collectors_data, household_ids)
+            )
             errors.extend(
                 cls.collector_column_validator(
                     "alternate_collector_id",
@@ -782,8 +807,6 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
 
 class KoboProjectImportDataValidator(ImportDataValidator):
-
-
     @classmethod
     def get_core_fields(cls):
         try:
@@ -791,6 +814,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_flex_fields(cls):
         try:
@@ -798,6 +822,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_all_fields(cls):
         try:
@@ -805,42 +830,39 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_household_core_fields(cls):
         try:
-            return {
-                field["xlsx_field"] for field in cls.get_core_fields()["households"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in cls.get_core_fields()["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_households_flex_fields(cls):
         try:
-            return {
-                field["xlsx_field"] for field in cls.get_flex_fields()["households"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in cls.get_flex_fields()["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_individuals_core_fields(cls):
         try:
-            return {
-                field["xlsx_field"] for field in cls.get_core_fields()["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in cls.get_core_fields()["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_individuals_flex_fields(cls):
         try:
-            return {
-                field["xlsx_field"] for field in cls.get_flex_fields()["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in cls.get_flex_fields()["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_household_fields(cls):
         try:
@@ -848,6 +870,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
         except Exception as e:
             logger.exception(e)
             raise
+
     @classmethod
     def get_expected_individuals_fields(cls):
         try:
@@ -933,7 +956,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
     def date_validator(cls, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = (
-                f"Invalid datetime/date {value} for field {field}, " "accepted formats: datetime ISO 8601, date YYYY-MM-DD"
+                f"Invalid datetime/date {value} for field {field}, "
+                "accepted formats: datetime ISO 8601, date YYYY-MM-DD"
             )
 
             if not value:
@@ -1120,7 +1144,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                         documents_numbers["other_id_type_i_c"]["names"].append(i_value)
                                     elif i_field == "other_id_no_i_c":
                                         documents_numbers["other_id_type_i_c"]["validation_data"].append(
-                                            {"value": i_value})
+                                            {"value": i_value}
+                                        )
                                         documents_numbers["other_id_type_i_c"]["numbers"].append(i_value)
                                     else:
                                         documents_numbers[i_field]["validation_data"].append({"value": i_value})
@@ -1160,17 +1185,22 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
                         if head_of_hh_counter == 0:
                             errors.append(
-                                {"header": "relationship_i_c",
-                                 "message": "Household has to have a " "head of household"}
+                                {
+                                    "header": "relationship_i_c",
+                                    "message": "Household has to have a " "head of household",
+                                }
                             )
                         if head_of_hh_counter > 1:
                             errors.append(
-                                {"header": "relationship_i_c",
-                                 "message": "Only one person can " "be a head of household"}
+                                {
+                                    "header": "relationship_i_c",
+                                    "message": "Only one person can " "be a head of household",
+                                }
                             )
                         if primary_collector_counter == 0:
                             errors.append(
-                                {"header": "role_i_c", "message": "Household must have a " "primary collector"})
+                                {"header": "role_i_c", "message": "Household must have a " "primary collector"}
+                            )
                         if primary_collector_counter > 1:
                             errors.append(
                                 {"header": "role_i_c", "message": "Only one person can " "be a primary collector"}
