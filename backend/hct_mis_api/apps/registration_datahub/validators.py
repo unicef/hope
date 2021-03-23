@@ -498,11 +498,11 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 for choice in selected_choices:
                     if isinstance(choice, str):
                         choice = choice.strip()
-                        if choice not in choices or choice.upper() not in choices:
-                            return False
+                        if choice in choices or choice.upper() in choices:
+                            return True
                     if choice not in choices:
-                        return False
-                return True
+                        return True
+                return False
 
             return False
         except Exception as e:
@@ -1095,10 +1095,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
                 for choice in selected_choices:
                     choice = choice.strip()
-                    if choice not in choices:
-                        # try uppercase version
-                        uppercase_value = choice.upper()
-                        return None if uppercase_value in choices else message
+                    if choice not in choices or choice.upper() not in choices:
+                        return message
                 return None
         except Exception as e:
             logger.exception(e)
