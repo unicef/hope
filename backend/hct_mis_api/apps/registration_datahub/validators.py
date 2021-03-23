@@ -442,10 +442,13 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                 if isinstance(value, float) and value.is_integer():
                     value = int(value)
 
+                household_id_can_be_empty = False
                 if header.value == "household_id":
                     current_household_id = value
                     if sheet.title == "Households":
                         cls.household_ids.append(value)
+                    else:
+                        household_id_can_be_empty = True
 
                 if header.value == "relationship_i_c" and cell.value == "HEAD":
                     head_of_household_count[current_household_id] += 1
@@ -453,7 +456,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
                 field_type = current_field["type"]
                 fn = switch_dict.get(field_type)
 
-                if fn(value, header.value, cell) is False:
+                if fn(value, header.value, cell) is False and household_id_can_be_empty is False:
                     message = (
                         f"Sheet: {sheet.title}, Unexpected value: "
                         f"{value} for type "
