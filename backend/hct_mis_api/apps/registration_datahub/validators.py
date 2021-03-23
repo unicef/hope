@@ -193,10 +193,18 @@ class ImportDataValidator(BaseValidator):
 
 class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     WB = None
-    CORE_FIELDS = CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
-    FLEX_FIELDS = serialize_flex_attributes()
-    ALL_FIELDS = get_combined_attributes()
     household_ids = []
+
+    @classmethod
+    def get_core_fields(cls):
+        return CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
+    @classmethod
+    def get_flex_fields(cls):
+        return serialize_flex_attributes()
+    @classmethod
+    def get_all_fields(cls):
+        return get_combined_attributes()
+
 
     @classmethod
     def string_validator(cls, value, header, *args, **kwargs):
@@ -269,7 +277,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def choice_validator(cls, value, header, *args, **kwargs):
-        field = cls.ALL_FIELDS.get(header)
+        field = cls.get_all_fields().get(header)
         if field is None:
             return False
 
@@ -280,7 +288,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
         choices = [x.get("value") for x in field["choices"]]
 
-        choice_type = cls.ALL_FIELDS[header]["type"]
+        choice_type = cls.get_all_fields()[header]["type"]
 
         if choice_type == TYPE_SELECT_ONE:
             if isinstance(value, str):
@@ -321,7 +329,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         if isinstance(value, bool):
             return True
 
-        if cls.ALL_FIELDS[header]["required"] is False and (value is None or value == ""):
+        if cls.get_all_fields()[header]["required"] is False and (value is None or value == ""):
             return True
         if type(value) is str:
             value = value.capitalize()
@@ -331,7 +339,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
 
     @classmethod
     def required_validator(cls, value, header, *args, **kwargs):
-        is_required = cls.ALL_FIELDS[header]["required"]
+        is_required = cls.get_all_fields()[header]["required"]
         is_not_empty = cls.not_empty_validator(value)
 
         if is_required:
@@ -349,8 +357,8 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
     def rows_validator(cls, sheet):
         first_row = sheet[1]
         combined_fields = {
-            **cls.CORE_FIELDS[sheet.title.lower()],
-            **cls.FLEX_FIELDS[sheet.title.lower()],
+            **cls.get_core_fields()[sheet.title.lower()],
+            **cls.get_flex_fields()[sheet.title.lower()],
         }
 
         switch_dict = {
@@ -533,7 +541,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
         wb = openpyxl.load_workbook(xlsx_file, data_only=True)
 
         errors = []
-        core_fields = {**cls.CORE_FIELDS}
+        core_fields = {**cls.get_core_fields()}
         core_fields["individuals"] = {
             **core_fields["individuals"],
             **COLLECTORS_FIELDS,
@@ -543,7 +551,7 @@ class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
             sheet = wb[name.capitalize()]
             first_row = sheet[1]
 
-            all_fields = list(fields.values()) + list(cls.FLEX_FIELDS[name].values())
+            all_fields = list(fields.values()) + list(cls.get_flex_fields()[name].values())
 
             required_fields = set(field["xlsx_field"] for field in all_fields if field["required"])
 
