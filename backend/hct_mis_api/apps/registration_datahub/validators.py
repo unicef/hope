@@ -192,7 +192,6 @@ class ImportDataValidator(BaseValidator):
 
 
 class UploadXLSXValidator(XLSXValidator, ImportDataValidator):
-    WB = None
     household_ids = []
 
     @classmethod
