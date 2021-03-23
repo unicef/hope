@@ -48,7 +48,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedIndividualIdentity,
 )
-from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -164,7 +164,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-    flex_fields = Arg()
+    flex_fields = FlexFieldsScalar()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()

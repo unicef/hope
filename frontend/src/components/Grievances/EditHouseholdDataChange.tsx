@@ -19,6 +19,7 @@ import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LabelizedField } from '../LabelizedField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 
 const Title = styled.div`
   width: 100%;
@@ -82,7 +83,8 @@ export const EditHouseholdDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
-        component: FormikCheckboxField,
+        component: FormikBoolFieldGrievances,
+        required: field.required,
       };
       break;
     default:
@@ -279,7 +281,7 @@ export const EditHouseholdDataChange = ({
                 <Button
                   color='primary'
                   onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    arrayHelpers.push({ fieldName: null, fieldValue: null });
                   }}
                 >
                   <AddIcon />
