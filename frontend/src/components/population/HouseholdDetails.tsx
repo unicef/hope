@@ -82,6 +82,16 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
+              <LabelizedField label='FEMALE CHILD HEADED HOUSEHOLD'>
+                {household.fchildHoh ? 'Yes' : 'No'}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='CHILD HEADED HOUSEHOLD'>
+                {household.childHoh ? 'Yes' : 'No'}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
               <LabelizedField label='Country'>
                 {household.country}
               </LabelizedField>
