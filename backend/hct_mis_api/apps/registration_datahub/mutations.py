@@ -39,8 +39,7 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXValidator,
-    KoboProjectImportDataValidator,
+    UploadXLSXInstanceValidator, KoboProjectImportDataInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -243,7 +242,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
-class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
+class UploadImportDataXLSXFile(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
 
@@ -256,9 +255,7 @@ class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
     def mutate(cls, root, info, file, business_area_slug):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-
-        errors = cls.validate(file=file, business_area_slug=business_area_slug)
-
+        errors = UploadXLSXInstanceValidator().validate_everything(file, business_area_slug)
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
             return UploadImportDataXLSXFile(None, errors)
@@ -292,7 +289,7 @@ class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutation):
+class SaveKoboProjectImportDataMutation( PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -310,8 +307,8 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, Permissi
         submissions = kobo_api.get_project_submissions(uid)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-
-        errors = cls.validate(submissions=submissions, business_area_name=business_area.name)
+        validator=KoboProjectImportDataInstanceValidator()
+        errors = validator.validate_everything(submissions, business_area.name)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
