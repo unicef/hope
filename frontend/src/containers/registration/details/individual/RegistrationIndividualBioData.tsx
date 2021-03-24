@@ -161,11 +161,15 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink
-              href={`/${businessArea}/registration-data-import/household/${individual.household.id}`}
-            >
-              {decodeIdString(individual.household.id)}
-            </ContentLink>
+            {individual?.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
+              >
+                {decodeIdString(individual?.household?.id)}
+              </ContentLink>
+            ) : (
+              '-'
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

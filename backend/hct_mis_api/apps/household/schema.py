@@ -137,7 +137,7 @@ class HouseholdFilter(FilterSet):
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(
-        field_name="household__business_area__slug",
+        field_name="business_area__slug",
     )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
