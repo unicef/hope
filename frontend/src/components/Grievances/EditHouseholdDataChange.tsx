@@ -124,6 +124,19 @@ export function CurrentValue({
         displayValue =
           field.choices.find((item) => item.value === value)?.labelEn || '-';
         break;
+      case 'SELECT_MANY':
+        displayValue =
+          field.choices.find((item) => item.value === value)?.labelEn || '-';
+        if (value instanceof Array) {
+          displayValue = value
+            .map(
+              (choice) =>
+                field.choices.find((item) => item.value === choice)?.labelEn ||
+                '-',
+            )
+            .join(', ');
+        }
+        break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
