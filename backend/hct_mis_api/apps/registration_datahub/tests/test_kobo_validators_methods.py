@@ -1,6 +1,8 @@
 from operator import itemgetter
 from unittest import TestCase
 
+from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator
+
 
 class TestKoboSaveValidatorsMethods(TestCase):
     VALID_JSON = [
@@ -349,9 +351,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     def setUp(self) -> None:
-        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
-
-        self.KoboProjectImportDataValidator = KoboProjectImportDataValidator
+        pass
 
     def test_image_validator(self):
         # test for valid value
@@ -386,9 +386,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 549819,
             }
         ]
-        result = self.KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", valid_attachments
-        )
+        validator = KoboProjectImportDataInstanceValidator()
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", valid_attachments)
         self.assertIsNone(result, None)
 
         # test for invalid value
@@ -423,19 +422,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = self.KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments
-        )
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
         expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
         expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
+        result = validator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
         expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
@@ -452,9 +449,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             [],
             None,
         )
+        validator = KoboProjectImportDataInstanceValidator()
         for valid_option in valid_geolocations:
             self.assertIsNone(
-                self.KoboProjectImportDataValidator.geopoint_validator(
+                validator.geopoint_validator(
                     valid_option,
                     "hh_geopoint_h_c",
                 )
@@ -462,7 +460,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                self.KoboProjectImportDataValidator.geopoint_validator(
+                validator.geopoint_validator(
                     invalid_option,
                     "hh_geopoint_h_c",
                 ),
@@ -490,8 +488,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
             },
         )
+        validator = KoboProjectImportDataInstanceValidator()
         for data in test_data:
-            result = self.KoboProjectImportDataValidator.date_validator(*data["args"])
+            result = validator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_get_field_type_error(self):
@@ -580,16 +579,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
         )
-
+        validator = KoboProjectImportDataInstanceValidator()
         for data in test_data:
-            result = self.KoboProjectImportDataValidator._get_field_type_error(*data["args"])
+            result = validator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
-    def test_validate_fields(self):
-        result = self.KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
+    def test_validate_everything(self):
+        validator = KoboProjectImportDataInstanceValidator()
+        result = validator.validate_everything(self.VALID_JSON, "Afghanistan")
         self.assertEqual(result, [])
 
-        result = self.KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
+        result = validator.validate_everything(self.INVALID_JSON, "Afghanistan")
 
         result.sort(key=itemgetter("header"))
 
