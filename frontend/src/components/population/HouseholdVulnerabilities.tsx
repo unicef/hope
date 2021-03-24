@@ -62,6 +62,31 @@ export function HouseholdVulnerabilities({
           </LabelizedField>
         );
       }
+      if (
+        flexAttributesDict[key].type === 'SELECT_MANY' ||
+        flexAttributesDict[key].type === 'SELECT_ONE'
+      ) {
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+        if (value instanceof Array) {
+          newValue = value
+            .map(
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
+            )
+            .join(', ');
+        }
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={newValue}
+          />
+        );
+      }
       return (
         <LabelizedField
           key={key}

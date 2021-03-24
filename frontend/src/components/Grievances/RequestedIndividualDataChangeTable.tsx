@@ -18,6 +18,7 @@ import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
+import { NewValue } from './RequestedHouseholdDataChangeTable';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
@@ -45,12 +46,22 @@ export function CurrentValue({
       displayValue =
         field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
+      break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
-      break;
-    case 'SELECT_MANY':
-      displayValue = value.map((el) => startCase(camelCase(el))).join(', ');
       break;
     default:
       displayValue = value;
@@ -119,7 +130,7 @@ function individualDataRow(
         <CurrentValue field={field} value={currentValue} />
       </TableCell>
       <TableCell align='left'>
-        <CurrentValue field={field} value={valueDetails.value} />
+        <NewValue field={field} value={valueDetails.value} />
       </TableCell>
     </TableRow>
   );

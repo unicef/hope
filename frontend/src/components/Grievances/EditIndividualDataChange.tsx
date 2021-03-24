@@ -21,7 +21,7 @@ import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
-import {FormikBoolFieldGrievances} from "./FormikBoolFieldGrievances";
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 
 const Title = styled.div`
   width: 100%;
@@ -133,6 +133,19 @@ export function CurrentValue({
     case 'SELECT_ONE':
       displayValue =
         field.choices.find((item) => item.value === value)?.labelEn || '-';
+      break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */

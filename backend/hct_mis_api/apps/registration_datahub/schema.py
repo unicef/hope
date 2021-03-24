@@ -28,7 +28,7 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     encode_ids,
     CustomOrderingFilter,
-    resolve_flex_fields_choices_with_correct_labels,
+    resolve_flex_fields_choices_to_string,
     get_model_choices_fields,
 )
 from hct_mis_api.apps.household.models import (
@@ -149,7 +149,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         ).exists()
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     class Meta:
         model = ImportedHousehold
@@ -189,7 +189,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return encode_ids(results, "Individual", "hit_id")
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     class Meta:
         model = ImportedIndividual
