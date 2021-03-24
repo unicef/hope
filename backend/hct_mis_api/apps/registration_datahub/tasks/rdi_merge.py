@@ -82,6 +82,8 @@ class RdiMergeTask:
         "unhcr_id",
         "geopoint",
         "returnee",
+        "fchild_hoh",
+        "child_hoh",
     )
 
     INDIVIDUAL_FIELDS = (
