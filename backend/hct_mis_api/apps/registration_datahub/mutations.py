@@ -39,9 +39,7 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXInstanceValidator,
-    KoboProjectImportDataValidator,
-    XLSXValidator,
+    UploadXLSXInstanceValidator, KoboProjectImportDataInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -291,7 +289,7 @@ class UploadImportDataXLSXFile(PermissionMutation):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutation):
+class SaveKoboProjectImportDataMutation( PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -309,8 +307,8 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, Permissi
         submissions = kobo_api.get_project_submissions(uid)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-
-        errors = cls.validate(submissions=submissions, business_area_name=business_area.name)
+        validator=KoboProjectImportDataInstanceValidator()
+        errors = validator.validate_everything(submissions, business_area.name)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))
