@@ -223,7 +223,7 @@ class ImportDataValidator(BaseValidator):
             raise
 
 
-class ImportDataInstanceValidator(BaseValidator):
+class ImportDataInstanceValidator:
     BUSINESS_AREA_SLUG = None
     business_area_code = None
     DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
@@ -346,7 +346,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     household_ids = []
 
     def get_core_fields(self):
-        print("get_core_fields")
         try:
             return CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY
         except Exception as e:
@@ -354,7 +353,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def get_flex_fields(self):
-        print("get_flex_fields")
         try:
             return serialize_flex_attributes()
         except Exception as e:
@@ -362,7 +360,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def get_all_fields(self):
-        print("get_all_fields")
         try:
             return get_combined_attributes()
         except Exception as e:
@@ -500,7 +497,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         choice = choice.strip()
                         if choice in choices or choice.upper() in choices:
                             return True
-                    if choice not in choices:
+                    if choice in choices:
                         return True
                 return False
 
@@ -880,81 +877,86 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
 
-class KoboProjectImportDataValidator(ImportDataValidator):
-    @classmethod
-    def get_core_fields(cls):
+class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
+    def __init__(self):
+        self.core_fields = self.get_core_fields()
+        self.flex_fields = self.get_flex_fields()
+        self.all_fields = self.get_all_fields()
+        self.expected_household_core_fields = self.get_expected_household_core_fields()
+        self.expected_households_flex_fields = self.get_expected_households_flex_fields()
+        self.expected_individuals_core_fields = self.get_expected_individuals_core_fields()
+        self.expected_individuals_flex_fields = self.get_expected_individuals_flex_fields()
+        self.expected_household_fields = self.get_expected_household_fields()
+        self.expected_individuals_fields = self.get_expected_individuals_fields()
+
+    def get_core_fields(self):
         try:
             return core_fields_to_separated_dict(append_household_id=False, append_xlsx=False)
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_flex_fields(cls):
+    def get_flex_fields(self):
         try:
             return serialize_flex_attributes()
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_all_fields(cls):
+    def get_all_fields(self):
         try:
             return get_combined_attributes()
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_household_core_fields(cls):
+    def get_expected_household_core_fields(self):
         try:
-            return {field["xlsx_field"] for field in cls.get_core_fields()["households"].values() if field["required"]}
+            return {field["xlsx_field"] for field in self.core_fields["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_households_flex_fields(cls):
+    def get_expected_households_flex_fields(self):
         try:
-            return {field["xlsx_field"] for field in cls.get_flex_fields()["households"].values() if field["required"]}
+            return {field["xlsx_field"] for field in self.flex_fields["households"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_individuals_core_fields(cls):
+    def get_expected_individuals_core_fields(self):
         try:
-            return {field["xlsx_field"] for field in cls.get_core_fields()["individuals"].values() if field["required"]}
+            return {
+                field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]
+            }
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_individuals_flex_fields(cls):
+    def get_expected_individuals_flex_fields(self):
         try:
-            return {field["xlsx_field"] for field in cls.get_flex_fields()["individuals"].values() if field["required"]}
+            return {
+                field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]
+            }
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_household_fields(cls):
+    def get_expected_household_fields(self):
         try:
-            return cls.get_expected_household_core_fields().union(cls.get_expected_households_flex_fields())
+            return self.expected_household_core_fields.union(self.expected_households_flex_fields)
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def get_expected_individuals_fields(cls):
+    def get_expected_individuals_fields(self):
         try:
-            return cls.get_expected_individuals_core_fields().union(cls.get_expected_individuals_flex_fields())
+            return self.expected_individuals_core_fields.union(self.expected_individuals_flex_fields)
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def standard_type_validator(cls, value: str, field: str, field_type: str):
+    def standard_type_validator(self, value: str, field: str, field_type: str):
         try:
             value_type_name = type(value).__name__
 
@@ -969,7 +971,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 # only check phone number
                 if field.startswith("phone_no"):
                     try:
-                        phonenumbers.parse(value, region=cls.BUSINESS_AREA_CODE)
+                        phonenumbers.parse(value, region=self.BUSINESS_AREA_CODE)
                     except (phonenumbers.NumberParseException, TypeError):
                         return f"Invalid phone number {value} for field {field}"
                 return
@@ -985,8 +987,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             logger.exception(e)
             raise
 
-    @classmethod
-    def image_validator(cls, value: str, field: str, attachments: List[dict], *args, **kwargs) -> Union[str, None]:
+    def image_validator(self, value: str, field: str, attachments: List[dict], *args, **kwargs) -> Union[str, None]:
         try:
             allowed_extensions = django_core_validators.get_available_image_extensions()
             file_extension = value.split(".")[-1]
@@ -1011,8 +1012,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             logger.exception(e)
             raise
 
-    @classmethod
-    def geopoint_validator(cls, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def geopoint_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         message = f"Invalid geopoint {value} for field {field}"
 
         if not value or not isinstance(value, str):
@@ -1026,8 +1026,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
         return None if is_valid_geopoint else message
 
-    @classmethod
-    def date_validator(cls, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def date_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = (
                 f"Invalid datetime/date {value} for field {field}, "
@@ -1056,12 +1055,11 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             logger.exception(e)
             raise
 
-    @classmethod
-    def choice_validator(cls, value: str, field: str, *args, **kwargs) -> Union[str, None]:
+    def choice_validator(self, value: str, field: str, *args, **kwargs) -> Union[str, None]:
         try:
             message = f"Invalid choice {value} for field {field}"
 
-            field = cls.get_all_fields().get(field)
+            field = self.all_fields.get(field)
             if not value:
                 return message
 
@@ -1095,26 +1093,25 @@ class KoboProjectImportDataValidator(ImportDataValidator):
 
                 for choice in selected_choices:
                     choice = choice.strip()
-                    if choice not in choices or choice.upper() not in choices:
+                    if choice not in choices and choice.upper() not in choices:
                         return message
                 return None
         except Exception as e:
             logger.exception(e)
             raise
 
-    @classmethod
-    def _get_field_type_error(cls, field: str, value: Union[str, list], attachments: list) -> Union[dict, None]:
+    def _get_field_type_error(self, field: str, value: Union[str, list], attachments: list) -> Union[dict, None]:
         try:
-            field_dict = cls.get_all_fields().get(field)
+            field_dict = self.all_fields.get(field)
             if field_dict is None:
                 return
 
             complex_types = {
-                "GEOPOINT": cls.geopoint_validator,
-                "IMAGE": cls.image_validator,
-                "DATE": cls.date_validator,
-                "SELECT_ONE": cls.choice_validator,
-                "SELECT_MANY": cls.choice_validator,
+                "GEOPOINT": self.geopoint_validator,
+                "IMAGE": self.image_validator,
+                "DATE": self.date_validator,
+                "SELECT_ONE": self.choice_validator,
+                "SELECT_MANY": self.choice_validator,
             }
             field_type = field_dict["type"]
             complex_type_fn = complex_types.get(field_type)
@@ -1127,7 +1124,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                         "message": message,
                     }
             else:
-                message = cls.standard_type_validator(value, field, field_type)
+                message = self.standard_type_validator(value, field, field_type)
                 if message:
                     return {
                         "header": field,
@@ -1137,10 +1134,9 @@ class KoboProjectImportDataValidator(ImportDataValidator):
             logger.exception(e)
             raise
 
-    @classmethod
-    def validate_fields(cls, submissions: list, business_area_name: str):
+    def validate_everything(self, submissions: list, business_area_name: str):
         try:
-            cls.BUSINESS_AREA_CODE = pycountry.countries.get(name=business_area_name).alpha_2
+            self.BUSINESS_AREA_CODE = pycountry.countries.get(name=business_area_name).alpha_2
             reduced_submissions = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
@@ -1199,14 +1195,14 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 head_of_hh_counter = 0
                 primary_collector_counter = 0
                 alternate_collector_counter = 0
-                expected_hh_fields = {*cls.get_expected_household_fields(), *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
+                expected_hh_fields = {*self.expected_household_fields, *KOBO_ONLY_HOUSEHOLD_FIELDS.keys()}
                 attachments = household.get("_attachments", [])
                 for hh_field, hh_value in household.items():
                     expected_hh_fields.discard(hh_field)
                     if hh_field == KOBO_FORM_INDIVIDUALS_COLUMN_NAME:
                         for individual in hh_value:
                             expected_i_fields = {
-                                *cls.get_expected_individuals_fields(),
+                                *self.expected_individuals_fields,
                                 *KOBO_ONLY_INDIVIDUAL_FIELDS,
                             }
                             current_individual_docs_and_identities = defaultdict(dict)
@@ -1222,8 +1218,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                     else:
                                         documents_numbers[i_field]["validation_data"].append({"value": i_value})
                                         documents_numbers[i_field]["numbers"].append(i_value)
-                                if i_field in cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
-                                    document_key = cls.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(i_field)
+                                if i_field in self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.keys():
+                                    document_key = self.DOCUMENTS_ISSUING_COUNTRIES_MAPPING.get(i_field)
                                     documents_dict = documents_numbers
                                     if document_key in identities_numbers.keys():
                                         documents_dict = identities_numbers
@@ -1243,7 +1239,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                         alternate_collector_counter += 1
 
                                 expected_i_fields.discard(i_field)
-                                error = cls._get_field_type_error(i_field, i_value, attachments)
+                                error = self._get_field_type_error(i_field, i_value, attachments)
                                 if error:
                                     errors.append(error)
 
@@ -1282,7 +1278,7 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                                 {"header": "role_i_c", "message": "Only one person can " "be a alternate collector"}
                             )
                     else:
-                        error = cls._get_field_type_error(hh_field, hh_value, attachments)
+                        error = self._get_field_type_error(hh_field, hh_value, attachments)
                         if error:
                             errors.append(error)
                 hh_expected_field_errors = [
@@ -1291,8 +1287,8 @@ class KoboProjectImportDataValidator(ImportDataValidator):
                 ]
                 errors.extend(hh_expected_field_errors)
 
-            document_errors = cls.documents_validator(documents_numbers, is_xlsx=False)
-            identities_errors = cls.identity_validator(identities_numbers, is_xlsx=False)
+            document_errors = self.documents_validator(documents_numbers, is_xlsx=False)
+            identities_errors = self.identity_validator(identities_numbers, is_xlsx=False)
 
             return [*errors, *document_errors, *identities_errors]
         except Exception as e:
