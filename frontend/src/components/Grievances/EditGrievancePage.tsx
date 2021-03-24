@@ -18,7 +18,8 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
-  useAllAddIndividualFieldsQuery, useAllEditHouseholdFieldsQuery,
+  useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
   useAllUsersQuery,
   useGrievancesChoiceDataQuery,
   useGrievanceTicketQuery,
@@ -46,7 +47,7 @@ import {
   hasCreatorOrOwnerPermissions,
   PERMISSIONS,
 } from '../../config/permissions';
-import {useArrayToDict} from "../../hooks/useArrayToDict";
+import { useArrayToDict } from '../../hooks/useArrayToDict';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -121,7 +122,7 @@ export function EditGrievancePage(): React.ReactElement {
     loading: householdFieldsLoading,
   } = useAllEditHouseholdFieldsQuery();
   const individualFieldsDict = useArrayToDict(
-    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
     'name',
     '*',
   );
@@ -135,7 +136,7 @@ export function EditGrievancePage(): React.ReactElement {
     choicesLoading ||
     ticketLoading ||
     allAddIndividualFieldsDataLoading ||
-    householdFieldsLoading||
+    householdFieldsLoading ||
     currentUserDataLoading
   )
     return <LoadingComponent />;
@@ -241,7 +242,14 @@ export function EditGrievancePage(): React.ReactElement {
           changeState(GRIEVANCE_TICKET_STATES.IN_PROGRESS);
         }
       }}
-      validate={(values) =>  validate(values, allAddIndividualFieldsData,individualFieldsDict,householdFieldsDict)}
+      validate={(values) =>
+        validate(
+          values,
+          allAddIndividualFieldsData,
+          individualFieldsDict,
+          householdFieldsDict,
+        )
+      }
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {
