@@ -19,6 +19,7 @@ import { LoadingComponent } from '../LoadingComponent';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { LabelizedField } from '../LabelizedField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
 
 const Title = styled.div`
   width: 100%;
@@ -82,7 +83,8 @@ export const EditHouseholdDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
-        component: FormikCheckboxField,
+        component: FormikBoolFieldGrievances,
+        required: field.required,
       };
       break;
     default:
@@ -121,6 +123,19 @@ export function CurrentValue({
       case 'SELECT_ONE':
         displayValue =
           field.choices.find((item) => item.value === value)?.labelEn || '-';
+        break;
+      case 'SELECT_MANY':
+        displayValue =
+          field.choices.find((item) => item.value === value)?.labelEn || '-';
+        if (value instanceof Array) {
+          displayValue = value
+            .map(
+              (choice) =>
+                field.choices.find((item) => item.value === choice)?.labelEn ||
+                '-',
+            )
+            .join(', ');
+        }
         break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */
@@ -279,7 +294,7 @@ export const EditHouseholdDataChange = ({
                 <Button
                   color='primary'
                   onClick={() => {
-                    arrayHelpers.push({ fieldName: null, fieldValue: '' });
+                    arrayHelpers.push({ fieldName: null, fieldValue: null });
                   }}
                 >
                   <AddIcon />

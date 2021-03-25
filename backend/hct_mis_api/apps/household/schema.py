@@ -29,7 +29,7 @@ from hct_mis_api.apps.core.utils import (
     sum_lists_with_values,
     chart_permission_decorator,
     chart_filters_decoder,
-    resolve_flex_fields_choices_with_correct_labels,
+    resolve_flex_fields_choices_to_string,
     get_model_choices_fields,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
@@ -137,7 +137,7 @@ class HouseholdFilter(FilterSet):
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(
-        field_name="household__business_area__slug",
+        field_name="business_area__slug",
     )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
@@ -296,7 +296,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -388,7 +388,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):

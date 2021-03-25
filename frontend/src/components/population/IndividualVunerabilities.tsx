@@ -51,7 +51,7 @@ export function IndividualVulnerabilities({
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
-      if (flexAttributesDict[key].type === 'IMAGE') {
+      if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
           <LabelizedField
             key={key}
@@ -59,6 +59,31 @@ export function IndividualVulnerabilities({
           >
             <Image src={value} />
           </LabelizedField>
+        );
+      }
+      if (
+        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
+        flexAttributesDict[key]?.type === 'SELECT_ONE'
+      ) {
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+        if (value instanceof Array) {
+          newValue = value
+            .map(
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
+            )
+            .join(', ');
+        }
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={newValue}
+          />
         );
       }
       return (

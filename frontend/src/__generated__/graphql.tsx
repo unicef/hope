@@ -2120,7 +2120,7 @@ export type ImportedIndividualNode = Node & {
   deduplicationGoldenRecordStatus?: Maybe<ImportedIndividualDeduplicationGoldenRecordStatus>,
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
-  flexFields?: Maybe<Scalars['Arg']>,
+  flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
   seeingDisability: Scalars['String'],
@@ -8036,7 +8036,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8787,6 +8787,8 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
+  fchildHoh
+  childHoh
 }
     `;
 export const ImportedHouseholdDetailedFragmentDoc = gql`
@@ -17190,7 +17192,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
   seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
