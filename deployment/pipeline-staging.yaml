@@ -1,11 +1,15 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - staging
-  paths:
-    exclude:
-    -  docs/*
+  # ========================================================================
+  #                          DEPRECATED
+  # ========================================================================
+trigger: none
+# trigger:
+#   batch: true
+#   branches:
+#     include:
+#     - staging
+#   paths:
+#     exclude:
+#     -  docs/*
 pr: none
 resources:
   - repo: self
@@ -98,6 +102,7 @@ stages:
                 global.env=staging,\
                 global.storageClass=default,\
                 global.init=false,\
+                celery.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
                 backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
@@ -132,4 +137,5 @@ stages:
                 cashassistdatahubpostgresql.externalDatabase.host=$(CASH_ASSIST_DATAHUB_POSTGRES_HOST),\
                 cashassistdatahubpostgresql.externalDatabase.user=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
                 cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),"
+                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),"

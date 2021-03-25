@@ -1,3 +1,6 @@
+import datetime
+import logging
+
 import graphene
 from django.db import models
 from django.db.models import Q
@@ -16,8 +19,6 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-
-import datetime
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -61,6 +62,8 @@ from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
 from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
+
+logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -348,6 +351,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                     and user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area)
                 )
             ):
+                logger.error("Permission Denied")
                 raise GraphQLError("Permission Denied")
         else:
             if not (
@@ -365,6 +369,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
                     )
                 )
             ):
+                logger.error("Permission Denied")
                 raise GraphQLError("Permission Denied")
 
     class Meta:
@@ -451,6 +456,8 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 
 
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
+    has_duplicated_document = graphene.Boolean()
+
     class Meta:
         model = TicketNeedsAdjudicationDetails
         exclude = ("ticket",)

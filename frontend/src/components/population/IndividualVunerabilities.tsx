@@ -8,7 +8,8 @@ import {
   IndividualNode,
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { getFlexFieldTextValue } from '../../utils/utils';
+import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { LoadingComponent } from '../LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -22,6 +23,10 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const Image = styled.img`
+  max-width: 150px;
+`;
+
 interface IndividualVulnerabilitesProps {
   individual: IndividualNode;
 }
@@ -30,31 +35,64 @@ export function IndividualVulnerabilities({
   individual,
 }: IndividualVulnerabilitesProps): React.ReactElement {
   const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
-  if (loading) {
-    return null;
-  }
-  const fieldsDict = data.allIndividualsFlexFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
+  const flexAttributesDict = useArrayToDict(
+    data?.allIndividualsFlexFieldsAttributes,
+    'name',
+    '*',
   );
 
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
+  if (!data || !flexAttributesDict) {
+    return null;
+  }
+
   const fields = Object.entries(individual.flexFields || {}).map(
-    // eslint-disable-next-line array-callback-return,consistent-return
     ([key, value]: [string, string | string[]]) => {
-      const flexFieldAttribute = fieldsDict[key];
-      if (typeof flexFieldAttribute !== 'undefined') {
+      if (flexAttributesDict[key].type === 'IMAGE') {
         return (
           <LabelizedField
             key={key}
             label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
-            value={getFlexFieldTextValue(key, value, flexFieldAttribute)}
+          >
+            <Image src={value} />
+          </LabelizedField>
+        );
+      }
+      if (
+        flexAttributesDict[key].type === 'SELECT_MANY' ||
+        flexAttributesDict[key].type === 'SELECT_ONE'
+      ) {
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+        if (value instanceof Array) {
+          newValue = value
+            .map(
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
+            )
+            .join(', ');
+        }
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={newValue}
           />
         );
       }
+      return (
+        <LabelizedField
+          key={key}
+          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+          value={value}
+        />
+      );
     },
   );
   return (
@@ -64,9 +102,11 @@ export function IndividualVulnerabilities({
           <Typography variant='h6'>Vulnerabilities</Typography>
         </Title>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
-            {fields}
-          </Grid>
+          {fields.map((field) => (
+            <Grid item xs={4}>
+              {field}
+            </Grid>
+          ))}
         </Grid>
       </Overview>
     </div>

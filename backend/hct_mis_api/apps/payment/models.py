@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -262,13 +263,23 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     )
     payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    status_date = models.DateField(null=True)
+    status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+
+    @property
+    def is_manually_editable(self):
+        if (
+            self.cash_plan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+        ):
+            return False
+        minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
+        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
     def business_area(self):

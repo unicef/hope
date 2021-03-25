@@ -28,7 +28,8 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     encode_ids,
     CustomOrderingFilter,
-    resolve_flex_fields_choices_with_correct_labels,
+    resolve_flex_fields_choices_to_string,
+    get_model_choices_fields,
 )
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
@@ -47,7 +48,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocument,
     ImportedIndividualIdentity,
 )
-from hct_mis_api.apps.utils.schema import Arg
+from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -148,7 +149,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         ).exists()
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     class Meta:
         model = ImportedHousehold
@@ -163,12 +164,13 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-    flex_fields = Arg()
+    flex_fields = FlexFieldsScalar()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    observed_disability = graphene.List(graphene.String)
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -187,13 +189,26 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return encode_ids(results, "Individual", "hit_id")
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     class Meta:
         model = ImportedIndividual
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            ImportedIndividual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+                "work_status",
+                "collect_individual_data",
+            ],
+        )
 
 
 class RegistrationDataImportDatahubNode(DjangoObjectType):
@@ -226,9 +241,13 @@ class ImportedDocumentNode(DjangoObjectType):
 
 class ImportedIndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = ImportedIndividualIdentity

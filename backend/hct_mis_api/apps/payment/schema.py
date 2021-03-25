@@ -13,15 +13,9 @@ from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.filters import filter_age
+from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.utils.schema import (
-    ChartDatasetNode,
-    ChartDetailedDatasetsNode,
-    SectionTotalNode,
-    TableTotalCashTransferred,
-)
 from hct_mis_api.apps.core.utils import (
     to_choice_object,
     decode_id_string,
@@ -44,6 +38,12 @@ from hct_mis_api.apps.payment.models import (
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from hct_mis_api.apps.payment.utils import get_number_of_samples, get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    SectionTotalNode,
+    TableTotalCashTransferred,
+)
 
 
 class PaymentRecordFilter(FilterSet):
@@ -188,6 +188,7 @@ class CashPlanPaymentVerificationNode(DjangoObjectType):
 
 class PaymentVerificationNode(BaseNodePermissionMixin, DjangoObjectType):
     permission_classes = (hopePermissionClass(Permissions.PAYMENT_VERIFICATION_VIEW_PAYMENT_RECORD_DETAILS),)
+    is_manually_editable = graphene.Boolean()
 
     class Meta:
         model = PaymentVerification
@@ -391,7 +392,7 @@ class Query(graphene.ObjectType):
                     "cash_plan_payment_verification__cash_plan", flat=True
                 )
             )
-            .filter(status=PaymentRecord.STATUS_SUCCESS)
+            .filter(status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0)
             .count()
         )
         if samples_count == 0 or all_payment_records_for_created_verifications == 0:
@@ -422,12 +423,18 @@ class Query(graphene.ObjectType):
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_payment(self, info, business_area_slug, year, **kwargs):
-        payment_records = get_payment_records_for_dashboard(year, business_area_slug, chart_filters_decoder(kwargs))
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs)
+        ).aggregate(
+            successful=Count("id", filter=~Q(status=PaymentRecord.STATUS_ERROR)),
+            unsuccessful=Count("id", filter=Q(status=PaymentRecord.STATUS_ERROR)),
+        )
+
         dataset = [
             {
                 "data": [
-                    payment_records.filter(delivered_quantity_usd__gt=0).count(),
-                    payment_records.filter(delivered_quantity_usd=0).count(),
+                    payment_records.get("successful", 0),
+                    payment_records.get("unsuccessful", 0),
                 ]
             }
         ]

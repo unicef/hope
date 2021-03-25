@@ -73,15 +73,26 @@ class TestTemplateFileGenerator(TestCase):
         result_wb = TemplateFileGenerator._add_template_columns(wb)
 
         expected_households_rows = (
-            ("test", "test_h_f",),
-            ("My Test Label - STRING - required", "Flex Test Label - STRING",),
+            (
+                "test",
+                "test_h_f",
+            ),
+            (
+                "My Test Label - STRING - required",
+                "Flex Test Label - STRING",
+            ),
         )
         households_rows = tuple(result_wb["Households"].iter_rows(values_only=True))
 
         self.assertEqual(expected_households_rows, households_rows)
 
         expected_individuals_rows = (
-            ("test2", "primary_collector_id", "alternate_collector_id", "test_i_f",),
+            (
+                "test2",
+                "primary_collector_id",
+                "alternate_collector_id",
+                "test_i_f",
+            ),
             (
                 "My Test Label 2 - STRING",
                 "List of primary collectors ids, separated by a semicolon - LIST_OF_IDS - required",

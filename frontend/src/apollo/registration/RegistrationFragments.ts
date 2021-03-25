@@ -64,9 +64,14 @@ export const importedHouseholdMinimal = gql`
     admin1Title
     admin2
     admin2Title
+    flexFields
+    deviceid
+    start
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
+    fchildHoh
+    childHoh
   }
 `;
 export const importedHouseholdDetailed = gql`
@@ -125,14 +130,24 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
+    workStatus
     pregnant
     flexFields
+    observedDisability
+    seeingDisability
+    hearingDisability
+    physicalDisability
+    memoryDisability
+    selfcareDisability
+    commsDisability
+    disability
     documents {
       edges {
         node {
           id
           type {
             label
+            country
           }
           documentNumber
         }
@@ -142,6 +157,7 @@ export const importedIndividualDetailed = gql`
       id
       documentNumber
       type
+      country
     }
     role
     relationship

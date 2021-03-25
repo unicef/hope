@@ -1,29 +1,35 @@
-import openpyxl
 import copy
-import functools
 import datetime
+import functools
+import io
+import logging
 from itertools import chain
-from django.core.files import File
-from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font
-from django.db.models import Sum, Count, F, Q
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from tempfile import NamedTemporaryFile
 
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.reporting.models import DashboardReport
-from hct_mis_api.apps.household.models import Household
-from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+import openpyxl
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Sum, Count, F, Q
+from django.template.loader import render_to_string
+from django.urls import reverse
+from openpyxl.styles import Font
+from openpyxl.utils import get_column_letter
+from openpyxl.writer.excel import save_virtual_workbook
+
 from hct_mis_api.apps.account.models import User
+from hct_mis_api.apps.core.models import BusinessArea, AdminArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.household.models import Household
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.program.models import Program
+from hct_mis_api.apps.reporting.models import DashboardReport
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateDashboardReportContentHelpers:
     @classmethod
-    def get_beneficiaries(self, report: DashboardReport):
+    def get_beneficiaries(cls, report: DashboardReport):
 
         children_count_fields = [
             "female_age_group_0_5_count",
@@ -33,10 +39,10 @@ class GenerateDashboardReportContentHelpers:
             "male_age_group_6_11_count",
             "male_age_group_12_17_count",
         ]
-        individual_count_fields = self._get_all_individual_count_fields()
-        valid_payment_records = self._get_payment_records_for_report(report)
+        individual_count_fields = cls._get_all_individual_count_fields()
+        valid_payment_records = cls._get_payment_records_for_report(report)
 
-        instances, valid_payment_records_in_instance_filter_key = self._get_business_areas_or_programs(
+        instances, valid_payment_records_in_instance_filter_key = cls._get_business_areas_or_programs(
             report, valid_payment_records
         )
 
@@ -47,31 +53,31 @@ class GenerateDashboardReportContentHelpers:
             valid_households = Household.objects.filter(
                 payment_records__in=valid_payment_records_in_instance
             ).distinct()
-            households_aggr = self._aggregate_instances_sum(
+            households_aggr = cls._aggregate_instances_sum(
                 valid_households,
                 individual_count_fields,
             )
-            instance["total_children"] = self._reduce_aggregate(households_aggr, children_count_fields)
-            instance["total_individuals"] = self._reduce_aggregate(households_aggr, individual_count_fields)
+            instance["total_children"] = cls._reduce_aggregate(households_aggr, children_count_fields)
+            instance["total_individuals"] = cls._reduce_aggregate(households_aggr, individual_count_fields)
             instance["num_households"] = valid_households.count()
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
         households = Household.objects.filter(payment_records__in=valid_payment_records).distinct()
-        households_aggr = self._aggregate_instances_sum(households, individual_count_fields)
+        households_aggr = cls._aggregate_instances_sum(households, individual_count_fields)
         totals = {
             "num_households": households.count(),
-            "total_individuals": self._reduce_aggregate(households_aggr, individual_count_fields),
-            "total_children": self._reduce_aggregate(households_aggr, children_count_fields),
+            "total_individuals": cls._reduce_aggregate(households_aggr, individual_count_fields),
+            "total_children": cls._reduce_aggregate(households_aggr, children_count_fields),
         }
         # return instances for rows and totals row info
         return instances, totals
 
     @classmethod
-    def get_individuals(self, report: DashboardReport):
+    def get_individuals(cls, report: DashboardReport):
 
-        valid_payment_records = self._get_payment_records_for_report(report)
-        individual_count_fields = self._get_all_with_disabled_individual_count_fields()
-        instances, valid_payment_records_in_instance_filter_key = self._get_business_areas_or_programs(
+        valid_payment_records = cls._get_payment_records_for_report(report)
+        individual_count_fields = cls._get_all_with_disabled_individual_count_fields()
+        instances, valid_payment_records_in_instance_filter_key = cls._get_business_areas_or_programs(
             report, valid_payment_records
         )
 
@@ -79,24 +85,24 @@ class GenerateDashboardReportContentHelpers:
             valid_payment_records_in_instance = valid_payment_records.filter(
                 **{valid_payment_records_in_instance_filter_key: instance["id"]}
             )
-            households_aggr = self._aggregate_instances_sum(
+            households_aggr = cls._aggregate_instances_sum(
                 Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             instance.update(households_aggr)
 
         # get total distincts (can't use the sum of column since some households might belong to multiple programs)
-        households_aggr = self._aggregate_instances_sum(
+        households_aggr = cls._aggregate_instances_sum(
             Household.objects.filter(payment_records__in=valid_payment_records).distinct(), individual_count_fields
         )
         # return instances for rows and totals row info
         return instances, households_aggr
 
     @classmethod
-    def get_volumes_by_delivery(self, report: DashboardReport):
+    def get_volumes_by_delivery(cls, report: DashboardReport):
 
-        valid_payment_records = self._get_payment_records_for_report(report)
-        instances, valid_payment_records_in_instance_filter_key = self._get_business_areas_or_programs(
+        valid_payment_records = cls._get_payment_records_for_report(report)
+        instances, valid_payment_records_in_instance_filter_key = cls._get_business_areas_or_programs(
             report, valid_payment_records
         )
 
@@ -122,9 +128,9 @@ class GenerateDashboardReportContentHelpers:
         return instances, totals
 
     @classmethod
-    def get_programs(self, report: DashboardReport):
+    def get_programs(cls, report: DashboardReport):
 
-        filter_vars = self._format_filters(
+        filter_vars = cls._format_filters(
             report,
             {},
             "cash_plans__payment_records__delivery_date",
@@ -132,7 +138,7 @@ class GenerateDashboardReportContentHelpers:
             "id",
             "business_area",
         )
-        months_labels = self.get_all_months()
+        months_labels = cls.get_all_months()
 
         def get_filter_query(cash: bool, month: int):
             if cash:
@@ -146,12 +152,13 @@ class GenerateDashboardReportContentHelpers:
                     cash_plans__payment_records__delivery_date__month=month,
                 )
 
-        def get_annotation(index: int, cash=True):
-            key_label = months_labels[index]
+        def get_annotation(index_number: int, cash=True):
+            key_label = months_labels[index_number]
             label = f"{key_label}_cash" if cash else f"{key_label}_voucher"
             return {
                 label: Sum(
-                    "cash_plans__payment_records__delivered_quantity_usd", filter=get_filter_query(cash, index + 1)
+                    "cash_plans__payment_records__delivered_quantity_usd",
+                    filter=get_filter_query(cash, index_number + 1),
                 )
             }
 
@@ -169,25 +176,24 @@ class GenerateDashboardReportContentHelpers:
                 )
             )
         )
-        for index in range(0, len(months_labels)):
-            programs = programs.annotate(**get_annotation(index, True))
-            programs = programs.annotate(**get_annotation(index, False))
+        for index_number in range(0, len(months_labels)):
+            programs = programs.annotate(**get_annotation(index_number, True))
+            programs = programs.annotate(**get_annotation(index_number, False))
 
         return programs, None
 
     @classmethod
-    def get_grievances(self, report: DashboardReport):
+    def get_grievances(cls, report: DashboardReport):
         filter_vars = {
             "created_at__year": report.year,
         }
         if report.admin_area:
             filter_vars["admin"] = report.admin_area.title
 
-        if not self._is_report_global(report):
+        if not cls._is_report_global(report):
             filter_vars["business_area"] = report.business_area
 
         valid_grievances = GrievanceTicket.objects.filter(**filter_vars)
-        instances = None
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
         days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
 
@@ -246,13 +252,13 @@ class GenerateDashboardReportContentHelpers:
         return instances, totals
 
     @classmethod
-    def get_payment_verifications(self, report: DashboardReport):
+    def get_payment_verifications(cls, report: DashboardReport):
         filter_vars = {"payment_record__delivery_date__year": report.year}
         if report.admin_area:
             filter_vars["payment_record__household__admin_area"] = report.admin_area
         if report.program:
             filter_vars["payment_record__cash_plan__program"] = report.program
-        if not self._is_report_global(report):
+        if not cls._is_report_global(report):
             filter_vars["payment_record__business_area"] = report.business_area
         valid_verifications = PaymentVerification.objects.filter(**filter_vars)
         path_to_payment_record_verifications = "cash_plans__verifications__payment_record_verifications"
@@ -266,13 +272,25 @@ class GenerateDashboardReportContentHelpers:
             .annotate(total_cash_plan_verifications=Count("cash_plans__verifications", distinct=True))
             .annotate(
                 total_households=Count(
-                    f"{path_to_payment_record_verifications}__payment_record__household", distinct=True
+                    f"{path_to_payment_record_verifications}__payment_record__household",
+                    distinct=True,
                 )
             )
             .annotate(
                 total_payment_records=Count(
                     "cash_plans__payment_records",
                     distinct=True,
+                )
+            )
+            .annotate(
+                all_possible_payment_records=Count(
+                    "cash_plans__payment_records",
+                    distinct=True,
+                    filter=Q(
+                        cash_plans__verifications__isnull=False,
+                        cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
+                        cash_plans__payment_records__delivered_quantity__gt=0,
+                    ),
                 )
             )
             .annotate(total_verifications_done=Count(path_to_payment_record_verifications, distinct=True))
@@ -297,6 +315,7 @@ class GenerateDashboardReportContentHelpers:
             .annotate(
                 not_responded=Count(
                     path_to_payment_record_verifications,
+                    distinct=True,
                     filter=format_status_filter(PaymentVerification.STATUS_PENDING),
                 )
             )
@@ -305,7 +324,7 @@ class GenerateDashboardReportContentHelpers:
         return programs, None
 
     @classmethod
-    def get_total_transferred_by_country(self, report: DashboardReport):
+    def get_total_transferred_by_country(cls, report: DashboardReport):
         # only for HQ dashboard
         business_areas = (
             BusinessArea.objects.filter(
@@ -330,10 +349,9 @@ class GenerateDashboardReportContentHelpers:
         return business_areas, totals
 
     @classmethod
-    def get_total_transferred_by_admin_area(self, report: DashboardReport):
+    def get_total_transferred_by_admin_area(cls, report: DashboardReport):
         # only for country dashboard
-
-        valid_payment_records = self._get_payment_records_for_report(report)
+        valid_payment_records = cls._get_payment_records_for_report(report)
         admin_areas = (
             AdminArea.objects.filter(
                 level=2,
@@ -346,18 +364,19 @@ class GenerateDashboardReportContentHelpers:
 
         totals = admin_areas.aggregate(Sum("total_transferred"), Sum("num_households"))
         admin_areas = admin_areas.values("id", "title", "p_code", "num_households", "total_transferred")
-        individual_count_fields = self._get_all_individual_count_fields()
+
+        individual_count_fields = cls._get_all_individual_count_fields()
 
         for admin_area in admin_areas:
             valid_payment_records_in_instance = valid_payment_records.filter(household__admin_area=admin_area["id"])
-            households_aggr = self._aggregate_instances_sum(
+            households_aggr = cls._aggregate_instances_sum(
                 Household.objects.filter(payment_records__in=valid_payment_records_in_instance).distinct(),
                 individual_count_fields,
             )
             admin_area.update(households_aggr)
 
         totals.update(
-            self._aggregate_instances_sum(
+            cls._aggregate_instances_sum(
                 Household.objects.filter(payment_records__in=valid_payment_records).distinct(),
                 individual_count_fields,
             )
@@ -376,8 +395,8 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_individuals_row(self, instance: dict, is_totals: bool, *args) -> tuple:
-        all_count_fields = self._get_all_with_disabled_individual_count_fields()
+    def format_individuals_row(cls, instance: dict, is_totals: bool, *args) -> tuple:
+        all_count_fields = cls._get_all_with_disabled_individual_count_fields()
         result = [
             instance.get("business_area_code", "") if not is_totals else "",
             instance.get("name", "") if not is_totals else "Total Distinct",
@@ -398,7 +417,7 @@ class GenerateDashboardReportContentHelpers:
         return tuple(result)
 
     @classmethod
-    def format_programs_row(self, instance: Program, *args) -> tuple:
+    def format_programs_row(cls, instance: Program, *args) -> tuple:
         result = (
             instance.business_area.code,
             instance.business_area.name,
@@ -409,7 +428,7 @@ class GenerateDashboardReportContentHelpers:
             instance.unsuccessful_payments,
             instance.successful_payments,
         )
-        months = self.get_all_months()
+        months = cls.get_all_months()
         for month in months:
             result += (getattr(instance, f"{month}_cash", 0), getattr(instance, f"{month}_voucher", 0))
         return result
@@ -417,7 +436,7 @@ class GenerateDashboardReportContentHelpers:
     @staticmethod
     def format_total_transferred_by_country(instance: BusinessArea, is_totals: bool, *args) -> tuple:
         if is_totals:
-            return ("", "Total", instance.get("total_cash__sum") or 0, instance.get("total_voucher__sum") or 0)
+            return "", "Total", instance.get("total_cash__sum") or 0, instance.get("total_voucher__sum") or 0
         else:
             return (
                 instance.code,
@@ -466,7 +485,7 @@ class GenerateDashboardReportContentHelpers:
             instance.name,
             instance.total_cash_plan_verifications,
             instance.total_households,
-            int((instance.total_verifications_done / instance.total_payment_records) * 100)
+            round((instance.total_verifications_done / instance.all_possible_payment_records) * 100)
             if instance.total_payment_records
             else 0,
             instance.received,
@@ -476,8 +495,8 @@ class GenerateDashboardReportContentHelpers:
         )
 
     @classmethod
-    def format_total_transferred_by_admin_area_row(self, instance, is_totals: bool, *args):
-        fields_list = self._get_all_individual_count_fields()
+    def format_total_transferred_by_admin_area_row(cls, instance, is_totals: bool, *args):
+        fields_list = cls._get_all_individual_count_fields()
 
         shared_cells = tuple([instance.get(f"{field_name}__sum", 0) for field_name in fields_list])
 
@@ -502,7 +521,7 @@ class GenerateDashboardReportContentHelpers:
 
     @classmethod
     def _format_filters(
-        self,
+        cls,
         report: DashboardReport,
         custom_filters: dict,
         date_path: str,
@@ -514,12 +533,10 @@ class GenerateDashboardReportContentHelpers:
         if date_path:
             filter_vars.update({f"{date_path}__year": report.year})
         if admin_area_path and report.admin_area:
-            filter_vars.update(
-                {admin_area_path: report.admin_area, f"{admin_area_path}__level": 2}
-            )
+            filter_vars.update({admin_area_path: report.admin_area, f"{admin_area_path}__level": 2})
         if program_path and report.program:
             filter_vars.update({program_path: report.program})
-        if not self._is_report_global(report) and business_area_path:
+        if not cls._is_report_global(report) and business_area_path:
             filter_vars.update({business_area_path: report.business_area})
         return filter_vars
 
@@ -540,12 +557,8 @@ class GenerateDashboardReportContentHelpers:
         return PaymentRecord.objects.filter(**filter_vars)
 
     @classmethod
-    def _get_business_areas_or_programs(self, report, valid_payment_records):
-        instances = None
-        valid_payment_records_in_instance_filter_key = None
-        business_area_code_path = None
-
-        if self._is_report_global(report):
+    def _get_business_areas_or_programs(cls, report, valid_payment_records):
+        if cls._is_report_global(report):
             business_area_code_path = "code"
             instances = BusinessArea.objects.filter(paymentrecord__in=valid_payment_records)
             valid_payment_records_in_instance_filter_key = "business_area"
@@ -843,6 +856,7 @@ class GenerateDashboardReportService:
             row = get_row_methods[1](instance, False, is_hq_report)
             str_row = self._stringify_all_values(row)
             active_sheet.append(str_row)
+            # active_sheet.append(str_row)
         # append totals row
         if totals:
             row = get_row_methods[1](totals, True, is_hq_report)
@@ -875,22 +889,17 @@ class GenerateDashboardReportService:
     def generate_report(self):
         try:
             self.generate_workbook()
-            with NamedTemporaryFile() as tmp:
-                self.wb.save(tmp.name)
-                tmp.seek(0)
-                file_name = (
-                    self._report_type_to_str(self.report_types[0])
-                    if len(self.report_types) == 1
-                    else "Multiple reports"
-                )
-                self.report.file.save(
-                    f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
-                    File(tmp),
-                    save=False,
-                )
-                self.report.status = DashboardReport.COMPLETED
+            file_name = (
+                self._report_type_to_str(self.report_types[0]) if len(self.report_types) == 1 else "Multiple reports"
+            )
+            self.report.file.save(
+                f"{file_name}-{self._format_date(self.report.created_at)}.xlsx",
+                io.BytesIO(save_virtual_workbook(self.wb)),
+                save=False,
+            )
+            self.report.status = DashboardReport.COMPLETED
         except Exception as e:
-            print("ERROR", e)
+            logger.exception(e)
             self.report.status = DashboardReport.FAILED
         self.report.save()
 
@@ -898,10 +907,12 @@ class GenerateDashboardReportService:
             self._send_email()
 
     def _send_email(self):
+        path = reverse("dashboard_report", kwargs={"report_id": self.report.id})
+        protocol = "http" if settings.IS_DEV else "https"
         context = {
             "report_type": self._report_types_to_joined_str(),
             "created_at": self._format_date(self.report.created_at),
-            "report_url": self.report.file.url,
+            "report_url": f"{protocol}://{Site.objects.first()}{path}",
         }
         text_body = render_to_string("dashboard_report.txt", context=context)
         html_body = render_to_string("dashboard_report.html", context=context)
@@ -914,25 +925,19 @@ class GenerateDashboardReportService:
         msg.attach_alternative(html_body, "text/html")
         msg.send()
 
-    def _adjust_column_width_from_col(self, ws, min_col, max_col, min_row):
-
+    @staticmethod
+    def _adjust_column_width_from_col(ws, min_col, max_col, min_row):
         column_widths = []
-
         for i, col in enumerate(ws.iter_cols(min_col=min_col, max_col=max_col, min_row=min_row)):
-
             for cell in col:
                 value = cell.value
-
                 if value is not None:
-
                     if isinstance(value, str) is False:
                         value = str(value)
-
                     if len(value) > GenerateDashboardReportService.MAX_COL_WIDTH:
                         alignment = copy.copy(cell.alignment)
                         alignment.wrapText = True
                         cell.alignment = alignment
-
                     try:
                         column_widths[i] = max(column_widths[i], len(value))
                     except IndexError:
@@ -948,36 +953,45 @@ class GenerateDashboardReportService:
             )
             ws.column_dimensions[col_name].width = value
 
-    def _add_font_style_to_sheet(self, ws, totals_row=None):
+    @staticmethod
+    def _add_font_style_to_sheet(ws, totals_row=None):
         bold_font = Font(bold=True)
         for cell in ws["1:1"]:
             cell.font = bold_font
         if totals_row:
             ws[f"B{totals_row}"].font = bold_font
 
-    def _report_type_to_str(self, report_type) -> str:
-        return str([name for value, name in DashboardReport.REPORT_TYPES if value == report_type][0])
+    @staticmethod
+    def _report_type_to_str(report_type) -> str:
+        types_dict = dict(DashboardReport.REPORT_TYPES)
+        label = str(types_dict.get(report_type, ""))
+        return label[:31]
 
     def _report_types_to_joined_str(self) -> str:
         return ", ".join([self._report_type_to_str(report_type) for report_type in self.report_types])
 
-    def _stringify_all_values(self, row: tuple) -> tuple:
+    @staticmethod
+    def _stringify_all_values(row: tuple) -> tuple:
         str_row = []
         for value in row:
-            str_row.append(str(value if value is not None else ""))
+            if isinstance(value, (str, int, float)):
+                str_row.append(value)
+            else:
+                str_row.append(str(value if value is not None else ""))
         return tuple(str_row)
 
-    def _format_date(self, date) -> str:
-        if not date:
-            return ""
-        return date.strftime("%Y-%m-%d")
+    @staticmethod
+    def _format_date(date) -> str:
+        return date.strftime("%Y-%m-%d") if date else ""
 
-    def _format_user_name(self, user: User) -> str:
+    @staticmethod
+    def _format_user_name(user: User) -> str:
         return (
             f"{user.first_name} {user.last_name}" if user.first_name or user.last_name else user.email or user.username
         )
 
-    def _remove_empty_columns(self, ws, totals_row, min_col=1, max_col=2):
+    @staticmethod
+    def _remove_empty_columns(ws, totals_row, min_col=1, max_col=2):
         to_remove_columns = []
         for col_idx in range(min_col, max_col):
             col_letter = get_column_letter(col_idx)

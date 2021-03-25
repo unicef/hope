@@ -143,7 +143,12 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
 
     @property
     def total_number_of_households(self):
-        return self.households.count()
+        return (
+            self.cash_plans.filter(payment_records__delivered_quantity__gte=0)
+            .distinct("payment_records__household__unicef_id")
+            .values_list("payment_records__household__unicef_id", flat=True)
+            .count()
+        )
 
     @property
     def admin_areas_log(self):
@@ -237,7 +242,8 @@ class CashPlan(TimeStampedUUIDModel):
 
     @cached_property
     def total_number_of_households(self):
-        return self.payment_records.exclude(status=PaymentRecord.STATUS_ERROR).values("household").distinct().count()
+        # https://unicef.visualstudio.com/ICTD-HCT-MIS/_workitems/edit/84040
+        return self.payment_records.count()
 
     @property
     def currency(self):

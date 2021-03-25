@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -16,6 +18,8 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
 from hct_mis_api.apps.household.models import NOT_PROVIDED, RELATIONSHIP_UNKNOWN, BLANK
+
+logger = logging.getLogger(__name__)
 
 
 class BaseValidator:
@@ -49,6 +53,7 @@ class BaseValidator:
                 errors_list.append(e.message)
 
         if errors_list:
+            logger.error(", ".join(errors_list))
             raise Exception(", ".join(errors_list))
 
 
@@ -59,6 +64,11 @@ class CommonValidator(BaseValidator):
         end_date = kwargs.get("end_date")
         if start_date and end_date:
             if start_date > end_date:
+                logger.error(
+                    f"Start date cannot be greater than the end date, "
+                    f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
+                    f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
+                )
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
@@ -71,6 +81,7 @@ def prepare_choices_for_validation(choices_sheet):
     choices_headers_map = [col.value for col in first_row]
 
     if {"list_name", "name", "label:English(EN)"}.issubset(set(choices_headers_map)) is False:
+        logger.error("Choices sheet does not contain all required columns")
         raise ValueError("Choices sheet does not contain all required columns")
 
     for row_number in range(1, choices_sheet.nrows):
@@ -81,7 +92,6 @@ def prepare_choices_for_validation(choices_sheet):
 
         last_list_name = None
         choice_value = None
-        english_label = ""
         for cell, header_name in zip(row, choices_headers_map):
             cell_value = cell.value
             if header_name == "list_name" and cell_value != last_list_name:
@@ -113,6 +123,9 @@ class KoboTemplateValidator:
         "date": TYPE_DATE,
         "select_multiple": TYPE_SELECT_MANY,
         "geopoint": TYPE_GEOPOINT,
+        "start": TYPE_STRING,
+        "end": TYPE_STRING,
+        "deviceid": TYPE_STRING,
     }
     EXPECTED_REQUIRED_FIELDS = (
         "country_h_c"
@@ -152,6 +165,7 @@ class KoboTemplateValidator:
                 columns_names_and_numbers_mapping[column_name] = index
 
         if None in columns_names_and_numbers_mapping.values():
+            logger.error("Survey sheet does not contain all required columns")
             raise ValueError("Survey sheet does not contain all required columns")
 
         return columns_names_and_numbers_mapping

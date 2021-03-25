@@ -38,6 +38,7 @@ export const AllPaymentVerifications = gql`
             id
             caId
             deliveredQuantity
+            currency
             household {
               unicefId
               id

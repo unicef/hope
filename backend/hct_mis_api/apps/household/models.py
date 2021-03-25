@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date
 
@@ -216,6 +217,8 @@ REGISTRATION_METHOD_CHOICES = (
     (COMMUNITY, "Community-level Registration"),
 )
 
+logger = logging.getLogger(__name__)
+
 
 class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
     ACTIVITY_LOG_MAPPING = create_mapping_dict(
@@ -424,7 +427,17 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
-
+    STATUS_PENDING = "PENDING"
+    STATUS_VALID = "VALID"
+    STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
+    STATUS_INVALID = "INVALID"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_VALID, _("Valid")),
+        (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
+        (STATUS_INVALID, _("Invalid")),
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     objects = models.Manager()
     existing_objects = SoftDeletableManager()
 
@@ -433,12 +446,15 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
+                logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["document_number", "type"], condition=Q(is_removed=False), name="unique_if_not_removed"
+                fields=["document_number", "type"],
+                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                name="unique_if_not_removed_and_valid",
             )
         ]
 
@@ -658,6 +674,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
+        self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()

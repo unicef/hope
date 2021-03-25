@@ -7,6 +7,7 @@ import DrawerMaterial from '@material-ui/core/Drawer';
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import { theme as themeObj } from '../../theme';
+import { Logo } from '../Logo';
 import { DrawerItems } from './DrawerItems';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
@@ -14,8 +15,8 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 0 0 31px',
-    backgroundColor: theme.palette.primary.main,
+    paddingLeft: '51px',
+    backgroundColor: theme.hctPalette.lightBlue,
     color: 'white',
     borderRightWidth: 2,
     borderRightColor: '#02367D',
@@ -27,12 +28,6 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
   collapseIcon: {
     color: '#fff',
     opacity: 0.54,
-  },
-  hctMisLogo: {
-    ...theme.hctTypography.font,
-    fontSize: '16px',
-    fontWeight: 500,
-    lineHeight: '19px',
   },
   drawerPaper: {
     position: 'relative',
@@ -86,10 +81,7 @@ export function Drawer({
       data-cy={dataCy}
     >
       <div className={classes.toolbarHeader}>
-        <div className={classes.hctMisLogo}>
-          <div>HOPE</div>
-          <div>PORTAL</div>
-        </div>
+        <Logo transparent={false} displayLogoWithoutSubtitle />
         <IconButton
           onClick={handleDrawerClose}
           className={classes.collapseIcon}

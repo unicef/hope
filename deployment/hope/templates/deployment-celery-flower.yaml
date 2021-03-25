@@ -25,6 +25,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      volumes:
+      - configMap:
+          defaultMode: 511
+          name: {{ include "hope.fullname" . }}-celeryflower-entrypoint
+        name: entrypoint
       containers:
         - name: {{ .Chart.Name }}-celery-flower
           securityContext:

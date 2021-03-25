@@ -218,6 +218,7 @@ PROJECT_APPS = [
 DJANGO_APPS = [
     "smart_admin.templates",
     "smart_admin",
+    "django_sysinfo",
     "django.contrib.auth",
     "django.contrib.humanize",
     "django.contrib.contenttypes",
@@ -244,6 +245,7 @@ OTHER_APPS = [
     "mptt",
     "django_extensions",
     "django_celery_results",
+    "django_celery_beat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS

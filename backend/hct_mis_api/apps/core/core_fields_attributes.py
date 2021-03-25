@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from functools import reduce
 
@@ -23,6 +24,8 @@ from hct_mis_api.apps.household.models import (
     YES_NO_CHOICE,
     BLANK,
 )
+
+logger = logging.getLogger(__name__)
 
 TYPE_ID = "ID"
 TYPE_INTEGER = "INTEGER"
@@ -62,6 +65,7 @@ def country_generic_query(comparision_method, args, lookup):
         return query
     elif comparision_method == "NOT_EQUALS":
         return ~query
+    logger.error(f"Country filter query does not support {comparision_method} type")
     raise ValidationError(f"Country filter query does not support {comparision_method} type")
 
 
@@ -1301,7 +1305,7 @@ FIELDS_EXCLUDED_FROM_RDI = {
 }
 
 KOBO_ONLY_HOUSEHOLD_FIELDS = {
-    "start_h_c": {
+    "start": {
         "id": "9da8c56a-3c65-47d9-8149-699761842ce4",
         "type": TYPE_STRING,
         "name": "start",
@@ -1313,7 +1317,7 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "start",
     },
-    "end_h_c": {
+    "end": {
         "id": "06e4c4a0-28d2-4530-be24-92623a5b48b0",
         "type": TYPE_STRING,
         "name": "end",

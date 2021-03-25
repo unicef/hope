@@ -802,6 +802,7 @@ export type DocumentNode = Node & {
   photo: Scalars['String'],
   individual: IndividualNode,
   type: DocumentTypeNode,
+  status: DocumentStatus,
 };
 
 export type DocumentNodeConnection = {
@@ -817,6 +818,13 @@ export type DocumentNodeEdge = {
   node?: Maybe<DocumentNode>,
   cursor: Scalars['String'],
 };
+
+export enum DocumentStatus {
+  Pending = 'PENDING',
+  Valid = 'VALID',
+  NeedInvestigation = 'NEED_INVESTIGATION',
+  Invalid = 'INVALID'
+}
 
 export type DocumentTypeNode = {
    __typename?: 'DocumentTypeNode',
@@ -2052,13 +2060,6 @@ export enum ImportedHouseholdResidenceStatus {
   NonHost = 'NON_HOST'
 }
 
-export enum ImportedIndividualCommsDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum ImportedIndividualDeduplicationBatchStatus {
   SimilarInBatch = 'SIMILAR_IN_BATCH',
   DuplicateInBatch = 'DUPLICATE_IN_BATCH',
@@ -2073,19 +2074,13 @@ export enum ImportedIndividualDeduplicationGoldenRecordStatus {
   NotProcessed = 'NOT_PROCESSED'
 }
 
-export enum ImportedIndividualHearingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export type ImportedIndividualIdentityNode = {
    __typename?: 'ImportedIndividualIdentityNode',
   id: Scalars['ID'],
   individual: ImportedIndividualNode,
   documentNumber: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum ImportedIndividualMaritalStatus {
@@ -2095,13 +2090,6 @@ export enum ImportedIndividualMaritalStatus {
   Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
-}
-
-export enum ImportedIndividualMemoryDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export type ImportedIndividualNode = Node & {
@@ -2125,22 +2113,22 @@ export type ImportedIndividualNode = Node & {
   household?: Maybe<ImportedHouseholdNode>,
   registrationDataImport: RegistrationDataImportDatahubNode,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<ImportedIndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   deduplicationBatchStatus?: Maybe<ImportedIndividualDeduplicationBatchStatus>,
   deduplicationGoldenRecordStatus?: Maybe<ImportedIndividualDeduplicationGoldenRecordStatus>,
   deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
   deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
-  flexFields?: Maybe<Scalars['Arg']>,
+  flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
   pregnant?: Maybe<Scalars['Boolean']>,
-  observedDisability: ImportedIndividualObservedDisability,
-  seeingDisability?: Maybe<ImportedIndividualSeeingDisability>,
-  hearingDisability?: Maybe<ImportedIndividualHearingDisability>,
-  physicalDisability?: Maybe<ImportedIndividualPhysicalDisability>,
-  memoryDisability?: Maybe<ImportedIndividualMemoryDisability>,
-  selfcareDisability?: Maybe<ImportedIndividualSelfcareDisability>,
-  commsDisability?: Maybe<ImportedIndividualCommsDisability>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
   importedhousehold?: Maybe<ImportedHouseholdNode>,
@@ -2171,46 +2159,9 @@ export type ImportedIndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum ImportedIndividualObservedDisability {
-  None = 'NONE',
-  Seeing = 'SEEING',
-  Hearing = 'HEARING',
-  Walking = 'WALKING',
-  Memory = 'MEMORY',
-  SelfCare = 'SELF_CARE',
-  Communicating = 'COMMUNICATING'
-}
-
-export enum ImportedIndividualPhysicalDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum ImportedIndividualSeeingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum ImportedIndividualSelfcareDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum ImportedIndividualSex {
   Male = 'MALE',
   Female = 'FEMALE'
-}
-
-export enum ImportedIndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
 }
 
 export type ImportXlsxCashPlanVerification = {
@@ -2218,13 +2169,6 @@ export type ImportXlsxCashPlanVerification = {
   cashPlan?: Maybe<CashPlanNode>,
   errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
 };
-
-export enum IndividualCommsDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
 
 export type IndividualDataChangeApproveMutation = {
    __typename?: 'IndividualDataChangeApproveMutation',
@@ -2260,19 +2204,13 @@ export type IndividualDocumentObjectType = {
   number: Scalars['String'],
 };
 
-export enum IndividualHearingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export type IndividualIdentityNode = {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
   individual: IndividualNode,
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
 };
 
 export enum IndividualMaritalStatus {
@@ -2282,13 +2220,6 @@ export enum IndividualMaritalStatus {
   Widowed = 'WIDOWED',
   Divorced = 'DIVORCED',
   Separated = 'SEPARATED'
-}
-
-export enum IndividualMemoryDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export type IndividualNode = Node & {
@@ -2320,7 +2251,7 @@ export type IndividualNode = Node & {
   household?: Maybe<HouseholdNode>,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
   disability: Scalars['Boolean'],
-  workStatus?: Maybe<IndividualWorkStatus>,
+  workStatus: Scalars['String'],
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
@@ -2337,12 +2268,12 @@ export type IndividualNode = Node & {
   sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
   pregnant?: Maybe<Scalars['Boolean']>,
   observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
-  seeingDisability?: Maybe<IndividualSeeingDisability>,
-  hearingDisability?: Maybe<IndividualHearingDisability>,
-  physicalDisability?: Maybe<IndividualPhysicalDisability>,
-  memoryDisability?: Maybe<IndividualMemoryDisability>,
-  selfcareDisability?: Maybe<IndividualSelfcareDisability>,
-  commsDisability?: Maybe<IndividualCommsDisability>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
   whoAnswersPhone: Scalars['String'],
   whoAnswersAltPhone: Scalars['String'],
   businessArea: UserBusinessAreaNode,
@@ -2441,13 +2372,6 @@ export type IndividualNodeEdge = {
   cursor: Scalars['String'],
 };
 
-export enum IndividualPhysicalDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
 export enum IndividualRelationship {
   Unknown = 'UNKNOWN',
   NonBeneficiary = 'NON_BENEFICIARY',
@@ -2481,20 +2405,6 @@ export enum IndividualRoleInHouseholdRole {
   Primary = 'PRIMARY',
   Alternate = 'ALTERNATE',
   NoRole = 'NO_ROLE'
-}
-
-export enum IndividualSeeingDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
-}
-
-export enum IndividualSelfcareDisability {
-  A = 'A_',
-  SomeDifficulty = 'SOME_DIFFICULTY',
-  LotDifficulty = 'LOT_DIFFICULTY',
-  CannotDo = 'CANNOT_DO'
 }
 
 export enum IndividualSex {
@@ -2534,12 +2444,6 @@ export type IndividualUpdateDataObjectType = {
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
-
-export enum IndividualWorkStatus {
-  A_1 = 'A_1',
-  A_0 = 'A_0',
-  NotProvided = 'NOT_PROVIDED'
-}
 
 export type IssueTypeExtrasInput = {
   householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
@@ -3051,9 +2955,10 @@ export type PaymentVerificationNode = Node & {
   cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
   paymentRecord: PaymentRecordNode,
   status: PaymentVerificationStatus,
-  statusDate?: Maybe<Scalars['Date']>,
+  statusDate?: Maybe<Scalars['DateTime']>,
   receivedAmount?: Maybe<Scalars['Float']>,
   ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
+  isManuallyEditable?: Maybe<Scalars['Boolean']>,
 };
 
 
@@ -3308,10 +3213,13 @@ export type Query = {
   residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  workStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  observedDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
   me?: Maybe<UserNode>,
@@ -4862,6 +4770,7 @@ export type TicketNeedsAdjudicationDetailsNode = Node & {
   possibleDuplicate: IndividualNode,
   selectedIndividual?: Maybe<IndividualNode>,
   roleReassignData: Scalars['JSONString'],
+  hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
 };
 
 export type TicketNoteNode = Node & {
@@ -5578,7 +5487,7 @@ export type IndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'number' | 'type'>
+    & Pick<IndividualIdentityNode, 'number' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
@@ -5706,7 +5615,17 @@ export type ActivateCashPlanPaymentVerificationMutation = (
     { __typename?: 'ActivateCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6033,7 +5952,17 @@ export type DiscardCashPlanPaymentVerificationMutation = (
     { __typename?: 'DiscardCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6098,7 +6027,17 @@ export type FinishCashPlanPaymentVerificationMutation = (
     { __typename?: 'FinishCashPlanVerificationMutation' }
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
-      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate'>
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'completionDate'>
+          )> }
+        )>> }
+      ) }
     )> }
   )> }
 );
@@ -6241,6 +6180,10 @@ export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = (
     & { paymentVerification: Maybe<(
       { __typename?: 'PaymentVerificationNode' }
       & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+      & { cashPlanPaymentVerification: (
+        { __typename?: 'CashPlanPaymentVerificationNode' }
+        & Pick<CashPlanPaymentVerificationNode, 'id' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount'>
+      ) }
     )> }
   )> }
 );
@@ -6788,7 +6731,7 @@ export type AllPaymentRecordsQuery = (
       & Pick<PaymentRecordNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'PaymentRecordNode' }
-        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
@@ -6834,7 +6777,7 @@ export type AllPaymentVerificationsQuery = (
         & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
         & { paymentRecord: (
           { __typename?: 'PaymentRecordNode' }
-          & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
+          & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
           & { household: (
             { __typename?: 'HouseholdNode' }
             & Pick<HouseholdNode, 'unicefId' | 'id'>
@@ -7386,7 +7329,7 @@ export type GrievanceTicketQuery = (
       ) }
     )>, needsAdjudicationTicketDetails: Maybe<(
       { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
-      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'roleReassignData'>
+      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'hasDuplicatedDocument' | 'roleReassignData'>
       & { goldenRecordsIndividual: (
         { __typename?: 'IndividualNode' }
         & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
@@ -7496,10 +7439,19 @@ export type HouseholdChoiceDataQuery = (
   )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, workStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, deduplicationGoldenRecordStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, observedDisabilityChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, severityOfDisabilityChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -7515,6 +7467,29 @@ export type IndividualQuery = (
   & { individual: Maybe<(
     { __typename?: 'IndividualNode' }
     & IndividualDetailedFragment
+  )> }
+);
+
+export type IndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'DocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'DocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'DocumentNode' }
+          & Pick<DocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
   )> }
 );
 
@@ -7645,7 +7620,7 @@ export type PaymentRecordVerificationQuery = (
   { __typename?: 'Query' }
   & { paymentRecordVerification: Maybe<(
     { __typename?: 'PaymentVerificationNode' }
-    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
     & { paymentRecord: (
       { __typename?: 'PaymentRecordNode' }
       & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
@@ -8061,7 +8036,7 @@ export type RegistrationDetailedFragment = (
 
 export type ImportedHouseholdMinimalFragment = (
   { __typename?: 'ImportedHouseholdNode' }
-  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates'>
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
   & { headOfHousehold: Maybe<(
     { __typename?: 'ImportedIndividualNode' }
     & Pick<ImportedIndividualNode, 'id' | 'fullName'>
@@ -8095,7 +8070,7 @@ export type ImportedIndividualMinimalFragment = (
 
 export type ImportedIndividualDetailedFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'pregnant' | 'flexFields' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
   & { documents: (
     { __typename?: 'ImportedDocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8105,13 +8080,13 @@ export type ImportedIndividualDetailedFragment = (
         & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
-          & Pick<ImportedDocumentTypeNode, 'label'>
+          & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
         ) }
       )> }
     )>> }
   ), identities: Array<(
     { __typename?: 'ImportedIndividualIdentityNode' }
-    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type'>
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
   )>, household: Maybe<(
     { __typename?: 'ImportedHouseholdNode' }
     & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
@@ -8569,6 +8544,7 @@ export const IndividualDetailedFragmentDoc = gql`
   identities {
     number
     type
+    country
   }
   household {
     status
@@ -8805,9 +8781,14 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   admin1Title
   admin2
   admin2Title
+  flexFields
+  deviceid
+  start
   firstRegistrationDate
   lastRegistrationDate
   hasDuplicates
+  fchildHoh
+  childHoh
 }
     `;
 export const ImportedHouseholdDetailedFragmentDoc = gql`
@@ -8863,14 +8844,24 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
   middleName
   estimatedBirthDate
   maritalStatus
+  workStatus
   pregnant
   flexFields
+  observedDisability
+  seeingDisability
+  hearingDisability
+  physicalDisability
+  memoryDisability
+  selfcareDisability
+  commsDisability
+  disability
   documents {
     edges {
       node {
         id
         type {
           label
+          country
         }
         documentNumber
       }
@@ -8880,6 +8871,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     id
     documentNumber
     type
+    country
   }
   role
   relationship
@@ -8905,6 +8897,16 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -9899,6 +9901,22 @@ export const DiscardCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
     }
   }
 }
@@ -10107,6 +10125,16 @@ export const FinishCashPlanPaymentVerificationDocument = gql`
       id
       status
       statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            completionDate
+          }
+        }
+      }
     }
   }
 }
@@ -10540,6 +10568,14 @@ export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
       id
       status
       receivedAmount
+      cashPlanPaymentVerification {
+        id
+        receivedCount
+        notReceivedCount
+        respondedCount
+        receivedCount
+        receivedWithProblemsCount
+      }
     }
   }
 }
@@ -11907,6 +11943,7 @@ export const AllPaymentRecordsDocument = gql`
           unicefId
           size
         }
+        currency
         entitlementQuantity
         deliveredQuantity
         deliveredQuantityUsd
@@ -11993,6 +12030,7 @@ export const AllPaymentVerificationsDocument = gql`
           id
           caId
           deliveredQuantity
+          currency
           household {
             unicefId
             id
@@ -13248,6 +13286,7 @@ export const GrievanceTicketDocument = gql`
     }
     needsAdjudicationTicketDetails {
       id
+      hasDuplicatedDocument
       goldenRecordsIndividual {
         id
         unicefId
@@ -13500,11 +13539,23 @@ export const HouseholdChoiceDataDocument = gql`
     name
     value
   }
+  workStatusChoices {
+    name
+    value
+  }
   deduplicationBatchStatusChoices {
     name
     value
   }
   deduplicationGoldenRecordStatusChoices {
+    name
+    value
+  }
+  observedDisabilityChoices {
+    name
+    value
+  }
+  severityOfDisabilityChoices {
     name
     value
   }
@@ -13602,6 +13653,65 @@ export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
 export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
 export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const IndividualPhotosDocument = gql`
+    query IndividualPhotos($id: ID!) {
+  individual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type IndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>, 'query'> & ({ variables: IndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualPhotosComponent = (props: IndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<IndividualPhotosQuery, IndividualPhotosQueryVariables> query={IndividualPhotosDocument} {...props} />
+    );
+    
+export type IndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualPhotosQuery, IndividualPhotosQueryVariables> & TChildProps;
+export function withIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualPhotosQuery,
+  IndividualPhotosQueryVariables,
+  IndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualPhotosQuery, IndividualPhotosQueryVariables, IndividualPhotosProps<TChildProps>>(IndividualPhotosDocument, {
+      alias: 'individualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+      }
+export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+        }
+export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
+export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
+export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
 export const LookUpPaymentRecordsDocument = gql`
     query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
   allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
@@ -13920,6 +14030,7 @@ export const PaymentRecordVerificationDocument = gql`
     status
     statusDate
     receivedAmount
+    isManuallyEditable
     paymentRecord {
       id
       status
@@ -15719,17 +15830,10 @@ export type ResolversTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
   Float: ResolverTypeWrapper<Scalars['Float']>,
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
   PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
   PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
   PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
@@ -15821,6 +15925,7 @@ export type ResolversTypes = {
   DocumentNode: ResolverTypeWrapper<DocumentNode>,
   DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
   DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
@@ -15902,16 +16007,8 @@ export type ResolversTypes = {
   ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
   ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
   ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
-  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
-  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
-  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
-  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
-  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
-  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
   ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
   ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
@@ -16052,17 +16149,10 @@ export type ResolversParentTypes = {
   RegistrationDataImportDataSource: RegistrationDataImportDataSource,
   CountAndPercentageNode: CountAndPercentageNode,
   Float: Scalars['Float'],
-  IndividualWorkStatus: IndividualWorkStatus,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
-  IndividualSeeingDisability: IndividualSeeingDisability,
-  IndividualHearingDisability: IndividualHearingDisability,
-  IndividualPhysicalDisability: IndividualPhysicalDisability,
-  IndividualMemoryDisability: IndividualMemoryDisability,
-  IndividualSelfcareDisability: IndividualSelfcareDisability,
-  IndividualCommsDisability: IndividualCommsDisability,
   PaymentRecordNodeConnection: PaymentRecordNodeConnection,
   PaymentRecordNodeEdge: PaymentRecordNodeEdge,
   PaymentRecordNode: PaymentRecordNode,
@@ -16154,6 +16244,7 @@ export type ResolversParentTypes = {
   DocumentNode: DocumentNode,
   DocumentTypeNode: DocumentTypeNode,
   DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
   IndividualIdentityNode: IndividualIdentityNode,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
@@ -16235,16 +16326,8 @@ export type ResolversParentTypes = {
   ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
   ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
   ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
-  ImportedIndividualWorkStatus: ImportedIndividualWorkStatus,
   ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
   ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
-  ImportedIndividualObservedDisability: ImportedIndividualObservedDisability,
-  ImportedIndividualSeeingDisability: ImportedIndividualSeeingDisability,
-  ImportedIndividualHearingDisability: ImportedIndividualHearingDisability,
-  ImportedIndividualPhysicalDisability: ImportedIndividualPhysicalDisability,
-  ImportedIndividualMemoryDisability: ImportedIndividualMemoryDisability,
-  ImportedIndividualSelfcareDisability: ImportedIndividualSelfcareDisability,
-  ImportedIndividualCommsDisability: ImportedIndividualCommsDisability,
   ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
   ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
   ImportedDocumentNode: ImportedDocumentNode,
@@ -16725,6 +16808,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
 };
 
 export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
@@ -17078,6 +17162,7 @@ export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentTyp
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
@@ -17100,22 +17185,22 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
   deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
   deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
   deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
-  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
-  observedDisability?: Resolver<ResolversTypes['ImportedIndividualObservedDisability'], ParentType, ContextType>,
-  seeingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSeeingDisability']>, ParentType, ContextType>,
-  hearingDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualHearingDisability']>, ParentType, ContextType>,
-  physicalDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualPhysicalDisability']>, ParentType, ContextType>,
-  memoryDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualMemoryDisability']>, ParentType, ContextType>,
-  selfcareDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualSelfcareDisability']>, ParentType, ContextType>,
-  commsDisability?: Resolver<Maybe<ResolversTypes['ImportedIndividualCommsDisability']>, ParentType, ContextType>,
+  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
@@ -17150,6 +17235,7 @@ export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extend
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
@@ -17180,7 +17266,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
   disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
-  workStatus?: Resolver<Maybe<ResolversTypes['IndividualWorkStatus']>, ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
@@ -17197,12 +17283,12 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
-  seeingDisability?: Resolver<Maybe<ResolversTypes['IndividualSeeingDisability']>, ParentType, ContextType>,
-  hearingDisability?: Resolver<Maybe<ResolversTypes['IndividualHearingDisability']>, ParentType, ContextType>,
-  physicalDisability?: Resolver<Maybe<ResolversTypes['IndividualPhysicalDisability']>, ParentType, ContextType>,
-  memoryDisability?: Resolver<Maybe<ResolversTypes['IndividualMemoryDisability']>, ParentType, ContextType>,
-  selfcareDisability?: Resolver<Maybe<ResolversTypes['IndividualSelfcareDisability']>, ParentType, ContextType>,
-  commsDisability?: Resolver<Maybe<ResolversTypes['IndividualCommsDisability']>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
@@ -17429,9 +17515,10 @@ export type PaymentVerificationNodeResolvers<ContextType = any, ParentType exten
   cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
   paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
-  statusDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
   ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
+  isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type PaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']> = {
@@ -17574,10 +17661,13 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  workStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
   me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
@@ -18185,6 +18275,7 @@ export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, Paren
   possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
 };
 
 export type TicketNoteNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNode'] = ResolversParentTypes['TicketNoteNode']> = {

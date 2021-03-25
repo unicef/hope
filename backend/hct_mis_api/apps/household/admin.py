@@ -1,33 +1,36 @@
-from django.db.models import Q
-
-from admin_extra_urls.decorators import action
-from admin_extra_urls.mixins import ExtraUrlMixin
 from django.contrib import admin, messages
-from adminfilters.filters import (
-    TextFieldFilter,
-    RelatedFieldComboFilter,
-    AllValuesComboFilter,
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-)
 from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    MaxMinFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
+from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
+
 from hct_mis_api.apps.household.models import (
+    HEAD,
+    ROLE_ALTERNATE,
+    ROLE_PRIMARY,
+    Agency,
+    Document,
+    DocumentType,
     Household,
     Individual,
-    DocumentType,
-    Document,
-    Agency,
-    IndividualRoleInHousehold,
     IndividualIdentity,
-    ROLE_PRIMARY,
-    ROLE_ALTERNATE,
-    HEAD,
+    IndividualRoleInHousehold,
 )
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase, SmartFieldsetMixin
+from hct_mis_api.apps.utils.admin import (
+    HOPEModelAdminBase,
+    LastSyncDateResetMixin,
+)
 
 
 @admin.register(Agency)
@@ -37,7 +40,7 @@ class AgencyTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(Document)
 class DocumentAdmin(HOPEModelAdminBase):
-    list_display = ("document_number", "type", "individual")
+    list_display = ("document_number", "type", "status", "individual")
     raw_id_fields = ("individual",)
     list_filter = (("type", RelatedFieldComboFilter),)
 
@@ -48,7 +51,7 @@ class DocumentTypeAdmin(HOPEModelAdminBase):
 
 
 @admin.register(Household)
-class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "country",
@@ -65,6 +68,7 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         "org_enumerator",
         "last_registration_date",
     )
+    readonly_fields = ("created_at", "updated_at")
     filter_horizontal = ("representatives", "programs")
     raw_id_fields = ("registration_data_import", "admin_area", "head_of_household", "business_area")
     fieldsets = [
@@ -84,16 +88,28 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
                 ),
             },
         ),
+        (
+            "Dates",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("created_at", "updated_at"),
+                    "last_sync_at",
+                    "removed_date",
+                    "withdrawn_date",
+                ),
+            },
+        ),
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def members(self, request, pk):
         obj = Household.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
         return HttpResponseRedirect(f"{url}?household|unicef_id|iexact={obj.unicef_id}")
 
-    @action()
+    @button()
     def sanity_check(self, request, pk):
         # NOTE: this code is not should be optimized in the future and it is not
         # intended to be used in bulk
@@ -114,12 +130,12 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         total_in_ranges = 0
         for gender in ["male", "female"]:
-            for range in ["0_5", "6_11", "12_17", "18_59", "60"]:
-                field = f"{gender}_age_group_{range}_count"
+            for num_range in ["0_5", "6_11", "12_17", "18_59", "60"]:
+                field = f"{gender}_age_group_{num_range}_count"
                 total_in_ranges += getattr(hh, field, 0) or 0
 
-        active_individuals = hh.individuals.exclude(Q(duplicate=True)|Q(withdrawn=True))
-        ghosts_individuals = hh.individuals.filter(Q(duplicate=True)|Q(withdrawn=True))
+        active_individuals = hh.individuals.exclude(Q(duplicate=True) | Q(withdrawn=True))
+        ghosts_individuals = hh.individuals.filter(Q(duplicate=True) | Q(withdrawn=True))
         all_individuals = hh.individuals.all()
         if hh.collect_individual_data:
             if active_individuals.count() != hh.size:
@@ -131,9 +147,10 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
         if hh.size != total_in_ranges:
             warnings.append(
-                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"])
+                [messages.ERROR, f"HH size ({hh.size}) and ranges population ({total_in_ranges}) does not match"]
+            )
 
-        aaaa = active_individuals.values_list('unicef_id', flat=True)
+        aaaa = active_individuals.values_list("unicef_id", flat=True)
         bbb = Household.objects.filter(unicef_id__in=aaaa)
         if bbb.count() > len(aaaa):
             warnings.append([messages.ERROR, "Unmarked duplicates found"])
@@ -153,7 +170,7 @@ class HouseholdAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(Individual)
-class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
+class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminBase):
     list_display = (
         "unicef_id",
         "given_name",
@@ -164,12 +181,17 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         "birth_date",
     )
     search_fields = ("family_name",)
+    readonly_fields = ("created_at", "updated_at")
+    exclude = ("created_at", "updated_at")
+
     list_filter = (
         TextFieldFilter.factory("unicef_id__iexact", "UNICEF ID"),
         TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
         ("business_area", RelatedFieldComboFilter),
+        "updated_at",
+        "last_sync_at",
     )
     raw_id_fields = ("household", "registration_data_import", "business_area")
     fieldsets = [
@@ -177,11 +199,29 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
             None,
             {
                 "fields": (
-                    ("full_name", "withdrawn", "withdrawn_date", "duplicate", "duplicate_date", "is_removed", "removed_date"),
+                    (
+                        "full_name",
+                        "withdrawn",
+                        "duplicate",
+                        "is_removed",
+                    ),
                     ("sex", "birth_date", "marital_status"),
                     ("unicef_id",),
                     ("household", "relationship"),
                 )
+            },
+        ),
+        (
+            "Dates",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    ("created_at", "updated_at"),
+                    "last_sync_at",
+                    "removed_date",
+                    "withdrawn_date",
+                    "duplicate_date",
+                ),
             },
         ),
         (
@@ -198,7 +238,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
         ("Others", {"classes": ("collapse",), "fields": ("__all__",)}),
     ]
 
-    @action()
+    @button()
     def household_members(self, request, pk):
         obj = Individual.objects.get(pk=pk)
         url = reverse("admin:household_individual_changelist")
@@ -206,7 +246,7 @@ class IndividualAdmin(SmartFieldsetMixin, ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("individual_id", "household_id", "role")
     list_filter = ("role",)
     raw_id_fields = (

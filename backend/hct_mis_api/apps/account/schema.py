@@ -1,4 +1,5 @@
 import json
+import logging
 
 import graphene
 from django.contrib.auth import get_user_model
@@ -18,6 +19,8 @@ from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+
+logger = logging.getLogger(__name__)
 
 
 def permissions_resolver(user_roles):

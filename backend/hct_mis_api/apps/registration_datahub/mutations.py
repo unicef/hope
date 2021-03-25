@@ -1,4 +1,5 @@
 import json
+import logging
 import operator
 import time
 from io import BytesIO
@@ -17,8 +18,8 @@ from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import count_population
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.validators import BaseValidator
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_data.schema import RegistrationDataImportNode
@@ -38,10 +39,12 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXValidator,
-    KoboProjectImportDataValidator,
+    UploadXLSXInstanceValidator, KoboProjectImportDataInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
+
+logger = logging.getLogger(__name__)
+
 
 @transaction.atomic(using="default")
 @transaction.atomic(using="registration_datahub")
@@ -134,8 +137,11 @@ class RegistrationDeduplicationMutation(BaseValidator, PermissionMutation):
     @classmethod
     def validate_object_status(cls, rdi_obj, *args, **kwargs):
         if rdi_obj.status != RegistrationDataImport.DEDUPLICATION_FAILED:
+            logger.error(
+                "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
+            )
             raise ValidationError(
-                "Deduplication can only be called when Registration Data Import" "status is Deduplication Failed"
+                "Deduplication can only be called when Registration Data Import status is Deduplication Failed"
             )
 
     @classmethod
@@ -168,6 +174,7 @@ class RegistrationKoboImportMutation(BaseValidator, PermissionMutation, Validati
     def check_is_not_empty(cls, import_data_id):
         import_data = get_object_or_404(ImportData, id=decode_id_string(import_data_id))
         if import_data.number_of_households == 0 and import_data.number_of_individuals == 0:
+            logger.error("Cannot import empty KoBo form")
             raise ValidationError("Cannot import empty KoBo form")
 
     @classmethod
@@ -206,7 +213,8 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
     def validate_object_status(cls, *args, **kwargs):
         status = kwargs.get("status")
         if status != RegistrationDataImport.IN_REVIEW:
-            raise ValidationError("Only In Review Registration Data Import " "can be merged into Population")
+            logger.error("Only In Review Registration Data Import can be merged into Population")
+            raise ValidationError("Only In Review Registration Data Import can be merged into Population")
 
     @classmethod
     @is_authenticated
@@ -234,7 +242,7 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         return MergeRegistrationDataImportMutation(obj_hct)
 
 
-class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
+class UploadImportDataXLSXFile(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(XlsxRowErrorNode)
 
@@ -247,9 +255,7 @@ class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
     def mutate(cls, root, info, file, business_area_slug):
 
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
-
-        errors = cls.validate(file=file, business_area_slug=business_area_slug)
-
+        errors = UploadXLSXInstanceValidator().validate_everything(file, business_area_slug)
         if errors:
             errors.sort(key=operator.itemgetter("row_number", "header"))
             return UploadImportDataXLSXFile(None, errors)
@@ -283,7 +289,7 @@ class UploadImportDataXLSXFile(UploadXLSXValidator, PermissionMutation):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, PermissionMutation):
+class SaveKoboProjectImportDataMutation( PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -294,7 +300,6 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, Permissi
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, uid, business_area_slug):
-
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
         kobo_api = KoboAPI(business_area_slug)
@@ -302,8 +307,8 @@ class SaveKoboProjectImportDataMutation(KoboProjectImportDataValidator, Permissi
         submissions = kobo_api.get_project_submissions(uid)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-
-        errors = cls.validate(submissions=submissions, business_area_name=business_area.name)
+        validator=KoboProjectImportDataInstanceValidator()
+        errors = validator.validate_everything(submissions, business_area.name)
 
         if errors:
             errors.sort(key=operator.itemgetter("header"))

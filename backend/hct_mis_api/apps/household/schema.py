@@ -1,7 +1,6 @@
+import graphene
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Lower
-
-import graphene
 from django_filters import (
     CharFilter,
     FilterSet,
@@ -11,7 +10,6 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
@@ -30,7 +28,9 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     sum_lists_with_values,
     chart_permission_decorator,
-    chart_filters_decoder, resolve_flex_fields_choices_with_correct_labels,
+    chart_filters_decoder,
+    resolve_flex_fields_choices_to_string,
+    get_model_choices_fields,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
@@ -50,11 +50,20 @@ from hct_mis_api.apps.household.models import (
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
+    DISABILITY_CHOICE,
+    SEVERITY_OF_DISABILITY_CHOICES,
+    WORK_STATUS_CHOICE,
 )
-from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
+from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
+from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    SectionTotalNode,
+    FlexFieldsScalar,
+)
 
 INDIVIDUALS_CHART_LABELS = [
     "Females 0-5",
@@ -128,7 +137,7 @@ class HouseholdFilter(FilterSet):
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(
-        field_name="household__business_area__slug",
+        field_name="business_area__slug",
     )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
@@ -197,9 +206,13 @@ class DocumentTypeNode(DjangoObjectType):
 
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = IndividualIdentity
@@ -211,27 +224,6 @@ class DocumentNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-
-class FlexFieldsScalar(graphene.Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return dt
-
-    @staticmethod
-    def parse_literal(node):
-        return node
-
-    @staticmethod
-    def parse_value(value):
-        return value
 
 
 class ExtendedHouseHoldConnection(graphene.Connection):
@@ -304,7 +296,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -396,7 +388,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         return
 
     def resolve_flex_fields(parent, info):
-        return resolve_flex_fields_choices_with_correct_labels(parent)
+        return resolve_flex_fields_choices_to_string(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -433,6 +425,19 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            Individual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+                "work_status",
+                "collect_individual_data",
+            ],
+        )
 
 
 class Query(graphene.ObjectType):
@@ -488,10 +493,13 @@ class Query(graphene.ObjectType):
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
+    work_status_choices = graphene.List(ChoiceObject)
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
+    observed_disability_choices = graphene.List(ChoiceObject)
+    severity_of_disability_choices = graphene.List(ChoiceObject)
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
@@ -529,6 +537,15 @@ class Query(graphene.ObjectType):
 
     def resolve_countries_choices(self, info, **kwargs):
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
+
+    def resolve_severity_of_disability_choices(self, info, **kwargs):
+        return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
+
+    def resolve_observed_disability_choices(self, info, **kwargs):
+        return to_choice_object(DISABILITY_CHOICE)
+
+    def resolve_work_status_choices(self, info, **kwargs):
+        return to_choice_object(WORK_STATUS_CHOICE)
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):

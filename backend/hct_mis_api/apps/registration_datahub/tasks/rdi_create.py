@@ -12,7 +12,6 @@ from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 from django_countries.fields import Country
-from openpyxl_image_loader import SheetImageLoader
 
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -26,7 +25,12 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes
+from hct_mis_api.apps.core.utils import (
+    get_combined_attributes,
+    rename_dict_keys,
+    serialize_flex_attributes,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
@@ -102,10 +106,11 @@ class RdiBaseCreateTask:
                 valid_choices = []
                 for single_choice in values:
                     if isinstance(single_choice, str):
-                        if single_choice in choices:
-                            valid_choices.append(single_choice)
+                        without_trailing_whitespace = single_choice.strip()
+                        if without_trailing_whitespace in choices:
+                            valid_choices.append(without_trailing_whitespace)
                             continue
-                        upper_value = single_choice.upper()
+                        upper_value = without_trailing_whitespace.upper()
                         if upper_value in choices:
                             valid_choices.append(upper_value)
                             continue
@@ -118,7 +123,11 @@ class RdiBaseCreateTask:
                 return valid_choices
             else:
                 if isinstance(value, str):
-                    upper_value = value.upper()
+                    without_trailing_whitespace = value.strip()
+                    if without_trailing_whitespace in choices:
+                        return without_trailing_whitespace
+
+                    upper_value = without_trailing_whitespace.upper()
                     if upper_value in choices:
                         return upper_value
 
@@ -623,7 +632,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         y = float(geopoint[1])
         return Point(x=x, y=y, srid=4326)
 
-    def _cast_and_assign(self, value: Union[str, list], field: str, obj: object):
+    def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]):
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
@@ -641,7 +650,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         else:
             correct_value = self._cast_value(value, field)
 
-        setattr(obj, field_data_dict["name"], correct_value)
+        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
+        if is_flex_field is True:
+            obj.flex_fields[field_data_dict["name"]] = correct_value
+        else:
+            setattr(obj, field_data_dict["name"], correct_value)
 
     def _handle_documents_and_identities(self, documents_and_identities):
         identity_fields = {
@@ -767,7 +780,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 collectors_count += 1
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
-                            elif i_field.endswith("_h_c"):
+                            elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
@@ -795,9 +808,13 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 role=role,
                             )
                             collectors_to_create[individual_obj.get_hash_key].append(role_obj)
+                        if individual_obj.household is None:
+                            individual_obj.relationship = NON_BENEFICIARY
 
-                elif hh_field == "end_h_c":
+                elif hh_field == "end":
                     registration_date = parse(hh_value)
+                elif hh_field == "start":
+                    household_obj.start = parse(hh_value)
                 elif hh_field == "_submission_time":
                     household_obj.kobo_submission_time = parse(hh_value)
                 else:

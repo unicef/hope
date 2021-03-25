@@ -178,7 +178,6 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
             )}
             {canActivate && (
               <ActivateVerificationPlan
-                cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
             )}
@@ -188,13 +187,11 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
           <Box display='flex'>
             {canFinish && (
               <FinishVerificationPlan
-                cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
             )}
             {canDiscard && (
               <DiscardVerificationPlan
-                cashPlanId={cashPlan.id}
                 cashPlanVerificationId={cashPlan.verifications.edges[0].node.id}
               />
             )}
@@ -355,9 +352,7 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 ].map((el) => (
                   <Grid item xs={3} key={el.label}>
                     <Box pt={2} pb={2}>
-                      <LabelizedField label={el.label}>
-                        {el.value}
-                      </LabelizedField>
+                      <LabelizedField label={el.label} value={el.value} />
                     </Box>
                   </Grid>
                 ))}
