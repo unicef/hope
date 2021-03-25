@@ -671,27 +671,23 @@ class CaIdIterator:
         return f"123-21-{self.name.upper()}-{self.last_id:05d}"
 
 
-def resolve_flex_fields_choices_with_correct_labels(parent):
+def resolve_flex_fields_choices_to_string(parent):
     from hct_mis_api.apps.core.models import FlexibleAttribute
+    flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
+    flex_fields_with_str_choices = {**parent.flex_fields}
+    for flex_field_name, value in flex_fields_with_str_choices.items():
+        flex_field = flex_fields.get(flex_field_name)
+        if flex_field is None:
+            continue
 
-    labelled_flex_fields = {**parent.flex_fields}
-    for flex_field_name, value in labelled_flex_fields.items():
-        try:
-            flex_field = FlexibleAttribute.objects.get(name=flex_field_name)
-            choices = dict(flex_field.choices.values_list("name", "label"))
-            if flex_field.type in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
-                if isinstance(value, list):
-                    new_value = [
-                        f"{choices.get(str(current_choice_value.strip()), {}).get('English(EN)') or current_choice_value}, "
-                        for current_choice_value in value
-                    ]
-                else:
-                    new_value = choices.get(str(value), {}).get("English(EN)") or value
-                labelled_flex_fields[flex_field_name] = new_value
-        except FlexibleAttribute.DoesNotExist:
-            pass
+        if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
+            if isinstance(value, list):
+                new_value = [str(current_choice_value) for current_choice_value in value]
+            else:
+                new_value = str(value)
+            flex_fields_with_str_choices[flex_field_name] = new_value
 
-    return labelled_flex_fields
+    return flex_fields_with_str_choices
 
 
 def get_model_choices_fields(model, excluded=None):

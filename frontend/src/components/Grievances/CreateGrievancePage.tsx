@@ -19,6 +19,7 @@ import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import {
   useAllAddIndividualFieldsQuery,
+  useAllEditHouseholdFieldsQuery,
   useAllUsersQuery,
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
@@ -86,13 +87,19 @@ export const dataChangeComponentDict = {
 const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string().required('Category is required').nullable(),
+  category: Yup.string()
+    .required('Category is required')
+    .nullable(),
   admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
-  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
+  selectedPaymentRecords: Yup.array()
+    .of(Yup.string())
+    .nullable(),
+  selectedRelatedTickets: Yup.array()
+    .of(Yup.string())
+    .nullable(),
 });
 
 export function CreateGrievancePage(): React.ReactElement {
@@ -129,21 +136,47 @@ export function CreateGrievancePage(): React.ReactElement {
     data: allAddIndividualFieldsData,
     loading: allAddIndividualFieldsDataLoading,
   } = useAllAddIndividualFieldsQuery();
-
+  const {
+    data: householdFieldsData,
+    loading: householdFieldsLoading,
+  } = useAllEditHouseholdFieldsQuery();
+  const individualFieldsDict = useArrayToDict(
+    allAddIndividualFieldsData?.allAddIndividualsFieldsAttributes,
+    'name',
+    '*',
+  );
+  const householdFieldsDict = useArrayToDict(
+    householdFieldsData?.allEditHouseholdFieldsAttributes,
+    'name',
+    '*',
+  );
   const issueTypeDict = useArrayToDict(
     choicesData?.grievanceTicketIssueTypeChoices,
     'category',
     '*',
   );
 
-  if (userDataLoading || choicesLoading || allAddIndividualFieldsDataLoading)
+  if (
+    userDataLoading ||
+    choicesLoading ||
+    allAddIndividualFieldsDataLoading ||
+    householdFieldsLoading
+  )
     return <LoadingComponent />;
   if (permissions === null) return null;
 
   if (!hasPermissions(PERMISSIONS.GRIEVANCES_CREATE, permissions))
     return <PermissionDenied />;
 
-  if (!choicesData || !userData || !allAddIndividualFieldsData) return null;
+  if (
+    !choicesData ||
+    !userData ||
+    !allAddIndividualFieldsData ||
+    !householdFieldsData ||
+    !householdFieldsDict ||
+    !individualFieldsDict
+  )
+    return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -195,7 +228,14 @@ export function CreateGrievancePage(): React.ReactElement {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
       }}
-      validate={(values) => validate(values, allAddIndividualFieldsData)}
+      validate={(values) =>
+        validate(
+          values,
+          allAddIndividualFieldsData,
+          individualFieldsDict,
+          householdFieldsDict,
+        )
+      }
       validationSchema={validationSchema}
     >
       {({ submitForm, values, setFieldValue, errors, touched }) => {

@@ -156,11 +156,11 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            {individual.household?.id ? (
+            {individual?.household?.id ? (
               <ContentLink
-                href={`/${businessArea}/population/household/${individual.household?.id}`}
+                href={`/${businessArea}/population/household/${individual?.household?.id}`}
               >
-                {individual.household?.unicefId}
+                {individual?.household?.unicefId}
               </ContentLink>
             ) : (
               <span>-</span>

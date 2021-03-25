@@ -25,8 +25,12 @@ from hct_mis_api.apps.core.core_fields_attributes import (
 from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
-from hct_mis_api.apps.core.utils import get_combined_attributes, rename_dict_keys, serialize_flex_attributes, \
-    SheetImageLoader
+from hct_mis_api.apps.core.utils import (
+    get_combined_attributes,
+    rename_dict_keys,
+    serialize_flex_attributes,
+    SheetImageLoader,
+)
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
@@ -804,10 +808,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 role=role,
                             )
                             collectors_to_create[individual_obj.get_hash_key].append(role_obj)
+                        if individual_obj.household is None:
+                            individual_obj.relationship = NON_BENEFICIARY
 
-                elif hh_field == "end_h_c":
+                elif hh_field == "end":
                     registration_date = parse(hh_value)
-                elif hh_field == "start_h_c":
+                elif hh_field == "start":
                     household_obj.start = parse(hh_value)
                 elif hh_field == "_submission_time":
                     household_obj.kobo_submission_time = parse(hh_value)

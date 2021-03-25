@@ -1,12 +1,17 @@
-from adminfilters.filters import RelatedFieldComboFilter, ChoicesFieldComboFilter, TextFieldFilter
 from django.contrib import admin
 
-from .models import Program, CashPlan
-from ..utils.admin import HOPEModelAdminBase
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
+
+from ..utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
+from .models import CashPlan, Program
 
 
 @admin.register(Program)
-class ProgramAdmin(HOPEModelAdminBase):
+class ProgramAdmin(LastSyncDateResetMixin, HOPEModelAdminBase):
     list_display = ("name", "status", "start_date", "end_date", "business_area")
     date_hierarchy = "start_date"
     list_filter = (
