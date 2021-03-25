@@ -32075,7 +32075,7 @@
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "Arg",
+              "name": "FlexFieldsScalar",
               "ofType": null
             },
             "isDeprecated": false,

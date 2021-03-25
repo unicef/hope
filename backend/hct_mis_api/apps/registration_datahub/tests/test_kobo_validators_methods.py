@@ -1,6 +1,8 @@
 from operator import itemgetter
 from unittest import TestCase
 
+from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataInstanceValidator
+
 
 class TestKoboSaveValidatorsMethods(TestCase):
     VALID_JSON = [
@@ -14,8 +16,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_bamboo_dataset_id": "",
             "_tags": [],
             "health_questions/pregnant_member_h_c": "0",
-            "health_questions/start_h_c": "2020-04-28T17:34:22.979+02:00",
-            "health_questions/end_h_c": "2020-05-28T18:56:33.979+02:00",
+            "health_questions/start": "2020-04-28T17:34:22.979+02:00",
+            "health_questions/end": "2020-05-28T18:56:33.979+02:00",
             "household_questions/first_registration_date_h_c": "2020-07-18",
             "household_questions/f_0_5_disability_h_c": "0",
             "household_questions/size_h_c": "1",
@@ -162,7 +164,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "wash_questions/hygiene_materials_h_f": "soap_material",
             "food_security_questions/tubers_roots_h_f": "3",
             "wash_questions/score_childclothes": "2.5",
-            "end_h_c": "2020-05-26T14:35:43.469+02:00",
+            "end": "2020-05-26T14:35:43.469+02:00",
             "wash_questions/total_liter_yesterday_h_f": "30",
             "level_debt_h_f": "111",
             "enumerator/name_enumerator": "test",
@@ -171,7 +173,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "_validation_status": {},
             "food_security_questions/vegetables_h_f": "2",
             "_uuid": "dd376f5c-57c1-4f37-9b5d-482359f38598",
-            "deviceid_h_c": "ee.humanitarianresponse.info:AqAb03KLuEfWXes0",
+            "deviceid": "ee.humanitarianresponse.info:AqAb03KLuEfWXes0",
             "food_security_questions/sugarsweet_h_f": "0",
             "wash_questions/score_cookingpot": "3.5",
             "child_protection_questions/children_safe_h_f": "level_mostly",
@@ -298,7 +300,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
             "monthly_income_questions/total_inc_h_f": "123",
             "child_protection_questions/law_against_underage_work_h_f": "level_rarely",
             "consent/consent_sign_h_c": "signature-12_13_0.png",
-            "start_h_c": "2020-05-26T12:11:01.475+02:00",
+            "start": "2020-05-26T12:11:01.475+02:00",
             "formhub/uuid": "59f3ce8716a0487bb2f82b10a4f3e8e3",
             "household_questions/household_location/hh_geopoint_h_c": "33.760882 67.661513 0 0",
             "household_questions/org_enumerator_h_c": "UNICEF",
@@ -349,9 +351,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
     ]
 
     def setUp(self) -> None:
-        from hct_mis_api.apps.registration_datahub.validators import KoboProjectImportDataValidator
-
-        self.KoboProjectImportDataValidator = KoboProjectImportDataValidator
+        pass
 
     def test_image_validator(self):
         # test for valid value
@@ -386,9 +386,8 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 549819,
             }
         ]
-        result = self.KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", valid_attachments
-        )
+        validator = KoboProjectImportDataInstanceValidator()
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", valid_attachments)
         self.assertIsNone(result, None)
 
         # test for invalid value
@@ -423,19 +422,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 "xform": 449127,
             }
         ]
-        result = self.KoboProjectImportDataValidator.image_validator(
-            "signature-17_10_32.png", "consent_sign_h_c", invalid_attachments
-        )
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", invalid_attachments)
         expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test for empty value
-        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
+        result = validator.image_validator("signature-17_10_32.png", "consent_sign_h_c", [])
         expected = "Specified image signature-17_10_32.png for field " "consent_sign_h_c is not in attachments"
         self.assertEqual(result, expected)
 
         # test invalid file extension
-        result = self.KoboProjectImportDataValidator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
+        result = validator.image_validator("signature-17_10_32.txt", "consent_sign_h_c", [])
         expected = "Specified image signature-17_10_32.txt for field " "consent_sign_h_c is not a valid image file"
         self.assertEqual(result, expected)
 
@@ -452,9 +449,10 @@ class TestKoboSaveValidatorsMethods(TestCase):
             [],
             None,
         )
+        validator = KoboProjectImportDataInstanceValidator()
         for valid_option in valid_geolocations:
             self.assertIsNone(
-                self.KoboProjectImportDataValidator.geopoint_validator(
+                validator.geopoint_validator(
                     valid_option,
                     "hh_geopoint_h_c",
                 )
@@ -462,7 +460,7 @@ class TestKoboSaveValidatorsMethods(TestCase):
 
         for invalid_option in invalid_geolocations:
             self.assertEqual(
-                self.KoboProjectImportDataValidator.geopoint_validator(
+                validator.geopoint_validator(
                     invalid_option,
                     "hh_geopoint_h_c",
                 ),
@@ -490,8 +488,9 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 ),
             },
         )
+        validator = KoboProjectImportDataInstanceValidator()
         for data in test_data:
-            result = self.KoboProjectImportDataValidator.date_validator(*data["args"])
+            result = validator.date_validator(*data["args"])
             self.assertEqual(result, data["expected"])
 
     def test_get_field_type_error(self):
@@ -580,16 +579,17 @@ class TestKoboSaveValidatorsMethods(TestCase):
                 },
             },
         )
-
+        validator = KoboProjectImportDataInstanceValidator()
         for data in test_data:
-            result = self.KoboProjectImportDataValidator._get_field_type_error(*data["args"])
+            result = validator._get_field_type_error(*data["args"])
             self.assertEqual(result, data["expected"])
 
-    def test_validate_fields(self):
-        result = self.KoboProjectImportDataValidator.validate_fields(self.VALID_JSON, "Afghanistan")
+    def test_validate_everything(self):
+        validator = KoboProjectImportDataInstanceValidator()
+        result = validator.validate_everything(self.VALID_JSON, "Afghanistan")
         self.assertEqual(result, [])
 
-        result = self.KoboProjectImportDataValidator.validate_fields(self.INVALID_JSON, "Afghanistan")
+        result = validator.validate_everything(self.INVALID_JSON, "Afghanistan")
 
         result.sort(key=itemgetter("header"))
 

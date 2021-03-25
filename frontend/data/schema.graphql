@@ -1680,7 +1680,7 @@ type ImportedIndividualNode implements Node {
   deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
   deduplicationBatchResults: [DeduplicationResultNode]
   deduplicationGoldenRecordResults: [DeduplicationResultNode]
-  flexFields: Arg
+  flexFields: FlexFieldsScalar
   pregnant: Boolean
   observedDisability: [String]
   seeingDisability: String!

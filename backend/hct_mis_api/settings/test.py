@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from .base import *  # noqa: ignore=F403
+import logging
 
 # dev overrides
 DEBUG = True
@@ -57,3 +58,4 @@ try:
     from .local import *  # noqa: ignore=F403
 except ImportError:
     pass
+logging.disable(logging.CRITICAL)
