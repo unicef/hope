@@ -233,7 +233,7 @@ class SendTPToDatahubTask:
         ids = {head_of_household.id, *collectors_ids}
         individuals_to_create = []
         if program.individual_data_needed:
-            individuals = household.individuals.all()
+            individuals = Individual.objects.filter(Q(Q(household=household) | Q(id__in=ids)))
             for individual in individuals:
                 if self.should_send_individual(individual, household):
                     dh_individual = self.send_individual(
