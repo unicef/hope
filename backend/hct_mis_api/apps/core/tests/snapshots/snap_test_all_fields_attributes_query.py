@@ -80,7 +80,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'specific_residence_h_f',
-                'required': True,
+                'required': False,
                 'type': 'SELECT_ONE'
             },
             {
@@ -2583,7 +2583,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'arm_picture_i_f',
-                'required': True,
+                'required': False,
                 'type': 'IMAGE'
             },
             {
@@ -2656,7 +2656,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'mas_treatment_i_f',
-                'required': True,
+                'required': False,
                 'type': 'SELECT_ONE'
             },
             {
