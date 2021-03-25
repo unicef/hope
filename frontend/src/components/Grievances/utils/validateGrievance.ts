@@ -6,7 +6,6 @@ import {
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
 export function isEmpty(value) {
-  console.log('isEmpty', value === undefined || value === null || value === '');
   return value === undefined || value === null || value === '';
 }
 
@@ -43,12 +42,14 @@ export function validate(
         values.householdDataUpdateFields?.[0]?.fieldName
       ) {
         values.householdDataUpdateFields.forEach((el) => {
-          const { required } = householdFieldsDict[el.fieldName];
-          if (el.fieldValue === 0) {
-            delete errors.householdDataUpdateFields;
-          } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
-            errors.householdDataUpdateFields =
-              'Field and field value are required';
+          if (el?.fieldName) {
+            const { required } = householdFieldsDict[el.fieldName];
+            if (el.fieldValue === 0) {
+              delete errors.householdDataUpdateFields;
+            } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
+              errors.householdDataUpdateFields =
+                'Field and field value are required';
+            }
           }
         });
       }
@@ -71,17 +72,16 @@ export function validate(
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';
       }
-      if (
-        values.individualDataUpdateFields?.length &&
-        values.individualDataUpdateFields[0]?.fieldName
-      ) {
+      if (values.individualDataUpdateFields?.length) {
         values.individualDataUpdateFields.forEach((el) => {
-          const { required } = individualFieldsDict[el.fieldName];
-          if (el.fieldValue === 0) {
-            delete errors.individualDataUpdateFields;
-          } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
-            errors.individualDataUpdateFields =
-              'Field and field value are required';
+          if (el?.fieldName) {
+            const { required } = individualFieldsDict[el.fieldName];
+            if (el.fieldValue === 0) {
+              delete errors.individualDataUpdateFields;
+            } else if (!el.fieldName || (isEmpty(el.fieldValue) && required)) {
+              errors.individualDataUpdateFields =
+                'Field and field value are required';
+            }
           }
         });
       }
