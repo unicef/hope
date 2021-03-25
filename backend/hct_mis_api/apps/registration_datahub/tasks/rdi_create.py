@@ -805,9 +805,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             )
                             collectors_to_create[individual_obj.get_hash_key].append(role_obj)
 
-                elif hh_field == "end_h_c":
+                elif hh_field == "end":
                     registration_date = parse(hh_value)
-                elif hh_field == "start_h_c":
+                elif hh_field == "start":
                     household_obj.start = parse(hh_value)
                 elif hh_field == "_submission_time":
                     household_obj.kobo_submission_time = parse(hh_value)
