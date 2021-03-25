@@ -31,4 +31,4 @@ class Command(BaseCommand):
         call_command("loadadminareas", "--business_area", "Somalia")
         call_command("loadadminareas", "--business_area", "South Sudan")
         call_command("loadadminareas", "--business_area", "Jordan")
-        call_command("loadadminareas", "--business_area", "Central African Republic ")
+        call_command("loadadminareas", "--business_area", "Central African Republic")
