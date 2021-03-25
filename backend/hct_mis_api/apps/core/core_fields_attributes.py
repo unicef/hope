@@ -1186,7 +1186,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "deviceid_h_c",
+        "xlsx_field": "deviceid",
     },
     {
         "id": "8f379d33-c5fd-4344-ba2b-73e136aba13a",
@@ -1305,7 +1305,7 @@ FIELDS_EXCLUDED_FROM_RDI = {
 }
 
 KOBO_ONLY_HOUSEHOLD_FIELDS = {
-    "start_h_c": {
+    "start": {
         "id": "9da8c56a-3c65-47d9-8149-699761842ce4",
         "type": TYPE_STRING,
         "name": "start",
@@ -1315,9 +1315,9 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "start_h_c",
+        "xlsx_field": "start",
     },
-    "end_h_c": {
+    "end": {
         "id": "06e4c4a0-28d2-4530-be24-92623a5b48b0",
         "type": TYPE_STRING,
         "name": "end",
@@ -1327,7 +1327,7 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "hint": "",
         "choices": [],
         "associated_with": _HOUSEHOLD,
-        "xlsx_field": "end_h_c",
+        "xlsx_field": "end",
     },
 }
 
