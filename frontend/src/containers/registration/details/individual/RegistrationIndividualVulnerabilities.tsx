@@ -52,7 +52,7 @@ export function RegistrationIndividualVulnerabilities({
 
   const fields = Object.entries(individual.flexFields || {}).map(
     ([key, value]: [string, string | string[]]) => {
-      if (flexAttributesDict[key].type === 'IMAGE') {
+      if (flexAttributesDict[key]?.type === 'IMAGE') {
         return (
           <LabelizedField
             key={key}
@@ -63,8 +63,8 @@ export function RegistrationIndividualVulnerabilities({
         );
       }
       if (
-        flexAttributesDict[key].type === 'SELECT_MANY' ||
-        flexAttributesDict[key].type === 'SELECT_ONE'
+        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
+        flexAttributesDict[key]?.type === 'SELECT_ONE'
       ) {
         let newValue =
           flexAttributesDict[key].choices.find((item) => item.value === value)
