@@ -158,6 +158,12 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
+UNHCR = "UNHCR"
+WFP = "WFP"
+AGENCY_TYPE_CHOICES = {
+    (UNHCR, _("UNHCR")),
+    (WFP, _("WFP")),
+}
 STATUS_ACTIVE = "ACTIVE"
 STATUS_INACTIVE = "INACTIVE"
 STATUS_WITHDRAWN = "WITHDRAWN"
@@ -460,11 +466,19 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
 
 class Agency(models.Model):
-    type = models.CharField(max_length=100, unique=True)
+    type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
     label = models.CharField(
         max_length=100,
     )
     country = CountryField()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["type", "country"],
+                name="unique_type_and_country",
+            )
+        ]
 
     def __str__(self):
         return self.label

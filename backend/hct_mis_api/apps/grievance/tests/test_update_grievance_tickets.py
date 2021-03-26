@@ -358,7 +358,6 @@ class TestUpdateGrievanceTickets(APITestCase):
         )
         self.individual_data_change_grievance_ticket.refresh_from_db()
         result = self.individual_data_change_grievance_ticket.individual_data_update_ticket_details.individual_data
-        expected_result = None
         if name == "with_permission":
             expected_result = {
                 "sex": {"value": "MALE", "approve_status": False, "previous_value": "FEMALE"},
@@ -372,34 +371,37 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "full_name": {"value": "John Example", "approve_status": False, "previous_value": "Benjamin Butler"},
                 "birth_date": {"value": "1962-12-21", "approve_status": False, "previous_value": "1943-07-30"},
                 "given_name": {"value": "John", "approve_status": False, "previous_value": "Benjamin"},
+                "identities": [],
                 "family_name": {"value": "Example", "approve_status": False, "previous_value": "Butler"},
                 "flex_fields": {},
                 "marital_status": {"value": "SINGLE", "approve_status": False, "previous_value": "DIVORCED"},
                 "previous_documents": {},
                 "documents_to_remove": [],
+                "previous_identities": {},
+                "identities_to_remove": [],
             }
 
         else:
             expected_result = {
-                "given_name": {"value": "Test", "approve_status": True},
-                "full_name": {"value": "Test Example", "approve_status": True},
-                "family_name": {"value": "Example", "approve_status": True},
                 "sex": {"value": "MALE", "approve_status": False},
-                "birth_date": {"value": "1980-02-01", "approve_status": False},
-                "marital_status": {"value": "SINGLE", "approve_status": True},
                 "role": {"value": "PRIMARY", "approve_status": True},
                 "documents": [
                     {
-                        "value": {"country": "POL", "type": "NATIONAL_ID", "number": "999-888-777"},
+                        "value": {"type": "NATIONAL_ID", "number": "999-888-777", "country": "POL"},
                         "approve_status": True,
-                    },
+                    }
                 ],
+                "full_name": {"value": "Test Example", "approve_status": True},
+                "birth_date": {"value": "1980-02-01", "approve_status": False},
+                "given_name": {"value": "Test", "approve_status": True},
+                "family_name": {"value": "Example", "approve_status": True},
+                "relationship": "UNKNOWN",
+                "marital_status": {"value": "SINGLE", "approve_status": True},
                 "documents_to_remove": [
                     {"value": self.id_to_base64(self.national_id.id, "DocumentNode"), "approve_status": True},
                     {"value": self.id_to_base64(self.birth_certificate.id, "DocumentNode"), "approve_status": False},
                 ],
                 "estimated_birth_date": False,
-                "relationship": "UNKNOWN",
             }
         self.assertEqual(result, expected_result)
         if name == "without_permission":
