@@ -1,12 +1,15 @@
+from django.db.transaction import atomic
+
+from hct_mis_api.apps.erp_datahub.utils import (
+    get_exchange_rate_for_cash_plan,
+    get_payment_record_delivered_quantity_in_usd,
+)
 from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.program.models import CashPlan
-from hct_mis_api.apps.erp_datahub.utils import (
-    get_payment_record_delivered_quantity_in_usd,
-    get_exchange_rate_for_cash_plan,
-)
 
 
 class PullFromErpDatahubTask:
+    @atomic()
     def execute(self):
         self.update_cash_plans()
         self.update_payment_records()
