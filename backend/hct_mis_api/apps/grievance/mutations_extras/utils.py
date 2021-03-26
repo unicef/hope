@@ -37,6 +37,29 @@ def handle_add_document(document, individual):
     return Document(document_number=number, individual=individual, type=document_type)
 
 
+def handle_add_identity(identity, individual):
+    from django_countries.fields import Country
+    from graphql import GraphQLError
+    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+
+    agency_name = identity.get("agency")
+    country_code = identity.get("country")
+    country = Country(country_code)
+    number = identity.get("number")
+    agency_type, _ = Agency.objects.get_or_create(
+        country=country,
+        type=agency_name,
+        defaults={"country": country, "type": agency_name, "label": f"{country.name} - {agency_name}"},
+    )
+
+    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
+    if identity_already_exists:
+        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
+        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+
+    return IndividualIdentity(number=number, individual=individual, agency=agency_type)
+
+
 def prepare_previous_documents(documents_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
@@ -55,6 +78,26 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
         }
 
     return previous_documents
+
+
+def prepare_previous_identities(identities_to_remove_with_approve_status):
+    from django.shortcuts import get_object_or_404
+    from hct_mis_api.apps.core.utils import encode_id_base64
+    from hct_mis_api.apps.household.models import IndividualIdentity
+
+    previous_identities = {}
+    for identity_data in identities_to_remove_with_approve_status:
+        identity_id = identity_data.get("value")
+        identity = get_object_or_404(IndividualIdentity, id=identity_id)
+        previous_identities[identity.id] = {
+            "id": identity.id,
+            "number": identity.number,
+            "individual": encode_id_base64(identity.individual.id, "Individual"),
+            "label": identity.agency.label,
+            "country": identity.agency.country.alpha3,
+        }
+
+    return previous_identities
 
 
 def verify_required_arguments(input_data, field_name, options):

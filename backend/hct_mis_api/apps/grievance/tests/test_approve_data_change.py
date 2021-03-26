@@ -47,14 +47,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $individualApproveData: JSONString,
       $flexFieldsApproveData: JSONString, 
       $approvedDocumentsToCreate: [Int], 
-      $approvedDocumentsToRemove: [Int]
+      $approvedDocumentsToRemove: [Int],
+      $approvedIdentitiesToCreate: [Int], 
+      $approvedIdentitiesToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId, 
         individualApproveData: $individualApproveData,
         flexFieldsApproveData: $flexFieldsApproveData,
         approvedDocumentsToCreate: $approvedDocumentsToCreate, 
-        approvedDocumentsToRemove: $approvedDocumentsToRemove
+        approvedDocumentsToRemove: $approvedDocumentsToRemove,
+        approvedIdentitiesToCreate: $approvedIdentitiesToCreate, 
+        approvedIdentitiesToRemove: $approvedIdentitiesToRemove
       ) {
         grievanceTicket {
           id
@@ -276,6 +280,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
                 "approvedDocumentsToCreate": [0],
                 "approvedDocumentsToRemove": [0],
+                "approvedIdentitiesToCreate": [],
+                "approvedIdentitiesToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )
