@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     MaxMinFilter,
@@ -63,7 +64,7 @@ class HouseholdAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdminB
         TextFieldFilter.factory("unhcr_id", "UNHCR ID"),
         TextFieldFilter.factory("id", "MIS ID"),
         # ("country", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         ("size", MaxMinFilter),
         "org_enumerator",
         "last_registration_date",
@@ -189,7 +190,7 @@ class IndividualAdmin(LastSyncDateResetMixin, SmartFieldsetMixin, HOPEModelAdmin
         TextFieldFilter.factory("household__unicef_id__iexact", "Household ID"),
         ("deduplication_golden_record_status", ChoicesFieldComboFilter),
         ("deduplication_batch_status", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         "updated_at",
         "last_sync_at",
     )
