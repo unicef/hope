@@ -1,14 +1,15 @@
 import logging
 
-import xlrd
-from admin_extra_urls.api import ExtraUrlMixin, button
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.messages import ERROR
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.html import format_html
+
+import xlrd
+from admin_extra_urls.api import ExtraUrlMixin, button
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
@@ -43,6 +44,7 @@ class TestRapidproForm(forms.Form):
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
+    search_fields = ("name",)
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
