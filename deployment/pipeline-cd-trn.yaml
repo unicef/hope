@@ -77,6 +77,5 @@ stages:
                 ingress.tls=true,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.enabled=false,\
                 cashassistdatahubpostgresql.postgresqlPassword=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),"
