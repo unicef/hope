@@ -207,11 +207,16 @@ export type AgeInput = {
 export type AgencyNode = {
    __typename?: 'AgencyNode',
   id: Scalars['ID'],
-  type: Scalars['String'],
+  type: AgencyType,
   label: Scalars['String'],
   country?: Maybe<Scalars['String']>,
   individualIdentities: Array<IndividualIdentityNode>,
 };
+
+export enum AgencyType {
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
+}
 
 export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
@@ -813,6 +818,7 @@ export type DocumentNode = Node & {
   individual: IndividualNode,
   type: DocumentTypeNode,
   status: DocumentStatus,
+  country?: Maybe<Scalars['String']>,
 };
 
 export type DocumentNodeConnection = {
@@ -1487,6 +1493,7 @@ export type ImportedDocumentNode = Node & {
   photo: Scalars['String'],
   individual: ImportedIndividualNode,
   type: ImportedDocumentTypeNode,
+  country?: Maybe<Scalars['String']>,
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -5462,7 +5469,7 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
@@ -5507,7 +5514,7 @@ export type IndividualDetailedFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
@@ -8115,7 +8122,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedDocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedDocumentNode' }
-        & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
+        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
           & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
@@ -8408,6 +8415,7 @@ export const IndividualMinimalFragmentDoc = gql`
     edges {
       node {
         id
+        country
         documentNumber
         type {
           country
@@ -8577,6 +8585,7 @@ export const IndividualDetailedFragmentDoc = gql`
     edges {
       node {
         id
+        country
         type {
           country
           label
@@ -8915,6 +8924,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     edges {
       node {
         id
+        country
         type {
           label
           country
@@ -15990,6 +16000,7 @@ export type ResolversTypes = {
   DocumentStatus: DocumentStatus,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
   AgencyNode: ResolverTypeWrapper<AgencyNode>,
+  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
@@ -16311,6 +16322,7 @@ export type ResolversParentTypes = {
   DocumentStatus: DocumentStatus,
   IndividualIdentityNode: IndividualIdentityNode,
   AgencyNode: AgencyNode,
+  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: Scalars['GeoJSON'],
@@ -16571,7 +16583,7 @@ export type AgeFilterObjectResolvers<ContextType = any, ParentType extends Resol
 
 export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
@@ -16883,6 +16895,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
@@ -17132,6 +17145,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
