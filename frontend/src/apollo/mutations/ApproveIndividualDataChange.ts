@@ -6,6 +6,8 @@ export const ApproveIndividualDataChange = gql`
     $flexFieldsApproveData: JSONString
     $approvedDocumentsToCreate: [Int]
     $approvedDocumentsToRemove: [Int]
+    $approvedIdentitiesToCreate: [Int]
+    $approvedIdentitiesToRemove: [Int]
   ) {
     approveIndividualDataChange(
       grievanceTicketId: $grievanceTicketId
@@ -13,6 +15,8 @@ export const ApproveIndividualDataChange = gql`
       flexFieldsApproveData: $flexFieldsApproveData
       approvedDocumentsToCreate: $approvedDocumentsToCreate
       approvedDocumentsToRemove: $approvedDocumentsToRemove
+      approvedIdentitiesToCreate: $approvedIdentitiesToCreate
+      approvedIdentitiesToRemove: $approvedIdentitiesToRemove
     ) {
       grievanceTicket {
         id
