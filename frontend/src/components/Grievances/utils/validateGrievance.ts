@@ -5,7 +5,7 @@ import {
 } from '../../../utils/constants';
 import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
 
-export function isEmpty(value) {
+export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';
 }
 
@@ -67,7 +67,9 @@ export function validate(
         values.selectedIndividual &&
         !values.individualDataUpdateFields[0]?.fieldName &&
         !values.individualDataUpdateFieldsDocuments?.length &&
-        !values.individualDataUpdateDocumentsToRemove?.length
+        !values.individualDataUpdateDocumentsToRemove?.length &&
+        !values.individualDataUpdateFieldsIdentities?.length &&
+        !values.individualDataUpdateIdentitiesToRemove?.length
       ) {
         errors.individualDataUpdateFields =
           'Individual Data Change is Required';
@@ -92,6 +94,15 @@ export function validate(
           if (!doc.country || !doc.type || !doc.number) {
             errors.individualDataUpdateFieldsDocuments =
               'Document country, type and number are required';
+          }
+        });
+      }
+      if (values.individualDataUpdateFieldsIdentities?.length) {
+        values.individualDataUpdateFieldsIdentities.forEach((el, index) => {
+          const doc = values.individualDataUpdateFieldsIdentities[index];
+          if (!doc.country || !doc.agency || !doc.number) {
+            errors.individualDataUpdateFieldsIdentities =
+              'Identity country, agency and number are required';
           }
         });
       }

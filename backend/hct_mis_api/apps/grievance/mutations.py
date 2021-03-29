@@ -578,6 +578,8 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data = graphene.JSONString()
         approved_documents_to_create = graphene.List(graphene.Int)
         approved_documents_to_remove = graphene.List(graphene.Int)
+        approved_identities_to_create = graphene.List(graphene.Int)
+        approved_identities_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -592,6 +594,8 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data,
         approved_documents_to_create,
         approved_documents_to_remove,
+        approved_identities_to_create,
+        approved_identities_to_remove,
         flex_fields_approve_data,
         **kwargs,
     ):
@@ -625,6 +629,15 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
                         document_data["approve_status"] = True
                     else:
                         document_data["approve_status"] = False
+            elif field_name in ("identities", "identities_to_remove"):
+                for index, identity_data in enumerate(individual_data[field_name]):
+                    approved_identities_indexes = (
+                        approved_identities_to_create if field_name == "identities" else approved_identities_to_remove
+                    )
+                    if index in approved_identities_indexes:
+                        identity_data["approve_status"] = True
+                    else:
+                        identity_data["approve_status"] = False
             elif field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
