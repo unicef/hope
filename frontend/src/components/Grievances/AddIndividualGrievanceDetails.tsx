@@ -49,10 +49,13 @@ export function AddIndividualGrievanceDetails({
     ...ticket.addIndividualTicketDetails?.individualData,
   };
   const documents = individualData?.documents;
+  const identities = individualData?.identities;
   delete individualData.documents;
+  delete individualData.identities;
   const flexFields = individualData?.flex_fields;
   delete individualData?.flex_fields;
   delete individualData.documents;
+  delete individualData.identities;
   const labels =
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
@@ -89,7 +92,18 @@ export function AddIndividualGrievanceDetails({
         </Grid>
       );
     }) || [];
-  const allLabels = [...labels, ...flexFieldLabels, ...documentLabels];
+  const identityLabels =
+    identities?.map((item) => {
+      return (
+        <Grid key={item.country + item.agency} item xs={6}>
+          <LabelizedField
+            label={item.agency}
+            value={item.number}
+          />
+        </Grid>
+      );
+    }) || [];
+  const allLabels = [...labels, ...flexFieldLabels, ...documentLabels, ...identityLabels];
   return (
     <StyledBox>
       <Title>
