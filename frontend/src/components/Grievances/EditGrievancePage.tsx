@@ -206,6 +206,7 @@ export function EditGrievancePage(): React.ReactElement {
       'householdDataUpdateFields',
       'individualDataUpdateFields',
       'individualDataUpdateFieldsDocuments',
+      'individualDataUpdateFieldsIdentities',
     ].map(
       (fieldname) =>
         isInvalid(fieldname, errors, touched) && (
