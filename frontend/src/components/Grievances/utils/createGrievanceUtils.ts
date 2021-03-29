@@ -119,6 +119,29 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+  console.log({
+    variables: {
+      input: {
+        ...requiredVariables,
+        issueType: values.issueType,
+        linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          issueType: {
+            individualDataUpdateIssueTypeExtras: {
+              individual: values.selectedIndividual?.id,
+              individualData: {
+                ...individualData,
+                documents: values.individualDataUpdateFieldsDocuments,
+                documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+                identities: values.individualDataUpdateFieldsIdentities,
+                identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   return {
     variables: {
       input: {
@@ -133,6 +156,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 ...individualData,
                 documents: values.individualDataUpdateFieldsDocuments,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+                identities: values.individualDataUpdateFieldsIdentities,
+                identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
               },
             },
           },
