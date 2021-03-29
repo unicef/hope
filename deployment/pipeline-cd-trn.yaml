@@ -8,7 +8,6 @@ resources:
       branches:
       - staging
       - master
-      - ops/*
 
 variables:
   # ========================================================================
