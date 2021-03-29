@@ -13,9 +13,9 @@ import {
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { DocumentField } from './DocumentField';
-import {FormikBoolFieldGrievances} from "./FormikBoolFieldGrievances";
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { AgencyField } from './AgencyField';
 
 const Title = styled.div`
   width: 100%;
@@ -173,6 +173,43 @@ export const AddIndividualDataChange = ({
                   >
                     <AddIcon />
                     Add Document
+                  </Button>
+                </Grid>
+              </>
+            );
+          }}
+        />
+      </Grid>
+      <Grid container spacing={3}>
+        <FieldArray
+          name='individualData.identities'
+          render={(arrayHelpers) => {
+            return (
+              <>
+                {values.individualData?.identities?.map((item, index) => (
+                  <AgencyField
+                    index={index}
+                    onDelete={() => arrayHelpers.remove(index)}
+                    countryChoices={data.countriesChoices}
+                    identityTypeChoices={data.identityTypeChoices}
+                    baseName='individualData.identities'
+                  />
+                ))}
+
+                <Grid item xs={8} />
+                <Grid item xs={12}>
+                  <Button
+                    color='primary'
+                    onClick={() => {
+                      arrayHelpers.push({
+                        country: null,
+                        agency: null,
+                        number: '',
+                      });
+                    }}
+                  >
+                    <AddIcon />
+                    Add Identity
                   </Button>
                 </Grid>
               </>

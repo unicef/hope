@@ -31,6 +31,14 @@ export const individualMinimal = gql`
         }
       }
     }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
+    }
 
     household {
       id
@@ -98,6 +106,14 @@ export const individualDetailed = gql`
           documentNumber
         }
       }
+    }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
     }
     enrolledInNutritionProgramme
     administrationOfRutf
