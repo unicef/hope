@@ -53,6 +53,8 @@ from hct_mis_api.apps.household.models import (
     DISABILITY_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
     WORK_STATUS_CHOICE,
+    AGENCY_TYPE_CHOICES,
+    Agency,
 )
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -204,6 +206,16 @@ class DocumentTypeNode(DjangoObjectType):
         model = DocumentType
 
 
+class AgencyNode(DjangoObjectType):
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parent, info):
+        return parent.country.name
+
+    class Meta:
+        model = Agency
+
+
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
     country = graphene.String(description="Agency country")
@@ -219,6 +231,11 @@ class IndividualIdentityNode(DjangoObjectType):
 
 
 class DocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+
+    def resolve_country(parent, info):
+        return getattr(parent.type.country, "name", parent.type.country)
+
     class Meta:
         model = Document
         filter_fields = []
@@ -497,6 +514,7 @@ class Query(graphene.ObjectType):
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
+    identity_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
     observed_disability_choices = graphene.List(ChoiceObject)
     severity_of_disability_choices = graphene.List(ChoiceObject)
@@ -534,6 +552,9 @@ class Query(graphene.ObjectType):
 
     def resolve_document_type_choices(self, info, **kwargs):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
+
+    def resolve_identity_type_choices(self, info, **kwargs):
+        return to_choice_object(AGENCY_TYPE_CHOICES)
 
     def resolve_countries_choices(self, info, **kwargs):
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
