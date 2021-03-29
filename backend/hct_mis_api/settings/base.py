@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import logging
 import os
+import re
 import sys
 
 ####
@@ -520,15 +521,25 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", False)
 
+from smart_admin.utils import match, regex
+
 SMART_ADMIN_SECTIONS = {
-    "Security": ["account", "auth"],
+    "HOPE": [
+        "program",
+        match("household.H*"),
+        regex(r"household\.I.*"),
+        "targeting",
+        "payment",
+    ],
+    "Grievance": ["grievance"],
+    "Configuration": ["core", "constance", "household", "household.agency"],
     "Rule Engine": [
         "steficon",
     ],
+    "Security": ["account", "auth"],
     "Logs": [
         "admin.LogEntry",
     ],
-    "Grievance": ["grievance"],
     "Kobo": [
         "core.FlexibleAttributeChoice",
         "core.XLSXKoboTemplate",
@@ -546,6 +557,4 @@ SMART_ADMIN_SECTIONS = {
         "constance",
         "sites",
     ],
-    "Other": [],
-    "_hidden_": [],
 }

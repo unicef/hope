@@ -1,7 +1,12 @@
-from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
 from django.contrib import admin
 
-from hct_mis_api.apps.payment.models import PaymentRecord, CashPlanPaymentVerification, PaymentVerification
+from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+
+from hct_mis_api.apps.payment.models import (
+    CashPlanPaymentVerification,
+    PaymentRecord,
+    PaymentVerification,
+)
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
@@ -18,7 +23,9 @@ class PaymentRecordAdmin(HOPEModelAdminBase):
         "business_area",
         "cash_plan",
         "household",
+        "head_of_household",
         "target_population",
+        "service_provider",
     )
 
     def cash_plan_name(self, obj):
