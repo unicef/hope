@@ -23,6 +23,7 @@ export const individualMinimal = gql`
       edges {
         node {
           id
+          country
           documentNumber
           type {
             country
@@ -30,6 +31,14 @@ export const individualMinimal = gql`
           }
         }
       }
+    }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
     }
 
     household {
@@ -91,6 +100,7 @@ export const individualDetailed = gql`
       edges {
         node {
           id
+          country
           type {
             country
             label
@@ -98,6 +108,14 @@ export const individualDetailed = gql`
           documentNumber
         }
       }
+    }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
     }
     enrolledInNutritionProgramme
     administrationOfRutf

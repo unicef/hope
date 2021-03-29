@@ -145,6 +145,7 @@ export const importedIndividualDetailed = gql`
       edges {
         node {
           id
+          country
           type {
             label
             country

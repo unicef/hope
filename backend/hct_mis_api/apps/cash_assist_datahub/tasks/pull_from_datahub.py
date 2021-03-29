@@ -7,14 +7,13 @@ from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import nested_getattr
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
-from hct_mis_api.apps.program.models import CashPlan, Program
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
-from sentry_sdk import capture_exception
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
+from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 log = logging.getLogger(__name__)
 
@@ -79,24 +78,36 @@ class PullFromDatahubTask:
         "vision_id": "vision_id",
     }
 
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="cash_assist_datahub_ca")
     def execute(self):
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
+        ret = {
+            "grouped_session": 0,
+            "skipped_due_failure": [],
+            "successes": [],
+            "failures": [],
+        }
         for group in grouped_session:
-            session_queryset = Session.objects.filter(business_area=group.get("business_area"))
+            ret["grouped_session"] += 1
+            business_area = group.get("business_area")
+            session_queryset = Session.objects.filter(business_area=business_area)
             # if any session in this business area fails omit other sessions in this business area
             if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
+                ret["skipped_due_failure"].append(business_area)
                 continue
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
             for session in sessions:
                 try:
-                    self.copy_session(session)
+                    with transaction.atomic(using="default"):
+                        with transaction.atomic(using="cash_assist_datahub_ca"):
+                            self.copy_session(session)
+                            ret["successes"].append(session.id)
                 except Exception as e:
+                    ret["failures"].append(session.id)
+                    log.exception(e)
                     session.status = Session.STATUS_FAILED
                     session.save()
-                    capture_exception(e)
-                    log.exception(e)
+
+        return ret
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
