@@ -35,6 +35,7 @@ input AddIndividualDataObjectType {
   whoAnswersAltPhone: String
   role: String!
   documents: [IndividualDocumentObjectType]
+  identities: [IndividualIdentityObjectType]
   businessArea: String
   flexFields: Arg
 }
@@ -107,6 +108,19 @@ type AgeFilterObject {
 input AgeInput {
   min: Int
   max: Int
+}
+
+type AgencyNode {
+  id: ID!
+  type: AgencyType!
+  label: String!
+  country: String
+  individualIdentities: [IndividualIdentityNode!]!
+}
+
+enum AgencyType {
+  WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
@@ -529,6 +543,7 @@ type DocumentNode implements Node {
   individual: IndividualNode!
   type: DocumentTypeNode!
   status: DocumentStatus!
+  country: String
 }
 
 type DocumentNodeConnection {
@@ -1061,6 +1076,7 @@ type ImportedDocumentNode implements Node {
   photo: String!
   individual: ImportedIndividualNode!
   type: ImportedDocumentTypeNode!
+  country: String
 }
 
 type ImportedDocumentNodeConnection {
@@ -1749,10 +1765,17 @@ input IndividualDocumentObjectType {
 
 type IndividualIdentityNode {
   id: ID!
+  agency: AgencyNode!
   individual: IndividualNode!
   number: String!
   type: String
   country: String
+}
+
+input IndividualIdentityObjectType {
+  country: String!
+  agency: String!
+  number: String!
 }
 
 enum IndividualMaritalStatus {
@@ -1914,6 +1937,8 @@ input IndividualUpdateDataObjectType {
   role: String
   documents: [IndividualDocumentObjectType]
   documentsToRemove: [ID]
+  identities: [IndividualIdentityObjectType]
+  identitiesToRemove: [ID]
   flexFields: Arg
 }
 
@@ -2007,7 +2032,7 @@ type Mutations {
   updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
   grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
   createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
-  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
   approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
@@ -2331,6 +2356,7 @@ type Query {
   relationshipChoices: [ChoiceObject]
   roleChoices: [ChoiceObject]
   documentTypeChoices: [ChoiceObject]
+  identityTypeChoices: [ChoiceObject]
   countriesChoices: [ChoiceObject]
   observedDisabilityChoices: [ChoiceObject]
   severityOfDisabilityChoices: [ChoiceObject]

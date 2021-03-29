@@ -79,6 +79,7 @@ export type AddIndividualDataObjectType = {
   whoAnswersAltPhone?: Maybe<Scalars['String']>,
   role: Scalars['String'],
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
+  identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
   businessArea?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
@@ -202,6 +203,20 @@ export type AgeInput = {
   min?: Maybe<Scalars['Int']>,
   max?: Maybe<Scalars['Int']>,
 };
+
+export type AgencyNode = {
+   __typename?: 'AgencyNode',
+  id: Scalars['ID'],
+  type: AgencyType,
+  label: Scalars['String'],
+  country?: Maybe<Scalars['String']>,
+  individualIdentities: Array<IndividualIdentityNode>,
+};
+
+export enum AgencyType {
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
+}
 
 export type ApproveTargetPopulationMutation = {
    __typename?: 'ApproveTargetPopulationMutation',
@@ -803,6 +818,7 @@ export type DocumentNode = Node & {
   individual: IndividualNode,
   type: DocumentTypeNode,
   status: DocumentStatus,
+  country?: Maybe<Scalars['String']>,
 };
 
 export type DocumentNodeConnection = {
@@ -1477,6 +1493,7 @@ export type ImportedDocumentNode = Node & {
   photo: Scalars['String'],
   individual: ImportedIndividualNode,
   type: ImportedDocumentTypeNode,
+  country?: Maybe<Scalars['String']>,
 };
 
 export type ImportedDocumentNodeConnection = {
@@ -2207,10 +2224,17 @@ export type IndividualDocumentObjectType = {
 export type IndividualIdentityNode = {
    __typename?: 'IndividualIdentityNode',
   id: Scalars['ID'],
+  agency: AgencyNode,
   individual: IndividualNode,
   number: Scalars['String'],
   type?: Maybe<Scalars['String']>,
   country?: Maybe<Scalars['String']>,
+};
+
+export type IndividualIdentityObjectType = {
+  country: Scalars['String'],
+  agency: Scalars['String'],
+  number: Scalars['String'],
 };
 
 export enum IndividualMaritalStatus {
@@ -2442,6 +2466,8 @@ export type IndividualUpdateDataObjectType = {
   role?: Maybe<Scalars['String']>,
   documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
   documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
+  identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -2619,6 +2645,8 @@ export type MutationsCreateTicketNoteArgs = {
 export type MutationsApproveIndividualDataChangeArgs = {
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
   approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   grievanceTicketId: Scalars['ID'],
   individualApproveData?: Maybe<Scalars['JSONString']>,
@@ -3217,6 +3245,7 @@ export type Query = {
   relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  identityTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   observedDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
   severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
@@ -5440,14 +5469,21 @@ export type IndividualMinimalFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
         ) }
       )> }
     )>> }
-  ), household: Maybe<(
+  ), identities: Array<(
+    { __typename?: 'IndividualIdentityNode' }
+    & Pick<IndividualIdentityNode, 'id' | 'number'>
+    & { agency: (
+      { __typename?: 'AgencyNode' }
+      & Pick<AgencyNode, 'country' | 'label'>
+    ) }
+  )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
     & { admin1: Maybe<(
@@ -5478,7 +5514,7 @@ export type IndividualDetailedFragment = (
       { __typename?: 'DocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'DocumentNode' }
-        & Pick<DocumentNode, 'id' | 'documentNumber'>
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'DocumentTypeNode' }
           & Pick<DocumentTypeNode, 'country' | 'label'>
@@ -5487,7 +5523,11 @@ export type IndividualDetailedFragment = (
     )>> }
   ), identities: Array<(
     { __typename?: 'IndividualIdentityNode' }
-    & Pick<IndividualIdentityNode, 'number' | 'type' | 'country'>
+    & Pick<IndividualIdentityNode, 'id' | 'number' | 'type' | 'country'>
+    & { agency: (
+      { __typename?: 'AgencyNode' }
+      & Pick<AgencyNode, 'country' | 'label'>
+    ) }
   )>, household: Maybe<(
     { __typename?: 'HouseholdNode' }
     & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
@@ -5695,7 +5735,9 @@ export type ApproveIndividualDataChangeMutationVariables = {
   individualApproveData?: Maybe<Scalars['JSONString']>,
   flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
   approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
-  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
+  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
 };
 
 
@@ -6300,6 +6342,9 @@ export type AllAddIndividualFieldsQuery = (
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>>, documentTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, identityTypeChoices: Maybe<Array<Maybe<(
     { __typename?: 'ChoiceObject' }
     & Pick<ChoiceObject, 'name' | 'value'>
   )>>> }
@@ -8077,7 +8122,7 @@ export type ImportedIndividualDetailedFragment = (
       { __typename?: 'ImportedDocumentNodeEdge' }
       & { node: Maybe<(
         { __typename?: 'ImportedDocumentNode' }
-        & Pick<ImportedDocumentNode, 'id' | 'documentNumber'>
+        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber'>
         & { type: (
           { __typename?: 'ImportedDocumentTypeNode' }
           & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
@@ -8370,6 +8415,7 @@ export const IndividualMinimalFragmentDoc = gql`
     edges {
       node {
         id
+        country
         documentNumber
         type {
           country
@@ -8377,6 +8423,14 @@ export const IndividualMinimalFragmentDoc = gql`
         }
       }
     }
+  }
+  identities {
+    id
+    agency {
+      country
+      label
+    }
+    number
   }
   household {
     id
@@ -8531,6 +8585,7 @@ export const IndividualDetailedFragmentDoc = gql`
     edges {
       node {
         id
+        country
         type {
           country
           label
@@ -8538,6 +8593,16 @@ export const IndividualDetailedFragmentDoc = gql`
         documentNumber
       }
     }
+  }
+  identities {
+    id
+    agency {
+      country
+      label
+    }
+    number
+    type
+    country
   }
   enrolledInNutritionProgramme
   administrationOfRutf
@@ -8859,6 +8924,7 @@ export const ImportedIndividualDetailedFragmentDoc = gql`
     edges {
       node {
         id
+        country
         type {
           label
           country
@@ -9121,8 +9187,8 @@ export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof use
 export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
 export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
 export const ApproveIndividualDataChangeDocument = gql`
-    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int]) {
-  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove) {
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
     grievanceTicket {
       id
       status
@@ -9174,6 +9240,8 @@ export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operat
  *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
  *      approvedDocumentsToCreate: // value for 'approvedDocumentsToCreate'
  *      approvedDocumentsToRemove: // value for 'approvedDocumentsToRemove'
+ *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
+ *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
  *   },
  * });
  */
@@ -10985,6 +11053,10 @@ export const AllAddIndividualFieldsDocument = gql`
     value
   }
   documentTypeChoices {
+    name
+    value
+  }
+  identityTypeChoices {
     name
     value
   }
@@ -15927,6 +15999,8 @@ export type ResolversTypes = {
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
   IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
+  AgencyNode: ResolverTypeWrapper<AgencyNode>,
+  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
@@ -16040,6 +16114,7 @@ export type ResolversTypes = {
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDocumentObjectType: IndividualDocumentObjectType,
+  IndividualIdentityObjectType: IndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
@@ -16246,6 +16321,8 @@ export type ResolversParentTypes = {
   DocumentTypeType: DocumentTypeType,
   DocumentStatus: DocumentStatus,
   IndividualIdentityNode: IndividualIdentityNode,
+  AgencyNode: AgencyNode,
+  AgencyType: AgencyType,
   IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
   IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
   GeoJSON: Scalars['GeoJSON'],
@@ -16359,6 +16436,7 @@ export type ResolversParentTypes = {
   IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
   IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
   IndividualDocumentObjectType: IndividualDocumentObjectType,
+  IndividualIdentityObjectType: IndividualIdentityObjectType,
   IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
   AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
   AddIndividualDataObjectType: AddIndividualDataObjectType,
@@ -16501,6 +16579,14 @@ export type AdminAreaTypeNodeEdgeResolvers<ContextType = any, ParentType extends
 export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
   min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
 };
 
 export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
@@ -16809,6 +16895,7 @@ export type DocumentNodeResolvers<ContextType = any, ParentType extends Resolver
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
   status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
@@ -17058,6 +17145,7 @@ export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends 
   photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
   type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
 };
 
 export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
@@ -17232,6 +17320,7 @@ export type IndividualDataChangeApproveMutationResolvers<ContextType = any, Pare
 
 export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  agency?: Resolver<ResolversTypes['AgencyNode'], ParentType, ContextType>,
   individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
   number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
@@ -17665,6 +17754,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  identityTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
   severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
@@ -18514,6 +18604,7 @@ export type Resolvers<ContextType = any> = {
   AdminAreaTypeNodeConnection?: AdminAreaTypeNodeConnectionResolvers<ContextType>,
   AdminAreaTypeNodeEdge?: AdminAreaTypeNodeEdgeResolvers<ContextType>,
   AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
+  AgencyNode?: AgencyNodeResolvers<ContextType>,
   ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
   Arg?: GraphQLScalarType,
   BigInt?: GraphQLScalarType,

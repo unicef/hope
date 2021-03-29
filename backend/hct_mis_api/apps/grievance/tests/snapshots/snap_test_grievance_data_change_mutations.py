@@ -161,12 +161,18 @@ snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_update_individu
                                 'previous_value': 'Benjamin',
                                 'value': 'Test'
                             },
+                            'identities': [
+                            ],
+                            'identities_to_remove': [
+                            ],
                             'marital_status': {
                                 'approve_status': False,
                                 'previous_value': 'WIDOWED',
                                 'value': 'SINGLE'
                             },
                             'previous_documents': {
+                            },
+                            'previous_identities': {
                             },
                             'sex': {
                                 'approve_status': False,
