@@ -16,12 +16,13 @@ import {
   useIndividualLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
 import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
+import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
 const Title = styled.div`
   width: 100%;
@@ -340,6 +341,20 @@ export const EditIndividualDataChange = ({
           individual={individual}
         />
         <NewDocumentFieldArray
+          values={values}
+          addIndividualFieldsData={addIndividualFieldsData}
+        />
+      </Box>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>Identities</Typography>
+        </Title>
+        <ExistingIdentityFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewIdentityFieldArray
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
         />
