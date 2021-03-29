@@ -23,6 +23,7 @@ export const individualMinimal = gql`
       edges {
         node {
           id
+          country
           documentNumber
           type {
             country
@@ -99,6 +100,7 @@ export const individualDetailed = gql`
       edges {
         node {
           id
+          country
           type {
             country
             label

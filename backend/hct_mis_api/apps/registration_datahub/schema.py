@@ -232,6 +232,11 @@ class ImportedDocumentTypeNode(DjangoObjectType):
 
 
 class ImportedDocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+
+    def resolve_country(parent, info):
+        return getattr(parent.type.country, "name", parent.type.country)
+
     class Meta:
         model = ImportedDocument
         filter_fields = []

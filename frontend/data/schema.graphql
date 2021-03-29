@@ -112,10 +112,15 @@ input AgeInput {
 
 type AgencyNode {
   id: ID!
-  type: String!
+  type: AgencyType!
   label: String!
   country: String
   individualIdentities: [IndividualIdentityNode!]!
+}
+
+enum AgencyType {
+  WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
@@ -538,6 +543,7 @@ type DocumentNode implements Node {
   individual: IndividualNode!
   type: DocumentTypeNode!
   status: DocumentStatus!
+  country: String
 }
 
 type DocumentNodeConnection {
@@ -1070,6 +1076,7 @@ type ImportedDocumentNode implements Node {
   photo: String!
   individual: ImportedIndividualNode!
   type: ImportedDocumentTypeNode!
+  country: String
 }
 
 type ImportedDocumentNodeConnection {
