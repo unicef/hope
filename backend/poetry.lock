@@ -323,7 +323,7 @@ tests = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytes
 
 [[package]]
 name = "django-adminfilters"
-version = "1.3.4"
+version = "1.3.5"
 description = "Extra filters for django admin site"
 category = "main"
 optional = false
@@ -1560,7 +1560,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "60ca6df438b8d19169e33a7dda89c3732cd9738ee98d1dad907a19f803cca80b"
+content-hash = "63bf23e4fcdf9137c3d908d6f175e75184568cba4ce3afb38e56caab0933a96d"
 
 [metadata.files]
 amqp = [
@@ -1710,7 +1710,7 @@ django-admin-extra-urls = [
     {file = "django-admin-extra-urls-3.3.tar.gz", hash = "sha256:7e898ccad59400fff52f6e6d970abf2c3ad4522eaea8590f84675ce3d150cd1c"},
 ]
 django-adminfilters = [
-    {file = "django-adminfilters-1.3.4.tar.gz", hash = "sha256:e6c10bb758bc48236e170c54a4933e69026e1bac2fafb2b771253b6c3fa1b649"},
+    {file = "django-adminfilters-1.3.5.tar.gz", hash = "sha256:d93d592ec989175d9a85254637b5191c40322d67f56fa5993b64b2f282ff660a"},
 ]
 django-appconf = [
     {file = "django-appconf-1.0.4.tar.gz", hash = "sha256:be58deb54a43d77d2e1621fe59f787681376d3cd0b8bd8e4758ef6c3a6453380"},
