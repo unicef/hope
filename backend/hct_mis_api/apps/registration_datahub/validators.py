@@ -374,7 +374,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def string_validator(self, value, header, *args, **kwargs):
         try:
             if not self.required_validator(value, header, *args, **kwargs):
-                return True
+                return False
             if value is None:
                 return True
         except Exception as e:
