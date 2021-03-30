@@ -4,6 +4,7 @@ trigger:
     include:
     - develop
     - staging
+    - master
     - ops/*
   paths:
     exclude:
