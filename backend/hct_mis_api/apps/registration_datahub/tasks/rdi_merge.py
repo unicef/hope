@@ -169,6 +169,7 @@ class RdiMergeTask:
         for imported_identity in imported_individual.identities.all():
             agency, _ = Agency.objects.get_or_create(
                 type=imported_identity.agency.type,
+                country=imported_identity.agency.country,
                 label=imported_identity.agency.label,
             )
             identity = IndividualIdentity(
