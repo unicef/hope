@@ -76,7 +76,7 @@ export function IndividualsBioData({
   const mappedIndividualDocumentsIssuers = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3} key={`${edge.node.id}-${edge.node.type.country}`}>
       <LabelizedField label={`${edge.node.type.label} ISSUER`}>
-        {edge.node.type.country}
+        {edge.node.country}
       </LabelizedField>
     </Grid>
   ));

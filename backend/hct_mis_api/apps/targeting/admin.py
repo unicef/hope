@@ -1,14 +1,15 @@
 from django import forms
 from django.contrib import admin, messages
-
 from django.core.validators import MinValueValidator
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
+    MaxMinFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
@@ -39,7 +40,7 @@ class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     search_fields = ("name",)
     list_filter = (
         ("status", ChoicesFieldComboFilter),
-        ("business_area", RelatedFieldComboFilter),
+        ("business_area", AutoCompleteFilter),
         "is_removed",
         "sent_to_datahub",
     )
@@ -103,4 +104,5 @@ class HouseholdSelectionAdmin(HOPEModelAdminBase):
         TextFieldFilter.factory("household__unicef_id", "Household ID"),
         TextFieldFilter.factory("target_population__id", "Target Population ID"),
         "final",
+        ("vulnerability_score", MaxMinFilter),
     )

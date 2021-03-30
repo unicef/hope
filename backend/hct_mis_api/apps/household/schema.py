@@ -53,7 +53,8 @@ from hct_mis_api.apps.household.models import (
     DISABILITY_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
     WORK_STATUS_CHOICE,
-    AGENCY_TYPE_CHOICES, Agency,
+    AGENCY_TYPE_CHOICES,
+    Agency,
 )
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -230,6 +231,11 @@ class IndividualIdentityNode(DjangoObjectType):
 
 
 class DocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+
+    def resolve_country(parent, info):
+        return getattr(parent.type.country, "name", parent.type.country)
+
     class Meta:
         model = Document
         filter_fields = []
