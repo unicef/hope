@@ -27,6 +27,7 @@ class Command(BaseCommand):
         call_command("generateroles")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/superuser.json")
 
+        call_command("loadcountrycodes")
         call_command("loadadminareas", "--business_area", "Afghanistan")
         call_command("loadadminareas", "--business_area", "Somalia")
         call_command("loadadminareas", "--business_area", "South Sudan")

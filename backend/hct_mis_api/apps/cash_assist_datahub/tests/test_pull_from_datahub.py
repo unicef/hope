@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from parameterized import parameterized
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan as DHCashPlan,
@@ -33,6 +34,8 @@ class TestPullDataFromDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         call_command("loadbusinessareas")
+        call_command("loadcountrycodes")
+
         # call_command("generatedocumenttypes")
         # business_area_with_data_sharing = BusinessArea.objects.first()
         # business_area_with_data_sharing.has_data_sharing_agreement = True
@@ -315,3 +318,34 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
         session3.delete()
+
+    @parameterized.expand(
+        [
+            (
+                "equal",
+                "AFG",
+                "AFG",
+            ),
+            (
+                "custom_code",
+                "AUL",
+                "AUS",
+            ),
+        ]
+    )
+    def test_country_mapping(self, _, ca_code, expected):
+        session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session.save()
+        dh_service_provider = DHServiceProvider()
+        dh_service_provider.session = session
+        dh_service_provider.business_area = BusinessArea.objects.first().code
+        dh_service_provider.ca_id = str(uuid.uuid4())
+        dh_service_provider.full_name = "SOME TEST BANK"
+        dh_service_provider.short_name = "STB"
+        dh_service_provider.country = ca_code
+        dh_service_provider.vision_id = "random-sp-vision-id"
+        dh_service_provider.save()
+        task = PullFromDatahubTask()
+        task.copy_service_providers(session)
+        service_provider = ServiceProvider.objects.filter(ca_id=dh_service_provider.ca_id).first()
+        self.assertEqual(service_provider.country, expected)

@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Q
 from django.utils import timezone
 
+from hct_mis_api.apps.core.models import CountryCodeMap
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
     Household,
@@ -48,7 +49,6 @@ class SendTPToDatahubTask:
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
-        "country": "country.alpha3",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
@@ -222,6 +222,7 @@ class SendTPToDatahubTask:
         dh_collectors_households = []
         dh_household = None
         is_creating = False
+        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.code)
         if household.last_sync_at is None or household.last_sync_at <= household.updated_at:
             dh_household = dh_mis_models.Household(**dh_household_args)
             dh_household.unhcr_id = self.get_unhcr_household_id(household)
@@ -229,7 +230,6 @@ class SendTPToDatahubTask:
             is_creating = True
         else:
             dh_household = dh_mis_models.Household.objects.filter(mis_id=household.id).last()
-
         head_of_household = household.head_of_household
         collectors_ids = list(
             household.representatives.filter(
