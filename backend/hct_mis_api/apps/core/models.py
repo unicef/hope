@@ -299,17 +299,34 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
 
 class CountryCodeMapManager(models.Manager):
     def __init__(self):
-        self._cache = {2: {}, 3: {}}
+        self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
     def get_code(self, iso_code):
         iso_code = iso_code.upper()
-        if not self._cache[2]:
+        self.build_cache()
+        return self._cache[len(iso_code)].get(iso_code, iso_code)
+
+    def get_iso3_code(self, ca_code):
+        ca_code = ca_code.upper()
+        self.build_cache()
+
+        return self._cache["ca3"].get(ca_code, ca_code)
+
+    def get_iso2_code(self, ca_code):
+        ca_code = ca_code.upper()
+        self.build_cache()
+
+        return self._cache["ca2"].get(ca_code, ca_code)
+
+
+    def build_cache(self):
+        if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
             for entry in self.all():
                 self._cache[2][entry.country.code] = entry.ca_code
                 self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
-
-        return self._cache[len(iso_code)].get(iso_code, iso_code)
+                self._cache["ca2"][entry.ca_code] = entry.country.code
+                self._cache["ca3"][entry.ca_code] = entry.country.countries.alpha3(entry.country.code)
 
 
 class CountryCodeMap(models.Model):
