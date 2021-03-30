@@ -24,3 +24,4 @@ class Command(BaseCommand):
         call_command("search_index", "--rebuild", "-f")
         call_command("generateroles")
         call_command("loaddata", "hct_mis_api/apps/account/fixtures/superuser.json")
+        call_command("loadcountrycodes")

@@ -5,7 +5,7 @@ from django.db.models import Count
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
@@ -74,7 +74,6 @@ class PullFromDatahubTask:
         "ca_id": "ca_id",
         "full_name": "full_name",
         "short_name": "short_name",
-        "country": "country",
         "vision_id": "vision_id",
     }
 
@@ -179,6 +178,7 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
+            service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
             ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
     def copy_programs_ids(self, session):
