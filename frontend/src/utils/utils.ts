@@ -503,3 +503,10 @@ export const handleValidationErrors = (
   }
   return { nonValidationErrors };
 };
+
+export function renderSomethingOrDash(something) {
+  if (something === null || something === undefined) {
+    return '-';
+  }
+  return something;
+}
