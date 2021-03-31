@@ -154,7 +154,7 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
-            {individual.pregnant ? 'Yes' : 'No'}
+            {renderBoolean(individual.pregnant)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
