@@ -374,7 +374,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
     def string_validator(self, value, header, *args, **kwargs):
         try:
             if not self.required_validator(value, header, *args, **kwargs):
-                return True
+                return False
             if value is None:
                 return True
         except Exception as e:
@@ -779,6 +779,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             except BadZipfile:
                 return [{"row_number": 1, "header": f"{xlsx_file.name}", "message": "Invalid .xlsx file"}]
             errors.extend(self.validate_file_with_template(wb))
+            errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
             business_area_name = BusinessArea.objects.get(slug=business_area_slug).name
@@ -808,7 +809,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                         {
                             "row_number": row,
                             "header": header,
-                            "message": "One or more ids are not attached " "to any household in the file.",
+                            "message": "One or more ids are not attached to any household in the file.",
                         }
                     )
                 collectors_ids.extend(list_of_ids)
@@ -821,14 +822,14 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     {
                         "row_number": 1,
                         "header": header,
-                        "message": f"Household with id: {hh_id} " f"does not have primary collector",
+                        "message": f"Household with id: {hh_id} does not have primary collector",
                     }
                     for hh_id in household_ids_without_collectors
                 )
 
             ids_counter = Counter(collectors_ids)
             erroneous_collectors_ids = [item for item, count in ids_counter.items() if count > 1]
-            message = "Household can contain only one " "primary and one alternate collector"
+            message = "Household can contain only one primary and one alternate collector"
             errors.extend(
                 {"row_number": 1, "header": header, "message": f"{message}, erroneous id: {hh_id}"}
                 for hh_id in erroneous_collectors_ids
@@ -838,11 +839,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             logger.exception(e)
             raise
 
-    def validate_collectors(self, *args, **kwargs):
+    def validate_collectors(self, wb):
         try:
-            xlsx_file = kwargs.get("file")
-            wb = openpyxl.load_workbook(xlsx_file, data_only=True)
-
             errors = []
 
             individuals_sheet = wb["Individuals"]

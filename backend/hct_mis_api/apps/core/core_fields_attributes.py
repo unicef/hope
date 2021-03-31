@@ -5,10 +5,25 @@ from functools import reduce
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from hct_mis_api.apps.core.attributes_qet_queries import (
+    age_to_birth_date_query,
+    get_birth_certificate_document_number_query,
+    get_birth_certificate_issuer_query,
+    get_other_issuer_query,
+    get_other_document_number_query,
+    get_national_id_issuer_query,
+    get_national_id_document_number_query,
+    get_national_passport_issuer_query,
+    get_national_passport_document_number_query,
+    get_electoral_card_issuer_query,
+    get_electoral_card_document_number_query,
+    get_drivers_license_document_number_query,
+    get_drivers_licensee_issuer_query,
+)
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query, admin_area1_query
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, admin_area1_query
 from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICE,
@@ -463,6 +478,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Birth certificate number"},
         "hint": "",
         "choices": [],
+        "get_query": get_birth_certificate_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_no_i_c",
     },
@@ -475,6 +491,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of birth certificate"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_birth_certificate_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_issuer_i_c",
     },
@@ -499,6 +516,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Driver's license number"},
         "hint": "",
         "choices": [],
+        "get_query": get_drivers_license_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_no_i_c",
     },
@@ -511,6 +529,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of driver's license"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_drivers_licensee_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_issuer_i_c",
     },
@@ -535,6 +554,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Electoral card number"},
         "hint": "",
         "choices": [],
+        "get_query": get_electoral_card_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_no_i_c",
     },
@@ -547,6 +567,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of electoral card"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_electoral_card_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_issuer_i_c",
     },
@@ -607,6 +628,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "National passport number"},
         "hint": "",
         "choices": [],
+        "get_query": get_national_passport_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_passport_i_c",
     },
@@ -615,6 +637,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_SELECT_ONE,
         "name": "national_passport_issuer",
         "lookup": "national_passport_issuer",
+        "get_query": get_national_passport_issuer_query,
         "required": False,
         "label": {"English(EN)": "Issuing country of national passport"},
         "hint": "",
@@ -643,6 +666,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "National ID number"},
         "hint": "",
         "choices": [],
+        "get_query": get_national_id_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_no_i_c",
     },
@@ -655,6 +679,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of national ID"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_national_id_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_issuer_i_c",
     },
@@ -727,6 +752,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Other ID number"},
         "hint": "",
         "choices": [],
+        "get_query": get_other_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_no_i_c",
     },
@@ -739,6 +765,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of other ID"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_other_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_issuer_i_c",
     },
