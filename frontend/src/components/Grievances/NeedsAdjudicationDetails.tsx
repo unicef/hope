@@ -61,6 +61,14 @@ export function NeedsAdjudicationDetails({
     'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.';
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
+
+  const isApproveDisabled = (): boolean => {
+    return (
+      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
+      !selectedDuplicate
+    );
+  };
+
   return (
     <StyledBox>
       <Title>
@@ -87,9 +95,7 @@ export function NeedsAdjudicationDetails({
               >
                 {(confirm) => (
                   <Button
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
+                    disabled={isApproveDisabled()}
                     onClick={confirm(() => {
                       approve({
                         variables: {
