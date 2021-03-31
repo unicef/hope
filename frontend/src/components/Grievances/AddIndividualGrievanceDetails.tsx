@@ -11,7 +11,7 @@ import { LabelizedField } from '../LabelizedField';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useSnackbar } from '../../hooks/useSnackBar';
-import { getFlexFieldTextValue } from "../../utils/utils"
+import {getFlexFieldTextValue, renderBoolean} from "../../utils/utils"
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -60,6 +60,9 @@ export function AddIndividualGrievanceDetails({
     Object.entries(individualData || {}).map(([key, value]) => {
       let textValue = value;
       const fieldAttribute = fieldsDict[key];
+      if(fieldAttribute.type==="BOOL"){
+        textValue = renderBoolean(value as boolean);
+      }
       if (fieldAttribute.type === 'SELECT_ONE') {
         textValue = fieldAttribute.choices.find((item) => item.value === value)
           .labelEn;
