@@ -504,9 +504,21 @@ export const handleValidationErrors = (
   return { nonValidationErrors };
 };
 
-export function renderSomethingOrDash(something) {
+export function renderSomethingOrDash(something): number | string | boolean {
   if (something === null || something === undefined) {
     return '-';
   }
   return something;
+}
+
+export function renderBoolean(booleanValue: boolean): string {
+  if (booleanValue === null || booleanValue === undefined) {
+    return '-';
+  }
+  switch (booleanValue) {
+    case true:
+      return 'Yes';
+    default:
+      return 'No';
+  }
 }

@@ -9,7 +9,7 @@ import {
 import {
   getAgeFromDob,
   sexToCapitalize,
-  choicesToDict,
+  choicesToDict, renderBoolean,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
@@ -134,9 +134,7 @@ export function IndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            {individual.estimatedBirthDate
-              ? individual.estimatedBirthDate
-              : 'No'}
+            {renderBoolean(individual.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

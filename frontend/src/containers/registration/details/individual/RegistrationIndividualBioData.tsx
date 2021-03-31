@@ -5,7 +5,7 @@ import {
   decodeIdString,
   getAgeFromDob,
   sexToCapitalize,
-  choicesToDict,
+  choicesToDict, renderBoolean,
 } from '../../../../utils/utils';
 import {
   ImportedIndividualDetailedFragment,
@@ -139,9 +139,7 @@ export function RegistrationIndividualsBioData({
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            {individual.estimatedBirthDate
-              ? individual.estimatedBirthDate
-              : 'No'}
+            {renderBoolean(individual.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
