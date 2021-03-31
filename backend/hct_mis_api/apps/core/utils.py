@@ -223,55 +223,6 @@ def get_combined_attributes():
     }
 
 
-def age_to_birth_date_range_query(field_name, age_min, age_max):
-    import datetime as dt
-
-    from django.db.models import Q
-
-    query_dict = {}
-    this_year = dt.date.today().year
-    if age_min == age_max and age_min is not None:
-        return Q(**{f"{field_name}__year": this_year - age_min})
-    if age_min is not None:
-        query_dict[f"{field_name}__year__lte"] = this_year - age_min
-    if age_max is not None:
-        query_dict[f"{field_name}__year__gte"] = this_year - age_max
-    return Q(**query_dict)
-
-
-def age_to_birth_date_query(comparision_method, args):
-    field_name = "birth_date"
-    comparision_method_args_count = {
-        "RANGE": 2,
-        "NOT_IN_RANGE": 2,
-        "EQUALS": 1,
-        "NOT_EQUALS": 1,
-        "GREATER_THAN": 1,
-        "LESS_THAN": 1,
-    }
-    args_count = comparision_method_args_count.get(comparision_method)
-    if args_count is None:
-        logger.error(f"Age filter query don't supports {comparision_method} type")
-        raise ValidationError(f"Age filter query don't supports {comparision_method} type")
-    if len(args) != args_count:
-        logger.error(f"Age {comparision_method} filter query expect {args_count} arguments")
-        raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
-    if comparision_method == "RANGE":
-        return age_to_birth_date_range_query(field_name, *args)
-    if comparision_method == "NOT_IN_RANGE":
-        return ~(age_to_birth_date_range_query(field_name, *args))
-    if comparision_method == "EQUALS":
-        return age_to_birth_date_range_query(field_name, args[0], args[0])
-    if comparision_method == "NOT_EQUALS":
-        return ~(age_to_birth_date_range_query(field_name, args[0], args[0]))
-    if comparision_method == "GREATER_THAN":
-        return age_to_birth_date_range_query(field_name, args[0], None)
-    if comparision_method == "LESS_THAN":
-        return age_to_birth_date_range_query(field_name, None, args[0])
-    logger.error(f"Age filter query don't supports {comparision_method} type")
-    raise ValidationError(f"Age filter query don't supports {comparision_method} type")
-
-
 def get_attr_value(name, obj, default=None):
     if isinstance(obj, (MutableMapping, dict)):
         return obj.get(name, default)
@@ -673,6 +624,7 @@ class CaIdIterator:
 
 def resolve_flex_fields_choices_to_string(parent):
     from hct_mis_api.apps.core.models import FlexibleAttribute
+
     flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
     flex_fields_with_str_choices = {**parent.flex_fields}
     for flex_field_name, value in flex_fields_with_str_choices.items():
