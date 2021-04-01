@@ -34,6 +34,10 @@ HOUR = MINUTE * 60
 DAY = HOUR * 24
 
 
+class RollbackException(Exception):
+    pass
+
+
 @admin.register(Session)
 class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
@@ -53,12 +57,12 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 with transaction.atomic(using="default"):
                     with transaction.atomic(using="cash_assist_datahub_ca"):
                         runner.copy_session(session)
-                    raise Exception("Success")
+                    raise RollbackException()
+            except RollbackException:
+                self.message_user(request, "Test Completed", messages.SUCCESS)
             except Exception as e:
                 self.message_user(request, str(e), messages.ERROR)
                 logger.exception(e)
-                session.status = Session.STATUS_FAILED
-                session.save()
 
         else:
             return _confirm_action(
