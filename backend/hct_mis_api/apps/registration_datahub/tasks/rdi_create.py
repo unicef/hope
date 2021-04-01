@@ -165,11 +165,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        common_header = header.replace("_no", "")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
-            document_data = self.documents.get(f"individual_{row_num}_{header}")
+            document_data = self.documents.get(f"individual_{row_num}_{common_header}")
 
         if header == "other_id_type_i_c":
             if document_data:
@@ -196,7 +196,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if document_data:
                 document_data["value"] = value
             else:
-                self.documents[f"individual_{row_num}_{header}"] = {
+                self.documents[f"individual_{row_num}_{common_header}"] = {
                     "individual": individual,
                     "name": IDENTIFICATION_TYPE_DICT.get(doc_type),
                     "type": doc_type,
@@ -206,7 +206,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_photo_fields(self, cell, row_num, individual, header, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        header = header.replace("_photo_i_c", "_i_c")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -226,7 +226,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        header = header.replace("_issuer_i_c", "_i_c")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -338,6 +338,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def _create_documents(self):
         docs_to_create = []
+        import ipdb; ipdb.set_trace()
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
             doc_type = ImportedDocumentType.objects.get(
