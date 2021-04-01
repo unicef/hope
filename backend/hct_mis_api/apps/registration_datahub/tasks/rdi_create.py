@@ -672,7 +672,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 is_identity = document_name in identity_fields
 
                 if is_identity:
-                    agency = ImportedAgency.objects.get(
+                    agency, _ = ImportedAgency.objects.get_or_create(
                         type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
                     )
                     identities.append(
@@ -691,7 +691,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if label is None:
                         label = data["name"]
 
-                    document_type = ImportedDocumentType.objects.get(
+                    document_type, _ = ImportedDocumentType.objects.get_or_create(
                         country=country,
                         label=label,
                         type=type_name,
