@@ -3,6 +3,8 @@ import logging
 from django.db import transaction
 from django.db.models import Count
 
+from sentry_sdk import configure_scope, push_scope, set_tag
+
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
@@ -112,16 +114,19 @@ class PullFromDatahubTask:
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
 
     def copy_session(self, session):
-        session.status = session.STATUS_PROCESSING
-        session.save()
-        self.copy_service_providers(session)
-        programs = self.copy_programs_ids(session)
-        Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
-        TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
-        self.copy_cash_plans(session)
-        self.copy_payment_records(session)
-        session.status = session.STATUS_COMPLETED
-        session.save()
+        with configure_scope() as scope:
+            scope.set_tag("session.ca", str(session.id))
+
+            session.status = session.STATUS_PROCESSING
+            session.save()
+            self.copy_service_providers(session)
+            programs = self.copy_programs_ids(session)
+            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
+            TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
+            self.copy_cash_plans(session)
+            self.copy_payment_records(session)
+            session.status = session.STATUS_COMPLETED
+            session.save()
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
