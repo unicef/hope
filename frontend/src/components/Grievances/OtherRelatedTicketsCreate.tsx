@@ -76,8 +76,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
       </Title>
       <Box display='flex' flexDirection='column'>
         <LabelizedField
-          label={`For Household ${householdTickets[0].node.household
-            ?.unicefId || null} `}
+          label={`For Household ${values?.selectedHousehold?.unicefId || '-'} `}
         >
           <>{renderIds(openHouseholdTickets)}</>
         </LabelizedField>
@@ -92,8 +91,7 @@ export function OtherRelatedTicketsCreate({ values }): React.ReactElement {
           <Box mb={3} mt={3}>
             <Typography>Closed Tickets</Typography>
             <LabelizedField
-              label={`For Household ${householdTickets[0].node.household
-                ?.unicefId || null} `}
+              label={`For Household ${values?.selectedHousehold?.unicefId || '-'} `}
             >
               <>{renderIds(closedHouseholdTickets)}</>
             </LabelizedField>
