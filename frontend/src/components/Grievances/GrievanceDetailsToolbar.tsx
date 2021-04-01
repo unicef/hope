@@ -140,7 +140,7 @@ export const GrievanceDetailsToolbar = ({
         'You have not confirmed sanction list flag, the ticket will be automatically rejected.';
     } else if (!ticket.needsAdjudicationTicketDetails?.selectedIndividual) {
       confirmationMessage =
-        'You have not marked any individual as a duplicate, the ticket will be automatically rejected.';
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system No duplicates were found.';
     }
 
     return confirmationMessage;
@@ -176,8 +176,8 @@ export const GrievanceDetailsToolbar = ({
   let closeButton = (
     <ConfirmationDialog
       title='Close ticket'
-      extraContent={getClosingConfirmationExtraText()}
-      content={closingConfirmationText}
+      extraContent={closingConfirmationText}
+      content={getClosingConfirmationExtraText()}
       continueText='close ticket'
     >
       {(confirm) => (
@@ -273,8 +273,8 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
-                extraContent={getClosingConfirmationExtraText()}
-                content={closingConfirmationText}
+                extraContent={closingConfirmationText}
+                content={getClosingConfirmationExtraText()}
                 continueText='close ticket'
               >
                 {(confirm) => (
@@ -323,8 +323,8 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
-                extraContent={getClosingConfirmationExtraText()}
-                content={closingConfirmationText}
+                extraContent={closingConfirmationText}
+                content={getClosingConfirmationExtraText()}
                 continueText='close ticket'
               >
                 {(confirm) => (
