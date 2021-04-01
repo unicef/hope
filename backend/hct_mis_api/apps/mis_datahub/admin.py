@@ -20,6 +20,7 @@ from hct_mis_api.apps.mis_datahub.models import (
     Program,
     Session,
     TargetPopulation,
+    TargetPopulationEntry,
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
@@ -115,7 +116,21 @@ class SessionAdmin(SmartFieldsetMixin, ExtraUrlMixin, admin.ModelAdmin):
 
     @button()
     def inspect(self, request, pk):
-        context = self.get_common_context(request)
+        context = self.get_common_context(request, pk)
+        obj = context["original"]
+        context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
+        context["data"] = {}
+        for model in [
+            Program,
+            TargetPopulation,
+            Household,
+            Individual,
+            IndividualRoleInHousehold,
+            TargetPopulationEntry,
+            Document,
+        ]:
+            context["data"][model] = {"count": model.objects.filter(session=pk).count(), "meta": model._meta}
+
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
@@ -152,6 +167,12 @@ class SessionAdmin(SmartFieldsetMixin, ExtraUrlMixin, admin.ModelAdmin):
                 "Continuing will reset last_sync_date of any" " object linked to this Session.",
                 "Successfully executed",
             )
+
+
+@admin.register(TargetPopulationEntry)
+class TargetPopulationEntryAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    raw_id_fields = ("session",)
 
 
 @admin.register(TargetPopulation)

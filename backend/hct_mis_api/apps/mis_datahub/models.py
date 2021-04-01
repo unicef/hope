@@ -2,12 +2,12 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.household.models import (
-    RELATIONSHIP_CHOICE,
-    ROLE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
-    RESIDENCE_STATUS_CHOICE,
     IDENTIFICATION_TYPE_CHOICE,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
+    MARITAL_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_CHOICE,
 )
 from hct_mis_api.apps.utils.models import AbstractSession
 
@@ -86,7 +86,7 @@ class Individual(SessionModel):
         unique_together = ("session", "mis_id")
 
     def __str__(self):
-        return self.family_name
+        return self.family_name or ""
 
 
 class TargetPopulation(SessionModel):
