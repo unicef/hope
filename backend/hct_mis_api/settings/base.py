@@ -485,6 +485,7 @@ COUNTRIES_OVERRIDE = {
 }
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
+SENTRY_URL = os.getenv("SENTRY_URL")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
