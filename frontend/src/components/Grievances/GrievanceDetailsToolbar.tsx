@@ -7,6 +7,7 @@ import { MiśTheme } from '../../theme';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
@@ -27,6 +28,23 @@ const Separator = styled.div`
     ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.lightGray};
   margin: 0 28px;
 `;
+
+const countApprovedAndUnapproved = (
+  data,
+): { approved: number; notApproved: number } => {
+  let approved = 0;
+  let notApproved = 0;
+  const flattenArray = data.flat(2);
+  flattenArray.forEach((item) => {
+    if (item.approve_status === true) {
+      approved += 1;
+    } else {
+      notApproved += 1;
+    }
+  });
+
+  return { approved, notApproved };
+};
 
 export const GrievanceDetailsToolbar = ({
   ticket,
@@ -68,59 +86,24 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const getClosingConfirmationExtraText = (): string => {
-    if (ticket.category.toString() !== GRIEVANCE_CATEGORIES.DATA_CHANGE) {
-      return '';
-    }
-    let approved = 0;
-    let notApproved = 0;
-
-    const countApproved = (data): void => {
-      if (!Array.isArray(data)) return;
-      for (const value of data) {
-        if (value && !Array.isArray(value) && value.value) {
-          if (value.approve_status === true) {
-            approved += 1;
-          } else if (value.approve_status === false) {
-            notApproved += 1;
-          }
-        }
-      }
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
+    const householdData =
+      ticket.householdDataUpdateTicketDetails?.householdData || {};
+    const individualData =
+      ticket.individualDataUpdateTicketDetails?.individualData || {};
+    const allData = {
+      ...householdData,
+      ...individualData,
+      ...householdData?.flex_fields,
+      ...individualData?.flex_fields,
     };
-    const arrayToCount = [];
+    delete allData.previous_documents;
+    delete allData.previous_identities;
+    delete allData.flex_fields;
 
-    arrayToCount.push(
-      Object.values(
-        ticket.householdDataUpdateTicketDetails?.householdData || {},
-      ),
+    const { approved, notApproved } = countApprovedAndUnapproved(
+      Object.values(allData),
     );
-    arrayToCount.push(
-      Object.values(
-        ticket.householdDataUpdateTicketDetails?.householdData.flex_fields ||
-          {},
-      ),
-    );
-    arrayToCount.push(
-      Object.values(
-        ticket.individualDataUpdateTicketDetails?.individualData || {},
-      ),
-    );
-    arrayToCount.push(
-      Object.values(
-        ticket.individualDataUpdateTicketDetails?.individualData.flex_fields ||
-          {},
-      ),
-    );
-    arrayToCount.push(
-      ticket.individualDataUpdateTicketDetails?.individualData.documents || [],
-    );
-    arrayToCount.push(
-      ticket.individualDataUpdateTicketDetails?.individualData
-        .documents_to_remove || [],
-    );
-
-    arrayToCount.forEach((value) => countApproved(value));
-
     // all changes were approved
     if (!notApproved) return '';
 
@@ -132,6 +115,46 @@ export const GrievanceDetailsToolbar = ({
     return `You approved ${approved} change${
       approved > 1 ? 's' : ''
     }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
+
+  const getClosingConfirmationExtraTextForOtherTypes = (): string => {
+    const hasApproveOption =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+      GRIEVANCE_CATEGORIES.DEDUPLICATION ||
+      GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+
+    if (!hasApproveOption) {
+      return '';
+    }
+
+    // added msg handling for
+    let confirmationMessage = '';
+    if (ticket.deleteIndividualTicketDetails?.approveStatus === false) {
+      confirmationMessage =
+        'You have not approved withdrawing individual, the ticket will be automatically rejected.';
+    } else if (ticket.addIndividualTicketDetails?.approveStatus === false) {
+      confirmationMessage =
+        'You have not approved adding individual, the ticket will be automatically rejected.';
+    } else if (ticket.systemFlaggingTicketDetails?.approveStatus === false) {
+      confirmationMessage =
+        'You have not confirmed sanction list flag, the ticket will be automatically rejected.';
+    } else if (!ticket.needsAdjudicationTicketDetails?.selectedIndividual) {
+      confirmationMessage =
+        'You have not marked any individual as a duplicate, the ticket will be automatically rejected.';
+    }
+
+    return confirmationMessage;
+  };
+
+  const getClosingConfirmationExtraText = (): string => {
+    switch (ticket.issueType?.toString()) {
+      case GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD:
+        return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
+      case GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL:
+        return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
+      default:
+        return getClosingConfirmationExtraTextForOtherTypes();
+    }
   };
 
   const closingConfirmationText = 'Are you sure you want to close the ticket?';
@@ -250,6 +273,7 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
+                extraContent={getClosingConfirmationExtraText()}
                 content={closingConfirmationText}
                 continueText='close ticket'
               >
@@ -299,6 +323,7 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
+                extraContent={getClosingConfirmationExtraText()}
                 content={closingConfirmationText}
                 continueText='close ticket'
               >
