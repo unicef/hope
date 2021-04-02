@@ -317,7 +317,7 @@ export function formatCurrencyWithSymbol(
     style: 'currency',
     currency,
     // enable this if decided that we always want code and not a symbol
-    // currencyDisplay: 'code',
+    currencyDisplay: 'code',
   }).format(amountCleared);
 }
 
