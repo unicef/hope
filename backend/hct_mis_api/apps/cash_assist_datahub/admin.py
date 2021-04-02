@@ -75,7 +75,6 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 """
                 ),
                 "Successfully executed",
-                template="admin_extra_urls/confirm_page.html",
             )
 
     @button()
