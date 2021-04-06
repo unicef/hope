@@ -2315,7 +2315,7 @@ type Query {
   allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
   sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
   adminArea(id: ID!): AdminAreaNode
-  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Startswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
+  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
   allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
   allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
   allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
