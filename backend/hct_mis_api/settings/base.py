@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import sys
+from uuid import uuid4
 
 ####
 # Change per project
@@ -170,9 +171,9 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
+        "DIRS": [os.path.join(PROJECT_ROOT, "apps", "core", "templates")],
         "OPTIONS": {
+            "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -483,6 +484,8 @@ COUNTRIES_OVERRIDE = {
         "ioc_code": "U",
     },
 }
+
+ROOT_TOKEN = os.getenv("ROOT_ACCESS_TOKEN", uuid4())
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 SENTRY_URL = os.getenv("SENTRY_URL")
