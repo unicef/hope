@@ -338,7 +338,6 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
 
     def _create_documents(self):
         docs_to_create = []
-        import ipdb; ipdb.set_trace()
         for document_data in self.documents.values():
             issuing_country = document_data.get("issuing_country")
             doc_type = ImportedDocumentType.objects.get(
