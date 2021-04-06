@@ -1,10 +1,13 @@
 from operator import itemgetter
 
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import _confirm_action, ExtraUrlMixin
 from adminfilters.filters import TextFieldFilter
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
@@ -32,7 +35,7 @@ class FundsCommitmentAddForm(forms.ModelForm):
 
 
 @admin.register(FundsCommitment)
-class FundsCommitmentAdmin(HOPEModelAdminBase):
+class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
         "mis_sync_date",
@@ -41,6 +44,28 @@ class FundsCommitmentAdmin(HOPEModelAdminBase):
     )
     date_hierarchy = "create_date"
     add_form = FundsCommitmentAddForm
+
+    @button()
+    def execute_exchange_rate_sync(self, request):
+        if request.method == "POST":
+            from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import PullFromErpDatahubTask
+
+            task = PullFromErpDatahubTask()
+            task.execute()
+            self.message_user(request, "Exchange rate synced", messages.SUCCESS)
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.execute_exchange_rate_sync,
+                mark_safe(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
+                        <h3>Import will only be simulated</h3> 
+                        """
+                ),
+                "Successfully executed",
+                template="admin_extra_urls/confirm_page.html",
+            )
 
     def get_changeform_initial_data(self, request):
         initial = super().get_changeform_initial_data(request)

@@ -122,7 +122,7 @@ export function DeleteIndividualGrievanceDetails({
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Individual to be deleted</Typography>
+          <Typography variant='h6'>Individual to be withdrawn</Typography>
           {canApproveDataChange && (
             <ConfirmationDialog title='Warning' content='Are you sure?'>
               {(confirm) => (
