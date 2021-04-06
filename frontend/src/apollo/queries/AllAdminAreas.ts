@@ -8,7 +8,7 @@ export const ALL_ADMIN_AREAS_QUERY = gql`
     $first: Int
   ) {
     allAdminAreas(
-      title_Startswith: $title
+      title_Istartswith: $title
       businessArea: $businessArea
       first: $first
       level: $level
