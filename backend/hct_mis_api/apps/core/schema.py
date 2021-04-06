@@ -22,7 +22,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS, ROLE_FIELD
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
@@ -249,6 +249,7 @@ def get_fields_attr_generators(flex_field):
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
         yield from XLSX_ONLY_FIELDS
+        yield ROLE_FIELD
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
