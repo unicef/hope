@@ -44447,6 +44447,53 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'first_registration_date',
                 'required': True,
                 'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Alternate collector',
+                        'labels': [
+                            {
+                                'label': 'Alternate collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ALTERNATE'
+                    },
+                    {
+                        'labelEn': 'None',
+                        'labels': [
+                            {
+                                'label': 'None',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NO_ROLE'
+                    },
+                    {
+                        'labelEn': 'Primary collector',
+                        'labels': [
+                            {
+                                'label': 'Primary collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PRIMARY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Role',
+                'labels': [
+                    {
+                        'label': 'Role',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'role',
+                'required': True,
+                'type': 'SELECT_ONE'
             }
         ]
     }
