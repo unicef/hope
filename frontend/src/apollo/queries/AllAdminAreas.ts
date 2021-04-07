@@ -23,6 +23,7 @@ export const ALL_ADMIN_AREAS_QUERY = gql`
         node {
           id
           title
+          pCode
         }
       }
     }
