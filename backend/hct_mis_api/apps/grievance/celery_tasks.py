@@ -1,6 +1,6 @@
 import logging
 
-from hct_mis_api.apps.core.celery import app
+from hct_mis_api.config.celery import app
 
 logger = logging.getLogger(__name__)
 

@@ -8,12 +8,12 @@ from environ import Env
 def parse_emails(value):
     admins = value.split(",")
     v = [(a.split("@")[0].strip(), a.strip()) for a in admins]
-    return v
+    return tuple(v)
 
 
 DEFAULTS = {
     "ADMINS": (parse_emails, ""),
-    "ALLOWED_HOSTS": (list, ""),
+    "ALLOWED_HOSTS": (list, []),
     "AZURE_CLIENT_ID": (str, ""),
     "AZURE_CLIENT_SECRET": (str, ""),
     "AZURE_TENANT_KEY": (str, ""),
@@ -53,8 +53,8 @@ DEFAULTS = {
     "STATIC_URL": (str, "static/"),
     "STORAGE_AZURE_ACCOUNT_NAME": (str, ""),
     "STORAGE_AZURE_ACCOUNT_KEY": (str, ""),
-    "STORAGE_DEFAULT": "hct_mis_api.apps.core.storage.AzureMediaStorage",
-    "STORAGE_STATICFILES": "hct_mis_api.apps.core.storage.AzureStaticStorage",
+    "STORAGE_DEFAULT": (str, "hct_mis_api.apps.core.storage.AzureMediaStorage"),
+    "STORAGE_STATICFILES": (str, "hct_mis_api.apps.core.storage.AzureStaticStorage"),
     "TEST_USERS": (parse_emails, ""),
 }
 env = Env(**DEFAULTS)

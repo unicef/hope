@@ -12,8 +12,6 @@ from django.utils.translation import gettext_lazy as _
 
 from sentry_sdk.integrations.celery import CeleryIntegration
 
-from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-
 from .defaults import env
 
 PROJECT_NAME = "hct_mis_api"
@@ -21,8 +19,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 
 # domains/hosts etc.
 DOMAIN_NAME = env("DOMAIN")
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", "*") + [DOMAIN_NAME]
-FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST", DOMAIN_NAME)
+ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS") + [DOMAIN_NAME]
+FRONTEND_HOST = env("HCT_MIS_FRONTEND_HOST")
 
 ####
 # Other settings
@@ -471,11 +469,9 @@ CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_BEAT_SCHEDULE = TASKS_SCHEDULES
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER")
 
 from smart_admin.utils import match, regex

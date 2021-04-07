@@ -1,6 +1,6 @@
 import logging
 
-from hct_mis_api.apps.core.celery import app
+from hct_mis_api.config.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +49,8 @@ def registration_kobo_import_hourly_task():
 
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiKoboCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiKoboCreateTask
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
@@ -82,12 +78,8 @@ def registration_xlsx_import_hourly_task():
 
     try:
         from hct_mis_api.apps.core.models import BusinessArea
-        from hct_mis_api.apps.registration_datahub.models import (
-            RegistrationDataImportDatahub,
-        )
-        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import (
-            RdiXlsxCreateTask,
-        )
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 
         not_started_rdi = RegistrationDataImportDatahub.objects.filter(
             import_done=RegistrationDataImportDatahub.NOT_STARTED
@@ -129,8 +121,8 @@ def rdi_deduplication_task(registration_data_import_id):
     logger.info("rdi_deduplication_task start")
 
     try:
-        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
         from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+        from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
         rdi_obj = RegistrationDataImportDatahub.objects.get(id=registration_data_import_id)
 

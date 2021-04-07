@@ -1,8 +1,8 @@
 import logging
 
-from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.core.models import XLSXKoboTemplate
 from hct_mis_api.apps.core.tasks.upload_new_template_and_update_flex_fields import KoboRetriableError
+from hct_mis_api.config.celery import app
 
 logger = logging.getLogger(__name__)
 

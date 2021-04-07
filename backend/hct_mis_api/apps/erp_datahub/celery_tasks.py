@@ -1,6 +1,6 @@
 import logging
 
-from hct_mis_api.apps.core.celery import app
+from hct_mis_api.config.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -10,9 +10,7 @@ def pull_from_erp_datahub_task():
     logger.info("pull_from_erp_datahub_task start")
 
     try:
-        from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
-            PullFromErpDatahubTask,
-        )
+        from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import PullFromErpDatahubTask
 
         PullFromErpDatahubTask().execute()
     except Exception as e:

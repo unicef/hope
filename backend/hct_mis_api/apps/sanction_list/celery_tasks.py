@@ -1,6 +1,6 @@
 import logging
 
-from hct_mis_api.apps.core.celery import app
+from hct_mis_api.config.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,7 @@ def check_against_sanction_list_task(uploaded_file_id, original_file_name):
     logger.info("check_against_sanction_list_task start")
 
     try:
-        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import (
-            CheckAgainstSanctionListTask,
-        )
+        from hct_mis_api.apps.sanction_list.tasks.check_against_sanction_list import CheckAgainstSanctionListTask
 
         CheckAgainstSanctionListTask().execute(
             uploaded_file_id=uploaded_file_id,
