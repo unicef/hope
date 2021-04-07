@@ -38,7 +38,7 @@ class GrievanceTicketFactory(factory.DjangoModelFactory):
         )
     )
     description = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
-    admin = factory.LazyAttribute(
+    admin2 = factory.LazyAttribute(
         lambda o: AdminArea.objects.filter(admin_area_level__business_area__slug="afghanistan").first()
     )
     area = factory.Faker("sentence", nb_words=6, variable_nb_words=True, ext_word_list=None)
