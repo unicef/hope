@@ -165,11 +165,11 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        common_header = header.replace("_no", "")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
-            document_data = self.documents.get(f"individual_{row_num}_{header}")
+            document_data = self.documents.get(f"individual_{row_num}_{common_header}")
 
         if header == "other_id_type_i_c":
             if document_data:
@@ -196,7 +196,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             if document_data:
                 document_data["value"] = value
             else:
-                self.documents[f"individual_{row_num}_{header}"] = {
+                self.documents[f"individual_{row_num}_{common_header}"] = {
                     "individual": individual,
                     "name": IDENTIFICATION_TYPE_DICT.get(doc_type),
                     "type": doc_type,
@@ -206,7 +206,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_photo_fields(self, cell, row_num, individual, header, *args, **kwargs):
         if not self.image_loader.image_in(cell.coordinate):
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        header = header.replace("_photo_i_c", "_i_c")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -226,7 +226,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
     def _handle_document_issuing_country_fields(self, value, header, row_num, individual, *args, **kwargs):
         if value is None:
             return
-        header = header.replace("_issuer_i_c", "_i_c").replace("_photo_i_c", "_i_c").replace("_no", "")
+        header = header.replace("_issuer_i_c", "_i_c")
         if header.startswith("other_id"):
             document_data = self.documents.get(f"individual_{row_num}_other")
         else:
@@ -672,7 +672,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 is_identity = document_name in identity_fields
 
                 if is_identity:
-                    agency = ImportedAgency.objects.get(
+                    agency, _ = ImportedAgency.objects.get_or_create(
                         type="WFP" if document_name == "scope_id" else "UNHCR", country=Country(data["issuing_country"])
                     )
                     identities.append(
@@ -691,7 +691,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                     if label is None:
                         label = data["name"]
 
-                    document_type = ImportedDocumentType.objects.get(
+                    document_type, _ = ImportedDocumentType.objects.get_or_create(
                         country=country,
                         label=label,
                         type=type_name,
