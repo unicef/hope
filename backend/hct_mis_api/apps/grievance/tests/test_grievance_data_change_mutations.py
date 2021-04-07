@@ -58,8 +58,8 @@ class TestGrievanceCreateDataChangeMutation(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="dffgh565556")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="fggtyjyj")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),

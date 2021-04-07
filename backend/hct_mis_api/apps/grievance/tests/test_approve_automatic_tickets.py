@@ -59,8 +59,8 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="sdfghjuytre2")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="dfghgf3456")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -131,7 +131,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
             issue_type=None,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
         )
 
@@ -146,7 +146,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
             id="2b419ce3-3297-47ee-a47f-43442abac73e",
             category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
             issue_type=None,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
         )
 
