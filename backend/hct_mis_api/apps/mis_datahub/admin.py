@@ -1,10 +1,14 @@
 import logging
 
+from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin.models import DELETION, LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button, href
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
@@ -20,6 +24,7 @@ from hct_mis_api.apps.mis_datahub.models import (
     Program,
     Session,
     TargetPopulation,
+    TargetPopulationEntry,
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
@@ -28,8 +33,50 @@ from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 logger = logging.getLogger(__name__)
 
 
+def is_root(request, obj):
+    return request.user.is_superuser and request.headers.get("x-root-token") == settings.ROOT_TOKEN
+
+
+class HUBAdminMixin(ExtraUrlMixin, HOPEModelAdminBase):
+    @button(label="Truncate", css_class="btn-danger", permission=is_root)
+    def truncate(self, request):
+        if not request.headers.get("x-root-access") == "XMLHttpRequest":
+            self.message_user(request, "You are not allowed to perform this action", messages.ERROR)
+            return
+        if request.method == "POST":
+            with atomic():
+                LogEntry.objects.log_action(
+                    user_id=request.user.pk,
+                    content_type_id=ContentType.objects.get_for_model(self.model).pk,
+                    object_id=None,
+                    object_repr=f"truncate table {self.model._meta.verbose_name}",
+                    action_flag=DELETION,
+                    change_message="truncate table",
+                )
+                from django.db import connections
+
+                conn = connections[self.model.objects.db]
+                cursor = conn.cursor()
+                cursor.execute('TRUNCATE TABLE "{0}" RESTART IDENTITY CASCADE '.format(self.model._meta.db_table))
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.truncate,
+                mark_safe(
+                    """
+<h1 class="color-red"><b>This is a low level system feature</b></h1>                                      
+<h1 class="color-red"><b>Continuing irreversibly delete all table content</b></h1>
+                                       
+                                       """
+                ),
+                "Successfully executed",
+                title="Truncate table",
+            )
+
+
 @admin.register(Household)
-class HouseholdAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class HouseholdAdmin(HUBAdminMixin):
     list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
     raw_id_fields = ("session",)
 
@@ -52,7 +99,7 @@ class HouseholdAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(Individual)
-class IndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class IndividualAdmin(HUBAdminMixin):
     list_display = ("session", "unicef_id", "mis_id", "household_mis_id", "family_name", "given_name")
     list_filter = (
         TextFieldFilter.factory("session__id"),
@@ -75,12 +122,12 @@ class IndividualAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(IndividualRoleInHousehold)
-class IndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
+class IndividualRoleInHouseholdAdmin(HUBAdminMixin):
     list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
 
 
 @admin.register(Session)
-class SessionAdmin(SmartFieldsetMixin, ExtraUrlMixin, admin.ModelAdmin):
+class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
@@ -115,7 +162,21 @@ class SessionAdmin(SmartFieldsetMixin, ExtraUrlMixin, admin.ModelAdmin):
 
     @button()
     def inspect(self, request, pk):
-        context = self.get_common_context(request)
+        context = self.get_common_context(request, pk)
+        obj = context["original"]
+        context["title"] = f"Session {obj.pk} - {obj.timestamp} - {obj.status}"
+        context["data"] = {}
+        for model in [
+            Program,
+            TargetPopulation,
+            Household,
+            Individual,
+            IndividualRoleInHousehold,
+            TargetPopulationEntry,
+            Document,
+        ]:
+            context["data"][model] = {"count": model.objects.filter(session=pk).count(), "meta": model._meta}
+
         return TemplateResponse(request, "admin/mis_datahub/session/inspect.html", context)
 
     @button()
@@ -154,8 +215,14 @@ class SessionAdmin(SmartFieldsetMixin, ExtraUrlMixin, admin.ModelAdmin):
             )
 
 
+@admin.register(TargetPopulationEntry)
+class TargetPopulationEntryAdmin(HUBAdminMixin):
+    list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    raw_id_fields = ("session",)
+
+
 @admin.register(TargetPopulation)
-class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
+class TargetPopulationAdmin(HUBAdminMixin):
     list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
     raw_id_fields = ("session",)
 
@@ -179,12 +246,12 @@ class TargetPopulationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(Program)
-class ProgramAdmin(HOPEModelAdminBase):
+class ProgramAdmin(HUBAdminMixin):
     list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
 
 
 @admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
+class DocumentAdmin(HUBAdminMixin):
     list_display = ("type", "number")
     list_filter = (TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
     raw_id_fields = ("session",)

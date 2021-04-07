@@ -60,6 +60,7 @@ export const LookUpIndividualTable = ({
       ? decodeIdString(valuesInner.selectedHousehold.id)
       : null,
     excludedId: excludedId || ticket?.individual?.id || null,
+    withdrawn: false,
   };
 
   return (
