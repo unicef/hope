@@ -24,7 +24,7 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     _INDIVIDUAL,
     TYPE_SELECT_MANY,
     _HOUSEHOLD,
-    XLSX_ONLY_FIELDS,
+    XLSX_ONLY_FIELDS, TARGETING_CORE_FIELDS,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
@@ -659,7 +659,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     """
 
     def get_core_fields(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        core_fields = TARGETING_CORE_FIELDS
         return [c for c in core_fields if c.get("associated_with") == _HOUSEHOLD]
 
     comparision_method = models.CharField(
@@ -689,7 +689,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     """
 
     def get_core_fields(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        core_fields = TARGETING_CORE_FIELDS
         return [c for c in core_fields if c.get("associated_with") == _INDIVIDUAL]
 
     comparision_method = models.CharField(

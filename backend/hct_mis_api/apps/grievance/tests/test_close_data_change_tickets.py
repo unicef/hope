@@ -57,8 +57,8 @@ class TestCloseDataChangeTickets(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="sfds323")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type,p_code="sfds3dgg23")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -146,7 +146,7 @@ class TestCloseDataChangeTickets(APITestCase):
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -170,7 +170,7 @@ class TestCloseDataChangeTickets(APITestCase):
             id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -202,7 +202,7 @@ class TestCloseDataChangeTickets(APITestCase):
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -219,7 +219,7 @@ class TestCloseDataChangeTickets(APITestCase):
             id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )

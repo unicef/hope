@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   FormControl,
   FormHelperText,
@@ -8,6 +8,16 @@ import {
 } from '@material-ui/core';
 import get from 'lodash/get';
 
+const toExternalValue = (internalValue) => {
+  switch (internalValue) {
+    case 'YES':
+      return true;
+    case 'NO':
+      return false;
+    default:
+      return null;
+  }
+};
 export const FormikBoolFieldGrievances = ({
   field,
   form,
@@ -36,19 +46,15 @@ export const FormikBoolFieldGrievances = ({
     default:
       value = '';
   }
+  useEffect(() => {
+    if (field.value === '') {
+      form.setFieldValue(field.name, toExternalValue(field.value));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [field.value]);
   const handleChange = (event): void => {
     const targetValue = event.target.value;
-    let correctValue;
-    switch (targetValue) {
-      case 'YES':
-        correctValue = true;
-        break;
-      case 'NO':
-        correctValue = false;
-        break;
-      default:
-        correctValue = null;
-    }
+    const correctValue = toExternalValue(targetValue);
     form.setFieldValue(field.name, correctValue);
   };
   return (

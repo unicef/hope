@@ -19,6 +19,7 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     get_electoral_card_document_number_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
+    get_role_query,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
@@ -1358,19 +1359,21 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
     },
 }
 
+ROLE_FIELD = {
+    "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
+    "type": TYPE_SELECT_ONE,
+    "name": "role",
+    "lookup": "role",
+    "required": True,
+    "label": {"English(EN)": "Role"},
+    "hint": "",
+    "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
+    "associated_with": _INDIVIDUAL,
+    "xlsx_field": "role_i_c",
+    "get_query": get_role_query,
+}
 KOBO_ONLY_INDIVIDUAL_FIELDS = {
-    "role_i_c": {
-        "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
-        "type": TYPE_SELECT_ONE,
-        "name": "role",
-        "lookup": "role",
-        "required": True,
-        "label": {"English(EN)": "Role"},
-        "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "role_i_c",
-    },
+    "role_i_c": ROLE_FIELD,
 }
 
 XLSX_ONLY_FIELDS = [
@@ -1427,8 +1430,10 @@ def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
     return result_dict
 
 
+TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD]
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
 
-CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS, {})
+CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()
+
