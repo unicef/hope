@@ -108,8 +108,8 @@ class TestGrievanceQuery(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="123aa123")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type,p_code="sadasdasfd222")
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -121,7 +121,7 @@ class TestGrievanceQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": self.business_area,
-                    "admin": self.admin_area_1.title,
+                    "admin2": self.admin_area_1,
                     "language": "Polish",
                     "consent": True,
                     "description": "Just random description",
@@ -134,7 +134,7 @@ class TestGrievanceQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": self.business_area,
-                    "admin": self.admin_area_2.title,
+                    "admin2": self.admin_area_2,
                     "language": "English",
                     "consent": True,
                     "description": "Just random description",
@@ -147,7 +147,7 @@ class TestGrievanceQuery(APITestCase):
             GrievanceTicket(
                 **{
                     "business_area": self.business_area,
-                    "admin": self.admin_area_2.title,
+                    "admin2": self.admin_area_2,
                     "language": "Polish, English",
                     "consent": True,
                     "description": "Just random description",
