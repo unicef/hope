@@ -59,6 +59,7 @@ type AdminAreaNode implements Node {
   treeId: Int!
   level: Int!
   children(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
@@ -664,7 +665,7 @@ type GrievanceTicketNode implements Node {
   category: Int!
   issueType: Int
   description: String!
-  admin: String!
+  admin2: AdminAreaNode
   area: String!
   language: String!
   consent: Boolean!
@@ -685,6 +686,7 @@ type GrievanceTicketNode implements Node {
   individual: IndividualNode
   paymentRecord: PaymentRecordNode
   relatedTickets: [GrievanceTicketNode]
+  admin: String
 }
 
 type GrievanceTicketNodeConnection {
