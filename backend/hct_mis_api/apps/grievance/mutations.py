@@ -228,7 +228,7 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         business_area_slug = arg("business_area")
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
-        admin = input.pop("admin")
+        admin = input.pop("admin", None)
         admin_object = None
         if admin:
             admin_object = get_object_or_404(AdminArea, p_code=admin)
@@ -357,7 +357,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
-        admin = input.pop("admin")
+        admin = input.pop("admin", None)
         if admin:
             grievance_ticket.admin2 = get_object_or_404(AdminArea, p_code=admin)
         grievance_ticket.user_modified = timezone.now()
