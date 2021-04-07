@@ -15,7 +15,6 @@ class TestGrievanceModelValidation(TestCase):
         cls.base_model_data = {
             "status": GrievanceTicket.STATUS_NEW,
             "description": "test description",
-            "admin": "test admin",
             "area": "test area",
             "language": "english",
             "consent": True,

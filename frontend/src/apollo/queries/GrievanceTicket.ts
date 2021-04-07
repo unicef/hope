@@ -18,6 +18,11 @@ export const GrievanceTicket = gql`
       description
       language
       admin
+      admin2 {
+        id
+        title
+        pCode
+      }
       area
       assignedTo {
         id

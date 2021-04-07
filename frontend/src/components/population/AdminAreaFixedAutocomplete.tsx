@@ -51,7 +51,7 @@ export function AdminAreaFixedAutocomplete({
           : value,
       );
     } else {
-      setNewValue(null);
+      // setNewValue(value);
     }
     // onInputTextChange('');
   }, [data, value]);
@@ -59,7 +59,6 @@ export function AdminAreaFixedAutocomplete({
     onInputTextChange(selectedValue?.node?.title);
     onChange(e, selectedValue, reason);
   };
-
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
       open={open}

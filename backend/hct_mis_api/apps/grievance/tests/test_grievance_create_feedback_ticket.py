@@ -34,7 +34,7 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdfgfhghkjltr")
 
     @parameterized.expand(
         [
@@ -53,7 +53,7 @@ class TestGrievanceCreateFeedbackTicketQuery(APITestCase):
                 "description": "Test Feedback",
                 "assignedTo": self.id_to_base64(self.user.id, "UserNode"),
                 "category": GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
-                "admin": self.admin_area.title,
+                "admin": self.admin_area.p_code,
                 "language": "Polish, English",
                 "consent": True,
                 "businessArea": "afghanistan",
