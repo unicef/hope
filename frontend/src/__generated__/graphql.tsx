@@ -223,8 +223,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Wfp = 'WFP',
-  Unhcr = 'UNHCR'
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -7587,7 +7587,7 @@ export type LookUpPaymentRecordsQuery = (
             { __typename?: 'PaymentVerificationNodeEdge' }
             & { node: Maybe<(
               { __typename?: 'PaymentVerificationNode' }
-              & Pick<PaymentVerificationNode, 'status'>
+              & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
             )> }
           )>> }
         ), cashPlan: Maybe<(
@@ -13826,7 +13826,9 @@ export const LookUpPaymentRecordsDocument = gql`
         verifications {
           edges {
             node {
+              id
               status
+              receivedAmount
             }
           }
         }
