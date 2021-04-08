@@ -241,7 +241,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "issuing_country": Country(value),
             }
 
-    def _handle_image_field(self, cell, is_flex_field=False, *args, **kwargs):
+    def _handle_image_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
         if self.image_loader.image_in(cell.coordinate):
             image = self.image_loader.get(cell.coordinate)
             file_name = f"{cell.coordinate}-{timezone.now()}.jpg"
@@ -255,7 +255,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 return default_storage.save(file_name, file)
 
             return file
-        return ""
+        return "" if is_field_required is True else None
 
     def _handle_geopoint_field(self, value, *args, **kwargs):
         if not value:
@@ -470,6 +470,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                         row_num=cell.row,
                         individual=obj_to_create if sheet_title == "individuals" else None,
                         household=obj_to_create if sheet_title == "households" else None,
+                        is_field_required=current_field.get("required", False),
                     )
                     if value is not None:
                         setattr(
@@ -509,8 +510,10 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                             cell=cell,
                             header=header,
                             is_flex_field=True,
+                            is_field_required=current_field.get("required", False),
                         )
-                    obj_to_create.flex_fields[header] = value
+                    if value is not None:
+                        obj_to_create.flex_fields[header] = value
 
             obj_to_create.last_registration_date = obj_to_create.first_registration_date
 
