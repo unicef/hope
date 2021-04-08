@@ -1144,8 +1144,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             # have fun debugging this ;_;
 
             identities_numbers = {
-                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": []},
-                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": []},
+                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
             }
             documents_numbers = {
                 "birth_certificate_no_i_c": {
