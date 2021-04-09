@@ -48,6 +48,8 @@ export function LookUpPaymentRecordTableRow({
   };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
+  const received =
+    paymentRecord?.verifications?.edges?.[0]?.node?.receivedAmount;
   return (
     <ClickableTableRow hover role='checkbox' key={paymentRecord.id}>
       <TableCell padding='checkbox'>
@@ -81,7 +83,9 @@ export function LookUpPaymentRecordTableRow({
         )}
       </TableCell>
       <TableCell align='right'>
-        <Missing />
+        {received === null || received === undefined
+          ? '-'
+          : formatCurrencyWithSymbol(received, paymentRecord.currency)}
       </TableCell>
     </ClickableTableRow>
   );
