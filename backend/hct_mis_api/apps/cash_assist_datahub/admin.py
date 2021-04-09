@@ -14,7 +14,6 @@ from admin_extra_urls.api import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import TextFieldFilter
 
-
 logger = logging.getLogger(__name__)
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -65,7 +64,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                         """
                 ),
                 "Successfully executed",
-                template="admin_extra_urls/confirm_page.html",
+                template="admin_extra_urls/confirm.html",
             )
 
     @button(label="test import", permission=lambda r, o: r.user.is_superuser)
