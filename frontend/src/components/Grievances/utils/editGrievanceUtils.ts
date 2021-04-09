@@ -242,6 +242,15 @@ function prepareSesitiveVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
+  let { flexFields } = values.individualData;
+  if (flexFields) {
+    flexFields = { ...flexFields };
+    for (const [key, value] of Object.entries(flexFields)) {
+      if (value === '') {
+        delete flexFields[key];
+      }
+    }
+  }
   return {
     variables: {
       input: {
@@ -249,7 +258,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           addIndividualIssueTypeExtras: {
-            individualData: values.individualData,
+            individualData: { ...values.individualData, flexFields },
           },
         },
       },
