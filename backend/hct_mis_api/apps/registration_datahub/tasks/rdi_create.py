@@ -333,6 +333,8 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return
 
         for hh_id in list_of_ids:
+            if not hh_id:
+                continue
             role = ROLE_PRIMARY if header == "primary_collector_id" else ROLE_ALTERNATE
             self.collectors[hh_id].append(ImportedIndividualRoleInHousehold(individual=individual, role=role))
 
