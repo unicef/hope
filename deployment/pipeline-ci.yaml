@@ -27,6 +27,8 @@ variables:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
     Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
+    Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
+  isTraining: $[eq(variables['Build.SourceName'], 'staging')]
 
 stages:
   - stage: build_and_push
@@ -61,7 +63,7 @@ stages:
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
-                dev-latest
+
           - task: Docker@2
             displayName: Push
             inputs:
@@ -72,7 +74,32 @@ stages:
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
-                dev-latest
+
+          - task: Docker@2
+            displayName: Build frontend for TRN
+            condition: and(succeeded(), eq(variables.isTraining, true))
+            inputs:
+              command: build
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)-trn
+                $(Build.SourceVersion)-trn
+
+          - task: Docker@2
+            displayName: Push frontend for TRN
+            condition: and(succeeded(), eq(variables.isTraining, true))
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)-trn
+                $(Build.SourceVersion)-trn
+
   - stage: test
     displayName: TEST
     jobs:
