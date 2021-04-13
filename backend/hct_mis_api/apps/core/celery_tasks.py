@@ -47,5 +47,6 @@ def upload_new_kobo_template_and_update_flex_fields_task(xlsx_kobo_template_id):
         upload_new_kobo_template_and_update_flex_fields_task_with_retry.delay(xlsx_kobo_template_id)
     except Exception as e:
         logger.exception(e)
+        raise
 
     logger.info("upload_new_kobo_template_and_update_flex_fields_task_with_retry end")
