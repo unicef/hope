@@ -3,7 +3,7 @@ from datetime import date
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
@@ -47,6 +47,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedDocument,
     ImportedIndividualIdentity,
+    ImportedIndividualRoleInHousehold,
 )
 from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
@@ -150,6 +151,17 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_individuals(parent, info):
+        imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+        ids = list(set(imported_individuals_ids + collectors_ids))
+        return ImportedIndividual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=ImportedIndividualRoleInHousehold.objects.filter(household=parent.id),
+            )
+        )
 
     class Meta:
         model = ImportedHousehold
