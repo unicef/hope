@@ -43,4 +43,7 @@ stages:
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 rediscache.password=$(REDIS_CACHE_PASSWORD),\
-                redismain.password=$(REDIS_MAIN_PASSWORD),"
+                redismain.password=$(REDIS_MAIN_PASSWORD),
+                smtp.host=$(SMTP_HOST),\
+                smtp.email=kobo@unitst.org,\
+                ingress.host=$(DOMAIN),"
