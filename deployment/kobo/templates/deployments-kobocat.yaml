@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kobo.fullname" . }}-kobocat
+  {{- if .Values.kpi.annotations }}
+  annotations:
+    {{- toYaml .Values.kobocat.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kobocat
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- if .Values.kobocat.labels }}
+    {{- toYaml .Values.kobocat.labels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.kobocat.replicas }}
+  minReadySeconds: 30
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "kobo.labels.app" . }}
+      component: kobocat
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "kobo.labels.app" . }}
+        component: kobocat
+        release: {{ .Release.Name }}
+        {{- if .Values.kobocat.podLabels }}
+        {{- toYaml .Values.kobocat.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- if .Values.kobocat.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.kobocat.nodeSelector | nindent 8 }}
+      {{- end }}
+      
+      {{- if .Values.kobocat.affinity }}
+      affinity:
+        {{- toYaml .Values.kobocat.affinity | nindent 8 }}
+      {{- end }}
+
+      containers:
+      - name: backend
+        image: {{ .Values.kobocat.image }}
+        ports:
+          - containerPort: 8000
+        resources:
+          {{- toYaml .Values.kobocat.resources | nindent 12 }}
+        env:
+          {{- include "kobo.mapenvsecrets" . | indent 10 }}
+        envFrom:
+        - configMapRef:
+            name: kobocat-config
+        volumeMounts:
+        - name: media-volume
+          mountPath: /srv/src/kobocat/media
+        - name: static-volume
+          mountPath: /srv/static
+        - name: uwsgi-config
+          mountPath: /srv/src/kobocat/docker/kobocat.ini
+          subPath: uwsgi.ini
+        - name: scripts
+          mountPath: /etc/profile.d/
+      - name: nginx
+        image: nginx:1.19.0
+        command: [nginx, -g,'daemon off;']
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: media-volume
+          mountPath: /media
+        - name: static-volume
+          mountPath: /static
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d/
+        ports:
+          - containerPort: 80
+      volumes:
+      - name: media-volume
+        persistentVolumeClaim:
+          claimName: kobocat-media-pvc
+      - name: static-volume
+        emptyDir: {}
+      - name: uwsgi-config
+        configMap:
+          name: kobocat-uwsgi-config
+      - name: nginx-conf
+        configMap:
+          name: nginx-kobocat-conf
+      - name: scripts
+        configMap:
+          name: kobocat-scripts
+          defaultMode: 0744
+          items:
+          - key: runtime_variables_kobocat.source.bash
+            path: runtime_variables_kobocat.source.bash.sh
