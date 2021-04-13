@@ -1,0 +1,46 @@
+trigger: none
+pr: none
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables 
+  # ========================================================================
+  Kubernetes.serviceConnection: ""
+  Kubernetes.namespace: "ictd-kobo-prd"
+
+stages:
+  - stage: deploy
+    displayName: DEPLOY
+    jobs:
+      - job: deploy_hope
+        displayName: "[KOBO] Deployment"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: '**/deployment/kobo'
+          - task: HelmDeploy@0
+            displayName: "DEPLOY"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/deployment/kobo'
+              releaseName: 'kobo'
+              install: true
+              waitForExecution: false
+              failOnStderr: false
+              arguments: "--timeout 600s"
+              overrideValues: "
+                global.storageClass=default,\
+                kobotoolbox.superuserPassword=$(KOBO_SUPERUSER_PASSWORD),\
+                mongodb.mongodbPassword=$(MONGO_PASSWORD),\
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
+                rediscache.password=$(REDIS_CACHE_PASSWORD),\
+                redismain.password=$(REDIS_MAIN_PASSWORD),"
