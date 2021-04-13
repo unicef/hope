@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kobo.fullname" . }}-kpi
+  {{- if .Values.kpi.annotations }}
+  annotations:
+    {{- toYaml .Values.kpi.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kpi
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- if .Values.kpi.labels }}
+    {{- toYaml .Values.kpi.labels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.kpi.replicas }}
+  minReadySeconds: 30
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "kobo.labels.app" . }}
+      component: kpi
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "kobo.labels.app" . }}
+        component: kpi
+        release: {{ .Release.Name }}
+        {{- if .Values.kpi.podLabels }}
+        {{- toYaml .Values.kpi.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- if .Values.kpi.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.kpi.nodeSelector | nindent 8 }}
+      {{- end }}
+      
+      {{- if .Values.kpi.affinity }}
+      affinity:
+        {{- toYaml .Values.kpi.affinity | nindent 8 }}
+      {{- end }}
+  
+      containers:
+      - name: backend
+        image: {{ .Values.kpi.image }}
+        ports:
+          - containerPort: 8000
+        resources:
+          {{- toYaml .Values.kpi.resources | nindent 12 }}        
+        env:
+          {{- include "kobo.mapenvsecrets" . | indent 10 }}
+        envFrom:
+        - configMapRef:
+            name: kpi-config
+        volumeMounts:
+        - name: media-volume
+          mountPath: /srv/src/kpi/media
+        - name: static-volume
+          mountPath: /srv/static
+        - name: scripts
+          mountPath: /srv/init/
+        - name: scripts
+          mountPath: /etc/profile.d/
+        - name: uwsgi-config
+          mountPath: /srv/src/kpi/uwsgi.ini
+          subPath: uwsgi.ini
+        {{- if .Values.kpi.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            scheme: {{ .Values.kobo.scheme | upper }}
+            path: "{{ printf "%s.%s" .Values.kpi.subdomain .Values.kobo.domain }}"
+            port: 80
+            httpHeaders:
+            - name: X-Health
+              value:  "Kubernetes-Health"
+            - name: Host
+              value: "kubernetes.internal"
+          initialDelaySeconds: {{ .Values.kpi.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.kpi.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.kpi.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.kpi.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.kpi.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.kpi.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            scheme: {{ .Values.kobo.scheme | upper }}
+            path: "/accounts/login/"
+            port: 80
+            httpHeaders:
+            - name: X-Health
+              value:  "Kubernetes-Health"
+            - name: Host
+              value: "kubernetes.internal"
+          initialDelaySeconds: {{ .Values.kpi.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.kpi.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.kpi.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.kpi.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.kpi.readinessProbe.failureThreshold }}
+        {{- end }}
+      - name: nginx
+        image: {{ .Values.nginx.image }}
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: media-volume
+          mountPath: /media
+        - name: static-volume
+          mountPath: /static
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d/
+        ports:
+          - containerPort: 80
+
+      volumes:
+      - name: media-volume
+        persistentVolumeClaim:
+          claimName: kpi-media-pvc
+      - name: static-volume
+        emptyDir: {}
+      - name: uwsgi-config
+        configMap:
+          name: kpi-uwsgi-config
+      - name: nginx-conf
+        configMap:
+          name: nginx-kpi-conf
+      - name: scripts
+        configMap:
+          name: kpi-scripts
+          defaultMode: 0744
+          items:
+          - key: runtime_variables_kpi.source.bash
+            path: runtime_variables_kpi.source.bash.sh
+          - key: wait_for_postgres.bash
+            path: wait_for_postgres.bash
+          - key: wait_for_mongo.bash
+            path: wait_for_mongo.bash
