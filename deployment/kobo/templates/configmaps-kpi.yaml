@@ -1,0 +1,112 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kpi-uwsgi-config
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kpi
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/kpi/uwsgi.ini").AsConfig | indent 2}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kpi-scripts
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kpi
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/kpi/runtime_variables_kpi.source.bash").AsConfig | indent 2}}
+{{ (.Files.Glob "files/kpi/wait_for_postgres.bash").AsConfig | indent 2}}
+{{ (.Files.Glob "files/kpi/wait_for_mongo.bash").AsConfig | indent 2}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kpi-config
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kpi
+    chart: {{ include "kobo.labels.chart" . }}1
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  ENKETO_VERSION: "Express"
+
+  {{- if .Values.mongodb.enabled }}
+  KPI_MONGO_PORT: "27017"
+  KPI_MONGO_HOST: "{{ template "kobo.mongodb.fullname" .}}"
+  KPI_MONGO_NAME: "{{ .Values.mongodb.mongodbDatabase }}"
+  MONGO_INITDB_ROOT_USERNAME: "root"
+  MONGO_INITDB_DATABASE: "{{ .Values.mongodb.mongodbDatabase }}"
+  KPI_MONGO_USER: "{{ .Values.mongodb.mongodbUsername }}"
+  {{- else }}
+  KPI_MONGO_PORT: "27017"
+  KPI_MONGO_HOST: "{{ .Values.mongodb.externalDatabase.mongodbHost }}"
+  KPI_MONGO_NAME: "{{ .Values.mongodb.externalDatabase.mongodbDatabase }}"
+  MONGO_INITDB_ROOT_USERNAME: "root"
+  MONGO_INITDB_DATABASE: "{{ .Values.mongodb.externalDatabase.mongodbDatabase }}"
+  KPI_MONGO_USER: "{{ .Values.mongodb.externalDatabase.mongodbUsername }}"
+  {{- end }}
+
+  KOBOFORM_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kpi.subdomain .Values.ingress.host }}"
+  KOBOCAT_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.kobocat.subdomain .Values.ingress.host }}"
+  ENKETO_URL: "{{ printf "%s://%s.%s" .Values.ingress.scheme .Values.enketo.subdomain .Values.ingress.host }}"
+
+  KOBOFORM_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kpi"
+  KOBOCAT_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-kobocat"
+  ENKETO_INTERNAL_URL: "http://{{ include "kobo.fullname" . }}-enketo"
+
+  USE_X_FORWARDED_HOST: "False"
+  KPI_PREFIX: "/"
+  
+  
+  ENKETO_EXPRESS_PUBLIC_SUBDOMAIN: "{{ .Values.enketo.subdomain }}"
+  KOBOCAT_PUBLIC_SUBDOMAIN: "{{ .Values.kobocat.subdomain }}"
+  KOBOFORM_PUBLIC_SUBDOMAIN: "{{ .Values.kpi.subdomain }}"
+  PUBLIC_DOMAIN_NAME: "{{ .Values.ingress.host }}"
+
+  PUBLIC_REQUEST_SCHEME: "{{ .Values.ingress.scheme }}"
+
+  INTERNAL_DOMAIN_NAME: "{{ include "kobo.fullname" . }}-kpi"
+
+  {{- if .Values.postgresql.enabled }}
+  POSTGRES_USER: "kobo"
+  POSTGRES_HOST: "kobo-postgresql"
+  KPI_POSTGRES_DB: "koboform"
+  KOBOCAT_POSTGRES_DB: "kobocat"
+  {{- else }}
+  POSTGRES_USER: "{{ .Values.postgresql.externalDatabase.user }}"
+  POSTGRES_HOST: "{{ .Values.postgresql.externalDatabase.host }}"
+  KPI_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kpiDatabase }}"
+  KOBOCAT_POSTGRES_DB: "{{ .Values.postgresql.externalDatabase.kobocatDatabase }}"
+  {{- end  }}
+  {{-  if .Values.ingress.tls }}
+  SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO, https"
+  {{- end }}
+  SYNC_KOBOCAT_XFORMS: "True"
+
+  EMAIL_HOST: "{{ .Values.smtp.host }}"
+  EMAIL_BACKEND: "django.core.mail.backends.smtp.EmailBackend"
+  DEFAULT_FROM_EMAIL: "{{ .Values.smtp.email }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-kpi-conf
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kpi
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/kpi/nginx.conf").AsConfig | indent 2 }}
+---

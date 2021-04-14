@@ -1,0 +1,18849 @@
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import gql from 'graphql-tag';
+import * as ApolloReactCommon from '@apollo/react-common';
+import * as React from 'react';
+import * as ApolloReactComponents from '@apollo/react-components';
+import * as ApolloReactHoc from '@apollo/react-hoc';
+import * as ApolloReactHooks from '@apollo/react-hooks';
+export type Maybe<T> = T | null;
+export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: string,
+  String: string,
+  Boolean: boolean,
+  Int: number,
+  Float: number,
+  UUID: any,
+  Arg: any,
+  DateTime: any,
+  BigInt: any,
+  Date: any,
+  Decimal: any,
+  FlexFieldsScalar: any,
+  JSONString: any,
+  GeoJSON: any,
+  Upload: any,
+};
+
+export type _DatasetsNode = {
+   __typename?: '_DatasetsNode',
+  data?: Maybe<Array<Maybe<Scalars['Float']>>>,
+};
+
+export type _DetailedDatasetsNode = {
+   __typename?: '_DetailedDatasetsNode',
+  label?: Maybe<Scalars['String']>,
+  data?: Maybe<Array<Maybe<Scalars['Float']>>>,
+};
+
+export type _TableTotalCashTransferredDataNode = {
+   __typename?: '_TableTotalCashTransferredDataNode',
+  id?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Scalars['String']>,
+  totalCashTransferred?: Maybe<Scalars['Float']>,
+  totalHouseholds?: Maybe<Scalars['Int']>,
+};
+
+export type ActivateCashPlanVerificationMutation = {
+   __typename?: 'ActivateCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
+export type AddIndividualDataObjectType = {
+  fullName: Scalars['String'],
+  givenName?: Maybe<Scalars['String']>,
+  middleName?: Maybe<Scalars['String']>,
+  familyName?: Maybe<Scalars['String']>,
+  sex: Scalars['String'],
+  birthDate: Scalars['Date'],
+  estimatedBirthDate: Scalars['Boolean'],
+  maritalStatus?: Maybe<Scalars['String']>,
+  phoneNo?: Maybe<Scalars['String']>,
+  phoneNoAlternative?: Maybe<Scalars['String']>,
+  relationship: Scalars['String'],
+  disability?: Maybe<Scalars['Boolean']>,
+  workStatus?: Maybe<Scalars['String']>,
+  enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
+  administrationOfRutf?: Maybe<Scalars['Boolean']>,
+  pregnant?: Maybe<Scalars['Boolean']>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability?: Maybe<Scalars['String']>,
+  hearingDisability?: Maybe<Scalars['String']>,
+  physicalDisability?: Maybe<Scalars['String']>,
+  memoryDisability?: Maybe<Scalars['String']>,
+  selfcareDisability?: Maybe<Scalars['String']>,
+  commsDisability?: Maybe<Scalars['String']>,
+  whoAnswersPhone?: Maybe<Scalars['String']>,
+  whoAnswersAltPhone?: Maybe<Scalars['String']>,
+  role: Scalars['String'],
+  documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
+  identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
+  businessArea?: Maybe<Scalars['String']>,
+  flexFields?: Maybe<Scalars['Arg']>,
+};
+
+export type AddIndividualIssueTypeExtras = {
+  household: Scalars['ID'],
+  individualData: AddIndividualDataObjectType,
+};
+
+export type AdminAreaNode = Node & {
+   __typename?: 'AdminAreaNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  externalId?: Maybe<Scalars['String']>,
+  title: Scalars['String'],
+  adminAreaLevel: AdminAreaTypeNode,
+  pCode?: Maybe<Scalars['String']>,
+  parent?: Maybe<AdminAreaNode>,
+  lft: Scalars['Int'],
+  rght: Scalars['Int'],
+  treeId: Scalars['Int'],
+  level: Scalars['Int'],
+  children: AdminAreaNodeConnection,
+  grievanceticketSet: GrievanceTicketNodeConnection,
+  householdSet: HouseholdNodeConnection,
+  programs: ProgramNodeConnection,
+  reports: ReportNodeConnection,
+};
+
+
+export type AdminAreaNodeChildrenArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>
+};
+
+
+export type AdminAreaNodeGrievanceticketSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AdminAreaNodeHouseholdSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type AdminAreaNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type AdminAreaNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type AdminAreaNodeConnection = {
+   __typename?: 'AdminAreaNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<AdminAreaNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type AdminAreaNodeEdge = {
+   __typename?: 'AdminAreaNodeEdge',
+  node?: Maybe<AdminAreaNode>,
+  cursor: Scalars['String'],
+};
+
+export type AdminAreaTypeNode = Node & {
+   __typename?: 'AdminAreaTypeNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+  displayName?: Maybe<Scalars['String']>,
+  adminLevel: Scalars['Int'],
+  realAdminLevel?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  adminAreas: AdminAreaNodeConnection,
+};
+
+
+export type AdminAreaTypeNodeAdminAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>
+};
+
+export type AdminAreaTypeNodeConnection = {
+   __typename?: 'AdminAreaTypeNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<AdminAreaTypeNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type AdminAreaTypeNodeEdge = {
+   __typename?: 'AdminAreaTypeNodeEdge',
+  node?: Maybe<AdminAreaTypeNode>,
+  cursor: Scalars['String'],
+};
+
+export type AgeFilterObject = {
+   __typename?: 'AgeFilterObject',
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
+};
+
+export type AgeInput = {
+  min?: Maybe<Scalars['Int']>,
+  max?: Maybe<Scalars['Int']>,
+};
+
+export type AgencyNode = {
+   __typename?: 'AgencyNode',
+  id: Scalars['ID'],
+  type: AgencyType,
+  label: Scalars['String'],
+  country?: Maybe<Scalars['String']>,
+  individualIdentities: Array<IndividualIdentityNode>,
+};
+
+export enum AgencyType {
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP'
+}
+
+export type ApproveTargetPopulationMutation = {
+   __typename?: 'ApproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+
+
+export type BusinessAreaNode = Node & {
+   __typename?: 'BusinessAreaNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  code: Scalars['String'],
+  name: Scalars['String'],
+  longName: Scalars['String'],
+  regionCode: Scalars['String'],
+  regionName: Scalars['String'],
+  koboUsername?: Maybe<Scalars['String']>,
+  rapidProHost?: Maybe<Scalars['String']>,
+  rapidProApiKey?: Maybe<Scalars['String']>,
+  slug: Scalars['String'],
+  hasDataSharingAgreement: Scalars['Boolean'],
+  adminAreaLevel: AdminAreaTypeNodeConnection,
+  userRoles: Array<UserRoleNode>,
+  paymentrecordSet: PaymentRecordNodeConnection,
+  serviceproviderSet: ServiceProviderNodeConnection,
+  tickets: GrievanceTicketNodeConnection,
+  householdSet: HouseholdNodeConnection,
+  individualSet: IndividualNodeConnection,
+  programSet: ProgramNodeConnection,
+  cashplanSet: CashPlanNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
+  registrationdataimportSet: RegistrationDataImportNodeConnection,
+  reports: ReportNodeConnection,
+  logentrySet: LogEntryNodeConnection,
+};
+
+
+export type BusinessAreaNodeAdminAreaLevelArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodePaymentrecordSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type BusinessAreaNodeServiceproviderSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeHouseholdSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeIndividualSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeProgramSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type BusinessAreaNodeCashplanSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeTargetpopulationSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type BusinessAreaNodeRegistrationdataimportSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type BusinessAreaNodeLogentrySetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type BusinessAreaNodeConnection = {
+   __typename?: 'BusinessAreaNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<BusinessAreaNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type BusinessAreaNodeEdge = {
+   __typename?: 'BusinessAreaNodeEdge',
+  node?: Maybe<BusinessAreaNode>,
+  cursor: Scalars['String'],
+};
+
+export type CashPlanNode = Node & {
+   __typename?: 'CashPlanNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  businessArea: UserBusinessAreaNode,
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
+  status: CashPlanStatus,
+  statusDate: Scalars['DateTime'],
+  name: Scalars['String'],
+  distributionLevel: Scalars['String'],
+  startDate: Scalars['DateTime'],
+  endDate: Scalars['DateTime'],
+  dispersionDate: Scalars['DateTime'],
+  coverageDuration: Scalars['Int'],
+  coverageUnit: Scalars['String'],
+  comments?: Maybe<Scalars['String']>,
+  program: ProgramNode,
+  deliveryType?: Maybe<Scalars['String']>,
+  assistanceMeasurement: Scalars['String'],
+  assistanceThrough: Scalars['String'],
+  serviceProvider?: Maybe<ServiceProviderNode>,
+  visionId?: Maybe<Scalars['String']>,
+  fundsCommitment?: Maybe<Scalars['String']>,
+  exchangeRate?: Maybe<Scalars['Float']>,
+  downPayment?: Maybe<Scalars['String']>,
+  validationAlertsCount: Scalars['Int'],
+  totalPersonsCovered: Scalars['Int'],
+  totalPersonsCoveredRevised: Scalars['Int'],
+  totalEntitledQuantity?: Maybe<Scalars['Float']>,
+  totalEntitledQuantityRevised?: Maybe<Scalars['Float']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Float']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Float']>,
+  verificationStatus: CashPlanVerificationStatus,
+  paymentRecords: PaymentRecordNodeConnection,
+  verifications: CashPlanPaymentVerificationNodeConnection,
+  bankReconciliationSuccess?: Maybe<Scalars['Int']>,
+  bankReconciliationError?: Maybe<Scalars['Int']>,
+  totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+  currency?: Maybe<Scalars['String']>,
+};
+
+
+export type CashPlanNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type CashPlanNodeVerificationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type CashPlanNodeConnection = {
+   __typename?: 'CashPlanNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<CashPlanNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type CashPlanNodeEdge = {
+   __typename?: 'CashPlanNodeEdge',
+  node?: Maybe<CashPlanNode>,
+  cursor: Scalars['String'],
+};
+
+export type CashPlanPaymentVerificationNode = Node & {
+   __typename?: 'CashPlanPaymentVerificationNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  status: CashPlanPaymentVerificationStatus,
+  cashPlan: CashPlanNode,
+  sampling: CashPlanPaymentVerificationSampling,
+  verificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  sampleSize?: Maybe<Scalars['Int']>,
+  respondedCount?: Maybe<Scalars['Int']>,
+  receivedCount?: Maybe<Scalars['Int']>,
+  notReceivedCount?: Maybe<Scalars['Int']>,
+  receivedWithProblemsCount?: Maybe<Scalars['Int']>,
+  confidenceInterval?: Maybe<Scalars['Float']>,
+  marginOfError?: Maybe<Scalars['Float']>,
+  rapidProFlowId: Scalars['String'],
+  rapidProFlowStartUuid: Scalars['String'],
+  ageFilter?: Maybe<AgeFilterObject>,
+  excludedAdminAreasFilter?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sexFilter?: Maybe<Scalars['String']>,
+  activationDate?: Maybe<Scalars['DateTime']>,
+  completionDate?: Maybe<Scalars['DateTime']>,
+  paymentRecordVerifications: PaymentVerificationNodeConnection,
+};
+
+
+export type CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type CashPlanPaymentVerificationNodeConnection = {
+   __typename?: 'CashPlanPaymentVerificationNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<CashPlanPaymentVerificationNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type CashPlanPaymentVerificationNodeEdge = {
+   __typename?: 'CashPlanPaymentVerificationNodeEdge',
+  node?: Maybe<CashPlanPaymentVerificationNode>,
+  cursor: Scalars['String'],
+};
+
+export enum CashPlanPaymentVerificationSampling {
+  FullList = 'FULL_LIST',
+  Random = 'RANDOM'
+}
+
+export enum CashPlanPaymentVerificationStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
+export enum CashPlanPaymentVerificationVerificationMethod {
+  Rapidpro = 'RAPIDPRO',
+  Xlsx = 'XLSX',
+  Manual = 'MANUAL'
+}
+
+export enum CashPlanStatus {
+  DistributionCompleted = 'DISTRIBUTION_COMPLETED',
+  DistributionCompletedWithErrors = 'DISTRIBUTION_COMPLETED_WITH_ERRORS',
+  TransactionCompleted = 'TRANSACTION_COMPLETED',
+  TransactionCompletedWithErrors = 'TRANSACTION_COMPLETED_WITH_ERRORS'
+}
+
+export enum CashPlanVerificationStatus {
+  Pending = 'PENDING',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
+export type CategoryExtrasInput = {
+  sensitiveGrievanceTicketExtras?: Maybe<SensitiveGrievanceTicketExtras>,
+  grievanceComplaintTicketExtras?: Maybe<GrievanceComplaintTicketExtras>,
+};
+
+export type ChartDatasetNode = {
+   __typename?: 'ChartDatasetNode',
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
+};
+
+export type ChartDetailedDatasetsNode = {
+   __typename?: 'ChartDetailedDatasetsNode',
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
+};
+
+export type ChartGrievanceTicketsNode = {
+   __typename?: 'ChartGrievanceTicketsNode',
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  datasets?: Maybe<Array<Maybe<_DatasetsNode>>>,
+  totalNumberOfGrievances?: Maybe<Scalars['Int']>,
+  totalNumberOfFeedback?: Maybe<Scalars['Int']>,
+  totalNumberOfOpenSensitive?: Maybe<Scalars['Int']>,
+};
+
+export type ChartPaymentVerification = {
+   __typename?: 'ChartPaymentVerification',
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  datasets?: Maybe<Array<Maybe<_DetailedDatasetsNode>>>,
+  households?: Maybe<Scalars['Int']>,
+  averageSampleSize?: Maybe<Scalars['Float']>,
+};
+
+export type CheckAgainstSanctionListMutation = {
+   __typename?: 'CheckAgainstSanctionListMutation',
+  ok?: Maybe<Scalars['Boolean']>,
+  errors?: Maybe<Array<Maybe<XlsxRowErrorNode>>>,
+};
+
+export type ChoiceObject = {
+   __typename?: 'ChoiceObject',
+  name?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+};
+
+export type ContentTypeObjectType = {
+   __typename?: 'ContentTypeObjectType',
+  id: Scalars['ID'],
+  appLabel: Scalars['String'],
+  model: Scalars['String'],
+  logEntries: LogEntryNodeConnection,
+  name?: Maybe<Scalars['String']>,
+};
+
+
+export type ContentTypeObjectTypeLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type CopyTargetPopulationInput = {
+  id?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+};
+
+export type CopyTargetPopulationMutationInput = {
+  targetPopulationData?: Maybe<CopyTargetPopulationInput>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type CopyTargetPopulationMutationPayload = {
+   __typename?: 'CopyTargetPopulationMutationPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  validationErrors?: Maybe<Scalars['Arg']>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type CoreFieldChoiceObject = {
+   __typename?: 'CoreFieldChoiceObject',
+  labels?: Maybe<Array<Maybe<LabelNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+  value?: Maybe<Scalars['String']>,
+  admin?: Maybe<Scalars['String']>,
+  listName?: Maybe<Scalars['String']>,
+};
+
+export type CountAndPercentageNode = {
+   __typename?: 'CountAndPercentageNode',
+  count?: Maybe<Scalars['Int']>,
+  percentage?: Maybe<Scalars['Float']>,
+};
+
+export type CreateDashboardReport = {
+   __typename?: 'CreateDashboardReport',
+  success?: Maybe<Scalars['Boolean']>,
+};
+
+export type CreateDashboardReportInput = {
+  reportTypes: Array<Maybe<Scalars['String']>>,
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  adminArea?: Maybe<Scalars['ID']>,
+  program?: Maybe<Scalars['ID']>,
+};
+
+export type CreateGrievanceTicketExtrasInput = {
+  category?: Maybe<CategoryExtrasInput>,
+  issueType?: Maybe<IssueTypeExtrasInput>,
+};
+
+export type CreateGrievanceTicketInput = {
+  description: Scalars['String'],
+  assignedTo: Scalars['ID'],
+  category: Scalars['Int'],
+  issueType?: Maybe<Scalars['Int']>,
+  admin?: Maybe<Scalars['String']>,
+  area?: Maybe<Scalars['String']>,
+  language: Scalars['String'],
+  consent: Scalars['Boolean'],
+  businessArea: Scalars['ID'],
+  linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  extras?: Maybe<CreateGrievanceTicketExtrasInput>,
+};
+
+export type CreateGrievanceTicketMutation = {
+   __typename?: 'CreateGrievanceTicketMutation',
+  grievanceTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+};
+
+export type CreatePaymentVerificationInput = {
+  cashPlanId: Scalars['ID'],
+  sampling: Scalars['String'],
+  verificationChannel: Scalars['String'],
+  businessAreaSlug: Scalars['String'],
+  fullListArguments?: Maybe<FullListArguments>,
+  randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+  rapidProArguments?: Maybe<RapidProArguments>,
+};
+
+export type CreatePaymentVerificationMutation = {
+   __typename?: 'CreatePaymentVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
+export type CreateProgram = {
+   __typename?: 'CreateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  program?: Maybe<ProgramNode>,
+};
+
+export type CreateProgramInput = {
+  name?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  description?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['Decimal']>,
+  frequencyOfPayments?: Maybe<Scalars['String']>,
+  sector?: Maybe<Scalars['String']>,
+  scope?: Maybe<Scalars['String']>,
+  cashPlus?: Maybe<Scalars['Boolean']>,
+  populationGoal?: Maybe<Scalars['Int']>,
+  administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
+};
+
+export type CreateReport = {
+   __typename?: 'CreateReport',
+  report?: Maybe<ReportNode>,
+};
+
+export type CreateReportInput = {
+  reportType: Scalars['Int'],
+  businessAreaSlug: Scalars['String'],
+  dateFrom: Scalars['Date'],
+  dateTo: Scalars['Date'],
+  adminArea?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  program?: Maybe<Scalars['ID']>,
+};
+
+export type CreateTargetPopulationInput = {
+  name: Scalars['String'],
+  targetingCriteria: TargetingCriteriaObjectType,
+  businessAreaSlug: Scalars['String'],
+  programId: Scalars['ID'],
+};
+
+export type CreateTargetPopulationMutation = {
+   __typename?: 'CreateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type CreateTicketNoteInput = {
+  description: Scalars['String'],
+  ticket: Scalars['ID'],
+};
+
+export type CreateTicketNoteMutation = {
+   __typename?: 'CreateTicketNoteMutation',
+  grievanceTicketNote?: Maybe<TicketNoteNode>,
+};
+
+
+
+
+export type DeduplicationResultNode = {
+   __typename?: 'DeduplicationResultNode',
+  hitId?: Maybe<Scalars['ID']>,
+  fullName?: Maybe<Scalars['String']>,
+  score?: Maybe<Scalars['Float']>,
+  proximityToScore?: Maybe<Scalars['Float']>,
+  location?: Maybe<Scalars['String']>,
+  age?: Maybe<Scalars['Int']>,
+};
+
+export type DeleteProgram = {
+   __typename?: 'DeleteProgram',
+  ok?: Maybe<Scalars['Boolean']>,
+};
+
+export type DeleteRegistrationDataImport = {
+   __typename?: 'DeleteRegistrationDataImport',
+  ok?: Maybe<Scalars['Boolean']>,
+};
+
+export type DeleteTargetPopulationMutationInput = {
+  targetId: Scalars['ID'],
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type DeleteTargetPopulationMutationPayload = {
+   __typename?: 'DeleteTargetPopulationMutationPayload',
+  ok?: Maybe<Scalars['Boolean']>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type DiscardCashPlanVerificationMutation = {
+   __typename?: 'DiscardCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
+export type DjangoDebug = {
+   __typename?: 'DjangoDebug',
+  sql?: Maybe<Array<Maybe<DjangoDebugSql>>>,
+};
+
+export type DjangoDebugSql = {
+   __typename?: 'DjangoDebugSQL',
+  vendor: Scalars['String'],
+  alias: Scalars['String'],
+  sql?: Maybe<Scalars['String']>,
+  duration: Scalars['Float'],
+  rawSql: Scalars['String'],
+  params: Scalars['String'],
+  startTime: Scalars['Float'],
+  stopTime: Scalars['Float'],
+  isSlow: Scalars['Boolean'],
+  isSelect: Scalars['Boolean'],
+  transId?: Maybe<Scalars['String']>,
+  transStatus?: Maybe<Scalars['String']>,
+  isoLevel?: Maybe<Scalars['String']>,
+  encoding?: Maybe<Scalars['String']>,
+};
+
+export type DocumentNode = Node & {
+   __typename?: 'DocumentNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  documentNumber: Scalars['String'],
+  photo: Scalars['String'],
+  individual: IndividualNode,
+  type: DocumentTypeNode,
+  status: DocumentStatus,
+  country?: Maybe<Scalars['String']>,
+};
+
+export type DocumentNodeConnection = {
+   __typename?: 'DocumentNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<DocumentNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type DocumentNodeEdge = {
+   __typename?: 'DocumentNodeEdge',
+  node?: Maybe<DocumentNode>,
+  cursor: Scalars['String'],
+};
+
+export enum DocumentStatus {
+  Pending = 'PENDING',
+  Valid = 'VALID',
+  NeedInvestigation = 'NEED_INVESTIGATION',
+  Invalid = 'INVALID'
+}
+
+export type DocumentTypeNode = {
+   __typename?: 'DocumentTypeNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  country?: Maybe<Scalars['String']>,
+  label: Scalars['String'],
+  type: DocumentTypeType,
+  documents: DocumentNodeConnection,
+};
+
+
+export type DocumentTypeNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export enum DocumentTypeType {
+  BirthCertificate = 'BIRTH_CERTIFICATE',
+  DriversLicense = 'DRIVERS_LICENSE',
+  NationalId = 'NATIONAL_ID',
+  NationalPassport = 'NATIONAL_PASSPORT',
+  ElectoralCard = 'ELECTORAL_CARD',
+  Other = 'OTHER'
+}
+
+export type EditCashPlanPaymentVerificationInput = {
+  cashPlanPaymentVerificationId: Scalars['ID'],
+  sampling: Scalars['String'],
+  verificationChannel: Scalars['String'],
+  businessAreaSlug: Scalars['String'],
+  fullListArguments?: Maybe<FullListArguments>,
+  randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+  rapidProArguments?: Maybe<RapidProArguments>,
+};
+
+export type EditPaymentVerificationMutation = {
+   __typename?: 'EditPaymentVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
+export type FieldAttributeNode = {
+   __typename?: 'FieldAttributeNode',
+  id?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  labels?: Maybe<Array<Maybe<LabelNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+  hint?: Maybe<Scalars['String']>,
+  required?: Maybe<Scalars['Boolean']>,
+  choices?: Maybe<Array<Maybe<CoreFieldChoiceObject>>>,
+  associatedWith?: Maybe<Scalars['String']>,
+  isFlexField?: Maybe<Scalars['Boolean']>,
+};
+
+export type FinalizeTargetPopulationMutation = {
+   __typename?: 'FinalizeTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type FinishCashPlanVerificationMutation = {
+   __typename?: 'FinishCashPlanVerificationMutation',
+  cashPlan?: Maybe<CashPlanNode>,
+};
+
+
+export type FullListArguments = {
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+
+export type GetCashplanVerificationSampleSizeInput = {
+  cashPlanId?: Maybe<Scalars['ID']>,
+  sampling: Scalars['String'],
+  verificationChannel?: Maybe<Scalars['String']>,
+  businessAreaSlug: Scalars['String'],
+  fullListArguments?: Maybe<FullListArguments>,
+  randomSamplingArguments?: Maybe<RandomSamplingArguments>,
+  rapidProArguments?: Maybe<RapidProArguments>,
+};
+
+export type GetCashplanVerificationSampleSizeObject = {
+   __typename?: 'GetCashplanVerificationSampleSizeObject',
+  paymentRecordCount?: Maybe<Scalars['Int']>,
+  sampleSize?: Maybe<Scalars['Int']>,
+};
+
+export type GrievanceComplaintTicketExtras = {
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
+};
+
+export type GrievanceStatusChangeMutation = {
+   __typename?: 'GrievanceStatusChangeMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type GrievanceTicketNode = Node & {
+   __typename?: 'GrievanceTicketNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  userModified?: Maybe<Scalars['DateTime']>,
+  createdBy?: Maybe<UserNode>,
+  assignedTo?: Maybe<UserNode>,
+  status: Scalars['Int'],
+  category: Scalars['Int'],
+  issueType?: Maybe<Scalars['Int']>,
+  description: Scalars['String'],
+  admin2?: Maybe<AdminAreaNode>,
+  area: Scalars['String'],
+  language: Scalars['String'],
+  consent: Scalars['Boolean'],
+  businessArea: UserBusinessAreaNode,
+  linkedTickets: GrievanceTicketNodeConnection,
+  linkedTicketsRelated: GrievanceTicketNodeConnection,
+  ticketNotes: TicketNoteNodeConnection,
+  complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
+  sensitiveTicketDetails?: Maybe<TicketSensitiveDetailsNode>,
+  householdDataUpdateTicketDetails?: Maybe<TicketHouseholdDataUpdateDetailsNode>,
+  individualDataUpdateTicketDetails?: Maybe<TicketIndividualDataUpdateDetailsNode>,
+  addIndividualTicketDetails?: Maybe<TicketAddIndividualDetailsNode>,
+  deleteIndividualTicketDetails?: Maybe<TicketDeleteIndividualDetailsNode>,
+  systemFlaggingTicketDetails?: Maybe<TicketSystemFlaggingDetailsNode>,
+  needsAdjudicationTicketDetails?: Maybe<TicketNeedsAdjudicationDetailsNode>,
+  paymentVerificationTicketDetails?: Maybe<TicketPaymentVerificationDetailsNode>,
+  household?: Maybe<HouseholdNode>,
+  individual?: Maybe<IndividualNode>,
+  paymentRecord?: Maybe<PaymentRecordNode>,
+  relatedTickets?: Maybe<Array<Maybe<GrievanceTicketNode>>>,
+  admin?: Maybe<Scalars['String']>,
+};
+
+
+export type GrievanceTicketNodeLinkedTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeLinkedTicketsRelatedArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketNodeTicketNotesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type GrievanceTicketNodeConnection = {
+   __typename?: 'GrievanceTicketNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<GrievanceTicketNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type GrievanceTicketNodeEdge = {
+   __typename?: 'GrievanceTicketNodeEdge',
+  node?: Maybe<GrievanceTicketNode>,
+  cursor: Scalars['String'],
+};
+
+export type GroupAttributeNode = {
+   __typename?: 'GroupAttributeNode',
+  id: Scalars['UUID'],
+  name: Scalars['String'],
+  label: Scalars['JSONString'],
+  flexAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  labelEn?: Maybe<Scalars['String']>,
+};
+
+
+export type GroupAttributeNodeFlexAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
+export enum HouseholdCollectIndividualData {
+  A = 'A_',
+  A_1 = 'A_1',
+  A_0 = 'A_0'
+}
+
+export enum HouseholdCurrency {
+  A = 'A_',
+  Aed = 'AED',
+  Afn = 'AFN',
+  All = 'ALL',
+  Amd = 'AMD',
+  Ang = 'ANG',
+  Aoa = 'AOA',
+  Ars = 'ARS',
+  Aud = 'AUD',
+  Awg = 'AWG',
+  Azn = 'AZN',
+  Bam = 'BAM',
+  Bbd = 'BBD',
+  Bdt = 'BDT',
+  Bgn = 'BGN',
+  Bhd = 'BHD',
+  Bif = 'BIF',
+  Bmd = 'BMD',
+  Bnd = 'BND',
+  Bob = 'BOB',
+  Bov = 'BOV',
+  Brl = 'BRL',
+  Bsd = 'BSD',
+  Btn = 'BTN',
+  Bwp = 'BWP',
+  Byn = 'BYN',
+  Bzd = 'BZD',
+  Cad = 'CAD',
+  Cdf = 'CDF',
+  Chf = 'CHF',
+  Clp = 'CLP',
+  Cny = 'CNY',
+  Cop = 'COP',
+  Crc = 'CRC',
+  Cuc = 'CUC',
+  Cup = 'CUP',
+  Cve = 'CVE',
+  Czk = 'CZK',
+  Djf = 'DJF',
+  Dkk = 'DKK',
+  Dop = 'DOP',
+  Dzd = 'DZD',
+  Egp = 'EGP',
+  Ern = 'ERN',
+  Etb = 'ETB',
+  Eur = 'EUR',
+  Fjd = 'FJD',
+  Fkp = 'FKP',
+  Gbp = 'GBP',
+  Gel = 'GEL',
+  Ghs = 'GHS',
+  Gip = 'GIP',
+  Gmd = 'GMD',
+  Gnf = 'GNF',
+  Gtq = 'GTQ',
+  Gyd = 'GYD',
+  Hkd = 'HKD',
+  Hnl = 'HNL',
+  Hrk = 'HRK',
+  Htg = 'HTG',
+  Huf = 'HUF',
+  Idr = 'IDR',
+  Ils = 'ILS',
+  Inr = 'INR',
+  Iqd = 'IQD',
+  Irr = 'IRR',
+  Isk = 'ISK',
+  Jmd = 'JMD',
+  Jod = 'JOD',
+  Jpy = 'JPY',
+  Kes = 'KES',
+  Kgs = 'KGS',
+  Khr = 'KHR',
+  Kmf = 'KMF',
+  Kpw = 'KPW',
+  Krw = 'KRW',
+  Kwd = 'KWD',
+  Kyd = 'KYD',
+  Kzt = 'KZT',
+  Lak = 'LAK',
+  Lbp = 'LBP',
+  Lkr = 'LKR',
+  Lrd = 'LRD',
+  Lsl = 'LSL',
+  Lyd = 'LYD',
+  Mad = 'MAD',
+  Mdl = 'MDL',
+  Mga = 'MGA',
+  Mkd = 'MKD',
+  Mmk = 'MMK',
+  Mnt = 'MNT',
+  Mop = 'MOP',
+  Mru = 'MRU',
+  Mur = 'MUR',
+  Mvr = 'MVR',
+  Mwk = 'MWK',
+  Mxn = 'MXN',
+  Myr = 'MYR',
+  Mzn = 'MZN',
+  Nad = 'NAD',
+  Ngn = 'NGN',
+  Nio = 'NIO',
+  Nok = 'NOK',
+  Npr = 'NPR',
+  Nzd = 'NZD',
+  Omr = 'OMR',
+  Pab = 'PAB',
+  Pen = 'PEN',
+  Pgk = 'PGK',
+  Php = 'PHP',
+  Pkr = 'PKR',
+  Pln = 'PLN',
+  Pyg = 'PYG',
+  Qar = 'QAR',
+  Ron = 'RON',
+  Rsd = 'RSD',
+  Rub = 'RUB',
+  Rwf = 'RWF',
+  Sar = 'SAR',
+  Sbd = 'SBD',
+  Scr = 'SCR',
+  Sdg = 'SDG',
+  Sek = 'SEK',
+  Sgd = 'SGD',
+  Shp = 'SHP',
+  Sll = 'SLL',
+  Sos = 'SOS',
+  Srd = 'SRD',
+  Ssp = 'SSP',
+  Stn = 'STN',
+  Svc = 'SVC',
+  Syp = 'SYP',
+  Szl = 'SZL',
+  Thb = 'THB',
+  Tjs = 'TJS',
+  Tmt = 'TMT',
+  Tnd = 'TND',
+  Top = 'TOP',
+  Try = 'TRY',
+  Ttd = 'TTD',
+  Twd = 'TWD',
+  Tzs = 'TZS',
+  Uah = 'UAH',
+  Ugx = 'UGX',
+  Usd = 'USD',
+  Uyu = 'UYU',
+  Uyw = 'UYW',
+  Uzs = 'UZS',
+  Ves = 'VES',
+  Vnd = 'VND',
+  Vuv = 'VUV',
+  Wst = 'WST',
+  Xaf = 'XAF',
+  Xag = 'XAG',
+  Xau = 'XAU',
+  Xcd = 'XCD',
+  Xof = 'XOF',
+  Xpf = 'XPF',
+  Yer = 'YER',
+  Zar = 'ZAR',
+  Zmw = 'ZMW',
+  Zwl = 'ZWL'
+}
+
+export type HouseholdDataChangeApproveMutation = {
+   __typename?: 'HouseholdDataChangeApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type HouseholdDataUpdateIssueTypeExtras = {
+  household: Scalars['ID'],
+  householdData: HouseholdUpdateDataObjectType,
+};
+
+export type HouseholdNode = Node & {
+   __typename?: 'HouseholdNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  removedDate?: Maybe<Scalars['DateTime']>,
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
+  withdrawn: Scalars['Boolean'],
+  withdrawnDate?: Maybe<Scalars['DateTime']>,
+  consentSign: Scalars['String'],
+  consent?: Maybe<Scalars['Boolean']>,
+  consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
+  residenceStatus: HouseholdResidenceStatus,
+  countryOrigin?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  size: Scalars['Int'],
+  address: Scalars['String'],
+  adminArea?: Maybe<AdminAreaNode>,
+  representatives: IndividualNodeConnection,
+  geopoint?: Maybe<Scalars['GeoJSON']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
+  pregnantCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup60Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
+  registrationDataImport: RegistrationDataImportNode,
+  programs: ProgramNodeConnection,
+  returnee?: Maybe<Scalars['Boolean']>,
+  flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  firstRegistrationDate: Scalars['DateTime'],
+  lastRegistrationDate: Scalars['DateTime'],
+  headOfHousehold: IndividualNode,
+  fchildHoh?: Maybe<Scalars['Boolean']>,
+  childHoh?: Maybe<Scalars['Boolean']>,
+  unicefId: Scalars['String'],
+  businessArea: UserBusinessAreaNode,
+  start?: Maybe<Scalars['DateTime']>,
+  deviceid: Scalars['String'],
+  nameEnumerator: Scalars['String'],
+  orgEnumerator: HouseholdOrgEnumerator,
+  orgNameEnumerator: Scalars['String'],
+  village: Scalars['String'],
+  registrationMethod: HouseholdRegistrationMethod,
+  collectIndividualData: HouseholdCollectIndividualData,
+  currency: HouseholdCurrency,
+  unhcrId: Scalars['String'],
+  paymentRecords: PaymentRecordNodeConnection,
+  complaintTicketDetails: TicketComplaintDetailsNodeConnection,
+  sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
+  householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNodeConnection,
+  addIndividualTicketDetails: TicketAddIndividualDetailsNodeConnection,
+  individualsAndRoles: Array<IndividualRoleInHouseholdNode>,
+  individuals: IndividualNodeConnection,
+  targetPopulations: TargetPopulationNodeConnection,
+  selections: Array<HouseholdSelection>,
+  totalCashReceived?: Maybe<Scalars['Decimal']>,
+  selection?: Maybe<HouseholdSelection>,
+  sanctionListPossibleMatch?: Maybe<Scalars['Boolean']>,
+  sanctionListConfirmedMatch?: Maybe<Scalars['Boolean']>,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
+  admin1?: Maybe<AdminAreaNode>,
+  admin2?: Maybe<AdminAreaNode>,
+  status?: Maybe<Scalars['String']>,
+};
+
+
+export type HouseholdNodeRepresentativesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type HouseholdNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type HouseholdNodeComplaintTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeSensitiveTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeHouseholdDataUpdateTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeAddIndividualTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type HouseholdNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+export type HouseholdNodeConnection = {
+   __typename?: 'HouseholdNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<HouseholdNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  individualsCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type HouseholdNodeEdge = {
+   __typename?: 'HouseholdNodeEdge',
+  node?: Maybe<HouseholdNode>,
+  cursor: Scalars['String'],
+};
+
+export enum HouseholdOrgEnumerator {
+  A = 'A_',
+  Unicef = 'UNICEF',
+  Partner = 'PARTNER'
+}
+
+export enum HouseholdRegistrationMethod {
+  A = 'A_',
+  HhRegistration = 'HH_REGISTRATION',
+  Community = 'COMMUNITY'
+}
+
+export enum HouseholdResidenceStatus {
+  A = 'A_',
+  Idp = 'IDP',
+  Refugee = 'REFUGEE',
+  OthersOfConcern = 'OTHERS_OF_CONCERN',
+  Host = 'HOST',
+  NonHost = 'NON_HOST'
+}
+
+export type HouseholdSelection = {
+   __typename?: 'HouseholdSelection',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household: HouseholdNode,
+  targetPopulation: TargetPopulationNode,
+  vulnerabilityScore?: Maybe<Scalars['Float']>,
+  final: Scalars['Boolean'],
+};
+
+export type HouseholdUpdateDataObjectType = {
+  status?: Maybe<Scalars['String']>,
+  consent?: Maybe<Scalars['Boolean']>,
+  consentSharing?: Maybe<Array<Maybe<Scalars['String']>>>,
+  residenceStatus?: Maybe<Scalars['String']>,
+  countryOrigin?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  size?: Maybe<Scalars['Int']>,
+  address?: Maybe<Scalars['String']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  pregnantCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  returnee?: Maybe<Scalars['Boolean']>,
+  fchildHoh?: Maybe<Scalars['Boolean']>,
+  childHoh?: Maybe<Scalars['Boolean']>,
+  start?: Maybe<Scalars['DateTime']>,
+  end?: Maybe<Scalars['DateTime']>,
+  nameEnumerator?: Maybe<Scalars['String']>,
+  orgEnumerator?: Maybe<Scalars['String']>,
+  orgNameEnumerator?: Maybe<Scalars['String']>,
+  village?: Maybe<Scalars['String']>,
+  flexFields?: Maybe<Scalars['Arg']>,
+};
+
+export enum ImportDataDataType {
+  Xlsx = 'XLSX',
+  Json = 'JSON'
+}
+
+export type ImportDataNode = Node & {
+   __typename?: 'ImportDataNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  file: Scalars['String'],
+  dataType: ImportDataDataType,
+  numberOfHouseholds: Scalars['Int'],
+  numberOfIndividuals: Scalars['Int'],
+  registrationDataImport?: Maybe<RegistrationDataImportDatahubNode>,
+};
+
+export type ImportedDocumentNode = Node & {
+   __typename?: 'ImportedDocumentNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  documentNumber: Scalars['String'],
+  photo: Scalars['String'],
+  individual: ImportedIndividualNode,
+  type: ImportedDocumentTypeNode,
+  country?: Maybe<Scalars['String']>,
+};
+
+export type ImportedDocumentNodeConnection = {
+   __typename?: 'ImportedDocumentNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ImportedDocumentNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ImportedDocumentNodeEdge = {
+   __typename?: 'ImportedDocumentNodeEdge',
+  node?: Maybe<ImportedDocumentNode>,
+  cursor: Scalars['String'],
+};
+
+export enum ImportedDocumentTypeCountry {
+  Af = 'AF',
+  Ax = 'AX',
+  Al = 'AL',
+  Dz = 'DZ',
+  As = 'AS',
+  Ad = 'AD',
+  Ao = 'AO',
+  Ai = 'AI',
+  Aq = 'AQ',
+  Ag = 'AG',
+  Ar = 'AR',
+  Am = 'AM',
+  Aw = 'AW',
+  Au = 'AU',
+  At = 'AT',
+  Az = 'AZ',
+  Bs = 'BS',
+  Bh = 'BH',
+  Bd = 'BD',
+  Bb = 'BB',
+  By = 'BY',
+  Be = 'BE',
+  Bz = 'BZ',
+  Bj = 'BJ',
+  Bm = 'BM',
+  Bt = 'BT',
+  Bo = 'BO',
+  Bq = 'BQ',
+  Ba = 'BA',
+  Bw = 'BW',
+  Bv = 'BV',
+  Br = 'BR',
+  Io = 'IO',
+  Bn = 'BN',
+  Bg = 'BG',
+  Bf = 'BF',
+  Bi = 'BI',
+  Cv = 'CV',
+  Kh = 'KH',
+  Cm = 'CM',
+  Ca = 'CA',
+  Ky = 'KY',
+  Cf = 'CF',
+  Td = 'TD',
+  Cl = 'CL',
+  Cn = 'CN',
+  Cx = 'CX',
+  Cc = 'CC',
+  Co = 'CO',
+  Km = 'KM',
+  Cg = 'CG',
+  Cd = 'CD',
+  Ck = 'CK',
+  Cr = 'CR',
+  Ci = 'CI',
+  Hr = 'HR',
+  Cu = 'CU',
+  Cw = 'CW',
+  Cy = 'CY',
+  Cz = 'CZ',
+  Dk = 'DK',
+  Dj = 'DJ',
+  Dm = 'DM',
+  Do = 'DO',
+  Ec = 'EC',
+  Eg = 'EG',
+  Sv = 'SV',
+  Gq = 'GQ',
+  Er = 'ER',
+  Ee = 'EE',
+  Sz = 'SZ',
+  Et = 'ET',
+  Fk = 'FK',
+  Fo = 'FO',
+  Fj = 'FJ',
+  Fi = 'FI',
+  Fr = 'FR',
+  Gf = 'GF',
+  Pf = 'PF',
+  Tf = 'TF',
+  Ga = 'GA',
+  Gm = 'GM',
+  Ge = 'GE',
+  De = 'DE',
+  Gh = 'GH',
+  Gi = 'GI',
+  Gr = 'GR',
+  Gl = 'GL',
+  Gd = 'GD',
+  Gp = 'GP',
+  Gu = 'GU',
+  Gt = 'GT',
+  Gg = 'GG',
+  Gn = 'GN',
+  Gw = 'GW',
+  Gy = 'GY',
+  Ht = 'HT',
+  Hm = 'HM',
+  Va = 'VA',
+  Hn = 'HN',
+  Hk = 'HK',
+  Hu = 'HU',
+  Is = 'IS',
+  In = 'IN',
+  Id = 'ID',
+  Ir = 'IR',
+  Iq = 'IQ',
+  Ie = 'IE',
+  Im = 'IM',
+  Il = 'IL',
+  It = 'IT',
+  Jm = 'JM',
+  Jp = 'JP',
+  Je = 'JE',
+  Jo = 'JO',
+  Kz = 'KZ',
+  Ke = 'KE',
+  Ki = 'KI',
+  Kw = 'KW',
+  Kg = 'KG',
+  La = 'LA',
+  Lv = 'LV',
+  Lb = 'LB',
+  Ls = 'LS',
+  Lr = 'LR',
+  Ly = 'LY',
+  Li = 'LI',
+  Lt = 'LT',
+  Lu = 'LU',
+  Mo = 'MO',
+  Mg = 'MG',
+  Mw = 'MW',
+  My = 'MY',
+  Mv = 'MV',
+  Ml = 'ML',
+  Mt = 'MT',
+  Mh = 'MH',
+  Mq = 'MQ',
+  Mr = 'MR',
+  Mu = 'MU',
+  Yt = 'YT',
+  Mx = 'MX',
+  Fm = 'FM',
+  Md = 'MD',
+  Mc = 'MC',
+  Mn = 'MN',
+  Me = 'ME',
+  Ms = 'MS',
+  Ma = 'MA',
+  Mz = 'MZ',
+  Mm = 'MM',
+  Na = 'NA',
+  Nr = 'NR',
+  Np = 'NP',
+  Nl = 'NL',
+  Nc = 'NC',
+  Nz = 'NZ',
+  Ni = 'NI',
+  Ne = 'NE',
+  Ng = 'NG',
+  Nu = 'NU',
+  Nf = 'NF',
+  Kp = 'KP',
+  Mk = 'MK',
+  Mp = 'MP',
+  No = 'NO',
+  Om = 'OM',
+  Pk = 'PK',
+  Pw = 'PW',
+  Ps = 'PS',
+  Pa = 'PA',
+  Pg = 'PG',
+  Py = 'PY',
+  Pe = 'PE',
+  Ph = 'PH',
+  Pn = 'PN',
+  Pl = 'PL',
+  Pt = 'PT',
+  Pr = 'PR',
+  Qa = 'QA',
+  Re = 'RE',
+  Ro = 'RO',
+  Ru = 'RU',
+  Rw = 'RW',
+  Bl = 'BL',
+  Sh = 'SH',
+  Kn = 'KN',
+  Lc = 'LC',
+  Mf = 'MF',
+  Pm = 'PM',
+  Vc = 'VC',
+  Ws = 'WS',
+  Sm = 'SM',
+  St = 'ST',
+  Sa = 'SA',
+  Sn = 'SN',
+  Rs = 'RS',
+  Sc = 'SC',
+  Sl = 'SL',
+  Sg = 'SG',
+  Sx = 'SX',
+  Sk = 'SK',
+  Si = 'SI',
+  Sb = 'SB',
+  So = 'SO',
+  Za = 'ZA',
+  Gs = 'GS',
+  Kr = 'KR',
+  Ss = 'SS',
+  Es = 'ES',
+  Lk = 'LK',
+  Sd = 'SD',
+  Sr = 'SR',
+  Sj = 'SJ',
+  Se = 'SE',
+  Ch = 'CH',
+  Sy = 'SY',
+  Tw = 'TW',
+  Tj = 'TJ',
+  Tz = 'TZ',
+  Th = 'TH',
+  Tl = 'TL',
+  Tg = 'TG',
+  Tk = 'TK',
+  To = 'TO',
+  Tt = 'TT',
+  Tn = 'TN',
+  Tr = 'TR',
+  Tm = 'TM',
+  Tc = 'TC',
+  Tv = 'TV',
+  Ug = 'UG',
+  Ua = 'UA',
+  Ae = 'AE',
+  Gb = 'GB',
+  Um = 'UM',
+  Us = 'US',
+  U = 'U',
+  Uy = 'UY',
+  Uz = 'UZ',
+  Vu = 'VU',
+  Ve = 'VE',
+  Vn = 'VN',
+  Vg = 'VG',
+  Vi = 'VI',
+  Wf = 'WF',
+  Eh = 'EH',
+  Ye = 'YE',
+  Zm = 'ZM',
+  Zw = 'ZW'
+}
+
+export type ImportedDocumentTypeNode = {
+   __typename?: 'ImportedDocumentTypeNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  country: ImportedDocumentTypeCountry,
+  label: Scalars['String'],
+  type: ImportedDocumentTypeType,
+  documents: ImportedDocumentNodeConnection,
+};
+
+
+export type ImportedDocumentTypeNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export enum ImportedDocumentTypeType {
+  BirthCertificate = 'BIRTH_CERTIFICATE',
+  DriversLicense = 'DRIVERS_LICENSE',
+  NationalId = 'NATIONAL_ID',
+  NationalPassport = 'NATIONAL_PASSPORT',
+  ElectoralCard = 'ELECTORAL_CARD',
+  Other = 'OTHER'
+}
+
+export enum ImportedHouseholdCollectIndividualData {
+  A = 'A_',
+  A_1 = 'A_1',
+  A_0 = 'A_0'
+}
+
+export enum ImportedHouseholdConsentSharing {
+  A = 'A_',
+  Unicef = 'UNICEF',
+  HumanitarianPartner = 'HUMANITARIAN_PARTNER',
+  PrivatePartner = 'PRIVATE_PARTNER',
+  GovernmentPartner = 'GOVERNMENT_PARTNER'
+}
+
+export enum ImportedHouseholdCurrency {
+  A = 'A_',
+  Aed = 'AED',
+  Afn = 'AFN',
+  All = 'ALL',
+  Amd = 'AMD',
+  Ang = 'ANG',
+  Aoa = 'AOA',
+  Ars = 'ARS',
+  Aud = 'AUD',
+  Awg = 'AWG',
+  Azn = 'AZN',
+  Bam = 'BAM',
+  Bbd = 'BBD',
+  Bdt = 'BDT',
+  Bgn = 'BGN',
+  Bhd = 'BHD',
+  Bif = 'BIF',
+  Bmd = 'BMD',
+  Bnd = 'BND',
+  Bob = 'BOB',
+  Bov = 'BOV',
+  Brl = 'BRL',
+  Bsd = 'BSD',
+  Btn = 'BTN',
+  Bwp = 'BWP',
+  Byn = 'BYN',
+  Bzd = 'BZD',
+  Cad = 'CAD',
+  Cdf = 'CDF',
+  Chf = 'CHF',
+  Clp = 'CLP',
+  Cny = 'CNY',
+  Cop = 'COP',
+  Crc = 'CRC',
+  Cuc = 'CUC',
+  Cup = 'CUP',
+  Cve = 'CVE',
+  Czk = 'CZK',
+  Djf = 'DJF',
+  Dkk = 'DKK',
+  Dop = 'DOP',
+  Dzd = 'DZD',
+  Egp = 'EGP',
+  Ern = 'ERN',
+  Etb = 'ETB',
+  Eur = 'EUR',
+  Fjd = 'FJD',
+  Fkp = 'FKP',
+  Gbp = 'GBP',
+  Gel = 'GEL',
+  Ghs = 'GHS',
+  Gip = 'GIP',
+  Gmd = 'GMD',
+  Gnf = 'GNF',
+  Gtq = 'GTQ',
+  Gyd = 'GYD',
+  Hkd = 'HKD',
+  Hnl = 'HNL',
+  Hrk = 'HRK',
+  Htg = 'HTG',
+  Huf = 'HUF',
+  Idr = 'IDR',
+  Ils = 'ILS',
+  Inr = 'INR',
+  Iqd = 'IQD',
+  Irr = 'IRR',
+  Isk = 'ISK',
+  Jmd = 'JMD',
+  Jod = 'JOD',
+  Jpy = 'JPY',
+  Kes = 'KES',
+  Kgs = 'KGS',
+  Khr = 'KHR',
+  Kmf = 'KMF',
+  Kpw = 'KPW',
+  Krw = 'KRW',
+  Kwd = 'KWD',
+  Kyd = 'KYD',
+  Kzt = 'KZT',
+  Lak = 'LAK',
+  Lbp = 'LBP',
+  Lkr = 'LKR',
+  Lrd = 'LRD',
+  Lsl = 'LSL',
+  Lyd = 'LYD',
+  Mad = 'MAD',
+  Mdl = 'MDL',
+  Mga = 'MGA',
+  Mkd = 'MKD',
+  Mmk = 'MMK',
+  Mnt = 'MNT',
+  Mop = 'MOP',
+  Mru = 'MRU',
+  Mur = 'MUR',
+  Mvr = 'MVR',
+  Mwk = 'MWK',
+  Mxn = 'MXN',
+  Myr = 'MYR',
+  Mzn = 'MZN',
+  Nad = 'NAD',
+  Ngn = 'NGN',
+  Nio = 'NIO',
+  Nok = 'NOK',
+  Npr = 'NPR',
+  Nzd = 'NZD',
+  Omr = 'OMR',
+  Pab = 'PAB',
+  Pen = 'PEN',
+  Pgk = 'PGK',
+  Php = 'PHP',
+  Pkr = 'PKR',
+  Pln = 'PLN',
+  Pyg = 'PYG',
+  Qar = 'QAR',
+  Ron = 'RON',
+  Rsd = 'RSD',
+  Rub = 'RUB',
+  Rwf = 'RWF',
+  Sar = 'SAR',
+  Sbd = 'SBD',
+  Scr = 'SCR',
+  Sdg = 'SDG',
+  Sek = 'SEK',
+  Sgd = 'SGD',
+  Shp = 'SHP',
+  Sll = 'SLL',
+  Sos = 'SOS',
+  Srd = 'SRD',
+  Ssp = 'SSP',
+  Stn = 'STN',
+  Svc = 'SVC',
+  Syp = 'SYP',
+  Szl = 'SZL',
+  Thb = 'THB',
+  Tjs = 'TJS',
+  Tmt = 'TMT',
+  Tnd = 'TND',
+  Top = 'TOP',
+  Try = 'TRY',
+  Ttd = 'TTD',
+  Twd = 'TWD',
+  Tzs = 'TZS',
+  Uah = 'UAH',
+  Ugx = 'UGX',
+  Usd = 'USD',
+  Uyu = 'UYU',
+  Uyw = 'UYW',
+  Uzs = 'UZS',
+  Ves = 'VES',
+  Vnd = 'VND',
+  Vuv = 'VUV',
+  Wst = 'WST',
+  Xaf = 'XAF',
+  Xag = 'XAG',
+  Xau = 'XAU',
+  Xcd = 'XCD',
+  Xof = 'XOF',
+  Xpf = 'XPF',
+  Yer = 'YER',
+  Zar = 'ZAR',
+  Zmw = 'ZMW',
+  Zwl = 'ZWL'
+}
+
+export type ImportedHouseholdNode = Node & {
+   __typename?: 'ImportedHouseholdNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  consentSign: Scalars['String'],
+  consent?: Maybe<Scalars['Boolean']>,
+  consentSharing: ImportedHouseholdConsentSharing,
+  residenceStatus: ImportedHouseholdResidenceStatus,
+  countryOrigin?: Maybe<Scalars['String']>,
+  size: Scalars['Int'],
+  address: Scalars['String'],
+  country?: Maybe<Scalars['String']>,
+  admin1: Scalars['String'],
+  admin1Title: Scalars['String'],
+  admin2: Scalars['String'],
+  admin2Title: Scalars['String'],
+  geopoint?: Maybe<Scalars['GeoJSON']>,
+  femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
+  pregnantCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup611Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup60Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
+  headOfHousehold?: Maybe<ImportedIndividualNode>,
+  fchildHoh?: Maybe<Scalars['Boolean']>,
+  childHoh?: Maybe<Scalars['Boolean']>,
+  registrationDataImport: RegistrationDataImportDatahubNode,
+  firstRegistrationDate: Scalars['DateTime'],
+  lastRegistrationDate: Scalars['DateTime'],
+  returnee?: Maybe<Scalars['Boolean']>,
+  flexFields?: Maybe<Scalars['Arg']>,
+  start?: Maybe<Scalars['DateTime']>,
+  deviceid: Scalars['String'],
+  nameEnumerator: Scalars['String'],
+  orgEnumerator?: Maybe<ImportedHouseholdOrgEnumerator>,
+  orgNameEnumerator: Scalars['String'],
+  village: Scalars['String'],
+  registrationMethod: ImportedHouseholdRegistrationMethod,
+  collectIndividualData: ImportedHouseholdCollectIndividualData,
+  currency: ImportedHouseholdCurrency,
+  unhcrId: Scalars['String'],
+  koboSubmissionUuid?: Maybe<Scalars['UUID']>,
+  koboAssetId: Scalars['String'],
+  koboSubmissionTime?: Maybe<Scalars['DateTime']>,
+  individuals: ImportedIndividualNodeConnection,
+  hasDuplicates?: Maybe<Scalars['Boolean']>,
+};
+
+
+export type ImportedHouseholdNodeIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type ImportedHouseholdNodeConnection = {
+   __typename?: 'ImportedHouseholdNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ImportedHouseholdNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ImportedHouseholdNodeEdge = {
+   __typename?: 'ImportedHouseholdNodeEdge',
+  node?: Maybe<ImportedHouseholdNode>,
+  cursor: Scalars['String'],
+};
+
+export enum ImportedHouseholdOrgEnumerator {
+  A = 'A_',
+  Unicef = 'UNICEF',
+  Partner = 'PARTNER'
+}
+
+export enum ImportedHouseholdRegistrationMethod {
+  A = 'A_',
+  HhRegistration = 'HH_REGISTRATION',
+  Community = 'COMMUNITY'
+}
+
+export enum ImportedHouseholdResidenceStatus {
+  A = 'A_',
+  Idp = 'IDP',
+  Refugee = 'REFUGEE',
+  OthersOfConcern = 'OTHERS_OF_CONCERN',
+  Host = 'HOST',
+  NonHost = 'NON_HOST'
+}
+
+export enum ImportedIndividualDeduplicationBatchStatus {
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
+  NotProcessed = 'NOT_PROCESSED'
+}
+
+export enum ImportedIndividualDeduplicationGoldenRecordStatus {
+  Unique = 'UNIQUE',
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  NotProcessed = 'NOT_PROCESSED'
+}
+
+export type ImportedIndividualIdentityNode = {
+   __typename?: 'ImportedIndividualIdentityNode',
+  id: Scalars['ID'],
+  individual: ImportedIndividualNode,
+  documentNumber: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+};
+
+export enum ImportedIndividualMaritalStatus {
+  A = 'A_',
+  Single = 'SINGLE',
+  Married = 'MARRIED',
+  Widowed = 'WIDOWED',
+  Divorced = 'DIVORCED',
+  Separated = 'SEPARATED'
+}
+
+export type ImportedIndividualNode = Node & {
+   __typename?: 'ImportedIndividualNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  individualId: Scalars['String'],
+  photo: Scalars['String'],
+  fullName: Scalars['String'],
+  givenName: Scalars['String'],
+  middleName: Scalars['String'],
+  familyName: Scalars['String'],
+  relationship?: Maybe<Scalars['String']>,
+  sex: ImportedIndividualSex,
+  birthDate: Scalars['Date'],
+  estimatedBirthDate?: Maybe<Scalars['Boolean']>,
+  maritalStatus: ImportedIndividualMaritalStatus,
+  phoneNo: Scalars['String'],
+  phoneNoAlternative: Scalars['String'],
+  household?: Maybe<ImportedHouseholdNode>,
+  registrationDataImport: RegistrationDataImportDatahubNode,
+  disability: Scalars['Boolean'],
+  workStatus: Scalars['String'],
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
+  deduplicationBatchStatus?: Maybe<ImportedIndividualDeduplicationBatchStatus>,
+  deduplicationGoldenRecordStatus?: Maybe<ImportedIndividualDeduplicationGoldenRecordStatus>,
+  deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  pregnant?: Maybe<Scalars['Boolean']>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
+  whoAnswersPhone: Scalars['String'],
+  whoAnswersAltPhone: Scalars['String'],
+  importedhousehold?: Maybe<ImportedHouseholdNode>,
+  documents: ImportedDocumentNodeConnection,
+  identities: Array<ImportedIndividualIdentityNode>,
+  role?: Maybe<Scalars['String']>,
+};
+
+
+export type ImportedIndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type ImportedIndividualNodeConnection = {
+   __typename?: 'ImportedIndividualNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ImportedIndividualNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ImportedIndividualNodeEdge = {
+   __typename?: 'ImportedIndividualNodeEdge',
+  node?: Maybe<ImportedIndividualNode>,
+  cursor: Scalars['String'],
+};
+
+export enum ImportedIndividualSex {
+  Male = 'MALE',
+  Female = 'FEMALE'
+}
+
+export type ImportXlsxCashPlanVerification = {
+   __typename?: 'ImportXlsxCashPlanVerification',
+  cashPlan?: Maybe<CashPlanNode>,
+  errors?: Maybe<Array<Maybe<XlsxErrorNode>>>,
+};
+
+export type IndividualDataChangeApproveMutation = {
+   __typename?: 'IndividualDataChangeApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type IndividualDataUpdateIssueTypeExtras = {
+  individual: Scalars['ID'],
+  individualData: IndividualUpdateDataObjectType,
+};
+
+export enum IndividualDeduplicationBatchStatus {
+  SimilarInBatch = 'SIMILAR_IN_BATCH',
+  DuplicateInBatch = 'DUPLICATE_IN_BATCH',
+  UniqueInBatch = 'UNIQUE_IN_BATCH',
+  NotProcessed = 'NOT_PROCESSED'
+}
+
+export enum IndividualDeduplicationGoldenRecordStatus {
+  Unique = 'UNIQUE',
+  Duplicate = 'DUPLICATE',
+  NeedsAdjudication = 'NEEDS_ADJUDICATION',
+  NotProcessed = 'NOT_PROCESSED'
+}
+
+export type IndividualDeleteIssueTypeExtras = {
+  individual: Scalars['ID'],
+};
+
+export type IndividualDocumentObjectType = {
+  country: Scalars['String'],
+  type: Scalars['String'],
+  number: Scalars['String'],
+};
+
+export type IndividualIdentityNode = {
+   __typename?: 'IndividualIdentityNode',
+  id: Scalars['ID'],
+  agency: AgencyNode,
+  individual: IndividualNode,
+  number: Scalars['String'],
+  type?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+};
+
+export type IndividualIdentityObjectType = {
+  country: Scalars['String'],
+  agency: Scalars['String'],
+  number: Scalars['String'],
+};
+
+export enum IndividualMaritalStatus {
+  A = 'A_',
+  Single = 'SINGLE',
+  Married = 'MARRIED',
+  Widowed = 'WIDOWED',
+  Divorced = 'DIVORCED',
+  Separated = 'SEPARATED'
+}
+
+export type IndividualNode = Node & {
+   __typename?: 'IndividualNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  removedDate?: Maybe<Scalars['DateTime']>,
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
+  duplicate: Scalars['Boolean'],
+  duplicateDate?: Maybe<Scalars['DateTime']>,
+  withdrawn: Scalars['Boolean'],
+  withdrawnDate?: Maybe<Scalars['DateTime']>,
+  individualId: Scalars['String'],
+  photo?: Maybe<Scalars['String']>,
+  fullName: Scalars['String'],
+  givenName: Scalars['String'],
+  middleName: Scalars['String'],
+  familyName: Scalars['String'],
+  sex: IndividualSex,
+  birthDate: Scalars['Date'],
+  estimatedBirthDate?: Maybe<Scalars['Boolean']>,
+  maritalStatus: IndividualMaritalStatus,
+  phoneNo: Scalars['String'],
+  phoneNoAlternative: Scalars['String'],
+  relationship?: Maybe<IndividualRelationship>,
+  household?: Maybe<HouseholdNode>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+  disability: Scalars['Boolean'],
+  workStatus: Scalars['String'],
+  firstRegistrationDate: Scalars['Date'],
+  lastRegistrationDate: Scalars['Date'],
+  flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
+  administrationOfRutf?: Maybe<Scalars['Boolean']>,
+  unicefId: Scalars['String'],
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  deduplicationGoldenRecordResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  deduplicationBatchResults?: Maybe<Array<Maybe<DeduplicationResultNode>>>,
+  importedIndividualId?: Maybe<Scalars['UUID']>,
+  sanctionListPossibleMatch: Scalars['Boolean'],
+  sanctionListConfirmedMatch: Scalars['Boolean'],
+  sanctionListLastCheck?: Maybe<Scalars['DateTime']>,
+  pregnant?: Maybe<Scalars['Boolean']>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability: Scalars['String'],
+  hearingDisability: Scalars['String'],
+  physicalDisability: Scalars['String'],
+  memoryDisability: Scalars['String'],
+  selfcareDisability: Scalars['String'],
+  commsDisability: Scalars['String'],
+  whoAnswersPhone: Scalars['String'],
+  whoAnswersAltPhone: Scalars['String'],
+  businessArea: UserBusinessAreaNode,
+  paymentRecords: PaymentRecordNodeConnection,
+  complaintTicketDetails: TicketComplaintDetailsNodeConnection,
+  sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
+  individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNodeConnection,
+  deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNodeConnection,
+  ticketsystemflaggingdetailsSet: TicketSystemFlaggingDetailsNodeConnection,
+  representedHouseholds: HouseholdNodeConnection,
+  headingHousehold?: Maybe<HouseholdNode>,
+  documents: DocumentNodeConnection,
+  identities: Array<IndividualIdentityNode>,
+  householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
+  status?: Maybe<Scalars['String']>,
+  role?: Maybe<Scalars['String']>,
+};
+
+
+export type IndividualNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type IndividualNodeComplaintTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeSensitiveTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeIndividualDataUpdateTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeDeleteIndividualTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeTicketsystemflaggingdetailsSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeRepresentedHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type IndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type IndividualNodeConnection = {
+   __typename?: 'IndividualNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<IndividualNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type IndividualNodeEdge = {
+   __typename?: 'IndividualNodeEdge',
+  node?: Maybe<IndividualNode>,
+  cursor: Scalars['String'],
+};
+
+export enum IndividualRelationship {
+  Unknown = 'UNKNOWN',
+  NonBeneficiary = 'NON_BENEFICIARY',
+  Head = 'HEAD',
+  SonDaughter = 'SON_DAUGHTER',
+  WifeHusband = 'WIFE_HUSBAND',
+  BrotherSister = 'BROTHER_SISTER',
+  MotherFather = 'MOTHER_FATHER',
+  AuntUncle = 'AUNT_UNCLE',
+  GrandmotherGrandfather = 'GRANDMOTHER_GRANDFATHER',
+  MotherinlawFatherinlaw = 'MOTHERINLAW_FATHERINLAW',
+  DaughterinlawSoninlaw = 'DAUGHTERINLAW_SONINLAW',
+  SisterinlawBrotherinlaw = 'SISTERINLAW_BROTHERINLAW',
+  GranddaugherGrandson = 'GRANDDAUGHER_GRANDSON',
+  NephewNiece = 'NEPHEW_NIECE',
+  Cousin = 'COUSIN'
+}
+
+export type IndividualRoleInHouseholdNode = {
+   __typename?: 'IndividualRoleInHouseholdNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  individual: IndividualNode,
+  household: HouseholdNode,
+  role?: Maybe<IndividualRoleInHouseholdRole>,
+};
+
+export enum IndividualRoleInHouseholdRole {
+  Primary = 'PRIMARY',
+  Alternate = 'ALTERNATE',
+  NoRole = 'NO_ROLE'
+}
+
+export enum IndividualSex {
+  Male = 'MALE',
+  Female = 'FEMALE'
+}
+
+export type IndividualUpdateDataObjectType = {
+  status?: Maybe<Scalars['String']>,
+  fullName?: Maybe<Scalars['String']>,
+  givenName?: Maybe<Scalars['String']>,
+  middleName?: Maybe<Scalars['String']>,
+  familyName?: Maybe<Scalars['String']>,
+  sex?: Maybe<Scalars['String']>,
+  birthDate?: Maybe<Scalars['Date']>,
+  estimatedBirthDate?: Maybe<Scalars['Boolean']>,
+  maritalStatus?: Maybe<Scalars['String']>,
+  phoneNo?: Maybe<Scalars['String']>,
+  phoneNoAlternative?: Maybe<Scalars['String']>,
+  relationship?: Maybe<Scalars['String']>,
+  disability?: Maybe<Scalars['Boolean']>,
+  workStatus?: Maybe<Scalars['String']>,
+  enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
+  administrationOfRutf?: Maybe<Scalars['Boolean']>,
+  pregnant?: Maybe<Scalars['Boolean']>,
+  observedDisability?: Maybe<Array<Maybe<Scalars['String']>>>,
+  seeingDisability?: Maybe<Scalars['String']>,
+  hearingDisability?: Maybe<Scalars['String']>,
+  physicalDisability?: Maybe<Scalars['String']>,
+  memoryDisability?: Maybe<Scalars['String']>,
+  selfcareDisability?: Maybe<Scalars['String']>,
+  commsDisability?: Maybe<Scalars['String']>,
+  whoAnswersPhone?: Maybe<Scalars['String']>,
+  whoAnswersAltPhone?: Maybe<Scalars['String']>,
+  role?: Maybe<Scalars['String']>,
+  documents?: Maybe<Array<Maybe<IndividualDocumentObjectType>>>,
+  documentsToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  identities?: Maybe<Array<Maybe<IndividualIdentityObjectType>>>,
+  identitiesToRemove?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  flexFields?: Maybe<Scalars['Arg']>,
+};
+
+export type IssueTypeExtrasInput = {
+  householdDataUpdateIssueTypeExtras?: Maybe<HouseholdDataUpdateIssueTypeExtras>,
+  individualDataUpdateIssueTypeExtras?: Maybe<IndividualDataUpdateIssueTypeExtras>,
+  individualDeleteIssueTypeExtras?: Maybe<IndividualDeleteIssueTypeExtras>,
+  addIndividualIssueTypeExtras?: Maybe<AddIndividualIssueTypeExtras>,
+};
+
+export type IssueTypesObject = {
+   __typename?: 'IssueTypesObject',
+  category?: Maybe<Scalars['String']>,
+  label?: Maybe<Scalars['String']>,
+  subCategories?: Maybe<Array<Maybe<ChoiceObject>>>,
+};
+
+
+export type KoboAssetObject = {
+   __typename?: 'KoboAssetObject',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  sector?: Maybe<Scalars['String']>,
+  country?: Maybe<Scalars['String']>,
+  assetType?: Maybe<Scalars['String']>,
+  dateModified?: Maybe<Scalars['DateTime']>,
+  deploymentActive?: Maybe<Scalars['Boolean']>,
+  hasDeployment?: Maybe<Scalars['Boolean']>,
+  xlsLink?: Maybe<Scalars['String']>,
+};
+
+export type KoboAssetObjectConnection = {
+   __typename?: 'KoboAssetObjectConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<KoboAssetObjectEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+};
+
+export type KoboAssetObjectEdge = {
+   __typename?: 'KoboAssetObjectEdge',
+  node?: Maybe<KoboAssetObject>,
+  cursor: Scalars['String'],
+};
+
+export type KoboErrorNode = {
+   __typename?: 'KoboErrorNode',
+  header?: Maybe<Scalars['String']>,
+  message?: Maybe<Scalars['String']>,
+};
+
+export type LabelNode = {
+   __typename?: 'LabelNode',
+  language?: Maybe<Scalars['String']>,
+  label?: Maybe<Scalars['String']>,
+};
+
+export enum LogEntryAction {
+  Create = 'CREATE',
+  Update = 'UPDATE',
+  Delete = 'DELETE',
+  SoftDelete = 'SOFT_DELETE'
+}
+
+export type LogEntryNode = Node & {
+   __typename?: 'LogEntryNode',
+  id: Scalars['ID'],
+  contentType?: Maybe<ContentTypeObjectType>,
+  objectId?: Maybe<Scalars['UUID']>,
+  action: LogEntryAction,
+  objectRepr: Scalars['String'],
+  changes?: Maybe<Scalars['Arg']>,
+  user?: Maybe<UserNode>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  timestamp?: Maybe<Scalars['DateTime']>,
+};
+
+export type LogEntryNodeConnection = {
+   __typename?: 'LogEntryNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<LogEntryNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type LogEntryNodeEdge = {
+   __typename?: 'LogEntryNodeEdge',
+  node?: Maybe<LogEntryNode>,
+  cursor: Scalars['String'],
+};
+
+export type MergeRegistrationDataImportMutation = {
+   __typename?: 'MergeRegistrationDataImportMutation',
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type Mutations = {
+   __typename?: 'Mutations',
+  createReport?: Maybe<CreateReport>,
+  createDashboardReport?: Maybe<CreateDashboardReport>,
+  createGrievanceTicket?: Maybe<CreateGrievanceTicketMutation>,
+  updateGrievanceTicket?: Maybe<UpdateGrievanceTicketMutation>,
+  grievanceStatusChange?: Maybe<GrievanceStatusChangeMutation>,
+  createTicketNote?: Maybe<CreateTicketNoteMutation>,
+  approveIndividualDataChange?: Maybe<IndividualDataChangeApproveMutation>,
+  approveHouseholdDataChange?: Maybe<HouseholdDataChangeApproveMutation>,
+  approveAddIndividual?: Maybe<SimpleApproveMutation>,
+  approveDeleteIndividual?: Maybe<SimpleApproveMutation>,
+  approveSystemFlagging?: Maybe<SimpleApproveMutation>,
+  approveNeedsAdjudication?: Maybe<NeedsAdjudicationApproveMutation>,
+  reassignRole?: Maybe<ReassignRoleMutation>,
+  createCashPlanPaymentVerification?: Maybe<CreatePaymentVerificationMutation>,
+  editCashPlanPaymentVerification?: Maybe<EditPaymentVerificationMutation>,
+  importXlsxCashPlanVerification?: Maybe<ImportXlsxCashPlanVerification>,
+  activateCashPlanPaymentVerification?: Maybe<ActivateCashPlanVerificationMutation>,
+  finishCashPlanPaymentVerification?: Maybe<FinishCashPlanVerificationMutation>,
+  discardCashPlanPaymentVerification?: Maybe<DiscardCashPlanVerificationMutation>,
+  updatePaymentVerificationStatusAndReceivedAmount?: Maybe<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  updatePaymentVerificationReceivedAndReceivedAmount?: Maybe<UpdatePaymentVerificationReceivedAndReceivedAmount>,
+  createTargetPopulation?: Maybe<CreateTargetPopulationMutation>,
+  updateTargetPopulation?: Maybe<UpdateTargetPopulationMutation>,
+  copyTargetPopulation?: Maybe<CopyTargetPopulationMutationPayload>,
+  deleteTargetPopulation?: Maybe<DeleteTargetPopulationMutationPayload>,
+  approveTargetPopulation?: Maybe<ApproveTargetPopulationMutation>,
+  unapproveTargetPopulation?: Maybe<UnapproveTargetPopulationMutation>,
+  finalizeTargetPopulation?: Maybe<FinalizeTargetPopulationMutation>,
+  setSteficonRuleOnTargetPopulation?: Maybe<SetSteficonRuleOnTargetPopulationMutationPayload>,
+  createProgram?: Maybe<CreateProgram>,
+  updateProgram?: Maybe<UpdateProgram>,
+  deleteProgram?: Maybe<DeleteProgram>,
+  uploadImportDataXlsxFile?: Maybe<UploadImportDataXlsxFile>,
+  deleteRegistrationDataImport?: Maybe<DeleteRegistrationDataImport>,
+  registrationXlsxImport?: Maybe<RegistrationXlsxImportMutation>,
+  registrationKoboImport?: Maybe<RegistrationKoboImportMutation>,
+  saveKoboImportData?: Maybe<SaveKoboProjectImportDataMutation>,
+  mergeRegistrationDataImport?: Maybe<MergeRegistrationDataImportMutation>,
+  rerunDedupe?: Maybe<RegistrationDeduplicationMutation>,
+  checkAgainstSanctionList?: Maybe<CheckAgainstSanctionListMutation>,
+};
+
+
+export type MutationsCreateReportArgs = {
+  reportData: CreateReportInput
+};
+
+
+export type MutationsCreateDashboardReportArgs = {
+  reportData: CreateDashboardReportInput
+};
+
+
+export type MutationsCreateGrievanceTicketArgs = {
+  input: CreateGrievanceTicketInput
+};
+
+
+export type MutationsUpdateGrievanceTicketArgs = {
+  input: UpdateGrievanceTicketInput,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsGrievanceStatusChangeArgs = {
+  grievanceTicketId?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['Int']>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsCreateTicketNoteArgs = {
+  noteInput: CreateTicketNoteInput,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveIndividualDataChangeArgs = {
+  approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
+  grievanceTicketId: Scalars['ID'],
+  individualApproveData?: Maybe<Scalars['JSONString']>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveHouseholdDataChangeArgs = {
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
+  grievanceTicketId: Scalars['ID'],
+  householdApproveData?: Maybe<Scalars['JSONString']>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveAddIndividualArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveDeleteIndividualArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveSystemFlaggingArgs = {
+  approveStatus: Scalars['Boolean'],
+  grievanceTicketId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsApproveNeedsAdjudicationArgs = {
+  grievanceTicketId: Scalars['ID'],
+  selectedIndividualId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsReassignRoleArgs = {
+  grievanceTicketId: Scalars['ID'],
+  householdId: Scalars['ID'],
+  householdVersion?: Maybe<Scalars['BigInt']>,
+  individualId: Scalars['ID'],
+  individualVersion?: Maybe<Scalars['BigInt']>,
+  role: Scalars['String'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsCreateCashPlanPaymentVerificationArgs = {
+  input: CreatePaymentVerificationInput
+};
+
+
+export type MutationsEditCashPlanPaymentVerificationArgs = {
+  input: EditCashPlanPaymentVerificationInput,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsImportXlsxCashPlanVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  file: Scalars['Upload']
+};
+
+
+export type MutationsActivateCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsFinishCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsDiscardCashPlanPaymentVerificationArgs = {
+  cashPlanVerificationId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs = {
+  paymentVerificationId: Scalars['ID'],
+  receivedAmount: Scalars['Decimal'],
+  status?: Maybe<PaymentVerificationStatusForUpdate>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs = {
+  paymentVerificationId: Scalars['ID'],
+  received: Scalars['Boolean'],
+  receivedAmount: Scalars['Decimal'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsCreateTargetPopulationArgs = {
+  input: CreateTargetPopulationInput
+};
+
+
+export type MutationsUpdateTargetPopulationArgs = {
+  input: UpdateTargetPopulationInput,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsCopyTargetPopulationArgs = {
+  input: CopyTargetPopulationMutationInput
+};
+
+
+export type MutationsDeleteTargetPopulationArgs = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type MutationsApproveTargetPopulationArgs = {
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsUnapproveTargetPopulationArgs = {
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsFinalizeTargetPopulationArgs = {
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsSetSteficonRuleOnTargetPopulationArgs = {
+  input: SetSteficonRuleOnTargetPopulationMutationInput
+};
+
+
+export type MutationsCreateProgramArgs = {
+  programData: CreateProgramInput
+};
+
+
+export type MutationsUpdateProgramArgs = {
+  programData?: Maybe<UpdateProgramInput>,
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsDeleteProgramArgs = {
+  programId: Scalars['String']
+};
+
+
+export type MutationsUploadImportDataXlsxFileArgs = {
+  businessAreaSlug: Scalars['String'],
+  file: Scalars['Upload']
+};
+
+
+export type MutationsDeleteRegistrationDataImportArgs = {
+  registrationDataImportId: Scalars['String']
+};
+
+
+export type MutationsRegistrationXlsxImportArgs = {
+  registrationDataImportData: RegistrationXlsxImportMutationInput
+};
+
+
+export type MutationsRegistrationKoboImportArgs = {
+  registrationDataImportData: RegistrationKoboImportMutationInput
+};
+
+
+export type MutationsSaveKoboImportDataArgs = {
+  businessAreaSlug: Scalars['String'],
+  uid: Scalars['Upload']
+};
+
+
+export type MutationsMergeRegistrationDataImportArgs = {
+  id: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsRerunDedupeArgs = {
+  registrationDataImportDatahubId: Scalars['ID'],
+  version?: Maybe<Scalars['BigInt']>
+};
+
+
+export type MutationsCheckAgainstSanctionListArgs = {
+  file: Scalars['Upload']
+};
+
+export type NeedsAdjudicationApproveMutation = {
+   __typename?: 'NeedsAdjudicationApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type Node = {
+  id: Scalars['ID'],
+};
+
+export type PageInfo = {
+   __typename?: 'PageInfo',
+  hasNextPage: Scalars['Boolean'],
+  hasPreviousPage: Scalars['Boolean'],
+  startCursor?: Maybe<Scalars['String']>,
+  endCursor?: Maybe<Scalars['String']>,
+};
+
+export enum PaymentRecordDeliveryType {
+  CardlessCashWithdrawal = 'CARDLESS_CASH_WITHDRAWAL',
+  Cash = 'CASH',
+  CashByFsp = 'CASH_BY_FSP',
+  Cheque = 'CHEQUE',
+  DepositToCard = 'DEPOSIT_TO_CARD',
+  InKind = 'IN_KIND',
+  MobileMoney = 'MOBILE_MONEY',
+  Other = 'OTHER',
+  PrePaidCard = 'PRE_PAID_CARD',
+  Referral = 'REFERRAL',
+  Transfer = 'TRANSFER',
+  TransferToAccount = 'TRANSFER_TO_ACCOUNT',
+  Voucher = 'VOUCHER'
+}
+
+export enum PaymentRecordEntitlementCardStatus {
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE'
+}
+
+export type PaymentRecordNode = Node & {
+   __typename?: 'PaymentRecordNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  businessArea: UserBusinessAreaNode,
+  status: PaymentRecordStatus,
+  statusDate: Scalars['DateTime'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['UUID']>,
+  cashPlan?: Maybe<CashPlanNode>,
+  household: HouseholdNode,
+  headOfHousehold?: Maybe<IndividualNode>,
+  fullName: Scalars['String'],
+  totalPersonsCovered: Scalars['Int'],
+  distributionModality: Scalars['String'],
+  targetPopulation: TargetPopulationNode,
+  targetPopulationCashAssistId: Scalars['String'],
+  entitlementCardNumber?: Maybe<Scalars['String']>,
+  entitlementCardStatus?: Maybe<PaymentRecordEntitlementCardStatus>,
+  entitlementCardIssueDate?: Maybe<Scalars['Date']>,
+  deliveryType: PaymentRecordDeliveryType,
+  currency: Scalars['String'],
+  entitlementQuantity: Scalars['Float'],
+  deliveredQuantity: Scalars['Float'],
+  deliveredQuantityUsd?: Maybe<Scalars['Float']>,
+  deliveryDate: Scalars['DateTime'],
+  serviceProvider: ServiceProviderNode,
+  transactionReferenceId?: Maybe<Scalars['String']>,
+  visionId?: Maybe<Scalars['String']>,
+  registrationCaId?: Maybe<Scalars['String']>,
+  verifications: PaymentVerificationNodeConnection,
+  complaintTicketDetails: TicketComplaintDetailsNodeConnection,
+  sensitiveTicketDetails: TicketSensitiveDetailsNodeConnection,
+};
+
+
+export type PaymentRecordNodeVerificationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PaymentRecordNodeComplaintTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type PaymentRecordNodeSensitiveTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type PaymentRecordNodeConnection = {
+   __typename?: 'PaymentRecordNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentRecordNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentRecordNodeEdge = {
+   __typename?: 'PaymentRecordNodeEdge',
+  node?: Maybe<PaymentRecordNode>,
+  cursor: Scalars['String'],
+};
+
+export enum PaymentRecordStatus {
+  TransactionSuccessful = 'TRANSACTION_SUCCESSFUL',
+  TransactionPending = 'TRANSACTION_PENDING',
+  TransactionErroneous = 'TRANSACTION_ERRONEOUS'
+}
+
+export type PaymentVerificationNode = Node & {
+   __typename?: 'PaymentVerificationNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  cashPlanPaymentVerification: CashPlanPaymentVerificationNode,
+  paymentRecord: PaymentRecordNode,
+  status: PaymentVerificationStatus,
+  statusDate?: Maybe<Scalars['DateTime']>,
+  receivedAmount?: Maybe<Scalars['Float']>,
+  ticketDetails: TicketPaymentVerificationDetailsNodeConnection,
+  isManuallyEditable?: Maybe<Scalars['Boolean']>,
+};
+
+
+export type PaymentVerificationNodeTicketDetailsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type PaymentVerificationNodeConnection = {
+   __typename?: 'PaymentVerificationNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<PaymentVerificationNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type PaymentVerificationNodeEdge = {
+   __typename?: 'PaymentVerificationNodeEdge',
+  node?: Maybe<PaymentVerificationNode>,
+  cursor: Scalars['String'],
+};
+
+export enum PaymentVerificationStatus {
+  Pending = 'PENDING',
+  Received = 'RECEIVED',
+  NotReceived = 'NOT_RECEIVED',
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+}
+
+export enum PaymentVerificationStatusForUpdate {
+  Pending = 'PENDING',
+  Received = 'RECEIVED',
+  NotReceived = 'NOT_RECEIVED',
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+}
+
+export enum ProgramFrequencyOfPayments {
+  Regular = 'REGULAR',
+  OneOff = 'ONE_OFF'
+}
+
+export type ProgramNode = Node & {
+   __typename?: 'ProgramNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  lastSyncAt?: Maybe<Scalars['DateTime']>,
+  version: Scalars['BigInt'],
+  name: Scalars['String'],
+  status: ProgramStatus,
+  startDate: Scalars['Date'],
+  endDate: Scalars['Date'],
+  description: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
+  adminAreas: AdminAreaNodeConnection,
+  businessArea: UserBusinessAreaNode,
+  budget?: Maybe<Scalars['Decimal']>,
+  frequencyOfPayments: ProgramFrequencyOfPayments,
+  sector: ProgramSector,
+  scope: ProgramScope,
+  cashPlus: Scalars['Boolean'],
+  populationGoal: Scalars['Int'],
+  administrativeAreasOfImplementation: Scalars['String'],
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
+  households: HouseholdNodeConnection,
+  cashPlans: CashPlanNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
+  reports: ReportNodeConnection,
+  totalEntitledQuantity?: Maybe<Scalars['Decimal']>,
+  totalDeliveredQuantity?: Maybe<Scalars['Decimal']>,
+  totalUndeliveredQuantity?: Maybe<Scalars['Decimal']>,
+  totalNumberOfHouseholds?: Maybe<Scalars['Int']>,
+};
+
+
+export type ProgramNodeAdminAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type ProgramNodeTargetpopulationSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type ProgramNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type ProgramNodeConnection = {
+   __typename?: 'ProgramNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ProgramNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ProgramNodeEdge = {
+   __typename?: 'ProgramNodeEdge',
+  node?: Maybe<ProgramNode>,
+  cursor: Scalars['String'],
+};
+
+export enum ProgramScope {
+  ForPartners = 'FOR_PARTNERS',
+  Unicef = 'UNICEF'
+}
+
+export enum ProgramSector {
+  ChildProtection = 'CHILD_PROTECTION',
+  Education = 'EDUCATION',
+  Health = 'HEALTH',
+  MultiPurpose = 'MULTI_PURPOSE',
+  Nutrition = 'NUTRITION',
+  SocialPolicy = 'SOCIAL_POLICY',
+  Wash = 'WASH'
+}
+
+export enum ProgramStatus {
+  Draft = 'DRAFT',
+  Active = 'ACTIVE',
+  Finished = 'FINISHED'
+}
+
+export type Query = {
+   __typename?: 'Query',
+  allLogEntries?: Maybe<LogEntryNodeConnection>,
+  logEntryActionChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  report?: Maybe<ReportNode>,
+  allReports?: Maybe<ReportNodeConnection>,
+  reportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  reportStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  dashboardReportTypesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  dashboardYearsChoices?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sanctionListIndividual?: Maybe<SanctionListIndividualNode>,
+  allSanctionListIndividuals?: Maybe<SanctionListIndividualNodeConnection>,
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+  allGrievanceTicket?: Maybe<GrievanceTicketNodeConnection>,
+  existingGrievanceTickets?: Maybe<GrievanceTicketNodeConnection>,
+  allTicketNotes?: Maybe<TicketNoteNodeConnection>,
+  chartGrievances?: Maybe<ChartGrievanceTicketsNode>,
+  allAddIndividualsFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allEditHouseholdFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  grievanceTicketStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketManualCategoryChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  grievanceTicketIssueTypeChoices?: Maybe<Array<Maybe<IssueTypesObject>>>,
+  allSteficonRules?: Maybe<SteficonRuleNodeConnection>,
+  paymentRecord?: Maybe<PaymentRecordNode>,
+  paymentRecordVerification?: Maybe<PaymentVerificationNode>,
+  cashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNode>,
+  allPaymentRecords?: Maybe<PaymentRecordNodeConnection>,
+  allPaymentVerifications?: Maybe<PaymentVerificationNodeConnection>,
+  allCashPlanPaymentVerification?: Maybe<CashPlanPaymentVerificationNodeConnection>,
+  chartPaymentVerification?: Maybe<ChartPaymentVerification>,
+  chartVolumeByDeliveryMechanism?: Maybe<ChartDatasetNode>,
+  chartPayment?: Maybe<ChartDatasetNode>,
+  sectionTotalTransferred?: Maybe<SectionTotalNode>,
+  tableTotalCashTransferredByAdministrativeArea?: Maybe<TableTotalCashTransferred>,
+  chartTotalTransferredCashByCountry?: Maybe<ChartDetailedDatasetsNode>,
+  paymentRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  paymentRecordEntitlementCardStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  paymentRecordDeliveryTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanVerificationSamplingChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanVerificationVerificationMethodChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  paymentVerificationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allRapidProFlows?: Maybe<Array<Maybe<RapidProFlow>>>,
+  sampleSize?: Maybe<GetCashplanVerificationSampleSizeObject>,
+  adminArea?: Maybe<AdminAreaNode>,
+  allAdminAreas?: Maybe<AdminAreaNodeConnection>,
+  allBusinessAreas?: Maybe<BusinessAreaNodeConnection>,
+  allFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allIndividualFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allGroupsWithFields?: Maybe<Array<Maybe<GroupAttributeNode>>>,
+  koboProject?: Maybe<KoboAssetObject>,
+  allKoboProjects?: Maybe<KoboAssetObjectConnection>,
+  cashAssistUrlPrefix?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  allPrograms?: Maybe<ProgramNodeConnection>,
+  chartProgrammesBySector?: Maybe<ChartDetailedDatasetsNode>,
+  chartTotalTransferredByMonth?: Maybe<ChartDetailedDatasetsNode>,
+  cashPlan?: Maybe<CashPlanNode>,
+  allCashPlans?: Maybe<CashPlanNodeConnection>,
+  programStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  programFrequencyOfPaymentsChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  programSectorChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  programScopeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  cashPlanStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  allTargetPopulation?: Maybe<TargetPopulationNodeConnection>,
+  goldenRecordByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  candidateHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  finalHouseholdsListByTargetingCriteria?: Maybe<HouseholdNodeConnection>,
+  targetPopulationStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  household?: Maybe<HouseholdNode>,
+  allHouseholds?: Maybe<HouseholdNodeConnection>,
+  individual?: Maybe<IndividualNode>,
+  allIndividuals?: Maybe<IndividualNodeConnection>,
+  sectionHouseholdsReached?: Maybe<SectionTotalNode>,
+  sectionIndividualsReached?: Maybe<SectionTotalNode>,
+  sectionChildReached?: Maybe<SectionTotalNode>,
+  chartIndividualsReachedByAgeAndGender?: Maybe<ChartDatasetNode>,
+  chartIndividualsWithDisabilityReachedByAge?: Maybe<ChartDetailedDatasetsNode>,
+  residenceStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  sexChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  maritalStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  workStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  relationshipChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  roleChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  documentTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  identityTypeChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  countriesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  observedDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  severityOfDisabilityChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  allHouseholdsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  allIndividualsFlexFieldsAttributes?: Maybe<Array<Maybe<FieldAttributeNode>>>,
+  me?: Maybe<UserNode>,
+  allUsers?: Maybe<UserNodeConnection>,
+  userRolesChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  userStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  userPartnerChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  hasAvailableUsersToExport?: Maybe<Scalars['Boolean']>,
+  importedHousehold?: Maybe<ImportedHouseholdNode>,
+  allImportedHouseholds?: Maybe<ImportedHouseholdNodeConnection>,
+  registrationDataImportDatahub?: Maybe<RegistrationDataImportDatahubNode>,
+  allRegistrationDataImportsDatahub?: Maybe<RegistrationDataImportDatahubNodeConnection>,
+  importedIndividual?: Maybe<ImportedIndividualNode>,
+  allImportedIndividuals?: Maybe<ImportedIndividualNodeConnection>,
+  importData?: Maybe<ImportDataNode>,
+  deduplicationBatchStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  deduplicationGoldenRecordStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+  allRegistrationDataImports?: Maybe<RegistrationDataImportNodeConnection>,
+  registrationDataStatusChoices?: Maybe<Array<Maybe<ChoiceObject>>>,
+  _debug?: Maybe<DjangoDebug>,
+};
+
+
+export type QueryAllLogEntriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  objectId?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
+};
+
+
+export type QueryReportArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  createdBy?: Maybe<Scalars['ID']>,
+  reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryDashboardReportTypesChoicesArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryDashboardYearsChoicesArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QuerySanctionListIndividualArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllSanctionListIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  fullName?: Maybe<Scalars['String']>,
+  fullName_Startswith?: Maybe<Scalars['String']>,
+  referenceNumber?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryGrievanceTicketArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllGrievanceTicketArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  id_Startswith?: Maybe<Scalars['UUID']>,
+  category?: Maybe<Scalars['String']>,
+  area?: Maybe<Scalars['String']>,
+  area_Startswith?: Maybe<Scalars['String']>,
+  assignedTo?: Maybe<Scalars['ID']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryExistingGrievanceTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  category?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllTicketNotesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  ticket: Scalars['UUID']
+};
+
+
+export type QueryChartGrievancesArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllSteficonRulesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
+};
+
+
+export type QueryPaymentRecordArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryPaymentRecordVerificationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryCashPlanPaymentVerificationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllPaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllPaymentVerificationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllCashPlanPaymentVerificationArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryChartPaymentVerificationArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartVolumeByDeliveryMechanismArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartPaymentArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QuerySectionTotalTransferredArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryTableTotalCashTransferredByAdministrativeAreaArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartTotalTransferredCashByCountryArgs = {
+  year: Scalars['Int']
+};
+
+
+export type QueryAllRapidProFlowsArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QuerySampleSizeArgs = {
+  input?: Maybe<GetCashplanVerificationSampleSizeInput>
+};
+
+
+export type QueryAdminAreaArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllAdminAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>,
+  title_Istartswith?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryAllBusinessAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
+};
+
+
+export type QueryAllFieldsAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
+
+export type QueryAllIndividualFieldsAttributesArgs = {
+  flexField?: Maybe<Scalars['Boolean']>
+};
+
+
+export type QueryKoboProjectArgs = {
+  uid: Scalars['String'],
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryAllKoboProjectsArgs = {
+  businessAreaSlug: Scalars['String'],
+  onlyDeployed?: Maybe<Scalars['Boolean']>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryProgramArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllProgramsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartProgrammesBySectorArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartTotalTransferredByMonthArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryCashPlanArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  program?: Maybe<Scalars['ID']>,
+  assistanceThrough?: Maybe<Scalars['String']>,
+  assistanceThrough_Startswith?: Maybe<Scalars['String']>,
+  serviceProvider_FullName?: Maybe<Scalars['String']>,
+  serviceProvider_FullName_Startswith?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['DateTime']>,
+  startDate_Lte?: Maybe<Scalars['DateTime']>,
+  startDate_Gte?: Maybe<Scalars['DateTime']>,
+  endDate?: Maybe<Scalars['DateTime']>,
+  endDate_Lte?: Maybe<Scalars['DateTime']>,
+  endDate_Gte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryTargetPopulationArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllTargetPopulationArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryGoldenRecordByTargetingCriteriaArgs = {
+  targetingCriteria: TargetingCriteriaObjectType,
+  program: Scalars['ID'],
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryCandidateHouseholdsListByTargetingCriteriaArgs = {
+  targetPopulation: Scalars['ID'],
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryFinalHouseholdsListByTargetingCriteriaArgs = {
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryHouseholdArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  countryOrigin?: Maybe<Scalars['String']>,
+  countryOrigin_Startswith?: Maybe<Scalars['String']>,
+  address?: Maybe<Scalars['String']>,
+  address_Startswith?: Maybe<Scalars['String']>,
+  headOfHousehold_FullName?: Maybe<Scalars['String']>,
+  headOfHousehold_FullName_Startswith?: Maybe<Scalars['String']>,
+  size_Range?: Maybe<Scalars['Int']>,
+  size_Lte?: Maybe<Scalars['Int']>,
+  size_Gte?: Maybe<Scalars['Int']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  targetPopulations?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  residenceStatus?: Maybe<Scalars['String']>,
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  size?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryIndividualArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  household_Id?: Maybe<Scalars['UUID']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  businessArea?: Maybe<Scalars['String']>,
+  fullName?: Maybe<Scalars['String']>,
+  fullName_Startswith?: Maybe<Scalars['String']>,
+  fullName_Endswith?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['String']>>>,
+  household_AdminArea?: Maybe<Scalars['ID']>,
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  age?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  excludedId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QuerySectionHouseholdsReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QuerySectionIndividualsReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QuerySectionChildReachedArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartIndividualsReachedByAgeAndGenderArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryChartIndividualsWithDisabilityReachedByAgeArgs = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type QueryAllUsersArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  partner?: Maybe<Array<Maybe<Scalars['String']>>>,
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryHasAvailableUsersToExportArgs = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type QueryImportedHouseholdArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllImportedHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryRegistrationDataImportDatahubArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllRegistrationDataImportsDatahubArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type QueryImportedIndividualArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllImportedIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  household?: Maybe<Scalars['ID']>,
+  rdiId?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type QueryImportDataArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryRegistrationDataImportArgs = {
+  id: Scalars['ID']
+};
+
+
+export type QueryAllRegistrationDataImportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  importDate?: Maybe<Scalars['Date']>,
+  status?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  name_Startswith?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+export type RandomSamplingArguments = {
+  confidenceInterval: Scalars['Float'],
+  marginOfError: Scalars['Float'],
+  excludedAdminAreas?: Maybe<Array<Maybe<Scalars['String']>>>,
+  age?: Maybe<AgeInput>,
+  sex?: Maybe<Scalars['String']>,
+};
+
+export type RapidProArguments = {
+  flowId: Scalars['String'],
+};
+
+export type RapidProFlow = {
+   __typename?: 'RapidProFlow',
+  id?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  type?: Maybe<Scalars['String']>,
+  archived?: Maybe<Scalars['Boolean']>,
+  labels?: Maybe<Array<Maybe<Scalars['String']>>>,
+  expires?: Maybe<Scalars['Int']>,
+  runs?: Maybe<Array<Maybe<RapidProFlowRun>>>,
+  results?: Maybe<Array<Maybe<RapidProFlowResult>>>,
+  createdOn?: Maybe<Scalars['DateTime']>,
+  modifiedOn?: Maybe<Scalars['DateTime']>,
+};
+
+export type RapidProFlowResult = {
+   __typename?: 'RapidProFlowResult',
+  key?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  categories?: Maybe<Array<Maybe<Scalars['String']>>>,
+  nodeUuids?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+export type RapidProFlowRun = {
+   __typename?: 'RapidProFlowRun',
+  active?: Maybe<Scalars['Int']>,
+  completed?: Maybe<Scalars['Int']>,
+  interrupted?: Maybe<Scalars['Int']>,
+  expired?: Maybe<Scalars['Int']>,
+};
+
+export type ReassignRoleMutation = {
+   __typename?: 'ReassignRoleMutation',
+  household?: Maybe<HouseholdNode>,
+  individual?: Maybe<IndividualNode>,
+};
+
+export enum RegistrationDataImportDatahubImportDone {
+  NotStarted = 'NOT_STARTED',
+  Started = 'STARTED',
+  Done = 'DONE'
+}
+
+export type RegistrationDataImportDatahubNode = Node & {
+   __typename?: 'RegistrationDataImportDatahubNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+  importDate: Scalars['DateTime'],
+  hctId?: Maybe<Scalars['UUID']>,
+  importData?: Maybe<ImportDataNode>,
+  importDone: RegistrationDataImportDatahubImportDone,
+  businessAreaSlug: Scalars['String'],
+  households: ImportedHouseholdNodeConnection,
+  individuals: ImportedIndividualNodeConnection,
+};
+
+
+export type RegistrationDataImportDatahubNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type RegistrationDataImportDatahubNodeIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type RegistrationDataImportDatahubNodeConnection = {
+   __typename?: 'RegistrationDataImportDatahubNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<RegistrationDataImportDatahubNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type RegistrationDataImportDatahubNodeEdge = {
+   __typename?: 'RegistrationDataImportDatahubNodeEdge',
+  node?: Maybe<RegistrationDataImportDatahubNode>,
+  cursor: Scalars['String'],
+};
+
+export enum RegistrationDataImportDataSource {
+  Xls = 'XLS',
+  Kobo = 'KOBO'
+}
+
+export type RegistrationDataImportNode = Node & {
+   __typename?: 'RegistrationDataImportNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  version: Scalars['BigInt'],
+  name: Scalars['String'],
+  status: RegistrationDataImportStatus,
+  importDate: Scalars['DateTime'],
+  importedBy: UserNode,
+  dataSource: RegistrationDataImportDataSource,
+  numberOfIndividuals: Scalars['Int'],
+  numberOfHouseholds: Scalars['Int'],
+  datahubId?: Maybe<Scalars['UUID']>,
+  errorMessage: Scalars['String'],
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  households: HouseholdNodeConnection,
+  individuals: IndividualNodeConnection,
+  batchDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  batchPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordPossibleDuplicatesCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  batchUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+  goldenRecordUniqueCountAndPercentage?: Maybe<CountAndPercentageNode>,
+};
+
+
+export type RegistrationDataImportNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type RegistrationDataImportNodeIndividualsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type RegistrationDataImportNodeConnection = {
+   __typename?: 'RegistrationDataImportNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<RegistrationDataImportNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type RegistrationDataImportNodeEdge = {
+   __typename?: 'RegistrationDataImportNodeEdge',
+  node?: Maybe<RegistrationDataImportNode>,
+  cursor: Scalars['String'],
+};
+
+export enum RegistrationDataImportStatus {
+  InReview = 'IN_REVIEW',
+  Merged = 'MERGED',
+  Merging = 'MERGING',
+  Importing = 'IMPORTING',
+  DeduplicationFailed = 'DEDUPLICATION_FAILED',
+  Deduplication = 'DEDUPLICATION'
+}
+
+export type RegistrationDeduplicationMutation = {
+   __typename?: 'RegistrationDeduplicationMutation',
+  ok?: Maybe<Scalars['Boolean']>,
+};
+
+export type RegistrationKoboImportMutation = {
+   __typename?: 'RegistrationKoboImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type RegistrationKoboImportMutationInput = {
+  importDataId?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+};
+
+export type RegistrationXlsxImportMutation = {
+   __typename?: 'RegistrationXlsxImportMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  registrationDataImport?: Maybe<RegistrationDataImportNode>,
+};
+
+export type RegistrationXlsxImportMutationInput = {
+  importDataId?: Maybe<Scalars['ID']>,
+  name?: Maybe<Scalars['String']>,
+  businessAreaSlug?: Maybe<Scalars['String']>,
+};
+
+export type ReportNode = Node & {
+   __typename?: 'ReportNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  businessArea: UserBusinessAreaNode,
+  file?: Maybe<Scalars['String']>,
+  createdBy: UserNode,
+  status: Scalars['Int'],
+  reportType: Scalars['Int'],
+  dateFrom: Scalars['Date'],
+  dateTo: Scalars['Date'],
+  numberOfRecords?: Maybe<Scalars['Int']>,
+  program?: Maybe<ProgramNode>,
+  adminArea: AdminAreaNodeConnection,
+  fileUrl?: Maybe<Scalars['String']>,
+};
+
+
+export type ReportNodeAdminAreaArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  title?: Maybe<Scalars['String']>
+};
+
+export type ReportNodeConnection = {
+   __typename?: 'ReportNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ReportNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ReportNodeEdge = {
+   __typename?: 'ReportNodeEdge',
+  node?: Maybe<ReportNode>,
+  cursor: Scalars['String'],
+};
+
+export type RoleNode = {
+   __typename?: 'RoleNode',
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+  userRoles: Array<UserRoleNode>,
+};
+
+export enum RuleLanguage {
+  Python = 'PYTHON',
+  Internal = 'INTERNAL'
+}
+
+export type SanctionListIndividualAliasNameNode = Node & {
+   __typename?: 'SanctionListIndividualAliasNameNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+};
+
+export type SanctionListIndividualAliasNameNodeConnection = {
+   __typename?: 'SanctionListIndividualAliasNameNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualAliasNameNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualAliasNameNodeEdge = {
+   __typename?: 'SanctionListIndividualAliasNameNodeEdge',
+  node?: Maybe<SanctionListIndividualAliasNameNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualCountriesNode = Node & {
+   __typename?: 'SanctionListIndividualCountriesNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  country?: Maybe<Scalars['String']>,
+};
+
+export type SanctionListIndividualCountriesNodeConnection = {
+   __typename?: 'SanctionListIndividualCountriesNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualCountriesNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualCountriesNodeEdge = {
+   __typename?: 'SanctionListIndividualCountriesNodeEdge',
+  node?: Maybe<SanctionListIndividualCountriesNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualDateOfBirthNode = Node & {
+   __typename?: 'SanctionListIndividualDateOfBirthNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  date: Scalars['Date'],
+};
+
+export type SanctionListIndividualDateOfBirthNodeConnection = {
+   __typename?: 'SanctionListIndividualDateOfBirthNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualDateOfBirthNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeEdge = {
+   __typename?: 'SanctionListIndividualDateOfBirthNodeEdge',
+  node?: Maybe<SanctionListIndividualDateOfBirthNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualDocumentNode = Node & {
+   __typename?: 'SanctionListIndividualDocumentNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  documentNumber: Scalars['String'],
+  typeOfDocument: Scalars['String'],
+  dateOfIssue?: Maybe<Scalars['String']>,
+  issuingCountry?: Maybe<Scalars['String']>,
+  note: Scalars['String'],
+};
+
+export type SanctionListIndividualDocumentNodeConnection = {
+   __typename?: 'SanctionListIndividualDocumentNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualDocumentNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualDocumentNodeEdge = {
+   __typename?: 'SanctionListIndividualDocumentNodeEdge',
+  node?: Maybe<SanctionListIndividualDocumentNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualNationalitiesNode = Node & {
+   __typename?: 'SanctionListIndividualNationalitiesNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  nationality?: Maybe<Scalars['String']>,
+};
+
+export type SanctionListIndividualNationalitiesNodeConnection = {
+   __typename?: 'SanctionListIndividualNationalitiesNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualNationalitiesNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualNationalitiesNodeEdge = {
+   __typename?: 'SanctionListIndividualNationalitiesNodeEdge',
+  node?: Maybe<SanctionListIndividualNationalitiesNode>,
+  cursor: Scalars['String'],
+};
+
+export type SanctionListIndividualNode = Node & {
+   __typename?: 'SanctionListIndividualNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  dataId: Scalars['Int'],
+  versionNum: Scalars['Int'],
+  firstName: Scalars['String'],
+  secondName: Scalars['String'],
+  thirdName: Scalars['String'],
+  fourthName: Scalars['String'],
+  fullName: Scalars['String'],
+  nameOriginalScript: Scalars['String'],
+  unListType: Scalars['String'],
+  referenceNumber: Scalars['String'],
+  listedOn: Scalars['DateTime'],
+  comments: Scalars['String'],
+  designation: Scalars['String'],
+  listType: Scalars['String'],
+  street: Scalars['String'],
+  city: Scalars['String'],
+  stateProvince: Scalars['String'],
+  addressNote: Scalars['String'],
+  countryOfBirth?: Maybe<Scalars['String']>,
+  active: Scalars['Boolean'],
+  documents: SanctionListIndividualDocumentNodeConnection,
+  nationalities: SanctionListIndividualNationalitiesNodeConnection,
+  countries: SanctionListIndividualCountriesNodeConnection,
+  aliasNames: SanctionListIndividualAliasNameNodeConnection,
+  datesOfBirth: SanctionListIndividualDateOfBirthNodeConnection,
+};
+
+
+export type SanctionListIndividualNodeDocumentsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeNationalitiesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeCountriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeAliasNamesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type SanctionListIndividualNodeDatesOfBirthArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type SanctionListIndividualNodeConnection = {
+   __typename?: 'SanctionListIndividualNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SanctionListIndividualNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SanctionListIndividualNodeEdge = {
+   __typename?: 'SanctionListIndividualNodeEdge',
+  node?: Maybe<SanctionListIndividualNode>,
+  cursor: Scalars['String'],
+};
+
+export type SaveKoboProjectImportDataMutation = {
+   __typename?: 'SaveKoboProjectImportDataMutation',
+  importData?: Maybe<ImportDataNode>,
+  errors?: Maybe<Array<Maybe<KoboErrorNode>>>,
+};
+
+export type SectionTotalNode = {
+   __typename?: 'SectionTotalNode',
+  total?: Maybe<Scalars['Float']>,
+};
+
+export type SensitiveGrievanceTicketExtras = {
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
+};
+
+export type ServiceProviderNode = Node & {
+   __typename?: 'ServiceProviderNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  businessArea: UserBusinessAreaNode,
+  caId: Scalars['String'],
+  fullName: Scalars['String'],
+  shortName: Scalars['String'],
+  country: Scalars['String'],
+  visionId: Scalars['String'],
+  paymentRecords: PaymentRecordNodeConnection,
+  cashPlans: CashPlanNodeConnection,
+};
+
+
+export type ServiceProviderNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type ServiceProviderNodeCashPlansArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type ServiceProviderNodeConnection = {
+   __typename?: 'ServiceProviderNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<ServiceProviderNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type ServiceProviderNodeEdge = {
+   __typename?: 'ServiceProviderNodeEdge',
+  node?: Maybe<ServiceProviderNode>,
+  cursor: Scalars['String'],
+};
+
+export type SetSteficonRuleOnTargetPopulationMutationInput = {
+  targetId: Scalars['ID'],
+  steficonRuleId?: Maybe<Scalars['ID']>,
+  version?: Maybe<Scalars['BigInt']>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type SetSteficonRuleOnTargetPopulationMutationPayload = {
+   __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+  clientMutationId?: Maybe<Scalars['String']>,
+};
+
+export type SimpleApproveMutation = {
+   __typename?: 'SimpleApproveMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type StatsObjectType = {
+   __typename?: 'StatsObjectType',
+  childMale?: Maybe<Scalars['Int']>,
+  childFemale?: Maybe<Scalars['Int']>,
+  adultMale?: Maybe<Scalars['Int']>,
+  adultFemale?: Maybe<Scalars['Int']>,
+  allHouseholds?: Maybe<Scalars['Int']>,
+  allIndividuals?: Maybe<Scalars['Int']>,
+};
+
+export type SteficonRuleNode = Node & {
+   __typename?: 'SteficonRuleNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  name: Scalars['String'],
+  definition: Scalars['String'],
+  enabled: Scalars['Boolean'],
+  deprecated: Scalars['Boolean'],
+  language: RuleLanguage,
+  createdBy?: Maybe<UserNode>,
+  updatedBy?: Maybe<UserNode>,
+  targetPopulations: TargetPopulationNodeConnection,
+};
+
+
+export type SteficonRuleNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+export type SteficonRuleNodeConnection = {
+   __typename?: 'SteficonRuleNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<SteficonRuleNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type SteficonRuleNodeEdge = {
+   __typename?: 'SteficonRuleNodeEdge',
+  node?: Maybe<SteficonRuleNode>,
+  cursor: Scalars['String'],
+};
+
+export type TableTotalCashTransferred = {
+   __typename?: 'TableTotalCashTransferred',
+  data?: Maybe<Array<Maybe<_TableTotalCashTransferredDataNode>>>,
+};
+
+export type TargetingCriteriaNode = {
+   __typename?: 'TargetingCriteriaNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetPopulationCandidate?: Maybe<TargetPopulationNode>,
+  targetPopulationFinal?: Maybe<TargetPopulationNode>,
+  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleNode>>>,
+};
+
+export type TargetingCriteriaObjectType = {
+  rules?: Maybe<Array<Maybe<TargetingCriteriaRuleObjectType>>>,
+};
+
+export enum TargetingCriteriaRuleFilterComparisionMethod {
+  Equals = 'EQUALS',
+  NotEquals = 'NOT_EQUALS',
+  Contains = 'CONTAINS',
+  NotContains = 'NOT_CONTAINS',
+  Range = 'RANGE',
+  NotInRange = 'NOT_IN_RANGE',
+  GreaterThan = 'GREATER_THAN',
+  LessThan = 'LESS_THAN'
+}
+
+export type TargetingCriteriaRuleFilterNode = {
+   __typename?: 'TargetingCriteriaRuleFilterNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  comparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  targetingCriteriaRule: TargetingCriteriaRuleNode,
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  fieldAttribute?: Maybe<FieldAttributeNode>,
+};
+
+export type TargetingCriteriaRuleFilterObjectType = {
+  comparisionMethod: Scalars['String'],
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments: Array<Maybe<Scalars['Arg']>>,
+};
+
+export type TargetingCriteriaRuleNode = {
+   __typename?: 'TargetingCriteriaRuleNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetingCriteria: TargetingCriteriaNode,
+  individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockNode>>>,
+  filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterNode>>>,
+};
+
+export type TargetingCriteriaRuleObjectType = {
+  filters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterObjectType>>>,
+  individualsFiltersBlocks?: Maybe<Array<Maybe<TargetingIndividualRuleFilterBlockObjectType>>>,
+};
+
+export enum TargetingIndividualBlockRuleFilterComparisionMethod {
+  Equals = 'EQUALS',
+  NotEquals = 'NOT_EQUALS',
+  Contains = 'CONTAINS',
+  NotContains = 'NOT_CONTAINS',
+  Range = 'RANGE',
+  NotInRange = 'NOT_IN_RANGE',
+  GreaterThan = 'GREATER_THAN',
+  LessThan = 'LESS_THAN'
+}
+
+export type TargetingIndividualBlockRuleFilterNode = {
+   __typename?: 'TargetingIndividualBlockRuleFilterNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  comparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode,
+  isFlexField: Scalars['Boolean'],
+  fieldName: Scalars['String'],
+  arguments?: Maybe<Array<Maybe<Scalars['Arg']>>>,
+  fieldAttribute?: Maybe<FieldAttributeNode>,
+};
+
+export type TargetingIndividualRuleFilterBlockNode = {
+   __typename?: 'TargetingIndividualRuleFilterBlockNode',
+  id: Scalars['UUID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  targetingCriteriaRule: TargetingCriteriaRuleNode,
+  targetOnlyHoh: Scalars['Boolean'],
+  individualBlockFilters?: Maybe<Array<Maybe<TargetingIndividualBlockRuleFilterNode>>>,
+};
+
+export type TargetingIndividualRuleFilterBlockObjectType = {
+  individualBlockFilters?: Maybe<Array<Maybe<TargetingCriteriaRuleFilterObjectType>>>,
+};
+
+export type TargetPopulationNode = Node & {
+   __typename?: 'TargetPopulationNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  isRemoved: Scalars['Boolean'],
+  version: Scalars['BigInt'],
+  name: Scalars['String'],
+  caId?: Maybe<Scalars['String']>,
+  caHashId?: Maybe<Scalars['String']>,
+  createdBy?: Maybe<UserNode>,
+  approvedAt?: Maybe<Scalars['DateTime']>,
+  approvedBy?: Maybe<UserNode>,
+  finalizedAt?: Maybe<Scalars['DateTime']>,
+  finalizedBy?: Maybe<UserNode>,
+  businessArea?: Maybe<UserBusinessAreaNode>,
+  status: TargetPopulationStatus,
+  households: HouseholdNodeConnection,
+  candidateListTotalHouseholds?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividuals?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholds?: Maybe<Scalars['Int']>,
+  finalListTotalIndividuals?: Maybe<Scalars['Int']>,
+  selectionComputationMetadata?: Maybe<Scalars['String']>,
+  program?: Maybe<ProgramNode>,
+  candidateListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
+  finalListTargetingCriteria?: Maybe<TargetingCriteriaNode>,
+  sentToDatahub: Scalars['Boolean'],
+  steficonRule?: Maybe<SteficonRuleNode>,
+  vulnerabilityScoreMin?: Maybe<Scalars['Float']>,
+  vulnerabilityScoreMax?: Maybe<Scalars['Float']>,
+  paymentRecords: PaymentRecordNodeConnection,
+  selections: Array<HouseholdSelection>,
+  totalHouseholds?: Maybe<Scalars['Int']>,
+  totalFamilySize?: Maybe<Scalars['Int']>,
+  finalList?: Maybe<HouseholdNodeConnection>,
+  candidateStats?: Maybe<StatsObjectType>,
+  finalStats?: Maybe<StatsObjectType>,
+};
+
+
+export type TargetPopulationNodeHouseholdsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type TargetPopulationNodePaymentRecordsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type TargetPopulationNodeFinalListArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type TargetPopulationNodeConnection = {
+   __typename?: 'TargetPopulationNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TargetPopulationNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TargetPopulationNodeEdge = {
+   __typename?: 'TargetPopulationNodeEdge',
+  node?: Maybe<TargetPopulationNode>,
+  cursor: Scalars['String'],
+};
+
+export enum TargetPopulationStatus {
+  Draft = 'DRAFT',
+  Approved = 'APPROVED',
+  Finalized = 'FINALIZED'
+}
+
+export type TicketAddIndividualDetailsNode = Node & {
+   __typename?: 'TicketAddIndividualDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household?: Maybe<HouseholdNode>,
+  individualData?: Maybe<Scalars['Arg']>,
+  approveStatus: Scalars['Boolean'],
+};
+
+export type TicketAddIndividualDetailsNodeConnection = {
+   __typename?: 'TicketAddIndividualDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketAddIndividualDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketAddIndividualDetailsNodeEdge = {
+   __typename?: 'TicketAddIndividualDetailsNodeEdge',
+  node?: Maybe<TicketAddIndividualDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketComplaintDetailsNode = Node & {
+   __typename?: 'TicketComplaintDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  paymentRecord?: Maybe<PaymentRecordNode>,
+  household?: Maybe<HouseholdNode>,
+  individual?: Maybe<IndividualNode>,
+};
+
+export type TicketComplaintDetailsNodeConnection = {
+   __typename?: 'TicketComplaintDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketComplaintDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketComplaintDetailsNodeEdge = {
+   __typename?: 'TicketComplaintDetailsNodeEdge',
+  node?: Maybe<TicketComplaintDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketDeleteIndividualDetailsNode = Node & {
+   __typename?: 'TicketDeleteIndividualDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  individual?: Maybe<IndividualNode>,
+  roleReassignData: Scalars['JSONString'],
+  approveStatus: Scalars['Boolean'],
+  individualData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketDeleteIndividualDetailsNodeConnection = {
+   __typename?: 'TicketDeleteIndividualDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketDeleteIndividualDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketDeleteIndividualDetailsNodeEdge = {
+   __typename?: 'TicketDeleteIndividualDetailsNodeEdge',
+  node?: Maybe<TicketDeleteIndividualDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketHouseholdDataUpdateDetailsNode = Node & {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  household?: Maybe<HouseholdNode>,
+  householdData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeConnection = {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketHouseholdDataUpdateDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeEdge = {
+   __typename?: 'TicketHouseholdDataUpdateDetailsNodeEdge',
+  node?: Maybe<TicketHouseholdDataUpdateDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketIndividualDataUpdateDetailsNode = Node & {
+   __typename?: 'TicketIndividualDataUpdateDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  individual?: Maybe<IndividualNode>,
+  individualData?: Maybe<Scalars['Arg']>,
+};
+
+export type TicketIndividualDataUpdateDetailsNodeConnection = {
+   __typename?: 'TicketIndividualDataUpdateDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketIndividualDataUpdateDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketIndividualDataUpdateDetailsNodeEdge = {
+   __typename?: 'TicketIndividualDataUpdateDetailsNodeEdge',
+  node?: Maybe<TicketIndividualDataUpdateDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketNeedsAdjudicationDetailsNode = Node & {
+   __typename?: 'TicketNeedsAdjudicationDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  goldenRecordsIndividual: IndividualNode,
+  possibleDuplicate: IndividualNode,
+  selectedIndividual?: Maybe<IndividualNode>,
+  roleReassignData: Scalars['JSONString'],
+  hasDuplicatedDocument?: Maybe<Scalars['Boolean']>,
+};
+
+export type TicketNoteNode = Node & {
+   __typename?: 'TicketNoteNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  description: Scalars['String'],
+  createdBy?: Maybe<UserNode>,
+};
+
+export type TicketNoteNodeConnection = {
+   __typename?: 'TicketNoteNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketNoteNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketNoteNodeEdge = {
+   __typename?: 'TicketNoteNodeEdge',
+  node?: Maybe<TicketNoteNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketPaymentVerificationDetailsNode = Node & {
+   __typename?: 'TicketPaymentVerificationDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  paymentVerifications: PaymentVerificationNodeConnection,
+  paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+};
+
+
+export type TicketPaymentVerificationDetailsNodePaymentVerificationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type TicketPaymentVerificationDetailsNodeConnection = {
+   __typename?: 'TicketPaymentVerificationDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketPaymentVerificationDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketPaymentVerificationDetailsNodeEdge = {
+   __typename?: 'TicketPaymentVerificationDetailsNodeEdge',
+  node?: Maybe<TicketPaymentVerificationDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  Pending = 'PENDING',
+  Received = 'RECEIVED',
+  NotReceived = 'NOT_RECEIVED',
+  ReceivedWithIssues = 'RECEIVED_WITH_ISSUES'
+}
+
+export type TicketSensitiveDetailsNode = Node & {
+   __typename?: 'TicketSensitiveDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  paymentRecord?: Maybe<PaymentRecordNode>,
+  household?: Maybe<HouseholdNode>,
+  individual?: Maybe<IndividualNode>,
+};
+
+export type TicketSensitiveDetailsNodeConnection = {
+   __typename?: 'TicketSensitiveDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketSensitiveDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketSensitiveDetailsNodeEdge = {
+   __typename?: 'TicketSensitiveDetailsNodeEdge',
+  node?: Maybe<TicketSensitiveDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type TicketSystemFlaggingDetailsNode = Node & {
+   __typename?: 'TicketSystemFlaggingDetailsNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  goldenRecordsIndividual: IndividualNode,
+  sanctionListIndividual: SanctionListIndividualNode,
+  approveStatus: Scalars['Boolean'],
+  roleReassignData: Scalars['JSONString'],
+};
+
+export type TicketSystemFlaggingDetailsNodeConnection = {
+   __typename?: 'TicketSystemFlaggingDetailsNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<TicketSystemFlaggingDetailsNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type TicketSystemFlaggingDetailsNodeEdge = {
+   __typename?: 'TicketSystemFlaggingDetailsNodeEdge',
+  node?: Maybe<TicketSystemFlaggingDetailsNode>,
+  cursor: Scalars['String'],
+};
+
+export type UnapproveTargetPopulationMutation = {
+   __typename?: 'UnapproveTargetPopulationMutation',
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+export type UpdateAddIndividualIssueTypeExtras = {
+  individualData: AddIndividualDataObjectType,
+};
+
+export type UpdateGrievanceTicketExtrasInput = {
+  householdDataUpdateIssueTypeExtras?: Maybe<UpdateHouseholdDataUpdateIssueTypeExtras>,
+  individualDataUpdateIssueTypeExtras?: Maybe<UpdateIndividualDataUpdateIssueTypeExtras>,
+  addIndividualIssueTypeExtras?: Maybe<UpdateAddIndividualIssueTypeExtras>,
+};
+
+export type UpdateGrievanceTicketInput = {
+  ticketId: Scalars['ID'],
+  description?: Maybe<Scalars['String']>,
+  assignedTo?: Maybe<Scalars['ID']>,
+  admin?: Maybe<Scalars['String']>,
+  area?: Maybe<Scalars['String']>,
+  language?: Maybe<Scalars['String']>,
+  linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
+};
+
+export type UpdateGrievanceTicketMutation = {
+   __typename?: 'UpdateGrievanceTicketMutation',
+  grievanceTicket?: Maybe<GrievanceTicketNode>,
+};
+
+export type UpdateHouseholdDataUpdateIssueTypeExtras = {
+  householdData: HouseholdUpdateDataObjectType,
+};
+
+export type UpdateIndividualDataUpdateIssueTypeExtras = {
+  individualData: IndividualUpdateDataObjectType,
+};
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmount = {
+   __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount',
+  paymentVerification?: Maybe<PaymentVerificationNode>,
+};
+
+export type UpdatePaymentVerificationStatusAndReceivedAmount = {
+   __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount',
+  paymentVerification?: Maybe<PaymentVerificationNode>,
+};
+
+export type UpdateProgram = {
+   __typename?: 'UpdateProgram',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  program?: Maybe<ProgramNode>,
+};
+
+export type UpdateProgramInput = {
+  id: Scalars['String'],
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  description?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['Decimal']>,
+  frequencyOfPayments?: Maybe<Scalars['String']>,
+  sector?: Maybe<Scalars['String']>,
+  scope?: Maybe<Scalars['String']>,
+  cashPlus?: Maybe<Scalars['Boolean']>,
+  populationGoal?: Maybe<Scalars['Int']>,
+  administrativeAreasOfImplementation?: Maybe<Scalars['String']>,
+  individualDataNeeded?: Maybe<Scalars['Boolean']>,
+};
+
+export type UpdateTargetPopulationInput = {
+  id: Scalars['ID'],
+  name?: Maybe<Scalars['String']>,
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  programId?: Maybe<Scalars['ID']>,
+  vulnerabilityScoreMin?: Maybe<Scalars['Decimal']>,
+  vulnerabilityScoreMax?: Maybe<Scalars['Decimal']>,
+};
+
+export type UpdateTargetPopulationMutation = {
+   __typename?: 'UpdateTargetPopulationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
+  targetPopulation?: Maybe<TargetPopulationNode>,
+};
+
+
+export type UploadImportDataXlsxFile = {
+   __typename?: 'UploadImportDataXLSXFile',
+  importData?: Maybe<ImportDataNode>,
+  errors?: Maybe<Array<Maybe<XlsxRowErrorNode>>>,
+};
+
+export type UserBusinessAreaNode = Node & {
+   __typename?: 'UserBusinessAreaNode',
+  id: Scalars['ID'],
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  code: Scalars['String'],
+  name: Scalars['String'],
+  longName: Scalars['String'],
+  regionCode: Scalars['String'],
+  regionName: Scalars['String'],
+  koboUsername?: Maybe<Scalars['String']>,
+  rapidProHost?: Maybe<Scalars['String']>,
+  rapidProApiKey?: Maybe<Scalars['String']>,
+  slug: Scalars['String'],
+  hasDataSharingAgreement: Scalars['Boolean'],
+  adminAreaLevel: AdminAreaTypeNodeConnection,
+  userRoles: Array<UserRoleNode>,
+  paymentrecordSet: PaymentRecordNodeConnection,
+  serviceproviderSet: ServiceProviderNodeConnection,
+  tickets: GrievanceTicketNodeConnection,
+  householdSet: HouseholdNodeConnection,
+  individualSet: IndividualNodeConnection,
+  programSet: ProgramNodeConnection,
+  cashplanSet: CashPlanNodeConnection,
+  targetpopulationSet: TargetPopulationNodeConnection,
+  registrationdataimportSet: RegistrationDataImportNodeConnection,
+  reports: ReportNodeConnection,
+  logentrySet: LogEntryNodeConnection,
+  permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+
+export type UserBusinessAreaNodeAdminAreaLevelArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodePaymentrecordSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>
+};
+
+
+export type UserBusinessAreaNodeServiceproviderSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeHouseholdSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeIndividualSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeProgramSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>
+};
+
+
+export type UserBusinessAreaNodeCashplanSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeTargetpopulationSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserBusinessAreaNodeRegistrationdataimportSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserBusinessAreaNodeLogentrySetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+export type UserBusinessAreaNodeConnection = {
+   __typename?: 'UserBusinessAreaNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<UserBusinessAreaNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type UserBusinessAreaNodeEdge = {
+   __typename?: 'UserBusinessAreaNodeEdge',
+  node?: Maybe<UserBusinessAreaNode>,
+  cursor: Scalars['String'],
+};
+
+export type UserNode = Node & {
+   __typename?: 'UserNode',
+  id: Scalars['ID'],
+  lastLogin?: Maybe<Scalars['DateTime']>,
+  isSuperuser: Scalars['Boolean'],
+  username: Scalars['String'],
+  firstName: Scalars['String'],
+  lastName: Scalars['String'],
+  email: Scalars['String'],
+  isStaff: Scalars['Boolean'],
+  isActive: Scalars['Boolean'],
+  dateJoined: Scalars['DateTime'],
+  status: UserStatus,
+  partner: UserPartner,
+  availableForExport: Scalars['Boolean'],
+  jobTitle: Scalars['String'],
+  adUuid?: Maybe<Scalars['String']>,
+  userRoles: Array<UserRoleNode>,
+  createdTickets: GrievanceTicketNodeConnection,
+  assignedTickets: GrievanceTicketNodeConnection,
+  ticketNotes: TicketNoteNodeConnection,
+  targetPopulations: TargetPopulationNodeConnection,
+  approvedTargetPopulations: TargetPopulationNodeConnection,
+  finalizedTargetPopulations: TargetPopulationNodeConnection,
+  registrationDataImports: RegistrationDataImportNodeConnection,
+  reports: ReportNodeConnection,
+  logs: LogEntryNodeConnection,
+  businessAreas?: Maybe<UserBusinessAreaNodeConnection>,
+};
+
+
+export type UserNodeCreatedTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeAssignedTicketsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeTicketNotesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserNodeApprovedTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserNodeFinalizedTargetPopulationsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  name?: Maybe<Scalars['String']>,
+  createdByName?: Maybe<Scalars['String']>,
+  createdAt?: Maybe<Scalars['DateTime']>,
+  updatedAt?: Maybe<Scalars['DateTime']>,
+  status?: Maybe<Scalars['String']>,
+  households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  finalListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMin?: Maybe<Scalars['Int']>,
+  finalListTotalIndividualsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type UserNodeRegistrationDataImportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeReportsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeLogsArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
+};
+
+
+export type UserNodeBusinessAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
+};
+
+export type UserNodeConnection = {
+   __typename?: 'UserNodeConnection',
+  pageInfo: PageInfo,
+  edges: Array<Maybe<UserNodeEdge>>,
+  totalCount?: Maybe<Scalars['Int']>,
+  edgeCount?: Maybe<Scalars['Int']>,
+};
+
+export type UserNodeEdge = {
+   __typename?: 'UserNodeEdge',
+  node?: Maybe<UserNode>,
+  cursor: Scalars['String'],
+};
+
+export enum UserPartner {
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP',
+  Unicef = 'UNICEF'
+}
+
+export type UserRoleNode = {
+   __typename?: 'UserRoleNode',
+  createdAt: Scalars['DateTime'],
+  updatedAt: Scalars['DateTime'],
+  businessArea: UserBusinessAreaNode,
+  role: RoleNode,
+};
+
+export enum UserStatus {
+  Invited = 'INVITED',
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE'
+}
+
+
+export type XlsxErrorNode = {
+   __typename?: 'XlsxErrorNode',
+  sheet?: Maybe<Scalars['String']>,
+  coordinates?: Maybe<Scalars['String']>,
+  message?: Maybe<Scalars['String']>,
+};
+
+export type XlsxRowErrorNode = {
+   __typename?: 'XlsxRowErrorNode',
+  rowNumber?: Maybe<Scalars['Int']>,
+  header?: Maybe<Scalars['String']>,
+  message?: Maybe<Scalars['String']>,
+};
+
+export type HouseholdMinimalFragment = (
+  { __typename?: 'HouseholdNode' }
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & { admin1: Maybe<(
+    { __typename?: 'AdminAreaNode' }
+    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+  )>, admin2: Maybe<(
+    { __typename?: 'AdminAreaNode' }
+    & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+  )>, headOfHousehold: (
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'fullName'>
+  ), individuals: (
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+  ), programs: (
+    { __typename?: 'ProgramNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      )> }
+    )>> }
+  ) }
+);
+
+export type HouseholdDetailedFragment = (
+  { __typename?: 'HouseholdNode' }
+  & Pick<HouseholdNode, 'countryOrigin' | 'country' | 'femaleAgeGroup05Count' | 'femaleAgeGroup611Count' | 'femaleAgeGroup1217Count' | 'femaleAgeGroup1859Count' | 'femaleAgeGroup60Count' | 'pregnantCount' | 'maleAgeGroup05Count' | 'maleAgeGroup611Count' | 'maleAgeGroup1217Count' | 'maleAgeGroup1859Count' | 'maleAgeGroup60Count' | 'femaleAgeGroup05DisabledCount' | 'femaleAgeGroup611DisabledCount' | 'femaleAgeGroup1217DisabledCount' | 'femaleAgeGroup1859DisabledCount' | 'femaleAgeGroup60DisabledCount' | 'maleAgeGroup05DisabledCount' | 'maleAgeGroup611DisabledCount' | 'maleAgeGroup1217DisabledCount' | 'maleAgeGroup1859DisabledCount' | 'maleAgeGroup60DisabledCount' | 'fchildHoh' | 'childHoh' | 'start' | 'deviceid' | 'orgNameEnumerator' | 'returnee' | 'address' | 'nameEnumerator' | 'lastSyncAt' | 'consentSharing' | 'orgEnumerator' | 'updatedAt' | 'consent' | 'flexFields'>
+  & { individuals: (
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'birthDate' | 'relationship'>
+        & { identities: Array<(
+          { __typename?: 'IndividualIdentityNode' }
+          & Pick<IndividualIdentityNode, 'id' | 'number' | 'type'>
+        )> }
+        & IndividualMinimalFragment
+      )> }
+    )>> }
+  ), programs: (
+    { __typename?: 'ProgramNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      )> }
+    )>> }
+  ), registrationDataImport: (
+    { __typename?: 'RegistrationDataImportNode' }
+    & Pick<RegistrationDataImportNode, 'name' | 'dataSource' | 'importDate'>
+    & { importedBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'firstName' | 'lastName' | 'email' | 'username'>
+    ) }
+  ), paymentRecords: (
+    { __typename?: 'PaymentRecordNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'PaymentRecordNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'PaymentRecordNode' }
+        & Pick<PaymentRecordNode, 'id' | 'fullName'>
+        & { cashPlan: Maybe<(
+          { __typename?: 'CashPlanNode' }
+          & Pick<CashPlanNode, 'id' | 'totalPersonsCovered' | 'totalDeliveredQuantity' | 'assistanceMeasurement'>
+          & { program: (
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          ) }
+        )> }
+      )> }
+    )>> }
+  ) }
+  & HouseholdMinimalFragment
+);
+
+export type IndividualMinimalFragment = (
+  { __typename?: 'IndividualNode' }
+  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & { documents: (
+    { __typename?: 'DocumentNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'DocumentNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'DocumentNode' }
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & { type: (
+          { __typename?: 'DocumentTypeNode' }
+          & Pick<DocumentTypeNode, 'country' | 'label'>
+        ) }
+      )> }
+    )>> }
+  ), identities: Array<(
+    { __typename?: 'IndividualIdentityNode' }
+    & Pick<IndividualIdentityNode, 'id' | 'number'>
+    & { agency: (
+      { __typename?: 'AgencyNode' }
+      & Pick<AgencyNode, 'country' | 'label'>
+    ) }
+  )>, household: Maybe<(
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id' | 'unicefId' | 'status'>
+    & { admin1: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+    )>, admin2: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
+    )>, programs: (
+      { __typename?: 'ProgramNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'ProgramNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
+export type IndividualDetailedFragment = (
+  { __typename?: 'IndividualNode' }
+  & Pick<IndividualNode, 'givenName' | 'familyName' | 'estimatedBirthDate' | 'pregnant' | 'status' | 'lastSyncAt' | 'deduplicationBatchStatus' | 'disability' | 'importedIndividualId' | 'commsDisability' | 'firstRegistrationDate' | 'whoAnswersAltPhone' | 'memoryDisability' | 'middleName' | 'whoAnswersPhone' | 'phoneNoAlternative' | 'hearingDisability' | 'observedDisability' | 'individualId' | 'seeingDisability' | 'physicalDisability' | 'selfcareDisability' | 'photo' | 'workStatus' | 'enrolledInNutritionProgramme' | 'administrationOfRutf' | 'role' | 'relationship' | 'flexFields'>
+  & { documents: (
+    { __typename?: 'DocumentNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'DocumentNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'DocumentNode' }
+        & Pick<DocumentNode, 'id' | 'country' | 'documentNumber'>
+        & { type: (
+          { __typename?: 'DocumentTypeNode' }
+          & Pick<DocumentTypeNode, 'country' | 'label'>
+        ) }
+      )> }
+    )>> }
+  ), identities: Array<(
+    { __typename?: 'IndividualIdentityNode' }
+    & Pick<IndividualIdentityNode, 'id' | 'number' | 'type' | 'country'>
+    & { agency: (
+      { __typename?: 'AgencyNode' }
+      & Pick<AgencyNode, 'country' | 'label'>
+    ) }
+  )>, household: Maybe<(
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'status' | 'id' | 'address' | 'countryOrigin'>
+    & { adminArea: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'level'>
+    )> }
+  )>, headingHousehold: Maybe<(
+    { __typename?: 'HouseholdNode' }
+    & Pick<HouseholdNode, 'id'>
+    & { headOfHousehold: (
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id'>
+    ) }
+  )> }
+  & IndividualMinimalFragment
+);
+
+export type TargetPopulationMinimalFragment = (
+  { __typename?: 'TargetPopulationNode' }
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'createdAt' | 'updatedAt' | 'candidateListTotalHouseholds' | 'finalListTotalHouseholds'>
+  & { program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'id' | 'name'>
+  )>, createdBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+  )> }
+);
+
+export type TargetPopulationDetailedFragment = (
+  { __typename?: 'TargetPopulationNode' }
+  & Pick<TargetPopulationNode, 'id' | 'name' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals' | 'caHashId' | 'vulnerabilityScoreMin' | 'vulnerabilityScoreMax' | 'approvedAt' | 'finalizedAt'>
+  & { steficonRule: Maybe<(
+    { __typename?: 'SteficonRuleNode' }
+    & Pick<SteficonRuleNode, 'id' | 'name'>
+  )>, finalizedBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+  )>, program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+  )>, createdBy: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+  )>, candidateListTargetingCriteria: Maybe<(
+    { __typename?: 'TargetingCriteriaNode' }
+    & { targetPopulationCandidate: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+      )> }
+    )>, rules: Maybe<Array<Maybe<(
+      { __typename?: 'TargetingCriteriaRuleNode' }
+      & Pick<TargetingCriteriaRuleNode, 'id'>
+      & { individualsFiltersBlocks: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingIndividualRuleFilterBlockNode' }
+        & { individualBlockFilters: Maybe<Array<Maybe<(
+          { __typename?: 'TargetingIndividualBlockRuleFilterNode' }
+          & Pick<TargetingIndividualBlockRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+          & { fieldAttribute: Maybe<(
+            { __typename?: 'FieldAttributeNode' }
+            & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+            & { choices: Maybe<Array<Maybe<(
+              { __typename?: 'CoreFieldChoiceObject' }
+              & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+            )>>> }
+          )> }
+        )>>> }
+      )>>>, filters: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleFilterNode' }
+        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+        & { fieldAttribute: Maybe<(
+          { __typename?: 'FieldAttributeNode' }
+          & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          & { choices: Maybe<Array<Maybe<(
+            { __typename?: 'CoreFieldChoiceObject' }
+            & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+          )>>> }
+        )> }
+      )>>> }
+    )>>> }
+  )>, finalListTargetingCriteria: Maybe<(
+    { __typename?: 'TargetingCriteriaNode' }
+    & { targetPopulationFinal: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+      )> }
+    )>, rules: Maybe<Array<Maybe<(
+      { __typename?: 'TargetingCriteriaRuleNode' }
+      & Pick<TargetingCriteriaRuleNode, 'id'>
+      & { filters: Maybe<Array<Maybe<(
+        { __typename?: 'TargetingCriteriaRuleFilterNode' }
+        & Pick<TargetingCriteriaRuleFilterNode, 'fieldName' | 'isFlexField' | 'arguments' | 'comparisionMethod'>
+        & { fieldAttribute: Maybe<(
+          { __typename?: 'FieldAttributeNode' }
+          & Pick<FieldAttributeNode, 'name' | 'labelEn' | 'type'>
+          & { choices: Maybe<Array<Maybe<(
+            { __typename?: 'CoreFieldChoiceObject' }
+            & Pick<CoreFieldChoiceObject, 'value' | 'labelEn'>
+          )>>> }
+        )> }
+      )>>> }
+    )>>> }
+  )>, candidateStats: Maybe<(
+    { __typename?: 'StatsObjectType' }
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale' | 'allHouseholds' | 'allIndividuals'>
+  )>, finalStats: Maybe<(
+    { __typename?: 'StatsObjectType' }
+    & Pick<StatsObjectType, 'childMale' | 'childFemale' | 'adultMale' | 'adultFemale'>
+  )> }
+);
+
+export type ActivateCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type ActivateCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { activateCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'ActivateCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type ApproveAddIndividualDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveAddIndividualDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveAddIndividual: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveDeleteIndividualDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveDeleteIndividualDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveDeleteIndividual: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveHouseholdDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  householdApproveData?: Maybe<Scalars['JSONString']>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>
+};
+
+
+export type ApproveHouseholdDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveHouseholdDataChange: Maybe<(
+    { __typename?: 'HouseholdDataChangeApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { householdDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+        & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )> }
+      )> }
+    )> }
+  )> }
+);
+
+export type ApproveIndividualDataChangeMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  individualApproveData?: Maybe<Scalars['JSONString']>,
+  flexFieldsApproveData?: Maybe<Scalars['JSONString']>,
+  approvedDocumentsToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedDocumentsToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToCreate?: Maybe<Array<Maybe<Scalars['Int']>>>,
+  approvedIdentitiesToRemove?: Maybe<Array<Maybe<Scalars['Int']>>>
+};
+
+
+export type ApproveIndividualDataChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { approveIndividualDataChange: Maybe<(
+    { __typename?: 'IndividualDataChangeApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { individualDataUpdateTicketDetails: Maybe<(
+        { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+        & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+        & { individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & IndividualDetailedFragment
+        )> }
+      )> }
+    )> }
+  )> }
+);
+
+export type ApproveNeedsAdjudicationMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  selectedIndividualId: Scalars['ID']
+};
+
+
+export type ApproveNeedsAdjudicationMutation = (
+  { __typename?: 'Mutations' }
+  & { approveNeedsAdjudication: Maybe<(
+    { __typename?: 'NeedsAdjudicationApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveSystemFlaggingMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  approveStatus: Scalars['Boolean']
+};
+
+
+export type ApproveSystemFlaggingMutation = (
+  { __typename?: 'Mutations' }
+  & { approveSystemFlagging: Maybe<(
+    { __typename?: 'SimpleApproveMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+    )> }
+  )> }
+);
+
+export type ApproveTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ApproveTpMutation = (
+  { __typename?: 'Mutations' }
+  & { approveTargetPopulation: Maybe<(
+    { __typename?: 'ApproveTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type CheckAgainstSanctionListUploadMutationVariables = {
+  file: Scalars['Upload']
+};
+
+
+export type CheckAgainstSanctionListUploadMutation = (
+  { __typename?: 'Mutations' }
+  & { checkAgainstSanctionList: Maybe<(
+    { __typename?: 'CheckAgainstSanctionListMutation' }
+    & { errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxRowErrorNode' }
+      & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
+    )>>> }
+  )> }
+);
+
+export type CreateCashPlanPaymentVerificationMutationVariables = {
+  input: CreatePaymentVerificationInput
+};
+
+
+export type CreateCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { createCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'CreatePaymentVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )> }
+  )> }
+);
+
+export type CreateDashboardReportMutationVariables = {
+  reportData: CreateDashboardReportInput
+};
+
+
+export type CreateDashboardReportMutation = (
+  { __typename?: 'Mutations' }
+  & { createDashboardReport: Maybe<(
+    { __typename?: 'CreateDashboardReport' }
+    & Pick<CreateDashboardReport, 'success'>
+  )> }
+);
+
+export type CreateGrievanceMutationVariables = {
+  input: CreateGrievanceTicketInput
+};
+
+
+export type CreateGrievanceMutation = (
+  { __typename?: 'Mutations' }
+  & { createGrievanceTicket: Maybe<(
+    { __typename?: 'CreateGrievanceTicketMutation' }
+    & { grievanceTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
+    )>>> }
+  )> }
+);
+
+export type CreateGrievanceTicketNoteMutationVariables = {
+  noteInput: CreateTicketNoteInput
+};
+
+
+export type CreateGrievanceTicketNoteMutation = (
+  { __typename?: 'Mutations' }
+  & { createTicketNote: Maybe<(
+    { __typename?: 'CreateTicketNoteMutation' }
+    & { grievanceTicketNote: Maybe<(
+      { __typename?: 'TicketNoteNode' }
+      & Pick<TicketNoteNode, 'id' | 'createdAt' | 'updatedAt'>
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName' | 'username' | 'email'>
+      )> }
+    )> }
+  )> }
+);
+
+export type CreateProgramMutationVariables = {
+  programData: CreateProgramInput
+};
+
+
+export type CreateProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { createProgram: Maybe<(
+    { __typename?: 'CreateProgram' }
+    & Pick<CreateProgram, 'validationErrors'>
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'status' | 'startDate' | 'endDate' | 'caId' | 'budget' | 'description' | 'frequencyOfPayments' | 'sector' | 'scope' | 'cashPlus' | 'populationGoal' | 'individualDataNeeded'>
+    )> }
+  )> }
+);
+
+export type CreateReportMutationVariables = {
+  reportData: CreateReportInput
+};
+
+
+export type CreateReportMutation = (
+  { __typename?: 'Mutations' }
+  & { createReport: Maybe<(
+    { __typename?: 'CreateReport' }
+    & { report: Maybe<(
+      { __typename?: 'ReportNode' }
+      & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl'>
+      & { createdBy: (
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'firstName' | 'lastName'>
+      ), adminArea: (
+        { __typename?: 'AdminAreaNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'AdminAreaNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'AdminAreaNode' }
+            & Pick<AdminAreaNode, 'title'>
+          )> }
+        )>> }
+      ), program: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'name'>
+      )> }
+    )> }
+  )> }
+);
+
+export type CreateTpMutationVariables = {
+  input: CreateTargetPopulationInput
+};
+
+
+export type CreateTpMutation = (
+  { __typename?: 'Mutations' }
+  & { createTargetPopulation: Maybe<(
+    { __typename?: 'CreateTargetPopulationMutation' }
+    & Pick<CreateTargetPopulationMutation, 'validationErrors'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'status' | 'candidateListTotalHouseholds' | 'candidateListTotalIndividuals' | 'finalListTotalHouseholds' | 'finalListTotalIndividuals'>
+    )> }
+  )> }
+);
+
+export type DeleteProgramMutationVariables = {
+  programId: Scalars['String']
+};
+
+
+export type DeleteProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteProgram: Maybe<(
+    { __typename?: 'DeleteProgram' }
+    & Pick<DeleteProgram, 'ok'>
+  )> }
+);
+
+export type DeleteTargetPopulationMutationVariables = {
+  input: DeleteTargetPopulationMutationInput
+};
+
+
+export type DeleteTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { deleteTargetPopulation: Maybe<(
+    { __typename?: 'DeleteTargetPopulationMutationPayload' }
+    & Pick<DeleteTargetPopulationMutationPayload, 'clientMutationId'>
+  )> }
+);
+
+export type DiscardCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type DiscardCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { discardCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'DiscardCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount' | 'activationDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type CopyTargetPopulationMutationVariables = {
+  input: CopyTargetPopulationMutationInput
+};
+
+
+export type CopyTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { copyTargetPopulation: Maybe<(
+    { __typename?: 'CopyTargetPopulationMutationPayload' }
+    & Pick<CopyTargetPopulationMutationPayload, 'clientMutationId' | 'validationErrors'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id'>
+    )> }
+  )> }
+);
+
+export type EditCashPlanPaymentVerificationMutationVariables = {
+  input: EditCashPlanPaymentVerificationInput
+};
+
+
+export type EditCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { editCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'EditPaymentVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )> }
+  )> }
+);
+
+export type FinalizeTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type FinalizeTpMutation = (
+  { __typename?: 'Mutations' }
+  & { finalizeTargetPopulation: Maybe<(
+    { __typename?: 'FinalizeTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type FinishCashPlanPaymentVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID']
+};
+
+
+export type FinishCashPlanPaymentVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { finishCashPlanPaymentVerification: Maybe<(
+    { __typename?: 'FinishCashPlanVerificationMutation' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
+      & { verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'completionDate'>
+          )> }
+        )>> }
+      ) }
+    )> }
+  )> }
+);
+
+export type GrievanceTicketStatusChangeMutationVariables = {
+  grievanceTicketId?: Maybe<Scalars['ID']>,
+  status?: Maybe<Scalars['Int']>
+};
+
+
+export type GrievanceTicketStatusChangeMutation = (
+  { __typename?: 'Mutations' }
+  & { grievanceStatusChange: Maybe<(
+    { __typename?: 'GrievanceStatusChangeMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status' | 'createdAt' | 'updatedAt'>
+      & { createdBy: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email'>
+      )> }
+    )> }
+  )> }
+);
+
+export type ImportXlsxCashPlanVerificationMutationVariables = {
+  cashPlanVerificationId: Scalars['ID'],
+  file: Scalars['Upload']
+};
+
+
+export type ImportXlsxCashPlanVerificationMutation = (
+  { __typename?: 'Mutations' }
+  & { importXlsxCashPlanVerification: Maybe<(
+    { __typename?: 'ImportXlsxCashPlanVerification' }
+    & { cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxErrorNode' }
+      & Pick<XlsxErrorNode, 'sheet' | 'coordinates' | 'message'>
+    )>>> }
+  )> }
+);
+
+export type ReassignRoleGrievanceMutationVariables = {
+  grievanceTicketId: Scalars['ID'],
+  householdId: Scalars['ID'],
+  individualId: Scalars['ID'],
+  role: Scalars['String']
+};
+
+
+export type ReassignRoleGrievanceMutation = (
+  { __typename?: 'Mutations' }
+  & { reassignRole: Maybe<(
+    { __typename?: 'ReassignRoleMutation' }
+    & { household: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'unicefId'>
+    )>, individual: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & Pick<IndividualNode, 'id' | 'unicefId'>
+    )> }
+  )> }
+);
+
+export type RerunDedupeMutationVariables = {
+  registrationDataImportDatahubId: Scalars['ID']
+};
+
+
+export type RerunDedupeMutation = (
+  { __typename?: 'Mutations' }
+  & { rerunDedupe: Maybe<(
+    { __typename?: 'RegistrationDeduplicationMutation' }
+    & Pick<RegistrationDeduplicationMutation, 'ok'>
+  )> }
+);
+
+export type SetSteficonRuleOnTargetPopulationMutationVariables = {
+  input: SetSteficonRuleOnTargetPopulationMutationInput
+};
+
+
+export type SetSteficonRuleOnTargetPopulationMutation = (
+  { __typename?: 'Mutations' }
+  & { setSteficonRuleOnTargetPopulation: Maybe<(
+    { __typename?: 'SetSteficonRuleOnTargetPopulationMutationPayload' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type UnapproveTpMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type UnapproveTpMutation = (
+  { __typename?: 'Mutations' }
+  & { unapproveTargetPopulation: Maybe<(
+    { __typename?: 'UnapproveTargetPopulationMutation' }
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type UpdateGrievanceMutationVariables = {
+  input: UpdateGrievanceTicketInput
+};
+
+
+export type UpdateGrievanceMutation = (
+  { __typename?: 'Mutations' }
+  & { updateGrievanceTicket: Maybe<(
+    { __typename?: 'UpdateGrievanceTicketMutation' }
+    & { grievanceTicket: Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id'>
+    )> }
+  )> }
+);
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables = {
+  paymentVerificationId: Scalars['ID'],
+  receivedAmount: Scalars['Decimal'],
+  received: Scalars['Boolean']
+};
+
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutation = (
+  { __typename?: 'Mutations' }
+  & { updatePaymentVerificationReceivedAndReceivedAmount: Maybe<(
+    { __typename?: 'UpdatePaymentVerificationReceivedAndReceivedAmount' }
+    & { paymentVerification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+      & { cashPlanPaymentVerification: (
+        { __typename?: 'CashPlanPaymentVerificationNode' }
+        & Pick<CashPlanPaymentVerificationNode, 'id' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'receivedWithProblemsCount'>
+      ) }
+    )> }
+  )> }
+);
+
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables = {
+  paymentVerificationId: Scalars['ID'],
+  receivedAmount: Scalars['Decimal'],
+  status?: Maybe<PaymentVerificationStatusForUpdate>
+};
+
+
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutation = (
+  { __typename?: 'Mutations' }
+  & { updatePaymentVerificationStatusAndReceivedAmount: Maybe<(
+    { __typename?: 'UpdatePaymentVerificationStatusAndReceivedAmount' }
+    & { paymentVerification: Maybe<(
+      { __typename?: 'PaymentVerificationNode' }
+      & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+    )> }
+  )> }
+);
+
+export type UpdateProgramMutationVariables = {
+  programData: UpdateProgramInput,
+  version: Scalars['BigInt']
+};
+
+
+export type UpdateProgramMutation = (
+  { __typename?: 'Mutations' }
+  & { updateProgram: Maybe<(
+    { __typename?: 'UpdateProgram' }
+    & Pick<UpdateProgram, 'validationErrors'>
+    & { program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+    )> }
+  )> }
+);
+
+export type UpdateTpMutationVariables = {
+  input: UpdateTargetPopulationInput
+};
+
+
+export type UpdateTpMutation = (
+  { __typename?: 'Mutations' }
+  & { updateTargetPopulation: Maybe<(
+    { __typename?: 'UpdateTargetPopulationMutation' }
+    & Pick<UpdateTargetPopulationMutation, 'validationErrors'>
+    & { targetPopulation: Maybe<(
+      { __typename?: 'TargetPopulationNode' }
+      & TargetPopulationDetailedFragment
+    )> }
+  )> }
+);
+
+export type CashPlanVerificationStatusChoicesQueryVariables = {};
+
+
+export type CashPlanVerificationStatusChoicesQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanVerificationStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, paymentRecordDeliveryTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type PaymentVerificationStatusChoicesQueryVariables = {};
+
+
+export type PaymentVerificationStatusChoicesQuery = (
+  { __typename?: 'Query' }
+  & { paymentVerificationStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type CashPlanVerificationSamplingChoicesQueryVariables = {};
+
+
+export type CashPlanVerificationSamplingChoicesQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanVerificationSamplingChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllAddIndividualFieldsQueryVariables = {};
+
+
+export type AllAddIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allAddIndividualsFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, documentTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, identityTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllAdminAreasQueryVariables = {
+  title?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  level?: Maybe<Scalars['Int']>,
+  first?: Maybe<Scalars['Int']>
+};
+
+
+export type AllAdminAreasQuery = (
+  { __typename?: 'Query' }
+  & { allAdminAreas: Maybe<(
+    { __typename?: 'AdminAreaNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'AdminAreaNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'AdminAreaNode' }
+        & Pick<AdminAreaNode, 'id' | 'title' | 'pCode'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllBusinessAreasQueryVariables = {};
+
+
+export type AllBusinessAreasQuery = (
+  { __typename?: 'Query' }
+  & { allBusinessAreas: Maybe<(
+    { __typename?: 'BusinessAreaNodeConnection' }
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'BusinessAreaNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'BusinessAreaNode' }
+        & Pick<BusinessAreaNode, 'id' | 'name' | 'slug'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllCashPlansQueryVariables = {
+  program?: Maybe<Scalars['ID']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  serviceProvider?: Maybe<Scalars['String']>,
+  deliveryType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  verificationStatus?: Maybe<Array<Maybe<Scalars['String']>>>,
+  startDateGte?: Maybe<Scalars['DateTime']>,
+  endDateLte?: Maybe<Scalars['DateTime']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllCashPlansQuery = (
+  { __typename?: 'Query' }
+  & { allCashPlans: Maybe<(
+    { __typename?: 'CashPlanNodeConnection' }
+    & Pick<CashPlanNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'CashPlanNodeEdge' }
+      & Pick<CashPlanNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'CashPlanNode' }
+        & Pick<CashPlanNode, 'id' | 'caId' | 'verificationStatus' | 'assistanceThrough' | 'totalNumberOfHouseholds' | 'deliveryType' | 'startDate' | 'endDate' | 'totalPersonsCovered' | 'dispersionDate' | 'assistanceMeasurement' | 'status' | 'currency' | 'totalEntitledQuantity' | 'totalDeliveredQuantity' | 'totalUndeliveredQuantity' | 'updatedAt'>
+        & { serviceProvider: Maybe<(
+          { __typename?: 'ServiceProviderNode' }
+          & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
+        )>, program: (
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllChartsQueryVariables = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllChartsQuery = (
+  { __typename?: 'Query' }
+  & { chartProgrammesBySector: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'label' | 'data'>
+    )>>> }
+  )>, chartPaymentVerification: Maybe<(
+    { __typename?: 'ChartPaymentVerification' }
+    & Pick<ChartPaymentVerification, 'labels' | 'households' | 'averageSampleSize'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'label' | 'data'>
+    )>>> }
+  )>, chartVolumeByDeliveryMechanism: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartPayment: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartGrievances: Maybe<(
+    { __typename?: 'ChartGrievanceTicketsNode' }
+    & Pick<ChartGrievanceTicketsNode, 'labels' | 'totalNumberOfGrievances' | 'totalNumberOfFeedback' | 'totalNumberOfOpenSensitive'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, sectionHouseholdsReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, sectionIndividualsReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, sectionChildReached: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, chartIndividualsReachedByAgeAndGender: Maybe<(
+    { __typename?: 'ChartDatasetNode' }
+    & Pick<ChartDatasetNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DatasetsNode' }
+      & Pick<_DatasetsNode, 'data'>
+    )>>> }
+  )>, chartIndividualsWithDisabilityReachedByAge: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
+  )>, sectionTotalTransferred: Maybe<(
+    { __typename?: 'SectionTotalNode' }
+    & Pick<SectionTotalNode, 'total'>
+  )>, chartTotalTransferredByMonth: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
+  )> }
+);
+
+export type AllEditHouseholdFieldsQueryVariables = {};
+
+
+export type AllEditHouseholdFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allEditHouseholdFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>>, countriesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllGrievanceTicketQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  category?: Maybe<Scalars['String']>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  createdAtRange?: Maybe<Scalars['String']>,
+  admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllGrievanceTicketQuery = (
+  { __typename?: 'Query' }
+  & { allGrievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNodeConnection' }
+    & Pick<GrievanceTicketNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'GrievanceTicketNodeEdge' }
+      & Pick<GrievanceTicketNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'GrievanceTicketNode' }
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
+        & { assignedTo: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        )>, createdBy: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id'>
+        )>, household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'unicefId' | 'id'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  familySize?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  headOfHouseholdFullNameIcontains?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  residenceStatus?: Maybe<Scalars['String']>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  withdrawn?: Maybe<Scalars['Boolean']>
+};
+
+
+export type AllHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allHouseholds: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & HouseholdMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllHouseholdsFlexFieldsAttributesQueryVariables = {};
+
+
+export type AllHouseholdsFlexFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allHouseholdsFlexFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
+export type AllIndividualsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  fullNameContains?: Maybe<Scalars['String']>,
+  sex?: Maybe<Array<Maybe<Scalars['String']>>>,
+  age?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  search?: Maybe<Scalars['String']>,
+  programs?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  lastRegistrationDate?: Maybe<Scalars['String']>,
+  householdId?: Maybe<Scalars['UUID']>,
+  excludedId?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>,
+  adminArea?: Maybe<Scalars['ID']>,
+  withdrawn?: Maybe<Scalars['Boolean']>
+};
+
+
+export type AllIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allIndividuals: Maybe<(
+    { __typename?: 'IndividualNodeConnection' }
+    & Pick<IndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'IndividualNodeEdge' }
+      & Pick<IndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & IndividualMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllIndividualsFlexFieldsAttributesQueryVariables = {};
+
+
+export type AllIndividualsFlexFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allIndividualsFlexFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'required' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
+export type AllLogEntriesQueryVariables = {
+  businessArea: Scalars['String'],
+  objectId?: Maybe<Scalars['UUID']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  search?: Maybe<Scalars['String']>,
+  module?: Maybe<Scalars['String']>
+};
+
+
+export type AllLogEntriesQuery = (
+  { __typename?: 'Query' }
+  & { allLogEntries: Maybe<(
+    { __typename?: 'LogEntryNodeConnection' }
+    & Pick<LogEntryNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'LogEntryNodeEdge' }
+      & Pick<LogEntryNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'LogEntryNode' }
+        & Pick<LogEntryNode, 'id' | 'action' | 'changes' | 'objectRepr' | 'objectId' | 'timestamp'>
+        & { contentType: Maybe<(
+          { __typename?: 'ContentTypeObjectType' }
+          & Pick<ContentTypeObjectType, 'id' | 'appLabel' | 'model' | 'name'>
+        )>, user: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName'>
+        )> }
+      )> }
+    )>> }
+  )>, logEntryActionChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllPaymentRecordsQueryVariables = {
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllPaymentRecordsQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentRecords: Maybe<(
+    { __typename?: 'PaymentRecordNodeConnection' }
+    & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentRecordNodeEdge' }
+      & Pick<PaymentRecordNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentRecordNode' }
+        & Pick<PaymentRecordNode, 'id' | 'createdAt' | 'updatedAt' | 'fullName' | 'statusDate' | 'status' | 'caId' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveredQuantityUsd' | 'deliveryDate'>
+        & { household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
+        ), cashPlan: Maybe<(
+          { __typename?: 'CashPlanNode' }
+          & Pick<CashPlanNode, 'id'>
+          & { program: (
+            { __typename?: 'ProgramNode' }
+            & Pick<ProgramNode, 'id' | 'name'>
+          ) }
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllPaymentVerificationsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  cashPlanPaymentVerification?: Maybe<Scalars['ID']>,
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllPaymentVerificationsQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentVerifications: Maybe<(
+    { __typename?: 'PaymentVerificationNodeConnection' }
+    & Pick<PaymentVerificationNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentVerificationNodeEdge' }
+      & Pick<PaymentVerificationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentVerificationNode' }
+        & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+        & { paymentRecord: (
+          { __typename?: 'PaymentRecordNode' }
+          & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity' | 'currency'>
+          & { household: (
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'unicefId' | 'id'>
+            & { headOfHousehold: (
+              { __typename?: 'IndividualNode' }
+              & Pick<IndividualNode, 'id' | 'fullName' | 'phoneNo' | 'phoneNoAlternative'>
+            ) }
+          ) }
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllProgramsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  sector?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  search?: Maybe<Scalars['String']>,
+  numberOfHouseholds?: Maybe<Scalars['String']>,
+  budget?: Maybe<Scalars['String']>,
+  startDate?: Maybe<Scalars['Date']>,
+  endDate?: Maybe<Scalars['Date']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllProgramsQuery = (
+  { __typename?: 'Query' }
+  & { allPrograms: Maybe<(
+    { __typename?: 'ProgramNodeConnection' }
+    & Pick<ProgramNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ProgramNodeEdge' }
+      & Pick<ProgramNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'description' | 'budget' | 'frequencyOfPayments' | 'populationGoal' | 'sector' | 'totalNumberOfHouseholds' | 'individualDataNeeded'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllRapidProFlowsQueryVariables = {
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllRapidProFlowsQuery = (
+  { __typename?: 'Query' }
+  & { allRapidProFlows: Maybe<Array<Maybe<(
+    { __typename?: 'RapidProFlow' }
+    & Pick<RapidProFlow, 'id' | 'name'>
+  )>>> }
+);
+
+export type AllReportsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  createdFrom?: Maybe<Scalars['DateTime']>,
+  createdTo?: Maybe<Scalars['DateTime']>,
+  reportType?: Maybe<Array<Maybe<Scalars['String']>>>,
+  createdBy?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllReportsQuery = (
+  { __typename?: 'Query' }
+  & { allReports: Maybe<(
+    { __typename?: 'ReportNodeConnection' }
+    & Pick<ReportNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ReportNodeEdge' }
+      & Pick<ReportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ReportNode' }
+        & Pick<ReportNode, 'id' | 'reportType' | 'dateFrom' | 'dateTo' | 'status' | 'createdAt' | 'fileUrl' | 'numberOfRecords'>
+        & { createdBy: (
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'firstName' | 'lastName'>
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllSanctionListIndividualsQueryVariables = {
+  referenceNumber: Scalars['String'],
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  fullNameContains?: Maybe<Scalars['String']>
+};
+
+
+export type AllSanctionListIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allSanctionListIndividuals: Maybe<(
+    { __typename?: 'SanctionListIndividualNodeConnection' }
+    & Pick<SanctionListIndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'SanctionListIndividualNodeEdge' }
+      & Pick<SanctionListIndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'SanctionListIndividualNode' }
+        & Pick<SanctionListIndividualNode, 'id' | 'referenceNumber' | 'fullName' | 'listedOn'>
+        & { documents: (
+          { __typename?: 'SanctionListIndividualDocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDocumentNode' }
+              & Pick<SanctionListIndividualDocumentNode, 'id' | 'documentNumber' | 'typeOfDocument' | 'issuingCountry'>
+            )> }
+          )>> }
+        ), aliasNames: (
+          { __typename?: 'SanctionListIndividualAliasNameNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualAliasNameNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualAliasNameNode' }
+              & Pick<SanctionListIndividualAliasNameNode, 'id' | 'name'>
+            )> }
+          )>> }
+        ), datesOfBirth: (
+          { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDateOfBirthNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDateOfBirthNode' }
+              & Pick<SanctionListIndividualDateOfBirthNode, 'id' | 'date'>
+            )> }
+          )>> }
+        ) }
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllSteficonRulesQueryVariables = {
+  enabled?: Maybe<Scalars['Boolean']>,
+  deprecated?: Maybe<Scalars['Boolean']>
+};
+
+
+export type AllSteficonRulesQuery = (
+  { __typename?: 'Query' }
+  & { allSteficonRules: Maybe<(
+    { __typename?: 'SteficonRuleNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'SteficonRuleNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'SteficonRuleNode' }
+        & Pick<SteficonRuleNode, 'id' | 'name'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllTargetPopulationsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name?: Maybe<Scalars['String']>,
+  status?: Maybe<Scalars['String']>,
+  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
+  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>,
+  program?: Maybe<Array<Maybe<Scalars['ID']>>>
+};
+
+
+export type AllTargetPopulationsQuery = (
+  { __typename?: 'Query' }
+  & { allTargetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNodeConnection' }
+    & Pick<TargetPopulationNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'TargetPopulationNodeEdge' }
+      & Pick<TargetPopulationNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'TargetPopulationNode' }
+        & TargetPopulationMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllUsersQueryVariables = {
+  search?: Maybe<Scalars['String']>,
+  status?: Maybe<Array<Maybe<Scalars['String']>>>,
+  partner?: Maybe<Array<Maybe<Scalars['String']>>>,
+  roles?: Maybe<Array<Maybe<Scalars['String']>>>,
+  businessArea: Scalars['String'],
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type AllUsersQuery = (
+  { __typename?: 'Query' }
+  & { allUsers: Maybe<(
+    { __typename?: 'UserNodeConnection' }
+    & Pick<UserNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'endCursor' | 'startCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'UserNodeEdge' }
+      & Pick<UserNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'UserNode' }
+        & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'username' | 'email' | 'isActive' | 'lastLogin' | 'status' | 'partner'>
+        & { userRoles: Array<(
+          { __typename?: 'UserRoleNode' }
+          & { businessArea: (
+            { __typename?: 'UserBusinessAreaNode' }
+            & Pick<UserBusinessAreaNode, 'name'>
+          ), role: (
+            { __typename?: 'RoleNode' }
+            & Pick<RoleNode, 'name' | 'permissions'>
+          ) }
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type CashAssistUrlPrefixQueryVariables = {};
+
+
+export type CashAssistUrlPrefixQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'cashAssistUrlPrefix'>
+);
+
+export type CashPlanQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type CashPlanQuery = (
+  { __typename?: 'Query' }
+  & { cashPlan: Maybe<(
+    { __typename?: 'CashPlanNode' }
+    & Pick<CashPlanNode, 'id' | 'name' | 'startDate' | 'endDate' | 'updatedAt' | 'status' | 'deliveryType' | 'fundsCommitment' | 'downPayment' | 'dispersionDate' | 'assistanceThrough' | 'caId' | 'caHashId' | 'verificationStatus' | 'bankReconciliationSuccess' | 'bankReconciliationError' | 'totalNumberOfHouseholds'>
+    & { serviceProvider: Maybe<(
+      { __typename?: 'ServiceProviderNode' }
+      & Pick<ServiceProviderNode, 'id' | 'caId' | 'fullName'>
+    )>, verifications: (
+      { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNode' }
+          & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'sampleSize' | 'receivedCount' | 'notReceivedCount' | 'respondedCount' | 'verificationMethod' | 'sampling' | 'receivedWithProblemsCount' | 'rapidProFlowId' | 'confidenceInterval' | 'marginOfError' | 'activationDate' | 'completionDate' | 'excludedAdminAreasFilter' | 'sexFilter'>
+          & { ageFilter: Maybe<(
+            { __typename?: 'AgeFilterObject' }
+            & Pick<AgeFilterObject, 'min' | 'max'>
+          )> }
+        )> }
+      )>> }
+    ), program: (
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'id' | 'name' | 'caId'>
+    ), paymentRecords: (
+      { __typename?: 'PaymentRecordNodeConnection' }
+      & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentRecordNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentRecordNode' }
+          & { targetPopulation: (
+            { __typename?: 'TargetPopulationNode' }
+            & Pick<TargetPopulationNode, 'id' | 'name'>
+          ) }
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
+export type CashPlanPaymentVerificationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type CashPlanPaymentVerificationQuery = (
+  { __typename?: 'Query' }
+  & { cashPlanPaymentVerification: Maybe<(
+    { __typename?: 'CashPlanPaymentVerificationNode' }
+    & Pick<CashPlanPaymentVerificationNode, 'id'>
+    & { cashPlan: (
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'caHashId'>
+    ) }
+  )> }
+);
+
+export type CountryChartsQueryVariables = {
+  businessAreaSlug: Scalars['String'],
+  year: Scalars['Int'],
+  program?: Maybe<Scalars['String']>,
+  administrativeArea?: Maybe<Scalars['String']>,
+  order?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type CountryChartsQuery = (
+  { __typename?: 'Query' }
+  & { tableTotalCashTransferredByAdministrativeArea: Maybe<(
+    { __typename?: 'TableTotalCashTransferred' }
+    & { data: Maybe<Array<Maybe<(
+      { __typename?: '_TableTotalCashTransferredDataNode' }
+      & Pick<_TableTotalCashTransferredDataNode, 'id' | 'admin2' | 'totalCashTransferred' | 'totalHouseholds'>
+    )>>> }
+  )> }
+);
+
+export type DashboardReportChoiceDataQueryVariables = {
+  businessArea: Scalars['String']
+};
+
+
+export type DashboardReportChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { dashboardReportTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type DashboardYearsChoiceDataQueryVariables = {
+  businessArea: Scalars['String']
+};
+
+
+export type DashboardYearsChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'dashboardYearsChoices'>
+);
+
+export type ExistingGrievanceTicketsQueryVariables = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>,
+  businessArea: Scalars['String'],
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
+  paymentRecord?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  category?: Maybe<Scalars['String']>,
+  issueType?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>
+};
+
+
+export type ExistingGrievanceTicketsQuery = (
+  { __typename?: 'Query' }
+  & { existingGrievanceTickets: Maybe<(
+    { __typename?: 'GrievanceTicketNodeConnection' }
+    & Pick<GrievanceTicketNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'GrievanceTicketNodeEdge' }
+      & Pick<GrievanceTicketNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'GrievanceTicketNode' }
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
+        & { assignedTo: Maybe<(
+          { __typename?: 'UserNode' }
+          & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+        )>, household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'unicefId' | 'id'>
+        )>, individual: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'unicefId' | 'id'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type GlobalAreaChartsQueryVariables = {
+  year: Scalars['Int']
+};
+
+
+export type GlobalAreaChartsQuery = (
+  { __typename?: 'Query' }
+  & { chartTotalTransferredCashByCountry: Maybe<(
+    { __typename?: 'ChartDetailedDatasetsNode' }
+    & Pick<ChartDetailedDatasetsNode, 'labels'>
+    & { datasets: Maybe<Array<Maybe<(
+      { __typename?: '_DetailedDatasetsNode' }
+      & Pick<_DetailedDatasetsNode, 'data' | 'label'>
+    )>>> }
+  )> }
+);
+
+export type GrievanceTicketQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type GrievanceTicketQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicket: Maybe<(
+    { __typename?: 'GrievanceTicketNode' }
+    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType'>
+    & { createdBy: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, admin2: Maybe<(
+      { __typename?: 'AdminAreaNode' }
+      & Pick<AdminAreaNode, 'id' | 'title' | 'pCode'>
+    )>, assignedTo: Maybe<(
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+    )>, individual: Maybe<(
+      { __typename?: 'IndividualNode' }
+      & { householdsAndRoles: Array<(
+        { __typename?: 'IndividualRoleInHouseholdNode' }
+        & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
+        & { individual: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'unicefId'>
+        ), household: (
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        ) }
+      )> }
+      & IndividualDetailedFragment
+    )>, household: Maybe<(
+      { __typename?: 'HouseholdNode' }
+      & HouseholdDetailedFragment
+    )>, paymentRecord: Maybe<(
+      { __typename?: 'PaymentRecordNode' }
+      & Pick<PaymentRecordNode, 'id'>
+    )>, relatedTickets: Maybe<Array<Maybe<(
+      { __typename?: 'GrievanceTicketNode' }
+      & Pick<GrievanceTicketNode, 'id' | 'status'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
+    )>>>, addIndividualTicketDetails: Maybe<(
+      { __typename?: 'TicketAddIndividualDetailsNode' }
+      & Pick<TicketAddIndividualDetailsNode, 'id' | 'individualData' | 'approveStatus'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId'>
+      )> }
+    )>, individualDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
+      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+      & { individual: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & IndividualDetailedFragment
+      )> }
+    )>, householdDataUpdateTicketDetails: Maybe<(
+      { __typename?: 'TicketHouseholdDataUpdateDetailsNode' }
+      & Pick<TicketHouseholdDataUpdateDetailsNode, 'id' | 'householdData'>
+      & { household: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & HouseholdDetailedFragment
+      )> }
+    )>, deleteIndividualTicketDetails: Maybe<(
+      { __typename?: 'TicketDeleteIndividualDetailsNode' }
+      & Pick<TicketDeleteIndividualDetailsNode, 'id' | 'roleReassignData' | 'approveStatus'>
+    )>, systemFlaggingTicketDetails: Maybe<(
+      { __typename?: 'TicketSystemFlaggingDetailsNode' }
+      & Pick<TicketSystemFlaggingDetailsNode, 'id' | 'approveStatus' | 'roleReassignData'>
+      & { goldenRecordsIndividual: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'fullName' | 'birthDate' | 'lastRegistrationDate'>
+        & { documents: (
+          { __typename?: 'DocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'DocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'DocumentNode' }
+              & Pick<DocumentNode, 'id' | 'documentNumber'>
+            )> }
+          )>> }
+        ) }
+      ), sanctionListIndividual: (
+        { __typename?: 'SanctionListIndividualNode' }
+        & Pick<SanctionListIndividualNode, 'id' | 'fullName' | 'referenceNumber'>
+        & { datesOfBirth: (
+          { __typename?: 'SanctionListIndividualDateOfBirthNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDateOfBirthNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDateOfBirthNode' }
+              & Pick<SanctionListIndividualDateOfBirthNode, 'id' | 'date'>
+            )> }
+          )>> }
+        ), documents: (
+          { __typename?: 'SanctionListIndividualDocumentNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'SanctionListIndividualDocumentNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'SanctionListIndividualDocumentNode' }
+              & Pick<SanctionListIndividualDocumentNode, 'id' | 'documentNumber' | 'typeOfDocument'>
+            )> }
+          )>> }
+        ) }
+      ) }
+    )>, paymentVerificationTicketDetails: Maybe<(
+      { __typename?: 'TicketPaymentVerificationDetailsNode' }
+      & Pick<TicketPaymentVerificationDetailsNode, 'paymentVerificationStatus'>
+      & { paymentVerifications: (
+        { __typename?: 'PaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'PaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'PaymentVerificationNode' }
+            & Pick<PaymentVerificationNode, 'id'>
+          )> }
+        )>> }
+      ) }
+    )>, needsAdjudicationTicketDetails: Maybe<(
+      { __typename?: 'TicketNeedsAdjudicationDetailsNode' }
+      & Pick<TicketNeedsAdjudicationDetailsNode, 'id' | 'hasDuplicatedDocument' | 'roleReassignData'>
+      & { goldenRecordsIndividual: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'fullName' | 'birthDate' | 'lastRegistrationDate' | 'sex'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'id' | 'unicefId'>
+        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>> }
+      ), possibleDuplicate: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'unicefId' | 'lastRegistrationDate' | 'fullName' | 'birthDate' | 'sex'>
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & Pick<HouseholdNode, 'unicefId' | 'id'>
+        )>, deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+          { __typename?: 'DeduplicationResultNode' }
+          & Pick<DeduplicationResultNode, 'hitId' | 'proximityToScore' | 'score'>
+        )>>> }
+      ), selectedIndividual: Maybe<(
+        { __typename?: 'IndividualNode' }
+        & { household: Maybe<(
+          { __typename?: 'HouseholdNode' }
+          & HouseholdDetailedFragment
+        )>, householdsAndRoles: Array<(
+          { __typename?: 'IndividualRoleInHouseholdNode' }
+          & Pick<IndividualRoleInHouseholdNode, 'id' | 'role'>
+          & { individual: (
+            { __typename?: 'IndividualNode' }
+            & Pick<IndividualNode, 'id' | 'unicefId'>
+          ), household: (
+            { __typename?: 'HouseholdNode' }
+            & Pick<HouseholdNode, 'id' | 'unicefId'>
+          ) }
+        )> }
+        & IndividualDetailedFragment
+      )> }
+    )>, ticketNotes: (
+      { __typename?: 'TicketNoteNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'TicketNoteNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'TicketNoteNode' }
+          & Pick<TicketNoteNode, 'id' | 'createdAt' | 'updatedAt' | 'description'>
+          & { createdBy: Maybe<(
+            { __typename?: 'UserNode' }
+            & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+          )> }
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
+export type GrievancesChoiceDataQueryVariables = {};
+
+
+export type GrievancesChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { grievanceTicketStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketManualCategoryChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, grievanceTicketIssueTypeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'IssueTypesObject' }
+    & Pick<IssueTypesObject, 'category' | 'label'>
+    & { subCategories: Maybe<Array<Maybe<(
+      { __typename?: 'ChoiceObject' }
+      & Pick<ChoiceObject, 'name' | 'value'>
+    )>>> }
+  )>>> }
+);
+
+export type HouseholdQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type HouseholdQuery = (
+  { __typename?: 'Query' }
+  & { household: Maybe<(
+    { __typename?: 'HouseholdNode' }
+    & HouseholdDetailedFragment
+  )> }
+);
+
+export type HouseholdChoiceDataQueryVariables = {};
+
+
+export type HouseholdChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { residenceStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, relationshipChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, roleChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, maritalStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, workStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, deduplicationBatchStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, deduplicationGoldenRecordStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, observedDisabilityChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, severityOfDisabilityChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type IndividualQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & IndividualDetailedFragment
+  )> }
+);
+
+export type IndividualPhotosQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type IndividualPhotosQuery = (
+  { __typename?: 'Query' }
+  & { individual: Maybe<(
+    { __typename?: 'IndividualNode' }
+    & Pick<IndividualNode, 'id' | 'photo'>
+    & { documents: (
+      { __typename?: 'DocumentNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'DocumentNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'DocumentNode' }
+          & Pick<DocumentNode, 'id' | 'photo'>
+        )> }
+      )>> }
+    ) }
+  )> }
+);
+
+export type LookUpPaymentRecordsQueryVariables = {
+  cashPlan?: Maybe<Scalars['ID']>,
+  household?: Maybe<Scalars['ID']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type LookUpPaymentRecordsQuery = (
+  { __typename?: 'Query' }
+  & { allPaymentRecords: Maybe<(
+    { __typename?: 'PaymentRecordNodeConnection' }
+    & Pick<PaymentRecordNodeConnection, 'totalCount' | 'edgeCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'PaymentRecordNodeEdge' }
+      & Pick<PaymentRecordNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'PaymentRecordNode' }
+        & Pick<PaymentRecordNode, 'id' | 'caId' | 'deliveredQuantity'>
+        & { verifications: (
+          { __typename?: 'PaymentVerificationNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'PaymentVerificationNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'PaymentVerificationNode' }
+              & Pick<PaymentVerificationNode, 'id' | 'status' | 'receivedAmount'>
+            )> }
+          )>> }
+        ), cashPlan: Maybe<(
+          { __typename?: 'CashPlanNode' }
+          & Pick<CashPlanNode, 'id' | 'name'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type MeQueryVariables = {};
+
+
+export type MeQuery = (
+  { __typename?: 'Query' }
+  & { me: Maybe<(
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'username' | 'email' | 'firstName' | 'lastName'>
+    & { businessAreas: Maybe<(
+      { __typename?: 'UserBusinessAreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'UserBusinessAreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'UserBusinessAreaNode' }
+          & Pick<UserBusinessAreaNode, 'id' | 'name' | 'slug' | 'permissions'>
+        )> }
+      )>> }
+    )> }
+  )> }
+);
+
+export type PaymentRecordQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecord: Maybe<(
+    { __typename?: 'PaymentRecordNode' }
+    & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'deliveredQuantityUsd' | 'deliveryType' | 'transactionReferenceId'>
+    & { household: (
+      { __typename?: 'HouseholdNode' }
+      & Pick<HouseholdNode, 'id' | 'size' | 'unicefId'>
+      & { headOfHousehold: (
+        { __typename?: 'IndividualNode' }
+        & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+      ) }
+    ), targetPopulation: (
+      { __typename?: 'TargetPopulationNode' }
+      & Pick<TargetPopulationNode, 'id' | 'name'>
+    ), cashPlan: Maybe<(
+      { __typename?: 'CashPlanNode' }
+      & Pick<CashPlanNode, 'id' | 'caId'>
+      & { program: (
+        { __typename?: 'ProgramNode' }
+        & Pick<ProgramNode, 'id' | 'name'>
+      ), verifications: (
+        { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+        & { edges: Array<Maybe<(
+          { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+          & { node: Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNode' }
+            & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+          )> }
+        )>> }
+      ) }
+    )>, verifications: (
+      { __typename?: 'PaymentVerificationNodeConnection' }
+      & Pick<PaymentVerificationNodeConnection, 'totalCount'>
+      & { edges: Array<Maybe<(
+        { __typename?: 'PaymentVerificationNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'PaymentVerificationNode' }
+          & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount'>
+        )> }
+      )>> }
+    ), serviceProvider: (
+      { __typename?: 'ServiceProviderNode' }
+      & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+    ) }
+  )> }
+);
+
+export type PaymentRecordVerificationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type PaymentRecordVerificationQuery = (
+  { __typename?: 'Query' }
+  & { paymentRecordVerification: Maybe<(
+    { __typename?: 'PaymentVerificationNode' }
+    & Pick<PaymentVerificationNode, 'id' | 'status' | 'statusDate' | 'receivedAmount' | 'isManuallyEditable'>
+    & { paymentRecord: (
+      { __typename?: 'PaymentRecordNode' }
+      & Pick<PaymentRecordNode, 'id' | 'status' | 'statusDate' | 'caId' | 'caHashId' | 'registrationCaId' | 'fullName' | 'distributionModality' | 'totalPersonsCovered' | 'currency' | 'entitlementQuantity' | 'deliveredQuantity' | 'deliveryDate' | 'deliveryType' | 'entitlementCardIssueDate' | 'entitlementCardNumber' | 'transactionReferenceId'>
+      & { household: (
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'unicefId' | 'id' | 'size'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'phoneNo' | 'phoneNoAlternative'>
+        ) }
+      ), targetPopulation: (
+        { __typename?: 'TargetPopulationNode' }
+        & Pick<TargetPopulationNode, 'id' | 'name'>
+      ), cashPlan: Maybe<(
+        { __typename?: 'CashPlanNode' }
+        & Pick<CashPlanNode, 'id' | 'caId'>
+        & { program: (
+          { __typename?: 'ProgramNode' }
+          & Pick<ProgramNode, 'id' | 'name'>
+        ), verifications: (
+          { __typename?: 'CashPlanPaymentVerificationNodeConnection' }
+          & { edges: Array<Maybe<(
+            { __typename?: 'CashPlanPaymentVerificationNodeEdge' }
+            & { node: Maybe<(
+              { __typename?: 'CashPlanPaymentVerificationNode' }
+              & Pick<CashPlanPaymentVerificationNode, 'id' | 'status' | 'verificationMethod'>
+            )> }
+          )>> }
+        ) }
+      )>, serviceProvider: (
+        { __typename?: 'ServiceProviderNode' }
+        & Pick<ServiceProviderNode, 'id' | 'fullName' | 'shortName'>
+      ) }
+    ) }
+  )> }
+);
+
+export type ProgramQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ProgramQuery = (
+  { __typename?: 'Query' }
+  & { program: Maybe<(
+    { __typename?: 'ProgramNode' }
+    & Pick<ProgramNode, 'id' | 'name' | 'startDate' | 'endDate' | 'status' | 'caId' | 'caHashId' | 'description' | 'budget' | 'frequencyOfPayments' | 'cashPlus' | 'populationGoal' | 'scope' | 'sector' | 'totalNumberOfHouseholds' | 'administrativeAreasOfImplementation' | 'individualDataNeeded' | 'version'>
+  )> }
+);
+
+export type ProgrammeChoiceDataQueryVariables = {};
+
+
+export type ProgrammeChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { programFrequencyOfPaymentsChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programScopeChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programSectorChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, programStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type ReportQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ReportQuery = (
+  { __typename?: 'Query' }
+  & { report: Maybe<(
+    { __typename?: 'ReportNode' }
+    & Pick<ReportNode, 'id' | 'status' | 'reportType' | 'createdAt' | 'dateFrom' | 'dateTo' | 'fileUrl' | 'numberOfRecords'>
+    & { createdBy: (
+      { __typename?: 'UserNode' }
+      & Pick<UserNode, 'firstName' | 'lastName'>
+    ), adminArea: (
+      { __typename?: 'AdminAreaNodeConnection' }
+      & { edges: Array<Maybe<(
+        { __typename?: 'AdminAreaNodeEdge' }
+        & { node: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'title'>
+        )> }
+      )>> }
+    ), program: Maybe<(
+      { __typename?: 'ProgramNode' }
+      & Pick<ProgramNode, 'name'>
+    )> }
+  )> }
+);
+
+export type ReportChoiceDataQueryVariables = {};
+
+
+export type ReportChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { reportStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, reportTypesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type SampleSizeQueryVariables = {
+  input: GetCashplanVerificationSampleSizeInput
+};
+
+
+export type SampleSizeQuery = (
+  { __typename?: 'Query' }
+  & { sampleSize: Maybe<(
+    { __typename?: 'GetCashplanVerificationSampleSizeObject' }
+    & Pick<GetCashplanVerificationSampleSizeObject, 'paymentRecordCount' | 'sampleSize'>
+  )> }
+);
+
+export type TargetPopulationQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type TargetPopulationQuery = (
+  { __typename?: 'Query' }
+  & { targetPopulation: Maybe<(
+    { __typename?: 'TargetPopulationNode' }
+    & TargetPopulationDetailedFragment
+  )> }
+);
+
+export type UserChoiceDataQueryVariables = {};
+
+
+export type UserChoiceDataQuery = (
+  { __typename?: 'Query' }
+  & { userRolesChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, userStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>>, userPartnerChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type AllImportedHouseholdsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllImportedHouseholdsQuery = (
+  { __typename?: 'Query' }
+  & { allImportedHouseholds: Maybe<(
+    { __typename?: 'ImportedHouseholdNodeConnection' }
+    & Pick<ImportedHouseholdNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ImportedHouseholdNodeEdge' }
+      & Pick<ImportedHouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ImportedHouseholdNode' }
+        & ImportedHouseholdMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllImportedIndividualsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  rdiId?: Maybe<Scalars['String']>,
+  household?: Maybe<Scalars['ID']>,
+  orderBy?: Maybe<Scalars['String']>,
+  duplicatesOnly?: Maybe<Scalars['Boolean']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllImportedIndividualsQuery = (
+  { __typename?: 'Query' }
+  & { allImportedIndividuals: Maybe<(
+    { __typename?: 'ImportedIndividualNodeConnection' }
+    & Pick<ImportedIndividualNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'ImportedIndividualNodeEdge' }
+      & Pick<ImportedIndividualNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'ImportedIndividualNode' }
+        & ImportedIndividualMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllKoboProjectsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type AllKoboProjectsQuery = (
+  { __typename?: 'Query' }
+  & { allKoboProjects: Maybe<(
+    { __typename?: 'KoboAssetObjectConnection' }
+    & Pick<KoboAssetObjectConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'KoboAssetObjectEdge' }
+      & Pick<KoboAssetObjectEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'KoboAssetObject' }
+        & Pick<KoboAssetObject, 'name' | 'id'>
+      )> }
+    )>> }
+  )> }
+);
+
+export type AllRegistrationDataImportsQueryVariables = {
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  name_Icontains?: Maybe<Scalars['String']>,
+  importedBy_Id?: Maybe<Scalars['UUID']>,
+  status?: Maybe<Scalars['String']>,
+  importDate?: Maybe<Scalars['Date']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type AllRegistrationDataImportsQuery = (
+  { __typename?: 'Query' }
+  & { allRegistrationDataImports: Maybe<(
+    { __typename?: 'RegistrationDataImportNodeConnection' }
+    & Pick<RegistrationDataImportNodeConnection, 'totalCount'>
+    & { pageInfo: (
+      { __typename?: 'PageInfo' }
+      & Pick<PageInfo, 'hasNextPage' | 'hasPreviousPage' | 'startCursor' | 'endCursor'>
+    ), edges: Array<Maybe<(
+      { __typename?: 'RegistrationDataImportNodeEdge' }
+      & Pick<RegistrationDataImportNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'RegistrationDataImportNode' }
+        & RegistrationMinimalFragment
+      )> }
+    )>> }
+  )> }
+);
+
+export type CreateRegistrationKoboImportMutationVariables = {
+  registrationDataImportData: RegistrationKoboImportMutationInput
+};
+
+
+export type CreateRegistrationKoboImportMutation = (
+  { __typename?: 'Mutations' }
+  & { registrationKoboImport: Maybe<(
+    { __typename?: 'RegistrationKoboImportMutation' }
+    & Pick<RegistrationKoboImportMutation, 'validationErrors'>
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+    )> }
+  )> }
+);
+
+export type CreateRegistrationXlsxImportMutationVariables = {
+  registrationDataImportData: RegistrationXlsxImportMutationInput
+};
+
+
+export type CreateRegistrationXlsxImportMutation = (
+  { __typename?: 'Mutations' }
+  & { registrationXlsxImport: Maybe<(
+    { __typename?: 'RegistrationXlsxImportMutation' }
+    & Pick<RegistrationXlsxImportMutation, 'validationErrors'>
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & Pick<RegistrationDataImportNode, 'id' | 'name' | 'dataSource' | 'datahubId'>
+    )> }
+  )> }
+);
+
+export type ImportedHouseholdQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedHouseholdQuery = (
+  { __typename?: 'Query' }
+  & { importedHousehold: Maybe<(
+    { __typename?: 'ImportedHouseholdNode' }
+    & ImportedHouseholdDetailedFragment
+  )> }
+);
+
+export type ImportedIndividualQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type ImportedIndividualQuery = (
+  { __typename?: 'Query' }
+  & { importedIndividual: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & ImportedIndividualDetailedFragment
+  )> }
+);
+
+export type MergeRdiMutationVariables = {
+  id: Scalars['ID']
+};
+
+
+export type MergeRdiMutation = (
+  { __typename?: 'Mutations' }
+  & { mergeRegistrationDataImport: Maybe<(
+    { __typename?: 'MergeRegistrationDataImportMutation' }
+    & { registrationDataImport: Maybe<(
+      { __typename?: 'RegistrationDataImportNode' }
+      & RegistrationDetailedFragment
+    )> }
+  )> }
+);
+
+export type RegistrationChoicesQueryVariables = {};
+
+
+export type RegistrationChoicesQuery = (
+  { __typename?: 'Query' }
+  & { registrationDataStatusChoices: Maybe<Array<Maybe<(
+    { __typename?: 'ChoiceObject' }
+    & Pick<ChoiceObject, 'name' | 'value'>
+  )>>> }
+);
+
+export type RegistrationDataImportQueryVariables = {
+  id: Scalars['ID']
+};
+
+
+export type RegistrationDataImportQuery = (
+  { __typename?: 'Query' }
+  & { registrationDataImport: Maybe<(
+    { __typename?: 'RegistrationDataImportNode' }
+    & RegistrationDetailedFragment
+  )> }
+);
+
+export type RegistrationMinimalFragment = (
+  { __typename?: 'RegistrationDataImportNode' }
+  & Pick<RegistrationDataImportNode, 'id' | 'createdAt' | 'name' | 'status' | 'importDate' | 'dataSource' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+  & { importedBy: (
+    { __typename?: 'UserNode' }
+    & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
+  ) }
+);
+
+export type RegistrationDetailedFragment = (
+  { __typename?: 'RegistrationDataImportNode' }
+  & Pick<RegistrationDataImportNode, 'numberOfIndividuals' | 'datahubId' | 'errorMessage'>
+  & { batchDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, batchPossibleDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, batchUniqueCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordUniqueCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )>, goldenRecordPossibleDuplicatesCountAndPercentage: Maybe<(
+    { __typename?: 'CountAndPercentageNode' }
+    & Pick<CountAndPercentageNode, 'count' | 'percentage'>
+  )> }
+  & RegistrationMinimalFragment
+);
+
+export type ImportedHouseholdMinimalFragment = (
+  { __typename?: 'ImportedHouseholdNode' }
+  & Pick<ImportedHouseholdNode, 'id' | 'size' | 'admin1' | 'admin1Title' | 'admin2' | 'admin2Title' | 'flexFields' | 'deviceid' | 'start' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'hasDuplicates' | 'fchildHoh' | 'childHoh'>
+  & { headOfHousehold: Maybe<(
+    { __typename?: 'ImportedIndividualNode' }
+    & Pick<ImportedIndividualNode, 'id' | 'fullName'>
+  )> }
+);
+
+export type ImportedHouseholdDetailedFragment = (
+  { __typename?: 'ImportedHouseholdNode' }
+  & Pick<ImportedHouseholdNode, 'residenceStatus' | 'country' | 'countryOrigin'>
+  & { registrationDataImport: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
+  ) }
+  & ImportedHouseholdMinimalFragment
+);
+
+export type ImportedIndividualMinimalFragment = (
+  { __typename?: 'ImportedIndividualNode' }
+  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, deduplicationBatchResults: Maybe<Array<Maybe<(
+    { __typename?: 'DeduplicationResultNode' }
+    & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
+  )>>>, registrationDataImport: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId'>
+  ) }
+);
+
+export type ImportedIndividualDetailedFragment = (
+  { __typename?: 'ImportedIndividualNode' }
+  & Pick<ImportedIndividualNode, 'givenName' | 'familyName' | 'middleName' | 'estimatedBirthDate' | 'maritalStatus' | 'workStatus' | 'pregnant' | 'flexFields' | 'observedDisability' | 'seeingDisability' | 'hearingDisability' | 'physicalDisability' | 'memoryDisability' | 'selfcareDisability' | 'commsDisability' | 'disability' | 'role' | 'relationship' | 'phoneNo' | 'phoneNoAlternative'>
+  & { documents: (
+    { __typename?: 'ImportedDocumentNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ImportedDocumentNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ImportedDocumentNode' }
+        & Pick<ImportedDocumentNode, 'id' | 'country' | 'documentNumber'>
+        & { type: (
+          { __typename?: 'ImportedDocumentTypeNode' }
+          & Pick<ImportedDocumentTypeNode, 'label' | 'country'>
+        ) }
+      )> }
+    )>> }
+  ), identities: Array<(
+    { __typename?: 'ImportedIndividualIdentityNode' }
+    & Pick<ImportedIndividualIdentityNode, 'id' | 'documentNumber' | 'type' | 'country'>
+  )>, household: Maybe<(
+    { __typename?: 'ImportedHouseholdNode' }
+    & Pick<ImportedHouseholdNode, 'id' | 'admin1' | 'admin2' | 'address'>
+  )>, registrationDataImport: (
+    { __typename?: 'RegistrationDataImportDatahubNode' }
+    & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
+  ) }
+  & ImportedIndividualMinimalFragment
+);
+
+export type SaveKoboImportDataMutationVariables = {
+  businessAreaSlug: Scalars['String'],
+  projectId: Scalars['Upload']
+};
+
+
+export type SaveKoboImportDataMutation = (
+  { __typename?: 'Mutations' }
+  & { saveKoboImportData: Maybe<(
+    { __typename?: 'SaveKoboProjectImportDataMutation' }
+    & { importData: Maybe<(
+      { __typename?: 'ImportDataNode' }
+      & Pick<ImportDataNode, 'id' | 'numberOfHouseholds' | 'numberOfIndividuals'>
+    )>, errors: Maybe<Array<Maybe<(
+      { __typename?: 'KoboErrorNode' }
+      & Pick<KoboErrorNode, 'header' | 'message'>
+    )>>> }
+  )> }
+);
+
+export type UploadImportDataXlsxFileMutationVariables = {
+  file: Scalars['Upload'],
+  businessAreaSlug: Scalars['String']
+};
+
+
+export type UploadImportDataXlsxFileMutation = (
+  { __typename?: 'Mutations' }
+  & { uploadImportDataXlsxFile: Maybe<(
+    { __typename?: 'UploadImportDataXLSXFile' }
+    & { errors: Maybe<Array<Maybe<(
+      { __typename?: 'XlsxRowErrorNode' }
+      & Pick<XlsxRowErrorNode, 'header' | 'message' | 'rowNumber'>
+    )>>>, importData: Maybe<(
+      { __typename?: 'ImportDataNode' }
+      & Pick<ImportDataNode, 'id' | 'numberOfIndividuals' | 'numberOfHouseholds'>
+      & { registrationDataImport: Maybe<(
+        { __typename?: 'RegistrationDataImportDatahubNode' }
+        & Pick<RegistrationDataImportDatahubNode, 'id'>
+      )> }
+    )> }
+  )> }
+);
+
+export type AllFieldsAttributesQueryVariables = {};
+
+
+export type AllFieldsAttributesQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'id' | 'name' | 'labelEn' | 'associatedWith' | 'isFlexField'>
+  )>>> }
+);
+
+export type CandidateHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID'],
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type CandidateHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { candidateHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
+        ), adminArea: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'id' | 'title'>
+        )>, selection: Maybe<(
+          { __typename?: 'HouseholdSelection' }
+          & Pick<HouseholdSelection, 'vulnerabilityScore'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type FinalHouseholdsListByTargetingCriteriaQueryVariables = {
+  targetPopulation: Scalars['ID'],
+  targetingCriteria?: Maybe<TargetingCriteriaObjectType>,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type FinalHouseholdsListByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { finalHouseholdsListByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
+        ), adminArea: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'id' | 'title'>
+        )>, selection: Maybe<(
+          { __typename?: 'HouseholdSelection' }
+          & Pick<HouseholdSelection, 'vulnerabilityScore'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type FlexFieldsQueryVariables = {};
+
+
+export type FlexFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allGroupsWithFields: Maybe<Array<Maybe<(
+    { __typename?: 'GroupAttributeNode' }
+    & Pick<GroupAttributeNode, 'name' | 'labelEn'>
+    & { flexAttributes: Maybe<Array<Maybe<(
+      { __typename?: 'FieldAttributeNode' }
+      & Pick<FieldAttributeNode, 'id' | 'labelEn' | 'associatedWith'>
+    )>>> }
+  )>>> }
+);
+
+export type GoldenRecordByTargetingCriteriaQueryVariables = {
+  targetingCriteria: TargetingCriteriaObjectType,
+  first?: Maybe<Scalars['Int']>,
+  after?: Maybe<Scalars['String']>,
+  before?: Maybe<Scalars['String']>,
+  last?: Maybe<Scalars['Int']>,
+  orderBy?: Maybe<Scalars['String']>,
+  program: Scalars['ID'],
+  businessArea?: Maybe<Scalars['String']>
+};
+
+
+export type GoldenRecordByTargetingCriteriaQuery = (
+  { __typename?: 'Query' }
+  & { goldenRecordByTargetingCriteria: Maybe<(
+    { __typename?: 'HouseholdNodeConnection' }
+    & Pick<HouseholdNodeConnection, 'totalCount' | 'edgeCount'>
+    & { edges: Array<Maybe<(
+      { __typename?: 'HouseholdNodeEdge' }
+      & Pick<HouseholdNodeEdge, 'cursor'>
+      & { node: Maybe<(
+        { __typename?: 'HouseholdNode' }
+        & Pick<HouseholdNode, 'id' | 'unicefId' | 'size' | 'updatedAt' | 'address'>
+        & { headOfHousehold: (
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'givenName' | 'familyName'>
+        ), adminArea: Maybe<(
+          { __typename?: 'AdminAreaNode' }
+          & Pick<AdminAreaNode, 'id' | 'title'>
+        )> }
+      )> }
+    )>> }
+  )> }
+);
+
+export type ImportedIndividualFieldsQueryVariables = {};
+
+
+export type ImportedIndividualFieldsQuery = (
+  { __typename?: 'Query' }
+  & { allFieldsAttributes: Maybe<Array<Maybe<(
+    { __typename?: 'FieldAttributeNode' }
+    & Pick<FieldAttributeNode, 'isFlexField' | 'id' | 'type' | 'name' | 'associatedWith' | 'labelEn' | 'hint'>
+    & { labels: Maybe<Array<Maybe<(
+      { __typename?: 'LabelNode' }
+      & Pick<LabelNode, 'language' | 'label'>
+    )>>>, choices: Maybe<Array<Maybe<(
+      { __typename?: 'CoreFieldChoiceObject' }
+      & Pick<CoreFieldChoiceObject, 'labelEn' | 'value' | 'admin' | 'listName'>
+      & { labels: Maybe<Array<Maybe<(
+        { __typename?: 'LabelNode' }
+        & Pick<LabelNode, 'label' | 'language'>
+      )>>> }
+    )>>> }
+  )>>> }
+);
+
+export const HouseholdMinimalFragmentDoc = gql`
+    fragment householdMinimal on HouseholdNode {
+  id
+  createdAt
+  residenceStatus
+  size
+  totalCashReceived
+  firstRegistrationDate
+  lastRegistrationDate
+  status
+  sanctionListPossibleMatch
+  sanctionListConfirmedMatch
+  hasDuplicates
+  unicefId
+  flexFields
+  unhcrId
+  geopoint
+  village
+  admin1 {
+    id
+    title
+    level
+    pCode
+  }
+  admin2 {
+    id
+    title
+    level
+    pCode
+  }
+  headOfHousehold {
+    id
+    fullName
+  }
+  address
+  individuals {
+    totalCount
+  }
+  programs {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export const IndividualMinimalFragmentDoc = gql`
+    fragment individualMinimal on IndividualNode {
+  id
+  lastRegistrationDate
+  createdAt
+  updatedAt
+  fullName
+  sex
+  unicefId
+  birthDate
+  maritalStatus
+  phoneNo
+  sanctionListPossibleMatch
+  sanctionListConfirmedMatch
+  deduplicationGoldenRecordStatus
+  sanctionListLastCheck
+  role
+  relationship
+  status
+  documents {
+    edges {
+      node {
+        id
+        country
+        documentNumber
+        type {
+          country
+          label
+        }
+      }
+    }
+  }
+  identities {
+    id
+    agency {
+      country
+      label
+    }
+    number
+  }
+  household {
+    id
+    unicefId
+    status
+    admin1 {
+      id
+      title
+      level
+      pCode
+    }
+    admin2 {
+      id
+      title
+      level
+      pCode
+    }
+    programs {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+    `;
+export const HouseholdDetailedFragmentDoc = gql`
+    fragment householdDetailed on HouseholdNode {
+  ...householdMinimal
+  countryOrigin
+  country
+  femaleAgeGroup05Count
+  femaleAgeGroup611Count
+  femaleAgeGroup1217Count
+  femaleAgeGroup1859Count
+  femaleAgeGroup60Count
+  pregnantCount
+  maleAgeGroup05Count
+  maleAgeGroup611Count
+  maleAgeGroup1217Count
+  maleAgeGroup1859Count
+  maleAgeGroup60Count
+  femaleAgeGroup05DisabledCount
+  femaleAgeGroup611DisabledCount
+  femaleAgeGroup1217DisabledCount
+  femaleAgeGroup1859DisabledCount
+  femaleAgeGroup60DisabledCount
+  maleAgeGroup05DisabledCount
+  maleAgeGroup611DisabledCount
+  maleAgeGroup1217DisabledCount
+  maleAgeGroup1859DisabledCount
+  maleAgeGroup60DisabledCount
+  fchildHoh
+  childHoh
+  start
+  deviceid
+  orgNameEnumerator
+  returnee
+  address
+  nameEnumerator
+  lastSyncAt
+  consentSharing
+  orgEnumerator
+  updatedAt
+  consent
+  individuals {
+    totalCount
+    edges {
+      node {
+        ...individualMinimal
+        birthDate
+        relationship
+        identities {
+          id
+          number
+          type
+        }
+      }
+    }
+  }
+  programs {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+  registrationDataImport {
+    name
+    dataSource
+    importDate
+    importedBy {
+      firstName
+      lastName
+      email
+      username
+    }
+  }
+  paymentRecords {
+    edges {
+      node {
+        id
+        fullName
+        cashPlan {
+          id
+          totalPersonsCovered
+          program {
+            id
+            name
+          }
+          totalDeliveredQuantity
+          assistanceMeasurement
+        }
+      }
+    }
+  }
+  flexFields
+}
+    ${HouseholdMinimalFragmentDoc}
+${IndividualMinimalFragmentDoc}`;
+export const IndividualDetailedFragmentDoc = gql`
+    fragment individualDetailed on IndividualNode {
+  ...individualMinimal
+  givenName
+  familyName
+  estimatedBirthDate
+  pregnant
+  status
+  lastSyncAt
+  deduplicationBatchStatus
+  disability
+  importedIndividualId
+  commsDisability
+  firstRegistrationDate
+  whoAnswersAltPhone
+  memoryDisability
+  middleName
+  whoAnswersPhone
+  phoneNoAlternative
+  hearingDisability
+  observedDisability
+  individualId
+  seeingDisability
+  physicalDisability
+  selfcareDisability
+  photo
+  workStatus
+  documents {
+    edges {
+      node {
+        id
+        country
+        type {
+          country
+          label
+        }
+        documentNumber
+      }
+    }
+  }
+  identities {
+    id
+    agency {
+      country
+      label
+    }
+    number
+    type
+    country
+  }
+  enrolledInNutritionProgramme
+  administrationOfRutf
+  identities {
+    number
+    type
+    country
+  }
+  household {
+    status
+    id
+    address
+    countryOrigin
+    adminArea {
+      id
+      title
+      level
+    }
+  }
+  role
+  relationship
+  headingHousehold {
+    id
+    headOfHousehold {
+      id
+    }
+  }
+  flexFields
+}
+    ${IndividualMinimalFragmentDoc}`;
+export const TargetPopulationMinimalFragmentDoc = gql`
+    fragment targetPopulationMinimal on TargetPopulationNode {
+  id
+  name
+  status
+  createdAt
+  updatedAt
+  candidateListTotalHouseholds
+  finalListTotalHouseholds
+  program {
+    id
+    name
+  }
+  createdBy {
+    id
+    firstName
+    lastName
+  }
+}
+    `;
+export const TargetPopulationDetailedFragmentDoc = gql`
+    fragment targetPopulationDetailed on TargetPopulationNode {
+  id
+  name
+  status
+  candidateListTotalHouseholds
+  candidateListTotalIndividuals
+  finalListTotalHouseholds
+  finalListTotalIndividuals
+  caHashId
+  steficonRule {
+    id
+    name
+  }
+  vulnerabilityScoreMin
+  vulnerabilityScoreMax
+  approvedAt
+  finalizedAt
+  finalizedBy {
+    id
+    firstName
+    lastName
+  }
+  program {
+    id
+    name
+    startDate
+    endDate
+    status
+    caId
+    caHashId
+    description
+    budget
+    frequencyOfPayments
+    populationGoal
+    sector
+    totalNumberOfHouseholds
+    individualDataNeeded
+  }
+  createdBy {
+    id
+    firstName
+    lastName
+  }
+  candidateListTargetingCriteria {
+    targetPopulationCandidate {
+      createdBy {
+        id
+        firstName
+        lastName
+      }
+    }
+    rules {
+      id
+      individualsFiltersBlocks {
+        individualBlockFilters {
+          fieldName
+          isFlexField
+          arguments
+          comparisionMethod
+          fieldAttribute {
+            name
+            labelEn
+            type
+            choices {
+              value
+              labelEn
+            }
+          }
+        }
+      }
+      filters {
+        fieldName
+        isFlexField
+        arguments
+        comparisionMethod
+        fieldAttribute {
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+        }
+      }
+    }
+  }
+  finalListTargetingCriteria {
+    targetPopulationFinal {
+      createdBy {
+        id
+        firstName
+        lastName
+      }
+    }
+    rules {
+      id
+      filters {
+        fieldName
+        isFlexField
+        arguments
+        comparisionMethod
+        fieldAttribute {
+          name
+          labelEn
+          type
+          choices {
+            value
+            labelEn
+          }
+        }
+      }
+    }
+  }
+  candidateStats {
+    childMale
+    childFemale
+    adultMale
+    adultFemale
+    allHouseholds
+    allIndividuals
+  }
+  finalStats {
+    childMale
+    childFemale
+    adultMale
+    adultFemale
+  }
+}
+    `;
+export const RegistrationMinimalFragmentDoc = gql`
+    fragment registrationMinimal on RegistrationDataImportNode {
+  id
+  createdAt
+  name
+  status
+  importDate
+  importedBy {
+    id
+    firstName
+    lastName
+    email
+  }
+  dataSource
+  numberOfHouseholds
+  numberOfIndividuals
+}
+    `;
+export const RegistrationDetailedFragmentDoc = gql`
+    fragment registrationDetailed on RegistrationDataImportNode {
+  ...registrationMinimal
+  numberOfIndividuals
+  datahubId
+  errorMessage
+  batchDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  batchPossibleDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  batchUniqueCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordUniqueCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+  goldenRecordPossibleDuplicatesCountAndPercentage {
+    count
+    percentage
+  }
+}
+    ${RegistrationMinimalFragmentDoc}`;
+export const ImportedHouseholdMinimalFragmentDoc = gql`
+    fragment importedHouseholdMinimal on ImportedHouseholdNode {
+  id
+  headOfHousehold {
+    id
+    fullName
+  }
+  size
+  admin1
+  admin1Title
+  admin2
+  admin2Title
+  flexFields
+  deviceid
+  start
+  firstRegistrationDate
+  lastRegistrationDate
+  hasDuplicates
+  fchildHoh
+  childHoh
+}
+    `;
+export const ImportedHouseholdDetailedFragmentDoc = gql`
+    fragment importedHouseholdDetailed on ImportedHouseholdNode {
+  ...importedHouseholdMinimal
+  residenceStatus
+  country
+  countryOrigin
+  registrationDataImport {
+    id
+    hctId
+    name
+  }
+}
+    ${ImportedHouseholdMinimalFragmentDoc}`;
+export const ImportedIndividualMinimalFragmentDoc = gql`
+    fragment importedIndividualMinimal on ImportedIndividualNode {
+  id
+  fullName
+  birthDate
+  sex
+  role
+  relationship
+  deduplicationBatchStatus
+  deduplicationGoldenRecordStatus
+  deduplicationGoldenRecordResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  deduplicationBatchResults {
+    hitId
+    fullName
+    score
+    proximityToScore
+    age
+    location
+  }
+  registrationDataImport {
+    id
+    hctId
+  }
+}
+    `;
+export const ImportedIndividualDetailedFragmentDoc = gql`
+    fragment importedIndividualDetailed on ImportedIndividualNode {
+  ...importedIndividualMinimal
+  givenName
+  familyName
+  middleName
+  estimatedBirthDate
+  maritalStatus
+  workStatus
+  pregnant
+  flexFields
+  observedDisability
+  seeingDisability
+  hearingDisability
+  physicalDisability
+  memoryDisability
+  selfcareDisability
+  commsDisability
+  disability
+  documents {
+    edges {
+      node {
+        id
+        country
+        type {
+          label
+          country
+        }
+        documentNumber
+      }
+    }
+  }
+  identities {
+    id
+    documentNumber
+    type
+    country
+  }
+  role
+  relationship
+  household {
+    id
+    admin1
+    admin2
+    address
+  }
+  registrationDataImport {
+    id
+    hctId
+    name
+  }
+  phoneNo
+  phoneNoAlternative
+}
+    ${ImportedIndividualMinimalFragmentDoc}`;
+export const ActivateCashPlanPaymentVerificationDocument = gql`
+    mutation ActivateCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  activateCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      status
+      statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            activationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type ActivateCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
+export type ActivateCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const ActivateCashPlanPaymentVerificationComponent = (props: ActivateCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables> mutation={ActivateCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type ActivateCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withActivateCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ActivateCashPlanPaymentVerificationMutation,
+  ActivateCashPlanPaymentVerificationMutationVariables,
+  ActivateCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables, ActivateCashPlanPaymentVerificationProps<TChildProps>>(ActivateCashPlanPaymentVerificationDocument, {
+      alias: 'activateCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useActivateCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useActivateCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useActivateCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [activateCashPlanPaymentVerificationMutation, { data, loading, error }] = useActivateCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useActivateCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>(ActivateCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type ActivateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useActivateCashPlanPaymentVerificationMutation>;
+export type ActivateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<ActivateCashPlanPaymentVerificationMutation>;
+export type ActivateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ActivateCashPlanPaymentVerificationMutation, ActivateCashPlanPaymentVerificationMutationVariables>;
+export const ApproveAddIndividualDataChangeDocument = gql`
+    mutation ApproveAddIndividualDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveAddIndividual(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveAddIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
+export type ApproveAddIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveAddIndividualDataChangeComponent = (props: ApproveAddIndividualDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables> mutation={ApproveAddIndividualDataChangeDocument} {...props} />
+    );
+    
+export type ApproveAddIndividualDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables> & TChildProps;
+export function withApproveAddIndividualDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveAddIndividualDataChangeMutation,
+  ApproveAddIndividualDataChangeMutationVariables,
+  ApproveAddIndividualDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables, ApproveAddIndividualDataChangeProps<TChildProps>>(ApproveAddIndividualDataChangeDocument, {
+      alias: 'approveAddIndividualDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveAddIndividualDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveAddIndividualDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveAddIndividualDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveAddIndividualDataChangeMutation, { data, loading, error }] = useApproveAddIndividualDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveAddIndividualDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>(ApproveAddIndividualDataChangeDocument, baseOptions);
+      }
+export type ApproveAddIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveAddIndividualDataChangeMutation>;
+export type ApproveAddIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveAddIndividualDataChangeMutation>;
+export type ApproveAddIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveAddIndividualDataChangeMutation, ApproveAddIndividualDataChangeMutationVariables>;
+export const ApproveDeleteIndividualDataChangeDocument = gql`
+    mutation ApproveDeleteIndividualDataChange($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveDeleteIndividual(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveDeleteIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
+export type ApproveDeleteIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveDeleteIndividualDataChangeComponent = (props: ApproveDeleteIndividualDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables> mutation={ApproveDeleteIndividualDataChangeDocument} {...props} />
+    );
+    
+export type ApproveDeleteIndividualDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables> & TChildProps;
+export function withApproveDeleteIndividualDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveDeleteIndividualDataChangeMutation,
+  ApproveDeleteIndividualDataChangeMutationVariables,
+  ApproveDeleteIndividualDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables, ApproveDeleteIndividualDataChangeProps<TChildProps>>(ApproveDeleteIndividualDataChangeDocument, {
+      alias: 'approveDeleteIndividualDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveDeleteIndividualDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveDeleteIndividualDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveDeleteIndividualDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveDeleteIndividualDataChangeMutation, { data, loading, error }] = useApproveDeleteIndividualDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveDeleteIndividualDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>(ApproveDeleteIndividualDataChangeDocument, baseOptions);
+      }
+export type ApproveDeleteIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveDeleteIndividualDataChangeMutation>;
+export type ApproveDeleteIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveDeleteIndividualDataChangeMutation>;
+export type ApproveDeleteIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveDeleteIndividualDataChangeMutation, ApproveDeleteIndividualDataChangeMutationVariables>;
+export const ApproveHouseholdDataChangeDocument = gql`
+    mutation ApproveHouseholdDataChange($grievanceTicketId: ID!, $householdApproveData: JSONString, $flexFieldsApproveData: JSONString) {
+  approveHouseholdDataChange(grievanceTicketId: $grievanceTicketId, householdApproveData: $householdApproveData, flexFieldsApproveData: $flexFieldsApproveData) {
+    grievanceTicket {
+      id
+      status
+      householdDataUpdateTicketDetails {
+        id
+        household {
+          ...householdDetailed
+        }
+        householdData
+      }
+    }
+  }
+}
+    ${HouseholdDetailedFragmentDoc}`;
+export type ApproveHouseholdDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
+export type ApproveHouseholdDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveHouseholdDataChangeComponent = (props: ApproveHouseholdDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables> mutation={ApproveHouseholdDataChangeDocument} {...props} />
+    );
+    
+export type ApproveHouseholdDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables> & TChildProps;
+export function withApproveHouseholdDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveHouseholdDataChangeMutation,
+  ApproveHouseholdDataChangeMutationVariables,
+  ApproveHouseholdDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables, ApproveHouseholdDataChangeProps<TChildProps>>(ApproveHouseholdDataChangeDocument, {
+      alias: 'approveHouseholdDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveHouseholdDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveHouseholdDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveHouseholdDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveHouseholdDataChangeMutation, { data, loading, error }] = useApproveHouseholdDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      householdApproveData: // value for 'householdApproveData'
+ *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
+ *   },
+ * });
+ */
+export function useApproveHouseholdDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>(ApproveHouseholdDataChangeDocument, baseOptions);
+      }
+export type ApproveHouseholdDataChangeMutationHookResult = ReturnType<typeof useApproveHouseholdDataChangeMutation>;
+export type ApproveHouseholdDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveHouseholdDataChangeMutation>;
+export type ApproveHouseholdDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveHouseholdDataChangeMutation, ApproveHouseholdDataChangeMutationVariables>;
+export const ApproveIndividualDataChangeDocument = gql`
+    mutation ApproveIndividualDataChange($grievanceTicketId: ID!, $individualApproveData: JSONString, $flexFieldsApproveData: JSONString, $approvedDocumentsToCreate: [Int], $approvedDocumentsToRemove: [Int], $approvedIdentitiesToCreate: [Int], $approvedIdentitiesToRemove: [Int]) {
+  approveIndividualDataChange(grievanceTicketId: $grievanceTicketId, individualApproveData: $individualApproveData, flexFieldsApproveData: $flexFieldsApproveData, approvedDocumentsToCreate: $approvedDocumentsToCreate, approvedDocumentsToRemove: $approvedDocumentsToRemove, approvedIdentitiesToCreate: $approvedIdentitiesToCreate, approvedIdentitiesToRemove: $approvedIdentitiesToRemove) {
+    grievanceTicket {
+      id
+      status
+      individualDataUpdateTicketDetails {
+        id
+        individual {
+          ...individualDetailed
+        }
+        individualData
+      }
+    }
+  }
+}
+    ${IndividualDetailedFragmentDoc}`;
+export type ApproveIndividualDataChangeMutationFn = ApolloReactCommon.MutationFunction<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
+export type ApproveIndividualDataChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>, 'mutation'>;
+
+    export const ApproveIndividualDataChangeComponent = (props: ApproveIndividualDataChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables> mutation={ApproveIndividualDataChangeDocument} {...props} />
+    );
+    
+export type ApproveIndividualDataChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables> & TChildProps;
+export function withApproveIndividualDataChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveIndividualDataChangeMutation,
+  ApproveIndividualDataChangeMutationVariables,
+  ApproveIndividualDataChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables, ApproveIndividualDataChangeProps<TChildProps>>(ApproveIndividualDataChangeDocument, {
+      alias: 'approveIndividualDataChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveIndividualDataChangeMutation__
+ *
+ * To run a mutation, you first call `useApproveIndividualDataChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveIndividualDataChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveIndividualDataChangeMutation, { data, loading, error }] = useApproveIndividualDataChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      individualApproveData: // value for 'individualApproveData'
+ *      flexFieldsApproveData: // value for 'flexFieldsApproveData'
+ *      approvedDocumentsToCreate: // value for 'approvedDocumentsToCreate'
+ *      approvedDocumentsToRemove: // value for 'approvedDocumentsToRemove'
+ *      approvedIdentitiesToCreate: // value for 'approvedIdentitiesToCreate'
+ *      approvedIdentitiesToRemove: // value for 'approvedIdentitiesToRemove'
+ *   },
+ * });
+ */
+export function useApproveIndividualDataChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>(ApproveIndividualDataChangeDocument, baseOptions);
+      }
+export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof useApproveIndividualDataChangeMutation>;
+export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
+export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
+export const ApproveNeedsAdjudicationDocument = gql`
+    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+  approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveNeedsAdjudicationMutationFn = ApolloReactCommon.MutationFunction<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
+export type ApproveNeedsAdjudicationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>, 'mutation'>;
+
+    export const ApproveNeedsAdjudicationComponent = (props: ApproveNeedsAdjudicationComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables> mutation={ApproveNeedsAdjudicationDocument} {...props} />
+    );
+    
+export type ApproveNeedsAdjudicationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables> & TChildProps;
+export function withApproveNeedsAdjudication<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveNeedsAdjudicationMutation,
+  ApproveNeedsAdjudicationMutationVariables,
+  ApproveNeedsAdjudicationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables, ApproveNeedsAdjudicationProps<TChildProps>>(ApproveNeedsAdjudicationDocument, {
+      alias: 'approveNeedsAdjudication',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveNeedsAdjudicationMutation__
+ *
+ * To run a mutation, you first call `useApproveNeedsAdjudicationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveNeedsAdjudicationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveNeedsAdjudicationMutation, { data, loading, error }] = useApproveNeedsAdjudicationMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      selectedIndividualId: // value for 'selectedIndividualId'
+ *   },
+ * });
+ */
+export function useApproveNeedsAdjudicationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>(ApproveNeedsAdjudicationDocument, baseOptions);
+      }
+export type ApproveNeedsAdjudicationMutationHookResult = ReturnType<typeof useApproveNeedsAdjudicationMutation>;
+export type ApproveNeedsAdjudicationMutationResult = ApolloReactCommon.MutationResult<ApproveNeedsAdjudicationMutation>;
+export type ApproveNeedsAdjudicationMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveNeedsAdjudicationMutation, ApproveNeedsAdjudicationMutationVariables>;
+export const ApproveSystemFlaggingDocument = gql`
+    mutation ApproveSystemFlagging($grievanceTicketId: ID!, $approveStatus: Boolean!) {
+  approveSystemFlagging(grievanceTicketId: $grievanceTicketId, approveStatus: $approveStatus) {
+    grievanceTicket {
+      id
+      status
+    }
+  }
+}
+    `;
+export type ApproveSystemFlaggingMutationFn = ApolloReactCommon.MutationFunction<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
+export type ApproveSystemFlaggingComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>, 'mutation'>;
+
+    export const ApproveSystemFlaggingComponent = (props: ApproveSystemFlaggingComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables> mutation={ApproveSystemFlaggingDocument} {...props} />
+    );
+    
+export type ApproveSystemFlaggingProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables> & TChildProps;
+export function withApproveSystemFlagging<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveSystemFlaggingMutation,
+  ApproveSystemFlaggingMutationVariables,
+  ApproveSystemFlaggingProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables, ApproveSystemFlaggingProps<TChildProps>>(ApproveSystemFlaggingDocument, {
+      alias: 'approveSystemFlagging',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveSystemFlaggingMutation__
+ *
+ * To run a mutation, you first call `useApproveSystemFlaggingMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveSystemFlaggingMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveSystemFlaggingMutation, { data, loading, error }] = useApproveSystemFlaggingMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      approveStatus: // value for 'approveStatus'
+ *   },
+ * });
+ */
+export function useApproveSystemFlaggingMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>(ApproveSystemFlaggingDocument, baseOptions);
+      }
+export type ApproveSystemFlaggingMutationHookResult = ReturnType<typeof useApproveSystemFlaggingMutation>;
+export type ApproveSystemFlaggingMutationResult = ApolloReactCommon.MutationResult<ApproveSystemFlaggingMutation>;
+export type ApproveSystemFlaggingMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveSystemFlaggingMutation, ApproveSystemFlaggingMutationVariables>;
+export const ApproveTpDocument = gql`
+    mutation ApproveTP($id: ID!) {
+  approveTargetPopulation(id: $id) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type ApproveTpMutationFn = ApolloReactCommon.MutationFunction<ApproveTpMutation, ApproveTpMutationVariables>;
+export type ApproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ApproveTpMutation, ApproveTpMutationVariables>, 'mutation'>;
+
+    export const ApproveTpComponent = (props: ApproveTpComponentProps) => (
+      <ApolloReactComponents.Mutation<ApproveTpMutation, ApproveTpMutationVariables> mutation={ApproveTpDocument} {...props} />
+    );
+    
+export type ApproveTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ApproveTpMutation, ApproveTpMutationVariables> & TChildProps;
+export function withApproveTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ApproveTpMutation,
+  ApproveTpMutationVariables,
+  ApproveTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ApproveTpMutation, ApproveTpMutationVariables, ApproveTpProps<TChildProps>>(ApproveTpDocument, {
+      alias: 'approveTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useApproveTpMutation__
+ *
+ * To run a mutation, you first call `useApproveTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveTpMutation, { data, loading, error }] = useApproveTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useApproveTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ApproveTpMutation, ApproveTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<ApproveTpMutation, ApproveTpMutationVariables>(ApproveTpDocument, baseOptions);
+      }
+export type ApproveTpMutationHookResult = ReturnType<typeof useApproveTpMutation>;
+export type ApproveTpMutationResult = ApolloReactCommon.MutationResult<ApproveTpMutation>;
+export type ApproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveTpMutation, ApproveTpMutationVariables>;
+export const CheckAgainstSanctionListUploadDocument = gql`
+    mutation CheckAgainstSanctionListUpload($file: Upload!) {
+  checkAgainstSanctionList(file: $file) {
+    errors {
+      header
+      message
+      rowNumber
+    }
+  }
+}
+    `;
+export type CheckAgainstSanctionListUploadMutationFn = ApolloReactCommon.MutationFunction<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>;
+export type CheckAgainstSanctionListUploadComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>, 'mutation'>;
+
+    export const CheckAgainstSanctionListUploadComponent = (props: CheckAgainstSanctionListUploadComponentProps) => (
+      <ApolloReactComponents.Mutation<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables> mutation={CheckAgainstSanctionListUploadDocument} {...props} />
+    );
+    
+export type CheckAgainstSanctionListUploadProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables> & TChildProps;
+export function withCheckAgainstSanctionListUpload<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CheckAgainstSanctionListUploadMutation,
+  CheckAgainstSanctionListUploadMutationVariables,
+  CheckAgainstSanctionListUploadProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables, CheckAgainstSanctionListUploadProps<TChildProps>>(CheckAgainstSanctionListUploadDocument, {
+      alias: 'checkAgainstSanctionListUpload',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCheckAgainstSanctionListUploadMutation__
+ *
+ * To run a mutation, you first call `useCheckAgainstSanctionListUploadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCheckAgainstSanctionListUploadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [checkAgainstSanctionListUploadMutation, { data, loading, error }] = useCheckAgainstSanctionListUploadMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useCheckAgainstSanctionListUploadMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>) {
+        return ApolloReactHooks.useMutation<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>(CheckAgainstSanctionListUploadDocument, baseOptions);
+      }
+export type CheckAgainstSanctionListUploadMutationHookResult = ReturnType<typeof useCheckAgainstSanctionListUploadMutation>;
+export type CheckAgainstSanctionListUploadMutationResult = ApolloReactCommon.MutationResult<CheckAgainstSanctionListUploadMutation>;
+export type CheckAgainstSanctionListUploadMutationOptions = ApolloReactCommon.BaseMutationOptions<CheckAgainstSanctionListUploadMutation, CheckAgainstSanctionListUploadMutationVariables>;
+export const CreateCashPlanPaymentVerificationDocument = gql`
+    mutation createCashPlanPaymentVerification($input: CreatePaymentVerificationInput!) {
+  createCashPlanPaymentVerification(input: $input) {
+    cashPlan {
+      id
+    }
+  }
+}
+    `;
+export type CreateCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export type CreateCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const CreateCashPlanPaymentVerificationComponent = (props: CreateCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables> mutation={CreateCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type CreateCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withCreateCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateCashPlanPaymentVerificationMutation,
+  CreateCashPlanPaymentVerificationMutationVariables,
+  CreateCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables, CreateCashPlanPaymentVerificationProps<TChildProps>>(CreateCashPlanPaymentVerificationDocument, {
+      alias: 'createCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useCreateCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createCashPlanPaymentVerificationMutation, { data, loading, error }] = useCreateCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>(CreateCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type CreateCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useCreateCashPlanPaymentVerificationMutation>;
+export type CreateCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<CreateCashPlanPaymentVerificationMutation>;
+export type CreateCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateCashPlanPaymentVerificationMutation, CreateCashPlanPaymentVerificationMutationVariables>;
+export const CreateDashboardReportDocument = gql`
+    mutation CreateDashboardReport($reportData: CreateDashboardReportInput!) {
+  createDashboardReport(reportData: $reportData) {
+    success
+  }
+}
+    `;
+export type CreateDashboardReportMutationFn = ApolloReactCommon.MutationFunction<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>;
+export type CreateDashboardReportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>, 'mutation'>;
+
+    export const CreateDashboardReportComponent = (props: CreateDashboardReportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables> mutation={CreateDashboardReportDocument} {...props} />
+    );
+    
+export type CreateDashboardReportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateDashboardReportMutation, CreateDashboardReportMutationVariables> & TChildProps;
+export function withCreateDashboardReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateDashboardReportMutation,
+  CreateDashboardReportMutationVariables,
+  CreateDashboardReportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateDashboardReportMutation, CreateDashboardReportMutationVariables, CreateDashboardReportProps<TChildProps>>(CreateDashboardReportDocument, {
+      alias: 'createDashboardReport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateDashboardReportMutation__
+ *
+ * To run a mutation, you first call `useCreateDashboardReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDashboardReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDashboardReportMutation, { data, loading, error }] = useCreateDashboardReportMutation({
+ *   variables: {
+ *      reportData: // value for 'reportData'
+ *   },
+ * });
+ */
+export function useCreateDashboardReportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>(CreateDashboardReportDocument, baseOptions);
+      }
+export type CreateDashboardReportMutationHookResult = ReturnType<typeof useCreateDashboardReportMutation>;
+export type CreateDashboardReportMutationResult = ApolloReactCommon.MutationResult<CreateDashboardReportMutation>;
+export type CreateDashboardReportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateDashboardReportMutation, CreateDashboardReportMutationVariables>;
+export const CreateGrievanceDocument = gql`
+    mutation CreateGrievance($input: CreateGrievanceTicketInput!) {
+  createGrievanceTicket(input: $input) {
+    grievanceTickets {
+      id
+    }
+  }
+}
+    `;
+export type CreateGrievanceMutationFn = ApolloReactCommon.MutationFunction<CreateGrievanceMutation, CreateGrievanceMutationVariables>;
+export type CreateGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>, 'mutation'>;
+
+    export const CreateGrievanceComponent = (props: CreateGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateGrievanceMutation, CreateGrievanceMutationVariables> mutation={CreateGrievanceDocument} {...props} />
+    );
+    
+export type CreateGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateGrievanceMutation, CreateGrievanceMutationVariables> & TChildProps;
+export function withCreateGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateGrievanceMutation,
+  CreateGrievanceMutationVariables,
+  CreateGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateGrievanceMutation, CreateGrievanceMutationVariables, CreateGrievanceProps<TChildProps>>(CreateGrievanceDocument, {
+      alias: 'createGrievance',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateGrievanceMutation__
+ *
+ * To run a mutation, you first call `useCreateGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGrievanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGrievanceMutation, { data, loading, error }] = useCreateGrievanceMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateGrievanceMutation, CreateGrievanceMutationVariables>(CreateGrievanceDocument, baseOptions);
+      }
+export type CreateGrievanceMutationHookResult = ReturnType<typeof useCreateGrievanceMutation>;
+export type CreateGrievanceMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceMutation>;
+export type CreateGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceMutation, CreateGrievanceMutationVariables>;
+export const CreateGrievanceTicketNoteDocument = gql`
+    mutation CreateGrievanceTicketNote($noteInput: CreateTicketNoteInput!) {
+  createTicketNote(noteInput: $noteInput) {
+    grievanceTicketNote {
+      id
+      createdAt
+      updatedAt
+      createdBy {
+        firstName
+        lastName
+        username
+        email
+      }
+    }
+  }
+}
+    `;
+export type CreateGrievanceTicketNoteMutationFn = ApolloReactCommon.MutationFunction<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>;
+export type CreateGrievanceTicketNoteComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>, 'mutation'>;
+
+    export const CreateGrievanceTicketNoteComponent = (props: CreateGrievanceTicketNoteComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables> mutation={CreateGrievanceTicketNoteDocument} {...props} />
+    );
+    
+export type CreateGrievanceTicketNoteProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables> & TChildProps;
+export function withCreateGrievanceTicketNote<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateGrievanceTicketNoteMutation,
+  CreateGrievanceTicketNoteMutationVariables,
+  CreateGrievanceTicketNoteProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables, CreateGrievanceTicketNoteProps<TChildProps>>(CreateGrievanceTicketNoteDocument, {
+      alias: 'createGrievanceTicketNote',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateGrievanceTicketNoteMutation__
+ *
+ * To run a mutation, you first call `useCreateGrievanceTicketNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGrievanceTicketNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createGrievanceTicketNoteMutation, { data, loading, error }] = useCreateGrievanceTicketNoteMutation({
+ *   variables: {
+ *      noteInput: // value for 'noteInput'
+ *   },
+ * });
+ */
+export function useCreateGrievanceTicketNoteMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>(CreateGrievanceTicketNoteDocument, baseOptions);
+      }
+export type CreateGrievanceTicketNoteMutationHookResult = ReturnType<typeof useCreateGrievanceTicketNoteMutation>;
+export type CreateGrievanceTicketNoteMutationResult = ApolloReactCommon.MutationResult<CreateGrievanceTicketNoteMutation>;
+export type CreateGrievanceTicketNoteMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateGrievanceTicketNoteMutation, CreateGrievanceTicketNoteMutationVariables>;
+export const CreateProgramDocument = gql`
+    mutation CreateProgram($programData: CreateProgramInput!) {
+  createProgram(programData: $programData) {
+    program {
+      id
+      name
+      status
+      startDate
+      endDate
+      caId
+      budget
+      description
+      frequencyOfPayments
+      sector
+      scope
+      cashPlus
+      populationGoal
+      individualDataNeeded
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateProgramMutationFn = ApolloReactCommon.MutationFunction<CreateProgramMutation, CreateProgramMutationVariables>;
+export type CreateProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateProgramMutation, CreateProgramMutationVariables>, 'mutation'>;
+
+    export const CreateProgramComponent = (props: CreateProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateProgramMutation, CreateProgramMutationVariables> mutation={CreateProgramDocument} {...props} />
+    );
+    
+export type CreateProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateProgramMutation, CreateProgramMutationVariables> & TChildProps;
+export function withCreateProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateProgramMutation,
+  CreateProgramMutationVariables,
+  CreateProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateProgramMutation, CreateProgramMutationVariables, CreateProgramProps<TChildProps>>(CreateProgramDocument, {
+      alias: 'createProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateProgramMutation__
+ *
+ * To run a mutation, you first call `useCreateProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProgramMutation, { data, loading, error }] = useCreateProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *   },
+ * });
+ */
+export function useCreateProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateProgramMutation, CreateProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateProgramMutation, CreateProgramMutationVariables>(CreateProgramDocument, baseOptions);
+      }
+export type CreateProgramMutationHookResult = ReturnType<typeof useCreateProgramMutation>;
+export type CreateProgramMutationResult = ApolloReactCommon.MutationResult<CreateProgramMutation>;
+export type CreateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateProgramMutation, CreateProgramMutationVariables>;
+export const CreateReportDocument = gql`
+    mutation CreateReport($reportData: CreateReportInput!) {
+  createReport(reportData: $reportData) {
+    report {
+      id
+      status
+      reportType
+      createdAt
+      dateFrom
+      dateTo
+      fileUrl
+      createdBy {
+        firstName
+        lastName
+      }
+      adminArea {
+        edges {
+          node {
+            title
+          }
+        }
+      }
+      program {
+        name
+      }
+    }
+  }
+}
+    `;
+export type CreateReportMutationFn = ApolloReactCommon.MutationFunction<CreateReportMutation, CreateReportMutationVariables>;
+export type CreateReportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateReportMutation, CreateReportMutationVariables>, 'mutation'>;
+
+    export const CreateReportComponent = (props: CreateReportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateReportMutation, CreateReportMutationVariables> mutation={CreateReportDocument} {...props} />
+    );
+    
+export type CreateReportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateReportMutation, CreateReportMutationVariables> & TChildProps;
+export function withCreateReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateReportMutation,
+  CreateReportMutationVariables,
+  CreateReportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateReportMutation, CreateReportMutationVariables, CreateReportProps<TChildProps>>(CreateReportDocument, {
+      alias: 'createReport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateReportMutation__
+ *
+ * To run a mutation, you first call `useCreateReportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateReportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createReportMutation, { data, loading, error }] = useCreateReportMutation({
+ *   variables: {
+ *      reportData: // value for 'reportData'
+ *   },
+ * });
+ */
+export function useCreateReportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateReportMutation, CreateReportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateReportMutation, CreateReportMutationVariables>(CreateReportDocument, baseOptions);
+      }
+export type CreateReportMutationHookResult = ReturnType<typeof useCreateReportMutation>;
+export type CreateReportMutationResult = ApolloReactCommon.MutationResult<CreateReportMutation>;
+export type CreateReportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateReportMutation, CreateReportMutationVariables>;
+export const CreateTpDocument = gql`
+    mutation CreateTP($input: CreateTargetPopulationInput!) {
+  createTargetPopulation(input: $input) {
+    targetPopulation {
+      id
+      status
+      candidateListTotalHouseholds
+      candidateListTotalIndividuals
+      finalListTotalHouseholds
+      finalListTotalIndividuals
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateTpMutationFn = ApolloReactCommon.MutationFunction<CreateTpMutation, CreateTpMutationVariables>;
+export type CreateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateTpMutation, CreateTpMutationVariables>, 'mutation'>;
+
+    export const CreateTpComponent = (props: CreateTpComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateTpMutation, CreateTpMutationVariables> mutation={CreateTpDocument} {...props} />
+    );
+    
+export type CreateTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateTpMutation, CreateTpMutationVariables> & TChildProps;
+export function withCreateTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateTpMutation,
+  CreateTpMutationVariables,
+  CreateTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateTpMutation, CreateTpMutationVariables, CreateTpProps<TChildProps>>(CreateTpDocument, {
+      alias: 'createTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateTpMutation__
+ *
+ * To run a mutation, you first call `useCreateTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTpMutation, { data, loading, error }] = useCreateTpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateTpMutation, CreateTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateTpMutation, CreateTpMutationVariables>(CreateTpDocument, baseOptions);
+      }
+export type CreateTpMutationHookResult = ReturnType<typeof useCreateTpMutation>;
+export type CreateTpMutationResult = ApolloReactCommon.MutationResult<CreateTpMutation>;
+export type CreateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateTpMutation, CreateTpMutationVariables>;
+export const DeleteProgramDocument = gql`
+    mutation DeleteProgram($programId: String!) {
+  deleteProgram(programId: $programId) {
+    ok
+  }
+}
+    `;
+export type DeleteProgramMutationFn = ApolloReactCommon.MutationFunction<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export type DeleteProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteProgramMutation, DeleteProgramMutationVariables>, 'mutation'>;
+
+    export const DeleteProgramComponent = (props: DeleteProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteProgramMutation, DeleteProgramMutationVariables> mutation={DeleteProgramDocument} {...props} />
+    );
+    
+export type DeleteProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteProgramMutation, DeleteProgramMutationVariables> & TChildProps;
+export function withDeleteProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteProgramMutation,
+  DeleteProgramMutationVariables,
+  DeleteProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteProgramMutation, DeleteProgramMutationVariables, DeleteProgramProps<TChildProps>>(DeleteProgramDocument, {
+      alias: 'deleteProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteProgramMutation__
+ *
+ * To run a mutation, you first call `useDeleteProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProgramMutation, { data, loading, error }] = useDeleteProgramMutation({
+ *   variables: {
+ *      programId: // value for 'programId'
+ *   },
+ * });
+ */
+export function useDeleteProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteProgramMutation, DeleteProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteProgramMutation, DeleteProgramMutationVariables>(DeleteProgramDocument, baseOptions);
+      }
+export type DeleteProgramMutationHookResult = ReturnType<typeof useDeleteProgramMutation>;
+export type DeleteProgramMutationResult = ApolloReactCommon.MutationResult<DeleteProgramMutation>;
+export type DeleteProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteProgramMutation, DeleteProgramMutationVariables>;
+export const DeleteTargetPopulationDocument = gql`
+    mutation DeleteTargetPopulation($input: DeleteTargetPopulationMutationInput!) {
+  deleteTargetPopulation(input: $input) {
+    clientMutationId
+  }
+}
+    `;
+export type DeleteTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
+export type DeleteTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const DeleteTargetPopulationComponent = (props: DeleteTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> mutation={DeleteTargetPopulationDocument} {...props} />
+    );
+    
+export type DeleteTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables> & TChildProps;
+export function withDeleteTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DeleteTargetPopulationMutation,
+  DeleteTargetPopulationMutationVariables,
+  DeleteTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables, DeleteTargetPopulationProps<TChildProps>>(DeleteTargetPopulationDocument, {
+      alias: 'deleteTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDeleteTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useDeleteTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteTargetPopulationMutation, { data, loading, error }] = useDeleteTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDeleteTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>(DeleteTargetPopulationDocument, baseOptions);
+      }
+export type DeleteTargetPopulationMutationHookResult = ReturnType<typeof useDeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationResult = ApolloReactCommon.MutationResult<DeleteTargetPopulationMutation>;
+export type DeleteTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteTargetPopulationMutation, DeleteTargetPopulationMutationVariables>;
+export const DiscardCashPlanPaymentVerificationDocument = gql`
+    mutation DiscardCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  discardCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      status
+      statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            sampleSize
+            receivedCount
+            notReceivedCount
+            respondedCount
+            receivedCount
+            receivedWithProblemsCount
+            activationDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type DiscardCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>;
+export type DiscardCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const DiscardCashPlanPaymentVerificationComponent = (props: DiscardCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables> mutation={DiscardCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type DiscardCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withDiscardCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DiscardCashPlanPaymentVerificationMutation,
+  DiscardCashPlanPaymentVerificationMutationVariables,
+  DiscardCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables, DiscardCashPlanPaymentVerificationProps<TChildProps>>(DiscardCashPlanPaymentVerificationDocument, {
+      alias: 'discardCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDiscardCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useDiscardCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDiscardCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [discardCashPlanPaymentVerificationMutation, { data, loading, error }] = useDiscardCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useDiscardCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>(DiscardCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type DiscardCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useDiscardCashPlanPaymentVerificationMutation>;
+export type DiscardCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<DiscardCashPlanPaymentVerificationMutation>;
+export type DiscardCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<DiscardCashPlanPaymentVerificationMutation, DiscardCashPlanPaymentVerificationMutationVariables>;
+export const CopyTargetPopulationDocument = gql`
+    mutation CopyTargetPopulation($input: CopyTargetPopulationMutationInput!) {
+  copyTargetPopulation(input: $input) {
+    clientMutationId
+    targetPopulation {
+      id
+    }
+    validationErrors
+  }
+}
+    `;
+export type CopyTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export type CopyTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const CopyTargetPopulationComponent = (props: CopyTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> mutation={CopyTargetPopulationDocument} {...props} />
+    );
+    
+export type CopyTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables> & TChildProps;
+export function withCopyTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CopyTargetPopulationMutation,
+  CopyTargetPopulationMutationVariables,
+  CopyTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables, CopyTargetPopulationProps<TChildProps>>(CopyTargetPopulationDocument, {
+      alias: 'copyTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCopyTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useCopyTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCopyTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [copyTargetPopulationMutation, { data, loading, error }] = useCopyTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCopyTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>(CopyTargetPopulationDocument, baseOptions);
+      }
+export type CopyTargetPopulationMutationHookResult = ReturnType<typeof useCopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationResult = ApolloReactCommon.MutationResult<CopyTargetPopulationMutation>;
+export type CopyTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<CopyTargetPopulationMutation, CopyTargetPopulationMutationVariables>;
+export const EditCashPlanPaymentVerificationDocument = gql`
+    mutation editCashPlanPaymentVerification($input: EditCashPlanPaymentVerificationInput!) {
+  editCashPlanPaymentVerification(input: $input) {
+    cashPlan {
+      id
+    }
+  }
+}
+    `;
+export type EditCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
+export type EditCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const EditCashPlanPaymentVerificationComponent = (props: EditCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> mutation={EditCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type EditCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withEditCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  EditCashPlanPaymentVerificationMutation,
+  EditCashPlanPaymentVerificationMutationVariables,
+  EditCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables, EditCashPlanPaymentVerificationProps<TChildProps>>(EditCashPlanPaymentVerificationDocument, {
+      alias: 'editCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useEditCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useEditCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEditCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [editCashPlanPaymentVerificationMutation, { data, loading, error }] = useEditCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useEditCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>(EditCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type EditCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useEditCashPlanPaymentVerificationMutation>;
+export type EditCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<EditCashPlanPaymentVerificationMutation>;
+export type EditCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<EditCashPlanPaymentVerificationMutation, EditCashPlanPaymentVerificationMutationVariables>;
+export const FinalizeTpDocument = gql`
+    mutation FinalizeTP($id: ID!) {
+  finalizeTargetPopulation(id: $id) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type FinalizeTpMutationFn = ApolloReactCommon.MutationFunction<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export type FinalizeTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinalizeTpMutation, FinalizeTpMutationVariables>, 'mutation'>;
+
+    export const FinalizeTpComponent = (props: FinalizeTpComponentProps) => (
+      <ApolloReactComponents.Mutation<FinalizeTpMutation, FinalizeTpMutationVariables> mutation={FinalizeTpDocument} {...props} />
+    );
+    
+export type FinalizeTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinalizeTpMutation, FinalizeTpMutationVariables> & TChildProps;
+export function withFinalizeTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalizeTpMutation,
+  FinalizeTpMutationVariables,
+  FinalizeTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinalizeTpMutation, FinalizeTpMutationVariables, FinalizeTpProps<TChildProps>>(FinalizeTpDocument, {
+      alias: 'finalizeTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalizeTpMutation__
+ *
+ * To run a mutation, you first call `useFinalizeTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinalizeTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finalizeTpMutation, { data, loading, error }] = useFinalizeTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useFinalizeTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinalizeTpMutation, FinalizeTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinalizeTpMutation, FinalizeTpMutationVariables>(FinalizeTpDocument, baseOptions);
+      }
+export type FinalizeTpMutationHookResult = ReturnType<typeof useFinalizeTpMutation>;
+export type FinalizeTpMutationResult = ApolloReactCommon.MutationResult<FinalizeTpMutation>;
+export type FinalizeTpMutationOptions = ApolloReactCommon.BaseMutationOptions<FinalizeTpMutation, FinalizeTpMutationVariables>;
+export const FinishCashPlanPaymentVerificationDocument = gql`
+    mutation FinishCashPlanPaymentVerification($cashPlanVerificationId: ID!) {
+  finishCashPlanPaymentVerification(cashPlanVerificationId: $cashPlanVerificationId) {
+    cashPlan {
+      id
+      status
+      statusDate
+      verificationStatus
+      verifications {
+        edges {
+          node {
+            id
+            status
+            completionDate
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type FinishCashPlanPaymentVerificationMutationFn = ApolloReactCommon.MutationFunction<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>;
+export type FinishCashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>, 'mutation'>;
+
+    export const FinishCashPlanPaymentVerificationComponent = (props: FinishCashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables> mutation={FinishCashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type FinishCashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables> & TChildProps;
+export function withFinishCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinishCashPlanPaymentVerificationMutation,
+  FinishCashPlanPaymentVerificationMutationVariables,
+  FinishCashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables, FinishCashPlanPaymentVerificationProps<TChildProps>>(FinishCashPlanPaymentVerificationDocument, {
+      alias: 'finishCashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinishCashPlanPaymentVerificationMutation__
+ *
+ * To run a mutation, you first call `useFinishCashPlanPaymentVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useFinishCashPlanPaymentVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [finishCashPlanPaymentVerificationMutation, { data, loading, error }] = useFinishCashPlanPaymentVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *   },
+ * });
+ */
+export function useFinishCashPlanPaymentVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>(FinishCashPlanPaymentVerificationDocument, baseOptions);
+      }
+export type FinishCashPlanPaymentVerificationMutationHookResult = ReturnType<typeof useFinishCashPlanPaymentVerificationMutation>;
+export type FinishCashPlanPaymentVerificationMutationResult = ApolloReactCommon.MutationResult<FinishCashPlanPaymentVerificationMutation>;
+export type FinishCashPlanPaymentVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<FinishCashPlanPaymentVerificationMutation, FinishCashPlanPaymentVerificationMutationVariables>;
+export const GrievanceTicketStatusChangeDocument = gql`
+    mutation GrievanceTicketStatusChange($grievanceTicketId: ID, $status: Int) {
+  grievanceStatusChange(grievanceTicketId: $grievanceTicketId, status: $status) {
+    grievanceTicket {
+      id
+      status
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        username
+        email
+      }
+    }
+  }
+}
+    `;
+export type GrievanceTicketStatusChangeMutationFn = ApolloReactCommon.MutationFunction<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
+export type GrievanceTicketStatusChangeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>, 'mutation'>;
+
+    export const GrievanceTicketStatusChangeComponent = (props: GrievanceTicketStatusChangeComponentProps) => (
+      <ApolloReactComponents.Mutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables> mutation={GrievanceTicketStatusChangeDocument} {...props} />
+    );
+    
+export type GrievanceTicketStatusChangeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables> & TChildProps;
+export function withGrievanceTicketStatusChange<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketStatusChangeMutation,
+  GrievanceTicketStatusChangeMutationVariables,
+  GrievanceTicketStatusChangeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables, GrievanceTicketStatusChangeProps<TChildProps>>(GrievanceTicketStatusChangeDocument, {
+      alias: 'grievanceTicketStatusChange',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketStatusChangeMutation__
+ *
+ * To run a mutation, you first call `useGrievanceTicketStatusChangeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketStatusChangeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [grievanceTicketStatusChangeMutation, { data, loading, error }] = useGrievanceTicketStatusChangeMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useGrievanceTicketStatusChangeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>) {
+        return ApolloReactHooks.useMutation<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>(GrievanceTicketStatusChangeDocument, baseOptions);
+      }
+export type GrievanceTicketStatusChangeMutationHookResult = ReturnType<typeof useGrievanceTicketStatusChangeMutation>;
+export type GrievanceTicketStatusChangeMutationResult = ApolloReactCommon.MutationResult<GrievanceTicketStatusChangeMutation>;
+export type GrievanceTicketStatusChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<GrievanceTicketStatusChangeMutation, GrievanceTicketStatusChangeMutationVariables>;
+export const ImportXlsxCashPlanVerificationDocument = gql`
+    mutation importXlsxCashPlanVerification($cashPlanVerificationId: ID!, $file: Upload!) {
+  importXlsxCashPlanVerification(cashPlanVerificationId: $cashPlanVerificationId, file: $file) {
+    cashPlan {
+      id
+    }
+    errors {
+      sheet
+      coordinates
+      message
+    }
+  }
+}
+    `;
+export type ImportXlsxCashPlanVerificationMutationFn = ApolloReactCommon.MutationFunction<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export type ImportXlsxCashPlanVerificationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>, 'mutation'>;
+
+    export const ImportXlsxCashPlanVerificationComponent = (props: ImportXlsxCashPlanVerificationComponentProps) => (
+      <ApolloReactComponents.Mutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> mutation={ImportXlsxCashPlanVerificationDocument} {...props} />
+    );
+    
+export type ImportXlsxCashPlanVerificationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables> & TChildProps;
+export function withImportXlsxCashPlanVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportXlsxCashPlanVerificationMutation,
+  ImportXlsxCashPlanVerificationMutationVariables,
+  ImportXlsxCashPlanVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables, ImportXlsxCashPlanVerificationProps<TChildProps>>(ImportXlsxCashPlanVerificationDocument, {
+      alias: 'importXlsxCashPlanVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportXlsxCashPlanVerificationMutation__
+ *
+ * To run a mutation, you first call `useImportXlsxCashPlanVerificationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImportXlsxCashPlanVerificationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [importXlsxCashPlanVerificationMutation, { data, loading, error }] = useImportXlsxCashPlanVerificationMutation({
+ *   variables: {
+ *      cashPlanVerificationId: // value for 'cashPlanVerificationId'
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useImportXlsxCashPlanVerificationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>) {
+        return ApolloReactHooks.useMutation<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>(ImportXlsxCashPlanVerificationDocument, baseOptions);
+      }
+export type ImportXlsxCashPlanVerificationMutationHookResult = ReturnType<typeof useImportXlsxCashPlanVerificationMutation>;
+export type ImportXlsxCashPlanVerificationMutationResult = ApolloReactCommon.MutationResult<ImportXlsxCashPlanVerificationMutation>;
+export type ImportXlsxCashPlanVerificationMutationOptions = ApolloReactCommon.BaseMutationOptions<ImportXlsxCashPlanVerificationMutation, ImportXlsxCashPlanVerificationMutationVariables>;
+export const ReassignRoleGrievanceDocument = gql`
+    mutation ReassignRoleGrievance($grievanceTicketId: ID!, $householdId: ID!, $individualId: ID!, $role: String!) {
+  reassignRole(grievanceTicketId: $grievanceTicketId, householdId: $householdId, individualId: $individualId, role: $role) {
+    household {
+      id
+      unicefId
+    }
+    individual {
+      id
+      unicefId
+    }
+  }
+}
+    `;
+export type ReassignRoleGrievanceMutationFn = ApolloReactCommon.MutationFunction<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>;
+export type ReassignRoleGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>, 'mutation'>;
+
+    export const ReassignRoleGrievanceComponent = (props: ReassignRoleGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables> mutation={ReassignRoleGrievanceDocument} {...props} />
+    );
+    
+export type ReassignRoleGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables> & TChildProps;
+export function withReassignRoleGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReassignRoleGrievanceMutation,
+  ReassignRoleGrievanceMutationVariables,
+  ReassignRoleGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables, ReassignRoleGrievanceProps<TChildProps>>(ReassignRoleGrievanceDocument, {
+      alias: 'reassignRoleGrievance',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReassignRoleGrievanceMutation__
+ *
+ * To run a mutation, you first call `useReassignRoleGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReassignRoleGrievanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [reassignRoleGrievanceMutation, { data, loading, error }] = useReassignRoleGrievanceMutation({
+ *   variables: {
+ *      grievanceTicketId: // value for 'grievanceTicketId'
+ *      householdId: // value for 'householdId'
+ *      individualId: // value for 'individualId'
+ *      role: // value for 'role'
+ *   },
+ * });
+ */
+export function useReassignRoleGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>(ReassignRoleGrievanceDocument, baseOptions);
+      }
+export type ReassignRoleGrievanceMutationHookResult = ReturnType<typeof useReassignRoleGrievanceMutation>;
+export type ReassignRoleGrievanceMutationResult = ApolloReactCommon.MutationResult<ReassignRoleGrievanceMutation>;
+export type ReassignRoleGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<ReassignRoleGrievanceMutation, ReassignRoleGrievanceMutationVariables>;
+export const RerunDedupeDocument = gql`
+    mutation RerunDedupe($registrationDataImportDatahubId: ID!) {
+  rerunDedupe(registrationDataImportDatahubId: $registrationDataImportDatahubId) {
+    ok
+  }
+}
+    `;
+export type RerunDedupeMutationFn = ApolloReactCommon.MutationFunction<RerunDedupeMutation, RerunDedupeMutationVariables>;
+export type RerunDedupeComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<RerunDedupeMutation, RerunDedupeMutationVariables>, 'mutation'>;
+
+    export const RerunDedupeComponent = (props: RerunDedupeComponentProps) => (
+      <ApolloReactComponents.Mutation<RerunDedupeMutation, RerunDedupeMutationVariables> mutation={RerunDedupeDocument} {...props} />
+    );
+    
+export type RerunDedupeProps<TChildProps = {}> = ApolloReactHoc.MutateProps<RerunDedupeMutation, RerunDedupeMutationVariables> & TChildProps;
+export function withRerunDedupe<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RerunDedupeMutation,
+  RerunDedupeMutationVariables,
+  RerunDedupeProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, RerunDedupeMutation, RerunDedupeMutationVariables, RerunDedupeProps<TChildProps>>(RerunDedupeDocument, {
+      alias: 'rerunDedupe',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRerunDedupeMutation__
+ *
+ * To run a mutation, you first call `useRerunDedupeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRerunDedupeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rerunDedupeMutation, { data, loading, error }] = useRerunDedupeMutation({
+ *   variables: {
+ *      registrationDataImportDatahubId: // value for 'registrationDataImportDatahubId'
+ *   },
+ * });
+ */
+export function useRerunDedupeMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RerunDedupeMutation, RerunDedupeMutationVariables>) {
+        return ApolloReactHooks.useMutation<RerunDedupeMutation, RerunDedupeMutationVariables>(RerunDedupeDocument, baseOptions);
+      }
+export type RerunDedupeMutationHookResult = ReturnType<typeof useRerunDedupeMutation>;
+export type RerunDedupeMutationResult = ApolloReactCommon.MutationResult<RerunDedupeMutation>;
+export type RerunDedupeMutationOptions = ApolloReactCommon.BaseMutationOptions<RerunDedupeMutation, RerunDedupeMutationVariables>;
+export const SetSteficonRuleOnTargetPopulationDocument = gql`
+    mutation setSteficonRuleOnTargetPopulation($input: SetSteficonRuleOnTargetPopulationMutationInput!) {
+  setSteficonRuleOnTargetPopulation(input: $input) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type SetSteficonRuleOnTargetPopulationMutationFn = ApolloReactCommon.MutationFunction<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
+export type SetSteficonRuleOnTargetPopulationComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>, 'mutation'>;
+
+    export const SetSteficonRuleOnTargetPopulationComponent = (props: SetSteficonRuleOnTargetPopulationComponentProps) => (
+      <ApolloReactComponents.Mutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables> mutation={SetSteficonRuleOnTargetPopulationDocument} {...props} />
+    );
+    
+export type SetSteficonRuleOnTargetPopulationProps<TChildProps = {}> = ApolloReactHoc.MutateProps<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables> & TChildProps;
+export function withSetSteficonRuleOnTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SetSteficonRuleOnTargetPopulationMutation,
+  SetSteficonRuleOnTargetPopulationMutationVariables,
+  SetSteficonRuleOnTargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables, SetSteficonRuleOnTargetPopulationProps<TChildProps>>(SetSteficonRuleOnTargetPopulationDocument, {
+      alias: 'setSteficonRuleOnTargetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSetSteficonRuleOnTargetPopulationMutation__
+ *
+ * To run a mutation, you first call `useSetSteficonRuleOnTargetPopulationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetSteficonRuleOnTargetPopulationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setSteficonRuleOnTargetPopulationMutation, { data, loading, error }] = useSetSteficonRuleOnTargetPopulationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSetSteficonRuleOnTargetPopulationMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>) {
+        return ApolloReactHooks.useMutation<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>(SetSteficonRuleOnTargetPopulationDocument, baseOptions);
+      }
+export type SetSteficonRuleOnTargetPopulationMutationHookResult = ReturnType<typeof useSetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationResult = ApolloReactCommon.MutationResult<SetSteficonRuleOnTargetPopulationMutation>;
+export type SetSteficonRuleOnTargetPopulationMutationOptions = ApolloReactCommon.BaseMutationOptions<SetSteficonRuleOnTargetPopulationMutation, SetSteficonRuleOnTargetPopulationMutationVariables>;
+export const UnapproveTpDocument = gql`
+    mutation UnapproveTP($id: ID!) {
+  unapproveTargetPopulation(id: $id) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type UnapproveTpMutationFn = ApolloReactCommon.MutationFunction<UnapproveTpMutation, UnapproveTpMutationVariables>;
+export type UnapproveTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UnapproveTpMutation, UnapproveTpMutationVariables>, 'mutation'>;
+
+    export const UnapproveTpComponent = (props: UnapproveTpComponentProps) => (
+      <ApolloReactComponents.Mutation<UnapproveTpMutation, UnapproveTpMutationVariables> mutation={UnapproveTpDocument} {...props} />
+    );
+    
+export type UnapproveTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UnapproveTpMutation, UnapproveTpMutationVariables> & TChildProps;
+export function withUnapproveTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UnapproveTpMutation,
+  UnapproveTpMutationVariables,
+  UnapproveTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UnapproveTpMutation, UnapproveTpMutationVariables, UnapproveTpProps<TChildProps>>(UnapproveTpDocument, {
+      alias: 'unapproveTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUnapproveTpMutation__
+ *
+ * To run a mutation, you first call `useUnapproveTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnapproveTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unapproveTpMutation, { data, loading, error }] = useUnapproveTpMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUnapproveTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UnapproveTpMutation, UnapproveTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UnapproveTpMutation, UnapproveTpMutationVariables>(UnapproveTpDocument, baseOptions);
+      }
+export type UnapproveTpMutationHookResult = ReturnType<typeof useUnapproveTpMutation>;
+export type UnapproveTpMutationResult = ApolloReactCommon.MutationResult<UnapproveTpMutation>;
+export type UnapproveTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UnapproveTpMutation, UnapproveTpMutationVariables>;
+export const UpdateGrievanceDocument = gql`
+    mutation UpdateGrievance($input: UpdateGrievanceTicketInput!) {
+  updateGrievanceTicket(input: $input) {
+    grievanceTicket {
+      id
+    }
+  }
+}
+    `;
+export type UpdateGrievanceMutationFn = ApolloReactCommon.MutationFunction<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
+export type UpdateGrievanceComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>, 'mutation'>;
+
+    export const UpdateGrievanceComponent = (props: UpdateGrievanceComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables> mutation={UpdateGrievanceDocument} {...props} />
+    );
+    
+export type UpdateGrievanceProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateGrievanceMutation, UpdateGrievanceMutationVariables> & TChildProps;
+export function withUpdateGrievance<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateGrievanceMutation,
+  UpdateGrievanceMutationVariables,
+  UpdateGrievanceProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateGrievanceMutation, UpdateGrievanceMutationVariables, UpdateGrievanceProps<TChildProps>>(UpdateGrievanceDocument, {
+      alias: 'updateGrievance',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateGrievanceMutation__
+ *
+ * To run a mutation, you first call `useUpdateGrievanceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGrievanceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGrievanceMutation, { data, loading, error }] = useUpdateGrievanceMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateGrievanceMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>(UpdateGrievanceDocument, baseOptions);
+      }
+export type UpdateGrievanceMutationHookResult = ReturnType<typeof useUpdateGrievanceMutation>;
+export type UpdateGrievanceMutationResult = ApolloReactCommon.MutationResult<UpdateGrievanceMutation>;
+export type UpdateGrievanceMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateGrievanceMutation, UpdateGrievanceMutationVariables>;
+export const UpdatePaymentVerificationReceivedAndReceivedAmountDocument = gql`
+    mutation updatePaymentVerificationReceivedAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $received: Boolean!) {
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, received: $received) {
+    paymentVerification {
+      id
+      status
+      receivedAmount
+      cashPlanPaymentVerification {
+        id
+        receivedCount
+        notReceivedCount
+        respondedCount
+        receivedCount
+        receivedWithProblemsCount
+      }
+    }
+  }
+}
+    `;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationFn = ApolloReactCommon.MutationFunction<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>, 'mutation'>;
+
+    export const UpdatePaymentVerificationReceivedAndReceivedAmountComponent = (props: UpdatePaymentVerificationReceivedAndReceivedAmountComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables> mutation={UpdatePaymentVerificationReceivedAndReceivedAmountDocument} {...props} />
+    );
+    
+export type UpdatePaymentVerificationReceivedAndReceivedAmountProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables> & TChildProps;
+export function withUpdatePaymentVerificationReceivedAndReceivedAmount<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdatePaymentVerificationReceivedAndReceivedAmountMutation,
+  UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables,
+  UpdatePaymentVerificationReceivedAndReceivedAmountProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables, UpdatePaymentVerificationReceivedAndReceivedAmountProps<TChildProps>>(UpdatePaymentVerificationReceivedAndReceivedAmountDocument, {
+      alias: 'updatePaymentVerificationReceivedAndReceivedAmount',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdatePaymentVerificationReceivedAndReceivedAmountMutation__
+ *
+ * To run a mutation, you first call `useUpdatePaymentVerificationReceivedAndReceivedAmountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePaymentVerificationReceivedAndReceivedAmountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePaymentVerificationReceivedAndReceivedAmountMutation, { data, loading, error }] = useUpdatePaymentVerificationReceivedAndReceivedAmountMutation({
+ *   variables: {
+ *      paymentVerificationId: // value for 'paymentVerificationId'
+ *      receivedAmount: // value for 'receivedAmount'
+ *      received: // value for 'received'
+ *   },
+ * });
+ */
+export function useUpdatePaymentVerificationReceivedAndReceivedAmountMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>(UpdatePaymentVerificationReceivedAndReceivedAmountDocument, baseOptions);
+      }
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationReceivedAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationReceivedAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationReceivedAndReceivedAmountMutation, UpdatePaymentVerificationReceivedAndReceivedAmountMutationVariables>;
+export const UpdatePaymentVerificationStatusAndReceivedAmountDocument = gql`
+    mutation updatePaymentVerificationStatusAndReceivedAmount($paymentVerificationId: ID!, $receivedAmount: Decimal!, $status: PaymentVerificationStatusForUpdate) {
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: $paymentVerificationId, receivedAmount: $receivedAmount, status: $status) {
+    paymentVerification {
+      id
+      status
+      receivedAmount
+    }
+  }
+}
+    `;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationFn = ApolloReactCommon.MutationFunction<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>, 'mutation'>;
+
+    export const UpdatePaymentVerificationStatusAndReceivedAmountComponent = (props: UpdatePaymentVerificationStatusAndReceivedAmountComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables> mutation={UpdatePaymentVerificationStatusAndReceivedAmountDocument} {...props} />
+    );
+    
+export type UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables> & TChildProps;
+export function withUpdatePaymentVerificationStatusAndReceivedAmount<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdatePaymentVerificationStatusAndReceivedAmountMutation,
+  UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables,
+  UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables, UpdatePaymentVerificationStatusAndReceivedAmountProps<TChildProps>>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, {
+      alias: 'updatePaymentVerificationStatusAndReceivedAmount',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdatePaymentVerificationStatusAndReceivedAmountMutation__
+ *
+ * To run a mutation, you first call `useUpdatePaymentVerificationStatusAndReceivedAmountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePaymentVerificationStatusAndReceivedAmountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePaymentVerificationStatusAndReceivedAmountMutation, { data, loading, error }] = useUpdatePaymentVerificationStatusAndReceivedAmountMutation({
+ *   variables: {
+ *      paymentVerificationId: // value for 'paymentVerificationId'
+ *      receivedAmount: // value for 'receivedAmount'
+ *      status: // value for 'status'
+ *   },
+ * });
+ */
+export function useUpdatePaymentVerificationStatusAndReceivedAmountMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>(UpdatePaymentVerificationStatusAndReceivedAmountDocument, baseOptions);
+      }
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationHookResult = ReturnType<typeof useUpdatePaymentVerificationStatusAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationResult = ApolloReactCommon.MutationResult<UpdatePaymentVerificationStatusAndReceivedAmountMutation>;
+export type UpdatePaymentVerificationStatusAndReceivedAmountMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdatePaymentVerificationStatusAndReceivedAmountMutation, UpdatePaymentVerificationStatusAndReceivedAmountMutationVariables>;
+export const UpdateProgramDocument = gql`
+    mutation UpdateProgram($programData: UpdateProgramInput!, $version: BigInt!) {
+  updateProgram(programData: $programData, version: $version) {
+    program {
+      id
+      name
+      startDate
+      endDate
+      status
+      caId
+      description
+      budget
+      frequencyOfPayments
+      cashPlus
+      populationGoal
+      scope
+      sector
+      totalNumberOfHouseholds
+      administrativeAreasOfImplementation
+      individualDataNeeded
+      version
+    }
+    validationErrors
+  }
+}
+    `;
+export type UpdateProgramMutationFn = ApolloReactCommon.MutationFunction<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export type UpdateProgramComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateProgramMutation, UpdateProgramMutationVariables>, 'mutation'>;
+
+    export const UpdateProgramComponent = (props: UpdateProgramComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateProgramMutation, UpdateProgramMutationVariables> mutation={UpdateProgramDocument} {...props} />
+    );
+    
+export type UpdateProgramProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateProgramMutation, UpdateProgramMutationVariables> & TChildProps;
+export function withUpdateProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateProgramMutation,
+  UpdateProgramMutationVariables,
+  UpdateProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateProgramMutation, UpdateProgramMutationVariables, UpdateProgramProps<TChildProps>>(UpdateProgramDocument, {
+      alias: 'updateProgram',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateProgramMutation__
+ *
+ * To run a mutation, you first call `useUpdateProgramMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProgramMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProgramMutation, { data, loading, error }] = useUpdateProgramMutation({
+ *   variables: {
+ *      programData: // value for 'programData'
+ *      version: // value for 'version'
+ *   },
+ * });
+ */
+export function useUpdateProgramMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateProgramMutation, UpdateProgramMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateProgramMutation, UpdateProgramMutationVariables>(UpdateProgramDocument, baseOptions);
+      }
+export type UpdateProgramMutationHookResult = ReturnType<typeof useUpdateProgramMutation>;
+export type UpdateProgramMutationResult = ApolloReactCommon.MutationResult<UpdateProgramMutation>;
+export type UpdateProgramMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateProgramMutation, UpdateProgramMutationVariables>;
+export const UpdateTpDocument = gql`
+    mutation UpdateTP($input: UpdateTargetPopulationInput!) {
+  updateTargetPopulation(input: $input) {
+    targetPopulation {
+      ...targetPopulationDetailed
+    }
+    validationErrors
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type UpdateTpMutationFn = ApolloReactCommon.MutationFunction<UpdateTpMutation, UpdateTpMutationVariables>;
+export type UpdateTpComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UpdateTpMutation, UpdateTpMutationVariables>, 'mutation'>;
+
+    export const UpdateTpComponent = (props: UpdateTpComponentProps) => (
+      <ApolloReactComponents.Mutation<UpdateTpMutation, UpdateTpMutationVariables> mutation={UpdateTpDocument} {...props} />
+    );
+    
+export type UpdateTpProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UpdateTpMutation, UpdateTpMutationVariables> & TChildProps;
+export function withUpdateTp<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UpdateTpMutation,
+  UpdateTpMutationVariables,
+  UpdateTpProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UpdateTpMutation, UpdateTpMutationVariables, UpdateTpProps<TChildProps>>(UpdateTpDocument, {
+      alias: 'updateTp',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUpdateTpMutation__
+ *
+ * To run a mutation, you first call `useUpdateTpMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTpMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTpMutation, { data, loading, error }] = useUpdateTpMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTpMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateTpMutation, UpdateTpMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateTpMutation, UpdateTpMutationVariables>(UpdateTpDocument, baseOptions);
+      }
+export type UpdateTpMutationHookResult = ReturnType<typeof useUpdateTpMutation>;
+export type UpdateTpMutationResult = ApolloReactCommon.MutationResult<UpdateTpMutation>;
+export type UpdateTpMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateTpMutation, UpdateTpMutationVariables>;
+export const CashPlanVerificationStatusChoicesDocument = gql`
+    query cashPlanVerificationStatusChoices {
+  cashPlanVerificationStatusChoices {
+    name
+    value
+  }
+  paymentRecordDeliveryTypeChoices {
+    name
+    value
+  }
+}
+    `;
+export type CashPlanVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>, 'query'>;
+
+    export const CashPlanVerificationStatusChoicesComponent = (props: CashPlanVerificationStatusChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> query={CashPlanVerificationStatusChoicesDocument} {...props} />
+    );
+    
+export type CashPlanVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables> & TChildProps;
+export function withCashPlanVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanVerificationStatusChoicesQuery,
+  CashPlanVerificationStatusChoicesQueryVariables,
+  CashPlanVerificationStatusChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables, CashPlanVerificationStatusChoicesProps<TChildProps>>(CashPlanVerificationStatusChoicesDocument, {
+      alias: 'cashPlanVerificationStatusChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanVerificationStatusChoicesQuery__
+ *
+ * To run a query within a React component, call `useCashPlanVerificationStatusChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanVerificationStatusChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashPlanVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
+      }
+export function useCashPlanVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>(CashPlanVerificationStatusChoicesDocument, baseOptions);
+        }
+export type CashPlanVerificationStatusChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesQuery>;
+export type CashPlanVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationStatusChoicesLazyQuery>;
+export type CashPlanVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationStatusChoicesQuery, CashPlanVerificationStatusChoicesQueryVariables>;
+export const PaymentVerificationStatusChoicesDocument = gql`
+    query paymentVerificationStatusChoices {
+  paymentVerificationStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type PaymentVerificationStatusChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>, 'query'>;
+
+    export const PaymentVerificationStatusChoicesComponent = (props: PaymentVerificationStatusChoicesComponentProps) => (
+      <ApolloReactComponents.Query<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> query={PaymentVerificationStatusChoicesDocument} {...props} />
+    );
+    
+export type PaymentVerificationStatusChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables> & TChildProps;
+export function withPaymentVerificationStatusChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentVerificationStatusChoicesQuery,
+  PaymentVerificationStatusChoicesQueryVariables,
+  PaymentVerificationStatusChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables, PaymentVerificationStatusChoicesProps<TChildProps>>(PaymentVerificationStatusChoicesDocument, {
+      alias: 'paymentVerificationStatusChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentVerificationStatusChoicesQuery__
+ *
+ * To run a query within a React component, call `usePaymentVerificationStatusChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentVerificationStatusChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentVerificationStatusChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function usePaymentVerificationStatusChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+      }
+export function usePaymentVerificationStatusChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>(PaymentVerificationStatusChoicesDocument, baseOptions);
+        }
+export type PaymentVerificationStatusChoicesQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesQuery>;
+export type PaymentVerificationStatusChoicesLazyQueryHookResult = ReturnType<typeof usePaymentVerificationStatusChoicesLazyQuery>;
+export type PaymentVerificationStatusChoicesQueryResult = ApolloReactCommon.QueryResult<PaymentVerificationStatusChoicesQuery, PaymentVerificationStatusChoicesQueryVariables>;
+export const CashPlanVerificationSamplingChoicesDocument = gql`
+    query cashPlanVerificationSamplingChoices {
+  cashPlanVerificationSamplingChoices {
+    name
+    value
+  }
+}
+    `;
+export type CashPlanVerificationSamplingChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>, 'query'>;
+
+    export const CashPlanVerificationSamplingChoicesComponent = (props: CashPlanVerificationSamplingChoicesComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables> query={CashPlanVerificationSamplingChoicesDocument} {...props} />
+    );
+    
+export type CashPlanVerificationSamplingChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables> & TChildProps;
+export function withCashPlanVerificationSamplingChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanVerificationSamplingChoicesQuery,
+  CashPlanVerificationSamplingChoicesQueryVariables,
+  CashPlanVerificationSamplingChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables, CashPlanVerificationSamplingChoicesProps<TChildProps>>(CashPlanVerificationSamplingChoicesDocument, {
+      alias: 'cashPlanVerificationSamplingChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanVerificationSamplingChoicesQuery__
+ *
+ * To run a query within a React component, call `useCashPlanVerificationSamplingChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanVerificationSamplingChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanVerificationSamplingChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashPlanVerificationSamplingChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, baseOptions);
+      }
+export function useCashPlanVerificationSamplingChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>(CashPlanVerificationSamplingChoicesDocument, baseOptions);
+        }
+export type CashPlanVerificationSamplingChoicesQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesQuery>;
+export type CashPlanVerificationSamplingChoicesLazyQueryHookResult = ReturnType<typeof useCashPlanVerificationSamplingChoicesLazyQuery>;
+export type CashPlanVerificationSamplingChoicesQueryResult = ApolloReactCommon.QueryResult<CashPlanVerificationSamplingChoicesQuery, CashPlanVerificationSamplingChoicesQueryVariables>;
+export const AllAddIndividualFieldsDocument = gql`
+    query AllAddIndividualFields {
+  allAddIndividualsFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+  countriesChoices {
+    name
+    value
+  }
+  documentTypeChoices {
+    name
+    value
+  }
+  identityTypeChoices {
+    name
+    value
+  }
+}
+    `;
+export type AllAddIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>, 'query'>;
+
+    export const AllAddIndividualFieldsComponent = (props: AllAddIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables> query={AllAddIndividualFieldsDocument} {...props} />
+    );
+    
+export type AllAddIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables> & TChildProps;
+export function withAllAddIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAddIndividualFieldsQuery,
+  AllAddIndividualFieldsQueryVariables,
+  AllAddIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables, AllAddIndividualFieldsProps<TChildProps>>(AllAddIndividualFieldsDocument, {
+      alias: 'allAddIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAddIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllAddIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAddIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAddIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllAddIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, baseOptions);
+      }
+export function useAllAddIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>(AllAddIndividualFieldsDocument, baseOptions);
+        }
+export type AllAddIndividualFieldsQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsQuery>;
+export type AllAddIndividualFieldsLazyQueryHookResult = ReturnType<typeof useAllAddIndividualFieldsLazyQuery>;
+export type AllAddIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<AllAddIndividualFieldsQuery, AllAddIndividualFieldsQueryVariables>;
+export const AllAdminAreasDocument = gql`
+    query AllAdminAreas($title: String, $businessArea: String, $level: Int, $first: Int) {
+  allAdminAreas(title_Istartswith: $title, businessArea: $businessArea, first: $first, level: $level) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        title
+        pCode
+      }
+    }
+  }
+}
+    `;
+export type AllAdminAreasComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>, 'query'>;
+
+    export const AllAdminAreasComponent = (props: AllAdminAreasComponentProps) => (
+      <ApolloReactComponents.Query<AllAdminAreasQuery, AllAdminAreasQueryVariables> query={AllAdminAreasDocument} {...props} />
+    );
+    
+export type AllAdminAreasProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllAdminAreasQuery, AllAdminAreasQueryVariables> & TChildProps;
+export function withAllAdminAreas<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllAdminAreasQuery,
+  AllAdminAreasQueryVariables,
+  AllAdminAreasProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllAdminAreasQuery, AllAdminAreasQueryVariables, AllAdminAreasProps<TChildProps>>(AllAdminAreasDocument, {
+      alias: 'allAdminAreas',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllAdminAreasQuery__
+ *
+ * To run a query within a React component, call `useAllAdminAreasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllAdminAreasQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllAdminAreasQuery({
+ *   variables: {
+ *      title: // value for 'title'
+ *      businessArea: // value for 'businessArea'
+ *      level: // value for 'level'
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useAllAdminAreasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+      }
+export function useAllAdminAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllAdminAreasQuery, AllAdminAreasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllAdminAreasQuery, AllAdminAreasQueryVariables>(AllAdminAreasDocument, baseOptions);
+        }
+export type AllAdminAreasQueryHookResult = ReturnType<typeof useAllAdminAreasQuery>;
+export type AllAdminAreasLazyQueryHookResult = ReturnType<typeof useAllAdminAreasLazyQuery>;
+export type AllAdminAreasQueryResult = ApolloReactCommon.QueryResult<AllAdminAreasQuery, AllAdminAreasQueryVariables>;
+export const AllBusinessAreasDocument = gql`
+    query AllBusinessAreas {
+  allBusinessAreas {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        name
+        slug
+      }
+    }
+  }
+}
+    `;
+export type AllBusinessAreasComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>, 'query'>;
+
+    export const AllBusinessAreasComponent = (props: AllBusinessAreasComponentProps) => (
+      <ApolloReactComponents.Query<AllBusinessAreasQuery, AllBusinessAreasQueryVariables> query={AllBusinessAreasDocument} {...props} />
+    );
+    
+export type AllBusinessAreasProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllBusinessAreasQuery, AllBusinessAreasQueryVariables> & TChildProps;
+export function withAllBusinessAreas<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllBusinessAreasQuery,
+  AllBusinessAreasQueryVariables,
+  AllBusinessAreasProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllBusinessAreasQuery, AllBusinessAreasQueryVariables, AllBusinessAreasProps<TChildProps>>(AllBusinessAreasDocument, {
+      alias: 'allBusinessAreas',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllBusinessAreasQuery__
+ *
+ * To run a query within a React component, call `useAllBusinessAreasQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllBusinessAreasQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllBusinessAreasQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllBusinessAreasQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, baseOptions);
+      }
+export function useAllBusinessAreasLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>(AllBusinessAreasDocument, baseOptions);
+        }
+export type AllBusinessAreasQueryHookResult = ReturnType<typeof useAllBusinessAreasQuery>;
+export type AllBusinessAreasLazyQueryHookResult = ReturnType<typeof useAllBusinessAreasLazyQuery>;
+export type AllBusinessAreasQueryResult = ApolloReactCommon.QueryResult<AllBusinessAreasQuery, AllBusinessAreasQueryVariables>;
+export const AllCashPlansDocument = gql`
+    query AllCashPlans($program: ID, $after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $search: String, $serviceProvider: String, $deliveryType: [String], $verificationStatus: [String], $startDateGte: DateTime, $endDateLte: DateTime, $businessArea: String) {
+  allCashPlans(program: $program, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, search: $search, serviceProvider_FullName_Startswith: $serviceProvider, deliveryType: $deliveryType, verificationStatus: $verificationStatus, startDate_Gte: $startDateGte, endDate_Lte: $endDateLte, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        caId
+        verificationStatus
+        assistanceThrough
+        totalNumberOfHouseholds
+        serviceProvider {
+          id
+          caId
+          fullName
+        }
+        deliveryType
+        startDate
+        endDate
+        program {
+          id
+          name
+        }
+        totalPersonsCovered
+        dispersionDate
+        assistanceMeasurement
+        status
+        currency
+        totalEntitledQuantity
+        totalDeliveredQuantity
+        totalUndeliveredQuantity
+        updatedAt
+      }
+    }
+  }
+}
+    `;
+export type AllCashPlansComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllCashPlansQuery, AllCashPlansQueryVariables>, 'query'>;
+
+    export const AllCashPlansComponent = (props: AllCashPlansComponentProps) => (
+      <ApolloReactComponents.Query<AllCashPlansQuery, AllCashPlansQueryVariables> query={AllCashPlansDocument} {...props} />
+    );
+    
+export type AllCashPlansProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllCashPlansQuery, AllCashPlansQueryVariables> & TChildProps;
+export function withAllCashPlans<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllCashPlansQuery,
+  AllCashPlansQueryVariables,
+  AllCashPlansProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllCashPlansQuery, AllCashPlansQueryVariables, AllCashPlansProps<TChildProps>>(AllCashPlansDocument, {
+      alias: 'allCashPlans',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllCashPlansQuery__
+ *
+ * To run a query within a React component, call `useAllCashPlansQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllCashPlansQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllCashPlansQuery({
+ *   variables: {
+ *      program: // value for 'program'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
+ *      serviceProvider: // value for 'serviceProvider'
+ *      deliveryType: // value for 'deliveryType'
+ *      verificationStatus: // value for 'verificationStatus'
+ *      startDateGte: // value for 'startDateGte'
+ *      endDateLte: // value for 'endDateLte'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllCashPlansQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllCashPlansQuery, AllCashPlansQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, baseOptions);
+      }
+export function useAllCashPlansLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllCashPlansQuery, AllCashPlansQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllCashPlansQuery, AllCashPlansQueryVariables>(AllCashPlansDocument, baseOptions);
+        }
+export type AllCashPlansQueryHookResult = ReturnType<typeof useAllCashPlansQuery>;
+export type AllCashPlansLazyQueryHookResult = ReturnType<typeof useAllCashPlansLazyQuery>;
+export type AllCashPlansQueryResult = ApolloReactCommon.QueryResult<AllCashPlansQuery, AllCashPlansQueryVariables>;
+export const AllChartsDocument = gql`
+    query AllCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String) {
+  chartProgrammesBySector(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    labels
+    datasets {
+      label
+      data
+    }
+  }
+  chartPaymentVerification(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      label
+      data
+    }
+    labels
+    households
+    averageSampleSize
+  }
+  chartVolumeByDeliveryMechanism(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartPayment(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartGrievances(businessAreaSlug: $businessAreaSlug, year: $year, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+    }
+    labels
+    totalNumberOfGrievances
+    totalNumberOfFeedback
+    totalNumberOfOpenSensitive
+  }
+  sectionHouseholdsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    total
+  }
+  sectionIndividualsReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    total
+  }
+  sectionChildReached(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    total
+  }
+  chartIndividualsReachedByAgeAndGender(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+    }
+    labels
+  }
+  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+  sectionTotalTransferred(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    total
+  }
+  chartTotalTransferredByMonth(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+}
+    `;
+export type AllChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllChartsQuery, AllChartsQueryVariables>, 'query'> & ({ variables: AllChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllChartsComponent = (props: AllChartsComponentProps) => (
+      <ApolloReactComponents.Query<AllChartsQuery, AllChartsQueryVariables> query={AllChartsDocument} {...props} />
+    );
+    
+export type AllChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllChartsQuery, AllChartsQueryVariables> & TChildProps;
+export function withAllCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllChartsQuery,
+  AllChartsQueryVariables,
+  AllChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllChartsQuery, AllChartsQueryVariables, AllChartsProps<TChildProps>>(AllChartsDocument, {
+      alias: 'allCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllChartsQuery__
+ *
+ * To run a query within a React component, call `useAllChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      year: // value for 'year'
+ *      program: // value for 'program'
+ *      administrativeArea: // value for 'administrativeArea'
+ *   },
+ * });
+ */
+export function useAllChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, baseOptions);
+      }
+export function useAllChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllChartsQuery, AllChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllChartsQuery, AllChartsQueryVariables>(AllChartsDocument, baseOptions);
+        }
+export type AllChartsQueryHookResult = ReturnType<typeof useAllChartsQuery>;
+export type AllChartsLazyQueryHookResult = ReturnType<typeof useAllChartsLazyQuery>;
+export type AllChartsQueryResult = ApolloReactCommon.QueryResult<AllChartsQuery, AllChartsQueryVariables>;
+export const AllEditHouseholdFieldsDocument = gql`
+    query AllEditHouseholdFields {
+  allEditHouseholdFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+  countriesChoices {
+    name
+    value
+  }
+}
+    `;
+export type AllEditHouseholdFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>, 'query'>;
+
+    export const AllEditHouseholdFieldsComponent = (props: AllEditHouseholdFieldsComponentProps) => (
+      <ApolloReactComponents.Query<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables> query={AllEditHouseholdFieldsDocument} {...props} />
+    );
+    
+export type AllEditHouseholdFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables> & TChildProps;
+export function withAllEditHouseholdFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllEditHouseholdFieldsQuery,
+  AllEditHouseholdFieldsQueryVariables,
+  AllEditHouseholdFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables, AllEditHouseholdFieldsProps<TChildProps>>(AllEditHouseholdFieldsDocument, {
+      alias: 'allEditHouseholdFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllEditHouseholdFieldsQuery__
+ *
+ * To run a query within a React component, call `useAllEditHouseholdFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllEditHouseholdFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllEditHouseholdFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllEditHouseholdFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, baseOptions);
+      }
+export function useAllEditHouseholdFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>(AllEditHouseholdFieldsDocument, baseOptions);
+        }
+export type AllEditHouseholdFieldsQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsQuery>;
+export type AllEditHouseholdFieldsLazyQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsLazyQuery>;
+export type AllEditHouseholdFieldsQueryResult = ApolloReactCommon.QueryResult<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>;
+export const AllGrievanceTicketDocument = gql`
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $admin: [ID], $orderBy: String) {
+  allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        status
+        assignedTo {
+          id
+          firstName
+          lastName
+          email
+        }
+        createdBy {
+          id
+        }
+        category
+        createdAt
+        userModified
+        admin
+        household {
+          unicefId
+          id
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllGrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>, 'query'> & ({ variables: AllGrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllGrievanceTicketComponent = (props: AllGrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Query<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables> query={AllGrievanceTicketDocument} {...props} />
+    );
+    
+export type AllGrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables> & TChildProps;
+export function withAllGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllGrievanceTicketQuery,
+  AllGrievanceTicketQueryVariables,
+  AllGrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables, AllGrievanceTicketProps<TChildProps>>(AllGrievanceTicketDocument, {
+      alias: 'allGrievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllGrievanceTicketQuery__
+ *
+ * To run a query within a React component, call `useAllGrievanceTicketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllGrievanceTicketQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllGrievanceTicketQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      id: // value for 'id'
+ *      category: // value for 'category'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      fsp: // value for 'fsp'
+ *      createdAtRange: // value for 'createdAtRange'
+ *      admin: // value for 'admin'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllGrievanceTicketQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, baseOptions);
+      }
+export function useAllGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>(AllGrievanceTicketDocument, baseOptions);
+        }
+export type AllGrievanceTicketQueryHookResult = ReturnType<typeof useAllGrievanceTicketQuery>;
+export type AllGrievanceTicketLazyQueryHookResult = ReturnType<typeof useAllGrievanceTicketLazyQuery>;
+export type AllGrievanceTicketQueryResult = ApolloReactCommon.QueryResult<AllGrievanceTicketQuery, AllGrievanceTicketQueryVariables>;
+export const AllHouseholdsDocument = gql`
+    query AllHouseholds($after: String, $before: String, $first: Int, $last: Int, $businessArea: String, $orderBy: String, $familySize: String, $programs: [ID], $headOfHouseholdFullNameIcontains: String, $adminArea: ID, $search: String, $residenceStatus: String, $lastRegistrationDate: String, $admin2: [ID], $withdrawn: Boolean) {
+  allHouseholds(after: $after, before: $before, first: $first, last: $last, businessArea: $businessArea, size: $familySize, orderBy: $orderBy, programs: $programs, headOfHousehold_FullName_Startswith: $headOfHouseholdFullNameIcontains, adminArea: $adminArea, search: $search, residenceStatus: $residenceStatus, lastRegistrationDate: $lastRegistrationDate, admin2: $admin2, withdrawn: $withdrawn) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...householdMinimal
+      }
+    }
+  }
+}
+    ${HouseholdMinimalFragmentDoc}`;
+export type AllHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>, 'query'>;
+
+    export const AllHouseholdsComponent = (props: AllHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<AllHouseholdsQuery, AllHouseholdsQueryVariables> query={AllHouseholdsDocument} {...props} />
+    );
+    
+export type AllHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllHouseholdsQuery, AllHouseholdsQueryVariables> & TChildProps;
+export function withAllHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllHouseholdsQuery,
+  AllHouseholdsQueryVariables,
+  AllHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllHouseholdsQuery, AllHouseholdsQueryVariables, AllHouseholdsProps<TChildProps>>(AllHouseholdsDocument, {
+      alias: 'allHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useAllHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *      orderBy: // value for 'orderBy'
+ *      familySize: // value for 'familySize'
+ *      programs: // value for 'programs'
+ *      headOfHouseholdFullNameIcontains: // value for 'headOfHouseholdFullNameIcontains'
+ *      adminArea: // value for 'adminArea'
+ *      search: // value for 'search'
+ *      residenceStatus: // value for 'residenceStatus'
+ *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      admin2: // value for 'admin2'
+ *      withdrawn: // value for 'withdrawn'
+ *   },
+ * });
+ */
+export function useAllHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, baseOptions);
+      }
+export function useAllHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllHouseholdsQuery, AllHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllHouseholdsQuery, AllHouseholdsQueryVariables>(AllHouseholdsDocument, baseOptions);
+        }
+export type AllHouseholdsQueryHookResult = ReturnType<typeof useAllHouseholdsQuery>;
+export type AllHouseholdsLazyQueryHookResult = ReturnType<typeof useAllHouseholdsLazyQuery>;
+export type AllHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsQuery, AllHouseholdsQueryVariables>;
+export const AllHouseholdsFlexFieldsAttributesDocument = gql`
+    query AllHouseholdsFlexFieldsAttributes {
+  allHouseholdsFlexFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllHouseholdsFlexFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllHouseholdsFlexFieldsAttributesComponent = (props: AllHouseholdsFlexFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables> query={AllHouseholdsFlexFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllHouseholdsFlexFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables> & TChildProps;
+export function withAllHouseholdsFlexFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllHouseholdsFlexFieldsAttributesQuery,
+  AllHouseholdsFlexFieldsAttributesQueryVariables,
+  AllHouseholdsFlexFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables, AllHouseholdsFlexFieldsAttributesProps<TChildProps>>(AllHouseholdsFlexFieldsAttributesDocument, {
+      alias: 'allHouseholdsFlexFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllHouseholdsFlexFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllHouseholdsFlexFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllHouseholdsFlexFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllHouseholdsFlexFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllHouseholdsFlexFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, baseOptions);
+      }
+export function useAllHouseholdsFlexFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>(AllHouseholdsFlexFieldsAttributesDocument, baseOptions);
+        }
+export type AllHouseholdsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesQuery>;
+export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesLazyQuery>;
+export type AllHouseholdsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>;
+export const AllIndividualsDocument = gql`
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        ...individualMinimal
+      }
+    }
+  }
+}
+    ${IndividualMinimalFragmentDoc}`;
+export type AllIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllIndividualsQuery, AllIndividualsQueryVariables>, 'query'>;
+
+    export const AllIndividualsComponent = (props: AllIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllIndividualsQuery, AllIndividualsQueryVariables> query={AllIndividualsDocument} {...props} />
+    );
+    
+export type AllIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllIndividualsQuery, AllIndividualsQueryVariables> & TChildProps;
+export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllIndividualsQuery,
+  AllIndividualsQueryVariables,
+  AllIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllIndividualsQuery, AllIndividualsQueryVariables, AllIndividualsProps<TChildProps>>(AllIndividualsDocument, {
+      alias: 'allIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllIndividualsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      fullNameContains: // value for 'fullNameContains'
+ *      sex: // value for 'sex'
+ *      age: // value for 'age'
+ *      orderBy: // value for 'orderBy'
+ *      search: // value for 'search'
+ *      programs: // value for 'programs'
+ *      status: // value for 'status'
+ *      lastRegistrationDate: // value for 'lastRegistrationDate'
+ *      householdId: // value for 'householdId'
+ *      excludedId: // value for 'excludedId'
+ *      businessArea: // value for 'businessArea'
+ *      adminArea: // value for 'adminArea'
+ *      withdrawn: // value for 'withdrawn'
+ *   },
+ * });
+ */
+export function useAllIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, baseOptions);
+      }
+export function useAllIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllIndividualsQuery, AllIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllIndividualsQuery, AllIndividualsQueryVariables>(AllIndividualsDocument, baseOptions);
+        }
+export type AllIndividualsQueryHookResult = ReturnType<typeof useAllIndividualsQuery>;
+export type AllIndividualsLazyQueryHookResult = ReturnType<typeof useAllIndividualsLazyQuery>;
+export type AllIndividualsQueryResult = ApolloReactCommon.QueryResult<AllIndividualsQuery, AllIndividualsQueryVariables>;
+export const AllIndividualsFlexFieldsAttributesDocument = gql`
+    query AllIndividualsFlexFieldsAttributes {
+  allIndividualsFlexFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    required
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type AllIndividualsFlexFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllIndividualsFlexFieldsAttributesComponent = (props: AllIndividualsFlexFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables> query={AllIndividualsFlexFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllIndividualsFlexFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables> & TChildProps;
+export function withAllIndividualsFlexFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllIndividualsFlexFieldsAttributesQuery,
+  AllIndividualsFlexFieldsAttributesQueryVariables,
+  AllIndividualsFlexFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables, AllIndividualsFlexFieldsAttributesProps<TChildProps>>(AllIndividualsFlexFieldsAttributesDocument, {
+      alias: 'allIndividualsFlexFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllIndividualsFlexFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllIndividualsFlexFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllIndividualsFlexFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllIndividualsFlexFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllIndividualsFlexFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, baseOptions);
+      }
+export function useAllIndividualsFlexFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>(AllIndividualsFlexFieldsAttributesDocument, baseOptions);
+        }
+export type AllIndividualsFlexFieldsAttributesQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesQuery>;
+export type AllIndividualsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllIndividualsFlexFieldsAttributesLazyQuery>;
+export type AllIndividualsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllIndividualsFlexFieldsAttributesQuery, AllIndividualsFlexFieldsAttributesQueryVariables>;
+export const AllLogEntriesDocument = gql`
+    query AllLogEntries($businessArea: String!, $objectId: UUID, $after: String, $before: String, $first: Int, $last: Int, $search: String, $module: String) {
+  allLogEntries(after: $after, before: $before, first: $first, last: $last, objectId: $objectId, businessArea: $businessArea, search: $search, module: $module) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        action
+        changes
+        objectRepr
+        objectId
+        timestamp
+        contentType {
+          id
+          appLabel
+          model
+          name
+        }
+        user {
+          id
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+  logEntryActionChoices {
+    name
+    value
+  }
+}
+    `;
+export type AllLogEntriesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>, 'query'> & ({ variables: AllLogEntriesQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllLogEntriesComponent = (props: AllLogEntriesComponentProps) => (
+      <ApolloReactComponents.Query<AllLogEntriesQuery, AllLogEntriesQueryVariables> query={AllLogEntriesDocument} {...props} />
+    );
+    
+export type AllLogEntriesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllLogEntriesQuery, AllLogEntriesQueryVariables> & TChildProps;
+export function withAllLogEntries<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllLogEntriesQuery,
+  AllLogEntriesQueryVariables,
+  AllLogEntriesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllLogEntriesQuery, AllLogEntriesQueryVariables, AllLogEntriesProps<TChildProps>>(AllLogEntriesDocument, {
+      alias: 'allLogEntries',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllLogEntriesQuery__
+ *
+ * To run a query within a React component, call `useAllLogEntriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllLogEntriesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllLogEntriesQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *      objectId: // value for 'objectId'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      search: // value for 'search'
+ *      module: // value for 'module'
+ *   },
+ * });
+ */
+export function useAllLogEntriesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, baseOptions);
+      }
+export function useAllLogEntriesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllLogEntriesQuery, AllLogEntriesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllLogEntriesQuery, AllLogEntriesQueryVariables>(AllLogEntriesDocument, baseOptions);
+        }
+export type AllLogEntriesQueryHookResult = ReturnType<typeof useAllLogEntriesQuery>;
+export type AllLogEntriesLazyQueryHookResult = ReturnType<typeof useAllLogEntriesLazyQuery>;
+export type AllLogEntriesQueryResult = ApolloReactCommon.QueryResult<AllLogEntriesQuery, AllLogEntriesQueryVariables>;
+export const AllPaymentRecordsDocument = gql`
+    query AllPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
+  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        createdAt
+        updatedAt
+        fullName
+        statusDate
+        status
+        caId
+        totalPersonsCovered
+        household {
+          id
+          unicefId
+          size
+        }
+        currency
+        entitlementQuantity
+        deliveredQuantity
+        deliveredQuantityUsd
+        deliveryDate
+        cashPlan {
+          id
+          program {
+            id
+            name
+          }
+        }
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>, 'query'>;
+
+    export const AllPaymentRecordsComponent = (props: AllPaymentRecordsComponentProps) => (
+      <ApolloReactComponents.Query<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables> query={AllPaymentRecordsDocument} {...props} />
+    );
+    
+export type AllPaymentRecordsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables> & TChildProps;
+export function withAllPaymentRecords<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllPaymentRecordsQuery,
+  AllPaymentRecordsQueryVariables,
+  AllPaymentRecordsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables, AllPaymentRecordsProps<TChildProps>>(AllPaymentRecordsDocument, {
+      alias: 'allPaymentRecords',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllPaymentRecordsQuery__
+ *
+ * To run a query within a React component, call `useAllPaymentRecordsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPaymentRecordsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllPaymentRecordsQuery({
+ *   variables: {
+ *      cashPlan: // value for 'cashPlan'
+ *      household: // value for 'household'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllPaymentRecordsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, baseOptions);
+      }
+export function useAllPaymentRecordsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>(AllPaymentRecordsDocument, baseOptions);
+        }
+export type AllPaymentRecordsQueryHookResult = ReturnType<typeof useAllPaymentRecordsQuery>;
+export type AllPaymentRecordsLazyQueryHookResult = ReturnType<typeof useAllPaymentRecordsLazyQuery>;
+export type AllPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<AllPaymentRecordsQuery, AllPaymentRecordsQueryVariables>;
+export const AllPaymentVerificationsDocument = gql`
+    query AllPaymentVerifications($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $cashPlanPaymentVerification: ID, $search: String, $status: String, $businessArea: String) {
+  allPaymentVerifications(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, cashPlanPaymentVerification: $cashPlanPaymentVerification, search: $search, status: $status, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        paymentRecord {
+          id
+          caId
+          deliveredQuantity
+          currency
+          household {
+            unicefId
+            id
+            headOfHousehold {
+              id
+              fullName
+              phoneNo
+              phoneNoAlternative
+            }
+          }
+        }
+        status
+        receivedAmount
+      }
+    }
+  }
+}
+    `;
+export type AllPaymentVerificationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>, 'query'>;
+
+    export const AllPaymentVerificationsComponent = (props: AllPaymentVerificationsComponentProps) => (
+      <ApolloReactComponents.Query<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables> query={AllPaymentVerificationsDocument} {...props} />
+    );
+    
+export type AllPaymentVerificationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables> & TChildProps;
+export function withAllPaymentVerifications<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllPaymentVerificationsQuery,
+  AllPaymentVerificationsQueryVariables,
+  AllPaymentVerificationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables, AllPaymentVerificationsProps<TChildProps>>(AllPaymentVerificationsDocument, {
+      alias: 'allPaymentVerifications',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllPaymentVerificationsQuery__
+ *
+ * To run a query within a React component, call `useAllPaymentVerificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllPaymentVerificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllPaymentVerificationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      cashPlanPaymentVerification: // value for 'cashPlanPaymentVerification'
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllPaymentVerificationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, baseOptions);
+      }
+export function useAllPaymentVerificationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>(AllPaymentVerificationsDocument, baseOptions);
+        }
+export type AllPaymentVerificationsQueryHookResult = ReturnType<typeof useAllPaymentVerificationsQuery>;
+export type AllPaymentVerificationsLazyQueryHookResult = ReturnType<typeof useAllPaymentVerificationsLazyQuery>;
+export type AllPaymentVerificationsQueryResult = ApolloReactCommon.QueryResult<AllPaymentVerificationsQuery, AllPaymentVerificationsQueryVariables>;
+export const AllProgramsDocument = gql`
+    query AllPrograms($before: String, $after: String, $first: Int, $last: Int, $status: [String], $sector: [String], $businessArea: String!, $search: String, $numberOfHouseholds: String, $budget: String, $startDate: Date, $endDate: Date, $orderBy: String) {
+  allPrograms(before: $before, after: $after, first: $first, last: $last, status: $status, sector: $sector, businessArea: $businessArea, search: $search, numberOfHouseholds: $numberOfHouseholds, budget: $budget, orderBy: $orderBy, startDate: $startDate, endDate: $endDate) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        name
+        startDate
+        endDate
+        status
+        caId
+        description
+        budget
+        frequencyOfPayments
+        populationGoal
+        sector
+        totalNumberOfHouseholds
+        individualDataNeeded
+      }
+    }
+  }
+}
+    `;
+export type AllProgramsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllProgramsQuery, AllProgramsQueryVariables>, 'query'> & ({ variables: AllProgramsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllProgramsComponent = (props: AllProgramsComponentProps) => (
+      <ApolloReactComponents.Query<AllProgramsQuery, AllProgramsQueryVariables> query={AllProgramsDocument} {...props} />
+    );
+    
+export type AllProgramsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllProgramsQuery, AllProgramsQueryVariables> & TChildProps;
+export function withAllPrograms<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllProgramsQuery,
+  AllProgramsQueryVariables,
+  AllProgramsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllProgramsQuery, AllProgramsQueryVariables, AllProgramsProps<TChildProps>>(AllProgramsDocument, {
+      alias: 'allPrograms',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllProgramsQuery__
+ *
+ * To run a query within a React component, call `useAllProgramsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllProgramsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllProgramsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      sector: // value for 'sector'
+ *      businessArea: // value for 'businessArea'
+ *      search: // value for 'search'
+ *      numberOfHouseholds: // value for 'numberOfHouseholds'
+ *      budget: // value for 'budget'
+ *      startDate: // value for 'startDate'
+ *      endDate: // value for 'endDate'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllProgramsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllProgramsQuery, AllProgramsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, baseOptions);
+      }
+export function useAllProgramsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllProgramsQuery, AllProgramsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllProgramsQuery, AllProgramsQueryVariables>(AllProgramsDocument, baseOptions);
+        }
+export type AllProgramsQueryHookResult = ReturnType<typeof useAllProgramsQuery>;
+export type AllProgramsLazyQueryHookResult = ReturnType<typeof useAllProgramsLazyQuery>;
+export type AllProgramsQueryResult = ApolloReactCommon.QueryResult<AllProgramsQuery, AllProgramsQueryVariables>;
+export const AllRapidProFlowsDocument = gql`
+    query AllRapidProFlows($businessAreaSlug: String!) {
+  allRapidProFlows(businessAreaSlug: $businessAreaSlug) {
+    id
+    name
+  }
+}
+    `;
+export type AllRapidProFlowsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>, 'query'> & ({ variables: AllRapidProFlowsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllRapidProFlowsComponent = (props: AllRapidProFlowsComponentProps) => (
+      <ApolloReactComponents.Query<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables> query={AllRapidProFlowsDocument} {...props} />
+    );
+    
+export type AllRapidProFlowsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables> & TChildProps;
+export function withAllRapidProFlows<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllRapidProFlowsQuery,
+  AllRapidProFlowsQueryVariables,
+  AllRapidProFlowsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables, AllRapidProFlowsProps<TChildProps>>(AllRapidProFlowsDocument, {
+      alias: 'allRapidProFlows',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllRapidProFlowsQuery__
+ *
+ * To run a query within a React component, call `useAllRapidProFlowsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllRapidProFlowsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllRapidProFlowsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllRapidProFlowsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, baseOptions);
+      }
+export function useAllRapidProFlowsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>(AllRapidProFlowsDocument, baseOptions);
+        }
+export type AllRapidProFlowsQueryHookResult = ReturnType<typeof useAllRapidProFlowsQuery>;
+export type AllRapidProFlowsLazyQueryHookResult = ReturnType<typeof useAllRapidProFlowsLazyQuery>;
+export type AllRapidProFlowsQueryResult = ApolloReactCommon.QueryResult<AllRapidProFlowsQuery, AllRapidProFlowsQueryVariables>;
+export const AllReportsDocument = gql`
+    query AllReports($before: String, $after: String, $first: Int, $last: Int, $status: [String], $businessArea: String!, $createdFrom: DateTime, $createdTo: DateTime, $reportType: [String], $createdBy: ID, $orderBy: String) {
+  allReports(before: $before, after: $after, first: $first, last: $last, status: $status, businessArea: $businessArea, createdFrom: $createdFrom, createdTo: $createdTo, reportType: $reportType, createdBy: $createdBy, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    totalCount
+    edgeCount
+    edges {
+      cursor
+      node {
+        id
+        reportType
+        dateFrom
+        dateTo
+        status
+        createdAt
+        createdBy {
+          firstName
+          lastName
+        }
+        fileUrl
+        numberOfRecords
+      }
+    }
+  }
+}
+    `;
+export type AllReportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllReportsQuery, AllReportsQueryVariables>, 'query'> & ({ variables: AllReportsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllReportsComponent = (props: AllReportsComponentProps) => (
+      <ApolloReactComponents.Query<AllReportsQuery, AllReportsQueryVariables> query={AllReportsDocument} {...props} />
+    );
+    
+export type AllReportsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllReportsQuery, AllReportsQueryVariables> & TChildProps;
+export function withAllReports<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllReportsQuery,
+  AllReportsQueryVariables,
+  AllReportsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllReportsQuery, AllReportsQueryVariables, AllReportsProps<TChildProps>>(AllReportsDocument, {
+      alias: 'allReports',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllReportsQuery__
+ *
+ * To run a query within a React component, call `useAllReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllReportsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      status: // value for 'status'
+ *      businessArea: // value for 'businessArea'
+ *      createdFrom: // value for 'createdFrom'
+ *      createdTo: // value for 'createdTo'
+ *      reportType: // value for 'reportType'
+ *      createdBy: // value for 'createdBy'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllReportsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, baseOptions);
+      }
+export function useAllReportsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllReportsQuery, AllReportsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllReportsQuery, AllReportsQueryVariables>(AllReportsDocument, baseOptions);
+        }
+export type AllReportsQueryHookResult = ReturnType<typeof useAllReportsQuery>;
+export type AllReportsLazyQueryHookResult = ReturnType<typeof useAllReportsLazyQuery>;
+export type AllReportsQueryResult = ApolloReactCommon.QueryResult<AllReportsQuery, AllReportsQueryVariables>;
+export const AllSanctionListIndividualsDocument = gql`
+    query AllSanctionListIndividuals($referenceNumber: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String, $fullNameContains: String) {
+  allSanctionListIndividuals(fullName_Startswith: $fullNameContains, referenceNumber: $referenceNumber, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        referenceNumber
+        fullName
+        listedOn
+        documents {
+          edges {
+            node {
+              id
+              documentNumber
+              typeOfDocument
+              issuingCountry
+            }
+          }
+        }
+        aliasNames {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
+        datesOfBirth {
+          edges {
+            node {
+              id
+              date
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type AllSanctionListIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>, 'query'> & ({ variables: AllSanctionListIndividualsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllSanctionListIndividualsComponent = (props: AllSanctionListIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables> query={AllSanctionListIndividualsDocument} {...props} />
+    );
+    
+export type AllSanctionListIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables> & TChildProps;
+export function withAllSanctionListIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllSanctionListIndividualsQuery,
+  AllSanctionListIndividualsQueryVariables,
+  AllSanctionListIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables, AllSanctionListIndividualsProps<TChildProps>>(AllSanctionListIndividualsDocument, {
+      alias: 'allSanctionListIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllSanctionListIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllSanctionListIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllSanctionListIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllSanctionListIndividualsQuery({
+ *   variables: {
+ *      referenceNumber: // value for 'referenceNumber'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      fullNameContains: // value for 'fullNameContains'
+ *   },
+ * });
+ */
+export function useAllSanctionListIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, baseOptions);
+      }
+export function useAllSanctionListIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>(AllSanctionListIndividualsDocument, baseOptions);
+        }
+export type AllSanctionListIndividualsQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsQuery>;
+export type AllSanctionListIndividualsLazyQueryHookResult = ReturnType<typeof useAllSanctionListIndividualsLazyQuery>;
+export type AllSanctionListIndividualsQueryResult = ApolloReactCommon.QueryResult<AllSanctionListIndividualsQuery, AllSanctionListIndividualsQueryVariables>;
+export const AllSteficonRulesDocument = gql`
+    query AllSteficonRules($enabled: Boolean, $deprecated: Boolean) {
+  allSteficonRules(enabled: $enabled, deprecated: $deprecated) {
+    edges {
+      node {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+export type AllSteficonRulesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>, 'query'>;
+
+    export const AllSteficonRulesComponent = (props: AllSteficonRulesComponentProps) => (
+      <ApolloReactComponents.Query<AllSteficonRulesQuery, AllSteficonRulesQueryVariables> query={AllSteficonRulesDocument} {...props} />
+    );
+    
+export type AllSteficonRulesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllSteficonRulesQuery, AllSteficonRulesQueryVariables> & TChildProps;
+export function withAllSteficonRules<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllSteficonRulesQuery,
+  AllSteficonRulesQueryVariables,
+  AllSteficonRulesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllSteficonRulesQuery, AllSteficonRulesQueryVariables, AllSteficonRulesProps<TChildProps>>(AllSteficonRulesDocument, {
+      alias: 'allSteficonRules',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllSteficonRulesQuery__
+ *
+ * To run a query within a React component, call `useAllSteficonRulesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllSteficonRulesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllSteficonRulesQuery({
+ *   variables: {
+ *      enabled: // value for 'enabled'
+ *      deprecated: // value for 'deprecated'
+ *   },
+ * });
+ */
+export function useAllSteficonRulesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, baseOptions);
+      }
+export function useAllSteficonRulesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>(AllSteficonRulesDocument, baseOptions);
+        }
+export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRulesQuery>;
+export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
+export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
+export const AllTargetPopulationsDocument = gql`
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea, program: $program) {
+    edges {
+      node {
+        ...targetPopulationMinimal
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    ${TargetPopulationMinimalFragmentDoc}`;
+export type AllTargetPopulationsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>, 'query'>;
+
+    export const AllTargetPopulationsComponent = (props: AllTargetPopulationsComponentProps) => (
+      <ApolloReactComponents.Query<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> query={AllTargetPopulationsDocument} {...props} />
+    );
+    
+export type AllTargetPopulationsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables> & TChildProps;
+export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllTargetPopulationsQuery,
+  AllTargetPopulationsQueryVariables,
+  AllTargetPopulationsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables, AllTargetPopulationsProps<TChildProps>>(AllTargetPopulationsDocument, {
+      alias: 'allTargetPopulations',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllTargetPopulationsQuery__
+ *
+ * To run a query within a React component, call `useAllTargetPopulationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllTargetPopulationsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllTargetPopulationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name: // value for 'name'
+ *      status: // value for 'status'
+ *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
+ *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
+ *      businessArea: // value for 'businessArea'
+ *      program: // value for 'program'
+ *   },
+ * });
+ */
+export function useAllTargetPopulationsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+      }
+export function useAllTargetPopulationsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>(AllTargetPopulationsDocument, baseOptions);
+        }
+export type AllTargetPopulationsQueryHookResult = ReturnType<typeof useAllTargetPopulationsQuery>;
+export type AllTargetPopulationsLazyQueryHookResult = ReturnType<typeof useAllTargetPopulationsLazyQuery>;
+export type AllTargetPopulationsQueryResult = ApolloReactCommon.QueryResult<AllTargetPopulationsQuery, AllTargetPopulationsQueryVariables>;
+export const AllUsersDocument = gql`
+    query AllUsers($search: String, $status: [String], $partner: [String], $roles: [String], $businessArea: String!, $first: Int, $last: Int, $after: String, $before: String, $orderBy: String) {
+  allUsers(search: $search, status: $status, partner: $partner, roles: $roles, businessArea: $businessArea, first: $first, last: $last, after: $after, before: $before, orderBy: $orderBy) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      endCursor
+      startCursor
+    }
+    edges {
+      node {
+        id
+        firstName
+        lastName
+        username
+        email
+        isActive
+        lastLogin
+        status
+        partner
+        userRoles {
+          businessArea {
+            name
+          }
+          role {
+            name
+            permissions
+          }
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type AllUsersComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllUsersQuery, AllUsersQueryVariables>, 'query'> & ({ variables: AllUsersQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllUsersComponent = (props: AllUsersComponentProps) => (
+      <ApolloReactComponents.Query<AllUsersQuery, AllUsersQueryVariables> query={AllUsersDocument} {...props} />
+    );
+    
+export type AllUsersProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllUsersQuery, AllUsersQueryVariables> & TChildProps;
+export function withAllUsers<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllUsersQuery,
+  AllUsersQueryVariables,
+  AllUsersProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllUsersQuery, AllUsersQueryVariables, AllUsersProps<TChildProps>>(AllUsersDocument, {
+      alias: 'allUsers',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllUsersQuery__
+ *
+ * To run a query within a React component, call `useAllUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllUsersQuery({
+ *   variables: {
+ *      search: // value for 'search'
+ *      status: // value for 'status'
+ *      partner: // value for 'partner'
+ *      roles: // value for 'roles'
+ *      businessArea: // value for 'businessArea'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useAllUsersQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+      }
+export function useAllUsersLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllUsersQuery, AllUsersQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllUsersQuery, AllUsersQueryVariables>(AllUsersDocument, baseOptions);
+        }
+export type AllUsersQueryHookResult = ReturnType<typeof useAllUsersQuery>;
+export type AllUsersLazyQueryHookResult = ReturnType<typeof useAllUsersLazyQuery>;
+export type AllUsersQueryResult = ApolloReactCommon.QueryResult<AllUsersQuery, AllUsersQueryVariables>;
+export const CashAssistUrlPrefixDocument = gql`
+    query CashAssistUrlPrefix {
+  cashAssistUrlPrefix
+}
+    `;
+export type CashAssistUrlPrefixComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>, 'query'>;
+
+    export const CashAssistUrlPrefixComponent = (props: CashAssistUrlPrefixComponentProps) => (
+      <ApolloReactComponents.Query<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables> query={CashAssistUrlPrefixDocument} {...props} />
+    );
+    
+export type CashAssistUrlPrefixProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables> & TChildProps;
+export function withCashAssistUrlPrefix<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashAssistUrlPrefixQuery,
+  CashAssistUrlPrefixQueryVariables,
+  CashAssistUrlPrefixProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables, CashAssistUrlPrefixProps<TChildProps>>(CashAssistUrlPrefixDocument, {
+      alias: 'cashAssistUrlPrefix',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashAssistUrlPrefixQuery__
+ *
+ * To run a query within a React component, call `useCashAssistUrlPrefixQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashAssistUrlPrefixQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashAssistUrlPrefixQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCashAssistUrlPrefixQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, baseOptions);
+      }
+export function useCashAssistUrlPrefixLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>(CashAssistUrlPrefixDocument, baseOptions);
+        }
+export type CashAssistUrlPrefixQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixQuery>;
+export type CashAssistUrlPrefixLazyQueryHookResult = ReturnType<typeof useCashAssistUrlPrefixLazyQuery>;
+export type CashAssistUrlPrefixQueryResult = ApolloReactCommon.QueryResult<CashAssistUrlPrefixQuery, CashAssistUrlPrefixQueryVariables>;
+export const CashPlanDocument = gql`
+    query CashPlan($id: ID!) {
+  cashPlan(id: $id) {
+    id
+    name
+    startDate
+    endDate
+    updatedAt
+    status
+    deliveryType
+    fundsCommitment
+    downPayment
+    dispersionDate
+    assistanceThrough
+    serviceProvider {
+      id
+      caId
+      fullName
+    }
+    caId
+    caHashId
+    dispersionDate
+    verificationStatus
+    bankReconciliationSuccess
+    bankReconciliationError
+    totalNumberOfHouseholds
+    verifications {
+      edges {
+        node {
+          id
+          status
+          sampleSize
+          receivedCount
+          notReceivedCount
+          respondedCount
+          verificationMethod
+          sampling
+          receivedCount
+          receivedWithProblemsCount
+          rapidProFlowId
+          confidenceInterval
+          marginOfError
+          activationDate
+          completionDate
+          ageFilter {
+            min
+            max
+          }
+          excludedAdminAreasFilter
+          sexFilter
+        }
+      }
+    }
+    program {
+      id
+      name
+      caId
+    }
+    paymentRecords {
+      totalCount
+      edgeCount
+      edges {
+        node {
+          targetPopulation {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export type CashPlanComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanQuery, CashPlanQueryVariables>, 'query'> & ({ variables: CashPlanQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CashPlanComponent = (props: CashPlanComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanQuery, CashPlanQueryVariables> query={CashPlanDocument} {...props} />
+    );
+    
+export type CashPlanProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanQuery, CashPlanQueryVariables> & TChildProps;
+export function withCashPlan<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanQuery,
+  CashPlanQueryVariables,
+  CashPlanProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanQuery, CashPlanQueryVariables, CashPlanProps<TChildProps>>(CashPlanDocument, {
+      alias: 'cashPlan',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanQuery__
+ *
+ * To run a query within a React component, call `useCashPlanQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCashPlanQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanQuery, CashPlanQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, baseOptions);
+      }
+export function useCashPlanLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanQuery, CashPlanQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanQuery, CashPlanQueryVariables>(CashPlanDocument, baseOptions);
+        }
+export type CashPlanQueryHookResult = ReturnType<typeof useCashPlanQuery>;
+export type CashPlanLazyQueryHookResult = ReturnType<typeof useCashPlanLazyQuery>;
+export type CashPlanQueryResult = ApolloReactCommon.QueryResult<CashPlanQuery, CashPlanQueryVariables>;
+export const CashPlanPaymentVerificationDocument = gql`
+    query CashPlanPaymentVerification($id: ID!) {
+  cashPlanPaymentVerification(id: $id) {
+    id
+    cashPlan {
+      id
+      caHashId
+    }
+  }
+}
+    `;
+export type CashPlanPaymentVerificationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>, 'query'> & ({ variables: CashPlanPaymentVerificationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CashPlanPaymentVerificationComponent = (props: CashPlanPaymentVerificationComponentProps) => (
+      <ApolloReactComponents.Query<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> query={CashPlanPaymentVerificationDocument} {...props} />
+    );
+    
+export type CashPlanPaymentVerificationProps<TChildProps = {}> = ApolloReactHoc.DataProps<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables> & TChildProps;
+export function withCashPlanPaymentVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CashPlanPaymentVerificationQuery,
+  CashPlanPaymentVerificationQueryVariables,
+  CashPlanPaymentVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables, CashPlanPaymentVerificationProps<TChildProps>>(CashPlanPaymentVerificationDocument, {
+      alias: 'cashPlanPaymentVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCashPlanPaymentVerificationQuery__
+ *
+ * To run a query within a React component, call `useCashPlanPaymentVerificationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCashPlanPaymentVerificationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCashPlanPaymentVerificationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCashPlanPaymentVerificationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
+        return ApolloReactHooks.useQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+      }
+export function useCashPlanPaymentVerificationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>(CashPlanPaymentVerificationDocument, baseOptions);
+        }
+export type CashPlanPaymentVerificationQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationQuery>;
+export type CashPlanPaymentVerificationLazyQueryHookResult = ReturnType<typeof useCashPlanPaymentVerificationLazyQuery>;
+export type CashPlanPaymentVerificationQueryResult = ApolloReactCommon.QueryResult<CashPlanPaymentVerificationQuery, CashPlanPaymentVerificationQueryVariables>;
+export const CountryChartsDocument = gql`
+    query CountryCharts($businessAreaSlug: String!, $year: Int!, $program: String, $administrativeArea: String, $order: String, $orderBy: String) {
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: $businessAreaSlug, year: $year, program: $program, administrativeArea: $administrativeArea, order: $order, orderBy: $orderBy) {
+    data {
+      id
+      admin2
+      totalCashTransferred
+      totalHouseholds
+    }
+  }
+}
+    `;
+export type CountryChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CountryChartsQuery, CountryChartsQueryVariables>, 'query'> & ({ variables: CountryChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CountryChartsComponent = (props: CountryChartsComponentProps) => (
+      <ApolloReactComponents.Query<CountryChartsQuery, CountryChartsQueryVariables> query={CountryChartsDocument} {...props} />
+    );
+    
+export type CountryChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<CountryChartsQuery, CountryChartsQueryVariables> & TChildProps;
+export function withCountryCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CountryChartsQuery,
+  CountryChartsQueryVariables,
+  CountryChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CountryChartsQuery, CountryChartsQueryVariables, CountryChartsProps<TChildProps>>(CountryChartsDocument, {
+      alias: 'countryCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCountryChartsQuery__
+ *
+ * To run a query within a React component, call `useCountryChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCountryChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCountryChartsQuery({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      year: // value for 'year'
+ *      program: // value for 'program'
+ *      administrativeArea: // value for 'administrativeArea'
+ *      order: // value for 'order'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useCountryChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+      }
+export function useCountryChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CountryChartsQuery, CountryChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CountryChartsQuery, CountryChartsQueryVariables>(CountryChartsDocument, baseOptions);
+        }
+export type CountryChartsQueryHookResult = ReturnType<typeof useCountryChartsQuery>;
+export type CountryChartsLazyQueryHookResult = ReturnType<typeof useCountryChartsLazyQuery>;
+export type CountryChartsQueryResult = ApolloReactCommon.QueryResult<CountryChartsQuery, CountryChartsQueryVariables>;
+export const DashboardReportChoiceDataDocument = gql`
+    query DashboardReportChoiceData($businessArea: String!) {
+  dashboardReportTypesChoices(businessAreaSlug: $businessArea) {
+    name
+    value
+  }
+}
+    `;
+export type DashboardReportChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>, 'query'> & ({ variables: DashboardReportChoiceDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const DashboardReportChoiceDataComponent = (props: DashboardReportChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables> query={DashboardReportChoiceDataDocument} {...props} />
+    );
+    
+export type DashboardReportChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables> & TChildProps;
+export function withDashboardReportChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DashboardReportChoiceDataQuery,
+  DashboardReportChoiceDataQueryVariables,
+  DashboardReportChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables, DashboardReportChoiceDataProps<TChildProps>>(DashboardReportChoiceDataDocument, {
+      alias: 'dashboardReportChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDashboardReportChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useDashboardReportChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardReportChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardReportChoiceDataQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useDashboardReportChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, baseOptions);
+      }
+export function useDashboardReportChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>(DashboardReportChoiceDataDocument, baseOptions);
+        }
+export type DashboardReportChoiceDataQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataQuery>;
+export type DashboardReportChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardReportChoiceDataLazyQuery>;
+export type DashboardReportChoiceDataQueryResult = ApolloReactCommon.QueryResult<DashboardReportChoiceDataQuery, DashboardReportChoiceDataQueryVariables>;
+export const DashboardYearsChoiceDataDocument = gql`
+    query DashboardYearsChoiceData($businessArea: String!) {
+  dashboardYearsChoices(businessAreaSlug: $businessArea)
+}
+    `;
+export type DashboardYearsChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>, 'query'> & ({ variables: DashboardYearsChoiceDataQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const DashboardYearsChoiceDataComponent = (props: DashboardYearsChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables> query={DashboardYearsChoiceDataDocument} {...props} />
+    );
+    
+export type DashboardYearsChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables> & TChildProps;
+export function withDashboardYearsChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  DashboardYearsChoiceDataQuery,
+  DashboardYearsChoiceDataQueryVariables,
+  DashboardYearsChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables, DashboardYearsChoiceDataProps<TChildProps>>(DashboardYearsChoiceDataDocument, {
+      alias: 'dashboardYearsChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useDashboardYearsChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useDashboardYearsChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardYearsChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useDashboardYearsChoiceDataQuery({
+ *   variables: {
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useDashboardYearsChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, baseOptions);
+      }
+export function useDashboardYearsChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>(DashboardYearsChoiceDataDocument, baseOptions);
+        }
+export type DashboardYearsChoiceDataQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataQuery>;
+export type DashboardYearsChoiceDataLazyQueryHookResult = ReturnType<typeof useDashboardYearsChoiceDataLazyQuery>;
+export type DashboardYearsChoiceDataQueryResult = ApolloReactCommon.QueryResult<DashboardYearsChoiceDataQuery, DashboardYearsChoiceDataQueryVariables>;
+export const ExistingGrievanceTicketsDocument = gql`
+    query ExistingGrievanceTickets($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $businessArea: String!, $household: ID, $individual: ID, $paymentRecord: [ID], $category: String, $issueType: String, $orderBy: String) {
+  existingGrievanceTickets(before: $before, after: $after, first: $first, last: $last, id: $id, businessArea: $businessArea, household: $household, individual: $individual, paymentRecord: $paymentRecord, category: $category, issueType: $issueType, orderBy: $orderBy) {
+    totalCount
+    pageInfo {
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        status
+        assignedTo {
+          id
+          firstName
+          lastName
+          email
+        }
+        category
+        createdAt
+        userModified
+        admin
+        household {
+          unicefId
+          id
+        }
+        individual {
+          unicefId
+          id
+        }
+      }
+    }
+  }
+}
+    `;
+export type ExistingGrievanceTicketsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>, 'query'> & ({ variables: ExistingGrievanceTicketsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ExistingGrievanceTicketsComponent = (props: ExistingGrievanceTicketsComponentProps) => (
+      <ApolloReactComponents.Query<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables> query={ExistingGrievanceTicketsDocument} {...props} />
+    );
+    
+export type ExistingGrievanceTicketsProps<TChildProps = {}> = ApolloReactHoc.DataProps<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables> & TChildProps;
+export function withExistingGrievanceTickets<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ExistingGrievanceTicketsQuery,
+  ExistingGrievanceTicketsQueryVariables,
+  ExistingGrievanceTicketsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables, ExistingGrievanceTicketsProps<TChildProps>>(ExistingGrievanceTicketsDocument, {
+      alias: 'existingGrievanceTickets',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useExistingGrievanceTicketsQuery__
+ *
+ * To run a query within a React component, call `useExistingGrievanceTicketsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useExistingGrievanceTicketsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useExistingGrievanceTicketsQuery({
+ *   variables: {
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      id: // value for 'id'
+ *      businessArea: // value for 'businessArea'
+ *      household: // value for 'household'
+ *      individual: // value for 'individual'
+ *      paymentRecord: // value for 'paymentRecord'
+ *      category: // value for 'category'
+ *      issueType: // value for 'issueType'
+ *      orderBy: // value for 'orderBy'
+ *   },
+ * });
+ */
+export function useExistingGrievanceTicketsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>) {
+        return ApolloReactHooks.useQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, baseOptions);
+      }
+export function useExistingGrievanceTicketsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>(ExistingGrievanceTicketsDocument, baseOptions);
+        }
+export type ExistingGrievanceTicketsQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsQuery>;
+export type ExistingGrievanceTicketsLazyQueryHookResult = ReturnType<typeof useExistingGrievanceTicketsLazyQuery>;
+export type ExistingGrievanceTicketsQueryResult = ApolloReactCommon.QueryResult<ExistingGrievanceTicketsQuery, ExistingGrievanceTicketsQueryVariables>;
+export const GlobalAreaChartsDocument = gql`
+    query GlobalAreaCharts($year: Int!) {
+  chartTotalTransferredCashByCountry(year: $year) {
+    datasets {
+      data
+      label
+    }
+    labels
+  }
+}
+    `;
+export type GlobalAreaChartsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>, 'query'> & ({ variables: GlobalAreaChartsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GlobalAreaChartsComponent = (props: GlobalAreaChartsComponentProps) => (
+      <ApolloReactComponents.Query<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables> query={GlobalAreaChartsDocument} {...props} />
+    );
+    
+export type GlobalAreaChartsProps<TChildProps = {}> = ApolloReactHoc.DataProps<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables> & TChildProps;
+export function withGlobalAreaCharts<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GlobalAreaChartsQuery,
+  GlobalAreaChartsQueryVariables,
+  GlobalAreaChartsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables, GlobalAreaChartsProps<TChildProps>>(GlobalAreaChartsDocument, {
+      alias: 'globalAreaCharts',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGlobalAreaChartsQuery__
+ *
+ * To run a query within a React component, call `useGlobalAreaChartsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGlobalAreaChartsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGlobalAreaChartsQuery({
+ *   variables: {
+ *      year: // value for 'year'
+ *   },
+ * });
+ */
+export function useGlobalAreaChartsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
+        return ApolloReactHooks.useQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, baseOptions);
+      }
+export function useGlobalAreaChartsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>(GlobalAreaChartsDocument, baseOptions);
+        }
+export type GlobalAreaChartsQueryHookResult = ReturnType<typeof useGlobalAreaChartsQuery>;
+export type GlobalAreaChartsLazyQueryHookResult = ReturnType<typeof useGlobalAreaChartsLazyQuery>;
+export type GlobalAreaChartsQueryResult = ApolloReactCommon.QueryResult<GlobalAreaChartsQuery, GlobalAreaChartsQueryVariables>;
+export const GrievanceTicketDocument = gql`
+    query GrievanceTicket($id: ID!) {
+  grievanceTicket(id: $id) {
+    id
+    status
+    category
+    consent
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    createdAt
+    updatedAt
+    description
+    language
+    admin
+    admin2 {
+      id
+      title
+      pCode
+    }
+    area
+    assignedTo {
+      id
+      firstName
+      lastName
+      email
+    }
+    individual {
+      ...individualDetailed
+      householdsAndRoles {
+        individual {
+          id
+          unicefId
+        }
+        household {
+          id
+          unicefId
+        }
+        id
+        role
+      }
+    }
+    household {
+      ...householdDetailed
+    }
+    paymentRecord {
+      id
+    }
+    relatedTickets {
+      id
+      status
+      household {
+        id
+        unicefId
+      }
+    }
+    addIndividualTicketDetails {
+      id
+      individualData
+      approveStatus
+      household {
+        id
+        unicefId
+      }
+    }
+    individualDataUpdateTicketDetails {
+      id
+      individual {
+        ...individualDetailed
+      }
+      individualData
+    }
+    householdDataUpdateTicketDetails {
+      id
+      household {
+        ...householdDetailed
+      }
+      householdData
+    }
+    deleteIndividualTicketDetails {
+      id
+      roleReassignData
+      approveStatus
+    }
+    systemFlaggingTicketDetails {
+      id
+      approveStatus
+      roleReassignData
+      goldenRecordsIndividual {
+        id
+        fullName
+        birthDate
+        lastRegistrationDate
+        documents {
+          edges {
+            node {
+              id
+              documentNumber
+            }
+          }
+        }
+      }
+      sanctionListIndividual {
+        id
+        fullName
+        referenceNumber
+        datesOfBirth {
+          edges {
+            node {
+              id
+              date
+            }
+          }
+        }
+        documents {
+          edges {
+            node {
+              id
+              documentNumber
+              typeOfDocument
+            }
+          }
+        }
+      }
+    }
+    paymentVerificationTicketDetails {
+      paymentVerificationStatus
+      paymentVerifications {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+    }
+    needsAdjudicationTicketDetails {
+      id
+      hasDuplicatedDocument
+      goldenRecordsIndividual {
+        id
+        unicefId
+        household {
+          id
+          unicefId
+        }
+        fullName
+        birthDate
+        lastRegistrationDate
+        sex
+        deduplicationGoldenRecordResults {
+          hitId
+          proximityToScore
+          score
+        }
+      }
+      possibleDuplicate {
+        id
+        unicefId
+        lastRegistrationDate
+        household {
+          unicefId
+          id
+        }
+        fullName
+        birthDate
+        sex
+        deduplicationGoldenRecordResults {
+          hitId
+          proximityToScore
+          score
+        }
+      }
+      selectedIndividual {
+        ...individualDetailed
+        household {
+          ...householdDetailed
+        }
+        householdsAndRoles {
+          individual {
+            id
+            unicefId
+          }
+          household {
+            id
+            unicefId
+          }
+          id
+          role
+        }
+      }
+      roleReassignData
+    }
+    issueType
+    ticketNotes {
+      edges {
+        node {
+          id
+          createdAt
+          updatedAt
+          description
+          createdBy {
+            id
+            firstName
+            lastName
+            email
+          }
+        }
+      }
+    }
+  }
+}
+    ${IndividualDetailedFragmentDoc}
+${HouseholdDetailedFragmentDoc}`;
+export type GrievanceTicketComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>, 'query'> & ({ variables: GrievanceTicketQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GrievanceTicketComponent = (props: GrievanceTicketComponentProps) => (
+      <ApolloReactComponents.Query<GrievanceTicketQuery, GrievanceTicketQueryVariables> query={GrievanceTicketDocument} {...props} />
+    );
+    
+export type GrievanceTicketProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievanceTicketQuery, GrievanceTicketQueryVariables> & TChildProps;
+export function withGrievanceTicket<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievanceTicketQuery,
+  GrievanceTicketQueryVariables,
+  GrievanceTicketProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievanceTicketQuery, GrievanceTicketQueryVariables, GrievanceTicketProps<TChildProps>>(GrievanceTicketDocument, {
+      alias: 'grievanceTicket',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievanceTicketQuery__
+ *
+ * To run a query within a React component, call `useGrievanceTicketQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievanceTicketQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievanceTicketQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGrievanceTicketQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+      }
+export function useGrievanceTicketLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievanceTicketQuery, GrievanceTicketQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievanceTicketQuery, GrievanceTicketQueryVariables>(GrievanceTicketDocument, baseOptions);
+        }
+export type GrievanceTicketQueryHookResult = ReturnType<typeof useGrievanceTicketQuery>;
+export type GrievanceTicketLazyQueryHookResult = ReturnType<typeof useGrievanceTicketLazyQuery>;
+export type GrievanceTicketQueryResult = ApolloReactCommon.QueryResult<GrievanceTicketQuery, GrievanceTicketQueryVariables>;
+export const GrievancesChoiceDataDocument = gql`
+    query GrievancesChoiceData {
+  grievanceTicketStatusChoices {
+    name
+    value
+  }
+  grievanceTicketCategoryChoices {
+    name
+    value
+  }
+  grievanceTicketManualCategoryChoices {
+    name
+    value
+  }
+  grievanceTicketIssueTypeChoices {
+    category
+    label
+    subCategories {
+      name
+      value
+    }
+  }
+}
+    `;
+export type GrievancesChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>, 'query'>;
+
+    export const GrievancesChoiceDataComponent = (props: GrievancesChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables> query={GrievancesChoiceDataDocument} {...props} />
+    );
+    
+export type GrievancesChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables> & TChildProps;
+export function withGrievancesChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GrievancesChoiceDataQuery,
+  GrievancesChoiceDataQueryVariables,
+  GrievancesChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables, GrievancesChoiceDataProps<TChildProps>>(GrievancesChoiceDataDocument, {
+      alias: 'grievancesChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGrievancesChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useGrievancesChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGrievancesChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGrievancesChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGrievancesChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, baseOptions);
+      }
+export function useGrievancesChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>(GrievancesChoiceDataDocument, baseOptions);
+        }
+export type GrievancesChoiceDataQueryHookResult = ReturnType<typeof useGrievancesChoiceDataQuery>;
+export type GrievancesChoiceDataLazyQueryHookResult = ReturnType<typeof useGrievancesChoiceDataLazyQuery>;
+export type GrievancesChoiceDataQueryResult = ApolloReactCommon.QueryResult<GrievancesChoiceDataQuery, GrievancesChoiceDataQueryVariables>;
+export const HouseholdDocument = gql`
+    query Household($id: ID!) {
+  household(id: $id) {
+    ...householdDetailed
+  }
+}
+    ${HouseholdDetailedFragmentDoc}`;
+export type HouseholdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdQuery, HouseholdQueryVariables>, 'query'> & ({ variables: HouseholdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const HouseholdComponent = (props: HouseholdComponentProps) => (
+      <ApolloReactComponents.Query<HouseholdQuery, HouseholdQueryVariables> query={HouseholdDocument} {...props} />
+    );
+    
+export type HouseholdProps<TChildProps = {}> = ApolloReactHoc.DataProps<HouseholdQuery, HouseholdQueryVariables> & TChildProps;
+export function withHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  HouseholdQuery,
+  HouseholdQueryVariables,
+  HouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, HouseholdQuery, HouseholdQueryVariables, HouseholdProps<TChildProps>>(HouseholdDocument, {
+      alias: 'household',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useHouseholdQuery__
+ *
+ * To run a query within a React component, call `useHouseholdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHouseholdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHouseholdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useHouseholdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
+        return ApolloReactHooks.useQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, baseOptions);
+      }
+export function useHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HouseholdQuery, HouseholdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<HouseholdQuery, HouseholdQueryVariables>(HouseholdDocument, baseOptions);
+        }
+export type HouseholdQueryHookResult = ReturnType<typeof useHouseholdQuery>;
+export type HouseholdLazyQueryHookResult = ReturnType<typeof useHouseholdLazyQuery>;
+export type HouseholdQueryResult = ApolloReactCommon.QueryResult<HouseholdQuery, HouseholdQueryVariables>;
+export const HouseholdChoiceDataDocument = gql`
+    query householdChoiceData {
+  residenceStatusChoices {
+    name
+    value
+  }
+  relationshipChoices {
+    name
+    value
+  }
+  roleChoices {
+    name
+    value
+  }
+  maritalStatusChoices {
+    name
+    value
+  }
+  workStatusChoices {
+    name
+    value
+  }
+  deduplicationBatchStatusChoices {
+    name
+    value
+  }
+  deduplicationGoldenRecordStatusChoices {
+    name
+    value
+  }
+  observedDisabilityChoices {
+    name
+    value
+  }
+  severityOfDisabilityChoices {
+    name
+    value
+  }
+}
+    `;
+export type HouseholdChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>, 'query'>;
+
+    export const HouseholdChoiceDataComponent = (props: HouseholdChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> query={HouseholdChoiceDataDocument} {...props} />
+    );
+    
+export type HouseholdChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables> & TChildProps;
+export function withHouseholdChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  HouseholdChoiceDataQuery,
+  HouseholdChoiceDataQueryVariables,
+  HouseholdChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables, HouseholdChoiceDataProps<TChildProps>>(HouseholdChoiceDataDocument, {
+      alias: 'householdChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useHouseholdChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useHouseholdChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHouseholdChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHouseholdChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHouseholdChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+      }
+export function useHouseholdChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>(HouseholdChoiceDataDocument, baseOptions);
+        }
+export type HouseholdChoiceDataQueryHookResult = ReturnType<typeof useHouseholdChoiceDataQuery>;
+export type HouseholdChoiceDataLazyQueryHookResult = ReturnType<typeof useHouseholdChoiceDataLazyQuery>;
+export type HouseholdChoiceDataQueryResult = ApolloReactCommon.QueryResult<HouseholdChoiceDataQuery, HouseholdChoiceDataQueryVariables>;
+export const IndividualDocument = gql`
+    query Individual($id: ID!) {
+  individual(id: $id) {
+    ...individualDetailed
+  }
+}
+    ${IndividualDetailedFragmentDoc}`;
+export type IndividualComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualQuery, IndividualQueryVariables>, 'query'> & ({ variables: IndividualQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualComponent = (props: IndividualComponentProps) => (
+      <ApolloReactComponents.Query<IndividualQuery, IndividualQueryVariables> query={IndividualDocument} {...props} />
+    );
+    
+export type IndividualProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualQuery, IndividualQueryVariables> & TChildProps;
+export function withIndividual<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualQuery,
+  IndividualQueryVariables,
+  IndividualProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualQuery, IndividualQueryVariables, IndividualProps<TChildProps>>(IndividualDocument, {
+      alias: 'individual',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualQuery__
+ *
+ * To run a query within a React component, call `useIndividualQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, baseOptions);
+      }
+export function useIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualQuery, IndividualQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualQuery, IndividualQueryVariables>(IndividualDocument, baseOptions);
+        }
+export type IndividualQueryHookResult = ReturnType<typeof useIndividualQuery>;
+export type IndividualLazyQueryHookResult = ReturnType<typeof useIndividualLazyQuery>;
+export type IndividualQueryResult = ApolloReactCommon.QueryResult<IndividualQuery, IndividualQueryVariables>;
+export const IndividualPhotosDocument = gql`
+    query IndividualPhotos($id: ID!) {
+  individual(id: $id) {
+    id
+    photo
+    documents {
+      edges {
+        node {
+          id
+          photo
+        }
+      }
+    }
+  }
+}
+    `;
+export type IndividualPhotosComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>, 'query'> & ({ variables: IndividualPhotosQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const IndividualPhotosComponent = (props: IndividualPhotosComponentProps) => (
+      <ApolloReactComponents.Query<IndividualPhotosQuery, IndividualPhotosQueryVariables> query={IndividualPhotosDocument} {...props} />
+    );
+    
+export type IndividualPhotosProps<TChildProps = {}> = ApolloReactHoc.DataProps<IndividualPhotosQuery, IndividualPhotosQueryVariables> & TChildProps;
+export function withIndividualPhotos<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  IndividualPhotosQuery,
+  IndividualPhotosQueryVariables,
+  IndividualPhotosProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, IndividualPhotosQuery, IndividualPhotosQueryVariables, IndividualPhotosProps<TChildProps>>(IndividualPhotosDocument, {
+      alias: 'individualPhotos',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useIndividualPhotosQuery__
+ *
+ * To run a query within a React component, call `useIndividualPhotosQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIndividualPhotosQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIndividualPhotosQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useIndividualPhotosQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+        return ApolloReactHooks.useQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+      }
+export function useIndividualPhotosLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IndividualPhotosQuery, IndividualPhotosQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<IndividualPhotosQuery, IndividualPhotosQueryVariables>(IndividualPhotosDocument, baseOptions);
+        }
+export type IndividualPhotosQueryHookResult = ReturnType<typeof useIndividualPhotosQuery>;
+export type IndividualPhotosLazyQueryHookResult = ReturnType<typeof useIndividualPhotosLazyQuery>;
+export type IndividualPhotosQueryResult = ApolloReactCommon.QueryResult<IndividualPhotosQuery, IndividualPhotosQueryVariables>;
+export const LookUpPaymentRecordsDocument = gql`
+    query LookUpPaymentRecords($cashPlan: ID, $household: ID, $after: String, $before: String, $orderBy: String, $first: Int, $last: Int, $businessArea: String) {
+  allPaymentRecords(cashPlan: $cashPlan, household: $household, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        id
+        caId
+        verifications {
+          edges {
+            node {
+              id
+              status
+              receivedAmount
+            }
+          }
+        }
+        cashPlan {
+          id
+          name
+        }
+        deliveredQuantity
+      }
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type LookUpPaymentRecordsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>, 'query'>;
+
+    export const LookUpPaymentRecordsComponent = (props: LookUpPaymentRecordsComponentProps) => (
+      <ApolloReactComponents.Query<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables> query={LookUpPaymentRecordsDocument} {...props} />
+    );
+    
+export type LookUpPaymentRecordsProps<TChildProps = {}> = ApolloReactHoc.DataProps<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables> & TChildProps;
+export function withLookUpPaymentRecords<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  LookUpPaymentRecordsQuery,
+  LookUpPaymentRecordsQueryVariables,
+  LookUpPaymentRecordsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables, LookUpPaymentRecordsProps<TChildProps>>(LookUpPaymentRecordsDocument, {
+      alias: 'lookUpPaymentRecords',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useLookUpPaymentRecordsQuery__
+ *
+ * To run a query within a React component, call `useLookUpPaymentRecordsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLookUpPaymentRecordsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLookUpPaymentRecordsQuery({
+ *   variables: {
+ *      cashPlan: // value for 'cashPlan'
+ *      household: // value for 'household'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      orderBy: // value for 'orderBy'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useLookUpPaymentRecordsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>) {
+        return ApolloReactHooks.useQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, baseOptions);
+      }
+export function useLookUpPaymentRecordsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>(LookUpPaymentRecordsDocument, baseOptions);
+        }
+export type LookUpPaymentRecordsQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsQuery>;
+export type LookUpPaymentRecordsLazyQueryHookResult = ReturnType<typeof useLookUpPaymentRecordsLazyQuery>;
+export type LookUpPaymentRecordsQueryResult = ApolloReactCommon.QueryResult<LookUpPaymentRecordsQuery, LookUpPaymentRecordsQueryVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    id
+    username
+    email
+    firstName
+    lastName
+    businessAreas {
+      edges {
+        node {
+          id
+          name
+          slug
+          permissions
+        }
+      }
+    }
+  }
+}
+    `;
+export type MeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<MeQuery, MeQueryVariables>, 'query'>;
+
+    export const MeComponent = (props: MeComponentProps) => (
+      <ApolloReactComponents.Query<MeQuery, MeQueryVariables> query={MeDocument} {...props} />
+    );
+    
+export type MeProps<TChildProps = {}> = ApolloReactHoc.DataProps<MeQuery, MeQueryVariables> & TChildProps;
+export function withMe<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MeQuery,
+  MeQueryVariables,
+  MeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, MeQuery, MeQueryVariables, MeProps<TChildProps>>(MeDocument, {
+      alias: 'me',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+      }
+export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;
+export const PaymentRecordDocument = gql`
+    query PaymentRecord($id: ID!) {
+  paymentRecord(id: $id) {
+    id
+    status
+    statusDate
+    caId
+    caHashId
+    registrationCaId
+    household {
+      id
+      size
+      unicefId
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+      }
+    }
+    fullName
+    distributionModality
+    totalPersonsCovered
+    targetPopulation {
+      id
+      name
+    }
+    cashPlan {
+      id
+      caId
+      program {
+        id
+        name
+      }
+      verifications {
+        edges {
+          node {
+            id
+            status
+            verificationMethod
+          }
+        }
+      }
+    }
+    verifications {
+      totalCount
+      edges {
+        node {
+          id
+          status
+          statusDate
+          receivedAmount
+        }
+      }
+    }
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveryDate
+    deliveryDate
+    entitlementCardIssueDate
+    entitlementCardNumber
+    serviceProvider {
+      id
+      fullName
+      shortName
+    }
+    id
+    status
+    statusDate
+    caId
+    household {
+      id
+      size
+      unicefId
+      headOfHousehold {
+        id
+        phoneNo
+        phoneNoAlternative
+      }
+    }
+    fullName
+    distributionModality
+    totalPersonsCovered
+    targetPopulation {
+      id
+      name
+    }
+    cashPlan {
+      id
+      caId
+      program {
+        id
+        name
+      }
+      verifications {
+        edges {
+          node {
+            id
+            status
+            verificationMethod
+          }
+        }
+      }
+    }
+    currency
+    entitlementQuantity
+    deliveredQuantity
+    deliveredQuantityUsd
+    deliveryDate
+    deliveryDate
+    deliveryType
+    entitlementCardIssueDate
+    entitlementCardNumber
+    transactionReferenceId
+    serviceProvider {
+      id
+      fullName
+      shortName
+    }
+  }
+}
+    `;
+export type PaymentRecordComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordQuery, PaymentRecordQueryVariables>, 'query'> & ({ variables: PaymentRecordQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentRecordComponent = (props: PaymentRecordComponentProps) => (
+      <ApolloReactComponents.Query<PaymentRecordQuery, PaymentRecordQueryVariables> query={PaymentRecordDocument} {...props} />
+    );
+    
+export type PaymentRecordProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentRecordQuery, PaymentRecordQueryVariables> & TChildProps;
+export function withPaymentRecord<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentRecordQuery,
+  PaymentRecordQueryVariables,
+  PaymentRecordProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentRecordQuery, PaymentRecordQueryVariables, PaymentRecordProps<TChildProps>>(PaymentRecordDocument, {
+      alias: 'paymentRecord',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentRecordQuery__
+ *
+ * To run a query within a React component, call `usePaymentRecordQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentRecordQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentRecordQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentRecordQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+      }
+export function usePaymentRecordLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentRecordQuery, PaymentRecordQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentRecordQuery, PaymentRecordQueryVariables>(PaymentRecordDocument, baseOptions);
+        }
+export type PaymentRecordQueryHookResult = ReturnType<typeof usePaymentRecordQuery>;
+export type PaymentRecordLazyQueryHookResult = ReturnType<typeof usePaymentRecordLazyQuery>;
+export type PaymentRecordQueryResult = ApolloReactCommon.QueryResult<PaymentRecordQuery, PaymentRecordQueryVariables>;
+export const PaymentRecordVerificationDocument = gql`
+    query PaymentRecordVerification($id: ID!) {
+  paymentRecordVerification(id: $id) {
+    id
+    status
+    statusDate
+    receivedAmount
+    isManuallyEditable
+    paymentRecord {
+      id
+      status
+      statusDate
+      caId
+      caHashId
+      registrationCaId
+      household {
+        unicefId
+        id
+        size
+        headOfHousehold {
+          id
+          phoneNo
+          phoneNoAlternative
+        }
+      }
+      fullName
+      distributionModality
+      totalPersonsCovered
+      targetPopulation {
+        id
+        name
+      }
+      cashPlan {
+        id
+        caId
+        program {
+          id
+          name
+        }
+        verifications {
+          edges {
+            node {
+              id
+              status
+              verificationMethod
+            }
+          }
+        }
+      }
+      currency
+      entitlementQuantity
+      deliveredQuantity
+      deliveryDate
+      deliveryDate
+      deliveryType
+      entitlementCardIssueDate
+      entitlementCardNumber
+      transactionReferenceId
+      serviceProvider {
+        id
+        fullName
+        shortName
+      }
+    }
+  }
+}
+    `;
+export type PaymentRecordVerificationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>, 'query'> & ({ variables: PaymentRecordVerificationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const PaymentRecordVerificationComponent = (props: PaymentRecordVerificationComponentProps) => (
+      <ApolloReactComponents.Query<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables> query={PaymentRecordVerificationDocument} {...props} />
+    );
+    
+export type PaymentRecordVerificationProps<TChildProps = {}> = ApolloReactHoc.DataProps<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables> & TChildProps;
+export function withPaymentRecordVerification<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  PaymentRecordVerificationQuery,
+  PaymentRecordVerificationQueryVariables,
+  PaymentRecordVerificationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables, PaymentRecordVerificationProps<TChildProps>>(PaymentRecordVerificationDocument, {
+      alias: 'paymentRecordVerification',
+      ...operationOptions
+    });
+};
+
+/**
+ * __usePaymentRecordVerificationQuery__
+ *
+ * To run a query within a React component, call `usePaymentRecordVerificationQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePaymentRecordVerificationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePaymentRecordVerificationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePaymentRecordVerificationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
+        return ApolloReactHooks.useQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, baseOptions);
+      }
+export function usePaymentRecordVerificationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>(PaymentRecordVerificationDocument, baseOptions);
+        }
+export type PaymentRecordVerificationQueryHookResult = ReturnType<typeof usePaymentRecordVerificationQuery>;
+export type PaymentRecordVerificationLazyQueryHookResult = ReturnType<typeof usePaymentRecordVerificationLazyQuery>;
+export type PaymentRecordVerificationQueryResult = ApolloReactCommon.QueryResult<PaymentRecordVerificationQuery, PaymentRecordVerificationQueryVariables>;
+export const ProgramDocument = gql`
+    query Program($id: ID!) {
+  program(id: $id) {
+    id
+    name
+    startDate
+    endDate
+    status
+    caId
+    caHashId
+    description
+    budget
+    frequencyOfPayments
+    cashPlus
+    populationGoal
+    scope
+    sector
+    totalNumberOfHouseholds
+    administrativeAreasOfImplementation
+    individualDataNeeded
+    version
+  }
+}
+    `;
+export type ProgramComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgramQuery, ProgramQueryVariables>, 'query'> & ({ variables: ProgramQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ProgramComponent = (props: ProgramComponentProps) => (
+      <ApolloReactComponents.Query<ProgramQuery, ProgramQueryVariables> query={ProgramDocument} {...props} />
+    );
+    
+export type ProgramProps<TChildProps = {}> = ApolloReactHoc.DataProps<ProgramQuery, ProgramQueryVariables> & TChildProps;
+export function withProgram<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ProgramQuery,
+  ProgramQueryVariables,
+  ProgramProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ProgramQuery, ProgramQueryVariables, ProgramProps<TChildProps>>(ProgramDocument, {
+      alias: 'program',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useProgramQuery__
+ *
+ * To run a query within a React component, call `useProgramQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProgramQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProgramQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useProgramQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ProgramQuery, ProgramQueryVariables>) {
+        return ApolloReactHooks.useQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, baseOptions);
+      }
+export function useProgramLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ProgramQuery, ProgramQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ProgramQuery, ProgramQueryVariables>(ProgramDocument, baseOptions);
+        }
+export type ProgramQueryHookResult = ReturnType<typeof useProgramQuery>;
+export type ProgramLazyQueryHookResult = ReturnType<typeof useProgramLazyQuery>;
+export type ProgramQueryResult = ApolloReactCommon.QueryResult<ProgramQuery, ProgramQueryVariables>;
+export const ProgrammeChoiceDataDocument = gql`
+    query ProgrammeChoiceData {
+  programFrequencyOfPaymentsChoices {
+    name
+    value
+  }
+  programScopeChoices {
+    name
+    value
+  }
+  programSectorChoices {
+    name
+    value
+  }
+  programStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type ProgrammeChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>, 'query'>;
+
+    export const ProgrammeChoiceDataComponent = (props: ProgrammeChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables> query={ProgrammeChoiceDataDocument} {...props} />
+    );
+    
+export type ProgrammeChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables> & TChildProps;
+export function withProgrammeChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ProgrammeChoiceDataQuery,
+  ProgrammeChoiceDataQueryVariables,
+  ProgrammeChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables, ProgrammeChoiceDataProps<TChildProps>>(ProgrammeChoiceDataDocument, {
+      alias: 'programmeChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useProgrammeChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useProgrammeChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProgrammeChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProgrammeChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useProgrammeChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, baseOptions);
+      }
+export function useProgrammeChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>(ProgrammeChoiceDataDocument, baseOptions);
+        }
+export type ProgrammeChoiceDataQueryHookResult = ReturnType<typeof useProgrammeChoiceDataQuery>;
+export type ProgrammeChoiceDataLazyQueryHookResult = ReturnType<typeof useProgrammeChoiceDataLazyQuery>;
+export type ProgrammeChoiceDataQueryResult = ApolloReactCommon.QueryResult<ProgrammeChoiceDataQuery, ProgrammeChoiceDataQueryVariables>;
+export const ReportDocument = gql`
+    query Report($id: ID!) {
+  report(id: $id) {
+    id
+    status
+    reportType
+    createdAt
+    dateFrom
+    dateTo
+    fileUrl
+    numberOfRecords
+    createdBy {
+      firstName
+      lastName
+    }
+    adminArea {
+      edges {
+        node {
+          title
+        }
+      }
+    }
+    program {
+      name
+    }
+  }
+}
+    `;
+export type ReportComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ReportQuery, ReportQueryVariables>, 'query'> & ({ variables: ReportQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ReportComponent = (props: ReportComponentProps) => (
+      <ApolloReactComponents.Query<ReportQuery, ReportQueryVariables> query={ReportDocument} {...props} />
+    );
+    
+export type ReportProps<TChildProps = {}> = ApolloReactHoc.DataProps<ReportQuery, ReportQueryVariables> & TChildProps;
+export function withReport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReportQuery,
+  ReportQueryVariables,
+  ReportProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ReportQuery, ReportQueryVariables, ReportProps<TChildProps>>(ReportDocument, {
+      alias: 'report',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReportQuery__
+ *
+ * To run a query within a React component, call `useReportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReportQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReportQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useReportQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ReportQuery, ReportQueryVariables>) {
+        return ApolloReactHooks.useQuery<ReportQuery, ReportQueryVariables>(ReportDocument, baseOptions);
+      }
+export function useReportLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ReportQuery, ReportQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ReportQuery, ReportQueryVariables>(ReportDocument, baseOptions);
+        }
+export type ReportQueryHookResult = ReturnType<typeof useReportQuery>;
+export type ReportLazyQueryHookResult = ReturnType<typeof useReportLazyQuery>;
+export type ReportQueryResult = ApolloReactCommon.QueryResult<ReportQuery, ReportQueryVariables>;
+export const ReportChoiceDataDocument = gql`
+    query ReportChoiceData {
+  reportStatusChoices {
+    name
+    value
+  }
+  reportTypesChoices {
+    name
+    value
+  }
+}
+    `;
+export type ReportChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>, 'query'>;
+
+    export const ReportChoiceDataComponent = (props: ReportChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<ReportChoiceDataQuery, ReportChoiceDataQueryVariables> query={ReportChoiceDataDocument} {...props} />
+    );
+    
+export type ReportChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<ReportChoiceDataQuery, ReportChoiceDataQueryVariables> & TChildProps;
+export function withReportChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ReportChoiceDataQuery,
+  ReportChoiceDataQueryVariables,
+  ReportChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ReportChoiceDataQuery, ReportChoiceDataQueryVariables, ReportChoiceDataProps<TChildProps>>(ReportChoiceDataDocument, {
+      alias: 'reportChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useReportChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useReportChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useReportChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useReportChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useReportChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, baseOptions);
+      }
+export function useReportChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>(ReportChoiceDataDocument, baseOptions);
+        }
+export type ReportChoiceDataQueryHookResult = ReturnType<typeof useReportChoiceDataQuery>;
+export type ReportChoiceDataLazyQueryHookResult = ReturnType<typeof useReportChoiceDataLazyQuery>;
+export type ReportChoiceDataQueryResult = ApolloReactCommon.QueryResult<ReportChoiceDataQuery, ReportChoiceDataQueryVariables>;
+export const SampleSizeDocument = gql`
+    query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {
+  sampleSize(input: $input) {
+    paymentRecordCount
+    sampleSize
+  }
+}
+    `;
+export type SampleSizeComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<SampleSizeQuery, SampleSizeQueryVariables>, 'query'> & ({ variables: SampleSizeQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const SampleSizeComponent = (props: SampleSizeComponentProps) => (
+      <ApolloReactComponents.Query<SampleSizeQuery, SampleSizeQueryVariables> query={SampleSizeDocument} {...props} />
+    );
+    
+export type SampleSizeProps<TChildProps = {}> = ApolloReactHoc.DataProps<SampleSizeQuery, SampleSizeQueryVariables> & TChildProps;
+export function withSampleSize<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SampleSizeQuery,
+  SampleSizeQueryVariables,
+  SampleSizeProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, SampleSizeQuery, SampleSizeQueryVariables, SampleSizeProps<TChildProps>>(SampleSizeDocument, {
+      alias: 'sampleSize',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSampleSizeQuery__
+ *
+ * To run a query within a React component, call `useSampleSizeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSampleSizeQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSampleSizeQuery({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useSampleSizeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
+        return ApolloReactHooks.useQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, baseOptions);
+      }
+export function useSampleSizeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<SampleSizeQuery, SampleSizeQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<SampleSizeQuery, SampleSizeQueryVariables>(SampleSizeDocument, baseOptions);
+        }
+export type SampleSizeQueryHookResult = ReturnType<typeof useSampleSizeQuery>;
+export type SampleSizeLazyQueryHookResult = ReturnType<typeof useSampleSizeLazyQuery>;
+export type SampleSizeQueryResult = ApolloReactCommon.QueryResult<SampleSizeQuery, SampleSizeQueryVariables>;
+export const TargetPopulationDocument = gql`
+    query targetPopulation($id: ID!) {
+  targetPopulation(id: $id) {
+    ...targetPopulationDetailed
+  }
+}
+    ${TargetPopulationDetailedFragmentDoc}`;
+export type TargetPopulationComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<TargetPopulationQuery, TargetPopulationQueryVariables>, 'query'> & ({ variables: TargetPopulationQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const TargetPopulationComponent = (props: TargetPopulationComponentProps) => (
+      <ApolloReactComponents.Query<TargetPopulationQuery, TargetPopulationQueryVariables> query={TargetPopulationDocument} {...props} />
+    );
+    
+export type TargetPopulationProps<TChildProps = {}> = ApolloReactHoc.DataProps<TargetPopulationQuery, TargetPopulationQueryVariables> & TChildProps;
+export function withTargetPopulation<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  TargetPopulationQuery,
+  TargetPopulationQueryVariables,
+  TargetPopulationProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, TargetPopulationQuery, TargetPopulationQueryVariables, TargetPopulationProps<TChildProps>>(TargetPopulationDocument, {
+      alias: 'targetPopulation',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useTargetPopulationQuery__
+ *
+ * To run a query within a React component, call `useTargetPopulationQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTargetPopulationQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTargetPopulationQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTargetPopulationQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+        return ApolloReactHooks.useQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+      }
+export function useTargetPopulationLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<TargetPopulationQuery, TargetPopulationQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<TargetPopulationQuery, TargetPopulationQueryVariables>(TargetPopulationDocument, baseOptions);
+        }
+export type TargetPopulationQueryHookResult = ReturnType<typeof useTargetPopulationQuery>;
+export type TargetPopulationLazyQueryHookResult = ReturnType<typeof useTargetPopulationLazyQuery>;
+export type TargetPopulationQueryResult = ApolloReactCommon.QueryResult<TargetPopulationQuery, TargetPopulationQueryVariables>;
+export const UserChoiceDataDocument = gql`
+    query userChoiceData {
+  userRolesChoices {
+    name
+    value
+  }
+  userStatusChoices {
+    name
+    value
+  }
+  userPartnerChoices {
+    name
+    value
+  }
+}
+    `;
+export type UserChoiceDataComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>, 'query'>;
+
+    export const UserChoiceDataComponent = (props: UserChoiceDataComponentProps) => (
+      <ApolloReactComponents.Query<UserChoiceDataQuery, UserChoiceDataQueryVariables> query={UserChoiceDataDocument} {...props} />
+    );
+    
+export type UserChoiceDataProps<TChildProps = {}> = ApolloReactHoc.DataProps<UserChoiceDataQuery, UserChoiceDataQueryVariables> & TChildProps;
+export function withUserChoiceData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UserChoiceDataQuery,
+  UserChoiceDataQueryVariables,
+  UserChoiceDataProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, UserChoiceDataQuery, UserChoiceDataQueryVariables, UserChoiceDataProps<TChildProps>>(UserChoiceDataDocument, {
+      alias: 'userChoiceData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUserChoiceDataQuery__
+ *
+ * To run a query within a React component, call `useUserChoiceDataQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUserChoiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUserChoiceDataQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUserChoiceDataQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>) {
+        return ApolloReactHooks.useQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, baseOptions);
+      }
+export function useUserChoiceDataLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<UserChoiceDataQuery, UserChoiceDataQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<UserChoiceDataQuery, UserChoiceDataQueryVariables>(UserChoiceDataDocument, baseOptions);
+        }
+export type UserChoiceDataQueryHookResult = ReturnType<typeof useUserChoiceDataQuery>;
+export type UserChoiceDataLazyQueryHookResult = ReturnType<typeof useUserChoiceDataLazyQuery>;
+export type UserChoiceDataQueryResult = ApolloReactCommon.QueryResult<UserChoiceDataQuery, UserChoiceDataQueryVariables>;
+export const AllImportedHouseholdsDocument = gql`
+    query AllImportedHouseholds($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $orderBy: String, $businessArea: String) {
+  allImportedHouseholds(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, orderBy: $orderBy, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...importedHouseholdMinimal
+      }
+    }
+  }
+}
+    ${ImportedHouseholdMinimalFragmentDoc}`;
+export type AllImportedHouseholdsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>, 'query'>;
+
+    export const AllImportedHouseholdsComponent = (props: AllImportedHouseholdsComponentProps) => (
+      <ApolloReactComponents.Query<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables> query={AllImportedHouseholdsDocument} {...props} />
+    );
+    
+export type AllImportedHouseholdsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables> & TChildProps;
+export function withAllImportedHouseholds<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllImportedHouseholdsQuery,
+  AllImportedHouseholdsQueryVariables,
+  AllImportedHouseholdsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables, AllImportedHouseholdsProps<TChildProps>>(AllImportedHouseholdsDocument, {
+      alias: 'allImportedHouseholds',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllImportedHouseholdsQuery__
+ *
+ * To run a query within a React component, call `useAllImportedHouseholdsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllImportedHouseholdsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllImportedHouseholdsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllImportedHouseholdsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, baseOptions);
+      }
+export function useAllImportedHouseholdsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>(AllImportedHouseholdsDocument, baseOptions);
+        }
+export type AllImportedHouseholdsQueryHookResult = ReturnType<typeof useAllImportedHouseholdsQuery>;
+export type AllImportedHouseholdsLazyQueryHookResult = ReturnType<typeof useAllImportedHouseholdsLazyQuery>;
+export type AllImportedHouseholdsQueryResult = ApolloReactCommon.QueryResult<AllImportedHouseholdsQuery, AllImportedHouseholdsQueryVariables>;
+export const AllImportedIndividualsDocument = gql`
+    query AllImportedIndividuals($after: String, $before: String, $first: Int, $last: Int, $rdiId: String, $household: ID, $orderBy: String, $duplicatesOnly: Boolean, $businessArea: String) {
+  allImportedIndividuals(after: $after, before: $before, first: $first, last: $last, rdiId: $rdiId, household: $household, orderBy: $orderBy, duplicatesOnly: $duplicatesOnly, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...importedIndividualMinimal
+      }
+    }
+  }
+}
+    ${ImportedIndividualMinimalFragmentDoc}`;
+export type AllImportedIndividualsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>, 'query'>;
+
+    export const AllImportedIndividualsComponent = (props: AllImportedIndividualsComponentProps) => (
+      <ApolloReactComponents.Query<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables> query={AllImportedIndividualsDocument} {...props} />
+    );
+    
+export type AllImportedIndividualsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables> & TChildProps;
+export function withAllImportedIndividuals<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllImportedIndividualsQuery,
+  AllImportedIndividualsQueryVariables,
+  AllImportedIndividualsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables, AllImportedIndividualsProps<TChildProps>>(AllImportedIndividualsDocument, {
+      alias: 'allImportedIndividuals',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllImportedIndividualsQuery__
+ *
+ * To run a query within a React component, call `useAllImportedIndividualsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllImportedIndividualsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllImportedIndividualsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      rdiId: // value for 'rdiId'
+ *      household: // value for 'household'
+ *      orderBy: // value for 'orderBy'
+ *      duplicatesOnly: // value for 'duplicatesOnly'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllImportedIndividualsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, baseOptions);
+      }
+export function useAllImportedIndividualsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>(AllImportedIndividualsDocument, baseOptions);
+        }
+export type AllImportedIndividualsQueryHookResult = ReturnType<typeof useAllImportedIndividualsQuery>;
+export type AllImportedIndividualsLazyQueryHookResult = ReturnType<typeof useAllImportedIndividualsLazyQuery>;
+export type AllImportedIndividualsQueryResult = ApolloReactCommon.QueryResult<AllImportedIndividualsQuery, AllImportedIndividualsQueryVariables>;
+export const AllKoboProjectsDocument = gql`
+    query AllKoboProjects($after: String, $before: String, $first: Int, $last: Int, $businessAreaSlug: String!) {
+  allKoboProjects(after: $after, before: $before, first: $first, last: $last, businessAreaSlug: $businessAreaSlug) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        name
+        id
+      }
+    }
+  }
+}
+    `;
+export type AllKoboProjectsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>, 'query'> & ({ variables: AllKoboProjectsQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const AllKoboProjectsComponent = (props: AllKoboProjectsComponentProps) => (
+      <ApolloReactComponents.Query<AllKoboProjectsQuery, AllKoboProjectsQueryVariables> query={AllKoboProjectsDocument} {...props} />
+    );
+    
+export type AllKoboProjectsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllKoboProjectsQuery, AllKoboProjectsQueryVariables> & TChildProps;
+export function withAllKoboProjects<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllKoboProjectsQuery,
+  AllKoboProjectsQueryVariables,
+  AllKoboProjectsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllKoboProjectsQuery, AllKoboProjectsQueryVariables, AllKoboProjectsProps<TChildProps>>(AllKoboProjectsDocument, {
+      alias: 'allKoboProjects',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllKoboProjectsQuery__
+ *
+ * To run a query within a React component, call `useAllKoboProjectsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllKoboProjectsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllKoboProjectsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useAllKoboProjectsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, baseOptions);
+      }
+export function useAllKoboProjectsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>(AllKoboProjectsDocument, baseOptions);
+        }
+export type AllKoboProjectsQueryHookResult = ReturnType<typeof useAllKoboProjectsQuery>;
+export type AllKoboProjectsLazyQueryHookResult = ReturnType<typeof useAllKoboProjectsLazyQuery>;
+export type AllKoboProjectsQueryResult = ApolloReactCommon.QueryResult<AllKoboProjectsQuery, AllKoboProjectsQueryVariables>;
+export const AllRegistrationDataImportsDocument = gql`
+    query AllRegistrationDataImports($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name_Icontains: String, $importedBy_Id: UUID, $status: String, $importDate: Date, $businessArea: String) {
+  allRegistrationDataImports(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name_Startswith: $name_Icontains, importedBy_Id: $importedBy_Id, status: $status, importDate: $importDate, businessArea: $businessArea) {
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ...registrationMinimal
+      }
+    }
+  }
+}
+    ${RegistrationMinimalFragmentDoc}`;
+export type AllRegistrationDataImportsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>, 'query'>;
+
+    export const AllRegistrationDataImportsComponent = (props: AllRegistrationDataImportsComponentProps) => (
+      <ApolloReactComponents.Query<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> query={AllRegistrationDataImportsDocument} {...props} />
+    );
+    
+export type AllRegistrationDataImportsProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables> & TChildProps;
+export function withAllRegistrationDataImports<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllRegistrationDataImportsQuery,
+  AllRegistrationDataImportsQueryVariables,
+  AllRegistrationDataImportsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables, AllRegistrationDataImportsProps<TChildProps>>(AllRegistrationDataImportsDocument, {
+      alias: 'allRegistrationDataImports',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllRegistrationDataImportsQuery__
+ *
+ * To run a query within a React component, call `useAllRegistrationDataImportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllRegistrationDataImportsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllRegistrationDataImportsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      name_Icontains: // value for 'name_Icontains'
+ *      importedBy_Id: // value for 'importedBy_Id'
+ *      status: // value for 'status'
+ *      importDate: // value for 'importDate'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useAllRegistrationDataImportsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
+      }
+export function useAllRegistrationDataImportsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>(AllRegistrationDataImportsDocument, baseOptions);
+        }
+export type AllRegistrationDataImportsQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsQuery>;
+export type AllRegistrationDataImportsLazyQueryHookResult = ReturnType<typeof useAllRegistrationDataImportsLazyQuery>;
+export type AllRegistrationDataImportsQueryResult = ApolloReactCommon.QueryResult<AllRegistrationDataImportsQuery, AllRegistrationDataImportsQueryVariables>;
+export const CreateRegistrationKoboImportDocument = gql`
+    mutation CreateRegistrationKoboImport($registrationDataImportData: RegistrationKoboImportMutationInput!) {
+  registrationKoboImport(registrationDataImportData: $registrationDataImportData) {
+    registrationDataImport {
+      id
+      name
+      dataSource
+      datahubId
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateRegistrationKoboImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
+export type CreateRegistrationKoboImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>, 'mutation'>;
+
+    export const CreateRegistrationKoboImportComponent = (props: CreateRegistrationKoboImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables> mutation={CreateRegistrationKoboImportDocument} {...props} />
+    );
+    
+export type CreateRegistrationKoboImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables> & TChildProps;
+export function withCreateRegistrationKoboImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateRegistrationKoboImportMutation,
+  CreateRegistrationKoboImportMutationVariables,
+  CreateRegistrationKoboImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables, CreateRegistrationKoboImportProps<TChildProps>>(CreateRegistrationKoboImportDocument, {
+      alias: 'createRegistrationKoboImport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateRegistrationKoboImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationKoboImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationKoboImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationKoboImportMutation, { data, loading, error }] = useCreateRegistrationKoboImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationKoboImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>(CreateRegistrationKoboImportDocument, baseOptions);
+      }
+export type CreateRegistrationKoboImportMutationHookResult = ReturnType<typeof useCreateRegistrationKoboImportMutation>;
+export type CreateRegistrationKoboImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationKoboImportMutation>;
+export type CreateRegistrationKoboImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationKoboImportMutation, CreateRegistrationKoboImportMutationVariables>;
+export const CreateRegistrationXlsxImportDocument = gql`
+    mutation CreateRegistrationXlsxImport($registrationDataImportData: RegistrationXlsxImportMutationInput!) {
+  registrationXlsxImport(registrationDataImportData: $registrationDataImportData) {
+    registrationDataImport {
+      id
+      name
+      dataSource
+      datahubId
+    }
+    validationErrors
+  }
+}
+    `;
+export type CreateRegistrationXlsxImportMutationFn = ApolloReactCommon.MutationFunction<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export type CreateRegistrationXlsxImportComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>, 'mutation'>;
+
+    export const CreateRegistrationXlsxImportComponent = (props: CreateRegistrationXlsxImportComponentProps) => (
+      <ApolloReactComponents.Mutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> mutation={CreateRegistrationXlsxImportDocument} {...props} />
+    );
+    
+export type CreateRegistrationXlsxImportProps<TChildProps = {}> = ApolloReactHoc.MutateProps<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables> & TChildProps;
+export function withCreateRegistrationXlsxImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CreateRegistrationXlsxImportMutation,
+  CreateRegistrationXlsxImportMutationVariables,
+  CreateRegistrationXlsxImportProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables, CreateRegistrationXlsxImportProps<TChildProps>>(CreateRegistrationXlsxImportDocument, {
+      alias: 'createRegistrationXlsxImport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCreateRegistrationXlsxImportMutation__
+ *
+ * To run a mutation, you first call `useCreateRegistrationXlsxImportMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateRegistrationXlsxImportMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createRegistrationXlsxImportMutation, { data, loading, error }] = useCreateRegistrationXlsxImportMutation({
+ *   variables: {
+ *      registrationDataImportData: // value for 'registrationDataImportData'
+ *   },
+ * });
+ */
+export function useCreateRegistrationXlsxImportMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>(CreateRegistrationXlsxImportDocument, baseOptions);
+      }
+export type CreateRegistrationXlsxImportMutationHookResult = ReturnType<typeof useCreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationResult = ApolloReactCommon.MutationResult<CreateRegistrationXlsxImportMutation>;
+export type CreateRegistrationXlsxImportMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateRegistrationXlsxImportMutation, CreateRegistrationXlsxImportMutationVariables>;
+export const ImportedHouseholdDocument = gql`
+    query ImportedHousehold($id: ID!) {
+  importedHousehold(id: $id) {
+    ...importedHouseholdDetailed
+  }
+}
+    ${ImportedHouseholdDetailedFragmentDoc}`;
+export type ImportedHouseholdComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>, 'query'> & ({ variables: ImportedHouseholdQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedHouseholdComponent = (props: ImportedHouseholdComponentProps) => (
+      <ApolloReactComponents.Query<ImportedHouseholdQuery, ImportedHouseholdQueryVariables> query={ImportedHouseholdDocument} {...props} />
+    );
+    
+export type ImportedHouseholdProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedHouseholdQuery, ImportedHouseholdQueryVariables> & TChildProps;
+export function withImportedHousehold<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedHouseholdQuery,
+  ImportedHouseholdQueryVariables,
+  ImportedHouseholdProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedHouseholdQuery, ImportedHouseholdQueryVariables, ImportedHouseholdProps<TChildProps>>(ImportedHouseholdDocument, {
+      alias: 'importedHousehold',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedHouseholdQuery__
+ *
+ * To run a query within a React component, call `useImportedHouseholdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedHouseholdQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedHouseholdQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedHouseholdQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, baseOptions);
+      }
+export function useImportedHouseholdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>(ImportedHouseholdDocument, baseOptions);
+        }
+export type ImportedHouseholdQueryHookResult = ReturnType<typeof useImportedHouseholdQuery>;
+export type ImportedHouseholdLazyQueryHookResult = ReturnType<typeof useImportedHouseholdLazyQuery>;
+export type ImportedHouseholdQueryResult = ApolloReactCommon.QueryResult<ImportedHouseholdQuery, ImportedHouseholdQueryVariables>;
+export const ImportedIndividualDocument = gql`
+    query ImportedIndividual($id: ID!) {
+  importedIndividual(id: $id) {
+    ...importedIndividualDetailed
+  }
+}
+    ${ImportedIndividualDetailedFragmentDoc}`;
+export type ImportedIndividualComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>, 'query'> & ({ variables: ImportedIndividualQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const ImportedIndividualComponent = (props: ImportedIndividualComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualQuery, ImportedIndividualQueryVariables> query={ImportedIndividualDocument} {...props} />
+    );
+    
+export type ImportedIndividualProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualQuery, ImportedIndividualQueryVariables> & TChildProps;
+export function withImportedIndividual<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualQuery,
+  ImportedIndividualQueryVariables,
+  ImportedIndividualProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualQuery, ImportedIndividualQueryVariables, ImportedIndividualProps<TChildProps>>(ImportedIndividualDocument, {
+      alias: 'importedIndividual',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useImportedIndividualQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, baseOptions);
+      }
+export function useImportedIndividualLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualQuery, ImportedIndividualQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualQuery, ImportedIndividualQueryVariables>(ImportedIndividualDocument, baseOptions);
+        }
+export type ImportedIndividualQueryHookResult = ReturnType<typeof useImportedIndividualQuery>;
+export type ImportedIndividualLazyQueryHookResult = ReturnType<typeof useImportedIndividualLazyQuery>;
+export type ImportedIndividualQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualQuery, ImportedIndividualQueryVariables>;
+export const MergeRdiDocument = gql`
+    mutation MergeRDI($id: ID!) {
+  mergeRegistrationDataImport(id: $id) {
+    registrationDataImport {
+      ...registrationDetailed
+    }
+  }
+}
+    ${RegistrationDetailedFragmentDoc}`;
+export type MergeRdiMutationFn = ApolloReactCommon.MutationFunction<MergeRdiMutation, MergeRdiMutationVariables>;
+export type MergeRdiComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<MergeRdiMutation, MergeRdiMutationVariables>, 'mutation'>;
+
+    export const MergeRdiComponent = (props: MergeRdiComponentProps) => (
+      <ApolloReactComponents.Mutation<MergeRdiMutation, MergeRdiMutationVariables> mutation={MergeRdiDocument} {...props} />
+    );
+    
+export type MergeRdiProps<TChildProps = {}> = ApolloReactHoc.MutateProps<MergeRdiMutation, MergeRdiMutationVariables> & TChildProps;
+export function withMergeRdi<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  MergeRdiMutation,
+  MergeRdiMutationVariables,
+  MergeRdiProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, MergeRdiMutation, MergeRdiMutationVariables, MergeRdiProps<TChildProps>>(MergeRdiDocument, {
+      alias: 'mergeRdi',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useMergeRdiMutation__
+ *
+ * To run a mutation, you first call `useMergeRdiMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useMergeRdiMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [mergeRdiMutation, { data, loading, error }] = useMergeRdiMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMergeRdiMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<MergeRdiMutation, MergeRdiMutationVariables>) {
+        return ApolloReactHooks.useMutation<MergeRdiMutation, MergeRdiMutationVariables>(MergeRdiDocument, baseOptions);
+      }
+export type MergeRdiMutationHookResult = ReturnType<typeof useMergeRdiMutation>;
+export type MergeRdiMutationResult = ApolloReactCommon.MutationResult<MergeRdiMutation>;
+export type MergeRdiMutationOptions = ApolloReactCommon.BaseMutationOptions<MergeRdiMutation, MergeRdiMutationVariables>;
+export const RegistrationChoicesDocument = gql`
+    query registrationChoices {
+  registrationDataStatusChoices {
+    name
+    value
+  }
+}
+    `;
+export type RegistrationChoicesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>, 'query'>;
+
+    export const RegistrationChoicesComponent = (props: RegistrationChoicesComponentProps) => (
+      <ApolloReactComponents.Query<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> query={RegistrationChoicesDocument} {...props} />
+    );
+    
+export type RegistrationChoicesProps<TChildProps = {}> = ApolloReactHoc.DataProps<RegistrationChoicesQuery, RegistrationChoicesQueryVariables> & TChildProps;
+export function withRegistrationChoices<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RegistrationChoicesQuery,
+  RegistrationChoicesQueryVariables,
+  RegistrationChoicesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RegistrationChoicesQuery, RegistrationChoicesQueryVariables, RegistrationChoicesProps<TChildProps>>(RegistrationChoicesDocument, {
+      alias: 'registrationChoices',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRegistrationChoicesQuery__
+ *
+ * To run a query within a React component, call `useRegistrationChoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRegistrationChoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRegistrationChoicesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useRegistrationChoicesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+        return ApolloReactHooks.useQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+      }
+export function useRegistrationChoicesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>(RegistrationChoicesDocument, baseOptions);
+        }
+export type RegistrationChoicesQueryHookResult = ReturnType<typeof useRegistrationChoicesQuery>;
+export type RegistrationChoicesLazyQueryHookResult = ReturnType<typeof useRegistrationChoicesLazyQuery>;
+export type RegistrationChoicesQueryResult = ApolloReactCommon.QueryResult<RegistrationChoicesQuery, RegistrationChoicesQueryVariables>;
+export const RegistrationDataImportDocument = gql`
+    query RegistrationDataImport($id: ID!) {
+  registrationDataImport(id: $id) {
+    ...registrationDetailed
+  }
+}
+    ${RegistrationDetailedFragmentDoc}`;
+export type RegistrationDataImportComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>, 'query'> & ({ variables: RegistrationDataImportQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const RegistrationDataImportComponent = (props: RegistrationDataImportComponentProps) => (
+      <ApolloReactComponents.Query<RegistrationDataImportQuery, RegistrationDataImportQueryVariables> query={RegistrationDataImportDocument} {...props} />
+    );
+    
+export type RegistrationDataImportProps<TChildProps = {}> = ApolloReactHoc.DataProps<RegistrationDataImportQuery, RegistrationDataImportQueryVariables> & TChildProps;
+export function withRegistrationDataImport<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  RegistrationDataImportQuery,
+  RegistrationDataImportQueryVariables,
+  RegistrationDataImportProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, RegistrationDataImportQuery, RegistrationDataImportQueryVariables, RegistrationDataImportProps<TChildProps>>(RegistrationDataImportDocument, {
+      alias: 'registrationDataImport',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useRegistrationDataImportQuery__
+ *
+ * To run a query within a React component, call `useRegistrationDataImportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRegistrationDataImportQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRegistrationDataImportQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRegistrationDataImportQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>) {
+        return ApolloReactHooks.useQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, baseOptions);
+      }
+export function useRegistrationDataImportLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>(RegistrationDataImportDocument, baseOptions);
+        }
+export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistrationDataImportQuery>;
+export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
+export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
+export const SaveKoboImportDataDocument = gql`
+    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!) {
+  saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId) {
+    importData {
+      id
+      numberOfHouseholds
+      numberOfIndividuals
+    }
+    errors {
+      header
+      message
+    }
+  }
+}
+    `;
+export type SaveKoboImportDataMutationFn = ApolloReactCommon.MutationFunction<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
+export type SaveKoboImportDataComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>, 'mutation'>;
+
+    export const SaveKoboImportDataComponent = (props: SaveKoboImportDataComponentProps) => (
+      <ApolloReactComponents.Mutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables> mutation={SaveKoboImportDataDocument} {...props} />
+    );
+    
+export type SaveKoboImportDataProps<TChildProps = {}> = ApolloReactHoc.MutateProps<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables> & TChildProps;
+export function withSaveKoboImportData<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  SaveKoboImportDataMutation,
+  SaveKoboImportDataMutationVariables,
+  SaveKoboImportDataProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables, SaveKoboImportDataProps<TChildProps>>(SaveKoboImportDataDocument, {
+      alias: 'saveKoboImportData',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useSaveKoboImportDataMutation__
+ *
+ * To run a mutation, you first call `useSaveKoboImportDataMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveKoboImportDataMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveKoboImportDataMutation, { data, loading, error }] = useSaveKoboImportDataMutation({
+ *   variables: {
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useSaveKoboImportDataMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>) {
+        return ApolloReactHooks.useMutation<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>(SaveKoboImportDataDocument, baseOptions);
+      }
+export type SaveKoboImportDataMutationHookResult = ReturnType<typeof useSaveKoboImportDataMutation>;
+export type SaveKoboImportDataMutationResult = ApolloReactCommon.MutationResult<SaveKoboImportDataMutation>;
+export type SaveKoboImportDataMutationOptions = ApolloReactCommon.BaseMutationOptions<SaveKoboImportDataMutation, SaveKoboImportDataMutationVariables>;
+export const UploadImportDataXlsxFileDocument = gql`
+    mutation UploadImportDataXlsxFile($file: Upload!, $businessAreaSlug: String!) {
+  uploadImportDataXlsxFile(file: $file, businessAreaSlug: $businessAreaSlug) {
+    errors {
+      header
+      message
+      rowNumber
+    }
+    importData {
+      id
+      numberOfIndividuals
+      numberOfHouseholds
+      registrationDataImport {
+        id
+      }
+    }
+  }
+}
+    `;
+export type UploadImportDataXlsxFileMutationFn = ApolloReactCommon.MutationFunction<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export type UploadImportDataXlsxFileComponentProps = Omit<ApolloReactComponents.MutationComponentOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>, 'mutation'>;
+
+    export const UploadImportDataXlsxFileComponent = (props: UploadImportDataXlsxFileComponentProps) => (
+      <ApolloReactComponents.Mutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> mutation={UploadImportDataXlsxFileDocument} {...props} />
+    );
+    
+export type UploadImportDataXlsxFileProps<TChildProps = {}> = ApolloReactHoc.MutateProps<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables> & TChildProps;
+export function withUploadImportDataXlsxFile<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  UploadImportDataXlsxFileMutation,
+  UploadImportDataXlsxFileMutationVariables,
+  UploadImportDataXlsxFileProps<TChildProps>>) {
+    return ApolloReactHoc.withMutation<TProps, UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables, UploadImportDataXlsxFileProps<TChildProps>>(UploadImportDataXlsxFileDocument, {
+      alias: 'uploadImportDataXlsxFile',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useUploadImportDataXlsxFileMutation__
+ *
+ * To run a mutation, you first call `useUploadImportDataXlsxFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUploadImportDataXlsxFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [uploadImportDataXlsxFileMutation, { data, loading, error }] = useUploadImportDataXlsxFileMutation({
+ *   variables: {
+ *      file: // value for 'file'
+ *      businessAreaSlug: // value for 'businessAreaSlug'
+ *   },
+ * });
+ */
+export function useUploadImportDataXlsxFileMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>) {
+        return ApolloReactHooks.useMutation<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>(UploadImportDataXlsxFileDocument, baseOptions);
+      }
+export type UploadImportDataXlsxFileMutationHookResult = ReturnType<typeof useUploadImportDataXlsxFileMutation>;
+export type UploadImportDataXlsxFileMutationResult = ApolloReactCommon.MutationResult<UploadImportDataXlsxFileMutation>;
+export type UploadImportDataXlsxFileMutationOptions = ApolloReactCommon.BaseMutationOptions<UploadImportDataXlsxFileMutation, UploadImportDataXlsxFileMutationVariables>;
+export const AllFieldsAttributesDocument = gql`
+    query AllFieldsAttributes {
+  allFieldsAttributes {
+    id
+    name
+    labelEn
+    associatedWith
+    isFlexField
+  }
+}
+    `;
+export type AllFieldsAttributesComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>, 'query'>;
+
+    export const AllFieldsAttributesComponent = (props: AllFieldsAttributesComponentProps) => (
+      <ApolloReactComponents.Query<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables> query={AllFieldsAttributesDocument} {...props} />
+    );
+    
+export type AllFieldsAttributesProps<TChildProps = {}> = ApolloReactHoc.DataProps<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables> & TChildProps;
+export function withAllFieldsAttributes<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  AllFieldsAttributesQuery,
+  AllFieldsAttributesQueryVariables,
+  AllFieldsAttributesProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables, AllFieldsAttributesProps<TChildProps>>(AllFieldsAttributesDocument, {
+      alias: 'allFieldsAttributes',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useAllFieldsAttributesQuery__
+ *
+ * To run a query within a React component, call `useAllFieldsAttributesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAllFieldsAttributesQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAllFieldsAttributesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAllFieldsAttributesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
+        return ApolloReactHooks.useQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, baseOptions);
+      }
+export function useAllFieldsAttributesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>(AllFieldsAttributesDocument, baseOptions);
+        }
+export type AllFieldsAttributesQueryHookResult = ReturnType<typeof useAllFieldsAttributesQuery>;
+export type AllFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllFieldsAttributesLazyQuery>;
+export type AllFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllFieldsAttributesQuery, AllFieldsAttributesQueryVariables>;
+export const CandidateHouseholdsListByTargetingCriteriaDocument = gql`
+    query candidateHouseholdsListByTargetingCriteria($targetPopulation: ID!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $businessArea: String) {
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    edges {
+      node {
+        id
+        unicefId
+        headOfHousehold {
+          id
+          givenName
+          familyName
+        }
+        size
+        adminArea {
+          id
+          title
+        }
+        updatedAt
+        address
+        selection {
+          vulnerabilityScore
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type CandidateHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: CandidateHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const CandidateHouseholdsListByTargetingCriteriaComponent = (props: CandidateHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> query={CandidateHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type CandidateHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withCandidateHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  CandidateHouseholdsListByTargetingCriteriaQuery,
+  CandidateHouseholdsListByTargetingCriteriaQueryVariables,
+  CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables, CandidateHouseholdsListByTargetingCriteriaProps<TChildProps>>(CandidateHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'candidateHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useCandidateHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useCandidateHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCandidateHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCandidateHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useCandidateHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useCandidateHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>(CandidateHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type CandidateHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useCandidateHouseholdsListByTargetingCriteriaLazyQuery>;
+export type CandidateHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<CandidateHouseholdsListByTargetingCriteriaQuery, CandidateHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FinalHouseholdsListByTargetingCriteriaDocument = gql`
+    query FinalHouseholdsListByTargetingCriteria($targetPopulation: ID!, $targetingCriteria: TargetingCriteriaObjectType, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $businessArea: String) {
+  finalHouseholdsListByTargetingCriteria(targetPopulation: $targetPopulation, targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, businessArea: $businessArea) {
+    edges {
+      node {
+        id
+        unicefId
+        headOfHousehold {
+          id
+          givenName
+          familyName
+        }
+        size
+        adminArea {
+          id
+          title
+        }
+        updatedAt
+        address
+        selection {
+          vulnerabilityScore
+        }
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type FinalHouseholdsListByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: FinalHouseholdsListByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const FinalHouseholdsListByTargetingCriteriaComponent = (props: FinalHouseholdsListByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> query={FinalHouseholdsListByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type FinalHouseholdsListByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables> & TChildProps;
+export function withFinalHouseholdsListByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FinalHouseholdsListByTargetingCriteriaQuery,
+  FinalHouseholdsListByTargetingCriteriaQueryVariables,
+  FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables, FinalHouseholdsListByTargetingCriteriaProps<TChildProps>>(FinalHouseholdsListByTargetingCriteriaDocument, {
+      alias: 'finalHouseholdsListByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFinalHouseholdsListByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useFinalHouseholdsListByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFinalHouseholdsListByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFinalHouseholdsListByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetPopulation: // value for 'targetPopulation'
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useFinalHouseholdsListByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+      }
+export function useFinalHouseholdsListByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>(FinalHouseholdsListByTargetingCriteriaDocument, baseOptions);
+        }
+export type FinalHouseholdsListByTargetingCriteriaQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaQuery>;
+export type FinalHouseholdsListByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useFinalHouseholdsListByTargetingCriteriaLazyQuery>;
+export type FinalHouseholdsListByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<FinalHouseholdsListByTargetingCriteriaQuery, FinalHouseholdsListByTargetingCriteriaQueryVariables>;
+export const FlexFieldsDocument = gql`
+    query FlexFields {
+  allGroupsWithFields {
+    name
+    labelEn
+    flexAttributes {
+      id
+      labelEn
+      associatedWith
+    }
+  }
+}
+    `;
+export type FlexFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<FlexFieldsQuery, FlexFieldsQueryVariables>, 'query'>;
+
+    export const FlexFieldsComponent = (props: FlexFieldsComponentProps) => (
+      <ApolloReactComponents.Query<FlexFieldsQuery, FlexFieldsQueryVariables> query={FlexFieldsDocument} {...props} />
+    );
+    
+export type FlexFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<FlexFieldsQuery, FlexFieldsQueryVariables> & TChildProps;
+export function withFlexFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  FlexFieldsQuery,
+  FlexFieldsQueryVariables,
+  FlexFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, FlexFieldsQuery, FlexFieldsQueryVariables, FlexFieldsProps<TChildProps>>(FlexFieldsDocument, {
+      alias: 'flexFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useFlexFieldsQuery__
+ *
+ * To run a query within a React component, call `useFlexFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFlexFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFlexFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFlexFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+      }
+export function useFlexFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<FlexFieldsQuery, FlexFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<FlexFieldsQuery, FlexFieldsQueryVariables>(FlexFieldsDocument, baseOptions);
+        }
+export type FlexFieldsQueryHookResult = ReturnType<typeof useFlexFieldsQuery>;
+export type FlexFieldsLazyQueryHookResult = ReturnType<typeof useFlexFieldsLazyQuery>;
+export type FlexFieldsQueryResult = ApolloReactCommon.QueryResult<FlexFieldsQuery, FlexFieldsQueryVariables>;
+export const GoldenRecordByTargetingCriteriaDocument = gql`
+    query GoldenRecordByTargetingCriteria($targetingCriteria: TargetingCriteriaObjectType!, $first: Int, $after: String, $before: String, $last: Int, $orderBy: String, $program: ID!, $businessArea: String) {
+  goldenRecordByTargetingCriteria(targetingCriteria: $targetingCriteria, after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, program: $program, businessArea: $businessArea) {
+    edges {
+      node {
+        id
+        unicefId
+        headOfHousehold {
+          id
+          givenName
+          familyName
+        }
+        size
+        adminArea {
+          id
+          title
+        }
+        updatedAt
+        address
+      }
+      cursor
+    }
+    totalCount
+    edgeCount
+  }
+}
+    `;
+export type GoldenRecordByTargetingCriteriaComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>, 'query'> & ({ variables: GoldenRecordByTargetingCriteriaQueryVariables; skip?: boolean; } | { skip: boolean; });
+
+    export const GoldenRecordByTargetingCriteriaComponent = (props: GoldenRecordByTargetingCriteriaComponentProps) => (
+      <ApolloReactComponents.Query<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> query={GoldenRecordByTargetingCriteriaDocument} {...props} />
+    );
+    
+export type GoldenRecordByTargetingCriteriaProps<TChildProps = {}> = ApolloReactHoc.DataProps<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables> & TChildProps;
+export function withGoldenRecordByTargetingCriteria<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  GoldenRecordByTargetingCriteriaQuery,
+  GoldenRecordByTargetingCriteriaQueryVariables,
+  GoldenRecordByTargetingCriteriaProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables, GoldenRecordByTargetingCriteriaProps<TChildProps>>(GoldenRecordByTargetingCriteriaDocument, {
+      alias: 'goldenRecordByTargetingCriteria',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useGoldenRecordByTargetingCriteriaQuery__
+ *
+ * To run a query within a React component, call `useGoldenRecordByTargetingCriteriaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGoldenRecordByTargetingCriteriaQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGoldenRecordByTargetingCriteriaQuery({
+ *   variables: {
+ *      targetingCriteria: // value for 'targetingCriteria'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      orderBy: // value for 'orderBy'
+ *      program: // value for 'program'
+ *      businessArea: // value for 'businessArea'
+ *   },
+ * });
+ */
+export function useGoldenRecordByTargetingCriteriaQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+        return ApolloReactHooks.useQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+      }
+export function useGoldenRecordByTargetingCriteriaLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>(GoldenRecordByTargetingCriteriaDocument, baseOptions);
+        }
+export type GoldenRecordByTargetingCriteriaQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaQuery>;
+export type GoldenRecordByTargetingCriteriaLazyQueryHookResult = ReturnType<typeof useGoldenRecordByTargetingCriteriaLazyQuery>;
+export type GoldenRecordByTargetingCriteriaQueryResult = ApolloReactCommon.QueryResult<GoldenRecordByTargetingCriteriaQuery, GoldenRecordByTargetingCriteriaQueryVariables>;
+export const ImportedIndividualFieldsDocument = gql`
+    query ImportedIndividualFields {
+  allFieldsAttributes {
+    isFlexField
+    id
+    type
+    name
+    associatedWith
+    labels {
+      language
+      label
+    }
+    labelEn
+    hint
+    choices {
+      labels {
+        label
+        language
+      }
+      labelEn
+      value
+      admin
+      listName
+    }
+  }
+}
+    `;
+export type ImportedIndividualFieldsComponentProps = Omit<ApolloReactComponents.QueryComponentOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>, 'query'>;
+
+    export const ImportedIndividualFieldsComponent = (props: ImportedIndividualFieldsComponentProps) => (
+      <ApolloReactComponents.Query<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> query={ImportedIndividualFieldsDocument} {...props} />
+    );
+    
+export type ImportedIndividualFieldsProps<TChildProps = {}> = ApolloReactHoc.DataProps<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables> & TChildProps;
+export function withImportedIndividualFields<TProps, TChildProps = {}>(operationOptions?: ApolloReactHoc.OperationOption<
+  TProps,
+  ImportedIndividualFieldsQuery,
+  ImportedIndividualFieldsQueryVariables,
+  ImportedIndividualFieldsProps<TChildProps>>) {
+    return ApolloReactHoc.withQuery<TProps, ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables, ImportedIndividualFieldsProps<TChildProps>>(ImportedIndividualFieldsDocument, {
+      alias: 'importedIndividualFields',
+      ...operationOptions
+    });
+};
+
+/**
+ * __useImportedIndividualFieldsQuery__
+ *
+ * To run a query within a React component, call `useImportedIndividualFieldsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useImportedIndividualFieldsQuery` returns an object from Apollo Client that contains loading, error, and data properties 
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useImportedIndividualFieldsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useImportedIndividualFieldsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+        return ApolloReactHooks.useQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+      }
+export function useImportedIndividualFieldsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>(ImportedIndividualFieldsDocument, baseOptions);
+        }
+export type ImportedIndividualFieldsQueryHookResult = ReturnType<typeof useImportedIndividualFieldsQuery>;
+export type ImportedIndividualFieldsLazyQueryHookResult = ReturnType<typeof useImportedIndividualFieldsLazyQuery>;
+export type ImportedIndividualFieldsQueryResult = ApolloReactCommon.QueryResult<ImportedIndividualFieldsQuery, ImportedIndividualFieldsQueryVariables>;
+
+
+export type ResolverTypeWrapper<T> = Promise<T> | T;
+
+export type ResolverFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Promise<TResult> | TResult;
+
+
+export type StitchingResolver<TResult, TParent, TContext, TArgs> = {
+  fragment: string;
+  resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
+};
+
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
+  | ResolverFn<TResult, TParent, TContext, TArgs>
+  | StitchingResolver<TResult, TParent, TContext, TArgs>;
+
+export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => AsyncIterator<TResult> | Promise<AsyncIterator<TResult>>;
+
+export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => TResult | Promise<TResult>;
+
+export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
+  subscribe: SubscriptionSubscribeFn<{ [key in TKey]: TResult }, TParent, TContext, TArgs>;
+  resolve?: SubscriptionResolveFn<TResult, { [key in TKey]: TResult }, TContext, TArgs>;
+}
+
+export interface SubscriptionResolverObject<TResult, TParent, TContext, TArgs> {
+  subscribe: SubscriptionSubscribeFn<any, TParent, TContext, TArgs>;
+  resolve: SubscriptionResolveFn<TResult, any, TContext, TArgs>;
+}
+
+export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, TArgs> =
+  | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
+  | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
+
+export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+  | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
+  | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
+
+export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+  parent: TParent,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Maybe<TTypes>;
+
+export type NextResolverFn<T> = () => Promise<T>;
+
+export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+  next: NextResolverFn<TResult>,
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => TResult | Promise<TResult>;
+
+/** Mapping between all available schema types and the resolvers types */
+export type ResolversTypes = {
+  Query: ResolverTypeWrapper<{}>,
+  String: ResolverTypeWrapper<Scalars['String']>,
+  Int: ResolverTypeWrapper<Scalars['Int']>,
+  UUID: ResolverTypeWrapper<Scalars['UUID']>,
+  LogEntryNodeConnection: ResolverTypeWrapper<LogEntryNodeConnection>,
+  PageInfo: ResolverTypeWrapper<PageInfo>,
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
+  LogEntryNodeEdge: ResolverTypeWrapper<LogEntryNodeEdge>,
+  LogEntryNode: ResolverTypeWrapper<LogEntryNode>,
+  Node: ResolverTypeWrapper<Node>,
+  ID: ResolverTypeWrapper<Scalars['ID']>,
+  ContentTypeObjectType: ResolverTypeWrapper<ContentTypeObjectType>,
+  LogEntryAction: LogEntryAction,
+  Arg: ResolverTypeWrapper<Scalars['Arg']>,
+  UserNode: ResolverTypeWrapper<UserNode>,
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
+  UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
+  AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
+  AdminAreaTypeNodeEdge: ResolverTypeWrapper<AdminAreaTypeNodeEdge>,
+  AdminAreaTypeNode: ResolverTypeWrapper<AdminAreaTypeNode>,
+  AdminAreaNodeConnection: ResolverTypeWrapper<AdminAreaNodeConnection>,
+  AdminAreaNodeEdge: ResolverTypeWrapper<AdminAreaNodeEdge>,
+  AdminAreaNode: ResolverTypeWrapper<AdminAreaNode>,
+  GrievanceTicketNodeConnection: ResolverTypeWrapper<GrievanceTicketNodeConnection>,
+  GrievanceTicketNodeEdge: ResolverTypeWrapper<GrievanceTicketNodeEdge>,
+  GrievanceTicketNode: ResolverTypeWrapper<GrievanceTicketNode>,
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>,
+  TicketNoteNodeConnection: ResolverTypeWrapper<TicketNoteNodeConnection>,
+  TicketNoteNodeEdge: ResolverTypeWrapper<TicketNoteNodeEdge>,
+  TicketNoteNode: ResolverTypeWrapper<TicketNoteNode>,
+  TicketComplaintDetailsNode: ResolverTypeWrapper<TicketComplaintDetailsNode>,
+  PaymentRecordNode: ResolverTypeWrapper<PaymentRecordNode>,
+  PaymentRecordStatus: PaymentRecordStatus,
+  CashPlanNode: ResolverTypeWrapper<CashPlanNode>,
+  CashPlanStatus: CashPlanStatus,
+  ProgramNode: ResolverTypeWrapper<ProgramNode>,
+  ProgramStatus: ProgramStatus,
+  Date: ResolverTypeWrapper<Scalars['Date']>,
+  Decimal: ResolverTypeWrapper<Scalars['Decimal']>,
+  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
+  ProgramSector: ProgramSector,
+  ProgramScope: ProgramScope,
+  HouseholdNodeConnection: ResolverTypeWrapper<HouseholdNodeConnection>,
+  HouseholdNodeEdge: ResolverTypeWrapper<HouseholdNodeEdge>,
+  HouseholdNode: ResolverTypeWrapper<HouseholdNode>,
+  HouseholdResidenceStatus: HouseholdResidenceStatus,
+  IndividualNodeConnection: ResolverTypeWrapper<IndividualNodeConnection>,
+  IndividualNodeEdge: ResolverTypeWrapper<IndividualNodeEdge>,
+  IndividualNode: ResolverTypeWrapper<IndividualNode>,
+  IndividualSex: IndividualSex,
+  IndividualMaritalStatus: IndividualMaritalStatus,
+  IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: ResolverTypeWrapper<RegistrationDataImportNode>,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: ResolverTypeWrapper<CountAndPercentageNode>,
+  Float: ResolverTypeWrapper<Scalars['Float']>,
+  FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
+  PaymentRecordNodeConnection: ResolverTypeWrapper<PaymentRecordNodeConnection>,
+  PaymentRecordNodeEdge: ResolverTypeWrapper<PaymentRecordNodeEdge>,
+  TicketComplaintDetailsNodeConnection: ResolverTypeWrapper<TicketComplaintDetailsNodeConnection>,
+  TicketComplaintDetailsNodeEdge: ResolverTypeWrapper<TicketComplaintDetailsNodeEdge>,
+  TicketSensitiveDetailsNodeConnection: ResolverTypeWrapper<TicketSensitiveDetailsNodeConnection>,
+  TicketSensitiveDetailsNodeEdge: ResolverTypeWrapper<TicketSensitiveDetailsNodeEdge>,
+  TicketSensitiveDetailsNode: ResolverTypeWrapper<TicketSensitiveDetailsNode>,
+  TicketIndividualDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeConnection>,
+  TicketIndividualDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNodeEdge>,
+  TicketIndividualDataUpdateDetailsNode: ResolverTypeWrapper<TicketIndividualDataUpdateDetailsNode>,
+  TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
+  TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
+  TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
+  TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
+  TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
+  TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<TicketSystemFlaggingDetailsNode>,
+  SanctionListIndividualNode: ResolverTypeWrapper<SanctionListIndividualNode>,
+  SanctionListIndividualDocumentNodeConnection: ResolverTypeWrapper<SanctionListIndividualDocumentNodeConnection>,
+  SanctionListIndividualDocumentNodeEdge: ResolverTypeWrapper<SanctionListIndividualDocumentNodeEdge>,
+  SanctionListIndividualDocumentNode: ResolverTypeWrapper<SanctionListIndividualDocumentNode>,
+  SanctionListIndividualNationalitiesNodeConnection: ResolverTypeWrapper<SanctionListIndividualNationalitiesNodeConnection>,
+  SanctionListIndividualNationalitiesNodeEdge: ResolverTypeWrapper<SanctionListIndividualNationalitiesNodeEdge>,
+  SanctionListIndividualNationalitiesNode: ResolverTypeWrapper<SanctionListIndividualNationalitiesNode>,
+  SanctionListIndividualCountriesNodeConnection: ResolverTypeWrapper<SanctionListIndividualCountriesNodeConnection>,
+  SanctionListIndividualCountriesNodeEdge: ResolverTypeWrapper<SanctionListIndividualCountriesNodeEdge>,
+  SanctionListIndividualCountriesNode: ResolverTypeWrapper<SanctionListIndividualCountriesNode>,
+  SanctionListIndividualAliasNameNodeConnection: ResolverTypeWrapper<SanctionListIndividualAliasNameNodeConnection>,
+  SanctionListIndividualAliasNameNodeEdge: ResolverTypeWrapper<SanctionListIndividualAliasNameNodeEdge>,
+  SanctionListIndividualAliasNameNode: ResolverTypeWrapper<SanctionListIndividualAliasNameNode>,
+  SanctionListIndividualDateOfBirthNodeConnection: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeConnection>,
+  SanctionListIndividualDateOfBirthNodeEdge: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNodeEdge>,
+  SanctionListIndividualDateOfBirthNode: ResolverTypeWrapper<SanctionListIndividualDateOfBirthNode>,
+  DocumentNodeConnection: ResolverTypeWrapper<DocumentNodeConnection>,
+  DocumentNodeEdge: ResolverTypeWrapper<DocumentNodeEdge>,
+  DocumentNode: ResolverTypeWrapper<DocumentNode>,
+  DocumentTypeNode: ResolverTypeWrapper<DocumentTypeNode>,
+  DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
+  IndividualIdentityNode: ResolverTypeWrapper<IndividualIdentityNode>,
+  AgencyNode: ResolverTypeWrapper<AgencyNode>,
+  AgencyType: AgencyType,
+  IndividualRoleInHouseholdNode: ResolverTypeWrapper<IndividualRoleInHouseholdNode>,
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  GeoJSON: ResolverTypeWrapper<Scalars['GeoJSON']>,
+  ProgramNodeConnection: ResolverTypeWrapper<ProgramNodeConnection>,
+  ProgramNodeEdge: ResolverTypeWrapper<ProgramNodeEdge>,
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  HouseholdRegistrationMethod: HouseholdRegistrationMethod,
+  HouseholdCollectIndividualData: HouseholdCollectIndividualData,
+  HouseholdCurrency: HouseholdCurrency,
+  TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeConnection>,
+  TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeEdge>,
+  TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
+  TicketAddIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketAddIndividualDetailsNodeConnection>,
+  TicketAddIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketAddIndividualDetailsNodeEdge>,
+  TicketAddIndividualDetailsNode: ResolverTypeWrapper<TicketAddIndividualDetailsNode>,
+  TargetPopulationNodeConnection: ResolverTypeWrapper<TargetPopulationNodeConnection>,
+  TargetPopulationNodeEdge: ResolverTypeWrapper<TargetPopulationNodeEdge>,
+  TargetPopulationNode: ResolverTypeWrapper<TargetPopulationNode>,
+  TargetPopulationStatus: TargetPopulationStatus,
+  TargetingCriteriaNode: ResolverTypeWrapper<TargetingCriteriaNode>,
+  TargetingCriteriaRuleNode: ResolverTypeWrapper<TargetingCriteriaRuleNode>,
+  TargetingIndividualRuleFilterBlockNode: ResolverTypeWrapper<TargetingIndividualRuleFilterBlockNode>,
+  TargetingIndividualBlockRuleFilterNode: ResolverTypeWrapper<TargetingIndividualBlockRuleFilterNode>,
+  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  FieldAttributeNode: ResolverTypeWrapper<FieldAttributeNode>,
+  LabelNode: ResolverTypeWrapper<LabelNode>,
+  CoreFieldChoiceObject: ResolverTypeWrapper<CoreFieldChoiceObject>,
+  TargetingCriteriaRuleFilterNode: ResolverTypeWrapper<TargetingCriteriaRuleFilterNode>,
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  SteficonRuleNode: ResolverTypeWrapper<SteficonRuleNode>,
+  RuleLanguage: RuleLanguage,
+  HouseholdSelection: ResolverTypeWrapper<HouseholdSelection>,
+  StatsObjectType: ResolverTypeWrapper<StatsObjectType>,
+  CashPlanNodeConnection: ResolverTypeWrapper<CashPlanNodeConnection>,
+  CashPlanNodeEdge: ResolverTypeWrapper<CashPlanNodeEdge>,
+  ReportNodeConnection: ResolverTypeWrapper<ReportNodeConnection>,
+  ReportNodeEdge: ResolverTypeWrapper<ReportNodeEdge>,
+  ReportNode: ResolverTypeWrapper<ReportNode>,
+  ServiceProviderNode: ResolverTypeWrapper<ServiceProviderNode>,
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
+  CashPlanPaymentVerificationNodeConnection: ResolverTypeWrapper<CashPlanPaymentVerificationNodeConnection>,
+  CashPlanPaymentVerificationNodeEdge: ResolverTypeWrapper<CashPlanPaymentVerificationNodeEdge>,
+  CashPlanPaymentVerificationNode: ResolverTypeWrapper<CashPlanPaymentVerificationNode>,
+  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
+  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
+  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  AgeFilterObject: ResolverTypeWrapper<AgeFilterObject>,
+  PaymentVerificationNodeConnection: ResolverTypeWrapper<PaymentVerificationNodeConnection>,
+  PaymentVerificationNodeEdge: ResolverTypeWrapper<PaymentVerificationNodeEdge>,
+  PaymentVerificationNode: ResolverTypeWrapper<PaymentVerificationNode>,
+  PaymentVerificationStatus: PaymentVerificationStatus,
+  TicketPaymentVerificationDetailsNodeConnection: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeConnection>,
+  TicketPaymentVerificationDetailsNodeEdge: ResolverTypeWrapper<TicketPaymentVerificationDetailsNodeEdge>,
+  TicketPaymentVerificationDetailsNode: ResolverTypeWrapper<TicketPaymentVerificationDetailsNode>,
+  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  TicketNeedsAdjudicationDetailsNode: ResolverTypeWrapper<TicketNeedsAdjudicationDetailsNode>,
+  ServiceProviderNodeConnection: ResolverTypeWrapper<ServiceProviderNodeConnection>,
+  ServiceProviderNodeEdge: ResolverTypeWrapper<ServiceProviderNodeEdge>,
+  RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
+  RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
+  RoleNode: ResolverTypeWrapper<RoleNode>,
+  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
+  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
+  ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
+  SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
+  SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
+  ChartGrievanceTicketsNode: ResolverTypeWrapper<ChartGrievanceTicketsNode>,
+  _DatasetsNode: ResolverTypeWrapper<_DatasetsNode>,
+  IssueTypesObject: ResolverTypeWrapper<IssueTypesObject>,
+  SteficonRuleNodeConnection: ResolverTypeWrapper<SteficonRuleNodeConnection>,
+  SteficonRuleNodeEdge: ResolverTypeWrapper<SteficonRuleNodeEdge>,
+  ChartPaymentVerification: ResolverTypeWrapper<ChartPaymentVerification>,
+  _DetailedDatasetsNode: ResolverTypeWrapper<_DetailedDatasetsNode>,
+  ChartDatasetNode: ResolverTypeWrapper<ChartDatasetNode>,
+  SectionTotalNode: ResolverTypeWrapper<SectionTotalNode>,
+  TableTotalCashTransferred: ResolverTypeWrapper<TableTotalCashTransferred>,
+  _TableTotalCashTransferredDataNode: ResolverTypeWrapper<_TableTotalCashTransferredDataNode>,
+  ChartDetailedDatasetsNode: ResolverTypeWrapper<ChartDetailedDatasetsNode>,
+  RapidProFlow: ResolverTypeWrapper<RapidProFlow>,
+  RapidProFlowRun: ResolverTypeWrapper<RapidProFlowRun>,
+  RapidProFlowResult: ResolverTypeWrapper<RapidProFlowResult>,
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
+  GetCashplanVerificationSampleSizeObject: ResolverTypeWrapper<GetCashplanVerificationSampleSizeObject>,
+  BusinessAreaNodeConnection: ResolverTypeWrapper<BusinessAreaNodeConnection>,
+  BusinessAreaNodeEdge: ResolverTypeWrapper<BusinessAreaNodeEdge>,
+  BusinessAreaNode: ResolverTypeWrapper<BusinessAreaNode>,
+  GroupAttributeNode: ResolverTypeWrapper<GroupAttributeNode>,
+  KoboAssetObject: ResolverTypeWrapper<KoboAssetObject>,
+  KoboAssetObjectConnection: ResolverTypeWrapper<KoboAssetObjectConnection>,
+  KoboAssetObjectEdge: ResolverTypeWrapper<KoboAssetObjectEdge>,
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
+  UserNodeConnection: ResolverTypeWrapper<UserNodeConnection>,
+  UserNodeEdge: ResolverTypeWrapper<UserNodeEdge>,
+  ImportedHouseholdNode: ResolverTypeWrapper<ImportedHouseholdNode>,
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
+  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
+  ImportedIndividualNode: ResolverTypeWrapper<ImportedIndividualNode>,
+  ImportedIndividualSex: ImportedIndividualSex,
+  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
+  RegistrationDataImportDatahubNode: ResolverTypeWrapper<RegistrationDataImportDatahubNode>,
+  ImportDataNode: ResolverTypeWrapper<ImportDataNode>,
+  ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
+  ImportedHouseholdNodeConnection: ResolverTypeWrapper<ImportedHouseholdNodeConnection>,
+  ImportedHouseholdNodeEdge: ResolverTypeWrapper<ImportedHouseholdNodeEdge>,
+  ImportedIndividualNodeConnection: ResolverTypeWrapper<ImportedIndividualNodeConnection>,
+  ImportedIndividualNodeEdge: ResolverTypeWrapper<ImportedIndividualNodeEdge>,
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
+  ImportedDocumentNodeConnection: ResolverTypeWrapper<ImportedDocumentNodeConnection>,
+  ImportedDocumentNodeEdge: ResolverTypeWrapper<ImportedDocumentNodeEdge>,
+  ImportedDocumentNode: ResolverTypeWrapper<ImportedDocumentNode>,
+  ImportedDocumentTypeNode: ResolverTypeWrapper<ImportedDocumentTypeNode>,
+  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
+  ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNode: ResolverTypeWrapper<ImportedIndividualIdentityNode>,
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
+  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
+  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData,
+  ImportedHouseholdCurrency: ImportedHouseholdCurrency,
+  RegistrationDataImportDatahubNodeConnection: ResolverTypeWrapper<RegistrationDataImportDatahubNodeConnection>,
+  RegistrationDataImportDatahubNodeEdge: ResolverTypeWrapper<RegistrationDataImportDatahubNodeEdge>,
+  DjangoDebug: ResolverTypeWrapper<DjangoDebug>,
+  DjangoDebugSQL: ResolverTypeWrapper<DjangoDebugSql>,
+  Mutations: ResolverTypeWrapper<{}>,
+  CreateReportInput: CreateReportInput,
+  CreateReport: ResolverTypeWrapper<CreateReport>,
+  CreateDashboardReportInput: CreateDashboardReportInput,
+  CreateDashboardReport: ResolverTypeWrapper<CreateDashboardReport>,
+  CreateGrievanceTicketInput: CreateGrievanceTicketInput,
+  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
+  CategoryExtrasInput: CategoryExtrasInput,
+  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras,
+  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
+  IssueTypeExtrasInput: IssueTypeExtrasInput,
+  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
+  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
+  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
+  IndividualIdentityObjectType: IndividualIdentityObjectType,
+  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
+  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
+  AddIndividualDataObjectType: AddIndividualDataObjectType,
+  CreateGrievanceTicketMutation: ResolverTypeWrapper<CreateGrievanceTicketMutation>,
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  UpdateGrievanceTicketMutation: ResolverTypeWrapper<UpdateGrievanceTicketMutation>,
+  GrievanceStatusChangeMutation: ResolverTypeWrapper<GrievanceStatusChangeMutation>,
+  CreateTicketNoteInput: CreateTicketNoteInput,
+  CreateTicketNoteMutation: ResolverTypeWrapper<CreateTicketNoteMutation>,
+  IndividualDataChangeApproveMutation: ResolverTypeWrapper<IndividualDataChangeApproveMutation>,
+  HouseholdDataChangeApproveMutation: ResolverTypeWrapper<HouseholdDataChangeApproveMutation>,
+  SimpleApproveMutation: ResolverTypeWrapper<SimpleApproveMutation>,
+  NeedsAdjudicationApproveMutation: ResolverTypeWrapper<NeedsAdjudicationApproveMutation>,
+  ReassignRoleMutation: ResolverTypeWrapper<ReassignRoleMutation>,
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
+  CreatePaymentVerificationMutation: ResolverTypeWrapper<CreatePaymentVerificationMutation>,
+  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
+  EditPaymentVerificationMutation: ResolverTypeWrapper<EditPaymentVerificationMutation>,
+  Upload: ResolverTypeWrapper<Scalars['Upload']>,
+  ImportXlsxCashPlanVerification: ResolverTypeWrapper<ImportXlsxCashPlanVerification>,
+  XlsxErrorNode: ResolverTypeWrapper<XlsxErrorNode>,
+  ActivateCashPlanVerificationMutation: ResolverTypeWrapper<ActivateCashPlanVerificationMutation>,
+  FinishCashPlanVerificationMutation: ResolverTypeWrapper<FinishCashPlanVerificationMutation>,
+  DiscardCashPlanVerificationMutation: ResolverTypeWrapper<DiscardCashPlanVerificationMutation>,
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
+  UpdatePaymentVerificationStatusAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationStatusAndReceivedAmount>,
+  UpdatePaymentVerificationReceivedAndReceivedAmount: ResolverTypeWrapper<UpdatePaymentVerificationReceivedAndReceivedAmount>,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: ResolverTypeWrapper<CreateTargetPopulationMutation>,
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
+  UpdateTargetPopulationMutation: ResolverTypeWrapper<UpdateTargetPopulationMutation>,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
+  CopyTargetPopulationInput: CopyTargetPopulationInput,
+  CopyTargetPopulationMutationPayload: ResolverTypeWrapper<CopyTargetPopulationMutationPayload>,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: ResolverTypeWrapper<DeleteTargetPopulationMutationPayload>,
+  ApproveTargetPopulationMutation: ResolverTypeWrapper<ApproveTargetPopulationMutation>,
+  UnapproveTargetPopulationMutation: ResolverTypeWrapper<UnapproveTargetPopulationMutation>,
+  FinalizeTargetPopulationMutation: ResolverTypeWrapper<FinalizeTargetPopulationMutation>,
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
+  SetSteficonRuleOnTargetPopulationMutationPayload: ResolverTypeWrapper<SetSteficonRuleOnTargetPopulationMutationPayload>,
+  CreateProgramInput: CreateProgramInput,
+  CreateProgram: ResolverTypeWrapper<CreateProgram>,
+  UpdateProgramInput: UpdateProgramInput,
+  UpdateProgram: ResolverTypeWrapper<UpdateProgram>,
+  DeleteProgram: ResolverTypeWrapper<DeleteProgram>,
+  UploadImportDataXLSXFile: ResolverTypeWrapper<UploadImportDataXlsxFile>,
+  XlsxRowErrorNode: ResolverTypeWrapper<XlsxRowErrorNode>,
+  DeleteRegistrationDataImport: ResolverTypeWrapper<DeleteRegistrationDataImport>,
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
+  RegistrationXlsxImportMutation: ResolverTypeWrapper<RegistrationXlsxImportMutation>,
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
+  RegistrationKoboImportMutation: ResolverTypeWrapper<RegistrationKoboImportMutation>,
+  SaveKoboProjectImportDataMutation: ResolverTypeWrapper<SaveKoboProjectImportDataMutation>,
+  KoboErrorNode: ResolverTypeWrapper<KoboErrorNode>,
+  MergeRegistrationDataImportMutation: ResolverTypeWrapper<MergeRegistrationDataImportMutation>,
+  RegistrationDeduplicationMutation: ResolverTypeWrapper<RegistrationDeduplicationMutation>,
+  CheckAgainstSanctionListMutation: ResolverTypeWrapper<CheckAgainstSanctionListMutation>,
+};
+
+/** Mapping between all available schema types and the resolvers parents */
+export type ResolversParentTypes = {
+  Query: {},
+  String: Scalars['String'],
+  Int: Scalars['Int'],
+  UUID: Scalars['UUID'],
+  LogEntryNodeConnection: LogEntryNodeConnection,
+  PageInfo: PageInfo,
+  Boolean: Scalars['Boolean'],
+  LogEntryNodeEdge: LogEntryNodeEdge,
+  LogEntryNode: LogEntryNode,
+  Node: Node,
+  ID: Scalars['ID'],
+  ContentTypeObjectType: ContentTypeObjectType,
+  LogEntryAction: LogEntryAction,
+  Arg: Scalars['Arg'],
+  UserNode: UserNode,
+  DateTime: Scalars['DateTime'],
+  UserStatus: UserStatus,
+  UserPartner: UserPartner,
+  UserRoleNode: UserRoleNode,
+  UserBusinessAreaNode: UserBusinessAreaNode,
+  AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
+  AdminAreaTypeNodeEdge: AdminAreaTypeNodeEdge,
+  AdminAreaTypeNode: AdminAreaTypeNode,
+  AdminAreaNodeConnection: AdminAreaNodeConnection,
+  AdminAreaNodeEdge: AdminAreaNodeEdge,
+  AdminAreaNode: AdminAreaNode,
+  GrievanceTicketNodeConnection: GrievanceTicketNodeConnection,
+  GrievanceTicketNodeEdge: GrievanceTicketNodeEdge,
+  GrievanceTicketNode: GrievanceTicketNode,
+  BigInt: Scalars['BigInt'],
+  TicketNoteNodeConnection: TicketNoteNodeConnection,
+  TicketNoteNodeEdge: TicketNoteNodeEdge,
+  TicketNoteNode: TicketNoteNode,
+  TicketComplaintDetailsNode: TicketComplaintDetailsNode,
+  PaymentRecordNode: PaymentRecordNode,
+  PaymentRecordStatus: PaymentRecordStatus,
+  CashPlanNode: CashPlanNode,
+  CashPlanStatus: CashPlanStatus,
+  ProgramNode: ProgramNode,
+  ProgramStatus: ProgramStatus,
+  Date: Scalars['Date'],
+  Decimal: Scalars['Decimal'],
+  ProgramFrequencyOfPayments: ProgramFrequencyOfPayments,
+  ProgramSector: ProgramSector,
+  ProgramScope: ProgramScope,
+  HouseholdNodeConnection: HouseholdNodeConnection,
+  HouseholdNodeEdge: HouseholdNodeEdge,
+  HouseholdNode: HouseholdNode,
+  HouseholdResidenceStatus: HouseholdResidenceStatus,
+  IndividualNodeConnection: IndividualNodeConnection,
+  IndividualNodeEdge: IndividualNodeEdge,
+  IndividualNode: IndividualNode,
+  IndividualSex: IndividualSex,
+  IndividualMaritalStatus: IndividualMaritalStatus,
+  IndividualRelationship: IndividualRelationship,
+  RegistrationDataImportNode: RegistrationDataImportNode,
+  RegistrationDataImportStatus: RegistrationDataImportStatus,
+  RegistrationDataImportDataSource: RegistrationDataImportDataSource,
+  CountAndPercentageNode: CountAndPercentageNode,
+  Float: Scalars['Float'],
+  FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
+  IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
+  DeduplicationResultNode: DeduplicationResultNode,
+  PaymentRecordNodeConnection: PaymentRecordNodeConnection,
+  PaymentRecordNodeEdge: PaymentRecordNodeEdge,
+  TicketComplaintDetailsNodeConnection: TicketComplaintDetailsNodeConnection,
+  TicketComplaintDetailsNodeEdge: TicketComplaintDetailsNodeEdge,
+  TicketSensitiveDetailsNodeConnection: TicketSensitiveDetailsNodeConnection,
+  TicketSensitiveDetailsNodeEdge: TicketSensitiveDetailsNodeEdge,
+  TicketSensitiveDetailsNode: TicketSensitiveDetailsNode,
+  TicketIndividualDataUpdateDetailsNodeConnection: TicketIndividualDataUpdateDetailsNodeConnection,
+  TicketIndividualDataUpdateDetailsNodeEdge: TicketIndividualDataUpdateDetailsNodeEdge,
+  TicketIndividualDataUpdateDetailsNode: TicketIndividualDataUpdateDetailsNode,
+  TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
+  TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
+  TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
+  JSONString: Scalars['JSONString'],
+  TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
+  TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
+  TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode,
+  SanctionListIndividualNode: SanctionListIndividualNode,
+  SanctionListIndividualDocumentNodeConnection: SanctionListIndividualDocumentNodeConnection,
+  SanctionListIndividualDocumentNodeEdge: SanctionListIndividualDocumentNodeEdge,
+  SanctionListIndividualDocumentNode: SanctionListIndividualDocumentNode,
+  SanctionListIndividualNationalitiesNodeConnection: SanctionListIndividualNationalitiesNodeConnection,
+  SanctionListIndividualNationalitiesNodeEdge: SanctionListIndividualNationalitiesNodeEdge,
+  SanctionListIndividualNationalitiesNode: SanctionListIndividualNationalitiesNode,
+  SanctionListIndividualCountriesNodeConnection: SanctionListIndividualCountriesNodeConnection,
+  SanctionListIndividualCountriesNodeEdge: SanctionListIndividualCountriesNodeEdge,
+  SanctionListIndividualCountriesNode: SanctionListIndividualCountriesNode,
+  SanctionListIndividualAliasNameNodeConnection: SanctionListIndividualAliasNameNodeConnection,
+  SanctionListIndividualAliasNameNodeEdge: SanctionListIndividualAliasNameNodeEdge,
+  SanctionListIndividualAliasNameNode: SanctionListIndividualAliasNameNode,
+  SanctionListIndividualDateOfBirthNodeConnection: SanctionListIndividualDateOfBirthNodeConnection,
+  SanctionListIndividualDateOfBirthNodeEdge: SanctionListIndividualDateOfBirthNodeEdge,
+  SanctionListIndividualDateOfBirthNode: SanctionListIndividualDateOfBirthNode,
+  DocumentNodeConnection: DocumentNodeConnection,
+  DocumentNodeEdge: DocumentNodeEdge,
+  DocumentNode: DocumentNode,
+  DocumentTypeNode: DocumentTypeNode,
+  DocumentTypeType: DocumentTypeType,
+  DocumentStatus: DocumentStatus,
+  IndividualIdentityNode: IndividualIdentityNode,
+  AgencyNode: AgencyNode,
+  AgencyType: AgencyType,
+  IndividualRoleInHouseholdNode: IndividualRoleInHouseholdNode,
+  IndividualRoleInHouseholdRole: IndividualRoleInHouseholdRole,
+  GeoJSON: Scalars['GeoJSON'],
+  ProgramNodeConnection: ProgramNodeConnection,
+  ProgramNodeEdge: ProgramNodeEdge,
+  HouseholdOrgEnumerator: HouseholdOrgEnumerator,
+  HouseholdRegistrationMethod: HouseholdRegistrationMethod,
+  HouseholdCollectIndividualData: HouseholdCollectIndividualData,
+  HouseholdCurrency: HouseholdCurrency,
+  TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection,
+  TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge,
+  TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
+  TicketAddIndividualDetailsNodeConnection: TicketAddIndividualDetailsNodeConnection,
+  TicketAddIndividualDetailsNodeEdge: TicketAddIndividualDetailsNodeEdge,
+  TicketAddIndividualDetailsNode: TicketAddIndividualDetailsNode,
+  TargetPopulationNodeConnection: TargetPopulationNodeConnection,
+  TargetPopulationNodeEdge: TargetPopulationNodeEdge,
+  TargetPopulationNode: TargetPopulationNode,
+  TargetPopulationStatus: TargetPopulationStatus,
+  TargetingCriteriaNode: TargetingCriteriaNode,
+  TargetingCriteriaRuleNode: TargetingCriteriaRuleNode,
+  TargetingIndividualRuleFilterBlockNode: TargetingIndividualRuleFilterBlockNode,
+  TargetingIndividualBlockRuleFilterNode: TargetingIndividualBlockRuleFilterNode,
+  TargetingIndividualBlockRuleFilterComparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod,
+  FieldAttributeNode: FieldAttributeNode,
+  LabelNode: LabelNode,
+  CoreFieldChoiceObject: CoreFieldChoiceObject,
+  TargetingCriteriaRuleFilterNode: TargetingCriteriaRuleFilterNode,
+  TargetingCriteriaRuleFilterComparisionMethod: TargetingCriteriaRuleFilterComparisionMethod,
+  SteficonRuleNode: SteficonRuleNode,
+  RuleLanguage: RuleLanguage,
+  HouseholdSelection: HouseholdSelection,
+  StatsObjectType: StatsObjectType,
+  CashPlanNodeConnection: CashPlanNodeConnection,
+  CashPlanNodeEdge: CashPlanNodeEdge,
+  ReportNodeConnection: ReportNodeConnection,
+  ReportNodeEdge: ReportNodeEdge,
+  ReportNode: ReportNode,
+  ServiceProviderNode: ServiceProviderNode,
+  CashPlanVerificationStatus: CashPlanVerificationStatus,
+  CashPlanPaymentVerificationNodeConnection: CashPlanPaymentVerificationNodeConnection,
+  CashPlanPaymentVerificationNodeEdge: CashPlanPaymentVerificationNodeEdge,
+  CashPlanPaymentVerificationNode: CashPlanPaymentVerificationNode,
+  CashPlanPaymentVerificationStatus: CashPlanPaymentVerificationStatus,
+  CashPlanPaymentVerificationSampling: CashPlanPaymentVerificationSampling,
+  CashPlanPaymentVerificationVerificationMethod: CashPlanPaymentVerificationVerificationMethod,
+  AgeFilterObject: AgeFilterObject,
+  PaymentVerificationNodeConnection: PaymentVerificationNodeConnection,
+  PaymentVerificationNodeEdge: PaymentVerificationNodeEdge,
+  PaymentVerificationNode: PaymentVerificationNode,
+  PaymentVerificationStatus: PaymentVerificationStatus,
+  TicketPaymentVerificationDetailsNodeConnection: TicketPaymentVerificationDetailsNodeConnection,
+  TicketPaymentVerificationDetailsNodeEdge: TicketPaymentVerificationDetailsNodeEdge,
+  TicketPaymentVerificationDetailsNode: TicketPaymentVerificationDetailsNode,
+  TicketPaymentVerificationDetailsPaymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus,
+  PaymentRecordEntitlementCardStatus: PaymentRecordEntitlementCardStatus,
+  PaymentRecordDeliveryType: PaymentRecordDeliveryType,
+  TicketNeedsAdjudicationDetailsNode: TicketNeedsAdjudicationDetailsNode,
+  ServiceProviderNodeConnection: ServiceProviderNodeConnection,
+  ServiceProviderNodeEdge: ServiceProviderNodeEdge,
+  RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
+  RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
+  RoleNode: RoleNode,
+  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
+  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
+  ChoiceObject: ChoiceObject,
+  SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
+  SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
+  ChartGrievanceTicketsNode: ChartGrievanceTicketsNode,
+  _DatasetsNode: _DatasetsNode,
+  IssueTypesObject: IssueTypesObject,
+  SteficonRuleNodeConnection: SteficonRuleNodeConnection,
+  SteficonRuleNodeEdge: SteficonRuleNodeEdge,
+  ChartPaymentVerification: ChartPaymentVerification,
+  _DetailedDatasetsNode: _DetailedDatasetsNode,
+  ChartDatasetNode: ChartDatasetNode,
+  SectionTotalNode: SectionTotalNode,
+  TableTotalCashTransferred: TableTotalCashTransferred,
+  _TableTotalCashTransferredDataNode: _TableTotalCashTransferredDataNode,
+  ChartDetailedDatasetsNode: ChartDetailedDatasetsNode,
+  RapidProFlow: RapidProFlow,
+  RapidProFlowRun: RapidProFlowRun,
+  RapidProFlowResult: RapidProFlowResult,
+  GetCashplanVerificationSampleSizeInput: GetCashplanVerificationSampleSizeInput,
+  FullListArguments: FullListArguments,
+  RandomSamplingArguments: RandomSamplingArguments,
+  AgeInput: AgeInput,
+  RapidProArguments: RapidProArguments,
+  GetCashplanVerificationSampleSizeObject: GetCashplanVerificationSampleSizeObject,
+  BusinessAreaNodeConnection: BusinessAreaNodeConnection,
+  BusinessAreaNodeEdge: BusinessAreaNodeEdge,
+  BusinessAreaNode: BusinessAreaNode,
+  GroupAttributeNode: GroupAttributeNode,
+  KoboAssetObject: KoboAssetObject,
+  KoboAssetObjectConnection: KoboAssetObjectConnection,
+  KoboAssetObjectEdge: KoboAssetObjectEdge,
+  TargetingCriteriaObjectType: TargetingCriteriaObjectType,
+  TargetingCriteriaRuleObjectType: TargetingCriteriaRuleObjectType,
+  TargetingCriteriaRuleFilterObjectType: TargetingCriteriaRuleFilterObjectType,
+  TargetingIndividualRuleFilterBlockObjectType: TargetingIndividualRuleFilterBlockObjectType,
+  UserNodeConnection: UserNodeConnection,
+  UserNodeEdge: UserNodeEdge,
+  ImportedHouseholdNode: ImportedHouseholdNode,
+  ImportedHouseholdConsentSharing: ImportedHouseholdConsentSharing,
+  ImportedHouseholdResidenceStatus: ImportedHouseholdResidenceStatus,
+  ImportedIndividualNode: ImportedIndividualNode,
+  ImportedIndividualSex: ImportedIndividualSex,
+  ImportedIndividualMaritalStatus: ImportedIndividualMaritalStatus,
+  RegistrationDataImportDatahubNode: RegistrationDataImportDatahubNode,
+  ImportDataNode: ImportDataNode,
+  ImportDataDataType: ImportDataDataType,
+  RegistrationDataImportDatahubImportDone: RegistrationDataImportDatahubImportDone,
+  ImportedHouseholdNodeConnection: ImportedHouseholdNodeConnection,
+  ImportedHouseholdNodeEdge: ImportedHouseholdNodeEdge,
+  ImportedIndividualNodeConnection: ImportedIndividualNodeConnection,
+  ImportedIndividualNodeEdge: ImportedIndividualNodeEdge,
+  ImportedIndividualDeduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus,
+  ImportedIndividualDeduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus,
+  ImportedDocumentNodeConnection: ImportedDocumentNodeConnection,
+  ImportedDocumentNodeEdge: ImportedDocumentNodeEdge,
+  ImportedDocumentNode: ImportedDocumentNode,
+  ImportedDocumentTypeNode: ImportedDocumentTypeNode,
+  ImportedDocumentTypeCountry: ImportedDocumentTypeCountry,
+  ImportedDocumentTypeType: ImportedDocumentTypeType,
+  ImportedIndividualIdentityNode: ImportedIndividualIdentityNode,
+  ImportedHouseholdOrgEnumerator: ImportedHouseholdOrgEnumerator,
+  ImportedHouseholdRegistrationMethod: ImportedHouseholdRegistrationMethod,
+  ImportedHouseholdCollectIndividualData: ImportedHouseholdCollectIndividualData,
+  ImportedHouseholdCurrency: ImportedHouseholdCurrency,
+  RegistrationDataImportDatahubNodeConnection: RegistrationDataImportDatahubNodeConnection,
+  RegistrationDataImportDatahubNodeEdge: RegistrationDataImportDatahubNodeEdge,
+  DjangoDebug: DjangoDebug,
+  DjangoDebugSQL: DjangoDebugSql,
+  Mutations: {},
+  CreateReportInput: CreateReportInput,
+  CreateReport: CreateReport,
+  CreateDashboardReportInput: CreateDashboardReportInput,
+  CreateDashboardReport: CreateDashboardReport,
+  CreateGrievanceTicketInput: CreateGrievanceTicketInput,
+  CreateGrievanceTicketExtrasInput: CreateGrievanceTicketExtrasInput,
+  CategoryExtrasInput: CategoryExtrasInput,
+  SensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras,
+  GrievanceComplaintTicketExtras: GrievanceComplaintTicketExtras,
+  IssueTypeExtrasInput: IssueTypeExtrasInput,
+  HouseholdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras,
+  HouseholdUpdateDataObjectType: HouseholdUpdateDataObjectType,
+  IndividualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras,
+  IndividualUpdateDataObjectType: IndividualUpdateDataObjectType,
+  IndividualDocumentObjectType: IndividualDocumentObjectType,
+  IndividualIdentityObjectType: IndividualIdentityObjectType,
+  IndividualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras,
+  AddIndividualIssueTypeExtras: AddIndividualIssueTypeExtras,
+  AddIndividualDataObjectType: AddIndividualDataObjectType,
+  CreateGrievanceTicketMutation: CreateGrievanceTicketMutation,
+  UpdateGrievanceTicketInput: UpdateGrievanceTicketInput,
+  UpdateGrievanceTicketExtrasInput: UpdateGrievanceTicketExtrasInput,
+  UpdateHouseholdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras,
+  UpdateIndividualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras,
+  UpdateAddIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras,
+  UpdateGrievanceTicketMutation: UpdateGrievanceTicketMutation,
+  GrievanceStatusChangeMutation: GrievanceStatusChangeMutation,
+  CreateTicketNoteInput: CreateTicketNoteInput,
+  CreateTicketNoteMutation: CreateTicketNoteMutation,
+  IndividualDataChangeApproveMutation: IndividualDataChangeApproveMutation,
+  HouseholdDataChangeApproveMutation: HouseholdDataChangeApproveMutation,
+  SimpleApproveMutation: SimpleApproveMutation,
+  NeedsAdjudicationApproveMutation: NeedsAdjudicationApproveMutation,
+  ReassignRoleMutation: ReassignRoleMutation,
+  CreatePaymentVerificationInput: CreatePaymentVerificationInput,
+  CreatePaymentVerificationMutation: CreatePaymentVerificationMutation,
+  EditCashPlanPaymentVerificationInput: EditCashPlanPaymentVerificationInput,
+  EditPaymentVerificationMutation: EditPaymentVerificationMutation,
+  Upload: Scalars['Upload'],
+  ImportXlsxCashPlanVerification: ImportXlsxCashPlanVerification,
+  XlsxErrorNode: XlsxErrorNode,
+  ActivateCashPlanVerificationMutation: ActivateCashPlanVerificationMutation,
+  FinishCashPlanVerificationMutation: FinishCashPlanVerificationMutation,
+  DiscardCashPlanVerificationMutation: DiscardCashPlanVerificationMutation,
+  PaymentVerificationStatusForUpdate: PaymentVerificationStatusForUpdate,
+  UpdatePaymentVerificationStatusAndReceivedAmount: UpdatePaymentVerificationStatusAndReceivedAmount,
+  UpdatePaymentVerificationReceivedAndReceivedAmount: UpdatePaymentVerificationReceivedAndReceivedAmount,
+  CreateTargetPopulationInput: CreateTargetPopulationInput,
+  CreateTargetPopulationMutation: CreateTargetPopulationMutation,
+  UpdateTargetPopulationInput: UpdateTargetPopulationInput,
+  UpdateTargetPopulationMutation: UpdateTargetPopulationMutation,
+  CopyTargetPopulationMutationInput: CopyTargetPopulationMutationInput,
+  CopyTargetPopulationInput: CopyTargetPopulationInput,
+  CopyTargetPopulationMutationPayload: CopyTargetPopulationMutationPayload,
+  DeleteTargetPopulationMutationInput: DeleteTargetPopulationMutationInput,
+  DeleteTargetPopulationMutationPayload: DeleteTargetPopulationMutationPayload,
+  ApproveTargetPopulationMutation: ApproveTargetPopulationMutation,
+  UnapproveTargetPopulationMutation: UnapproveTargetPopulationMutation,
+  FinalizeTargetPopulationMutation: FinalizeTargetPopulationMutation,
+  SetSteficonRuleOnTargetPopulationMutationInput: SetSteficonRuleOnTargetPopulationMutationInput,
+  SetSteficonRuleOnTargetPopulationMutationPayload: SetSteficonRuleOnTargetPopulationMutationPayload,
+  CreateProgramInput: CreateProgramInput,
+  CreateProgram: CreateProgram,
+  UpdateProgramInput: UpdateProgramInput,
+  UpdateProgram: UpdateProgram,
+  DeleteProgram: DeleteProgram,
+  UploadImportDataXLSXFile: UploadImportDataXlsxFile,
+  XlsxRowErrorNode: XlsxRowErrorNode,
+  DeleteRegistrationDataImport: DeleteRegistrationDataImport,
+  RegistrationXlsxImportMutationInput: RegistrationXlsxImportMutationInput,
+  RegistrationXlsxImportMutation: RegistrationXlsxImportMutation,
+  RegistrationKoboImportMutationInput: RegistrationKoboImportMutationInput,
+  RegistrationKoboImportMutation: RegistrationKoboImportMutation,
+  SaveKoboProjectImportDataMutation: SaveKoboProjectImportDataMutation,
+  KoboErrorNode: KoboErrorNode,
+  MergeRegistrationDataImportMutation: MergeRegistrationDataImportMutation,
+  RegistrationDeduplicationMutation: RegistrationDeduplicationMutation,
+  CheckAgainstSanctionListMutation: CheckAgainstSanctionListMutation,
+};
+
+export type _DatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_DatasetsNode'] = ResolversParentTypes['_DatasetsNode']> = {
+  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Float']>>>, ParentType, ContextType>,
+};
+
+export type _DetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_DetailedDatasetsNode'] = ResolversParentTypes['_DetailedDatasetsNode']> = {
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['Float']>>>, ParentType, ContextType>,
+};
+
+export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['_TableTotalCashTransferredDataNode'] = ResolversParentTypes['_TableTotalCashTransferredDataNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  totalCashTransferred?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type AdminAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNode'] = ResolversParentTypes['AdminAreaNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNode'], ParentType, ContextType>,
+  pCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  lft?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  rght?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  treeId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  children?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaNodeChildrenArgs>,
+  grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, AdminAreaNodeGrievanceticketSetArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, AdminAreaNodeHouseholdSetArgs>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, AdminAreaNodeProgramsArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, AdminAreaNodeReportsArgs>,
+};
+
+export type AdminAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNodeConnection'] = ResolversParentTypes['AdminAreaNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['AdminAreaNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AdminAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaNodeEdge'] = ResolversParentTypes['AdminAreaNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type AdminAreaTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaTypeNode'] = ResolversParentTypes['AdminAreaTypeNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  adminLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  realAdminLevel?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeAdminAreasArgs>,
+};
+
+export type AdminAreaTypeNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaTypeNodeConnection'] = ResolversParentTypes['AdminAreaTypeNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['AdminAreaTypeNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AdminAreaTypeNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AdminAreaTypeNodeEdge'] = ResolversParentTypes['AdminAreaTypeNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['AdminAreaTypeNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type AgeFilterObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgeFilterObject'] = ResolversParentTypes['AgeFilterObject']> = {
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type AgencyNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['AgencyNode'] = ResolversParentTypes['AgencyNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['AgencyType'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  individualIdentities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+};
+
+export type ApproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ApproveTargetPopulationMutation'] = ResolversParentTypes['ApproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export interface ArgScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Arg'], any> {
+  name: 'Arg'
+}
+
+export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
+  name: 'BigInt'
+}
+
+export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNode'] = ResolversParentTypes['BusinessAreaNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
+  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
+  serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, BusinessAreaNodeServiceproviderSetArgs>,
+  tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, BusinessAreaNodeTicketsArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, BusinessAreaNodeHouseholdSetArgs>,
+  individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, BusinessAreaNodeIndividualSetArgs>,
+  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, BusinessAreaNodeProgramSetArgs>,
+  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, BusinessAreaNodeCashplanSetArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, BusinessAreaNodeTargetpopulationSetArgs>,
+  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, BusinessAreaNodeRegistrationdataimportSetArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, BusinessAreaNodeReportsArgs>,
+  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, BusinessAreaNodeLogentrySetArgs>,
+};
+
+export type BusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeConnection'] = ResolversParentTypes['BusinessAreaNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['BusinessAreaNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type BusinessAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['BusinessAreaNodeEdge'] = ResolversParentTypes['BusinessAreaNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['BusinessAreaNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNode'] = ResolversParentTypes['CashPlanNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['CashPlanStatus'], ParentType, ContextType>,
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  distributionLevel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  dispersionDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  coverageDuration?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  coverageUnit?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  comments?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<ResolversTypes['ProgramNode'], ParentType, ContextType>,
+  deliveryType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  assistanceMeasurement?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  assistanceThrough?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  serviceProvider?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  fundsCommitment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  exchangeRate?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  downPayment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  validationAlertsCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  totalPersonsCoveredRevised?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalEntitledQuantityRevised?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  verificationStatus?: Resolver<ResolversTypes['CashPlanVerificationStatus'], ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, CashPlanNodePaymentRecordsArgs>,
+  verifications?: Resolver<ResolversTypes['CashPlanPaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanNodeVerificationsArgs>,
+  bankReconciliationSuccess?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  bankReconciliationError?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CashPlanNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeConnection'] = ResolversParentTypes['CashPlanNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type CashPlanNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanNodeEdge'] = ResolversParentTypes['CashPlanNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type CashPlanPaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNode'] = ResolversParentTypes['CashPlanPaymentVerificationNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['CashPlanPaymentVerificationStatus'], ParentType, ContextType>,
+  cashPlan?: Resolver<ResolversTypes['CashPlanNode'], ParentType, ContextType>,
+  sampling?: Resolver<ResolversTypes['CashPlanPaymentVerificationSampling'], ParentType, ContextType>,
+  verificationMethod?: Resolver<ResolversTypes['CashPlanPaymentVerificationVerificationMethod'], ParentType, ContextType>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  respondedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  receivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  notReceivedCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  receivedWithProblemsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  confidenceInterval?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  marginOfError?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  rapidProFlowId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  rapidProFlowStartUuid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  ageFilter?: Resolver<Maybe<ResolversTypes['AgeFilterObject']>, ParentType, ContextType>,
+  excludedAdminAreasFilter?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  sexFilter?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  activationDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  completionDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  paymentRecordVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, CashPlanPaymentVerificationNodePaymentRecordVerificationsArgs>,
+};
+
+export type CashPlanPaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeConnection'] = ResolversParentTypes['CashPlanPaymentVerificationNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type CashPlanPaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CashPlanPaymentVerificationNodeEdge'] = ResolversParentTypes['CashPlanPaymentVerificationNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ChartDatasetNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDatasetNode'] = ResolversParentTypes['ChartDatasetNode']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
+};
+
+export type ChartDetailedDatasetsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartDetailedDatasetsNode'] = ResolversParentTypes['ChartDetailedDatasetsNode']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
+};
+
+export type ChartGrievanceTicketsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartGrievanceTicketsNode'] = ResolversParentTypes['ChartGrievanceTicketsNode']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DatasetsNode']>>>, ParentType, ContextType>,
+  totalNumberOfGrievances?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfFeedback?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalNumberOfOpenSensitive?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ChartPaymentVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChartPaymentVerification'] = ResolversParentTypes['ChartPaymentVerification']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  datasets?: Resolver<Maybe<Array<Maybe<ResolversTypes['_DetailedDatasetsNode']>>>, ParentType, ContextType>,
+  households?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  averageSampleSize?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
+export type CheckAgainstSanctionListMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CheckAgainstSanctionListMutation'] = ResolversParentTypes['CheckAgainstSanctionListMutation']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type ChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChoiceObject'] = ResolversParentTypes['ChoiceObject']> = {
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ContentTypeObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ContentTypeObjectType'] = ResolversParentTypes['ContentTypeObjectType']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  appLabel?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  model?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  logEntries?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, ContentTypeObjectTypeLogEntriesArgs>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CopyTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['CopyTargetPopulationMutationPayload'] = ResolversParentTypes['CopyTargetPopulationMutationPayload']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CoreFieldChoiceObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['CoreFieldChoiceObject'] = ResolversParentTypes['CoreFieldChoiceObject']> = {
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  listName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type CountAndPercentageNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['CountAndPercentageNode'] = ResolversParentTypes['CountAndPercentageNode']> = {
+  count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  percentage?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
+export type CreateDashboardReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateDashboardReport'] = ResolversParentTypes['CreateDashboardReport']> = {
+  success?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type CreateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateGrievanceTicketMutation'] = ResolversParentTypes['CreateGrievanceTicketMutation']> = {
+  grievanceTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+};
+
+export type CreatePaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreatePaymentVerificationMutation'] = ResolversParentTypes['CreatePaymentVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type CreateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateProgram'] = ResolversParentTypes['CreateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
+export type CreateReportResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateReport'] = ResolversParentTypes['CreateReport']> = {
+  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
+};
+
+export type CreateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTargetPopulationMutation'] = ResolversParentTypes['CreateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type CreateTicketNoteMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['CreateTicketNoteMutation'] = ResolversParentTypes['CreateTicketNoteMutation']> = {
+  grievanceTicketNote?: Resolver<Maybe<ResolversTypes['TicketNoteNode']>, ParentType, ContextType>,
+};
+
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date'
+}
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime'
+}
+
+export interface DecimalScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Decimal'], any> {
+  name: 'Decimal'
+}
+
+export type DeduplicationResultNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeduplicationResultNode'] = ResolversParentTypes['DeduplicationResultNode']> = {
+  hitId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>,
+  fullName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  score?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  proximityToScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  location?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type DeleteProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteProgram'] = ResolversParentTypes['DeleteProgram']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type DeleteRegistrationDataImportResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteRegistrationDataImport'] = ResolversParentTypes['DeleteRegistrationDataImport']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type DeleteTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['DeleteTargetPopulationMutationPayload'] = ResolversParentTypes['DeleteTargetPopulationMutationPayload']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type DiscardCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['DiscardCashPlanVerificationMutation'] = ResolversParentTypes['DiscardCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type DjangoDebugResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebug'] = ResolversParentTypes['DjangoDebug']> = {
+  sql?: Resolver<Maybe<Array<Maybe<ResolversTypes['DjangoDebugSQL']>>>, ParentType, ContextType>,
+};
+
+export type DjangoDebugSqlResolvers<ContextType = any, ParentType extends ResolversParentTypes['DjangoDebugSQL'] = ResolversParentTypes['DjangoDebugSQL']> = {
+  vendor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  alias?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  sql?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  duration?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  rawSql?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  params?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  startTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  stopTime?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  isSlow?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isSelect?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  transId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  transStatus?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isoLevel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  encoding?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type DocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNode'] = ResolversParentTypes['DocumentNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['DocumentTypeNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['DocumentStatus'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type DocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeConnection'] = ResolversParentTypes['DocumentNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['DocumentNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type DocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentNodeEdge'] = ResolversParentTypes['DocumentNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['DocumentNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type DocumentTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['DocumentTypeNode'] = ResolversParentTypes['DocumentTypeNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['DocumentTypeType'], ParentType, ContextType>,
+  documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, DocumentTypeNodeDocumentsArgs>,
+};
+
+export type EditPaymentVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['EditPaymentVerificationMutation'] = ResolversParentTypes['EditPaymentVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export type FieldAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['FieldAttributeNode'] = ResolversParentTypes['FieldAttributeNode']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['LabelNode']>>>, ParentType, ContextType>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  hint?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  required?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  choices?: Resolver<Maybe<Array<Maybe<ResolversTypes['CoreFieldChoiceObject']>>>, ParentType, ContextType>,
+  associatedWith?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  isFlexField?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type FinalizeTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinalizeTargetPopulationMutation'] = ResolversParentTypes['FinalizeTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type FinishCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['FinishCashPlanVerificationMutation'] = ResolversParentTypes['FinishCashPlanVerificationMutation']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+};
+
+export interface FlexFieldsScalarScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['FlexFieldsScalar'], any> {
+  name: 'FlexFieldsScalar'
+}
+
+export interface GeoJsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['GeoJSON'], any> {
+  name: 'GeoJSON'
+}
+
+export type GetCashplanVerificationSampleSizeObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['GetCashplanVerificationSampleSizeObject'] = ResolversParentTypes['GetCashplanVerificationSampleSizeObject']> = {
+  paymentRecordCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type GrievanceStatusChangeMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceStatusChangeMutation'] = ResolversParentTypes['GrievanceStatusChangeMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNode'] = ResolversParentTypes['GrievanceTicketNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  userModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  category?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  issueType?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  area?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  language?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
+  linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
+  ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
+  complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
+  sensitiveTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
+  householdDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
+  individualDataUpdateTicketDetails?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
+  addIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
+  deleteIndividualTicketDetails?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
+  systemFlaggingTicketDetails?: Resolver<Maybe<ResolversTypes['TicketSystemFlaggingDetailsNode']>, ParentType, ContextType>,
+  needsAdjudicationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketNeedsAdjudicationDetailsNode']>, ParentType, ContextType>,
+  paymentVerificationTicketDetails?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  relatedTickets?: Resolver<Maybe<Array<Maybe<ResolversTypes['GrievanceTicketNode']>>>, ParentType, ContextType>,
+  admin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type GrievanceTicketNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeConnection'] = ResolversParentTypes['GrievanceTicketNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['GrievanceTicketNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type GrievanceTicketNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GrievanceTicketNodeEdge'] = ResolversParentTypes['GrievanceTicketNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type GroupAttributeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['GroupAttributeNode'] = ResolversParentTypes['GroupAttributeNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  flexAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, GroupAttributeNodeFlexAttributesArgs>,
+  labelEn?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type HouseholdDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdDataChangeApproveMutation'] = ResolversParentTypes['HouseholdDataChangeApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type HouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNode'] = ResolversParentTypes['HouseholdNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  withdrawnDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  consentSharing?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  residenceStatus?: Resolver<ResolversTypes['HouseholdResidenceStatus'], ParentType, ContextType>,
+  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  representatives?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeRepresentativesArgs>,
+  geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
+  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportNode'], ParentType, ContextType>,
+  programs?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, HouseholdNodeProgramsArgs>,
+  returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  headOfHousehold?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  orgEnumerator?: Resolver<ResolversTypes['HouseholdOrgEnumerator'], ParentType, ContextType>,
+  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>,
+  collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['HouseholdCurrency'], ParentType, ContextType>,
+  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
+  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
+  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeSensitiveTicketDetailsArgs>,
+  householdDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeHouseholdDataUpdateTicketDetailsArgs>,
+  addIndividualTicketDetails?: Resolver<ResolversTypes['TicketAddIndividualDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeAddIndividualTicketDetailsArgs>,
+  individualsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, HouseholdNodeIndividualsArgs>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, HouseholdNodeTargetPopulationsArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  totalCashReceived?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  selection?: Resolver<Maybe<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  sanctionListPossibleMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  admin1?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  admin2?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type HouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeConnection'] = ResolversParentTypes['HouseholdNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['HouseholdNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  individualsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type HouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdNodeEdge'] = ResolversParentTypes['HouseholdNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type HouseholdSelectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['HouseholdSelection'] = ResolversParentTypes['HouseholdSelection']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  vulnerabilityScore?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  final?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+};
+
+export type ImportDataNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportDataNode'] = ResolversParentTypes['ImportDataNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  file?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dataType?: Resolver<ResolversTypes['ImportDataDataType'], ParentType, ContextType>,
+  numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
+};
+
+export type ImportedDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNode'] = ResolversParentTypes['ImportedDocumentNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['ImportedDocumentTypeNode'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ImportedDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeConnection'] = ResolversParentTypes['ImportedDocumentNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedDocumentNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ImportedDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentNodeEdge'] = ResolversParentTypes['ImportedDocumentNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ImportedDocumentNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ImportedDocumentTypeNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedDocumentTypeNode'] = ResolversParentTypes['ImportedDocumentTypeNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  country?: Resolver<ResolversTypes['ImportedDocumentTypeCountry'], ParentType, ContextType>,
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['ImportedDocumentTypeType'], ParentType, ContextType>,
+  documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedDocumentTypeNodeDocumentsArgs>,
+};
+
+export type ImportedHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNode'] = ResolversParentTypes['ImportedHouseholdNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  consentSign?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  consent?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  consentSharing?: Resolver<ResolversTypes['ImportedHouseholdConsentSharing'], ParentType, ContextType>,
+  residenceStatus?: Resolver<ResolversTypes['ImportedHouseholdResidenceStatus'], ParentType, ContextType>,
+  countryOrigin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  size?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  address?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  admin1?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin1Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  admin2Title?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  geopoint?: Resolver<Maybe<ResolversTypes['GeoJSON']>, ParentType, ContextType>,
+  femaleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  pregnantCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1859Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup60Count?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  femaleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup05DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup611DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1217DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup1859DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  maleAgeGroup60DisabledCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  headOfHousehold?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
+  fchildHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  childHoh?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  returnee?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  start?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deviceid?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  orgEnumerator?: Resolver<Maybe<ResolversTypes['ImportedHouseholdOrgEnumerator']>, ParentType, ContextType>,
+  orgNameEnumerator?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  registrationMethod?: Resolver<ResolversTypes['ImportedHouseholdRegistrationMethod'], ParentType, ContextType>,
+  collectIndividualData?: Resolver<ResolversTypes['ImportedHouseholdCollectIndividualData'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['ImportedHouseholdCurrency'], ParentType, ContextType>,
+  unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboSubmissionUuid?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  koboAssetId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboSubmissionTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, ImportedHouseholdNodeIndividualsArgs>,
+  hasDuplicates?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type ImportedHouseholdNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeConnection'] = ResolversParentTypes['ImportedHouseholdNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedHouseholdNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ImportedHouseholdNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedHouseholdNodeEdge'] = ResolversParentTypes['ImportedHouseholdNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ImportedIndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualIdentityNode'] = ResolversParentTypes['ImportedIndividualIdentityNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['ImportedIndividualNode'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNode'] = ResolversParentTypes['ImportedIndividualNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  relationship?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sex?: Resolver<ResolversTypes['ImportedIndividualSex'], ParentType, ContextType>,
+  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  maritalStatus?: Resolver<ResolversTypes['ImportedIndividualMaritalStatus'], ParentType, ContextType>,
+  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<ResolversTypes['RegistrationDataImportDatahubNode'], ParentType, ContextType>,
+  disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  deduplicationBatchStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationBatchStatus']>, ParentType, ContextType>,
+  deduplicationGoldenRecordStatus?: Resolver<Maybe<ResolversTypes['ImportedIndividualDeduplicationGoldenRecordStatus']>, ParentType, ContextType>,
+  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  importedhousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType>,
+  documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
+  identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ImportedIndividualNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ImportedIndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeEdge'] = ResolversParentTypes['ImportedIndividualNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ImportXlsxCashPlanVerificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportXlsxCashPlanVerification'] = ResolversParentTypes['ImportXlsxCashPlanVerification']> = {
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type IndividualDataChangeApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualDataChangeApproveMutation'] = ResolversParentTypes['IndividualDataChangeApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type IndividualIdentityNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualIdentityNode'] = ResolversParentTypes['IndividualIdentityNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  agency?: Resolver<ResolversTypes['AgencyNode'], ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  number?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type IndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNode'] = ResolversParentTypes['IndividualNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  removedDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  duplicate?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  duplicateDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  withdrawn?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  withdrawnDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individualId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  photo?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  givenName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  middleName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  familyName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  sex?: Resolver<ResolversTypes['IndividualSex'], ParentType, ContextType>,
+  birthDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  estimatedBirthDate?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  maritalStatus?: Resolver<ResolversTypes['IndividualMaritalStatus'], ParentType, ContextType>,
+  phoneNo?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  phoneNoAlternative?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  relationship?: Resolver<Maybe<ResolversTypes['IndividualRelationship']>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+  disability?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  workStatus?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  enrolledInNutritionProgramme?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  administrationOfRutf?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  deduplicationGoldenRecordStatus?: Resolver<ResolversTypes['IndividualDeduplicationGoldenRecordStatus'], ParentType, ContextType>,
+  deduplicationBatchStatus?: Resolver<ResolversTypes['IndividualDeduplicationBatchStatus'], ParentType, ContextType>,
+  deduplicationGoldenRecordResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  deduplicationBatchResults?: Resolver<Maybe<Array<Maybe<ResolversTypes['DeduplicationResultNode']>>>, ParentType, ContextType>,
+  importedIndividualId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  sanctionListPossibleMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  sanctionListConfirmedMatch?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  sanctionListLastCheck?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  pregnant?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  observedDisability?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  seeingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hearingDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  physicalDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  memoryDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  selfcareDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  commsDisability?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  whoAnswersAltPhone?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, IndividualNodePaymentRecordsArgs>,
+  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, IndividualNodeComplaintTicketDetailsArgs>,
+  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, IndividualNodeSensitiveTicketDetailsArgs>,
+  individualDataUpdateTicketDetails?: Resolver<ResolversTypes['TicketIndividualDataUpdateDetailsNodeConnection'], ParentType, ContextType, IndividualNodeIndividualDataUpdateTicketDetailsArgs>,
+  deleteIndividualTicketDetails?: Resolver<ResolversTypes['TicketDeleteIndividualDetailsNodeConnection'], ParentType, ContextType, IndividualNodeDeleteIndividualTicketDetailsArgs>,
+  ticketsystemflaggingdetailsSet?: Resolver<ResolversTypes['TicketSystemFlaggingDetailsNodeConnection'], ParentType, ContextType, IndividualNodeTicketsystemflaggingdetailsSetArgs>,
+  representedHouseholds?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, IndividualNodeRepresentedHouseholdsArgs>,
+  headingHousehold?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  documents?: Resolver<ResolversTypes['DocumentNodeConnection'], ParentType, ContextType, IndividualNodeDocumentsArgs>,
+  identities?: Resolver<Array<ResolversTypes['IndividualIdentityNode']>, ParentType, ContextType>,
+  householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
+  status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['IndividualNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type IndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeEdge'] = ResolversParentTypes['IndividualNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type IndividualRoleInHouseholdNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualRoleInHouseholdNode'] = ResolversParentTypes['IndividualRoleInHouseholdNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  individual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  role?: Resolver<Maybe<ResolversTypes['IndividualRoleInHouseholdRole']>, ParentType, ContextType>,
+};
+
+export type IssueTypesObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['IssueTypesObject'] = ResolversParentTypes['IssueTypesObject']> = {
+  category?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  subCategories?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+};
+
+export interface JsonStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONString'], any> {
+  name: 'JSONString'
+}
+
+export type KoboAssetObjectResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObject'] = ResolversParentTypes['KoboAssetObject']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  sector?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  assetType?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  dateModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  deploymentActive?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  hasDeployment?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  xlsLink?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type KoboAssetObjectConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectConnection'] = ResolversParentTypes['KoboAssetObjectConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['KoboAssetObjectEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type KoboAssetObjectEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboAssetObjectEdge'] = ResolversParentTypes['KoboAssetObjectEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type KoboErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['KoboErrorNode'] = ResolversParentTypes['KoboErrorNode']> = {
+  header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type LabelNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LabelNode'] = ResolversParentTypes['LabelNode']> = {
+  language?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type LogEntryNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNode'] = ResolversParentTypes['LogEntryNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  contentType?: Resolver<Maybe<ResolversTypes['ContentTypeObjectType']>, ParentType, ContextType>,
+  objectId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  action?: Resolver<ResolversTypes['LogEntryAction'], ParentType, ContextType>,
+  objectRepr?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  changes?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  user?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  timestamp?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
+export type LogEntryNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeConnection'] = ResolversParentTypes['LogEntryNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['LogEntryNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type LogEntryNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['LogEntryNodeEdge'] = ResolversParentTypes['LogEntryNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['LogEntryNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type MergeRegistrationDataImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['MergeRegistrationDataImportMutation'] = ResolversParentTypes['MergeRegistrationDataImportMutation']> = {
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type MutationsResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutations'] = ResolversParentTypes['Mutations']> = {
+  createReport?: Resolver<Maybe<ResolversTypes['CreateReport']>, ParentType, ContextType, RequireFields<MutationsCreateReportArgs, 'reportData'>>,
+  createDashboardReport?: Resolver<Maybe<ResolversTypes['CreateDashboardReport']>, ParentType, ContextType, RequireFields<MutationsCreateDashboardReportArgs, 'reportData'>>,
+  createGrievanceTicket?: Resolver<Maybe<ResolversTypes['CreateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsCreateGrievanceTicketArgs, 'input'>>,
+  updateGrievanceTicket?: Resolver<Maybe<ResolversTypes['UpdateGrievanceTicketMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateGrievanceTicketArgs, 'input'>>,
+  grievanceStatusChange?: Resolver<Maybe<ResolversTypes['GrievanceStatusChangeMutation']>, ParentType, ContextType, MutationsGrievanceStatusChangeArgs>,
+  createTicketNote?: Resolver<Maybe<ResolversTypes['CreateTicketNoteMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTicketNoteArgs, 'noteInput'>>,
+  approveIndividualDataChange?: Resolver<Maybe<ResolversTypes['IndividualDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveIndividualDataChangeArgs, 'grievanceTicketId'>>,
+  approveHouseholdDataChange?: Resolver<Maybe<ResolversTypes['HouseholdDataChangeApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveHouseholdDataChangeArgs, 'grievanceTicketId'>>,
+  approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
+  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId' | 'selectedIndividualId'>>,
+  reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
+  createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
+  editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
+  importXlsxCashPlanVerification?: Resolver<Maybe<ResolversTypes['ImportXlsxCashPlanVerification']>, ParentType, ContextType, RequireFields<MutationsImportXlsxCashPlanVerificationArgs, 'cashPlanVerificationId' | 'file'>>,
+  activateCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['ActivateCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsActivateCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  finishCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['FinishCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsFinishCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  discardCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['DiscardCashPlanVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsDiscardCashPlanPaymentVerificationArgs, 'cashPlanVerificationId'>>,
+  updatePaymentVerificationStatusAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationStatusAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationStatusAndReceivedAmountArgs, 'paymentVerificationId' | 'receivedAmount'>>,
+  updatePaymentVerificationReceivedAndReceivedAmount?: Resolver<Maybe<ResolversTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']>, ParentType, ContextType, RequireFields<MutationsUpdatePaymentVerificationReceivedAndReceivedAmountArgs, 'paymentVerificationId' | 'received' | 'receivedAmount'>>,
+  createTargetPopulation?: Resolver<Maybe<ResolversTypes['CreateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateTargetPopulationArgs, 'input'>>,
+  updateTargetPopulation?: Resolver<Maybe<ResolversTypes['UpdateTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUpdateTargetPopulationArgs, 'input'>>,
+  copyTargetPopulation?: Resolver<Maybe<ResolversTypes['CopyTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsCopyTargetPopulationArgs, 'input'>>,
+  deleteTargetPopulation?: Resolver<Maybe<ResolversTypes['DeleteTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsDeleteTargetPopulationArgs, 'input'>>,
+  approveTargetPopulation?: Resolver<Maybe<ResolversTypes['ApproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsApproveTargetPopulationArgs, 'id'>>,
+  unapproveTargetPopulation?: Resolver<Maybe<ResolversTypes['UnapproveTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsUnapproveTargetPopulationArgs, 'id'>>,
+  finalizeTargetPopulation?: Resolver<Maybe<ResolversTypes['FinalizeTargetPopulationMutation']>, ParentType, ContextType, RequireFields<MutationsFinalizeTargetPopulationArgs, 'id'>>,
+  setSteficonRuleOnTargetPopulation?: Resolver<Maybe<ResolversTypes['SetSteficonRuleOnTargetPopulationMutationPayload']>, ParentType, ContextType, RequireFields<MutationsSetSteficonRuleOnTargetPopulationArgs, 'input'>>,
+  createProgram?: Resolver<Maybe<ResolversTypes['CreateProgram']>, ParentType, ContextType, RequireFields<MutationsCreateProgramArgs, 'programData'>>,
+  updateProgram?: Resolver<Maybe<ResolversTypes['UpdateProgram']>, ParentType, ContextType, MutationsUpdateProgramArgs>,
+  deleteProgram?: Resolver<Maybe<ResolversTypes['DeleteProgram']>, ParentType, ContextType, RequireFields<MutationsDeleteProgramArgs, 'programId'>>,
+  uploadImportDataXlsxFile?: Resolver<Maybe<ResolversTypes['UploadImportDataXLSXFile']>, ParentType, ContextType, RequireFields<MutationsUploadImportDataXlsxFileArgs, 'businessAreaSlug' | 'file'>>,
+  deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
+  registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
+  registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
+  saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'uid'>>,
+  mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
+  rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
+  checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
+};
+
+export type NeedsAdjudicationApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['NeedsAdjudicationApproveMutation'] = ResolversParentTypes['NeedsAdjudicationApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type NodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = {
+  __resolveType: TypeResolveFn<'LogEntryNode' | 'UserNode' | 'UserBusinessAreaNode' | 'AdminAreaTypeNode' | 'AdminAreaNode' | 'GrievanceTicketNode' | 'TicketNoteNode' | 'TicketComplaintDetailsNode' | 'PaymentRecordNode' | 'CashPlanNode' | 'ProgramNode' | 'HouseholdNode' | 'IndividualNode' | 'RegistrationDataImportNode' | 'TicketSensitiveDetailsNode' | 'TicketIndividualDataUpdateDetailsNode' | 'TicketDeleteIndividualDetailsNode' | 'TicketSystemFlaggingDetailsNode' | 'SanctionListIndividualNode' | 'SanctionListIndividualDocumentNode' | 'SanctionListIndividualNationalitiesNode' | 'SanctionListIndividualCountriesNode' | 'SanctionListIndividualAliasNameNode' | 'SanctionListIndividualDateOfBirthNode' | 'DocumentNode' | 'TicketHouseholdDataUpdateDetailsNode' | 'TicketAddIndividualDetailsNode' | 'TargetPopulationNode' | 'SteficonRuleNode' | 'ReportNode' | 'ServiceProviderNode' | 'CashPlanPaymentVerificationNode' | 'PaymentVerificationNode' | 'TicketPaymentVerificationDetailsNode' | 'TicketNeedsAdjudicationDetailsNode' | 'BusinessAreaNode' | 'ImportedHouseholdNode' | 'ImportedIndividualNode' | 'RegistrationDataImportDatahubNode' | 'ImportDataNode' | 'ImportedDocumentNode', ParentType, ContextType>,
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+};
+
+export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
+  hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  hasPreviousPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  startCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type PaymentRecordNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNode'] = ResolversParentTypes['PaymentRecordNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['PaymentRecordStatus'], ParentType, ContextType>,
+  statusDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
+  household?: Resolver<ResolversTypes['HouseholdNode'], ParentType, ContextType>,
+  headOfHousehold?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  totalPersonsCovered?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  distributionModality?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  targetPopulation?: Resolver<ResolversTypes['TargetPopulationNode'], ParentType, ContextType>,
+  targetPopulationCashAssistId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  entitlementCardNumber?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  entitlementCardStatus?: Resolver<Maybe<ResolversTypes['PaymentRecordEntitlementCardStatus']>, ParentType, ContextType>,
+  entitlementCardIssueDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>,
+  deliveryType?: Resolver<ResolversTypes['PaymentRecordDeliveryType'], ParentType, ContextType>,
+  currency?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  entitlementQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deliveredQuantity?: Resolver<ResolversTypes['Float'], ParentType, ContextType>,
+  deliveredQuantityUsd?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  deliveryDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  serviceProvider?: Resolver<ResolversTypes['ServiceProviderNode'], ParentType, ContextType>,
+  transactionReferenceId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  visionId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  registrationCaId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  verifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, PaymentRecordNodeVerificationsArgs>,
+  complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeComplaintTicketDetailsArgs>,
+  sensitiveTicketDetails?: Resolver<ResolversTypes['TicketSensitiveDetailsNodeConnection'], ParentType, ContextType, PaymentRecordNodeSensitiveTicketDetailsArgs>,
+};
+
+export type PaymentRecordNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeConnection'] = ResolversParentTypes['PaymentRecordNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentRecordNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentRecordNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentRecordNodeEdge'] = ResolversParentTypes['PaymentRecordNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type PaymentVerificationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNode'] = ResolversParentTypes['PaymentVerificationNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  cashPlanPaymentVerification?: Resolver<ResolversTypes['CashPlanPaymentVerificationNode'], ParentType, ContextType>,
+  paymentRecord?: Resolver<ResolversTypes['PaymentRecordNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['PaymentVerificationStatus'], ParentType, ContextType>,
+  statusDate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  receivedAmount?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  ticketDetails?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsNodeConnection'], ParentType, ContextType, PaymentVerificationNodeTicketDetailsArgs>,
+  isManuallyEditable?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeConnection'] = ResolversParentTypes['PaymentVerificationNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['PaymentVerificationNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type PaymentVerificationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['PaymentVerificationNodeEdge'] = ResolversParentTypes['PaymentVerificationNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type ProgramNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNode'] = ResolversParentTypes['ProgramNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  lastSyncAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['ProgramStatus'], ParentType, ContextType>,
+  startDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  endDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ProgramNodeAdminAreasArgs>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  budget?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  frequencyOfPayments?: Resolver<ResolversTypes['ProgramFrequencyOfPayments'], ParentType, ContextType>,
+  sector?: Resolver<ResolversTypes['ProgramSector'], ParentType, ContextType>,
+  scope?: Resolver<ResolversTypes['ProgramScope'], ParentType, ContextType>,
+  cashPlus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  populationGoal?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  administrativeAreasOfImplementation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  individualDataNeeded?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, ProgramNodeHouseholdsArgs>,
+  cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ProgramNodeCashPlansArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, ProgramNodeTargetpopulationSetArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, ProgramNodeReportsArgs>,
+  totalEntitledQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  totalDeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  totalUndeliveredQuantity?: Resolver<Maybe<ResolversTypes['Decimal']>, ParentType, ContextType>,
+  totalNumberOfHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ProgramNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeConnection'] = ResolversParentTypes['ProgramNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ProgramNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ProgramNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ProgramNodeEdge'] = ResolversParentTypes['ProgramNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  allLogEntries?: Resolver<Maybe<ResolversTypes['LogEntryNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllLogEntriesArgs, 'businessArea'>>,
+  logEntryActionChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  report?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType, RequireFields<QueryReportArgs, 'id'>>,
+  allReports?: Resolver<Maybe<ResolversTypes['ReportNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllReportsArgs, 'businessArea'>>,
+  reportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  reportStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  dashboardReportTypesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType, RequireFields<QueryDashboardReportTypesChoicesArgs, 'businessAreaSlug'>>,
+  dashboardYearsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType, RequireFields<QueryDashboardYearsChoicesArgs, 'businessAreaSlug'>>,
+  sanctionListIndividual?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType, RequireFields<QuerySanctionListIndividualArgs, 'id'>>,
+  allSanctionListIndividuals?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNodeConnection']>, ParentType, ContextType, QueryAllSanctionListIndividualsArgs>,
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType, RequireFields<QueryGrievanceTicketArgs, 'id'>>,
+  allGrievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllGrievanceTicketArgs, 'businessArea'>>,
+  existingGrievanceTickets?: Resolver<Maybe<ResolversTypes['GrievanceTicketNodeConnection']>, ParentType, ContextType, RequireFields<QueryExistingGrievanceTicketsArgs, 'businessArea'>>,
+  allTicketNotes?: Resolver<Maybe<ResolversTypes['TicketNoteNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllTicketNotesArgs, 'ticket'>>,
+  chartGrievances?: Resolver<Maybe<ResolversTypes['ChartGrievanceTicketsNode']>, ParentType, ContextType, RequireFields<QueryChartGrievancesArgs, 'businessAreaSlug' | 'year'>>,
+  allAddIndividualsFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  allEditHouseholdFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  grievanceTicketStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketManualCategoryChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  grievanceTicketIssueTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['IssueTypesObject']>>>, ParentType, ContextType>,
+  allSteficonRules?: Resolver<Maybe<ResolversTypes['SteficonRuleNodeConnection']>, ParentType, ContextType, QueryAllSteficonRulesArgs>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordArgs, 'id'>>,
+  paymentRecordVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryPaymentRecordVerificationArgs, 'id'>>,
+  cashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNode']>, ParentType, ContextType, RequireFields<QueryCashPlanPaymentVerificationArgs, 'id'>>,
+  allPaymentRecords?: Resolver<Maybe<ResolversTypes['PaymentRecordNodeConnection']>, ParentType, ContextType, QueryAllPaymentRecordsArgs>,
+  allPaymentVerifications?: Resolver<Maybe<ResolversTypes['PaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllPaymentVerificationsArgs>,
+  allCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CashPlanPaymentVerificationNodeConnection']>, ParentType, ContextType, QueryAllCashPlanPaymentVerificationArgs>,
+  chartPaymentVerification?: Resolver<Maybe<ResolversTypes['ChartPaymentVerification']>, ParentType, ContextType, RequireFields<QueryChartPaymentVerificationArgs, 'businessAreaSlug' | 'year'>>,
+  chartVolumeByDeliveryMechanism?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartVolumeByDeliveryMechanismArgs, 'businessAreaSlug' | 'year'>>,
+  chartPayment?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartPaymentArgs, 'businessAreaSlug' | 'year'>>,
+  sectionTotalTransferred?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionTotalTransferredArgs, 'businessAreaSlug' | 'year'>>,
+  tableTotalCashTransferredByAdministrativeArea?: Resolver<Maybe<ResolversTypes['TableTotalCashTransferred']>, ParentType, ContextType, RequireFields<QueryTableTotalCashTransferredByAdministrativeAreaArgs, 'businessAreaSlug' | 'year'>>,
+  chartTotalTransferredCashByCountry?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredCashByCountryArgs, 'year'>>,
+  paymentRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  paymentRecordEntitlementCardStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  paymentRecordDeliveryTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanVerificationSamplingChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanVerificationVerificationMethodChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  paymentVerificationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allRapidProFlows?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlow']>>>, ParentType, ContextType, RequireFields<QueryAllRapidProFlowsArgs, 'businessAreaSlug'>>,
+  sampleSize?: Resolver<Maybe<ResolversTypes['GetCashplanVerificationSampleSizeObject']>, ParentType, ContextType, QuerySampleSizeArgs>,
+  adminArea?: Resolver<Maybe<ResolversTypes['AdminAreaNode']>, ParentType, ContextType, RequireFields<QueryAdminAreaArgs, 'id'>>,
+  allAdminAreas?: Resolver<Maybe<ResolversTypes['AdminAreaNodeConnection']>, ParentType, ContextType, QueryAllAdminAreasArgs>,
+  allBusinessAreas?: Resolver<Maybe<ResolversTypes['BusinessAreaNodeConnection']>, ParentType, ContextType, QueryAllBusinessAreasArgs>,
+  allFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllFieldsAttributesArgs>,
+  allIndividualFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType, QueryAllIndividualFieldsAttributesArgs>,
+  allGroupsWithFields?: Resolver<Maybe<Array<Maybe<ResolversTypes['GroupAttributeNode']>>>, ParentType, ContextType>,
+  koboProject?: Resolver<Maybe<ResolversTypes['KoboAssetObject']>, ParentType, ContextType, RequireFields<QueryKoboProjectArgs, 'uid' | 'businessAreaSlug'>>,
+  allKoboProjects?: Resolver<Maybe<ResolversTypes['KoboAssetObjectConnection']>, ParentType, ContextType, RequireFields<QueryAllKoboProjectsArgs, 'businessAreaSlug'>>,
+  cashAssistUrlPrefix?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType, RequireFields<QueryProgramArgs, 'id'>>,
+  allPrograms?: Resolver<Maybe<ResolversTypes['ProgramNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllProgramsArgs, 'businessArea'>>,
+  chartProgrammesBySector?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartProgrammesBySectorArgs, 'businessAreaSlug' | 'year'>>,
+  chartTotalTransferredByMonth?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartTotalTransferredByMonthArgs, 'businessAreaSlug' | 'year'>>,
+  cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType, RequireFields<QueryCashPlanArgs, 'id'>>,
+  allCashPlans?: Resolver<Maybe<ResolversTypes['CashPlanNodeConnection']>, ParentType, ContextType, QueryAllCashPlansArgs>,
+  programStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  programFrequencyOfPaymentsChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  programSectorChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  programScopeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  cashPlanStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType, RequireFields<QueryTargetPopulationArgs, 'id'>>,
+  allTargetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNodeConnection']>, ParentType, ContextType, QueryAllTargetPopulationArgs>,
+  goldenRecordByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryGoldenRecordByTargetingCriteriaArgs, 'targetingCriteria' | 'program'>>,
+  candidateHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryCandidateHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  finalHouseholdsListByTargetingCriteria?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, RequireFields<QueryFinalHouseholdsListByTargetingCriteriaArgs, 'targetPopulation'>>,
+  targetPopulationStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType, RequireFields<QueryHouseholdArgs, 'id'>>,
+  allHouseholds?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, QueryAllHouseholdsArgs>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType, RequireFields<QueryIndividualArgs, 'id'>>,
+  allIndividuals?: Resolver<Maybe<ResolversTypes['IndividualNodeConnection']>, ParentType, ContextType, QueryAllIndividualsArgs>,
+  sectionHouseholdsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionHouseholdsReachedArgs, 'businessAreaSlug' | 'year'>>,
+  sectionIndividualsReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionIndividualsReachedArgs, 'businessAreaSlug' | 'year'>>,
+  sectionChildReached?: Resolver<Maybe<ResolversTypes['SectionTotalNode']>, ParentType, ContextType, RequireFields<QuerySectionChildReachedArgs, 'businessAreaSlug' | 'year'>>,
+  chartIndividualsReachedByAgeAndGender?: Resolver<Maybe<ResolversTypes['ChartDatasetNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsReachedByAgeAndGenderArgs, 'businessAreaSlug' | 'year'>>,
+  chartIndividualsWithDisabilityReachedByAge?: Resolver<Maybe<ResolversTypes['ChartDetailedDatasetsNode']>, ParentType, ContextType, RequireFields<QueryChartIndividualsWithDisabilityReachedByAgeArgs, 'businessAreaSlug' | 'year'>>,
+  residenceStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  sexChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  maritalStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  workStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  relationshipChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  roleChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  documentTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  identityTypeChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  countriesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  observedDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  severityOfDisabilityChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  allHouseholdsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  allIndividualsFlexFieldsAttributes?: Resolver<Maybe<Array<Maybe<ResolversTypes['FieldAttributeNode']>>>, ParentType, ContextType>,
+  me?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  allUsers?: Resolver<Maybe<ResolversTypes['UserNodeConnection']>, ParentType, ContextType, RequireFields<QueryAllUsersArgs, 'businessArea'>>,
+  userRolesChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  userStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  userPartnerChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  hasAvailableUsersToExport?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<QueryHasAvailableUsersToExportArgs, 'businessAreaSlug'>>,
+  importedHousehold?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNode']>, ParentType, ContextType, RequireFields<QueryImportedHouseholdArgs, 'id'>>,
+  allImportedHouseholds?: Resolver<Maybe<ResolversTypes['ImportedHouseholdNodeConnection']>, ParentType, ContextType, QueryAllImportedHouseholdsArgs>,
+  registrationDataImportDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportDatahubArgs, 'id'>>,
+  allRegistrationDataImportsDatahub?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsDatahubArgs>,
+  importedIndividual?: Resolver<Maybe<ResolversTypes['ImportedIndividualNode']>, ParentType, ContextType, RequireFields<QueryImportedIndividualArgs, 'id'>>,
+  allImportedIndividuals?: Resolver<Maybe<ResolversTypes['ImportedIndividualNodeConnection']>, ParentType, ContextType, QueryAllImportedIndividualsArgs>,
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType, RequireFields<QueryImportDataArgs, 'id'>>,
+  deduplicationBatchStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  deduplicationGoldenRecordStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType, RequireFields<QueryRegistrationDataImportArgs, 'id'>>,
+  allRegistrationDataImports?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNodeConnection']>, ParentType, ContextType, QueryAllRegistrationDataImportsArgs>,
+  registrationDataStatusChoices?: Resolver<Maybe<Array<Maybe<ResolversTypes['ChoiceObject']>>>, ParentType, ContextType>,
+  _debug?: Resolver<Maybe<ResolversTypes['DjangoDebug']>, ParentType, ContextType>,
+};
+
+export type RapidProFlowResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlow'] = ResolversParentTypes['RapidProFlow']> = {
+  id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  archived?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+  labels?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  expires?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  runs?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowRun']>>>, ParentType, ContextType>,
+  results?: Resolver<Maybe<Array<Maybe<ResolversTypes['RapidProFlowResult']>>>, ParentType, ContextType>,
+  createdOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  modifiedOn?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+};
+
+export type RapidProFlowResultResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowResult'] = ResolversParentTypes['RapidProFlowResult']> = {
+  key?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  categories?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  nodeUuids?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+};
+
+export type RapidProFlowRunResolvers<ContextType = any, ParentType extends ResolversParentTypes['RapidProFlowRun'] = ResolversParentTypes['RapidProFlowRun']> = {
+  active?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  completed?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  interrupted?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  expired?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ReassignRoleMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReassignRoleMutation'] = ResolversParentTypes['ReassignRoleMutation']> = {
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+};
+
+export type RegistrationDataImportDatahubNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNode'] = ResolversParentTypes['RegistrationDataImportDatahubNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  hctId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
+  importDone?: Resolver<ResolversTypes['RegistrationDataImportDatahubImportDone'], ParentType, ContextType>,
+  businessAreaSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['ImportedHouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeHouseholdsArgs>,
+  individuals?: Resolver<ResolversTypes['ImportedIndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportDatahubNodeIndividualsArgs>,
+};
+
+export type RegistrationDataImportDatahubNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeConnection'] = ResolversParentTypes['RegistrationDataImportDatahubNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['RegistrationDataImportDatahubNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type RegistrationDataImportDatahubNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportDatahubNodeEdge'] = ResolversParentTypes['RegistrationDataImportDatahubNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportDatahubNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNode'] = ResolversParentTypes['RegistrationDataImportNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['RegistrationDataImportStatus'], ParentType, ContextType>,
+  importDate?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  importedBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
+  dataSource?: Resolver<ResolversTypes['RegistrationDataImportDataSource'], ParentType, ContextType>,
+  numberOfIndividuals?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
+  errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
+  individuals?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeIndividualsArgs>,
+  batchDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  batchPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordPossibleDuplicatesCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  batchUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+  goldenRecordUniqueCountAndPercentage?: Resolver<Maybe<ResolversTypes['CountAndPercentageNode']>, ParentType, ContextType>,
+};
+
+export type RegistrationDataImportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeConnection'] = ResolversParentTypes['RegistrationDataImportNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['RegistrationDataImportNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type RegistrationDataImportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDataImportNodeEdge'] = ResolversParentTypes['RegistrationDataImportNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RegistrationDeduplicationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationDeduplicationMutation'] = ResolversParentTypes['RegistrationDeduplicationMutation']> = {
+  ok?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type RegistrationKoboImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationKoboImportMutation'] = ResolversParentTypes['RegistrationKoboImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type RegistrationXlsxImportMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['RegistrationXlsxImportMutation'] = ResolversParentTypes['RegistrationXlsxImportMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+};
+
+export type ReportNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNode'] = ResolversParentTypes['ReportNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  file?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  createdBy?: Resolver<ResolversTypes['UserNode'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  reportType?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  dateFrom?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  dateTo?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+  numberOfRecords?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  adminArea?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, ReportNodeAdminAreaArgs>,
+  fileUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type ReportNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeConnection'] = ResolversParentTypes['ReportNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ReportNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ReportNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ReportNodeEdge'] = ResolversParentTypes['ReportNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ReportNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type RoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['RoleNode'] = ResolversParentTypes['RoleNode']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualAliasNameNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNode'] = ResolversParentTypes['SanctionListIndividualAliasNameNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualAliasNameNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualAliasNameNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualAliasNameNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge'] = ResolversParentTypes['SanctionListIndividualAliasNameNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualAliasNameNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualCountriesNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNode'] = ResolversParentTypes['SanctionListIndividualCountriesNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualCountriesNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeConnection'] = ResolversParentTypes['SanctionListIndividualCountriesNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualCountriesNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualCountriesNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualCountriesNodeEdge'] = ResolversParentTypes['SanctionListIndividualCountriesNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualCountriesNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNode'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge'] = ResolversParentTypes['SanctionListIndividualDateOfBirthNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDateOfBirthNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNode'] = ResolversParentTypes['SanctionListIndividualDocumentNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  documentNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  typeOfDocument?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  dateOfIssue?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  issuingCountry?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  note?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeConnection'] = ResolversParentTypes['SanctionListIndividualDocumentNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualDocumentNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualDocumentNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualDocumentNodeEdge'] = ResolversParentTypes['SanctionListIndividualDocumentNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualDocumentNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNationalitiesNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNode'] = ResolversParentTypes['SanctionListIndividualNationalitiesNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  nationality?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNationalitiesNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualNationalitiesNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNationalitiesNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge'] = ResolversParentTypes['SanctionListIndividualNationalitiesNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNationalitiesNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNode'] = ResolversParentTypes['SanctionListIndividualNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  dataId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  versionNum?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  secondName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  thirdName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fourthName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  nameOriginalScript?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  unListType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  referenceNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  listedOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  comments?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  designation?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  listType?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  street?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  city?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  stateProvince?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  addressNote?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  countryOfBirth?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  active?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  documents?: Resolver<ResolversTypes['SanctionListIndividualDocumentNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDocumentsArgs>,
+  nationalities?: Resolver<ResolversTypes['SanctionListIndividualNationalitiesNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeNationalitiesArgs>,
+  countries?: Resolver<ResolversTypes['SanctionListIndividualCountriesNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeCountriesArgs>,
+  aliasNames?: Resolver<ResolversTypes['SanctionListIndividualAliasNameNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeAliasNamesArgs>,
+  datesOfBirth?: Resolver<ResolversTypes['SanctionListIndividualDateOfBirthNodeConnection'], ParentType, ContextType, SanctionListIndividualNodeDatesOfBirthArgs>,
+};
+
+export type SanctionListIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNodeConnection'] = ResolversParentTypes['SanctionListIndividualNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SanctionListIndividualNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SanctionListIndividualNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SanctionListIndividualNodeEdge'] = ResolversParentTypes['SanctionListIndividualNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SanctionListIndividualNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SaveKoboProjectImportDataMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SaveKoboProjectImportDataMutation'] = ResolversParentTypes['SaveKoboProjectImportDataMutation']> = {
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['KoboErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type SectionTotalNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SectionTotalNode'] = ResolversParentTypes['SectionTotalNode']> = {
+  total?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+};
+
+export type ServiceProviderNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNode'] = ResolversParentTypes['ServiceProviderNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  caId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  fullName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  shortName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  country?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  visionId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, ServiceProviderNodePaymentRecordsArgs>,
+  cashPlans?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, ServiceProviderNodeCashPlansArgs>,
+};
+
+export type ServiceProviderNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNodeConnection'] = ResolversParentTypes['ServiceProviderNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['ServiceProviderNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type ServiceProviderNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['ServiceProviderNodeEdge'] = ResolversParentTypes['ServiceProviderNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['ServiceProviderNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType = any, ParentType extends ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload'] = ResolversParentTypes['SetSteficonRuleOnTargetPopulationMutationPayload']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  clientMutationId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type SimpleApproveMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['SimpleApproveMutation'] = ResolversParentTypes['SimpleApproveMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type StatsObjectTypeResolvers<ContextType = any, ParentType extends ResolversParentTypes['StatsObjectType'] = ResolversParentTypes['StatsObjectType']> = {
+  childMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  childFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  adultMale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  adultFemale?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  allIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SteficonRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNode'] = ResolversParentTypes['SteficonRuleNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  definition?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  deprecated?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  language?: Resolver<ResolversTypes['RuleLanguage'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  updatedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, SteficonRuleNodeTargetPopulationsArgs>,
+};
+
+export type SteficonRuleNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeConnection'] = ResolversParentTypes['SteficonRuleNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['SteficonRuleNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type SteficonRuleNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['SteficonRuleNodeEdge'] = ResolversParentTypes['SteficonRuleNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TableTotalCashTransferredResolvers<ContextType = any, ParentType extends ResolversParentTypes['TableTotalCashTransferred'] = ResolversParentTypes['TableTotalCashTransferred']> = {
+  data?: Resolver<Maybe<Array<Maybe<ResolversTypes['_TableTotalCashTransferredDataNode']>>>, ParentType, ContextType>,
+};
+
+export type TargetingCriteriaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaNode'] = ResolversParentTypes['TargetingCriteriaNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetPopulationCandidate?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  targetPopulationFinal?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  rules?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleNode']>>>, ParentType, ContextType>,
+};
+
+export type TargetingCriteriaRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleFilterNode'] = ResolversParentTypes['TargetingCriteriaRuleFilterNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  comparisionMethod?: Resolver<ResolversTypes['TargetingCriteriaRuleFilterComparisionMethod'], ParentType, ContextType>,
+  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
+  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
+};
+
+export type TargetingCriteriaRuleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingCriteriaRuleNode'] = ResolversParentTypes['TargetingCriteriaRuleNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetingCriteria?: Resolver<ResolversTypes['TargetingCriteriaNode'], ParentType, ContextType>,
+  individualsFiltersBlocks?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualRuleFilterBlockNode']>>>, ParentType, ContextType>,
+  filters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingCriteriaRuleFilterNode']>>>, ParentType, ContextType>,
+};
+
+export type TargetingIndividualBlockRuleFilterNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingIndividualBlockRuleFilterNode'] = ResolversParentTypes['TargetingIndividualBlockRuleFilterNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  comparisionMethod?: Resolver<ResolversTypes['TargetingIndividualBlockRuleFilterComparisionMethod'], ParentType, ContextType>,
+  individualsFiltersBlock?: Resolver<ResolversTypes['TargetingIndividualRuleFilterBlockNode'], ParentType, ContextType>,
+  isFlexField?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  fieldName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  arguments?: Resolver<Maybe<Array<Maybe<ResolversTypes['Arg']>>>, ParentType, ContextType>,
+  fieldAttribute?: Resolver<Maybe<ResolversTypes['FieldAttributeNode']>, ParentType, ContextType>,
+};
+
+export type TargetingIndividualRuleFilterBlockNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetingIndividualRuleFilterBlockNode'] = ResolversParentTypes['TargetingIndividualRuleFilterBlockNode']> = {
+  id?: Resolver<ResolversTypes['UUID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  targetingCriteriaRule?: Resolver<ResolversTypes['TargetingCriteriaRuleNode'], ParentType, ContextType>,
+  targetOnlyHoh?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  individualBlockFilters?: Resolver<Maybe<Array<Maybe<ResolversTypes['TargetingIndividualBlockRuleFilterNode']>>>, ParentType, ContextType>,
+};
+
+export type TargetPopulationNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNode'] = ResolversParentTypes['TargetPopulationNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  isRemoved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  caId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  caHashId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  approvedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  approvedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  finalizedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  finalizedBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['TargetPopulationStatus'], ParentType, ContextType>,
+  households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, TargetPopulationNodeHouseholdsArgs>,
+  candidateListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  candidateListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalListTotalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalListTotalIndividuals?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  selectionComputationMetadata?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+  candidateListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
+  finalListTargetingCriteria?: Resolver<Maybe<ResolversTypes['TargetingCriteriaNode']>, ParentType, ContextType>,
+  sentToDatahub?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  steficonRule?: Resolver<Maybe<ResolversTypes['SteficonRuleNode']>, ParentType, ContextType>,
+  vulnerabilityScoreMin?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  vulnerabilityScoreMax?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>,
+  paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, TargetPopulationNodePaymentRecordsArgs>,
+  selections?: Resolver<Array<ResolversTypes['HouseholdSelection']>, ParentType, ContextType>,
+  totalHouseholds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  totalFamilySize?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  finalList?: Resolver<Maybe<ResolversTypes['HouseholdNodeConnection']>, ParentType, ContextType, TargetPopulationNodeFinalListArgs>,
+  candidateStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
+  finalStats?: Resolver<Maybe<ResolversTypes['StatsObjectType']>, ParentType, ContextType>,
+};
+
+export type TargetPopulationNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeConnection'] = ResolversParentTypes['TargetPopulationNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TargetPopulationNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TargetPopulationNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TargetPopulationNodeEdge'] = ResolversParentTypes['TargetPopulationNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketAddIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNode'] = ResolversParentTypes['TicketAddIndividualDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+};
+
+export type TicketAddIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketAddIndividualDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketAddIndividualDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketAddIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketAddIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketAddIndividualDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketAddIndividualDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketComplaintDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNode'] = ResolversParentTypes['TicketComplaintDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+};
+
+export type TicketComplaintDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeConnection'] = ResolversParentTypes['TicketComplaintDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketComplaintDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketComplaintDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketComplaintDetailsNodeEdge'] = ResolversParentTypes['TicketComplaintDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketDeleteIndividualDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNode'] = ResolversParentTypes['TicketDeleteIndividualDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge'] = ResolversParentTypes['TicketDeleteIndividualDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketDeleteIndividualDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  householdData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketHouseholdDataUpdateDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketHouseholdDataUpdateDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketIndividualDataUpdateDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNode'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+};
+
+export type TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketIndividualDataUpdateDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketNeedsAdjudicationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNeedsAdjudicationDetailsNode'] = ResolversParentTypes['TicketNeedsAdjudicationDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  possibleDuplicate?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  selectedIndividual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+  hasDuplicatedDocument?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
+};
+
+export type TicketNoteNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNode'] = ResolversParentTypes['TicketNoteNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+};
+
+export type TicketNoteNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNodeConnection'] = ResolversParentTypes['TicketNoteNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketNoteNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketNoteNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketNoteNodeEdge'] = ResolversParentTypes['TicketNoteNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketNoteNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketPaymentVerificationDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNode'] = ResolversParentTypes['TicketPaymentVerificationDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  paymentVerifications?: Resolver<ResolversTypes['PaymentVerificationNodeConnection'], ParentType, ContextType, TicketPaymentVerificationDetailsNodePaymentVerificationsArgs>,
+  paymentVerificationStatus?: Resolver<ResolversTypes['TicketPaymentVerificationDetailsPaymentVerificationStatus'], ParentType, ContextType>,
+};
+
+export type TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketPaymentVerificationDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge'] = ResolversParentTypes['TicketPaymentVerificationDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketPaymentVerificationDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketSensitiveDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNode'] = ResolversParentTypes['TicketSensitiveDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  paymentRecord?: Resolver<Maybe<ResolversTypes['PaymentRecordNode']>, ParentType, ContextType>,
+  household?: Resolver<Maybe<ResolversTypes['HouseholdNode']>, ParentType, ContextType>,
+  individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
+};
+
+export type TicketSensitiveDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeConnection'] = ResolversParentTypes['TicketSensitiveDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketSensitiveDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketSensitiveDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSensitiveDetailsNodeEdge'] = ResolversParentTypes['TicketSensitiveDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketSensitiveDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type TicketSystemFlaggingDetailsNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSystemFlaggingDetailsNode'] = ResolversParentTypes['TicketSystemFlaggingDetailsNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  goldenRecordsIndividual?: Resolver<ResolversTypes['IndividualNode'], ParentType, ContextType>,
+  sanctionListIndividual?: Resolver<ResolversTypes['SanctionListIndividualNode'], ParentType, ContextType>,
+  approveStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
+};
+
+export type TicketSystemFlaggingDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSystemFlaggingDetailsNodeConnection'] = ResolversParentTypes['TicketSystemFlaggingDetailsNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['TicketSystemFlaggingDetailsNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type TicketSystemFlaggingDetailsNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketSystemFlaggingDetailsNodeEdge'] = ResolversParentTypes['TicketSystemFlaggingDetailsNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['TicketSystemFlaggingDetailsNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type UnapproveTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UnapproveTargetPopulationMutation'] = ResolversParentTypes['UnapproveTargetPopulationMutation']> = {
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export type UpdateGrievanceTicketMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateGrievanceTicketMutation'] = ResolversParentTypes['UpdateGrievanceTicketMutation']> = {
+  grievanceTicket?: Resolver<Maybe<ResolversTypes['GrievanceTicketNode']>, ParentType, ContextType>,
+};
+
+export type UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationReceivedAndReceivedAmount']> = {
+  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+};
+
+export type UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount'] = ResolversParentTypes['UpdatePaymentVerificationStatusAndReceivedAmount']> = {
+  paymentVerification?: Resolver<Maybe<ResolversTypes['PaymentVerificationNode']>, ParentType, ContextType>,
+};
+
+export type UpdateProgramResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateProgram'] = ResolversParentTypes['UpdateProgram']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  program?: Resolver<Maybe<ResolversTypes['ProgramNode']>, ParentType, ContextType>,
+};
+
+export type UpdateTargetPopulationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['UpdateTargetPopulationMutation'] = ResolversParentTypes['UpdateTargetPopulationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  targetPopulation?: Resolver<Maybe<ResolversTypes['TargetPopulationNode']>, ParentType, ContextType>,
+};
+
+export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
+  name: 'Upload'
+}
+
+export type UploadImportDataXlsxFileResolvers<ContextType = any, ParentType extends ResolversParentTypes['UploadImportDataXLSXFile'] = ResolversParentTypes['UploadImportDataXLSXFile']> = {
+  importData?: Resolver<Maybe<ResolversTypes['ImportDataNode']>, ParentType, ContextType>,
+  errors?: Resolver<Maybe<Array<Maybe<ResolversTypes['XlsxRowErrorNode']>>>, ParentType, ContextType>,
+};
+
+export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserBusinessAreaNode'] = ResolversParentTypes['UserBusinessAreaNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  code?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  longName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  regionName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  koboUsername?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProHost?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
+  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
+  serviceproviderSet?: Resolver<ResolversTypes['ServiceProviderNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeServiceproviderSetArgs>,
+  tickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTicketsArgs>,
+  householdSet?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeHouseholdSetArgs>,
+  individualSet?: Resolver<ResolversTypes['IndividualNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeIndividualSetArgs>,
+  programSet?: Resolver<ResolversTypes['ProgramNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeProgramSetArgs>,
+  cashplanSet?: Resolver<ResolversTypes['CashPlanNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCashplanSetArgs>,
+  targetpopulationSet?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeTargetpopulationSetArgs>,
+  registrationdataimportSet?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeRegistrationdataimportSetArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeReportsArgs>,
+  logentrySet?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeLogentrySetArgs>,
+  permissions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>,
+};
+
+export type UserBusinessAreaNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserBusinessAreaNodeConnection'] = ResolversParentTypes['UserBusinessAreaNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['UserBusinessAreaNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type UserBusinessAreaNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserBusinessAreaNodeEdge'] = ResolversParentTypes['UserBusinessAreaNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type UserNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNode'] = ResolversParentTypes['UserNode']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  lastLogin?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  isSuperuser?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  firstName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  lastName?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  isStaff?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  dateJoined?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
+  partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
+  availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
+  createdTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeCreatedTicketsArgs>,
+  assignedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, UserNodeAssignedTicketsArgs>,
+  ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, UserNodeTicketNotesArgs>,
+  targetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeTargetPopulationsArgs>,
+  approvedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeApprovedTargetPopulationsArgs>,
+  finalizedTargetPopulations?: Resolver<ResolversTypes['TargetPopulationNodeConnection'], ParentType, ContextType, UserNodeFinalizedTargetPopulationsArgs>,
+  registrationDataImports?: Resolver<ResolversTypes['RegistrationDataImportNodeConnection'], ParentType, ContextType, UserNodeRegistrationDataImportsArgs>,
+  reports?: Resolver<ResolversTypes['ReportNodeConnection'], ParentType, ContextType, UserNodeReportsArgs>,
+  logs?: Resolver<ResolversTypes['LogEntryNodeConnection'], ParentType, ContextType, UserNodeLogsArgs>,
+  businessAreas?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNodeConnection']>, ParentType, ContextType, UserNodeBusinessAreasArgs>,
+};
+
+export type UserNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNodeConnection'] = ResolversParentTypes['UserNodeConnection']> = {
+  pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>,
+  edges?: Resolver<Array<Maybe<ResolversTypes['UserNodeEdge']>>, ParentType, ContextType>,
+  totalCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  edgeCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+};
+
+export type UserNodeEdgeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserNodeEdge'] = ResolversParentTypes['UserNodeEdge']> = {
+  node?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
+  cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+};
+
+export type UserRoleNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['UserRoleNode'] = ResolversParentTypes['UserRoleNode']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
+  role?: Resolver<ResolversTypes['RoleNode'], ParentType, ContextType>,
+};
+
+export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['UUID'], any> {
+  name: 'UUID'
+}
+
+export type XlsxErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxErrorNode'] = ResolversParentTypes['XlsxErrorNode']> = {
+  sheet?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  coordinates?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type XlsxRowErrorNodeResolvers<ContextType = any, ParentType extends ResolversParentTypes['XlsxRowErrorNode'] = ResolversParentTypes['XlsxRowErrorNode']> = {
+  rowNumber?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  header?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+};
+
+export type Resolvers<ContextType = any> = {
+  _DatasetsNode?: _DatasetsNodeResolvers<ContextType>,
+  _DetailedDatasetsNode?: _DetailedDatasetsNodeResolvers<ContextType>,
+  _TableTotalCashTransferredDataNode?: _TableTotalCashTransferredDataNodeResolvers<ContextType>,
+  ActivateCashPlanVerificationMutation?: ActivateCashPlanVerificationMutationResolvers<ContextType>,
+  AdminAreaNode?: AdminAreaNodeResolvers<ContextType>,
+  AdminAreaNodeConnection?: AdminAreaNodeConnectionResolvers<ContextType>,
+  AdminAreaNodeEdge?: AdminAreaNodeEdgeResolvers<ContextType>,
+  AdminAreaTypeNode?: AdminAreaTypeNodeResolvers<ContextType>,
+  AdminAreaTypeNodeConnection?: AdminAreaTypeNodeConnectionResolvers<ContextType>,
+  AdminAreaTypeNodeEdge?: AdminAreaTypeNodeEdgeResolvers<ContextType>,
+  AgeFilterObject?: AgeFilterObjectResolvers<ContextType>,
+  AgencyNode?: AgencyNodeResolvers<ContextType>,
+  ApproveTargetPopulationMutation?: ApproveTargetPopulationMutationResolvers<ContextType>,
+  Arg?: GraphQLScalarType,
+  BigInt?: GraphQLScalarType,
+  BusinessAreaNode?: BusinessAreaNodeResolvers<ContextType>,
+  BusinessAreaNodeConnection?: BusinessAreaNodeConnectionResolvers<ContextType>,
+  BusinessAreaNodeEdge?: BusinessAreaNodeEdgeResolvers<ContextType>,
+  CashPlanNode?: CashPlanNodeResolvers<ContextType>,
+  CashPlanNodeConnection?: CashPlanNodeConnectionResolvers<ContextType>,
+  CashPlanNodeEdge?: CashPlanNodeEdgeResolvers<ContextType>,
+  CashPlanPaymentVerificationNode?: CashPlanPaymentVerificationNodeResolvers<ContextType>,
+  CashPlanPaymentVerificationNodeConnection?: CashPlanPaymentVerificationNodeConnectionResolvers<ContextType>,
+  CashPlanPaymentVerificationNodeEdge?: CashPlanPaymentVerificationNodeEdgeResolvers<ContextType>,
+  ChartDatasetNode?: ChartDatasetNodeResolvers<ContextType>,
+  ChartDetailedDatasetsNode?: ChartDetailedDatasetsNodeResolvers<ContextType>,
+  ChartGrievanceTicketsNode?: ChartGrievanceTicketsNodeResolvers<ContextType>,
+  ChartPaymentVerification?: ChartPaymentVerificationResolvers<ContextType>,
+  CheckAgainstSanctionListMutation?: CheckAgainstSanctionListMutationResolvers<ContextType>,
+  ChoiceObject?: ChoiceObjectResolvers<ContextType>,
+  ContentTypeObjectType?: ContentTypeObjectTypeResolvers<ContextType>,
+  CopyTargetPopulationMutationPayload?: CopyTargetPopulationMutationPayloadResolvers<ContextType>,
+  CoreFieldChoiceObject?: CoreFieldChoiceObjectResolvers<ContextType>,
+  CountAndPercentageNode?: CountAndPercentageNodeResolvers<ContextType>,
+  CreateDashboardReport?: CreateDashboardReportResolvers<ContextType>,
+  CreateGrievanceTicketMutation?: CreateGrievanceTicketMutationResolvers<ContextType>,
+  CreatePaymentVerificationMutation?: CreatePaymentVerificationMutationResolvers<ContextType>,
+  CreateProgram?: CreateProgramResolvers<ContextType>,
+  CreateReport?: CreateReportResolvers<ContextType>,
+  CreateTargetPopulationMutation?: CreateTargetPopulationMutationResolvers<ContextType>,
+  CreateTicketNoteMutation?: CreateTicketNoteMutationResolvers<ContextType>,
+  Date?: GraphQLScalarType,
+  DateTime?: GraphQLScalarType,
+  Decimal?: GraphQLScalarType,
+  DeduplicationResultNode?: DeduplicationResultNodeResolvers<ContextType>,
+  DeleteProgram?: DeleteProgramResolvers<ContextType>,
+  DeleteRegistrationDataImport?: DeleteRegistrationDataImportResolvers<ContextType>,
+  DeleteTargetPopulationMutationPayload?: DeleteTargetPopulationMutationPayloadResolvers<ContextType>,
+  DiscardCashPlanVerificationMutation?: DiscardCashPlanVerificationMutationResolvers<ContextType>,
+  DjangoDebug?: DjangoDebugResolvers<ContextType>,
+  DjangoDebugSQL?: DjangoDebugSqlResolvers<ContextType>,
+  DocumentNode?: DocumentNodeResolvers<ContextType>,
+  DocumentNodeConnection?: DocumentNodeConnectionResolvers<ContextType>,
+  DocumentNodeEdge?: DocumentNodeEdgeResolvers<ContextType>,
+  DocumentTypeNode?: DocumentTypeNodeResolvers<ContextType>,
+  EditPaymentVerificationMutation?: EditPaymentVerificationMutationResolvers<ContextType>,
+  FieldAttributeNode?: FieldAttributeNodeResolvers<ContextType>,
+  FinalizeTargetPopulationMutation?: FinalizeTargetPopulationMutationResolvers<ContextType>,
+  FinishCashPlanVerificationMutation?: FinishCashPlanVerificationMutationResolvers<ContextType>,
+  FlexFieldsScalar?: GraphQLScalarType,
+  GeoJSON?: GraphQLScalarType,
+  GetCashplanVerificationSampleSizeObject?: GetCashplanVerificationSampleSizeObjectResolvers<ContextType>,
+  GrievanceStatusChangeMutation?: GrievanceStatusChangeMutationResolvers<ContextType>,
+  GrievanceTicketNode?: GrievanceTicketNodeResolvers<ContextType>,
+  GrievanceTicketNodeConnection?: GrievanceTicketNodeConnectionResolvers<ContextType>,
+  GrievanceTicketNodeEdge?: GrievanceTicketNodeEdgeResolvers<ContextType>,
+  GroupAttributeNode?: GroupAttributeNodeResolvers<ContextType>,
+  HouseholdDataChangeApproveMutation?: HouseholdDataChangeApproveMutationResolvers<ContextType>,
+  HouseholdNode?: HouseholdNodeResolvers<ContextType>,
+  HouseholdNodeConnection?: HouseholdNodeConnectionResolvers<ContextType>,
+  HouseholdNodeEdge?: HouseholdNodeEdgeResolvers<ContextType>,
+  HouseholdSelection?: HouseholdSelectionResolvers<ContextType>,
+  ImportDataNode?: ImportDataNodeResolvers<ContextType>,
+  ImportedDocumentNode?: ImportedDocumentNodeResolvers<ContextType>,
+  ImportedDocumentNodeConnection?: ImportedDocumentNodeConnectionResolvers<ContextType>,
+  ImportedDocumentNodeEdge?: ImportedDocumentNodeEdgeResolvers<ContextType>,
+  ImportedDocumentTypeNode?: ImportedDocumentTypeNodeResolvers<ContextType>,
+  ImportedHouseholdNode?: ImportedHouseholdNodeResolvers<ContextType>,
+  ImportedHouseholdNodeConnection?: ImportedHouseholdNodeConnectionResolvers<ContextType>,
+  ImportedHouseholdNodeEdge?: ImportedHouseholdNodeEdgeResolvers<ContextType>,
+  ImportedIndividualIdentityNode?: ImportedIndividualIdentityNodeResolvers<ContextType>,
+  ImportedIndividualNode?: ImportedIndividualNodeResolvers<ContextType>,
+  ImportedIndividualNodeConnection?: ImportedIndividualNodeConnectionResolvers<ContextType>,
+  ImportedIndividualNodeEdge?: ImportedIndividualNodeEdgeResolvers<ContextType>,
+  ImportXlsxCashPlanVerification?: ImportXlsxCashPlanVerificationResolvers<ContextType>,
+  IndividualDataChangeApproveMutation?: IndividualDataChangeApproveMutationResolvers<ContextType>,
+  IndividualIdentityNode?: IndividualIdentityNodeResolvers<ContextType>,
+  IndividualNode?: IndividualNodeResolvers<ContextType>,
+  IndividualNodeConnection?: IndividualNodeConnectionResolvers<ContextType>,
+  IndividualNodeEdge?: IndividualNodeEdgeResolvers<ContextType>,
+  IndividualRoleInHouseholdNode?: IndividualRoleInHouseholdNodeResolvers<ContextType>,
+  IssueTypesObject?: IssueTypesObjectResolvers<ContextType>,
+  JSONString?: GraphQLScalarType,
+  KoboAssetObject?: KoboAssetObjectResolvers<ContextType>,
+  KoboAssetObjectConnection?: KoboAssetObjectConnectionResolvers<ContextType>,
+  KoboAssetObjectEdge?: KoboAssetObjectEdgeResolvers<ContextType>,
+  KoboErrorNode?: KoboErrorNodeResolvers<ContextType>,
+  LabelNode?: LabelNodeResolvers<ContextType>,
+  LogEntryNode?: LogEntryNodeResolvers<ContextType>,
+  LogEntryNodeConnection?: LogEntryNodeConnectionResolvers<ContextType>,
+  LogEntryNodeEdge?: LogEntryNodeEdgeResolvers<ContextType>,
+  MergeRegistrationDataImportMutation?: MergeRegistrationDataImportMutationResolvers<ContextType>,
+  Mutations?: MutationsResolvers<ContextType>,
+  NeedsAdjudicationApproveMutation?: NeedsAdjudicationApproveMutationResolvers<ContextType>,
+  Node?: NodeResolvers,
+  PageInfo?: PageInfoResolvers<ContextType>,
+  PaymentRecordNode?: PaymentRecordNodeResolvers<ContextType>,
+  PaymentRecordNodeConnection?: PaymentRecordNodeConnectionResolvers<ContextType>,
+  PaymentRecordNodeEdge?: PaymentRecordNodeEdgeResolvers<ContextType>,
+  PaymentVerificationNode?: PaymentVerificationNodeResolvers<ContextType>,
+  PaymentVerificationNodeConnection?: PaymentVerificationNodeConnectionResolvers<ContextType>,
+  PaymentVerificationNodeEdge?: PaymentVerificationNodeEdgeResolvers<ContextType>,
+  ProgramNode?: ProgramNodeResolvers<ContextType>,
+  ProgramNodeConnection?: ProgramNodeConnectionResolvers<ContextType>,
+  ProgramNodeEdge?: ProgramNodeEdgeResolvers<ContextType>,
+  Query?: QueryResolvers<ContextType>,
+  RapidProFlow?: RapidProFlowResolvers<ContextType>,
+  RapidProFlowResult?: RapidProFlowResultResolvers<ContextType>,
+  RapidProFlowRun?: RapidProFlowRunResolvers<ContextType>,
+  ReassignRoleMutation?: ReassignRoleMutationResolvers<ContextType>,
+  RegistrationDataImportDatahubNode?: RegistrationDataImportDatahubNodeResolvers<ContextType>,
+  RegistrationDataImportDatahubNodeConnection?: RegistrationDataImportDatahubNodeConnectionResolvers<ContextType>,
+  RegistrationDataImportDatahubNodeEdge?: RegistrationDataImportDatahubNodeEdgeResolvers<ContextType>,
+  RegistrationDataImportNode?: RegistrationDataImportNodeResolvers<ContextType>,
+  RegistrationDataImportNodeConnection?: RegistrationDataImportNodeConnectionResolvers<ContextType>,
+  RegistrationDataImportNodeEdge?: RegistrationDataImportNodeEdgeResolvers<ContextType>,
+  RegistrationDeduplicationMutation?: RegistrationDeduplicationMutationResolvers<ContextType>,
+  RegistrationKoboImportMutation?: RegistrationKoboImportMutationResolvers<ContextType>,
+  RegistrationXlsxImportMutation?: RegistrationXlsxImportMutationResolvers<ContextType>,
+  ReportNode?: ReportNodeResolvers<ContextType>,
+  ReportNodeConnection?: ReportNodeConnectionResolvers<ContextType>,
+  ReportNodeEdge?: ReportNodeEdgeResolvers<ContextType>,
+  RoleNode?: RoleNodeResolvers<ContextType>,
+  SanctionListIndividualAliasNameNode?: SanctionListIndividualAliasNameNodeResolvers<ContextType>,
+  SanctionListIndividualAliasNameNodeConnection?: SanctionListIndividualAliasNameNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualAliasNameNodeEdge?: SanctionListIndividualAliasNameNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualCountriesNode?: SanctionListIndividualCountriesNodeResolvers<ContextType>,
+  SanctionListIndividualCountriesNodeConnection?: SanctionListIndividualCountriesNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualCountriesNodeEdge?: SanctionListIndividualCountriesNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNode?: SanctionListIndividualDateOfBirthNodeResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNodeConnection?: SanctionListIndividualDateOfBirthNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualDateOfBirthNodeEdge?: SanctionListIndividualDateOfBirthNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualDocumentNode?: SanctionListIndividualDocumentNodeResolvers<ContextType>,
+  SanctionListIndividualDocumentNodeConnection?: SanctionListIndividualDocumentNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualDocumentNodeEdge?: SanctionListIndividualDocumentNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualNationalitiesNode?: SanctionListIndividualNationalitiesNodeResolvers<ContextType>,
+  SanctionListIndividualNationalitiesNodeConnection?: SanctionListIndividualNationalitiesNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualNationalitiesNodeEdge?: SanctionListIndividualNationalitiesNodeEdgeResolvers<ContextType>,
+  SanctionListIndividualNode?: SanctionListIndividualNodeResolvers<ContextType>,
+  SanctionListIndividualNodeConnection?: SanctionListIndividualNodeConnectionResolvers<ContextType>,
+  SanctionListIndividualNodeEdge?: SanctionListIndividualNodeEdgeResolvers<ContextType>,
+  SaveKoboProjectImportDataMutation?: SaveKoboProjectImportDataMutationResolvers<ContextType>,
+  SectionTotalNode?: SectionTotalNodeResolvers<ContextType>,
+  ServiceProviderNode?: ServiceProviderNodeResolvers<ContextType>,
+  ServiceProviderNodeConnection?: ServiceProviderNodeConnectionResolvers<ContextType>,
+  ServiceProviderNodeEdge?: ServiceProviderNodeEdgeResolvers<ContextType>,
+  SetSteficonRuleOnTargetPopulationMutationPayload?: SetSteficonRuleOnTargetPopulationMutationPayloadResolvers<ContextType>,
+  SimpleApproveMutation?: SimpleApproveMutationResolvers<ContextType>,
+  StatsObjectType?: StatsObjectTypeResolvers<ContextType>,
+  SteficonRuleNode?: SteficonRuleNodeResolvers<ContextType>,
+  SteficonRuleNodeConnection?: SteficonRuleNodeConnectionResolvers<ContextType>,
+  SteficonRuleNodeEdge?: SteficonRuleNodeEdgeResolvers<ContextType>,
+  TableTotalCashTransferred?: TableTotalCashTransferredResolvers<ContextType>,
+  TargetingCriteriaNode?: TargetingCriteriaNodeResolvers<ContextType>,
+  TargetingCriteriaRuleFilterNode?: TargetingCriteriaRuleFilterNodeResolvers<ContextType>,
+  TargetingCriteriaRuleNode?: TargetingCriteriaRuleNodeResolvers<ContextType>,
+  TargetingIndividualBlockRuleFilterNode?: TargetingIndividualBlockRuleFilterNodeResolvers<ContextType>,
+  TargetingIndividualRuleFilterBlockNode?: TargetingIndividualRuleFilterBlockNodeResolvers<ContextType>,
+  TargetPopulationNode?: TargetPopulationNodeResolvers<ContextType>,
+  TargetPopulationNodeConnection?: TargetPopulationNodeConnectionResolvers<ContextType>,
+  TargetPopulationNodeEdge?: TargetPopulationNodeEdgeResolvers<ContextType>,
+  TicketAddIndividualDetailsNode?: TicketAddIndividualDetailsNodeResolvers<ContextType>,
+  TicketAddIndividualDetailsNodeConnection?: TicketAddIndividualDetailsNodeConnectionResolvers<ContextType>,
+  TicketAddIndividualDetailsNodeEdge?: TicketAddIndividualDetailsNodeEdgeResolvers<ContextType>,
+  TicketComplaintDetailsNode?: TicketComplaintDetailsNodeResolvers<ContextType>,
+  TicketComplaintDetailsNodeConnection?: TicketComplaintDetailsNodeConnectionResolvers<ContextType>,
+  TicketComplaintDetailsNodeEdge?: TicketComplaintDetailsNodeEdgeResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNode?: TicketDeleteIndividualDetailsNodeResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNodeConnection?: TicketDeleteIndividualDetailsNodeConnectionResolvers<ContextType>,
+  TicketDeleteIndividualDetailsNodeEdge?: TicketDeleteIndividualDetailsNodeEdgeResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNode?: TicketHouseholdDataUpdateDetailsNodeResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNodeConnection?: TicketHouseholdDataUpdateDetailsNodeConnectionResolvers<ContextType>,
+  TicketHouseholdDataUpdateDetailsNodeEdge?: TicketHouseholdDataUpdateDetailsNodeEdgeResolvers<ContextType>,
+  TicketIndividualDataUpdateDetailsNode?: TicketIndividualDataUpdateDetailsNodeResolvers<ContextType>,
+  TicketIndividualDataUpdateDetailsNodeConnection?: TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType>,
+  TicketIndividualDataUpdateDetailsNodeEdge?: TicketIndividualDataUpdateDetailsNodeEdgeResolvers<ContextType>,
+  TicketNeedsAdjudicationDetailsNode?: TicketNeedsAdjudicationDetailsNodeResolvers<ContextType>,
+  TicketNoteNode?: TicketNoteNodeResolvers<ContextType>,
+  TicketNoteNodeConnection?: TicketNoteNodeConnectionResolvers<ContextType>,
+  TicketNoteNodeEdge?: TicketNoteNodeEdgeResolvers<ContextType>,
+  TicketPaymentVerificationDetailsNode?: TicketPaymentVerificationDetailsNodeResolvers<ContextType>,
+  TicketPaymentVerificationDetailsNodeConnection?: TicketPaymentVerificationDetailsNodeConnectionResolvers<ContextType>,
+  TicketPaymentVerificationDetailsNodeEdge?: TicketPaymentVerificationDetailsNodeEdgeResolvers<ContextType>,
+  TicketSensitiveDetailsNode?: TicketSensitiveDetailsNodeResolvers<ContextType>,
+  TicketSensitiveDetailsNodeConnection?: TicketSensitiveDetailsNodeConnectionResolvers<ContextType>,
+  TicketSensitiveDetailsNodeEdge?: TicketSensitiveDetailsNodeEdgeResolvers<ContextType>,
+  TicketSystemFlaggingDetailsNode?: TicketSystemFlaggingDetailsNodeResolvers<ContextType>,
+  TicketSystemFlaggingDetailsNodeConnection?: TicketSystemFlaggingDetailsNodeConnectionResolvers<ContextType>,
+  TicketSystemFlaggingDetailsNodeEdge?: TicketSystemFlaggingDetailsNodeEdgeResolvers<ContextType>,
+  UnapproveTargetPopulationMutation?: UnapproveTargetPopulationMutationResolvers<ContextType>,
+  UpdateGrievanceTicketMutation?: UpdateGrievanceTicketMutationResolvers<ContextType>,
+  UpdatePaymentVerificationReceivedAndReceivedAmount?: UpdatePaymentVerificationReceivedAndReceivedAmountResolvers<ContextType>,
+  UpdatePaymentVerificationStatusAndReceivedAmount?: UpdatePaymentVerificationStatusAndReceivedAmountResolvers<ContextType>,
+  UpdateProgram?: UpdateProgramResolvers<ContextType>,
+  UpdateTargetPopulationMutation?: UpdateTargetPopulationMutationResolvers<ContextType>,
+  Upload?: GraphQLScalarType,
+  UploadImportDataXLSXFile?: UploadImportDataXlsxFileResolvers<ContextType>,
+  UserBusinessAreaNode?: UserBusinessAreaNodeResolvers<ContextType>,
+  UserBusinessAreaNodeConnection?: UserBusinessAreaNodeConnectionResolvers<ContextType>,
+  UserBusinessAreaNodeEdge?: UserBusinessAreaNodeEdgeResolvers<ContextType>,
+  UserNode?: UserNodeResolvers<ContextType>,
+  UserNodeConnection?: UserNodeConnectionResolvers<ContextType>,
+  UserNodeEdge?: UserNodeEdgeResolvers<ContextType>,
+  UserRoleNode?: UserRoleNodeResolvers<ContextType>,
+  UUID?: GraphQLScalarType,
+  XlsxErrorNode?: XlsxErrorNodeResolvers<ContextType>,
+  XlsxRowErrorNode?: XlsxRowErrorNodeResolvers<ContextType>,
+};
+
+
+/**
+ * @deprecated
+ * Use "Resolvers" root object instead. If you wish to get "IResolvers", add "typesPrefix: I" to your config.
+*/
+export type IResolvers<ContextType = any> = Resolvers<ContextType>;

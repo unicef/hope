@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %} {% load i18n admin_urls static %} 
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo;
+  <a href="{% url 'admin:app_list' app_label=opts.app_label %}"
+    >{{ opts.app_config.verbose_name }}</a
+  >
+  &rsaquo;
+  <a href="{% url opts|admin_urlname:'changelist' %}"
+    >{{ opts.verbose_name_plural|capfirst }}</a
+  >
+  &rsaquo;
+  <a href="{% url opts|admin_urlname:'change'  object_id=business_area.pk %}"
+    >{{ business_area }}</a
+  >
+  &rsaquo; Test RapidPRO connection
+</div>
+{% endblock %} {% block content %}
+
+{% if not phone_number and not run_results %}
+<div>
+<p>Enter your phone number so you can confirm the received message.</p>
+
+<p>After submitting, we will atempt to find a flow with a name 'Test' and initiate it.
+If you would like to use a different flow, please enter the flow name below (case sensitive).</p>
+<br>
+</div>
+{% endif%}
+
+{% if phone_number and not flow_uuid %}
+<div>
+<h3>Test flow for phone number {{phone_number }} and flow {{flow_name}} failed.</h3>
+</div>
+{% endif %}
+
+{% if flow_uuid and flow_status %}
+<div>
+<h3>Test flow {{flow_name}} for phone number {{phone_number }} was initiated with status {{flow_status}}. You can check flow run result by clicking the button bellow (after you receive and respond to phone message).</h3>
+</div>
+{% endif %}
+
+{% if form and not phone_number %}
+<form method="post" action=".">
+  {% csrf_token %} {{form.as_p}}
+  <input type="submit" />
+  </form>
+{% endif%}
+
+<br>
+<br>
+
+{% if run_result %}
+<h2>Flow name: {{flow_name}}. Phone number: {{phone_number}}. Test flow run results: </h2>
+<ul>
+<li><h3>Flow start status: {{run_result.flow_start_status}}.</h3></li>
+
+{% if run_result.responded %}
+<li><h3>Responses received:</h3>
+<ul>{% for rec in run_result.responded%}
+<li>{{rec}}</li>
+{% endfor%}
+</ul>
+</li>
+{%endif%}
+
+{% if run_result.not_responded%}
+<li><h3>Messages sent but responses not received: {{run_result.not_responded}} times.</h3></li>
+{% endif%}
+
+</ul>
+{% endif%}
+
+<br>
+<br>
+
+{% if phone_number and flow_uuid%}
+    <a href="{{request.path}}?phone_number={{phone_number|urlencode}}&flow_uuid={{flow_uuid|urlencode}}&flow_name={{flow_name|urlencode}}&timestamp={{timestamp|urlencode}}"><button>Check flow results</button> </a>
+{% endif%}
+
+{% endblock%}
+

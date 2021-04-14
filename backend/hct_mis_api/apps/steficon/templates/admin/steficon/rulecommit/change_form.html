@@ -1,0 +1,24 @@
+{% extends "admin_extra_urls/change_form.html" %}{% load engine %}
+{% block after_related_objects %}
+    <table>
+    <tr>
+        <td>Current</td>
+        <td>Differences with current record</td>
+    </tr>
+    <tr>
+        <td>{{ original.rule.as_dict|pretty_json }}</td>
+        <td>{{ original.diff_with_current|pretty_json }}</td>
+    </tr>
+    <tr>
+        <td>Record at time of change</td>
+        <td>Updates</td>
+    </tr>
+    <tr>
+        <td>{{ original.before|pretty_json }}</td>
+        <td>{{ original.changes|pretty_json }}</td>
+    </tr>
+    </table>
+
+
+{% endblock %}
+

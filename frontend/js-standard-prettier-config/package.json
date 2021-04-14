@@ -1,0 +1,17 @@
+{
+  "name": "@tivix/prettier-config",
+  "version": "1.0.0",
+  "description": "Tivix's Prettier config",
+  "main": "index.json",
+  "author": "tivix",
+  "license": "UNLICENSED",
+  "private": false,
+  "homepage": "https://github.com/tivix/js-standard-prettier-config",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tivix/js-standard-prettier-config.git"
+  },
+  "dependencies": {
+    "prettier": "^1.19.1"
+  }
+}

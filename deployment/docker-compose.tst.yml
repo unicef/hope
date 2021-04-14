@@ -1,0 +1,100 @@
+version: '3.7'
+
+volumes:
+  backend-data:
+  db:
+  db_ca:
+  db_reg:
+  data_es:
+  data_es_test:
+
+services:
+
+  redis:
+    restart: always
+    image: redis:4.0.11-alpine3.8
+    expose:
+      - "6379"
+
+  backend:
+    stdin_open: true
+    tty: true
+    image: ${backend_image}
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    command: "dev"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch_test
+  db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db:/data/postgres
+    env_file:
+      - .env
+
+  cash_assist_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_ca:/data/postgres
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+
+  registration_datahub_db:
+    image: mdillon/postgis:9.5-alpine
+    volumes:
+      - db_reg:/data/postgres
+    env_file:
+      - .env
+
+  celery_worker:
+    stdin_open: true
+    tty: true
+    image: ${backend_image}
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    build: ./backend
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    depends_on:
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch_test
+
+  elasticsearch_test:
+    build:
+      context: elasticsearch
+      dockerfile: Dockerfile
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster-test
+      - cluster.initial_master_nodes=es02
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data_es_test:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200

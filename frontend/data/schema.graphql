@@ -1,0 +1,3393 @@
+schema {
+  query: Query
+  mutation: Mutations
+}
+
+type ActivateCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+input AddIndividualDataObjectType {
+  fullName: String!
+  givenName: String
+  middleName: String
+  familyName: String
+  sex: String!
+  birthDate: Date!
+  estimatedBirthDate: Boolean!
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String!
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+  role: String!
+  documents: [IndividualDocumentObjectType]
+  identities: [IndividualIdentityObjectType]
+  businessArea: String
+  flexFields: Arg
+}
+
+input AddIndividualIssueTypeExtras {
+  household: ID!
+  individualData: AddIndividualDataObjectType!
+}
+
+type AdminAreaNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  externalId: String
+  title: String!
+  adminAreaLevel: AdminAreaTypeNode!
+  pCode: String
+  parent: AdminAreaNode
+  lft: Int!
+  rght: Int!
+  treeId: Int!
+  level: Int!
+  children(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+}
+
+type AdminAreaNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AdminAreaNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AdminAreaNodeEdge {
+  node: AdminAreaNode
+  cursor: String!
+}
+
+type AdminAreaTypeNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  displayName: String
+  adminLevel: Int!
+  realAdminLevel: Int
+  businessArea: UserBusinessAreaNode
+  adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+}
+
+type AdminAreaTypeNodeConnection {
+  pageInfo: PageInfo!
+  edges: [AdminAreaTypeNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type AdminAreaTypeNodeEdge {
+  node: AdminAreaTypeNode
+  cursor: String!
+}
+
+type AgeFilterObject {
+  min: Int
+  max: Int
+}
+
+input AgeInput {
+  min: Int
+  max: Int
+}
+
+type AgencyNode {
+  id: ID!
+  type: AgencyType!
+  label: String!
+  country: String
+  individualIdentities: [IndividualIdentityNode!]!
+}
+
+enum AgencyType {
+  UNHCR
+  WFP
+}
+
+type ApproveTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
+scalar Arg
+
+scalar BigInt
+
+type BusinessAreaNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  code: String!
+  name: String!
+  longName: String!
+  regionCode: String!
+  regionName: String!
+  koboUsername: String
+  rapidProHost: String
+  rapidProApiKey: String
+  slug: String!
+  hasDataSharingAgreement: Boolean!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  userRoles: [UserRoleNode!]!
+  paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
+  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+}
+
+type BusinessAreaNodeConnection {
+  pageInfo: PageInfo!
+  edges: [BusinessAreaNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type BusinessAreaNodeEdge {
+  node: BusinessAreaNode
+  cursor: String!
+}
+
+type CashPlanNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  caId: String
+  caHashId: UUID
+  status: CashPlanStatus!
+  statusDate: DateTime!
+  name: String!
+  distributionLevel: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  dispersionDate: DateTime!
+  coverageDuration: Int!
+  coverageUnit: String!
+  comments: String
+  program: ProgramNode!
+  deliveryType: String
+  assistanceMeasurement: String!
+  assistanceThrough: String!
+  serviceProvider: ServiceProviderNode
+  visionId: String
+  fundsCommitment: String
+  exchangeRate: Float
+  downPayment: String
+  validationAlertsCount: Int!
+  totalPersonsCovered: Int!
+  totalPersonsCoveredRevised: Int!
+  totalEntitledQuantity: Float
+  totalEntitledQuantityRevised: Float
+  totalDeliveredQuantity: Float
+  totalUndeliveredQuantity: Float
+  verificationStatus: CashPlanVerificationStatus!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
+  bankReconciliationSuccess: Int
+  bankReconciliationError: Int
+  totalNumberOfHouseholds: Int
+  currency: String
+}
+
+type CashPlanNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CashPlanNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CashPlanNodeEdge {
+  node: CashPlanNode
+  cursor: String!
+}
+
+type CashPlanPaymentVerificationNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  version: BigInt!
+  status: CashPlanPaymentVerificationStatus!
+  cashPlan: CashPlanNode!
+  sampling: CashPlanPaymentVerificationSampling!
+  verificationMethod: CashPlanPaymentVerificationVerificationMethod!
+  sampleSize: Int
+  respondedCount: Int
+  receivedCount: Int
+  notReceivedCount: Int
+  receivedWithProblemsCount: Int
+  confidenceInterval: Float
+  marginOfError: Float
+  rapidProFlowId: String!
+  rapidProFlowStartUuid: String!
+  ageFilter: AgeFilterObject
+  excludedAdminAreasFilter: [String]
+  sexFilter: String
+  activationDate: DateTime
+  completionDate: DateTime
+  paymentRecordVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+}
+
+type CashPlanPaymentVerificationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [CashPlanPaymentVerificationNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type CashPlanPaymentVerificationNodeEdge {
+  node: CashPlanPaymentVerificationNode
+  cursor: String!
+}
+
+enum CashPlanPaymentVerificationSampling {
+  FULL_LIST
+  RANDOM
+}
+
+enum CashPlanPaymentVerificationStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+}
+
+enum CashPlanPaymentVerificationVerificationMethod {
+  RAPIDPRO
+  XLSX
+  MANUAL
+}
+
+enum CashPlanStatus {
+  DISTRIBUTION_COMPLETED
+  DISTRIBUTION_COMPLETED_WITH_ERRORS
+  TRANSACTION_COMPLETED
+  TRANSACTION_COMPLETED_WITH_ERRORS
+}
+
+enum CashPlanVerificationStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+}
+
+input CategoryExtrasInput {
+  sensitiveGrievanceTicketExtras: SensitiveGrievanceTicketExtras
+  grievanceComplaintTicketExtras: GrievanceComplaintTicketExtras
+}
+
+type ChartDatasetNode {
+  labels: [String]
+  datasets: [_DatasetsNode]
+}
+
+type ChartDetailedDatasetsNode {
+  labels: [String]
+  datasets: [_DetailedDatasetsNode]
+}
+
+type ChartGrievanceTicketsNode {
+  labels: [String]
+  datasets: [_DatasetsNode]
+  totalNumberOfGrievances: Int
+  totalNumberOfFeedback: Int
+  totalNumberOfOpenSensitive: Int
+}
+
+type ChartPaymentVerification {
+  labels: [String]
+  datasets: [_DetailedDatasetsNode]
+  households: Int
+  averageSampleSize: Float
+}
+
+type CheckAgainstSanctionListMutation {
+  ok: Boolean
+  errors: [XlsxRowErrorNode]
+}
+
+type ChoiceObject {
+  name: String
+  value: String
+}
+
+type ContentTypeObjectType {
+  id: ID!
+  appLabel: String!
+  model: String!
+  logEntries(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  name: String
+}
+
+input CopyTargetPopulationInput {
+  id: ID
+  name: String
+}
+
+input CopyTargetPopulationMutationInput {
+  targetPopulationData: CopyTargetPopulationInput
+  clientMutationId: String
+}
+
+type CopyTargetPopulationMutationPayload {
+  targetPopulation: TargetPopulationNode
+  validationErrors: Arg
+  clientMutationId: String
+}
+
+type CoreFieldChoiceObject {
+  labels: [LabelNode]
+  labelEn: String
+  value: String
+  admin: String
+  listName: String
+}
+
+type CountAndPercentageNode {
+  count: Int
+  percentage: Float
+}
+
+type CreateDashboardReport {
+  success: Boolean
+}
+
+input CreateDashboardReportInput {
+  reportTypes: [String]!
+  businessAreaSlug: String!
+  year: Int!
+  adminArea: ID
+  program: ID
+}
+
+input CreateGrievanceTicketExtrasInput {
+  category: CategoryExtrasInput
+  issueType: IssueTypeExtrasInput
+}
+
+input CreateGrievanceTicketInput {
+  description: String!
+  assignedTo: ID!
+  category: Int!
+  issueType: Int
+  admin: String
+  area: String
+  language: String!
+  consent: Boolean!
+  businessArea: ID!
+  linkedTickets: [ID]
+  extras: CreateGrievanceTicketExtrasInput
+}
+
+type CreateGrievanceTicketMutation {
+  grievanceTickets: [GrievanceTicketNode]
+}
+
+input CreatePaymentVerificationInput {
+  cashPlanId: ID!
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+}
+
+type CreatePaymentVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+type CreateProgram {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input CreateProgramInput {
+  name: String
+  startDate: Date
+  endDate: Date
+  description: String
+  budget: Decimal
+  frequencyOfPayments: String
+  sector: String
+  scope: String
+  cashPlus: Boolean
+  populationGoal: Int
+  administrativeAreasOfImplementation: String
+  businessAreaSlug: String
+  individualDataNeeded: Boolean
+}
+
+type CreateReport {
+  report: ReportNode
+}
+
+input CreateReportInput {
+  reportType: Int!
+  businessAreaSlug: String!
+  dateFrom: Date!
+  dateTo: Date!
+  adminArea: [ID]
+  program: ID
+}
+
+input CreateTargetPopulationInput {
+  name: String!
+  targetingCriteria: TargetingCriteriaObjectType!
+  businessAreaSlug: String!
+  programId: ID!
+}
+
+type CreateTargetPopulationMutation {
+  validationErrors: Arg
+  targetPopulation: TargetPopulationNode
+}
+
+input CreateTicketNoteInput {
+  description: String!
+  ticket: ID!
+}
+
+type CreateTicketNoteMutation {
+  grievanceTicketNote: TicketNoteNode
+}
+
+scalar Date
+
+scalar DateTime
+
+scalar Decimal
+
+type DeduplicationResultNode {
+  hitId: ID
+  fullName: String
+  score: Float
+  proximityToScore: Float
+  location: String
+  age: Int
+}
+
+type DeleteProgram {
+  ok: Boolean
+}
+
+type DeleteRegistrationDataImport {
+  ok: Boolean
+}
+
+input DeleteTargetPopulationMutationInput {
+  targetId: ID!
+  clientMutationId: String
+}
+
+type DeleteTargetPopulationMutationPayload {
+  ok: Boolean
+  clientMutationId: String
+}
+
+type DiscardCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+type DjangoDebug {
+  sql: [DjangoDebugSQL]
+}
+
+type DjangoDebugSQL {
+  vendor: String!
+  alias: String!
+  sql: String
+  duration: Float!
+  rawSql: String!
+  params: String!
+  startTime: Float!
+  stopTime: Float!
+  isSlow: Boolean!
+  isSelect: Boolean!
+  transId: String
+  transStatus: String
+  isoLevel: String
+  encoding: String
+}
+
+type DocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  documentNumber: String!
+  photo: String!
+  individual: IndividualNode!
+  type: DocumentTypeNode!
+  status: DocumentStatus!
+  country: String
+}
+
+type DocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [DocumentNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type DocumentNodeEdge {
+  node: DocumentNode
+  cursor: String!
+}
+
+enum DocumentStatus {
+  PENDING
+  VALID
+  NEED_INVESTIGATION
+  INVALID
+}
+
+type DocumentTypeNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  country: String
+  label: String!
+  type: DocumentTypeType!
+  documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+}
+
+enum DocumentTypeType {
+  BIRTH_CERTIFICATE
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+  ELECTORAL_CARD
+  OTHER
+}
+
+input EditCashPlanPaymentVerificationInput {
+  cashPlanPaymentVerificationId: ID!
+  sampling: String!
+  verificationChannel: String!
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+}
+
+type EditPaymentVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+type FieldAttributeNode {
+  id: String
+  type: String
+  name: String
+  labels: [LabelNode]
+  labelEn: String
+  hint: String
+  required: Boolean
+  choices: [CoreFieldChoiceObject]
+  associatedWith: String
+  isFlexField: Boolean
+}
+
+type FinalizeTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
+type FinishCashPlanVerificationMutation {
+  cashPlan: CashPlanNode
+}
+
+scalar FlexFieldsScalar
+
+input FullListArguments {
+  excludedAdminAreas: [String]
+}
+
+scalar GeoJSON
+
+input GetCashplanVerificationSampleSizeInput {
+  cashPlanId: ID
+  sampling: String!
+  verificationChannel: String
+  businessAreaSlug: String!
+  fullListArguments: FullListArguments
+  randomSamplingArguments: RandomSamplingArguments
+  rapidProArguments: RapidProArguments
+}
+
+type GetCashplanVerificationSampleSizeObject {
+  paymentRecordCount: Int
+  sampleSize: Int
+}
+
+input GrievanceComplaintTicketExtras {
+  household: ID
+  individual: ID
+  paymentRecord: [ID]
+}
+
+type GrievanceStatusChangeMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+type GrievanceTicketNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  version: BigInt!
+  userModified: DateTime
+  createdBy: UserNode
+  assignedTo: UserNode
+  status: Int!
+  category: Int!
+  issueType: Int
+  description: String!
+  admin2: AdminAreaNode
+  area: String!
+  language: String!
+  consent: Boolean!
+  businessArea: UserBusinessAreaNode!
+  linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
+  complaintTicketDetails: TicketComplaintDetailsNode
+  sensitiveTicketDetails: TicketSensitiveDetailsNode
+  householdDataUpdateTicketDetails: TicketHouseholdDataUpdateDetailsNode
+  individualDataUpdateTicketDetails: TicketIndividualDataUpdateDetailsNode
+  addIndividualTicketDetails: TicketAddIndividualDetailsNode
+  deleteIndividualTicketDetails: TicketDeleteIndividualDetailsNode
+  systemFlaggingTicketDetails: TicketSystemFlaggingDetailsNode
+  needsAdjudicationTicketDetails: TicketNeedsAdjudicationDetailsNode
+  paymentVerificationTicketDetails: TicketPaymentVerificationDetailsNode
+  household: HouseholdNode
+  individual: IndividualNode
+  paymentRecord: PaymentRecordNode
+  relatedTickets: [GrievanceTicketNode]
+  admin: String
+}
+
+type GrievanceTicketNodeConnection {
+  pageInfo: PageInfo!
+  edges: [GrievanceTicketNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type GrievanceTicketNodeEdge {
+  node: GrievanceTicketNode
+  cursor: String!
+}
+
+type GroupAttributeNode {
+  id: UUID!
+  name: String!
+  label: JSONString!
+  flexAttributes(flexField: Boolean): [FieldAttributeNode]
+  labelEn: String
+}
+
+enum HouseholdCollectIndividualData {
+  A_
+  A_1
+  A_0
+}
+
+enum HouseholdCurrency {
+  A_
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BOV
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
+  EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HRK
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLL
+  SOS
+  SRD
+  SSP
+  STN
+  SVC
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
+  USD
+  UYU
+  UYW
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XAG
+  XAU
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
+}
+
+type HouseholdDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+input HouseholdDataUpdateIssueTypeExtras {
+  household: ID!
+  householdData: HouseholdUpdateDataObjectType!
+}
+
+type HouseholdNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  version: BigInt!
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
+  consentSign: String!
+  consent: Boolean
+  consentSharing: [String]
+  residenceStatus: HouseholdResidenceStatus!
+  countryOrigin: String
+  country: String
+  size: Int!
+  address: String!
+  adminArea: AdminAreaNode
+  representatives(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  geopoint: GeoJSON
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
+  registrationDataImport: RegistrationDataImportNode!
+  programs(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  returnee: Boolean
+  flexFields: FlexFieldsScalar
+  firstRegistrationDate: DateTime!
+  lastRegistrationDate: DateTime!
+  headOfHousehold: IndividualNode!
+  fchildHoh: Boolean
+  childHoh: Boolean
+  unicefId: String!
+  businessArea: UserBusinessAreaNode!
+  start: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: HouseholdOrgEnumerator!
+  orgNameEnumerator: String!
+  village: String!
+  registrationMethod: HouseholdRegistrationMethod!
+  collectIndividualData: HouseholdCollectIndividualData!
+  currency: HouseholdCurrency!
+  unhcrId: String!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
+  addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
+  individualsAndRoles: [IndividualRoleInHouseholdNode!]!
+  individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  selections: [HouseholdSelection!]!
+  totalCashReceived: Decimal
+  selection: HouseholdSelection
+  sanctionListPossibleMatch: Boolean
+  sanctionListConfirmedMatch: Boolean
+  hasDuplicates: Boolean
+  admin1: AdminAreaNode
+  admin2: AdminAreaNode
+  status: String
+}
+
+type HouseholdNodeConnection {
+  pageInfo: PageInfo!
+  edges: [HouseholdNodeEdge]!
+  totalCount: Int
+  individualsCount: Int
+  edgeCount: Int
+}
+
+type HouseholdNodeEdge {
+  node: HouseholdNode
+  cursor: String!
+}
+
+enum HouseholdOrgEnumerator {
+  A_
+  UNICEF
+  PARTNER
+}
+
+enum HouseholdRegistrationMethod {
+  A_
+  HH_REGISTRATION
+  COMMUNITY
+}
+
+enum HouseholdResidenceStatus {
+  A_
+  IDP
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
+}
+
+type HouseholdSelection {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode!
+  targetPopulation: TargetPopulationNode!
+  vulnerabilityScore: Float
+  final: Boolean!
+}
+
+input HouseholdUpdateDataObjectType {
+  status: String
+  consent: Boolean
+  consentSharing: [String]
+  residenceStatus: String
+  countryOrigin: String
+  country: String
+  size: Int
+  address: String
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  returnee: Boolean
+  fchildHoh: Boolean
+  childHoh: Boolean
+  start: DateTime
+  end: DateTime
+  nameEnumerator: String
+  orgEnumerator: String
+  orgNameEnumerator: String
+  village: String
+  flexFields: Arg
+}
+
+enum ImportDataDataType {
+  XLSX
+  JSON
+}
+
+type ImportDataNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  file: String!
+  dataType: ImportDataDataType!
+  numberOfHouseholds: Int!
+  numberOfIndividuals: Int!
+  registrationDataImport: RegistrationDataImportDatahubNode
+}
+
+type ImportXlsxCashPlanVerification {
+  cashPlan: CashPlanNode
+  errors: [XlsxErrorNode]
+}
+
+type ImportedDocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  documentNumber: String!
+  photo: String!
+  individual: ImportedIndividualNode!
+  type: ImportedDocumentTypeNode!
+  country: String
+}
+
+type ImportedDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedDocumentNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedDocumentNodeEdge {
+  node: ImportedDocumentNode
+  cursor: String!
+}
+
+enum ImportedDocumentTypeCountry {
+  AF
+  AX
+  AL
+  DZ
+  AS
+  AD
+  AO
+  AI
+  AQ
+  AG
+  AR
+  AM
+  AW
+  AU
+  AT
+  AZ
+  BS
+  BH
+  BD
+  BB
+  BY
+  BE
+  BZ
+  BJ
+  BM
+  BT
+  BO
+  BQ
+  BA
+  BW
+  BV
+  BR
+  IO
+  BN
+  BG
+  BF
+  BI
+  CV
+  KH
+  CM
+  CA
+  KY
+  CF
+  TD
+  CL
+  CN
+  CX
+  CC
+  CO
+  KM
+  CG
+  CD
+  CK
+  CR
+  CI
+  HR
+  CU
+  CW
+  CY
+  CZ
+  DK
+  DJ
+  DM
+  DO
+  EC
+  EG
+  SV
+  GQ
+  ER
+  EE
+  SZ
+  ET
+  FK
+  FO
+  FJ
+  FI
+  FR
+  GF
+  PF
+  TF
+  GA
+  GM
+  GE
+  DE
+  GH
+  GI
+  GR
+  GL
+  GD
+  GP
+  GU
+  GT
+  GG
+  GN
+  GW
+  GY
+  HT
+  HM
+  VA
+  HN
+  HK
+  HU
+  IS
+  IN
+  ID
+  IR
+  IQ
+  IE
+  IM
+  IL
+  IT
+  JM
+  JP
+  JE
+  JO
+  KZ
+  KE
+  KI
+  KW
+  KG
+  LA
+  LV
+  LB
+  LS
+  LR
+  LY
+  LI
+  LT
+  LU
+  MO
+  MG
+  MW
+  MY
+  MV
+  ML
+  MT
+  MH
+  MQ
+  MR
+  MU
+  YT
+  MX
+  FM
+  MD
+  MC
+  MN
+  ME
+  MS
+  MA
+  MZ
+  MM
+  NA
+  NR
+  NP
+  NL
+  NC
+  NZ
+  NI
+  NE
+  NG
+  NU
+  NF
+  KP
+  MK
+  MP
+  NO
+  OM
+  PK
+  PW
+  PS
+  PA
+  PG
+  PY
+  PE
+  PH
+  PN
+  PL
+  PT
+  PR
+  QA
+  RE
+  RO
+  RU
+  RW
+  BL
+  SH
+  KN
+  LC
+  MF
+  PM
+  VC
+  WS
+  SM
+  ST
+  SA
+  SN
+  RS
+  SC
+  SL
+  SG
+  SX
+  SK
+  SI
+  SB
+  SO
+  ZA
+  GS
+  KR
+  SS
+  ES
+  LK
+  SD
+  SR
+  SJ
+  SE
+  CH
+  SY
+  TW
+  TJ
+  TZ
+  TH
+  TL
+  TG
+  TK
+  TO
+  TT
+  TN
+  TR
+  TM
+  TC
+  TV
+  UG
+  UA
+  AE
+  GB
+  UM
+  US
+  U
+  UY
+  UZ
+  VU
+  VE
+  VN
+  VG
+  VI
+  WF
+  EH
+  YE
+  ZM
+  ZW
+}
+
+type ImportedDocumentTypeNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  country: ImportedDocumentTypeCountry!
+  label: String!
+  type: ImportedDocumentTypeType!
+  documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+}
+
+enum ImportedDocumentTypeType {
+  BIRTH_CERTIFICATE
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  NATIONAL_PASSPORT
+  ELECTORAL_CARD
+  OTHER
+}
+
+enum ImportedHouseholdCollectIndividualData {
+  A_
+  A_1
+  A_0
+}
+
+enum ImportedHouseholdConsentSharing {
+  A_
+  UNICEF
+  HUMANITARIAN_PARTNER
+  PRIVATE_PARTNER
+  GOVERNMENT_PARTNER
+}
+
+enum ImportedHouseholdCurrency {
+  A_
+  AED
+  AFN
+  ALL
+  AMD
+  ANG
+  AOA
+  ARS
+  AUD
+  AWG
+  AZN
+  BAM
+  BBD
+  BDT
+  BGN
+  BHD
+  BIF
+  BMD
+  BND
+  BOB
+  BOV
+  BRL
+  BSD
+  BTN
+  BWP
+  BYN
+  BZD
+  CAD
+  CDF
+  CHF
+  CLP
+  CNY
+  COP
+  CRC
+  CUC
+  CUP
+  CVE
+  CZK
+  DJF
+  DKK
+  DOP
+  DZD
+  EGP
+  ERN
+  ETB
+  EUR
+  FJD
+  FKP
+  GBP
+  GEL
+  GHS
+  GIP
+  GMD
+  GNF
+  GTQ
+  GYD
+  HKD
+  HNL
+  HRK
+  HTG
+  HUF
+  IDR
+  ILS
+  INR
+  IQD
+  IRR
+  ISK
+  JMD
+  JOD
+  JPY
+  KES
+  KGS
+  KHR
+  KMF
+  KPW
+  KRW
+  KWD
+  KYD
+  KZT
+  LAK
+  LBP
+  LKR
+  LRD
+  LSL
+  LYD
+  MAD
+  MDL
+  MGA
+  MKD
+  MMK
+  MNT
+  MOP
+  MRU
+  MUR
+  MVR
+  MWK
+  MXN
+  MYR
+  MZN
+  NAD
+  NGN
+  NIO
+  NOK
+  NPR
+  NZD
+  OMR
+  PAB
+  PEN
+  PGK
+  PHP
+  PKR
+  PLN
+  PYG
+  QAR
+  RON
+  RSD
+  RUB
+  RWF
+  SAR
+  SBD
+  SCR
+  SDG
+  SEK
+  SGD
+  SHP
+  SLL
+  SOS
+  SRD
+  SSP
+  STN
+  SVC
+  SYP
+  SZL
+  THB
+  TJS
+  TMT
+  TND
+  TOP
+  TRY
+  TTD
+  TWD
+  TZS
+  UAH
+  UGX
+  USD
+  UYU
+  UYW
+  UZS
+  VES
+  VND
+  VUV
+  WST
+  XAF
+  XAG
+  XAU
+  XCD
+  XOF
+  XPF
+  YER
+  ZAR
+  ZMW
+  ZWL
+}
+
+type ImportedHouseholdNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  consentSign: String!
+  consent: Boolean
+  consentSharing: ImportedHouseholdConsentSharing!
+  residenceStatus: ImportedHouseholdResidenceStatus!
+  countryOrigin: String
+  size: Int!
+  address: String!
+  country: String
+  admin1: String!
+  admin1Title: String!
+  admin2: String!
+  admin2Title: String!
+  geopoint: GeoJSON
+  femaleAgeGroup05Count: Int
+  femaleAgeGroup611Count: Int
+  femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
+  pregnantCount: Int
+  maleAgeGroup05Count: Int
+  maleAgeGroup611Count: Int
+  maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
+  femaleAgeGroup05DisabledCount: Int
+  femaleAgeGroup611DisabledCount: Int
+  femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
+  maleAgeGroup05DisabledCount: Int
+  maleAgeGroup611DisabledCount: Int
+  maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
+  headOfHousehold: ImportedIndividualNode
+  fchildHoh: Boolean
+  childHoh: Boolean
+  registrationDataImport: RegistrationDataImportDatahubNode!
+  firstRegistrationDate: DateTime!
+  lastRegistrationDate: DateTime!
+  returnee: Boolean
+  flexFields: Arg
+  start: DateTime
+  deviceid: String!
+  nameEnumerator: String!
+  orgEnumerator: ImportedHouseholdOrgEnumerator
+  orgNameEnumerator: String!
+  village: String!
+  registrationMethod: ImportedHouseholdRegistrationMethod!
+  collectIndividualData: ImportedHouseholdCollectIndividualData!
+  currency: ImportedHouseholdCurrency!
+  unhcrId: String!
+  koboSubmissionUuid: UUID
+  koboAssetId: String!
+  koboSubmissionTime: DateTime
+  individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+  hasDuplicates: Boolean
+}
+
+type ImportedHouseholdNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedHouseholdNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedHouseholdNodeEdge {
+  node: ImportedHouseholdNode
+  cursor: String!
+}
+
+enum ImportedHouseholdOrgEnumerator {
+  A_
+  UNICEF
+  PARTNER
+}
+
+enum ImportedHouseholdRegistrationMethod {
+  A_
+  HH_REGISTRATION
+  COMMUNITY
+}
+
+enum ImportedHouseholdResidenceStatus {
+  A_
+  IDP
+  REFUGEE
+  OTHERS_OF_CONCERN
+  HOST
+  NON_HOST
+}
+
+enum ImportedIndividualDeduplicationBatchStatus {
+  SIMILAR_IN_BATCH
+  DUPLICATE_IN_BATCH
+  UNIQUE_IN_BATCH
+  NOT_PROCESSED
+}
+
+enum ImportedIndividualDeduplicationGoldenRecordStatus {
+  UNIQUE
+  DUPLICATE
+  NEEDS_ADJUDICATION
+  NOT_PROCESSED
+}
+
+type ImportedIndividualIdentityNode {
+  id: ID!
+  individual: ImportedIndividualNode!
+  documentNumber: String!
+  type: String
+  country: String
+}
+
+enum ImportedIndividualMaritalStatus {
+  A_
+  SINGLE
+  MARRIED
+  WIDOWED
+  DIVORCED
+  SEPARATED
+}
+
+type ImportedIndividualNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individualId: String!
+  photo: String!
+  fullName: String!
+  givenName: String!
+  middleName: String!
+  familyName: String!
+  relationship: String
+  sex: ImportedIndividualSex!
+  birthDate: Date!
+  estimatedBirthDate: Boolean
+  maritalStatus: ImportedIndividualMaritalStatus!
+  phoneNo: String!
+  phoneNoAlternative: String!
+  household: ImportedHouseholdNode
+  registrationDataImport: RegistrationDataImportDatahubNode!
+  disability: Boolean!
+  workStatus: String!
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
+  deduplicationBatchStatus: ImportedIndividualDeduplicationBatchStatus
+  deduplicationGoldenRecordStatus: ImportedIndividualDeduplicationGoldenRecordStatus
+  deduplicationBatchResults: [DeduplicationResultNode]
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
+  flexFields: FlexFieldsScalar
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String!
+  hearingDisability: String!
+  physicalDisability: String!
+  memoryDisability: String!
+  selfcareDisability: String!
+  commsDisability: String!
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
+  importedhousehold: ImportedHouseholdNode
+  documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
+  identities: [ImportedIndividualIdentityNode!]!
+  role: String
+}
+
+type ImportedIndividualNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ImportedIndividualNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ImportedIndividualNodeEdge {
+  node: ImportedIndividualNode
+  cursor: String!
+}
+
+enum ImportedIndividualSex {
+  MALE
+  FEMALE
+}
+
+type IndividualDataChangeApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+input IndividualDataUpdateIssueTypeExtras {
+  individual: ID!
+  individualData: IndividualUpdateDataObjectType!
+}
+
+enum IndividualDeduplicationBatchStatus {
+  SIMILAR_IN_BATCH
+  DUPLICATE_IN_BATCH
+  UNIQUE_IN_BATCH
+  NOT_PROCESSED
+}
+
+enum IndividualDeduplicationGoldenRecordStatus {
+  UNIQUE
+  DUPLICATE
+  NEEDS_ADJUDICATION
+  NOT_PROCESSED
+}
+
+input IndividualDeleteIssueTypeExtras {
+  individual: ID!
+}
+
+input IndividualDocumentObjectType {
+  country: String!
+  type: String!
+  number: String!
+}
+
+type IndividualIdentityNode {
+  id: ID!
+  agency: AgencyNode!
+  individual: IndividualNode!
+  number: String!
+  type: String
+  country: String
+}
+
+input IndividualIdentityObjectType {
+  country: String!
+  agency: String!
+  number: String!
+}
+
+enum IndividualMaritalStatus {
+  A_
+  SINGLE
+  MARRIED
+  WIDOWED
+  DIVORCED
+  SEPARATED
+}
+
+type IndividualNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  removedDate: DateTime
+  lastSyncAt: DateTime
+  version: BigInt!
+  duplicate: Boolean!
+  duplicateDate: DateTime
+  withdrawn: Boolean!
+  withdrawnDate: DateTime
+  individualId: String!
+  photo: String
+  fullName: String!
+  givenName: String!
+  middleName: String!
+  familyName: String!
+  sex: IndividualSex!
+  birthDate: Date!
+  estimatedBirthDate: Boolean
+  maritalStatus: IndividualMaritalStatus!
+  phoneNo: String!
+  phoneNoAlternative: String!
+  relationship: IndividualRelationship
+  household: HouseholdNode
+  registrationDataImport: RegistrationDataImportNode
+  disability: Boolean!
+  workStatus: String!
+  firstRegistrationDate: Date!
+  lastRegistrationDate: Date!
+  flexFields: FlexFieldsScalar
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  unicefId: String!
+  deduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus!
+  deduplicationBatchStatus: IndividualDeduplicationBatchStatus!
+  deduplicationGoldenRecordResults: [DeduplicationResultNode]
+  deduplicationBatchResults: [DeduplicationResultNode]
+  importedIndividualId: UUID
+  sanctionListPossibleMatch: Boolean!
+  sanctionListConfirmedMatch: Boolean!
+  sanctionListLastCheck: DateTime
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String!
+  hearingDisability: String!
+  physicalDisability: String!
+  memoryDisability: String!
+  selfcareDisability: String!
+  commsDisability: String!
+  whoAnswersPhone: String!
+  whoAnswersAltPhone: String!
+  businessArea: UserBusinessAreaNode!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+  individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
+  deleteIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketDeleteIndividualDetailsNodeConnection!
+  ticketsystemflaggingdetailsSet(before: String, after: String, first: Int, last: Int): TicketSystemFlaggingDetailsNodeConnection!
+  representedHouseholds(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  headingHousehold: HouseholdNode
+  documents(before: String, after: String, first: Int, last: Int): DocumentNodeConnection!
+  identities: [IndividualIdentityNode!]!
+  householdsAndRoles: [IndividualRoleInHouseholdNode!]!
+  status: String
+  role: String
+}
+
+type IndividualNodeConnection {
+  pageInfo: PageInfo!
+  edges: [IndividualNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type IndividualNodeEdge {
+  node: IndividualNode
+  cursor: String!
+}
+
+enum IndividualRelationship {
+  UNKNOWN
+  NON_BENEFICIARY
+  HEAD
+  SON_DAUGHTER
+  WIFE_HUSBAND
+  BROTHER_SISTER
+  MOTHER_FATHER
+  AUNT_UNCLE
+  GRANDMOTHER_GRANDFATHER
+  MOTHERINLAW_FATHERINLAW
+  DAUGHTERINLAW_SONINLAW
+  SISTERINLAW_BROTHERINLAW
+  GRANDDAUGHER_GRANDSON
+  NEPHEW_NIECE
+  COUSIN
+}
+
+type IndividualRoleInHouseholdNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastSyncAt: DateTime
+  individual: IndividualNode!
+  household: HouseholdNode!
+  role: IndividualRoleInHouseholdRole
+}
+
+enum IndividualRoleInHouseholdRole {
+  PRIMARY
+  ALTERNATE
+  NO_ROLE
+}
+
+enum IndividualSex {
+  MALE
+  FEMALE
+}
+
+input IndividualUpdateDataObjectType {
+  status: String
+  fullName: String
+  givenName: String
+  middleName: String
+  familyName: String
+  sex: String
+  birthDate: Date
+  estimatedBirthDate: Boolean
+  maritalStatus: String
+  phoneNo: String
+  phoneNoAlternative: String
+  relationship: String
+  disability: Boolean
+  workStatus: String
+  enrolledInNutritionProgramme: Boolean
+  administrationOfRutf: Boolean
+  pregnant: Boolean
+  observedDisability: [String]
+  seeingDisability: String
+  hearingDisability: String
+  physicalDisability: String
+  memoryDisability: String
+  selfcareDisability: String
+  commsDisability: String
+  whoAnswersPhone: String
+  whoAnswersAltPhone: String
+  role: String
+  documents: [IndividualDocumentObjectType]
+  documentsToRemove: [ID]
+  identities: [IndividualIdentityObjectType]
+  identitiesToRemove: [ID]
+  flexFields: Arg
+}
+
+input IssueTypeExtrasInput {
+  householdDataUpdateIssueTypeExtras: HouseholdDataUpdateIssueTypeExtras
+  individualDataUpdateIssueTypeExtras: IndividualDataUpdateIssueTypeExtras
+  individualDeleteIssueTypeExtras: IndividualDeleteIssueTypeExtras
+  addIndividualIssueTypeExtras: AddIndividualIssueTypeExtras
+}
+
+type IssueTypesObject {
+  category: String
+  label: String
+  subCategories: [ChoiceObject]
+}
+
+scalar JSONString
+
+type KoboAssetObject {
+  id: String
+  name: String
+  sector: String
+  country: String
+  assetType: String
+  dateModified: DateTime
+  deploymentActive: Boolean
+  hasDeployment: Boolean
+  xlsLink: String
+}
+
+type KoboAssetObjectConnection {
+  pageInfo: PageInfo!
+  edges: [KoboAssetObjectEdge]!
+  totalCount: Int
+}
+
+type KoboAssetObjectEdge {
+  node: KoboAssetObject
+  cursor: String!
+}
+
+type KoboErrorNode {
+  header: String
+  message: String
+}
+
+type LabelNode {
+  language: String
+  label: String
+}
+
+enum LogEntryAction {
+  CREATE
+  UPDATE
+  DELETE
+  SOFT_DELETE
+}
+
+type LogEntryNode implements Node {
+  id: ID!
+  contentType: ContentTypeObjectType
+  objectId: UUID
+  action: LogEntryAction!
+  objectRepr: String!
+  changes: Arg
+  user: UserNode
+  businessArea: UserBusinessAreaNode
+  timestamp: DateTime
+}
+
+type LogEntryNodeConnection {
+  pageInfo: PageInfo!
+  edges: [LogEntryNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type LogEntryNodeEdge {
+  node: LogEntryNode
+  cursor: String!
+}
+
+type MergeRegistrationDataImportMutation {
+  registrationDataImport: RegistrationDataImportNode
+}
+
+type Mutations {
+  createReport(reportData: CreateReportInput!): CreateReport
+  createDashboardReport(reportData: CreateDashboardReportInput!): CreateDashboardReport
+  createGrievanceTicket(input: CreateGrievanceTicketInput!): CreateGrievanceTicketMutation
+  updateGrievanceTicket(input: UpdateGrievanceTicketInput!, version: BigInt): UpdateGrievanceTicketMutation
+  grievanceStatusChange(grievanceTicketId: ID, status: Int, version: BigInt): GrievanceStatusChangeMutation
+  createTicketNote(noteInput: CreateTicketNoteInput!, version: BigInt): CreateTicketNoteMutation
+  approveIndividualDataChange(approvedDocumentsToCreate: [Int], approvedDocumentsToRemove: [Int], approvedIdentitiesToCreate: [Int], approvedIdentitiesToRemove: [Int], flexFieldsApproveData: JSONString, grievanceTicketId: ID!, individualApproveData: JSONString, version: BigInt): IndividualDataChangeApproveMutation
+  approveHouseholdDataChange(flexFieldsApproveData: JSONString, grievanceTicketId: ID!, householdApproveData: JSONString, version: BigInt): HouseholdDataChangeApproveMutation
+  approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!, version: BigInt): NeedsAdjudicationApproveMutation
+  reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
+  createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
+  editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation
+  importXlsxCashPlanVerification(cashPlanVerificationId: ID!, file: Upload!): ImportXlsxCashPlanVerification
+  activateCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): ActivateCashPlanVerificationMutation
+  finishCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): FinishCashPlanVerificationMutation
+  discardCashPlanPaymentVerification(cashPlanVerificationId: ID!, version: BigInt): DiscardCashPlanVerificationMutation
+  updatePaymentVerificationStatusAndReceivedAmount(paymentVerificationId: ID!, receivedAmount: Decimal!, status: PaymentVerificationStatusForUpdate, version: BigInt): UpdatePaymentVerificationStatusAndReceivedAmount
+  updatePaymentVerificationReceivedAndReceivedAmount(paymentVerificationId: ID!, received: Boolean!, receivedAmount: Decimal!, version: BigInt): UpdatePaymentVerificationReceivedAndReceivedAmount
+  createTargetPopulation(input: CreateTargetPopulationInput!): CreateTargetPopulationMutation
+  updateTargetPopulation(input: UpdateTargetPopulationInput!, version: BigInt): UpdateTargetPopulationMutation
+  copyTargetPopulation(input: CopyTargetPopulationMutationInput!): CopyTargetPopulationMutationPayload
+  deleteTargetPopulation(input: DeleteTargetPopulationMutationInput!): DeleteTargetPopulationMutationPayload
+  approveTargetPopulation(id: ID!, version: BigInt): ApproveTargetPopulationMutation
+  unapproveTargetPopulation(id: ID!, version: BigInt): UnapproveTargetPopulationMutation
+  finalizeTargetPopulation(id: ID!, version: BigInt): FinalizeTargetPopulationMutation
+  setSteficonRuleOnTargetPopulation(input: SetSteficonRuleOnTargetPopulationMutationInput!): SetSteficonRuleOnTargetPopulationMutationPayload
+  createProgram(programData: CreateProgramInput!): CreateProgram
+  updateProgram(programData: UpdateProgramInput, version: BigInt): UpdateProgram
+  deleteProgram(programId: String!): DeleteProgram
+  uploadImportDataXlsxFile(businessAreaSlug: String!, file: Upload!): UploadImportDataXLSXFile
+  deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
+  registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
+  registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
+  saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
+  mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
+  rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
+  checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
+}
+
+type NeedsAdjudicationApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+enum PaymentRecordDeliveryType {
+  CARDLESS_CASH_WITHDRAWAL
+  CASH
+  CASH_BY_FSP
+  CHEQUE
+  DEPOSIT_TO_CARD
+  IN_KIND
+  MOBILE_MONEY
+  OTHER
+  PRE_PAID_CARD
+  REFERRAL
+  TRANSFER
+  TRANSFER_TO_ACCOUNT
+  VOUCHER
+}
+
+enum PaymentRecordEntitlementCardStatus {
+  ACTIVE
+  INACTIVE
+}
+
+type PaymentRecordNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  version: BigInt!
+  businessArea: UserBusinessAreaNode!
+  status: PaymentRecordStatus!
+  statusDate: DateTime!
+  caId: String
+  caHashId: UUID
+  cashPlan: CashPlanNode
+  household: HouseholdNode!
+  headOfHousehold: IndividualNode
+  fullName: String!
+  totalPersonsCovered: Int!
+  distributionModality: String!
+  targetPopulation: TargetPopulationNode!
+  targetPopulationCashAssistId: String!
+  entitlementCardNumber: String
+  entitlementCardStatus: PaymentRecordEntitlementCardStatus
+  entitlementCardIssueDate: Date
+  deliveryType: PaymentRecordDeliveryType!
+  currency: String!
+  entitlementQuantity: Float!
+  deliveredQuantity: Float!
+  deliveredQuantityUsd: Float
+  deliveryDate: DateTime!
+  serviceProvider: ServiceProviderNode!
+  transactionReferenceId: String
+  visionId: String
+  registrationCaId: String
+  verifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
+  sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
+}
+
+type PaymentRecordNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentRecordNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentRecordNodeEdge {
+  node: PaymentRecordNode
+  cursor: String!
+}
+
+enum PaymentRecordStatus {
+  TRANSACTION_SUCCESSFUL
+  TRANSACTION_PENDING
+  TRANSACTION_ERRONEOUS
+}
+
+type PaymentVerificationNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  version: BigInt!
+  cashPlanPaymentVerification: CashPlanPaymentVerificationNode!
+  paymentRecord: PaymentRecordNode!
+  status: PaymentVerificationStatus!
+  statusDate: DateTime
+  receivedAmount: Float
+  ticketDetails(before: String, after: String, first: Int, last: Int): TicketPaymentVerificationDetailsNodeConnection!
+  isManuallyEditable: Boolean
+}
+
+type PaymentVerificationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [PaymentVerificationNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type PaymentVerificationNodeEdge {
+  node: PaymentVerificationNode
+  cursor: String!
+}
+
+enum PaymentVerificationStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
+enum PaymentVerificationStatusForUpdate {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
+enum ProgramFrequencyOfPayments {
+  REGULAR
+  ONE_OFF
+}
+
+type ProgramNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  lastSyncAt: DateTime
+  version: BigInt!
+  name: String!
+  status: ProgramStatus!
+  startDate: Date!
+  endDate: Date!
+  description: String!
+  caId: String
+  caHashId: String
+  adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  businessArea: UserBusinessAreaNode!
+  budget: Decimal
+  frequencyOfPayments: ProgramFrequencyOfPayments!
+  sector: ProgramSector!
+  scope: ProgramScope!
+  cashPlus: Boolean!
+  populationGoal: Int!
+  administrativeAreasOfImplementation: String!
+  individualDataNeeded: Boolean
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  totalEntitledQuantity: Decimal
+  totalDeliveredQuantity: Decimal
+  totalUndeliveredQuantity: Decimal
+  totalNumberOfHouseholds: Int
+}
+
+type ProgramNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ProgramNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ProgramNodeEdge {
+  node: ProgramNode
+  cursor: String!
+}
+
+enum ProgramScope {
+  FOR_PARTNERS
+  UNICEF
+}
+
+enum ProgramSector {
+  CHILD_PROTECTION
+  EDUCATION
+  HEALTH
+  MULTI_PURPOSE
+  NUTRITION
+  SOCIAL_POLICY
+  WASH
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+}
+
+type Query {
+  allLogEntries(before: String, after: String, first: Int, last: Int, objectId: UUID, businessArea: String!, search: String, module: String): LogEntryNodeConnection
+  logEntryActionChoices: [ChoiceObject]
+  report(id: ID!): ReportNode
+  allReports(before: String, after: String, first: Int, last: Int, createdBy: ID, reportType: [String], status: [String], businessArea: String!, createdFrom: DateTime, createdTo: DateTime, orderBy: String): ReportNodeConnection
+  reportTypesChoices: [ChoiceObject]
+  reportStatusChoices: [ChoiceObject]
+  dashboardReportTypesChoices(businessAreaSlug: String!): [ChoiceObject]
+  dashboardYearsChoices(businessAreaSlug: String!): [String]
+  sanctionListIndividual(id: ID!): SanctionListIndividualNode
+  allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
+  grievanceTicket(id: ID!): GrievanceTicketNode
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
+  existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
+  allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
+  chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
+  allAddIndividualsFieldsAttributes: [FieldAttributeNode]
+  allEditHouseholdFieldsAttributes: [FieldAttributeNode]
+  grievanceTicketStatusChoices: [ChoiceObject]
+  grievanceTicketCategoryChoices: [ChoiceObject]
+  grievanceTicketManualCategoryChoices: [ChoiceObject]
+  grievanceTicketIssueTypeChoices: [IssueTypesObject]
+  allSteficonRules(before: String, after: String, first: Int, last: Int, enabled: Boolean, deprecated: Boolean): SteficonRuleNodeConnection
+  paymentRecord(id: ID!): PaymentRecordNode
+  paymentRecordVerification(id: ID!): PaymentVerificationNode
+  cashPlanPaymentVerification(id: ID!): CashPlanPaymentVerificationNode
+  allPaymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID, individual: String, businessArea: String, orderBy: String): PaymentRecordNodeConnection
+  allPaymentVerifications(before: String, after: String, first: Int, last: Int, cashPlanPaymentVerification: ID, status: String, search: String, businessArea: String, orderBy: String): PaymentVerificationNodeConnection
+  allCashPlanPaymentVerification(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection
+  chartPaymentVerification(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartPaymentVerification
+  chartVolumeByDeliveryMechanism(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
+  chartPayment(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
+  sectionTotalTransferred(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
+  tableTotalCashTransferredByAdministrativeArea(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String, order: String, orderBy: String): TableTotalCashTransferred
+  chartTotalTransferredCashByCountry(year: Int!): ChartDetailedDatasetsNode
+  paymentRecordStatusChoices: [ChoiceObject]
+  paymentRecordEntitlementCardStatusChoices: [ChoiceObject]
+  paymentRecordDeliveryTypeChoices: [ChoiceObject]
+  cashPlanVerificationStatusChoices: [ChoiceObject]
+  cashPlanVerificationSamplingChoices: [ChoiceObject]
+  cashPlanVerificationVerificationMethodChoices: [ChoiceObject]
+  paymentVerificationStatusChoices: [ChoiceObject]
+  allRapidProFlows(businessAreaSlug: String!): [RapidProFlow]
+  sampleSize(input: GetCashplanVerificationSampleSizeInput): GetCashplanVerificationSampleSizeObject
+  adminArea(id: ID!): AdminAreaNode
+  allAdminAreas(before: String, after: String, first: Int, last: Int, title: String, title_Istartswith: String, businessArea: String, level: Int): AdminAreaNodeConnection
+  allBusinessAreas(before: String, after: String, first: Int, last: Int, id: UUID): BusinessAreaNodeConnection
+  allFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  allIndividualFieldsAttributes(flexField: Boolean): [FieldAttributeNode]
+  allGroupsWithFields: [GroupAttributeNode]
+  koboProject(uid: String!, businessAreaSlug: String!): KoboAssetObject
+  allKoboProjects(businessAreaSlug: String!, onlyDeployed: Boolean, before: String, after: String, first: Int, last: Int): KoboAssetObjectConnection
+  cashAssistUrlPrefix: String
+  program(id: ID!): ProgramNode
+  allPrograms(before: String, after: String, first: Int, last: Int, businessArea: String!, search: String, status: [String], sector: [String], numberOfHouseholds: String, budget: String, startDate: Date, endDate: Date, orderBy: String): ProgramNodeConnection
+  chartProgrammesBySector(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
+  chartTotalTransferredByMonth(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
+  cashPlan(id: ID!): CashPlanNode
+  allCashPlans(before: String, after: String, first: Int, last: Int, program: ID, assistanceThrough: String, assistanceThrough_Startswith: String, serviceProvider_FullName: String, serviceProvider_FullName_Startswith: String, startDate: DateTime, startDate_Lte: DateTime, startDate_Gte: DateTime, endDate: DateTime, endDate_Lte: DateTime, endDate_Gte: DateTime, businessArea: String, search: String, deliveryType: [String], verificationStatus: [String], orderBy: String): CashPlanNodeConnection
+  programStatusChoices: [ChoiceObject]
+  programFrequencyOfPaymentsChoices: [ChoiceObject]
+  programSectorChoices: [ChoiceObject]
+  programScopeChoices: [ChoiceObject]
+  cashPlanStatusChoices: [ChoiceObject]
+  targetPopulation(id: ID!): TargetPopulationNode
+  allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
+  goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
+  targetPopulationStatusChoices: [ChoiceObject]
+  household(id: ID!): HouseholdNode
+  allHouseholds(before: String, after: String, first: Int, last: Int, businessArea: String, countryOrigin: String, countryOrigin_Startswith: String, address: String, address_Startswith: String, headOfHousehold_FullName: String, headOfHousehold_FullName_Startswith: String, size_Range: Int, size_Lte: Int, size_Gte: Int, adminArea: ID, targetPopulations: [ID], programs: [ID], residenceStatus: String, withdrawn: Boolean, size: String, search: String, lastRegistrationDate: String, admin2: [ID], orderBy: String): HouseholdNodeConnection
+  individual(id: ID!): IndividualNode
+  allIndividuals(before: String, after: String, first: Int, last: Int, household_Id: UUID, programs: [ID], businessArea: String, fullName: String, fullName_Startswith: String, fullName_Endswith: String, sex: [String], household_AdminArea: ID, withdrawn: Boolean, age: String, search: String, lastRegistrationDate: String, admin2: [ID], status: [String], excludedId: String, orderBy: String): IndividualNodeConnection
+  sectionHouseholdsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
+  sectionIndividualsReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
+  sectionChildReached(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): SectionTotalNode
+  chartIndividualsReachedByAgeAndGender(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDatasetNode
+  chartIndividualsWithDisabilityReachedByAge(businessAreaSlug: String!, year: Int!, program: String, administrativeArea: String): ChartDetailedDatasetsNode
+  residenceStatusChoices: [ChoiceObject]
+  sexChoices: [ChoiceObject]
+  maritalStatusChoices: [ChoiceObject]
+  workStatusChoices: [ChoiceObject]
+  relationshipChoices: [ChoiceObject]
+  roleChoices: [ChoiceObject]
+  documentTypeChoices: [ChoiceObject]
+  identityTypeChoices: [ChoiceObject]
+  countriesChoices: [ChoiceObject]
+  observedDisabilityChoices: [ChoiceObject]
+  severityOfDisabilityChoices: [ChoiceObject]
+  allHouseholdsFlexFieldsAttributes: [FieldAttributeNode]
+  allIndividualsFlexFieldsAttributes: [FieldAttributeNode]
+  me: UserNode
+  allUsers(before: String, after: String, first: Int, last: Int, search: String, status: [String], partner: [String], roles: [String], businessArea: String!, orderBy: String): UserNodeConnection
+  userRolesChoices: [ChoiceObject]
+  userStatusChoices: [ChoiceObject]
+  userPartnerChoices: [ChoiceObject]
+  hasAvailableUsersToExport(businessAreaSlug: String!): Boolean
+  importedHousehold(id: ID!): ImportedHouseholdNode
+  allImportedHouseholds(before: String, after: String, first: Int, last: Int, rdiId: String, businessArea: String, orderBy: String): ImportedHouseholdNodeConnection
+  registrationDataImportDatahub(id: ID!): RegistrationDataImportDatahubNode
+  allRegistrationDataImportsDatahub(before: String, after: String, first: Int, last: Int): RegistrationDataImportDatahubNodeConnection
+  importedIndividual(id: ID!): ImportedIndividualNode
+  allImportedIndividuals(before: String, after: String, first: Int, last: Int, household: ID, rdiId: String, duplicatesOnly: Boolean, businessArea: String, orderBy: String): ImportedIndividualNodeConnection
+  importData(id: ID!): ImportDataNode
+  deduplicationBatchStatusChoices: [ChoiceObject]
+  deduplicationGoldenRecordStatusChoices: [ChoiceObject]
+  registrationDataImport(id: ID!): RegistrationDataImportNode
+  allRegistrationDataImports(before: String, after: String, first: Int, last: Int, importedBy_Id: UUID, importDate: Date, status: String, name: String, name_Startswith: String, businessArea: String, orderBy: String): RegistrationDataImportNodeConnection
+  registrationDataStatusChoices: [ChoiceObject]
+  _debug: DjangoDebug
+}
+
+input RandomSamplingArguments {
+  confidenceInterval: Float!
+  marginOfError: Float!
+  excludedAdminAreas: [String]
+  age: AgeInput
+  sex: String
+}
+
+input RapidProArguments {
+  flowId: String!
+}
+
+type RapidProFlow {
+  id: String
+  name: String
+  type: String
+  archived: Boolean
+  labels: [String]
+  expires: Int
+  runs: [RapidProFlowRun]
+  results: [RapidProFlowResult]
+  createdOn: DateTime
+  modifiedOn: DateTime
+}
+
+type RapidProFlowResult {
+  key: String
+  name: String
+  categories: [String]
+  nodeUuids: [String]
+}
+
+type RapidProFlowRun {
+  active: Int
+  completed: Int
+  interrupted: Int
+  expired: Int
+}
+
+type ReassignRoleMutation {
+  household: HouseholdNode
+  individual: IndividualNode
+}
+
+enum RegistrationDataImportDataSource {
+  XLS
+  KOBO
+}
+
+enum RegistrationDataImportDatahubImportDone {
+  NOT_STARTED
+  STARTED
+  DONE
+}
+
+type RegistrationDataImportDatahubNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  importDate: DateTime!
+  hctId: UUID
+  importData: ImportDataNode
+  importDone: RegistrationDataImportDatahubImportDone!
+  businessAreaSlug: String!
+  households(before: String, after: String, first: Int, last: Int): ImportedHouseholdNodeConnection!
+  individuals(before: String, after: String, first: Int, last: Int): ImportedIndividualNodeConnection!
+}
+
+type RegistrationDataImportDatahubNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RegistrationDataImportDatahubNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RegistrationDataImportDatahubNodeEdge {
+  node: RegistrationDataImportDatahubNode
+  cursor: String!
+}
+
+type RegistrationDataImportNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  version: BigInt!
+  name: String!
+  status: RegistrationDataImportStatus!
+  importDate: DateTime!
+  importedBy: UserNode!
+  dataSource: RegistrationDataImportDataSource!
+  numberOfIndividuals: Int!
+  numberOfHouseholds: Int!
+  datahubId: UUID
+  errorMessage: String!
+  businessArea: UserBusinessAreaNode
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  batchDuplicatesCountAndPercentage: CountAndPercentageNode
+  goldenRecordDuplicatesCountAndPercentage: CountAndPercentageNode
+  batchPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
+  goldenRecordPossibleDuplicatesCountAndPercentage: CountAndPercentageNode
+  batchUniqueCountAndPercentage: CountAndPercentageNode
+  goldenRecordUniqueCountAndPercentage: CountAndPercentageNode
+}
+
+type RegistrationDataImportNodeConnection {
+  pageInfo: PageInfo!
+  edges: [RegistrationDataImportNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type RegistrationDataImportNodeEdge {
+  node: RegistrationDataImportNode
+  cursor: String!
+}
+
+enum RegistrationDataImportStatus {
+  IN_REVIEW
+  MERGED
+  MERGING
+  IMPORTING
+  DEDUPLICATION_FAILED
+  DEDUPLICATION
+}
+
+type RegistrationDeduplicationMutation {
+  ok: Boolean
+}
+
+type RegistrationKoboImportMutation {
+  validationErrors: Arg
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationKoboImportMutationInput {
+  importDataId: String
+  name: String
+  businessAreaSlug: String
+}
+
+type RegistrationXlsxImportMutation {
+  validationErrors: Arg
+  registrationDataImport: RegistrationDataImportNode
+}
+
+input RegistrationXlsxImportMutationInput {
+  importDataId: ID
+  name: String
+  businessAreaSlug: String
+}
+
+type ReportNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  file: String
+  createdBy: UserNode!
+  status: Int!
+  reportType: Int!
+  dateFrom: Date!
+  dateTo: Date!
+  numberOfRecords: Int
+  program: ProgramNode
+  adminArea(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
+  fileUrl: String
+}
+
+type ReportNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ReportNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ReportNodeEdge {
+  node: ReportNode
+  cursor: String!
+}
+
+type RoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  permissions: [String]
+  userRoles: [UserRoleNode!]!
+}
+
+enum RuleLanguage {
+  PYTHON
+  INTERNAL
+}
+
+type SanctionListIndividualAliasNameNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+}
+
+type SanctionListIndividualAliasNameNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualAliasNameNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualAliasNameNodeEdge {
+  node: SanctionListIndividualAliasNameNode
+  cursor: String!
+}
+
+type SanctionListIndividualCountriesNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  country: String
+}
+
+type SanctionListIndividualCountriesNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualCountriesNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualCountriesNodeEdge {
+  node: SanctionListIndividualCountriesNode
+  cursor: String!
+}
+
+type SanctionListIndividualDateOfBirthNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  date: Date!
+}
+
+type SanctionListIndividualDateOfBirthNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualDateOfBirthNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualDateOfBirthNodeEdge {
+  node: SanctionListIndividualDateOfBirthNode
+  cursor: String!
+}
+
+type SanctionListIndividualDocumentNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  documentNumber: String!
+  typeOfDocument: String!
+  dateOfIssue: String
+  issuingCountry: String
+  note: String!
+}
+
+type SanctionListIndividualDocumentNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualDocumentNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualDocumentNodeEdge {
+  node: SanctionListIndividualDocumentNode
+  cursor: String!
+}
+
+type SanctionListIndividualNationalitiesNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  nationality: String
+}
+
+type SanctionListIndividualNationalitiesNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualNationalitiesNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualNationalitiesNodeEdge {
+  node: SanctionListIndividualNationalitiesNode
+  cursor: String!
+}
+
+type SanctionListIndividualNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  dataId: Int!
+  versionNum: Int!
+  firstName: String!
+  secondName: String!
+  thirdName: String!
+  fourthName: String!
+  fullName: String!
+  nameOriginalScript: String!
+  unListType: String!
+  referenceNumber: String!
+  listedOn: DateTime!
+  comments: String!
+  designation: String!
+  listType: String!
+  street: String!
+  city: String!
+  stateProvince: String!
+  addressNote: String!
+  countryOfBirth: String
+  active: Boolean!
+  documents(before: String, after: String, first: Int, last: Int): SanctionListIndividualDocumentNodeConnection!
+  nationalities(before: String, after: String, first: Int, last: Int): SanctionListIndividualNationalitiesNodeConnection!
+  countries(before: String, after: String, first: Int, last: Int): SanctionListIndividualCountriesNodeConnection!
+  aliasNames(before: String, after: String, first: Int, last: Int): SanctionListIndividualAliasNameNodeConnection!
+  datesOfBirth(before: String, after: String, first: Int, last: Int): SanctionListIndividualDateOfBirthNodeConnection!
+}
+
+type SanctionListIndividualNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SanctionListIndividualNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SanctionListIndividualNodeEdge {
+  node: SanctionListIndividualNode
+  cursor: String!
+}
+
+type SaveKoboProjectImportDataMutation {
+  importData: ImportDataNode
+  errors: [KoboErrorNode]
+}
+
+type SectionTotalNode {
+  total: Float
+}
+
+input SensitiveGrievanceTicketExtras {
+  household: ID
+  individual: ID
+  paymentRecord: [ID]
+}
+
+type ServiceProviderNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  caId: String!
+  fullName: String!
+  shortName: String!
+  country: String!
+  visionId: String!
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+}
+
+type ServiceProviderNodeConnection {
+  pageInfo: PageInfo!
+  edges: [ServiceProviderNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type ServiceProviderNodeEdge {
+  node: ServiceProviderNode
+  cursor: String!
+}
+
+input SetSteficonRuleOnTargetPopulationMutationInput {
+  targetId: ID!
+  steficonRuleId: ID
+  version: BigInt
+  clientMutationId: String
+}
+
+type SetSteficonRuleOnTargetPopulationMutationPayload {
+  targetPopulation: TargetPopulationNode
+  clientMutationId: String
+}
+
+type SimpleApproveMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+type StatsObjectType {
+  childMale: Int
+  childFemale: Int
+  adultMale: Int
+  adultFemale: Int
+  allHouseholds: Int
+  allIndividuals: Int
+}
+
+type SteficonRuleNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  definition: String!
+  enabled: Boolean!
+  deprecated: Boolean!
+  language: RuleLanguage!
+  createdBy: UserNode
+  updatedBy: UserNode
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+}
+
+type SteficonRuleNodeConnection {
+  pageInfo: PageInfo!
+  edges: [SteficonRuleNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type SteficonRuleNodeEdge {
+  node: SteficonRuleNode
+  cursor: String!
+}
+
+type TableTotalCashTransferred {
+  data: [_TableTotalCashTransferredDataNode]
+}
+
+type TargetPopulationNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isRemoved: Boolean!
+  version: BigInt!
+  name: String!
+  caId: String
+  caHashId: String
+  createdBy: UserNode
+  approvedAt: DateTime
+  approvedBy: UserNode
+  finalizedAt: DateTime
+  finalizedBy: UserNode
+  businessArea: UserBusinessAreaNode
+  status: TargetPopulationStatus!
+  households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  candidateListTotalHouseholds: Int
+  candidateListTotalIndividuals: Int
+  finalListTotalHouseholds: Int
+  finalListTotalIndividuals: Int
+  selectionComputationMetadata: String
+  program: ProgramNode
+  candidateListTargetingCriteria: TargetingCriteriaNode
+  finalListTargetingCriteria: TargetingCriteriaNode
+  sentToDatahub: Boolean!
+  steficonRule: SteficonRuleNode
+  vulnerabilityScoreMin: Float
+  vulnerabilityScoreMax: Float
+  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  selections: [HouseholdSelection!]!
+  totalHouseholds: Int
+  totalFamilySize: Int
+  finalList(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection
+  candidateStats: StatsObjectType
+  finalStats: StatsObjectType
+}
+
+type TargetPopulationNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TargetPopulationNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TargetPopulationNodeEdge {
+  node: TargetPopulationNode
+  cursor: String!
+}
+
+enum TargetPopulationStatus {
+  DRAFT
+  APPROVED
+  FINALIZED
+}
+
+type TargetingCriteriaNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetPopulationCandidate: TargetPopulationNode
+  targetPopulationFinal: TargetPopulationNode
+  rules: [TargetingCriteriaRuleNode]
+}
+
+input TargetingCriteriaObjectType {
+  rules: [TargetingCriteriaRuleObjectType]
+}
+
+enum TargetingCriteriaRuleFilterComparisionMethod {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  RANGE
+  NOT_IN_RANGE
+  GREATER_THAN
+  LESS_THAN
+}
+
+type TargetingCriteriaRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  comparisionMethod: TargetingCriteriaRuleFilterComparisionMethod!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]
+  fieldAttribute: FieldAttributeNode
+}
+
+input TargetingCriteriaRuleFilterObjectType {
+  comparisionMethod: String!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]!
+}
+
+type TargetingCriteriaRuleNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteria: TargetingCriteriaNode!
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockNode]
+  filters: [TargetingCriteriaRuleFilterNode]
+}
+
+input TargetingCriteriaRuleObjectType {
+  filters: [TargetingCriteriaRuleFilterObjectType]
+  individualsFiltersBlocks: [TargetingIndividualRuleFilterBlockObjectType]
+}
+
+enum TargetingIndividualBlockRuleFilterComparisionMethod {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  RANGE
+  NOT_IN_RANGE
+  GREATER_THAN
+  LESS_THAN
+}
+
+type TargetingIndividualBlockRuleFilterNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  comparisionMethod: TargetingIndividualBlockRuleFilterComparisionMethod!
+  individualsFiltersBlock: TargetingIndividualRuleFilterBlockNode!
+  isFlexField: Boolean!
+  fieldName: String!
+  arguments: [Arg]
+  fieldAttribute: FieldAttributeNode
+}
+
+type TargetingIndividualRuleFilterBlockNode {
+  id: UUID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  targetingCriteriaRule: TargetingCriteriaRuleNode!
+  targetOnlyHoh: Boolean!
+  individualBlockFilters: [TargetingIndividualBlockRuleFilterNode]
+}
+
+input TargetingIndividualRuleFilterBlockObjectType {
+  individualBlockFilters: [TargetingCriteriaRuleFilterObjectType]
+}
+
+type TicketAddIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  individualData: Arg
+  approveStatus: Boolean!
+}
+
+type TicketAddIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketAddIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketAddIndividualDetailsNodeEdge {
+  node: TicketAddIndividualDetailsNode
+  cursor: String!
+}
+
+type TicketComplaintDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentRecord: PaymentRecordNode
+  household: HouseholdNode
+  individual: IndividualNode
+}
+
+type TicketComplaintDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketComplaintDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketComplaintDetailsNodeEdge {
+  node: TicketComplaintDetailsNode
+  cursor: String!
+}
+
+type TicketDeleteIndividualDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  roleReassignData: JSONString!
+  approveStatus: Boolean!
+  individualData: Arg
+}
+
+type TicketDeleteIndividualDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketDeleteIndividualDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketDeleteIndividualDetailsNodeEdge {
+  node: TicketDeleteIndividualDetailsNode
+  cursor: String!
+}
+
+type TicketHouseholdDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  household: HouseholdNode
+  householdData: Arg
+}
+
+type TicketHouseholdDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketHouseholdDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketHouseholdDataUpdateDetailsNodeEdge {
+  node: TicketHouseholdDataUpdateDetailsNode
+  cursor: String!
+}
+
+type TicketIndividualDataUpdateDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  individual: IndividualNode
+  individualData: Arg
+}
+
+type TicketIndividualDataUpdateDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketIndividualDataUpdateDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketIndividualDataUpdateDetailsNodeEdge {
+  node: TicketIndividualDataUpdateDetailsNode
+  cursor: String!
+}
+
+type TicketNeedsAdjudicationDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  goldenRecordsIndividual: IndividualNode!
+  possibleDuplicate: IndividualNode!
+  selectedIndividual: IndividualNode
+  roleReassignData: JSONString!
+  hasDuplicatedDocument: Boolean
+}
+
+type TicketNoteNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  description: String!
+  createdBy: UserNode
+}
+
+type TicketNoteNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketNoteNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketNoteNodeEdge {
+  node: TicketNoteNode
+  cursor: String!
+}
+
+type TicketPaymentVerificationDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentVerifications(before: String, after: String, first: Int, last: Int): PaymentVerificationNodeConnection!
+  paymentVerificationStatus: TicketPaymentVerificationDetailsPaymentVerificationStatus!
+}
+
+type TicketPaymentVerificationDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketPaymentVerificationDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketPaymentVerificationDetailsNodeEdge {
+  node: TicketPaymentVerificationDetailsNode
+  cursor: String!
+}
+
+enum TicketPaymentVerificationDetailsPaymentVerificationStatus {
+  PENDING
+  RECEIVED
+  NOT_RECEIVED
+  RECEIVED_WITH_ISSUES
+}
+
+type TicketSensitiveDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  paymentRecord: PaymentRecordNode
+  household: HouseholdNode
+  individual: IndividualNode
+}
+
+type TicketSensitiveDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketSensitiveDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketSensitiveDetailsNodeEdge {
+  node: TicketSensitiveDetailsNode
+  cursor: String!
+}
+
+type TicketSystemFlaggingDetailsNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  goldenRecordsIndividual: IndividualNode!
+  sanctionListIndividual: SanctionListIndividualNode!
+  approveStatus: Boolean!
+  roleReassignData: JSONString!
+}
+
+type TicketSystemFlaggingDetailsNodeConnection {
+  pageInfo: PageInfo!
+  edges: [TicketSystemFlaggingDetailsNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type TicketSystemFlaggingDetailsNodeEdge {
+  node: TicketSystemFlaggingDetailsNode
+  cursor: String!
+}
+
+scalar UUID
+
+type UnapproveTargetPopulationMutation {
+  targetPopulation: TargetPopulationNode
+}
+
+input UpdateAddIndividualIssueTypeExtras {
+  individualData: AddIndividualDataObjectType!
+}
+
+input UpdateGrievanceTicketExtrasInput {
+  householdDataUpdateIssueTypeExtras: UpdateHouseholdDataUpdateIssueTypeExtras
+  individualDataUpdateIssueTypeExtras: UpdateIndividualDataUpdateIssueTypeExtras
+  addIndividualIssueTypeExtras: UpdateAddIndividualIssueTypeExtras
+}
+
+input UpdateGrievanceTicketInput {
+  ticketId: ID!
+  description: String
+  assignedTo: ID
+  admin: String
+  area: String
+  language: String
+  linkedTickets: [ID]
+  extras: UpdateGrievanceTicketExtrasInput
+}
+
+type UpdateGrievanceTicketMutation {
+  grievanceTicket: GrievanceTicketNode
+}
+
+input UpdateHouseholdDataUpdateIssueTypeExtras {
+  householdData: HouseholdUpdateDataObjectType!
+}
+
+input UpdateIndividualDataUpdateIssueTypeExtras {
+  individualData: IndividualUpdateDataObjectType!
+}
+
+type UpdatePaymentVerificationReceivedAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
+}
+
+type UpdatePaymentVerificationStatusAndReceivedAmount {
+  paymentVerification: PaymentVerificationNode
+}
+
+type UpdateProgram {
+  validationErrors: Arg
+  program: ProgramNode
+}
+
+input UpdateProgramInput {
+  id: String!
+  name: String
+  status: String
+  startDate: Date
+  endDate: Date
+  description: String
+  budget: Decimal
+  frequencyOfPayments: String
+  sector: String
+  scope: String
+  cashPlus: Boolean
+  populationGoal: Int
+  administrativeAreasOfImplementation: String
+  individualDataNeeded: Boolean
+}
+
+input UpdateTargetPopulationInput {
+  id: ID!
+  name: String
+  targetingCriteria: TargetingCriteriaObjectType
+  programId: ID
+  vulnerabilityScoreMin: Decimal
+  vulnerabilityScoreMax: Decimal
+}
+
+type UpdateTargetPopulationMutation {
+  validationErrors: Arg
+  targetPopulation: TargetPopulationNode
+}
+
+scalar Upload
+
+type UploadImportDataXLSXFile {
+  importData: ImportDataNode
+  errors: [XlsxRowErrorNode]
+}
+
+type UserBusinessAreaNode implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  code: String!
+  name: String!
+  longName: String!
+  regionCode: String!
+  regionName: String!
+  koboUsername: String
+  rapidProHost: String
+  rapidProApiKey: String
+  slug: String!
+  hasDataSharingAgreement: Boolean!
+  adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
+  userRoles: [UserRoleNode!]!
+  paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
+  tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
+  individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
+  programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
+  cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  permissions: [String]
+}
+
+type UserBusinessAreaNodeConnection {
+  pageInfo: PageInfo!
+  edges: [UserBusinessAreaNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type UserBusinessAreaNodeEdge {
+  node: UserBusinessAreaNode
+  cursor: String!
+}
+
+type UserNode implements Node {
+  id: ID!
+  lastLogin: DateTime
+  isSuperuser: Boolean!
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  isStaff: Boolean!
+  isActive: Boolean!
+  dateJoined: DateTime!
+  status: UserStatus!
+  partner: UserPartner!
+  availableForExport: Boolean!
+  jobTitle: String!
+  adUuid: String
+  userRoles: [UserRoleNode!]!
+  createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
+  ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
+  reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
+  logs(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
+  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection
+}
+
+type UserNodeConnection {
+  pageInfo: PageInfo!
+  edges: [UserNodeEdge]!
+  totalCount: Int
+  edgeCount: Int
+}
+
+type UserNodeEdge {
+  node: UserNode
+  cursor: String!
+}
+
+enum UserPartner {
+  UNHCR
+  WFP
+  UNICEF
+}
+
+type UserRoleNode {
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  businessArea: UserBusinessAreaNode!
+  role: RoleNode!
+}
+
+enum UserStatus {
+  INVITED
+  ACTIVE
+  INACTIVE
+}
+
+type XlsxErrorNode {
+  sheet: String
+  coordinates: String
+  message: String
+}
+
+type XlsxRowErrorNode {
+  rowNumber: Int
+  header: String
+  message: String
+}
+
+type _DatasetsNode {
+  data: [Float]
+}
+
+type _DetailedDatasetsNode {
+  label: String
+  data: [Float]
+}
+
+type _TableTotalCashTransferredDataNode {
+  id: String
+  admin2: String
+  totalCashTransferred: Float
+  totalHouseholds: Int
+}

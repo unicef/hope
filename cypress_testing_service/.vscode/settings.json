@@ -1,0 +1,34 @@
+{
+  "cucumberautocomplete.steps": [
+    "cypress/integration/**/*.ts"
+  ],
+  "cucumberautocomplete.syncfeatures": "cypress/integration/**/*.feature",
+  "cucumberautocomplete.strictGherkinCompletion": true,
+  "cucumberautocomplete.strictGherkinValidation": true,
+  "cucumberautocomplete.smartSnippets": true,
+  "cucumberautocomplete.stepsInvariants": true,
+  "cucumberautocomplete.customParameters": [
+    {
+      "parameter": "{ab}",
+      "value": "(a|b)"
+    },
+    {
+      "parameter": "/\\{a.*\\}/",
+      "value": "a"
+    },
+  ],
+  "cucumberautocomplete.skipDocStringsFormat": true,
+  "cucumberautocomplete.formatConfOverride": {
+    "And": 3,
+    "But": "relative",
+  },
+  "cucumberautocomplete.onTypeFormat": true,
+  "editor.quickSuggestions": {
+    "comments": true,
+    "strings": true,
+    "other": true
+  },
+  "cucumberautocomplete.gherkinDefinitionPart": "(Given|When|Then)\\(",
+  "cucumberautocomplete.stepRegExSymbol": "'",
+  "eslint.enable": true
+}
