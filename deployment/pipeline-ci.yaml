@@ -68,6 +68,7 @@ stages:
 
           - task: Docker@2
             displayName: Push
+            condition: and(succeeded())
             inputs:
               command: push
               dockerfile: $(Docker.frontend.filePath)
