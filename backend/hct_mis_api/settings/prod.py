@@ -1,26 +1,66 @@
 from __future__ import absolute_import
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from .base import *  # noqa: ignore=F403
 
 # dev overrides
 DEBUG = False
-IS_STAGING = False
+IS_STAGING = True
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "HCT-MIS <noreply@hct-mis.org>")
+# domains/hosts etc.
+DOMAIN_NAME = os.getenv("DOMAIN", "dev-hct.unitst.org")
+WWW_ROOT = "http://%s/" % DOMAIN_NAME
 
-# Sentry Configs
-INSTALLED_APPS += ("raven.contrib.django.raven_compat",)
+# other
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-RAVEN_CONFIG = {
-    "dsn": os.environ.get("SENTRY_DSN"),
-}
+# CACHE
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
 
-# django-storages: https://django-storages.readthedocs.io/en/latest/backends/azure.html
-AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME", None)  # noqa: F405
-AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY", None)  # noqa: F405
-AZURE_CONTAINER = os.environ.get("AZURE_CONTAINER", None)  # noqa: F405
+# STORAGE
+STATIC_LOCATION = "static"
+MEDIA_LOCATION = "media"
 
+AZURE_ACCOUNT_NAME = os.getenv("STORAGE_AZURE_ACCOUNT_NAME", "")
+AZURE_ACCOUNT_KEY = os.getenv("STORAGE_AZURE_ACCOUNT_KEY", "")
 AZURE_URL_EXPIRATION_SECS = 10800
 
-if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY and AZURE_CONTAINER:
-    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+AZURE_CUSTOM_DOMAIN = f"{AZURE_ACCOUNT_NAME}.blob.core.windows.net"
+STATIC_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
+MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+
+DEFAULT_FILE_STORAGE = "hct_mis_api.apps.core.storage.AzureMediaStorage"
+STATICFILES_STORAGE = "hct_mis_api.apps.core.storage.AzureStaticStorage"
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+if os.getenv("POSTGRES_SSL", False):
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
+    DATABASES["cash_assist_datahub_mis"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=mis",
+    }
+    DATABASES["cash_assist_datahub_ca"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=ca",
+    }
+    DATABASES["cash_assist_datahub_erp"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+        "options": "-c search_path=erp",
+    }
+    DATABASES["registration_datahub"]["OPTIONS"] = {
+        "sslmode": "verify-full",
+        "sslrootcert": "/code/psql-cert.crt",
+    }
+
+# ELASTICSEARCH SETTINGS
+ELASTICSEARCH_DSL = {
+    "default": {"hosts": ELASTICSEARCH_HOST, "timeout": 30},
+}
