@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import openpyxl
 import copy
 from django.core.files import File
@@ -301,10 +303,12 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments_for_individuals(report: Report):
+        date_to_time = datetime.fromordinal(report.date_to.toordinal())
+        date_to_time += timedelta(days=1)
         filter_vars = {
             "household__payment_records__business_area": report.business_area,
             "household__payment_records__delivery_date__gte": report.date_from,
-            "household__payment_records__delivery_date__lte": report.date_to,
+            "household__payment_records__delivery_date__lt": date_to_time,
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
