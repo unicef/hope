@@ -50,7 +50,7 @@ stages:
               valueFile: '**/deployment/aks-values.yaml'
               arguments: "--timeout 600s"
               overrideValues: "
-                global.env=prod,\
+                global.env=staging,\
                 global.storageClass=default,\
                 global.init=false,\
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
