@@ -23,11 +23,12 @@ variables:
   Docker.frontend.repository: "hope-frontend"
   Docker.registry: "ICTD-HOPE-DEV-ACR"
   Docker.repository: "uniappsk8shopedev" 
-  ${{ if ne(variables['Build.SourceBranchName'], 'staging') }}:
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
     Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    Sentry.frontend.dsn: $(PRD_SENTRY_FRONTEND_DSN)
     Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
   isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
 
