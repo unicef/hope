@@ -24,6 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+backend/test-results/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -102,3 +103,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Pycharm/Jetbrains
+.idea*
+
+*.tgz
+
+/.DS_Store
+/.vscode/settings.json
+/HCT-MIS.code-workspace

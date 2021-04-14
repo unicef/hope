@@ -1,0 +1,175 @@
+# -*- coding: utf-8 -*-
+# snapshottest: v1 - https://goo.gl/zC4yUc
+from __future__ import unicode_literals
+
+from snapshottest import Snapshot
+
+
+snapshots = Snapshot()
+
+snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_admin2 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Test (Admin type one PCode: 123aa123)',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-03-12T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'Polish',
+                        'status': 1
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_status 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-08-22T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'Polish, English',
+                        'status': 3
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_created_at 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'category': 5,
+                        'consent': True,
+                        'createdAt': '2020-07-12T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'English',
+                        'status': 4
+                    }
+                },
+                {
+                    'node': {
+                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-08-22T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'Polish, English',
+                        'status': 3
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_query_all_0_with_permission 1'] = {
+    'data': {
+        'allGrievanceTicket': {
+            'edges': [
+                {
+                    'node': {
+                        'admin': 'City Test (Admin type one PCode: 123aa123)',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-03-12T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'Polish',
+                        'status': 1
+                    }
+                },
+                {
+                    'node': {
+                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'category': 5,
+                        'consent': True,
+                        'createdAt': '2020-07-12T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'English',
+                        'status': 4
+                    }
+                },
+                {
+                    'node': {
+                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'category': 7,
+                        'consent': True,
+                        'createdAt': '2020-08-22T00:00:00',
+                        'description': 'Just random description',
+                        'language': 'Polish, English',
+                        'status': 3
+                    }
+                }
+            ]
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_query_all_1_without_permission 1'] = {
+    'data': {
+        'allGrievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'allGrievanceTicket'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceQuery::test_grievance_query_single_0_with_permission 1'] = {
+    'data': {
+        'grievanceTicket': {
+            'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+            'category': 7,
+            'consent': True,
+            'createdAt': '2020-08-22T00:00:00',
+            'description': 'Just random description',
+            'language': 'Polish, English',
+            'status': 3
+        }
+    }
+}
+
+snapshots['TestGrievanceQuery::test_grievance_query_single_1_without_permission 1'] = {
+    'data': {
+        'grievanceTicket': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied',
+            'path': [
+                'grievanceTicket'
+            ]
+        }
+    ]
+}

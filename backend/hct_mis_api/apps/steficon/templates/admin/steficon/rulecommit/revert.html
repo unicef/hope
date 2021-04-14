@@ -1,0 +1,31 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls %}
+{#{% block breadcrumbs %}#}
+{#    <div class="breadcrumbs">#}
+{#        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>#}
+{#        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>#}
+{#        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>#}
+{#        &rsaquo; <a href="{% url opts|admin_urlname:'change' state.pk %}">{{ state }}</a>#}
+{#        &rsaquo; Revert#}
+{#    </div>#}
+{#{% endblock %}#}
+{% block content %}
+    <h1>Warning!!. you are reverting rule to a previous state.</h1>
+    <table width="100%">
+        <tr>
+            <th></th>
+            <th>Current</th>
+            <th>After reverting</th>
+            <th></th>
+        </tr>
+        {% for field in MONITORED_FIELDS %}
+        <tr>
+            <td>{{ field }}</td>
+            <td>{{ original.rule.as_dict|get_item:field }}</td>
+            <td>{{ original.before|get_item:field }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form method="post">{% csrf_token %}<input type="submit" value="Revert"></form>
+{% endblock %}
+

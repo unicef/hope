@@ -1,0 +1,177 @@
+  # ========================================================================
+  #                          DEPRECATED
+  # ========================================================================
+trigger: none
+  # batch: true
+  # branches:
+  #   include:
+  #   - develop
+  # paths:
+  #   exclude:
+  #   -  docs/*
+pr: none
+resources:
+  - repo: self
+
+variables:
+  # ========================================================================
+  #                          Mandatory variables 
+  # ========================================================================
+  Docker.backend.filePath: "**/backend/Dockerfile"
+  Docker.frontend.filePath: "**/frontend/Dockerfile"
+  Docker.backend.repository: "hope-backend"
+  Docker.frontend.repository: "hope-frontend"
+  Docker.registry: "uniappsk8sdevacr"
+  Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
+  Kubernetes.namespace: "ictd-hope-dev"
+
+stages:
+  - stage: build_and_push
+    displayName: BUILD and PUSH
+    jobs:
+      - job: build_push_backend
+        displayName: "[BACKEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build&Push
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                dev-latest
+
+      - job: build_push_frontend
+        displayName: "[FRONTEND]"
+        steps:
+          - task: Docker@2
+            displayName: Build
+            inputs:
+              command: build
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              arguments: --build-arg SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                dev-latest
+          - task: Docker@2
+            displayName: Push
+            inputs:
+              command: push
+              dockerfile: $(Docker.frontend.filePath)
+              repository: $(Docker.frontend.repository)
+              containerRegistry: $(Docker.registry)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
+                dev-latest
+
+  - stage: test
+    displayName: TEST
+    jobs:
+      - job: django_tests
+        displayName: "[DJANGO TEST]"
+        variables:
+          backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+        steps:
+          - task: Docker@2
+            displayName: "[ACR] Login"
+            inputs:
+              command: login
+              containerRegistry: $(Docker.registry)
+          - task: DownloadSecureFile@1
+            inputs:
+              secureFile: '.env-django-test'
+          - task: CmdLine@2
+            displayName: "Setup .env and docker-compose.tst.yml"
+            inputs:
+              script: |
+               mv deployment/docker-compose.tst.yml docker-compose.tst.yml
+               mv $(Agent.TempDirectory)/.env-django-test .env
+
+          - task: DockerCompose@0
+            displayName: "Run tests"
+            inputs:
+              containerregistrytype: 'Azure Container Registry'
+              azureContainerRegistry: $(Docker.registry)
+              dockerComposeFile: '**/docker-compose.tst.yml'
+              action: 'Run a Docker Compose command'
+              dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
+              dockerComposeFileArgs: |
+               backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
+
+          - task: PublishTestResults@2
+            displayName: "Publish Test Result"
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '*.xml'
+              searchFolder: 'backend/test-results/'
+              mergeTestResults: true
+              failTaskOnFailedTests: true
+              testRunTitle: 'TEST Results'
+
+  - stage: deploy
+    displayName: DEPLOY
+    jobs:
+      - job: deploy_hope
+        displayName: "[HOPE]"
+        steps:
+          - task: HelmDeploy@0
+            displayName: "[HOPE] Update Chart dependencies"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)     
+              command: package
+              updatedependency: true
+              chartPath: '**/deployment/hope'
+          - task: HelmDeploy@0
+            displayName: "[HOPE] DEPLOY"
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: $(Kubernetes.serviceConnection)
+              namespace: $(Kubernetes.namespace)
+              command: 'upgrade'
+              chartType: 'FilePath'
+              chartPath: '**/deployment/hope'
+              releaseName: 'hope'
+              install: true
+              waitForExecution: false
+              failOnStderr: false
+              arguments: "--timeout 600s"
+              valueFile: '**/deployment/azure-values.yaml'
+              overrideValues: "
+                global.env=staging,\
+                global.storageClass=default,\
+                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion),\
+                celery.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion),\
+                backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
+                backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
+                backend.secret.SECRET_KEY=$(SECRET_KEY),\
+                backend.secret.STORAGE_AZURE_ACCOUNT_KEY=$(STORAGE_AZURE_ACCOUNT_KEY),\
+                backend.secret.AZURE_CLIENT_SECRET=$(AZURE_CLIENT_SECRET),\
+                backend.secret.AZURE_TENANT_KEY=$(AZURE_TENANT_KEY),\
+                backend.secret.SENTRY_DSN=$(SENTRY_DSN),\
+                backend.secret.EMAIL_HOST=$(EMAIL_HOST),\
+                backend.secret.KOBO_API_URL=$(KOBO_API_URL),\
+                backend.secret.KOBO_MASTER_API_TOKEN=$(KOBO_MASTER_API_TOKEN),\
+                frontend.secret.SENTRY_FRONTEND_DSN=$(SENTRY_FRONTEND_DSN),\
+                backend.secret.DATAMART_USER=$(DATAMART_USER),\
+                backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
+                backend.secret.DATAMART_URL=$(DATAMART_URL),\
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.SourceVersion),\
+                ingress.host=dev-hope.unitst.org,\
+                ingress.tls=true,\
+                postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
+                registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.enabled=false,\
+                cashassistdatahubpostgresql.externalDatabase.host=$(CASH_ASSIST_DATAHUB_POSTGRES_HOST),\
+                cashassistdatahubpostgresql.externalDatabase.user=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
+                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
+                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),"
