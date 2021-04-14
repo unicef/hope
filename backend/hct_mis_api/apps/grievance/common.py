@@ -13,9 +13,15 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     if details_already_exists is True:
         return None, None
 
+    household = main_individual.household
+    admin_level_2 = household.admin2 if household else ""
+    area = household.village if household else ""
+
     ticket = GrievanceTicket.objects.create(
         category=GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION,
         business_area=business_area,
+        admin2=admin_level_2,
+        area=area,
     )
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
