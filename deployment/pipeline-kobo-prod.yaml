@@ -5,7 +5,7 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Kubernetes.serviceConnection: ""
+  Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-kobo-prd-1617968835008"
   Kubernetes.namespace: "ictd-kobo-prd"
 
 stages:

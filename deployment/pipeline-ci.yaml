@@ -27,8 +27,9 @@ variables:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
     Sentry.frontend.dsn: $(STG_SENTRY_FRONTEND_DSN)
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
     Sentry.frontend.trn_dsn: $(TRN_SENTRY_FRONTEND_DSN)
-  isTraining: $[eq(variables['Build.SourceBranchName'], 'staging')]
+  isTraining: $[eq(variables['Build.SourceBranchName'], 'master')]
 
 stages:
   - stage: build_and_push
