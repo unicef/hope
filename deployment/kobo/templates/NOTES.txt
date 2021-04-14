@@ -1,0 +1,2 @@
+To get your KOBO superuser password run:
+  export KOBO_PASSWORD=$(kubectl get secret --namespace {{ .Release.Namespace }} "{{ include "kobo.fullname" . }}" -o jsonpath="{.data.password}" | base64 --decode)
