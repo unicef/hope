@@ -1,0 +1,81 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enketo-config
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: enketo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/enketo/config.json").AsConfig | indent 2}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enketo-config-map
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: enketo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  ENKETO_EXPRESS_PUBLIC_SUBDOMAIN: "{{ .Values.enketo.subdomain }}"
+  KOBOCAT_PUBLIC_SUBDOMAIN: "{{ .Values.kobocat.subdomain }}"
+  KOBOFORM_PUBLIC_SUBDOMAIN: "{{ .Values.kpi.subdomain }}"
+  PUBLIC_DOMAIN_NAME: "{{ .Values.ingress.host }}"
+
+  INTERNAL_DOMAIN_NAME: "enketo"
+  PUBLIC_REQUEST_SCHEME: {{ .Values.ingress.scheme }}
+
+  # TODO: helper for host
+  ENKETO_REDIS_MAIN_HOST: "kobo-redis-master"
+  ENKETO_REDIS_CACHE_HOST: "kobo-redis-cache"
+
+  ENKETO_SUPPORT_EMAIL: {{ .Values.smtp.email }}
+  ENKETO_BUILD_IE11: "true"
+  
+  EMAIL_HOST: "{{ .Values.smtp.host }}"
+  DEFAULT_FROM_EMAIL: "{{ .Values.smtp.email }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enketo-nginx-config
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: enketo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_location_uri_prefix.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_location.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_proxy_pass.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_rewrite_response_reference_rules.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_site_http.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_site_https.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/nginx_command.bash").AsConfig | indent 2}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enketo-nginx-available-config
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: enketo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_location_uri_prefix.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_location.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_proxy_pass.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_rewrite_response_reference_rules.conf.tmpl").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_site_http.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/enketo_express_site_https.conf").AsConfig | indent 2}}
+{{ (.Files.Glob "files/enketo/nginx/nginx_command.bash").AsConfig | indent 2}}
+---
