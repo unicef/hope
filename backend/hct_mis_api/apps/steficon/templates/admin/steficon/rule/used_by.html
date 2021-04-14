@@ -1,0 +1,19 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine static %}
+
+
+{% block action-content %}
+     <table width="100%">
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Program</th>
+        </tr>
+        {% for tp in rule.used_by %}
+            <tr>
+                <td>{{ tp }}</td>
+                <td>{{ tp.status }}</td>
+                <td>{{ tp.program.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

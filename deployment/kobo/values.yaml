@@ -1,0 +1,189 @@
+global:
+  storageClass: "standard"
+
+kobotoolbox:
+  superuserName: "superuser"
+  superuserPassword: ""
+  exisitingSecret: ""
+  exisitingSecretKey: "kobo-password"
+
+smtp:
+  host: ""
+  email: "change@email.com"
+
+ingress:
+  scheme: "http"
+  # root domain for kobotoolbox services
+  host: "kobotoolbox.test"
+  annotations:
+   kubernetes.io/ingress.class: "azure/application-gateway"
+   appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  tls: false
+  tlsSecret: ""
+
+# Main database for kpi and kobocat
+postgresql:
+  enabled: true
+  postgresqlDatabase: kobocat
+  postgresqlUsername: kobo
+  postgresqlPassword: ""
+
+  # Script for adding postgis and creating koboform db
+  # Don't modify
+  initdbScripts:
+    init_script.sh: |
+      #!/bin/sh
+      psql -U postgres kobocat -c "create extension if not exists postgis;"
+      psql -U postgres kobocat -c "create database koboform;"
+      psql -U postgres koboform -c "create extension if not exists postgis;"
+
+  externalDatabase:
+    host: ""
+    port: ""
+    user: ""
+    existingSecret: ""
+    passwordSecretKey: "postgresql-password"
+    kpiDatabase: ""
+    kobocatDatabase: ""
+
+  image:
+    tag: 10.12.0
+
+# Replica database of received submissions
+mongodb:
+  enabled: true
+  mongodbDatabase: formhub
+  mongodbUsername: kobo
+  mongodbPassword: ""
+  externalDatabase:
+    mongodbHost: ""
+    mongodbUsername: ""
+    mongodbDatabase: ""
+    existingSecret: ""
+    passwordSecretKey: "mongodb-password"
+    rootPasswordSecretKey: "mongodb-root-password"
+
+  image:
+    tag: 4.0.16-ol-7-r21
+
+# Main database for enketo_express
+# stores queues of async (Celery) tasks for kpi and kobocat
+redismain:
+  enabled: true
+  fullnameOverride: redis-main
+  persistence.enabled: true
+  master.persistence.enabled: true
+  persistence:
+    enabled: true
+  cluster.enabled: false
+  cluster.slaveCount: 0
+  cluster:
+    enabled: false
+  image:
+    tag: 4.0.14
+
+# Cache of XLST for enketo_express
+rediscache:
+  enabled: true
+  fullnameOverride: redis-cache
+  persistence.enabled: true
+  master.persistence.enabled: true
+  persistence:
+    enabled: true
+  cluster.enabled: false
+  cluster.slaveCount: 0
+  cluster:
+    enabled: false
+  image:
+    tag: 4.0.14
+
+kpi:
+  subdomain: kf
+  image: kobotoolbox/kpi:2.020.25
+  service:
+    type: "ClusterIP"
+
+  resources: {}
+  podLabels: {}
+  labels: {}
+  annotations: {}
+  nodeSeletor: {}
+  affinity: {}
+
+  ## the number of kpi pods to run
+  ##
+  replicas: 1
+
+  ## configs for the kpi Service readiness probe
+  ##
+  readinessProbe:
+    enabled: false
+    scheme: HTTP
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+
+  ## configs for the kpi Service liveness probe
+  ##
+  livenessProbe:
+    enabled: false
+    scheme: HTTP
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 2
+
+kobocat:
+  subdomain: kc
+  image: kobotoolbox/kobocat:2.020.25
+  service:
+    type: "ClusterIP"
+  ## resource requests/limits for the kobocat pods
+  ##
+  ## EXAMPLE:
+  ##   resources:
+  ##     requests:
+  ##       cpu: "400m"
+  ##       memory: "2Gi"
+  ##
+  resources: {}
+  podLabels: {}
+  labels: {}
+  annotations: {}
+  nodeSeletor: {}
+  affinity: {}
+
+  ## the number of kpi pods to run
+  ##
+  replicas: 1
+
+enketo:
+  subdomain: ek
+  image: kobotoolbox/enketo-express-extra-widgets:2.3.3
+  service:
+    type: "ClusterIP"
+  ## resource requests/limits for the kobocat pods
+  ##
+  ## EXAMPLE:
+  ##   resources:
+  ##     requests:
+  ##       cpu: "400m"
+  ##       memory: "2Gi"
+  ##
+  resources: {}
+  podLabels: {}
+  labels: {}
+  annotations: {}
+  nodeSeletor: {}
+  affinity: {}
+
+  ## the number of kpi pods to run
+  ##
+  replicas: 1
+
+# Sidecar serving statics
+nginx:
+  image: nginx:1.19.0

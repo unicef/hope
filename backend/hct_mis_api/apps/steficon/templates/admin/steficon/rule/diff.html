@@ -1,0 +1,55 @@
+{% extends "admin_extra_urls/action_page.html" %}{% load engine static %}
+{% load engine i18n admin_urls static admin_modify %}
+{% block extrastyle %}
+    <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/diff.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "admin/steficon/code.css" %}">
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/collapse.js" %}"></script>
+    <style>
+        .local-tools {
+            position: relative;
+            top: 50px;
+            height: 50px;
+        }
+    </style>
+{% endblock %}
+{% block action-content %}
+    <div class="local-tools">
+        <ul class="object-tools">
+            <li><a class="btn btn-success" href="{% if prev %}?state_pk={{ prev.id }}{% else %}#{% endif %}"><< prev</a>
+            </li>
+            <li><a class="btn btn-success" href="{% if next %}?state_pk={{ next.id }}{% else %}#{% endif %}">next >></a>
+            </li>
+            <li><a id="btn-{{ options.method }}" href="{% url "admin:steficon_rule_revert" original.pk state.pk %}"
+                   class="btn extra-link">Revert</a>
+            </li>
+        </ul>
+    </div>
+    <fieldset class="module collapse open">
+        <h2>Diff with current code</h2>
+        <div class="code d-none" id="tab-diff">
+            {{ state|diff:"before,current" }}
+        </div>
+    </fieldset>
+    <fieldset class="module aligned collapse">
+        <h2>Commit changes</h2>
+        <div class="code d-none" id="tab-diff">
+            {{ state|diff:"after,before" }}
+        </div>
+    </fieldset>
+{% endblock %}
+{% block document_ready %}{{ block.super }}
+    <script>
+        window.addEventListener('load', function () {
+            var fieldsets = document.querySelectorAll('fieldset.collapse.open');
+            for (var i = 0; i < fieldsets.length; i++) {
+                var elem = fieldsets[i];
+                elem.classList.remove('collapsed');
+                var link = elem.querySelector('h2>a');
+                link.textContent = gettext('Hide');
+            }
+        });
+    </script>
+{% endblock %}
