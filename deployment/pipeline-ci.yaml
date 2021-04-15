@@ -57,7 +57,18 @@ stages:
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
-                dev-latest
+
+          - task: Docker@2
+            displayName: Build&Push
+            condition: and(succeeded(), eq(variables.isTraining, true))
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry_trn)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
 
       - job: build_push_frontend
         displayName: "[FRONTEND]"
