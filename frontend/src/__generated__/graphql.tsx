@@ -48,6 +48,7 @@ export type _TableTotalCashTransferredDataNode = {
 
 export type ActivateCashPlanVerificationMutation = {
    __typename?: 'ActivateCashPlanVerificationMutation',
+  validationErrors?: Maybe<Scalars['Arg']>,
   cashPlan?: Maybe<CashPlanNode>,
 };
 
@@ -223,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -5665,6 +5666,7 @@ export type ActivateCashPlanPaymentVerificationMutation = (
   { __typename?: 'Mutations' }
   & { activateCashPlanPaymentVerification: Maybe<(
     { __typename?: 'ActivateCashPlanVerificationMutation' }
+    & Pick<ActivateCashPlanVerificationMutation, 'validationErrors'>
     & { cashPlan: Maybe<(
       { __typename?: 'CashPlanNode' }
       & Pick<CashPlanNode, 'id' | 'status' | 'statusDate' | 'verificationStatus'>
@@ -6794,7 +6796,10 @@ export type AllPaymentRecordsQuery = (
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
-        ), cashPlan: Maybe<(
+        ), headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        )>, cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
           & { program: (
@@ -8991,6 +8996,7 @@ export const ActivateCashPlanPaymentVerificationDocument = gql`
         }
       }
     }
+    validationErrors
   }
 }
     `;
@@ -12034,6 +12040,10 @@ export const AllPaymentRecordsDocument = gql`
           id
           unicefId
           size
+        }
+        headOfHousehold {
+          id
+          fullName
         }
         currency
         entitlementQuantity
@@ -16545,6 +16555,7 @@ export type _TableTotalCashTransferredDataNodeResolvers<ContextType = any, Paren
 };
 
 export type ActivateCashPlanVerificationMutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActivateCashPlanVerificationMutation'] = ResolversParentTypes['ActivateCashPlanVerificationMutation']> = {
+  validationErrors?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
   cashPlan?: Resolver<Maybe<ResolversTypes['CashPlanNode']>, ParentType, ContextType>,
 };
 
