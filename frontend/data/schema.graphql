@@ -4,6 +4,7 @@ schema {
 }
 
 type ActivateCashPlanVerificationMutation {
+  validationErrors: Arg
   cashPlan: CashPlanNode
 }
 
@@ -120,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  UNHCR
   WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {

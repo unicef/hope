@@ -1,8 +1,11 @@
+import json
 import logging
 from decimal import Decimal
 
 import graphene
 import math
+
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -30,6 +33,7 @@ from hct_mis_api.apps.payment.utils import get_number_of_samples, from_received_
 from hct_mis_api.apps.payment.xlsx.XlsxVerificationImportService import XlsxVerificationImportService
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.program.schema import CashPlanNode
+from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
 logger = logging.getLogger(__name__)
 
@@ -390,7 +394,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         cash_plan_payment_verification.save()
 
 
-class ActivateCashPlanVerificationMutation(PermissionMutation):
+class ActivateCashPlanVerificationMutation(PermissionMutation, ValidationErrorMutationMixin):
     cash_plan = graphene.Field(CashPlanNode)
 
     class Arguments:
@@ -400,7 +404,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, cash_plan_verification_id, **kwargs):
+    def processed_mutate(cls, root, info, cash_plan_verification_id, **kwargs):
         id = decode_id_string(cash_plan_verification_id)
         cashplan_payment_verification = get_object_or_404(CashPlanPaymentVerification, id=id)
         check_concurrency_version_in_mutation(kwargs.get("version"), cashplan_payment_verification)
@@ -427,7 +431,7 @@ class ActivateCashPlanVerificationMutation(PermissionMutation):
             old_cashplan_payment_verification,
             cashplan_payment_verification,
         )
-        return ActivateCashPlanVerificationMutation(cashplan_payment_verification.cash_plan)
+        return ActivateCashPlanVerificationMutation(cash_plan=cashplan_payment_verification.cash_plan)
 
     @classmethod
     def activate_rapidpro(cls, cashplan_payment_verification):

@@ -655,6 +655,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                             self.household_ids.append(value)
                         else:
                             household_id_can_be_empty = True
+                            if current_household_id not in head_of_household_count:
+                                head_of_household_count[current_household_id] = 0
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
                         head_of_household_count[current_household_id] += 1
