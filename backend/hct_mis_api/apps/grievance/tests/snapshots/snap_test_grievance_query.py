@@ -13,7 +13,7 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_admin2 1'] = {
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test (Admin type one PCode: 123aa123)',
+                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
                         'createdAt': '2020-03-12T00:00:00',
@@ -33,7 +33,7 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_status 1'] = {
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'admin': 'City Example',
                         'category': 7,
                         'consent': True,
                         'createdAt': '2020-08-22T00:00:00',
@@ -53,7 +53,7 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_created_at 1'] = 
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'admin': 'City Example',
                         'category': 5,
                         'consent': True,
                         'createdAt': '2020-07-12T00:00:00',
@@ -64,7 +64,7 @@ snapshots['TestGrievanceQuery::test_grievance_list_filtered_by_created_at 1'] = 
                 },
                 {
                     'node': {
-                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'admin': 'City Example',
                         'category': 7,
                         'consent': True,
                         'createdAt': '2020-08-22T00:00:00',
@@ -84,7 +84,7 @@ snapshots['TestGrievanceQuery::test_grievance_query_all_0_with_permission 1'] = 
             'edges': [
                 {
                     'node': {
-                        'admin': 'City Test (Admin type one PCode: 123aa123)',
+                        'admin': 'City Test',
                         'category': 7,
                         'consent': True,
                         'createdAt': '2020-03-12T00:00:00',
@@ -95,7 +95,7 @@ snapshots['TestGrievanceQuery::test_grievance_query_all_0_with_permission 1'] = 
                 },
                 {
                     'node': {
-                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'admin': 'City Example',
                         'category': 5,
                         'consent': True,
                         'createdAt': '2020-07-12T00:00:00',
@@ -106,7 +106,7 @@ snapshots['TestGrievanceQuery::test_grievance_query_all_0_with_permission 1'] = 
                 },
                 {
                     'node': {
-                        'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+                        'admin': 'City Example',
                         'category': 7,
                         'consent': True,
                         'createdAt': '2020-08-22T00:00:00',
@@ -143,7 +143,7 @@ snapshots['TestGrievanceQuery::test_grievance_query_all_1_without_permission 1']
 snapshots['TestGrievanceQuery::test_grievance_query_single_0_with_permission 1'] = {
     'data': {
         'grievanceTicket': {
-            'admin': 'City Example (Admin type one PCode: sadasdasfd222)',
+            'admin': 'City Example',
             'category': 7,
             'consent': True,
             'createdAt': '2020-08-22T00:00:00',
