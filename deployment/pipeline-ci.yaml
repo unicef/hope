@@ -21,7 +21,7 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  ${{ if ne eq(variables['Build.SourceBranchName'], 'master') }}:
+  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.repository: "uniappsk8shopedev" 
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
