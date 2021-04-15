@@ -74,7 +74,7 @@ stages:
                 frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 ingress.host=hope.unicef.org,\
                 ingress.tls=true,\
-                ingress.tlsSecret=aks-unicef-tls,\
+                ingress.tlsSecret='aks-unicef-tls',\
                 postgresql.enabled=false,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 postgresql.externalDatabase.host=$(POSTGRES_HOST),\
