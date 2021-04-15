@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import logging
 import openpyxl
 import copy
 from django.core.files import File
@@ -19,13 +20,16 @@ from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPla
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
 
+logger = logging.getLogger(__name__)
+
 
 class GenerateReportContentHelpers:
     @staticmethod
     def get_individuals(report: Report):
         filter_vars = {
             "household__business_area": report.business_area,
-            "status": STATUS_ACTIVE,
+            "withdrawn": False,
+            "duplicate": False,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }
@@ -73,7 +77,7 @@ class GenerateReportContentHelpers:
     def get_households(report: Report):
         filter_vars = {
             "business_area": report.business_area,
-            "status": STATUS_ACTIVE,
+            "withdrawn": False,
             "last_registration_date__gte": report.date_from,
             "last_registration_date__lte": report.date_to,
         }
@@ -689,7 +693,7 @@ class GenerateReportService:
                 )
                 self.report.status = Report.COMPLETED
         except Exception as e:
-            print("ERROR", e)
+            logger.exception(e)
             self.report.status = Report.FAILED
         self.report.save()
 
