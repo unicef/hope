@@ -21,8 +21,14 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.registry: "ICTD-HOPE-DEV-ACR"
-  Docker.repository: "uniappsk8shopedev" 
+  ${{ if ne eq(variables['Build.SourceBranchName'], 'master') }}:
+    Docker.registry: "ICTD-HOPE-DEV-ACR"
+    Docker.repository: "uniappsk8shopedev" 
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
+    Docker.repository_trn: "uniappsk8shopedev" 
+    Docker.registry: "ICTD-HOPE-PRD-ACR"
+    Docker.repository: "uniappsk8shope" 
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
@@ -83,9 +89,9 @@ stages:
             inputs:
               command: build
               dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
+              repository: $(Docker.frontend.repository_trn)
               arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registry_trn)
               tags: |
                 $(Build.BuildId)-trn
                 $(Build.SourceVersion)-trn
@@ -96,8 +102,8 @@ stages:
             inputs:
               command: push
               dockerfile: $(Docker.frontend.filePath)
-              repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
+              repository: $(Docker.frontend.repository_trn)
+              containerRegistry: $(Docker.registry_trn)
               tags: |
                 $(Build.BuildId)-trn
                 $(Build.SourceVersion)-trn
