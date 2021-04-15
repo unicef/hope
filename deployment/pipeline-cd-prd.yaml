@@ -17,7 +17,7 @@ variables:
   Kubernetes.namespace: "ictd-hope-prd"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.registry: "uniappsakshopedev.azurecr.io"
+  Docker.registry: "uniappsakshope.azurecr.io"
 
 stages:
   - stage: deploy
