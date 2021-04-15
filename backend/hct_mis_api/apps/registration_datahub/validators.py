@@ -576,7 +576,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             invalid_rows = []
             current_household_id = None
-            head_of_household_count = defaultdict(int)
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
@@ -652,14 +651,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "household_id":
                         current_household_id = value
                         if sheet.title == "Households":
-                            self.household_ids.append(value)
+                            self.household_ids.append(current_household_id)
+                            self.head_of_household_count[current_household_id] = 0
                         else:
                             household_id_can_be_empty = True
-                            if current_household_id not in head_of_household_count:
-                                head_of_household_count[current_household_id] = 0
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
-                        head_of_household_count[current_household_id] += 1
+                        self.head_of_household_count[current_household_id] += 1
 
                     field_type = current_field["type"]
                     fn = switch_dict.get(field_type)
@@ -701,14 +699,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
                     documents_or_identity_dict[header]["validation_data"].append({"row_number": row[0].row})
 
-            # validate head of household count
-            for household_id, count in head_of_household_count.items():
-                if count == 0:
-                    message = f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
-                    invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
-                elif count > 1:
-                    message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
-                    invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+            if sheet.title == "Individuals":
+                for household_id, count in self.head_of_household_count.items():
+                    if count == 0:
+                        message = (
+                            f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
+                        )
+                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+                    elif count > 1:
+                        message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
+                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
             invalid_doc_rows = []
             invalid_ident_rows = []
@@ -786,6 +786,8 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             household_sheet = wb["Households"]
             business_area_name = BusinessArea.objects.get(slug=business_area_slug).name
             self.business_area_code = pycountry.countries.get(name=business_area_name).alpha_2
+
+            self.head_of_household_count = defaultdict(int)
             self.image_loader = SheetImageLoader(household_sheet)
             errors.extend(self.rows_validator(household_sheet))
             self.image_loader = SheetImageLoader(individuals_sheet)
@@ -929,18 +931,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def get_expected_individuals_core_fields(self):
         try:
-            return {
-                field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
     def get_expected_individuals_flex_fields(self):
         try:
-            return {
-                field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
