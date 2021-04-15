@@ -93,9 +93,14 @@ class CheckAgainstSanctionListPreMergeTask:
                     marked_individual = Individual.objects.filter(id=individual_hit.id).first()
                     if marked_individual:
                         possible_matches.add(marked_individual.id)
+                        household = marked_individual.household
+                        admin_level_2 = household.admin2 if household else ""
+                        area = household.village if household else ""
                         ticket = GrievanceTicket(
                             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                             business_area=marked_individual.business_area,
+                            admin2=admin_level_2,
+                            area=area,
                         )
                         ticket_details = TicketSystemFlaggingDetails(
                             ticket=ticket,
