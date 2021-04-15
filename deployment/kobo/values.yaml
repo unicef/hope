@@ -23,7 +23,7 @@ ingress:
 
 # Main database for kpi and kobocat
 postgresql:
-  enabled: false
+  enabled: true
   postgresqlDatabase: kobocat
   postgresqlUsername: kobo
   postgresqlPassword: ""
@@ -38,13 +38,13 @@ postgresql:
       psql -U postgres koboform -c "create extension if not exists postgis;"
 
   externalDatabase:
-    host: "pgsql-10-reserved-hctmis-prd.postgres.database.azure.com"
-    port: "5432"
-    user: "koboprdusr@pgsql-10-reserved-hctmis-prd "
-    existingSecret: "postgresql-password"
-    passwordSecretKey: "postgresql-password"
-    kpiDatabase: "prd_kobo_formdb"
-    kobocatDatabase: "prd_kobo_catdb"
+    # host: "pgsql-10-reserved-hctmis-prd.postgres.database.azure.com"
+    # port: "5432"
+    # user: "koboprdusr@pgsql-10-reserved-hctmis-prd "
+    # existingSecret: "postgresql-password"
+    # passwordSecretKey: "postgresql-password"
+    # kpiDatabase: "prd_kobo_formdb"
+    # kobocatDatabase: "prd_kobo_catdb"
 
   image:
     tag: 10.12.0
