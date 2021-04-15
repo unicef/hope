@@ -392,7 +392,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
 
     def resolve_admin(grievance_ticket, info):
-        return grievance_ticket.admin2
+        if grievance_ticket.admin2:
+            return grievance_ticket.admin2.title
+        return None
 
 
 class TicketNoteNode(DjangoObjectType):
