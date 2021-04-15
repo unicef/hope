@@ -6796,7 +6796,10 @@ export type AllPaymentRecordsQuery = (
         & { household: (
           { __typename?: 'HouseholdNode' }
           & Pick<HouseholdNode, 'id' | 'unicefId' | 'size'>
-        ), cashPlan: Maybe<(
+        ), headOfHousehold: Maybe<(
+          { __typename?: 'IndividualNode' }
+          & Pick<IndividualNode, 'id' | 'fullName'>
+        )>, cashPlan: Maybe<(
           { __typename?: 'CashPlanNode' }
           & Pick<CashPlanNode, 'id'>
           & { program: (
@@ -12037,6 +12040,10 @@ export const AllPaymentRecordsDocument = gql`
           id
           unicefId
           size
+        }
+        headOfHousehold {
+          id
+          fullName
         }
         currency
         entitlementQuantity
