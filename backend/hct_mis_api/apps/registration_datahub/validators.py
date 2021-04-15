@@ -367,6 +367,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def __init__(self):
+        self.head_of_household_count = defaultdict(int)
         self.core_fields = self.get_core_fields()
         self.flex_fields = self.get_flex_fields()
         self.all_fields = self.get_all_fields()
@@ -786,8 +787,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             household_sheet = wb["Households"]
             business_area_name = BusinessArea.objects.get(slug=business_area_slug).name
             self.business_area_code = pycountry.countries.get(name=business_area_name).alpha_2
-
-            self.head_of_household_count = defaultdict(int)
             self.image_loader = SheetImageLoader(household_sheet)
             errors.extend(self.rows_validator(household_sheet))
             self.image_loader = SheetImageLoader(individuals_sheet)
