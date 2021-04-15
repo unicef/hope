@@ -3,6 +3,7 @@
 from django.conf import settings
 import django.contrib.gis.db.models.fields
 import django.contrib.postgres.fields.jsonb
+from django.contrib.postgres.operations import CITextExtension
 from django.db import migrations, models
 import django.db.models.deletion
 import django_countries.fields
@@ -20,6 +21,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        CITextExtension(),
         migrations.CreateModel(
             name='BusinessArea',
             fields=[
