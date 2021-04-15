@@ -46,4 +46,7 @@ stages:
                 redismain.password=$(REDIS_MAIN_PASSWORD),\
                 smtp.host=$(SMTP_HOST),\
                 smtp.email=kobo@unitst.org,\
-                ingress.host=$(DOMAIN),"
+                ingress.host=$(DOMAIN),\
+                ingress.scheme=https,\
+                ingress.tls=true,"
+

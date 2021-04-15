@@ -350,6 +350,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
                 setattr(grievance_ticket, field, value)
 
         if assigned_to != grievance_ticket.assigned_to:
+            if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
+                grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
             grievance_ticket.assigned_to = assigned_to
             if grievance_ticket.status in (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL):
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
