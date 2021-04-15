@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Wfp = 'WFP',
-  Unhcr = 'UNHCR'
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -7355,6 +7355,10 @@ export type GrievanceTicketQuery = (
             & { node: Maybe<(
               { __typename?: 'DocumentNode' }
               & Pick<DocumentNode, 'id' | 'documentNumber'>
+              & { type: (
+                { __typename?: 'DocumentTypeNode' }
+                & Pick<DocumentTypeNode, 'type'>
+              ) }
             )> }
           )>> }
         ) }
@@ -13353,6 +13357,9 @@ export const GrievanceTicketDocument = gql`
           edges {
             node {
               id
+              type {
+                type
+              }
               documentNumber
             }
           }
