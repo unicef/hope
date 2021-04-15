@@ -299,6 +299,106 @@ class TestXLSXValidatorsMethods(TestCase):
                         "header": "relationship_i_c",
                         "message": "Sheet: Individuals, There is no household with provided id: 52",
                     },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 34, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 35, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: TEXT, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 36, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 37, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 38, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 39, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 40, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 41, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 42, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 43, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 44, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 45, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 46, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 47, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 48, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 49, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 50, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 51, has to have a head of household",
+                    },
+                    {
+                        "row_number": 0,
+                        "header": "relationship_i_c",
+                        "message": "Sheet: Individuals, Household with id: 52, has to have a head of household",
+                    },
                 ],
             ),
             (
@@ -315,7 +415,6 @@ class TestXLSXValidatorsMethods(TestCase):
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
             upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
             result = upload_xlsx_instance_validator.rows_validator(sheet)
-            # import ipdb; ipdb.set_trace()
             self.assertEqual(result, expected_values)
 
     def test_validate_file_extension(self):
