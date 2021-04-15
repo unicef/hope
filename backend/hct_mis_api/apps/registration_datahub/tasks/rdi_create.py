@@ -749,7 +749,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
             if submission_exists is True:
                 continue
-            collectors_count = 0
+
             household_obj = ImportedHousehold(**submission_meta_data)
             self.attachments = household.get("_attachments", [])
             registration_date = None
@@ -782,7 +782,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 current_individual_docs_and_identities[key]["individual"] = individual_obj
                             elif i_field == "relationship_i_c" and i_value.upper() == NON_BENEFICIARY:
                                 only_collector_flag = True
-                                collectors_count += 1
                             elif i_field == "role_i_c":
                                 role = i_value.upper()
                             elif i_field.endswith("_h_c") or i_field.endswith("_h_f"):
@@ -825,7 +824,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                 else:
                     self._cast_and_assign(hh_value, hh_field, household_obj)
 
-            household_obj.size = household_obj.size - collectors_count
             household_obj.first_registration_date = registration_date
             household_obj.last_registration_date = registration_date
             household_obj.registration_data_import = registration_data_import
