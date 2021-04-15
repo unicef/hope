@@ -47,6 +47,6 @@ stages:
                 smtp.host=$(SMTP_HOST),\
                 smtp.email=kobo@unitst.org,\
                 ingress.host=$(DOMAIN),\
-                ingress.tlsSecret='aks-unicef-tls',\
+                ingress.scheme=https,\
                 ingress.tls=true,"
 
