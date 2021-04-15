@@ -19,7 +19,7 @@ ingress:
    kubernetes.io/ingress.class: "azure/application-gateway"
    appgw.ingress.kubernetes.io/ssl-redirect: "true"
   tls: false
-  tlsSecret: ""
+  tlsSecret: "aks-unicef-tls"
 
 # Main database for kpi and kobocat
 postgresql:
