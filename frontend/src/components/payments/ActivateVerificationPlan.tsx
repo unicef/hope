@@ -33,13 +33,26 @@ export function ActivateVerificationPlan({
   const { showMessage } = useSnackbar();
   const [mutate] = useActivateCashPlanPaymentVerificationMutation();
   const activate = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
-    });
-    if (errors) {
-      showMessage('Error while submitting');
-      return;
+    try {
+      await mutate({
+        variables: { cashPlanVerificationId },
+      });
+    } catch (error) {
+      console.log('error', error?.graphQLErrors);
+      if (
+        error?.graphQLErrors?.[0]?.validationErrors
+          ?.activateCashPlanPaymentVerification?.phone_numbers
+      ) {
+        showMessage(
+          error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
+            '\n',
+          ),
+        );
+      } else {
+        showMessage('Error during activating\n');
+      }
     }
+
     showMessage('Verification plan has been activated.');
   };
   return (

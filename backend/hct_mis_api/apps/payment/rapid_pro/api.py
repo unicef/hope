@@ -4,6 +4,7 @@ from decimal import Decimal
 import requests
 from constance import config
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Individual
@@ -55,9 +56,26 @@ class RapidProAPI:
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            logger.exception(e)
+            logger.exception(e.response.text)
+
             raise
         return response.json()
+
+    def _parse_json_urns_error(self, e, phone_numbers):
+        if e.response.status_code != 400:
+            return False
+        try:
+            error = e.response.json()
+            urns = error.get("urns")
+            if not urns:
+                return False
+            errors = []
+            for index, error in urns.items():
+                errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
+            return errors
+
+        except:
+            return False
 
     def _get_url(self):
         return f"{self.url}/api/v2"
@@ -70,11 +88,19 @@ class RapidProAPI:
         urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
 
-        response = self._handle_post_request(
-            RapidProAPI.FLOW_STARTS_ENDPOINT,
-            data,
-        )
-        return response
+        try:
+            response = self._handle_post_request(
+                RapidProAPI.FLOW_STARTS_ENDPOINT,
+                data,
+            )
+            return response
+        except requests.exceptions.HTTPError as e:
+            errors = self._parse_json_urns_error(e, phone_numbers)
+            if errors:
+                logger.error("wrong phone numbers " + str(errors))
+                raise ValidationError(message={"phone_numbers": errors})
+            else:
+                raise
 
     def get_flow_runs(self):
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
