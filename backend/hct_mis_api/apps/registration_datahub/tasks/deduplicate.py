@@ -421,7 +421,7 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            config.DEDUPLICATION_BATCH_MIN_SCORE,
+            config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
         )
         # noinspection PyTypeChecker
         query_dict["query"]["bool"]["filter"] = [
