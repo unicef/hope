@@ -52,6 +52,18 @@ function findValidationErrors(
 }
 const validationErrorMiddleware = new ApolloLink((operation, forward) => {
   return forward(operation).map((response) => {
+    if (response.data) {
+      const context = operation.getContext();
+      const {
+        response: { headers },
+      } = context;
+      if (headers) {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        client.writeData({
+          data: { backendVersion: headers.get('X-Hope-Backend-Version') },
+        });
+      }
+    }
     if (response.errors) {
       return response;
     }

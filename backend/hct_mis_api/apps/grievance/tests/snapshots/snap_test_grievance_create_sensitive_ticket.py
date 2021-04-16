@@ -12,7 +12,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -60,7 +60,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -79,7 +79,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
                     }
                 },
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -127,7 +127,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -169,7 +169,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -215,7 +215,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
@@ -301,7 +301,7 @@ snapshots['TestGrievanceCreateSensitiveTicketQuery::test_create_sensitive_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asfdsfg)',
+                    'admin': 'City Test',
                     'category': 3,
                     'consent': True,
                     'description': 'Test Feedback',
