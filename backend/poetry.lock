@@ -1320,6 +1320,14 @@ sqlalchemy = ["sqlalchemy (>=1.2)"]
 tornado = ["tornado (>=5)"]
 
 [[package]]
+name = "single-source"
+version = "0.1.5"
+description = "Access to the project version in Python code for PEP 621-style projects"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[[package]]
 name = "singledispatch"
 version = "3.6.1"
 description = "Backport functools.singledispatch from Python 3.4 to Python 2.6-3.3."
@@ -1560,7 +1568,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "63bf23e4fcdf9137c3d908d6f175e75184568cba4ce3afb38e56caab0933a96d"
+content-hash = "49c8c1ce7390b88a588d1e82e02f5d21c39f0cc0bb4e966c0bb9fd8abbe37113"
 
 [metadata.files]
 amqp = [
@@ -2237,6 +2245,10 @@ rx = [
 sentry-sdk = [
     {file = "sentry-sdk-0.19.5.tar.gz", hash = "sha256:737a094e49a529dd0fdcaafa9e97cf7c3d5eb964bd229821d640bc77f3502b3f"},
     {file = "sentry_sdk-0.19.5-py2.py3-none-any.whl", hash = "sha256:0a711ec952441c2ec89b8f5d226c33bc697914f46e876b44a4edd3e7864cf4d0"},
+]
+single-source = [
+    {file = "single-source-0.1.5.tar.gz", hash = "sha256:61b5c04e558fa73ac725b9fbdfb24027845533d99ca72e225efd5810dc261483"},
+    {file = "single_source-0.1.5-py3-none-any.whl", hash = "sha256:cc4574d4b62ae88230dc21a468017b9a25aacd41e2b16686ee8ec529f219f254"},
 ]
 singledispatch = [
     {file = "singledispatch-3.6.1-py2.py3-none-any.whl", hash = "sha256:85c97f94c8957fa4e6dab113156c182fb346d56d059af78aad710bced15f16fb"},

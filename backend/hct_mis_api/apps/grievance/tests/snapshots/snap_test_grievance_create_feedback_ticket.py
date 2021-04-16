@@ -12,7 +12,7 @@ snapshots['TestGrievanceCreateFeedbackTicketQuery::test_create_positive_feedback
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 7,
                     'consent': True,
                     'description': 'Test Feedback',
