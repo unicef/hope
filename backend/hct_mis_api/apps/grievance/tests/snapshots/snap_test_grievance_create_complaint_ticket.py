@@ -12,7 +12,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': {
@@ -59,7 +59,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': {
@@ -77,7 +77,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
                     'language': 'Polish, English'
                 },
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': {
@@ -124,7 +124,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': None,
@@ -165,7 +165,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': None,
@@ -210,7 +210,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': {
@@ -255,7 +255,7 @@ snapshots['TestGrievanceCreateComplaintTicketQuery::test_create_complaint_ticket
         'createGrievanceTicket': {
             'grievanceTickets': [
                 {
-                    'admin': 'City Test (Admin type one PCode: asdfgfhghkjltr)',
+                    'admin': 'City Test',
                     'category': 4,
                     'complaintTicketDetails': {
                         'household': {

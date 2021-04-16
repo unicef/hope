@@ -4,10 +4,15 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import DrawerMaterial from '@material-ui/core/Drawer';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
+import { gql } from 'apollo-boost';
+import { useQuery } from '@apollo/react-hooks';
 import { theme as themeObj } from '../../theme';
 import { Logo } from '../Logo';
+import { useMeQuery } from '../../__generated__/graphql';
+import packageJson from '../../../package.json';
+import { AlertDialog } from '../AlertDialog';
 import { DrawerItems } from './DrawerItems';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
@@ -56,6 +61,14 @@ const useStyles = makeStyles((theme: typeof themeObj) => ({
     borderRightStyle: 'solid',
     height: '100%',
   },
+  version: {
+    borderRightWidth: 2,
+    borderRightColor: '#E1E1E1',
+    color: '#aaa',
+    borderRightStyle: 'solid',
+    padding: 4,
+    textAlign: 'center',
+  },
 }));
 interface Props {
   open: boolean;
@@ -64,6 +77,12 @@ interface Props {
   dataCy: string;
 }
 
+const GET_BACKEND_VERSION = gql`
+  {
+    backendVersion @client
+  }
+`;
+
 export function Drawer({
   open,
   handleDrawerClose,
@@ -71,6 +90,20 @@ export function Drawer({
   dataCy,
 }: Props): React.ReactElement {
   const classes = useStyles({});
+  const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
+  const { data } = useQuery(GET_BACKEND_VERSION);
+  const backendVersion = data?.backendVersion;
+  const frontendVersion = packageJson.version;
+  useEffect(() => {
+    if (
+      !showMismatchedDialog &&
+      backendVersion &&
+      frontendVersion &&
+      backendVersion !== frontendVersion
+    ) {
+      setShowMismatchedDialog(true);
+    }
+  }, [backendVersion, frontendVersion, showMismatchedDialog]);
   return (
     <DrawerMaterial
       variant='permanent'
@@ -93,6 +126,14 @@ export function Drawer({
       <List className={classes.list}>
         <DrawerItems currentLocation={currentLocation} />
       </List>
+      <div className={classes.version}>
+        <div>Backend Version: {backendVersion}</div>
+        <div>Frontend Version: {frontendVersion}</div>
+      </div>
+      <AlertDialog
+        show={showMismatchedDialog}
+        message='Version mismatch, please refresh page'
+      />
     </DrawerMaterial>
   );
 }
