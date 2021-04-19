@@ -1,19 +1,20 @@
 import datetime
 import logging
 
-import graphene
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
+
+import graphene
 from django_filters import (
-    FilterSet,
     CharFilter,
-    ModelMultipleChoiceFilter,
-    OrderingFilter,
-    MultipleChoiceFilter,
-    TypedMultipleChoiceFilter,
     ChoiceFilter,
+    FilterSet,
     ModelChoiceFilter,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+    OrderingFilter,
+    TypedMultipleChoiceFilter,
     UUIDFilter,
 )
 from graphene import relay
@@ -27,9 +28,9 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    _INDIVIDUAL,
     _HOUSEHOLD,
+    _INDIVIDUAL,
+    CORE_FIELDS_ATTRIBUTES,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -37,29 +38,29 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
-    to_choice_object,
-    choices_to_dict,
-    nested_getattr,
+    chart_filters_decoder,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    chart_filters_decoder,
+    choices_to_dict,
+    nested_getattr,
+    to_choice_object,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketNote,
-    TicketSensitiveDetails,
+    TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
+    TicketNote,
     TicketPaymentVerificationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -339,39 +340,23 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
-            if not (
-                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value, business_area)
-                or (
-                    object_instance.created_by == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value, business_area
-                    )
-                )
-                or (
-                    object_instance.assigned_to == user
-                    and user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area)
-                )
-            ):
-                logger.error("Permission Denied")
-                raise GraphQLError("Permission Denied")
+            perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
         else:
-            if not (
-                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value, business_area)
-                or (
-                    object_instance.created_by == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value, business_area
-                    )
-                )
-                or (
-                    object_instance.assigned_to == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value, business_area
-                    )
-                )
-            ):
-                logger.error("Permission Denied")
-                raise GraphQLError("Permission Denied")
+            perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value
+        check_creator = object_instance.created_by == user and user.has_permission(
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value, business_area
+        )
+
+        check_assignee = object_instance.assigned_to == user and user.has_permission(
+            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area
+        )
+
+        if user.has_permission(perm, business_area) or check_creator or check_assignee:
+            return True
+
+        msg = "User is not active creator/assignee and does not have '{perm}' permission"
+        logger.error(msg)
+        raise GraphQLError(msg)
 
     class Meta:
         model = GrievanceTicket
