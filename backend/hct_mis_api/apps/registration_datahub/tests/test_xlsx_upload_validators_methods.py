@@ -166,7 +166,7 @@ class TestXLSXValidatorsMethods(TestCase):
             data_only=True,
         )
 
-        sheets_and_expected_values = (
+        invalid_file = (
             (
                 wb["Households"],
                 [
@@ -312,11 +312,6 @@ class TestXLSXValidatorsMethods(TestCase):
                     {
                         "row_number": 0,
                         "header": "relationship_i_c",
-                        "message": "Sheet: Individuals, Household with id: TEXT, has to have a head of household",
-                    },
-                    {
-                        "row_number": 0,
-                        "header": "relationship_i_c",
                         "message": "Sheet: Individuals, Household with id: 36, has to have a head of household",
                     },
                     {
@@ -397,10 +392,12 @@ class TestXLSXValidatorsMethods(TestCase):
                     {
                         "row_number": 0,
                         "header": "relationship_i_c",
-                        "message": "Sheet: Individuals, Household with id: 52, has to have a head of household",
+                        "message": "Sheet: Individuals, Household with id: Some Text, has to have a head of household",
                     },
                 ],
             ),
+        )
+        valid_file = (
             (
                 wb_valid["Households"],
                 [],
@@ -410,12 +407,13 @@ class TestXLSXValidatorsMethods(TestCase):
                 [],
             ),
         )
-
-        for sheet, expected_values in sheets_and_expected_values:
+        files = (invalid_file, valid_file)
+        for file in files:
             upload_xlsx_instance_validator = UploadXLSXInstanceValidator()
-            upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
-            result = upload_xlsx_instance_validator.rows_validator(sheet)
-            self.assertEqual(result, expected_values)
+            for sheet, expected_values in file:
+                upload_xlsx_instance_validator.image_loader = SheetImageLoader(sheet)
+                result = upload_xlsx_instance_validator.rows_validator(sheet)
+                self.assertEqual(result, expected_values)
 
     def test_validate_file_extension(self):
         file_path, expected_values = (
