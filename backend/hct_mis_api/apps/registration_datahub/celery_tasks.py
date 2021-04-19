@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 @app.task
 def registration_xlsx_import_task(registration_data_import_id, import_data_id, business_area):
     logger.info("registration_xlsx_import_task start")
-
     try:
         from hct_mis_api.apps.registration_datahub.tasks.rdi_create import RdiXlsxCreateTask
 
