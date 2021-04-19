@@ -10,6 +10,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedIndividualRoleInHousehold,
     ImportedIndividualIdentity,
+    KoboImportedSubmission,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -58,4 +59,9 @@ class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
+    pass
+
+
+@admin.register(KoboImportedSubmission)
+class KoboImportedSubmissionAdmin(HOPEModelAdminBase):
     pass

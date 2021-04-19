@@ -43,6 +43,10 @@ export const AllPaymentRecords = gql`
             unicefId
             size
           }
+          headOfHousehold {
+            id
+            fullName
+          }
           currency
           entitlementQuantity
           deliveredQuantity

@@ -160,7 +160,7 @@ class GrievanceTicketFilter(FilterSet):
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin__in=[admin.title for admin in value])
+            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):
@@ -311,6 +311,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     individual = graphene.Field(IndividualNode)
     payment_record = graphene.Field(PaymentRecordNode)
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
+    admin = graphene.String()
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
@@ -389,6 +390,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_payment_record(grievance_ticket, info):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
+
+    def resolve_admin(grievance_ticket, info):
+        if grievance_ticket.admin2:
+            return grievance_ticket.admin2.title
+        return None
 
 
 class TicketNoteNode(DjangoObjectType):

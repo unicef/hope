@@ -39,7 +39,8 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXInstanceValidator, KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
+    KoboProjectImportDataInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -217,6 +218,8 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             raise ValidationError("Only In Review Registration Data Import can be merged into Population")
 
     @classmethod
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @is_authenticated
     def mutate(cls, root, info, id, **kwargs):
         decode_id = decode_id_string(id)
@@ -232,9 +235,9 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 
         cls.validate(status=obj_hct.status)
-        merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
+        merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
@@ -289,7 +292,7 @@ class UploadImportDataXLSXFile(PermissionMutation):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation( PermissionMutation):
+class SaveKoboProjectImportDataMutation(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -307,7 +310,7 @@ class SaveKoboProjectImportDataMutation( PermissionMutation):
         submissions = kobo_api.get_project_submissions(uid)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        validator=KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator()
         errors = validator.validate_everything(submissions, business_area.name)
 
         if errors:

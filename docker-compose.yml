@@ -91,7 +91,7 @@ services:
       - ./backend:/code/
       - backend-data:/data
     restart: always
-    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler"
     depends_on:
       - backend
       - db

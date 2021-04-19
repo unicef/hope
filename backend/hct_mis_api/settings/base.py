@@ -4,6 +4,8 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
+from uuid import uuid4
 
 ####
 # Change per project
@@ -16,6 +18,8 @@ from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
+
+from single_source import get_version
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -165,14 +169,15 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
+    "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
+        "DIRS": [os.path.join(PROJECT_ROOT, "apps", "core", "templates")],
         "OPTIONS": {
+            "loaders": ["django.template.loaders.filesystem.Loader", "django.template.loaders.app_directories.Loader"],
             "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
@@ -484,6 +489,8 @@ COUNTRIES_OVERRIDE = {
     },
 }
 
+ROOT_TOKEN = os.getenv("ROOT_ACCESS_TOKEN", uuid4())
+
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 SENTRY_URL = os.getenv("SENTRY_URL")
 if SENTRY_DSN:
@@ -559,3 +566,4 @@ SMART_ADMIN_SECTIONS = {
         "sites",
     ],
 }
+VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
