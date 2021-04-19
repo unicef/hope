@@ -6,7 +6,6 @@ resources:
     source: '[CI] HOPE'
     trigger: 
       branches:
-      - staging
       - master
 
 variables:
