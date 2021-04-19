@@ -21,8 +21,16 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.registry: "ICTD-HOPE-DEV-ACR"
-  Docker.repository: "uniappsk8shopedev" 
+  ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
+    Docker.registry: "ICTD-HOPE-DEV-ACR"
+    Docker.repository: "uniappsk8shopedev"
+    Docker.url: "uniappsakshopedev.azurecr.io"
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
+    Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
+    Docker.repository_trn: "uniappsk8shopedev" 
+    Docker.registry: "ICTD-HOPE-PRD-ACR"
+    Docker.repository: "uniappsakshope"
+    Docker.url: "uniappsakshope.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}:
     Sentry.frontend.dsn: $(DEV_SENTRY_FRONTEND_DSN)
   ${{ if eq(variables['Build.SourceBranchName'], 'staging') }}:
@@ -49,7 +57,18 @@ stages:
               tags: |
                 $(Build.BuildId)
                 $(Build.SourceVersion)
-                dev-latest
+
+          - task: Docker@2
+            displayName: Build&Push
+            condition: and(succeeded(), eq(variables.isTraining, true))
+            inputs:
+              command: buildAndPush
+              dockerfile: $(Docker.backend.filePath)
+              repository: $(Docker.backend.repository)
+              containerRegistry: $(Docker.registry_trn)
+              tags: |
+                $(Build.BuildId)
+                $(Build.SourceVersion)
 
       - job: build_push_frontend
         displayName: "[FRONTEND]"
@@ -85,7 +104,7 @@ stages:
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
               arguments: --build-arg SENTRY_FRONTEND_DSN=$(Sentry.frontend.trn_dsn)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registry_trn)
               tags: |
                 $(Build.BuildId)-trn
                 $(Build.SourceVersion)-trn
@@ -97,7 +116,7 @@ stages:
               command: push
               dockerfile: $(Docker.frontend.filePath)
               repository: $(Docker.frontend.repository)
-              containerRegistry: $(Docker.registry)
+              containerRegistry: $(Docker.registry_trn)
               tags: |
                 $(Build.BuildId)-trn
                 $(Build.SourceVersion)-trn
@@ -108,7 +127,7 @@ stages:
       - job: django_tests
         displayName: "[DJANGO TEST]"
         variables:
-          backend_image: uniappsakshopedev.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion)
+          backend_image: $(Docker.url)/$(Docker.backend.repository):$(Build.SourceVersion)
         steps:
           - task: Docker@2
             displayName: "[ACR] Login"
@@ -133,7 +152,7 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
-                backend_image=uniappsakshopedev.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion)
+                backend_image=$(Docker.url)/$(Docker.backend.repository):$(Build.SourceVersion)
 
           - task: PublishTestResults@2
             displayName: "Publish Test Result"
