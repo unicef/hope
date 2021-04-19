@@ -14,7 +14,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         return None, None
 
     household = main_individual.household
-    admin_level_2 = household.admin2 if household else ""
+    admin_level_2 = household.admin2 if household else None
     area = household.village if household else ""
 
     ticket = GrievanceTicket.objects.create(
@@ -40,8 +40,11 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
     for possible_duplicate in individuals_queryset:
         linked_tickets = []
         for individual in possible_duplicate.deduplication_golden_record_results[results_key]:
+            duplicate = Individual.objects.filter(id=individual.get("hit_id")).first()
+            if not duplicate:
+                continue
             ticket, ticket_details = create_grievance_ticket_with_details(
-                main_individual=Individual.objects.get(id=individual.get("hit_id")),
+                main_individual=duplicate,
                 possible_duplicate=possible_duplicate,
                 business_area=business_area,
             )
