@@ -341,16 +341,15 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
+            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value
+            owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value
         else:
             perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value
-        check_creator = object_instance.created_by == user and user.has_permission(
-            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value, business_area
-        )
+            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
+            owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
 
-        check_assignee = object_instance.assigned_to == user and user.has_permission(
-            Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area
-        )
-
+        check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
+        check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
         if user.has_permission(perm, business_area) or check_creator or check_assignee:
             return True
 
