@@ -6,6 +6,7 @@ from django_filters import (
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
+    BooleanFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
@@ -87,6 +88,7 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
+    withdrawn = BooleanFilter(field_name="withdrawn")
 
     class Meta:
         model = Household
@@ -100,6 +102,7 @@ class HouseholdFilter(FilterSet):
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
+            "withdrawn": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -149,6 +152,7 @@ class IndividualFilter(FilterSet):
     admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")
+    withdrawn = BooleanFilter(field_name="withdrawn")
 
     class Meta:
         model = Individual
@@ -160,6 +164,7 @@ class IndividualFilter(FilterSet):
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
+            "withdrawn": ["exact"],
         }
 
     order_by = CustomOrderingFilter(

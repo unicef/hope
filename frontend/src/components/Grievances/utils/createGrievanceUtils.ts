@@ -62,6 +62,15 @@ function prepareSesitiveVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
+  let { flexFields } = values.individualData;
+  if (flexFields) {
+    flexFields = { ...flexFields };
+    for (const [key, value] of Object.entries(flexFields)) {
+      if (value === '') {
+        delete flexFields[key];
+      }
+    }
+  }
   return {
     variables: {
       input: {
@@ -72,7 +81,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
           issueType: {
             addIndividualIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              individualData: values.individualData,
+              individualData: { ...values.individualData, flexFields },
             },
           },
         },
@@ -103,7 +112,6 @@ function prepareDeleteIndividualVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareEditIndividualVariables(requiredVariables, values) {
-  console.log('values', values);
   const individualData = values.individualDataUpdateFields
     .filter((item) => item.fieldName && !item.isFlexField)
     .reduce((prev, current) => {
@@ -244,7 +252,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values?.admin?.node?.title,
+    admin: values?.admin?.node?.pCode,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(

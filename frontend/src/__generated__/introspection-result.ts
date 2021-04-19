@@ -33,13 +33,13 @@
             "name": "AdminAreaNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "GrievanceTicketNode"
           },
           {
-            "name": "IndividualNode"
+            "name": "TicketNoteNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "TicketComplaintDetailsNode"
           },
           {
             "name": "PaymentRecordNode"
@@ -51,28 +51,13 @@
             "name": "ProgramNode"
           },
           {
-            "name": "TargetPopulationNode"
+            "name": "HouseholdNode"
           },
           {
-            "name": "SteficonRuleNode"
+            "name": "IndividualNode"
           },
           {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "TicketComplaintDetailsNode"
+            "name": "RegistrationDataImportNode"
           },
           {
             "name": "TicketSensitiveDetailsNode"
@@ -114,10 +99,25 @@
             "name": "TicketAddIndividualDetailsNode"
           },
           {
-            "name": "GrievanceTicketNode"
+            "name": "TargetPopulationNode"
           },
           {
-            "name": "TicketNoteNode"
+            "name": "SteficonRuleNode"
+          },
+          {
+            "name": "ReportNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
           },
           {
             "name": "TicketNeedsAdjudicationDetailsNode"

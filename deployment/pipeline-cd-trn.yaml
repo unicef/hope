@@ -55,8 +55,8 @@ stages:
                 global.init=false,\
                 backend.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
                 celery.image=$(Docker.registry)/$(Docker.backend.repository):$(Build.SourceVersion),\
-                celery.replicaCount=0,\
-                celeryflower.replicaCount=0,\
+                celery.replicaCount=1,\
+                celeryflower.replicaCount=1,\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
                 backend.config.CELERY_TASK_ALWAYS_EAGER='true',\
@@ -72,10 +72,14 @@ stages:
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\
-                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion),\
+                frontend.image=$(Docker.registry)/$(Docker.frontend.repository):$(Build.SourceVersion)-trn,\
                 ingress.host=trn-hope.unitst.org,\
                 ingress.tls=true,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
-                cashassistdatahubpostgresql.postgresqlPassword=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.enabled=false,\
+                cashassistdatahubpostgresql.externalDatabase.host=$(CASH_ASSIST_DATAHUB_POSTGRES_HOST),\
+                cashassistdatahubpostgresql.externalDatabase.user=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
+                cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
+                cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
                 celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),"

@@ -17,7 +17,8 @@ interface EditValuesTypes {
   issueType?: string | number;
   category?: string | number;
   language: string;
-  admin: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any;
   area: string;
   selectedHousehold?;
   selectedIndividual?;
@@ -154,7 +155,7 @@ export function prepareInitialValues(
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
     language: ticket.language || '',
-    admin: ticket.admin || '',
+    admin: ticket.admin2 ? { node: ticket.admin2 } : null,
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
@@ -241,6 +242,15 @@ function prepareSesitiveVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
+  let { flexFields } = values.individualData;
+  if (flexFields) {
+    flexFields = { ...flexFields };
+    for (const [key, value] of Object.entries(flexFields)) {
+      if (value === '') {
+        delete flexFields[key];
+      }
+    }
+  }
   return {
     variables: {
       input: {
@@ -248,7 +258,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           addIndividualIssueTypeExtras: {
-            individualData: values.individualData,
+            individualData: { ...values.individualData, flexFields },
           },
         },
       },
@@ -378,7 +388,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values?.admin?.node?.title,
+    admin: values?.admin?.node?.pCode,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(

@@ -45,7 +45,7 @@ class TestRoleReassignMutation(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="sadf3223")
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
         self.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
@@ -84,7 +84,7 @@ class TestRoleReassignMutation(APITestCase):
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin=self.admin_area.title,
+            admin2=self.admin_area,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )

@@ -1,0 +1,104 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kobo.fullname" . }}-kobocat
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kobo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+    - {{ printf "%s.%s" .Values.kobocat.subdomain .Values.ingress.host }}
+    secretName: {{ .Values.ingress.tlsSecret }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.kobocat.subdomain .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kobo.fullname" . }}-kobocat
+                port: 
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kobo.fullname" . }}-enketo
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kobo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    appgw.ingress.kubernetes.io/backend-protocol: "https"
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+    - {{ printf "%s.%s" .Values.enketo.subdomain .Values.ingress.host }}
+    secretName: {{ .Values.ingress.tlsSecret }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.enketo.subdomain .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kobo.fullname" . }}-enketo
+                port:
+                  {{- if .Values.ingress.tls }}
+                  number: 443
+                  {{- else }}
+                  number: 80
+                  {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kobo.fullname" . }}-kpi
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: kobo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+  - hosts:
+    secretName: {{ .Values.ingress.tlsSecret }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.kpi.subdomain .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kobo.fullname" . }}-kpi
+                port: 
+                  number: 80
+---

@@ -367,6 +367,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             raise
 
     def __init__(self):
+        self.head_of_household_count = defaultdict(int)
         self.core_fields = self.get_core_fields()
         self.flex_fields = self.get_flex_fields()
         self.all_fields = self.get_all_fields()
@@ -576,7 +577,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
 
             invalid_rows = []
             current_household_id = None
-            head_of_household_count = defaultdict(int)
 
             identities_numbers = {
                 "unhcr_id_no_i_c": {
@@ -652,12 +652,13 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     if header.value == "household_id":
                         current_household_id = value
                         if sheet.title == "Households":
-                            self.household_ids.append(value)
+                            self.household_ids.append(current_household_id)
+                            self.head_of_household_count[current_household_id] = 0
                         else:
                             household_id_can_be_empty = True
 
                     if header.value == "relationship_i_c" and cell.value == "HEAD":
-                        head_of_household_count[current_household_id] += 1
+                        self.head_of_household_count[current_household_id] += 1
 
                     field_type = current_field["type"]
                     fn = switch_dict.get(field_type)
@@ -699,14 +700,16 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                     )
                     documents_or_identity_dict[header]["validation_data"].append({"row_number": row[0].row})
 
-            # validate head of household count
-            for household_id, count in head_of_household_count.items():
-                if count == 0:
-                    message = f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
-                    invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
-                elif count > 1:
-                    message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
-                    invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+            if sheet.title == "Individuals":
+                for household_id, count in self.head_of_household_count.items():
+                    if count == 0:
+                        message = (
+                            f"Sheet: Individuals, Household with id: {household_id}, has to have a head of household"
+                        )
+                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
+                    elif count > 1:
+                        message = f"Sheet: Individuals, There are multiple head of households for household with id: {household_id}"
+                        invalid_rows.append({"row_number": 0, "header": "relationship_i_c", "message": message})
 
             invalid_doc_rows = []
             invalid_ident_rows = []
@@ -927,18 +930,14 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def get_expected_individuals_core_fields(self):
         try:
-            return {
-                field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in self.core_fields["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
 
     def get_expected_individuals_flex_fields(self):
         try:
-            return {
-                field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]
-            }
+            return {field["xlsx_field"] for field in self.flex_fields["individuals"].values() if field["required"]}
         except Exception as e:
             logger.exception(e)
             raise
@@ -1144,8 +1143,8 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
             # have fun debugging this ;_;
 
             identities_numbers = {
-                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": []},
-                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": []},
+                "unhcr_id_no_i_c": {"agency": "UNHCR", "validation_data": [], "numbers": [], "issuing_countries": []},
+                "scope_id_no_i_c": {"agency": "WFP", "validation_data": [], "numbers": [], "issuing_countries": []},
             }
             documents_numbers = {
                 "birth_certificate_no_i_c": {

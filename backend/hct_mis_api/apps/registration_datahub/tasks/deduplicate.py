@@ -84,7 +84,7 @@ class DeduplicateTask:
         query_dict = {
             "min_score": min_score,
             # TODO add pagination
-            "size": "10000",
+            "size": "100",
             "query": {
                 "bool": {
                     "minimum_should_match": 1,
@@ -421,7 +421,7 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            0,
+            config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
         )
         # noinspection PyTypeChecker
         query_dict["query"]["bool"]["filter"] = [

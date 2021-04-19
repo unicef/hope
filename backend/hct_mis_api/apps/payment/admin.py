@@ -1,5 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.utils.safestring import mark_safe
 
+from admin_extra_urls.decorators import button
+from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
 
 from hct_mis_api.apps.payment.models import (
@@ -38,7 +41,7 @@ class PaymentRecordAdmin(HOPEModelAdminBase):
 
 
 @admin.register(CashPlanPaymentVerification)
-class CashPlanPaymentVerificationAdmin(HOPEModelAdminBase):
+class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("cash_plan", "status", "verification_method")
     list_filter = (
         ("status", ChoicesFieldComboFilter),
@@ -46,6 +49,28 @@ class CashPlanPaymentVerificationAdmin(HOPEModelAdminBase):
     )
     date_hierarchy = "updated_at"
     raw_id_fields = ("cash_plan",)
+
+    @button()
+    def execute_sync_rapid_pro(self, request):
+        if request.method == "POST":
+            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
+
+            task = CheckRapidProVerificationTask()
+            task.execute()
+            self.message_user(request, "Rapid Pro synced", messages.SUCCESS)
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.execute_sync_rapid_pro,
+                mark_safe(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
+                        <h3>Import will only be simulated</h3> 
+                        """
+                ),
+                "Successfully executed",
+                template="admin_extra_urls/confirm.html",
+            )
 
 
 @admin.register(PaymentVerification)
