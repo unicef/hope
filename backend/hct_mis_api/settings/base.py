@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
 from uuid import uuid4
 
 ####
@@ -17,6 +18,8 @@ from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
+
+from single_source import get_version
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -166,6 +169,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "hct_mis_api.middlewares.sentry.SentryScopeMiddleware",
+    "hct_mis_api.middlewares.version.VersionMiddleware",
 ]
 
 TEMPLATES = [
@@ -562,3 +566,4 @@ SMART_ADMIN_SECTIONS = {
         "sites",
     ],
 }
+VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)

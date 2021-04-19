@@ -100,6 +100,9 @@ export const GrievanceTicket = gql`
             edges {
               node {
                 id
+                type {
+                  type
+                }
                 documentNumber
               }
             }
