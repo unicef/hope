@@ -216,6 +216,8 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             logger.error("Only In Review Registration Data Import can be merged into Population")
             raise ValidationError("Only In Review Registration Data Import can be merged into Population")
 
+    @transaction.atomic(using="default")
+    @transaction.atomic(using="registration_datahub")
     @classmethod
     @is_authenticated
     def mutate(cls, root, info, id, **kwargs):
@@ -232,9 +234,9 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
         cls.has_permission(info, Permissions.RDI_MERGE_IMPORT, obj_hct.business_area)
 
         cls.validate(status=obj_hct.status)
-        merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
         obj_hct.status = RegistrationDataImport.MERGING
         obj_hct.save()
+        merge_registration_data_import_task.delay(registration_data_import_id=decode_id)
 
         log_create(
             RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", info.context.user, old_obj_hct, obj_hct
