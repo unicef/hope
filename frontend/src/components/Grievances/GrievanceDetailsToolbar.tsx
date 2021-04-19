@@ -126,6 +126,9 @@ export const GrievanceDetailsToolbar = ({
     if (!hasApproveOption) {
       return '';
     }
+    if (ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
+      return '';
+    }
 
     // added msg handling for
     let confirmationMessage = '';

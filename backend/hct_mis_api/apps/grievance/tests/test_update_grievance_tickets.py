@@ -74,8 +74,8 @@ class TestUpdateGrievanceTickets(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123333")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="2343123")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -130,7 +130,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -156,7 +156,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -190,7 +190,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
@@ -208,7 +208,6 @@ class TestUpdateGrievanceTickets(APITestCase):
             id="a2a15944-f836-4764-8163-30e0c47ce3bb",
             category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
             issue_type=None,
-            admin="",
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
             description="",
@@ -236,7 +235,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": self.add_individual_grievance_ticket.description,
                 "assignedTo": self.id_to_base64(self.add_individual_grievance_ticket.assigned_to.id, "UserNode"),
-                "admin": self.add_individual_grievance_ticket.admin,
+                "admin": self.add_individual_grievance_ticket.admin2.p_code,
                 "language": self.add_individual_grievance_ticket.language,
                 "area": self.add_individual_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.add_individual_grievance_ticket.id, "GrievanceTicketNode"),
@@ -328,7 +327,7 @@ class TestUpdateGrievanceTickets(APITestCase):
                 "assignedTo": self.id_to_base64(
                     self.individual_data_change_grievance_ticket.assigned_to.id, "UserNode"
                 ),
-                "admin": self.individual_data_change_grievance_ticket.admin,
+                "admin": self.individual_data_change_grievance_ticket.admin2.p_code,
                 "language": self.individual_data_change_grievance_ticket.language,
                 "area": self.individual_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.individual_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -429,7 +428,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "this is new description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.household_data_change_grievance_ticket.admin,
+                "admin": self.household_data_change_grievance_ticket.admin2.p_code,
                 "language": self.household_data_change_grievance_ticket.language,
                 "area": self.household_data_change_grievance_ticket.area,
                 "ticketId": self.id_to_base64(self.household_data_change_grievance_ticket.id, "GrievanceTicketNode"),
@@ -496,7 +495,7 @@ class TestUpdateGrievanceTickets(APITestCase):
             "input": {
                 "description": "New Description",
                 "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
-                "admin": self.admin_area_1.title,
+                "admin": self.admin_area_1.p_code,
                 "language": "Polish, English",
                 "area": "Example Town",
                 "ticketId": self.id_to_base64(self.positive_feedback_grievance_ticket.id, "GrievanceTicketNode"),
@@ -512,12 +511,12 @@ class TestUpdateGrievanceTickets(APITestCase):
         if name == "with_permission":
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "New Description")
             self.assertEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin, self.admin_area_1.title)
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2.title, self.admin_area_1.title)
             self.assertNotEqual(self.positive_feedback_grievance_ticket.language, "Polish, English")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
         else:
             self.assertEqual(self.positive_feedback_grievance_ticket.description, "")
             self.assertNotEqual(str(self.positive_feedback_grievance_ticket.assigned_to.id), self.user_two.id)
-            self.assertEqual(self.positive_feedback_grievance_ticket.admin, "")
+            self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
             self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")

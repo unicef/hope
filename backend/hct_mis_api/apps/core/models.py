@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
+from django_celery_beat.models import PeriodicTask
+from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -319,7 +321,6 @@ class CountryCodeMapManager(models.Manager):
 
         return self._cache["ca2"].get(ca_code, ca_code)
 
-
     def build_cache(self):
         if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
             for entry in self.all():
@@ -337,3 +338,21 @@ class CountryCodeMap(models.Model):
 
     class Meta:
         ordering = ("country",)
+
+
+class CustomModelEntry(ModelEntry):
+    """
+    don't update existing tasks
+    """
+
+    @classmethod
+    def from_entry(cls, name, app=None, **entry):
+        obj, _ = PeriodicTask._default_manager.get_or_create(
+            name=name,
+            defaults=cls._unpack_fields(**entry),
+        )
+        return cls(obj, app=app)
+
+
+class CustomDatabaseScheduler(DatabaseScheduler):
+    Entry = CustomModelEntry

@@ -119,3 +119,7 @@ def get_other_issuer_query(_, args):
 def get_documents_issuer_query(document_type, country_alpha3):
     alpha2 = Countries.get_country_value(country_alpha3)
     return Q(documents__type__type=document_type, documents__type__country=alpha2)
+
+
+def get_role_query(_, args):
+    return Q(households_and_roles__role=args[0])

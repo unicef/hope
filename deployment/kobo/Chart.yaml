@@ -1,0 +1,21 @@
+apiVersion: v2
+appVersion: 2.020.25
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.x.x
+- alias: redismain
+  name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.x.x
+- alias: rediscache
+  name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.x.x
+- name: mongodb
+  repository: https://charts.bitnami.com/bitnami
+  version: 7.x.x
+description: A Helm chart for Kobotoolbox
+name: kobo
+type: application
+version: 0.2.0

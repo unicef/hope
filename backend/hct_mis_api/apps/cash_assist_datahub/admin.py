@@ -45,6 +45,28 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
     ordering = ("timestamp",)
 
+    @button()
+    def execute_pull(self, request):
+        from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
+
+        if request.method == "POST":
+            task = PullFromDatahubTask()
+            task.execute()
+            self.message_user(request, "Cash Assist Pull Finished", messages.SUCCESS)
+        else:
+            return _confirm_action(
+                self,
+                request,
+                self.execute_pull,
+                mark_safe(
+                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
+                        <h3>Import will only be simulated</h3> 
+                        """
+                ),
+                "Successfully executed",
+                template="admin_extra_urls/confirm.html",
+            )
+
     @button(label="test import", permission=lambda r, o: r.user.is_superuser)
     def execute(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
@@ -57,7 +79,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 with transaction.atomic(using="default"):
                     with transaction.atomic(using="cash_assist_datahub_ca"):
                         runner.copy_session(session)
-                    raise RollbackException()
+                        raise RollbackException()
             except RollbackException:
                 self.message_user(request, "Test Completed", messages.SUCCESS)
             except Exception as e:
@@ -75,7 +97,6 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 """
                 ),
                 "Successfully executed",
-                template="admin_extra_urls/confirm_page.html",
             )
 
     @button()
