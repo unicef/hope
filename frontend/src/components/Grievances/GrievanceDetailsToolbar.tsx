@@ -109,7 +109,7 @@ export const GrievanceDetailsToolbar = ({
 
     // no changes were approved
     if (!approved)
-      return `You did not approved any changes. All change requests (${notApproved}) will be automatically rejected.`;
+      return `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`;
 
     // some changes were approved
     return `You approved ${approved} change${
@@ -120,30 +120,38 @@ export const GrievanceDetailsToolbar = ({
   const getClosingConfirmationExtraTextForOtherTypes = (): string => {
     const hasApproveOption =
       ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
-      GRIEVANCE_CATEGORIES.DEDUPLICATION ||
-      GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION ||
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
 
     if (!hasApproveOption) {
-      return '';
-    }
-    if (ticket?.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL) {
       return '';
     }
 
     // added msg handling for
     let confirmationMessage = '';
-    if (ticket.deleteIndividualTicketDetails?.approveStatus === false) {
+    if (
+      ticket.issueType?.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.deleteIndividualTicketDetails?.approveStatus === false
+    ) {
       confirmationMessage =
-        'You have not approved withdrawing individual, the ticket will be automatically rejected.';
-    } else if (ticket.addIndividualTicketDetails?.approveStatus === false) {
+        'You did not approve any changes. Are you sure you want to close the ticket?';
+    } else if (
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+      ticket.addIndividualTicketDetails?.approveStatus === false
+    ) {
+      confirmationMessage = 'You did not approve any changes.';
+    } else if (
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      ticket.systemFlaggingTicketDetails?.approveStatus === false
+    ) {
+      confirmationMessage = '';
+    } else if (
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual
+    ) {
       confirmationMessage =
-        'You have not approved adding individual, the ticket will be automatically rejected.';
-    } else if (ticket.systemFlaggingTicketDetails?.approveStatus === false) {
-      confirmationMessage =
-        'You have not confirmed sanction list flag, the ticket will be automatically rejected.';
-    } else if (!ticket.needsAdjudicationTicketDetails?.selectedIndividual) {
-      confirmationMessage =
-        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system No duplicates were found.';
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found';
     }
 
     return confirmationMessage;
@@ -179,8 +187,16 @@ export const GrievanceDetailsToolbar = ({
   let closeButton = (
     <ConfirmationDialog
       title='Close ticket'
-      extraContent={closingConfirmationText}
-      content={getClosingConfirmationExtraText()}
+      extraContent={
+        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+          ? closingConfirmationText
+          : getClosingConfirmationExtraText()
+      }
+      content={
+        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+          ? getClosingConfirmationExtraText()
+          : closingConfirmationText
+      }
       continueText='close ticket'
     >
       {(confirm) => (
@@ -276,8 +292,8 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
-                extraContent={closingConfirmationText}
-                content={getClosingConfirmationExtraText()}
+                extraContent=''
+                content={closingConfirmationText}
                 continueText='close ticket'
               >
                 {(confirm) => (
@@ -326,8 +342,8 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
-                extraContent={closingConfirmationText}
-                content={getClosingConfirmationExtraText()}
+                extraContent=''
+                content={closingConfirmationText}
                 continueText='close ticket'
               >
                 {(confirm) => (
