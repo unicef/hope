@@ -39,7 +39,8 @@ from hct_mis_api.apps.registration_datahub.schema import (
     KoboErrorNode,
 )
 from hct_mis_api.apps.registration_datahub.validators import (
-    UploadXLSXInstanceValidator, KoboProjectImportDataInstanceValidator,
+    UploadXLSXInstanceValidator,
+    KoboProjectImportDataInstanceValidator,
 )
 from hct_mis_api.apps.utils.mutations import ValidationErrorMutationMixin
 
@@ -216,9 +217,9 @@ class MergeRegistrationDataImportMutation(BaseValidator, PermissionMutation):
             logger.error("Only In Review Registration Data Import can be merged into Population")
             raise ValidationError("Only In Review Registration Data Import can be merged into Population")
 
+    @classmethod
     @transaction.atomic(using="default")
     @transaction.atomic(using="registration_datahub")
-    @classmethod
     @is_authenticated
     def mutate(cls, root, info, id, **kwargs):
         decode_id = decode_id_string(id)
@@ -291,7 +292,7 @@ class UploadImportDataXLSXFile(PermissionMutation):
         return UploadImportDataXLSXFile(created, [])
 
 
-class SaveKoboProjectImportDataMutation( PermissionMutation):
+class SaveKoboProjectImportDataMutation(PermissionMutation):
     import_data = graphene.Field(ImportDataNode)
     errors = graphene.List(KoboErrorNode)
 
@@ -309,7 +310,7 @@ class SaveKoboProjectImportDataMutation( PermissionMutation):
         submissions = kobo_api.get_project_submissions(uid)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
-        validator=KoboProjectImportDataInstanceValidator()
+        validator = KoboProjectImportDataInstanceValidator()
         errors = validator.validate_everything(submissions, business_area.name)
 
         if errors:
