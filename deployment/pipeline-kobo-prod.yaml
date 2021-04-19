@@ -5,7 +5,7 @@ variables:
   # ========================================================================
   #                          Mandatory variables 
   # ========================================================================
-  Kubernetes.serviceConnection: ""
+  Kubernetes.serviceConnection: "ICTD-HOPE-PRD-uni-apps-aks-hope-prd-ictd-kobo-prd-1617968835008"
   Kubernetes.namespace: "ictd-kobo-prd"
 
 stages:
@@ -43,7 +43,10 @@ stages:
                 mongodb.mongodbPassword=$(MONGO_PASSWORD),\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 rediscache.password=$(REDIS_CACHE_PASSWORD),\
-                redismain.password=$(REDIS_MAIN_PASSWORD),
+                redismain.password=$(REDIS_MAIN_PASSWORD),\
                 smtp.host=$(SMTP_HOST),\
                 smtp.email=kobo@unitst.org,\
-                ingress.host=$(DOMAIN),"
+                ingress.host=$(DOMAIN),\
+                ingress.scheme=https,\
+                ingress.tls=true,"
+
