@@ -173,6 +173,8 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
                     Permissions.GRIEVANCES_CREATE,
                     Permissions.GRIEVANCES_ADD_NOTE,
+                    Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+                    Permissions.GRIEVANCES_UPDATE_AS_OWNER,
                 ],
             },
             {
