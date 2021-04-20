@@ -91,7 +91,7 @@ export function Drawer({
 }: Props): React.ReactElement {
   const classes = useStyles({});
   const [showMismatchedDialog, setShowMismatchedDialog] = useState(false);
-  const { data } = useQuery(GET_BACKEND_VERSION);
+  const { data } = useQuery(GET_BACKEND_VERSION, { fetchPolicy: 'cache-only' });
   const backendVersion = data?.backendVersion;
   const frontendVersion = packageJson.version;
   useEffect(() => {
