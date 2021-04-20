@@ -118,13 +118,19 @@ export function DeleteIndividualGrievanceDetails({
     }) || [];
   const allLabels = [...labels, ...documentLabels];
 
+  let dialogText =
+    'You did not approve the following individual to be withdrawn. Are you sure you want to continue?';
+  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+    dialogText =
+      'You are approving the following individual to be withdrawn. Are you sure you want to continue?';
+  }
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Individual to be withdrawn</Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title='Warning' content='Are you sure?'>
+            <ConfirmationDialog title='Warning' content={dialogText}>
               {(confirm) => (
                 <Button
                   onClick={confirm(async () => {
