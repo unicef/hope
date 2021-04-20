@@ -16,6 +16,8 @@ from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
+    hopeOneOfPermissionClass,
+    ALL_GRIEVANCES_CREATE_MODIFY,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -467,13 +469,17 @@ class Query(graphene.ObjectType):
     all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
-        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST),),
+        permission_classes=(
+            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+        ),
     )
     individual = relay.Node.Field(IndividualNode)
     all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
-        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
+        permission_classes=(
+            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+        ),
     )
 
     section_households_reached = graphene.Field(
