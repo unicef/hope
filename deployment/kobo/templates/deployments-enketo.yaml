@@ -165,7 +165,7 @@ spec:
       {{- if .Values.ingress.tls }}
       - name: ssl
         secret:
-          secretName: {{ .Values.ingress.tls.secretName }}
+          secretName: {{ .Values.ingress.tlsSecret }}
       {{- end }}
       - name: nginx-config
         configMap:
