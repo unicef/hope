@@ -19,7 +19,7 @@ ingress:
    kubernetes.io/ingress.class: "azure/application-gateway"
    appgw.ingress.kubernetes.io/ssl-redirect: "true"
   tls: false
-  tlsSecret: ""
+  tlsSecret: "aks-unicef-tls"
 
 # Main database for kpi and kobocat
 postgresql:
@@ -38,13 +38,13 @@ postgresql:
       psql -U postgres koboform -c "create extension if not exists postgis;"
 
   externalDatabase:
-    host: ""
-    port: ""
-    user: ""
-    existingSecret: ""
-    passwordSecretKey: "postgresql-password"
-    kpiDatabase: ""
-    kobocatDatabase: ""
+    # host: "pgsql-10-reserved-hctmis-prd.postgres.database.azure.com"
+    # port: "5432"
+    # user: "koboprdusr@pgsql-10-reserved-hctmis-prd "
+    # existingSecret: "postgresql-password"
+    # passwordSecretKey: "postgresql-password"
+    # kpiDatabase: "prd_kobo_formdb"
+    # kobocatDatabase: "prd_kobo_catdb"
 
   image:
     tag: 10.12.0
