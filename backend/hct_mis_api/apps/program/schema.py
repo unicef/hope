@@ -16,6 +16,8 @@ from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     hopePermissionClass,
     Permissions,
+    hopeOneOfPermissionClass,
+    ALL_GRIEVANCES_CREATE_MODIFY,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
@@ -208,9 +210,7 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-            ),
+            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
