@@ -152,6 +152,17 @@ class Permissions(Enum):
         return tuple((i.value, i.value.replace("_", " ")) for i in cls)
 
 
+ALL_GRIEVANCES_CREATE_MODIFY = (
+    Permissions.GRIEVANCES_CREATE,
+    Permissions.GRIEVANCES_UPDATE,
+    Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+    Permissions.GRIEVANCES_UPDATE_AS_OWNER,
+    Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE,
+    Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_CREATOR,
+    Permissions.GRIEVANCES_UPDATE_REQUESTED_DATA_CHANGE_AS_OWNER,
+)
+
+
 class BasePermission:
     @classmethod
     def has_permission(cls, info, **kwargs):
@@ -184,6 +195,27 @@ def hopePermissionClass(permission):
                 if business_area is None:
                     return False
             return info.context.user.has_permission(permission.name, business_area)
+
+    return XDPerm
+
+
+def hopeOneOfPermissionClass(*permissions):
+    class XDPerm(BasePermission):
+        @classmethod
+        def has_permission(cls, info, **kwargs):
+            business_area_arg = kwargs.get("business_area")
+            if isinstance(business_area_arg, BusinessArea):
+                business_area = business_area_arg
+            else:
+                if business_area_arg is None:
+                    return False
+                business_area = BusinessArea.objects.filter(slug=business_area_arg).first()
+                if business_area is None:
+                    return False
+            for permission in permissions:
+                if info.context.user.has_permission(permission.name, business_area):
+                    return True
+            return False
 
     return XDPerm
 
