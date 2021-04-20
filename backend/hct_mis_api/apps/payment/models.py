@@ -15,12 +15,14 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_SUCCESS = "Transaction Successful"
-    STATUS_PENDING = "Transaction Pending"
     STATUS_ERROR = "Transaction Erroneous"
+    STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
+    STATUS_NOT_DISTRIBUTED = "Not Distributed"
     STATUS_CHOICE = (
         (STATUS_SUCCESS, _("Transaction Successful")),
-        (STATUS_PENDING, _("Transaction Pending")),
         (STATUS_ERROR, _("Transaction Erroneous")),
+        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
+        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
