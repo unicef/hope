@@ -21,13 +21,13 @@ variables:
   Docker.frontend.filePath: "**/frontend/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
+  Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
+  Docker.repository_trn: "uniappsk8shopedev" 
   ${{ if ne(variables['Build.SourceBranchName'], 'master') }}:
     Docker.registry: "ICTD-HOPE-DEV-ACR"
     Docker.repository: "uniappsk8shopedev"
     Docker.url: "uniappsakshopedev.azurecr.io"
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}:
-    Docker.registry_trn: "ICTD-HOPE-DEV-ACR"
-    Docker.repository_trn: "uniappsk8shopedev" 
     Docker.registry: "ICTD-HOPE-PRD-ACR"
     Docker.repository: "uniappsakshope"
     Docker.url: "uniappsakshope.azurecr.io"
