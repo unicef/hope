@@ -38,6 +38,8 @@ from hct_mis_api.apps.household.models import (
     NEEDS_ADJUDICATION,
     DUPLICATE_IN_BATCH,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
+    ROLE_PRIMARY,
+    ROLE_ALTERNATE,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
@@ -154,7 +156,9 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_individuals(parent, info):
         imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
-        collectors_ids = list(parent.representatives.values_list("id", flat=True))
+        collectors_ids = list(
+            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list("id", flat=True)
+        )
         ids = list(set(imported_individuals_ids + collectors_ids))
         return ImportedIndividual.objects.filter(id__in=ids).prefetch_related(
             Prefetch(

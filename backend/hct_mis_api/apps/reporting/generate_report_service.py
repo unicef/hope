@@ -174,10 +174,11 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments(report: Report):
+        start_date = datetime(report.date_from.year, report.date_from.month, report.date_from.day, 0, 0, 0)
+        end_date = datetime(report.date_to.year, report.date_to.month, report.date_to.day, 23, 59, 59)
         filter_vars = {
             "business_area": report.business_area,
-            "delivery_date__gte": report.date_from,
-            "delivery_date__lte": report.date_to,
+            "delivery_date__range": (start_date, end_date),
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
