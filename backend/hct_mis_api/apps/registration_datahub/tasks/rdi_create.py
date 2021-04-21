@@ -704,7 +704,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         label=label,
                         type=type_name,
                     )
-                    file = self._handle_image_field(data.get("photo", ""))
+                    file = self._handle_image_field(data.get("photo", ""), False)
                     documents.append(
                         ImportedDocument(
                             document_number=data["number"],
