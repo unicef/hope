@@ -328,7 +328,7 @@ export function RequestedIndividualDataChangeTable({
           })}
         </TableBody>
       </Table>
-      {documents.length ? (
+      {documents?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
@@ -377,7 +377,7 @@ export function RequestedIndividualDataChangeTable({
           </Table>
         </>
       ) : null}
-      {identities.length ? (
+      {identities?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
@@ -426,7 +426,7 @@ export function RequestedIndividualDataChangeTable({
           </Table>
         </>
       ) : null}
-      {documentsToRemove.length ? (
+      {documentsToRemove?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
@@ -476,7 +476,7 @@ export function RequestedIndividualDataChangeTable({
           </Table>
         </>
       ) : null}
-      {identitiesToRemove.length ? (
+      {identitiesToRemove?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
