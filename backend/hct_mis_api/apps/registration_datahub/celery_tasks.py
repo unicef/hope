@@ -23,7 +23,7 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
-        ).update(status=RegistrationDataImportDatahub.DONE)
+        ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         RegistrationDataImport.objects.filter(
             datahub_id=registration_data_import_id,
@@ -52,7 +52,7 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
 
         RegistrationDataImportDatahub.objects.filter(
             id=registration_data_import_id,
-        ).update(status=RegistrationDataImportDatahub.DONE)
+        ).update(import_done=RegistrationDataImportDatahub.DONE)
 
         RegistrationDataImport.objects.filter(
             datahub_id=registration_data_import_id,
@@ -141,7 +141,7 @@ def merge_registration_data_import_task(registration_data_import_id):
         from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 
         RegistrationDataImport.objects.filter(
-            datahub_id=registration_data_import_id,
+            id=registration_data_import_id,
         ).update(status=RegistrationDataImport.MERGE_ERROR)
         raise
 
