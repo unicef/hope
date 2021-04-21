@@ -18,6 +18,16 @@ def registration_xlsx_import_task(registration_data_import_id, import_data_id, b
         )
     except Exception as e:
         logger.exception(e)
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+
+        RegistrationDataImportDatahub.objects.filter(
+            id=registration_data_import_id,
+        ).update(import_done=RegistrationDataImportDatahub.DONE)
+
+        RegistrationDataImport.objects.filter(
+            datahub_id=registration_data_import_id,
+        ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
     logger.info("registration_xlsx_import_task end")
@@ -37,6 +47,16 @@ def registration_kobo_import_task(registration_data_import_id, import_data_id, b
         )
     except Exception as e:
         logger.exception(e)
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+        from hct_mis_api.apps.registration_datahub.models import RegistrationDataImportDatahub
+
+        RegistrationDataImportDatahub.objects.filter(
+            id=registration_data_import_id,
+        ).update(import_done=RegistrationDataImportDatahub.DONE)
+
+        RegistrationDataImport.objects.filter(
+            datahub_id=registration_data_import_id,
+        ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
     logger.info("registration_kobo_import_task end")
@@ -118,6 +138,11 @@ def merge_registration_data_import_task(registration_data_import_id):
         RdiMergeTask().execute(registration_data_import_id)
     except Exception as e:
         logger.exception(e)
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        RegistrationDataImport.objects.filter(
+            id=registration_data_import_id,
+        ).update(status=RegistrationDataImport.MERGE_ERROR)
         raise
 
     logger.info("merge_registration_data_import_task end")
@@ -136,6 +161,11 @@ def rdi_deduplication_task(registration_data_import_id):
         DeduplicateTask.deduplicate_imported_individuals(registration_data_import_datahub=rdi_obj)
     except Exception as e:
         logger.exception(e)
+        from hct_mis_api.apps.registration_data.models import RegistrationDataImport
+
+        RegistrationDataImport.objects.filter(
+            datahub_id=registration_data_import_id,
+        ).update(status=RegistrationDataImport.IMPORT_ERROR)
         raise
 
     logger.info("rdi_deduplication_task end")
