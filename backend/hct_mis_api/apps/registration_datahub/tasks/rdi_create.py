@@ -615,11 +615,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value):
+    def _handle_image_field(self, value, is_flex_field):
         download_url = ""
         for attachment in self.attachments:
+            filename = attachment.get("filename", "")
             current_download_url = attachment.get("download_url", "")
-            if current_download_url.endswith(value):
+            if filename.endswith(value):
                 download_url = current_download_url
 
         if not download_url:
@@ -632,7 +633,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             return default_storage.save(value, file)
         return file
 
-    def _handle_geopoint_field(self, value):
+    def _handle_geopoint_field(self, value, is_flex_field):
         geopoint = value.split(" ")
         x = float(geopoint[0])
         y = float(geopoint[1])
