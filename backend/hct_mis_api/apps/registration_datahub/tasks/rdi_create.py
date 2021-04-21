@@ -628,7 +628,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         api = KoboAPI(self.business_area.slug)
         image_bytes = api.get_attached_file(download_url)
         file = File(image_bytes, name=value)
-
+        if is_flex_field:
+            return default_storage.save(value, file)
         return file
 
     def _handle_geopoint_field(self, value):
@@ -649,13 +650,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict is None or field in excluded:
             return
 
+        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
+
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])
-            correct_value = cast_fn(value)
+            correct_value = cast_fn(value, is_flex_field)
         else:
             correct_value = self._cast_value(value, field)
 
-        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
         if is_flex_field is True:
             obj.flex_fields[field_data_dict["name"]] = correct_value
         else:
