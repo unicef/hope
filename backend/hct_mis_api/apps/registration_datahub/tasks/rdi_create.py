@@ -615,11 +615,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     business_area = None
     attachments = None
 
-    def _handle_image_field(self, value):
+    def _handle_image_field(self, value, is_flex_field):
         download_url = ""
         for attachment in self.attachments:
+            filename = attachment.get("filename", "")
             current_download_url = attachment.get("download_url", "")
-            if current_download_url.endswith(value):
+            if filename.endswith(value):
                 download_url = current_download_url
 
         if not download_url:
@@ -628,10 +629,11 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         api = KoboAPI(self.business_area.slug)
         image_bytes = api.get_attached_file(download_url)
         file = File(image_bytes, name=value)
-
+        if is_flex_field:
+            return default_storage.save(value, file)
         return file
 
-    def _handle_geopoint_field(self, value):
+    def _handle_geopoint_field(self, value, is_flex_field):
         geopoint = value.split(" ")
         x = float(geopoint[0])
         y = float(geopoint[1])
@@ -649,13 +651,14 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict is None or field in excluded:
             return
 
+        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
+
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])
-            correct_value = cast_fn(value)
+            correct_value = cast_fn(value, is_flex_field)
         else:
             correct_value = self._cast_value(value, field)
 
-        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
         if is_flex_field is True:
             obj.flex_fields[field_data_dict["name"]] = correct_value
         else:
@@ -701,7 +704,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                         label=label,
                         type=type_name,
                     )
-                    file = self._handle_image_field(data.get("photo", ""))
+                    file = self._handle_image_field(data.get("photo", ""), False)
                     documents.append(
                         ImportedDocument(
                             document_number=data["number"],
