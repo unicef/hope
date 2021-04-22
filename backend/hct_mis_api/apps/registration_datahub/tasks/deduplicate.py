@@ -770,7 +770,7 @@ class DeduplicateTask:
             )
 
     @classmethod
-    def hard_deduplicate_documents(cls, documents):
+    def hard_deduplicate_documents(cls, documents, registration_data_import=None):
         batch_document_strings = [f"{d.type}--{d.document_number}" for d in documents]
         batch_document_strings = [d for d in batch_document_strings if batch_document_strings.count(d) > 1]
         for document in documents:
@@ -784,7 +784,10 @@ class DeduplicateTask:
             documents_count = documents_queryset.count()
             if documents_count > 0:
                 create_grievance_ticket_with_details(
-                    documents_queryset.first().individual, document.individual, document.individual.business_area
+                    documents_queryset.first().individual,
+                    document.individual,
+                    document.individual.business_area,
+                    registration_data_import=registration_data_import,
                 )
                 document.status = Document.STATUS_NEED_INVESTIGATION
             else:
