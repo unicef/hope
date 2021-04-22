@@ -106,6 +106,7 @@ class GrievanceTicketFilter(FilterSet):
             "category": ["exact"],
             "area": ["exact", "startswith"],
             "assigned_to": ["exact"],
+            "registration_data_import": ["exact"],
         }
         model = GrievanceTicket
 

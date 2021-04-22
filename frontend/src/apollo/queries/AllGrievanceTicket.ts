@@ -15,6 +15,7 @@ export const AllGrievanceTicket = gql`
     $createdAtRange: String
     $admin: [ID]
     $orderBy: String
+    $registrationDataImport: ID
   ) {
     allGrievanceTicket(
       before: $before
@@ -30,6 +31,7 @@ export const AllGrievanceTicket = gql`
       createdAtRange: $createdAtRange
       orderBy: $orderBy
       admin: $admin
+      registrationDataImport: $registrationDataImport
     ) {
       totalCount
       pageInfo {
