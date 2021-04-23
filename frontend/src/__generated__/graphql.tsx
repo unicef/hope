@@ -1457,16 +1457,24 @@ export type HouseholdUpdateDataObjectType = {
   femaleAgeGroup05Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup611Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60Count?: Maybe<Scalars['Int']>,
   pregnantCount?: Maybe<Scalars['Int']>,
   maleAgeGroup05Count?: Maybe<Scalars['Int']>,
   maleAgeGroup611Count?: Maybe<Scalars['Int']>,
   maleAgeGroup1217Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859Count?: Maybe<Scalars['Int']>,
+  maleAgeGroup60Count?: Maybe<Scalars['Int']>,
   femaleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
   femaleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  femaleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup05DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup611DisabledCount?: Maybe<Scalars['Int']>,
   maleAgeGroup1217DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup1859DisabledCount?: Maybe<Scalars['Int']>,
+  maleAgeGroup60DisabledCount?: Maybe<Scalars['Int']>,
   returnee?: Maybe<Scalars['Boolean']>,
   fchildHoh?: Maybe<Scalars['Boolean']>,
   childHoh?: Maybe<Scalars['Boolean']>,
@@ -1476,6 +1484,10 @@ export type HouseholdUpdateDataObjectType = {
   orgEnumerator?: Maybe<Scalars['String']>,
   orgNameEnumerator?: Maybe<Scalars['String']>,
   village?: Maybe<Scalars['String']>,
+  registrationMethod?: Maybe<Scalars['String']>,
+  collectIndividualData?: Maybe<Scalars['String']>,
+  currency?: Maybe<Scalars['String']>,
+  unhcrId?: Maybe<Scalars['String']>,
   flexFields?: Maybe<Scalars['Arg']>,
 };
 
@@ -3366,7 +3378,7 @@ export type QueryAllGrievanceTicketArgs = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  fsp?: Maybe<Scalars['String']>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   createdAtRange?: Maybe<Scalars['String']>,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
@@ -6582,7 +6594,7 @@ export type AllGrievanceTicketQueryVariables = {
   businessArea: Scalars['String'],
   search?: Maybe<Scalars['String']>,
   status?: Maybe<Array<Maybe<Scalars['String']>>>,
-  fsp?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  fsp?: Maybe<Scalars['String']>,
   createdAtRange?: Maybe<Scalars['String']>,
   admin?: Maybe<Array<Maybe<Scalars['ID']>>>,
   orderBy?: Maybe<Scalars['String']>,
@@ -11565,7 +11577,7 @@ export type AllEditHouseholdFieldsQueryHookResult = ReturnType<typeof useAllEdit
 export type AllEditHouseholdFieldsLazyQueryHookResult = ReturnType<typeof useAllEditHouseholdFieldsLazyQuery>;
 export type AllEditHouseholdFieldsQueryResult = ApolloReactCommon.QueryResult<AllEditHouseholdFieldsQuery, AllEditHouseholdFieldsQueryVariables>;
 export const AllGrievanceTicketDocument = gql`
-    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: [ID], $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID) {
+    query AllGrievanceTicket($before: String, $after: String, $first: Int, $last: Int, $id: UUID, $category: String, $businessArea: String!, $search: String, $status: [String], $fsp: String, $createdAtRange: String, $admin: [ID], $orderBy: String, $registrationDataImport: ID) {
   allGrievanceTicket(before: $before, after: $after, first: $first, last: $last, id: $id, category: $category, businessArea: $businessArea, search: $search, status: $status, fsp: $fsp, createdAtRange: $createdAtRange, orderBy: $orderBy, admin: $admin, registrationDataImport: $registrationDataImport) {
     totalCount
     pageInfo {
