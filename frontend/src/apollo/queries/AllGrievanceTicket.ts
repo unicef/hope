@@ -11,7 +11,7 @@ export const AllGrievanceTicket = gql`
     $businessArea: String!
     $search: String
     $status: [String]
-    $fsp: [ID]
+    $fsp: String
     $createdAtRange: String
     $admin: [ID]
     $orderBy: String

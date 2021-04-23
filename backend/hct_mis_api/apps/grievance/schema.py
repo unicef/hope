@@ -88,12 +88,16 @@ class GrievanceTicketFilter(FilterSet):
             "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
         },
     }
-    TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
+    TICKET_TYPES_WITH_FSP = (
+        ("complaint_ticket_details", "payment_record__service_provider"),
+        ("sensitive_ticket_details", "payment_record__service_provider"),
+        ("payment_verification_ticket_details", "payment_verifications__payment_record__service_provider"),
+    )
 
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
-    fsp = ModelMultipleChoiceFilter(method="fsp_filter", queryset=ServiceProvider.objects.all())
+    fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
@@ -154,8 +158,8 @@ class GrievanceTicketFilter(FilterSet):
     def fsp_filter(self, qs, name, value):
         if value:
             q_obj = Q()
-            for ticket_type in self.TICKET_TYPES_WITH_FSP:
-                q_obj |= Q(**{f"{ticket_type}__payment_record__service_provider__in": value})
+            for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
+                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
 
             return qs.filter(q_obj)
         return qs
