@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if (( $# != 1 )); then
     >&2 echo "Illegal number of arguments"
     exit 1
@@ -9,9 +10,10 @@ cd ..
 cd frontend
 npm version $1 > /dev/null
 cd ..
-git add -A
+git add -A > /dev/null
 VERSION=$(./get_version.py)
-git commit -m "Bump version $VERSION"
-git tag $VERSION
-git push origin --tags
-git push origin
+git commit -m "Bump version $VERSION" > /dev/null
+git tag $VERSION > /dev/null
+git push origin --tags > /dev/null
+git push origin > /dev/null
+echo "New version $VERSION pushed to origin"
