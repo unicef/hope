@@ -8135,6 +8135,15 @@ export type ImportedHouseholdDetailedFragment = (
   & { registrationDataImport: (
     { __typename?: 'RegistrationDataImportDatahubNode' }
     & Pick<RegistrationDataImportDatahubNode, 'id' | 'hctId' | 'name'>
+  ), individuals: (
+    { __typename?: 'ImportedIndividualNodeConnection' }
+    & { edges: Array<Maybe<(
+      { __typename?: 'ImportedIndividualNodeEdge' }
+      & { node: Maybe<(
+        { __typename?: 'ImportedIndividualNode' }
+        & ImportedIndividualMinimalFragment
+      )> }
+    )>> }
   ) }
   & ImportedHouseholdMinimalFragment
 );
@@ -8897,19 +8906,6 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
   childHoh
 }
     `;
-export const ImportedHouseholdDetailedFragmentDoc = gql`
-    fragment importedHouseholdDetailed on ImportedHouseholdNode {
-  ...importedHouseholdMinimal
-  residenceStatus
-  country
-  countryOrigin
-  registrationDataImport {
-    id
-    hctId
-    name
-  }
-}
-    ${ImportedHouseholdMinimalFragmentDoc}`;
 export const ImportedIndividualMinimalFragmentDoc = gql`
     fragment importedIndividualMinimal on ImportedIndividualNode {
   id
@@ -8942,6 +8938,27 @@ export const ImportedIndividualMinimalFragmentDoc = gql`
   }
 }
     `;
+export const ImportedHouseholdDetailedFragmentDoc = gql`
+    fragment importedHouseholdDetailed on ImportedHouseholdNode {
+  ...importedHouseholdMinimal
+  residenceStatus
+  country
+  countryOrigin
+  registrationDataImport {
+    id
+    hctId
+    name
+  }
+  individuals {
+    edges {
+      node {
+        ...importedIndividualMinimal
+      }
+    }
+  }
+}
+    ${ImportedHouseholdMinimalFragmentDoc}
+${ImportedIndividualMinimalFragmentDoc}`;
 export const ImportedIndividualDetailedFragmentDoc = gql`
     fragment importedIndividualDetailed on ImportedIndividualNode {
   ...importedIndividualMinimal
