@@ -1029,16 +1029,24 @@ input HouseholdUpdateDataObjectType {
   femaleAgeGroup05Count: Int
   femaleAgeGroup611Count: Int
   femaleAgeGroup1217Count: Int
+  femaleAgeGroup1859Count: Int
+  femaleAgeGroup60Count: Int
   pregnantCount: Int
   maleAgeGroup05Count: Int
   maleAgeGroup611Count: Int
   maleAgeGroup1217Count: Int
+  maleAgeGroup1859Count: Int
+  maleAgeGroup60Count: Int
   femaleAgeGroup05DisabledCount: Int
   femaleAgeGroup611DisabledCount: Int
   femaleAgeGroup1217DisabledCount: Int
+  femaleAgeGroup1859DisabledCount: Int
+  femaleAgeGroup60DisabledCount: Int
   maleAgeGroup05DisabledCount: Int
   maleAgeGroup611DisabledCount: Int
   maleAgeGroup1217DisabledCount: Int
+  maleAgeGroup1859DisabledCount: Int
+  maleAgeGroup60DisabledCount: Int
   returnee: Boolean
   fchildHoh: Boolean
   childHoh: Boolean
@@ -1048,6 +1056,10 @@ input HouseholdUpdateDataObjectType {
   orgEnumerator: String
   orgNameEnumerator: String
   village: String
+  registrationMethod: String
+  collectIndividualData: String
+  currency: String
+  unhcrId: String
   flexFields: Arg
 }
 
@@ -2287,7 +2299,7 @@ type Query {
   sanctionListIndividual(id: ID!): SanctionListIndividualNode
   allSanctionListIndividuals(before: String, after: String, first: Int, last: Int, id: UUID, fullName: String, fullName_Startswith: String, referenceNumber: String, orderBy: String): SanctionListIndividualNodeConnection
   grievanceTicket(id: ID!): GrievanceTicketNode
-  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: [ID], admin: [ID], createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
+  allGrievanceTicket(before: String, after: String, first: Int, last: Int, id: UUID, id_Startswith: UUID, category: String, area: String, area_Startswith: String, assignedTo: ID, registrationDataImport: ID, businessArea: String!, search: String, status: [String], fsp: String, admin: [ID], createdAtRange: String, permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   existingGrievanceTickets(before: String, after: String, first: Int, last: Int, id: UUID, businessArea: String!, category: String, issueType: String, household: ID, individual: ID, paymentRecord: [ID], permissions: [String], orderBy: String): GrievanceTicketNodeConnection
   allTicketNotes(before: String, after: String, first: Int, last: Int, id: UUID, ticket: UUID!): TicketNoteNodeConnection
   chartGrievances(businessAreaSlug: String!, year: Int!, administrativeArea: String): ChartGrievanceTicketsNode
