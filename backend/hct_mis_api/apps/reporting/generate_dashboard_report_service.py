@@ -298,18 +298,21 @@ class GenerateDashboardReportContentHelpers:
                 received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED),
+                    distinct=True
                 )
             )
             .annotate(
                 not_received=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_NOT_RECEIVED),
+                    distinct=True
                 )
             )
             .annotate(
                 received_with_issues=Count(
                     path_to_payment_record_verifications,
                     filter=format_status_filter(PaymentVerification.STATUS_RECEIVED_WITH_ISSUES),
+                    distinct=True
                 )
             )
             .annotate(
