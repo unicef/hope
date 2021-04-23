@@ -4,13 +4,14 @@ if (( $# != 1 )); then
     exit 1
 fi
 cd backend
-poetry version $1
+poetry version $1 > /dev/null
 cd ..
 cd frontend
-npm version $1
+npm version $1 > /dev/null
 cd ..
 git add -A
 VERSION=$(./get_version.py)
 git commit -m "Bump version $VERSION"
 git tag $VERSION
 git push origin --tags
+git push origin
