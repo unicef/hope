@@ -1,5 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
+import ListItem from '@material-ui/core/ListItem';
 import {
   RegistrationDataImportStatus,
   RegistrationDetailedFragment,
@@ -27,6 +30,7 @@ export function RegistrationDataImportDetailsPageHeader({
   canRerunDedupe,
   canViewList,
 }: RegistrationDataImportDetailsPageHeaderPropTypes): React.ReactElement {
+  const businessArea = useBusinessArea();
   let buttons = null;
   // eslint-disable-next-line default-case
   switch (registration?.status) {
@@ -52,9 +56,26 @@ export function RegistrationDataImportDetailsPageHeader({
         </div>
       );
       break;
+    case RegistrationDataImportStatus.Merged:
+      buttons = (
+        <div>
+          {canRerunDedupe && (
+            <MergeButtonContainer>
+              <Button
+                variant='contained'
+                color='primary'
+                component={Link}
+                to={`/${businessArea}/grievance-and-feedback/rdi/${registration.id}`}
+              >
+                View Tickets
+              </Button>
+            </MergeButtonContainer>
+          )}
+        </div>
+      );
+      break;
   }
 
-  const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
       title: 'Registration Data import',

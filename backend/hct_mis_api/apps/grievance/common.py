@@ -1,5 +1,7 @@
-def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area):
+def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
+
+    registration_data_import = kwargs.pop("registration_data_import", None)
 
     details_already_exists = (
         TicketNeedsAdjudicationDetails.objects.exclude(ticket__status=GrievanceTicket.STATUS_CLOSED)
@@ -22,6 +24,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         business_area=business_area,
         admin2=admin_level_2,
         area=area,
+        registration_data_import=registration_data_import,
     )
     ticket_details = TicketNeedsAdjudicationDetails.objects.create(
         ticket=ticket,
@@ -33,9 +36,10 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
     return ticket, ticket_details
 
 
-def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area):
+def create_needs_adjudication_tickets(individuals_queryset, results_key, business_area, **kwargs):
     from hct_mis_api.apps.household.models import Individual
 
+    registration_data_import = kwargs.pop("registration_data_import", None)
     ticket_details_to_create = []
     for possible_duplicate in individuals_queryset:
         linked_tickets = []
@@ -47,7 +51,9 @@ def create_needs_adjudication_tickets(individuals_queryset, results_key, busines
                 main_individual=duplicate,
                 possible_duplicate=possible_duplicate,
                 business_area=business_area,
+                registration_data_import=registration_data_import,
             )
+
             if ticket is not None and ticket_details is not None:
                 linked_tickets.append(ticket)
                 ticket_details_to_create.append(ticket_details)

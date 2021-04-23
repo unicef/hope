@@ -36,10 +36,13 @@
             "name": "GrievanceTicketNode"
           },
           {
-            "name": "TicketNoteNode"
+            "name": "RegistrationDataImportNode"
           },
           {
-            "name": "TicketComplaintDetailsNode"
+            "name": "HouseholdNode"
+          },
+          {
+            "name": "IndividualNode"
           },
           {
             "name": "PaymentRecordNode"
@@ -51,13 +54,28 @@
             "name": "ProgramNode"
           },
           {
-            "name": "HouseholdNode"
+            "name": "TargetPopulationNode"
           },
           {
-            "name": "IndividualNode"
+            "name": "SteficonRuleNode"
           },
           {
-            "name": "RegistrationDataImportNode"
+            "name": "ReportNode"
+          },
+          {
+            "name": "ServiceProviderNode"
+          },
+          {
+            "name": "CashPlanPaymentVerificationNode"
+          },
+          {
+            "name": "PaymentVerificationNode"
+          },
+          {
+            "name": "TicketPaymentVerificationDetailsNode"
+          },
+          {
+            "name": "TicketComplaintDetailsNode"
           },
           {
             "name": "TicketSensitiveDetailsNode"
@@ -99,25 +117,7 @@
             "name": "TicketAddIndividualDetailsNode"
           },
           {
-            "name": "TargetPopulationNode"
-          },
-          {
-            "name": "SteficonRuleNode"
-          },
-          {
-            "name": "ReportNode"
-          },
-          {
-            "name": "ServiceProviderNode"
-          },
-          {
-            "name": "CashPlanPaymentVerificationNode"
-          },
-          {
-            "name": "PaymentVerificationNode"
-          },
-          {
-            "name": "TicketPaymentVerificationDetailsNode"
+            "name": "TicketNoteNode"
           },
           {
             "name": "TicketNeedsAdjudicationDetailsNode"
