@@ -43,9 +43,11 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (IMPORT_ERROR, _("Import Error")),
         (MERGE_ERROR, _("Merge Error")),
     )
+    XLS = "XLS"
+    KOBO = "KOBO"
     DATA_SOURCE_CHOICE = (
-        ("XLS", "Excel"),
-        ("KOBO", "KoBo"),
+        (XLS, "Excel"),
+        (KOBO, "KoBo"),
     )
     name = CICharField(
         max_length=255,
