@@ -822,6 +822,8 @@ class ReassignRoleMutation(graphene.Mutation):
         ticket_details = grievance_ticket.ticket_details
         if grievance_ticket.category == GrievanceTicket.CATEGORY_NEEDS_ADJUDICATION:
             ticket_individual = ticket_details.selected_individual
+        elif grievance_ticket.category == GrievanceTicket.CATEGORY_SYSTEM_FLAGGING:
+            ticket_individual = ticket_details.golden_records_individual
         else:
             ticket_individual = ticket_details.individual
         cls.verify_if_role_exists(household, ticket_individual, role)
