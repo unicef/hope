@@ -2,6 +2,7 @@ from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.activity_log.utils import copy_model_object
 from hct_mis_api.apps.grievance.mutations_extras.utils import (
     mark_as_duplicate_individual_and_reassign_roles,
+    reassign_roles,
 )
 from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH, Document
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
@@ -27,8 +28,7 @@ def close_system_flagging_ticket(grievance_ticket, info):
             individual,
         )
     else:
-        individual.sanction_list_confirmed_match = True
-        individual.save()
+        reassign_roles(ticket_details.golden_records_individual, info, ticket_details)
 
 
 def _clear_deduplication_individuals_fields(individuals):
