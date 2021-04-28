@@ -49,13 +49,16 @@ class KoboAPI:
             results.extend(data["results"])
         return results
 
-    def _get_url(self, endpoint: str, append_api=True, add_limit=True):
+    def _get_url(self, endpoint: str, append_api=True, add_limit=True, additional_query_params=None):
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
             endpoint = f"api/v2/{endpoint}"
         # According to the Kobo API documentation,
         # the maximum limit per page is 30000
-        return f"{self.KPI_URL}/{endpoint}?format=json{'&limit=30000' if add_limit else ''}"
+        query_params = f"format=json{'&limit=30000' if add_limit else ''}"
+        if additional_query_params is not None:
+            query_params += f"&{additional_query_params}"
+        return f"{self.KPI_URL}/{endpoint}?{query_params}"
 
     def _get_token(self):
         self._client = requests.session()
@@ -149,7 +152,10 @@ class KoboAPI:
         return self._handle_request(projects_url)
 
     def get_project_submissions(self, uid: str) -> list:
-        submissions_url = self._get_url(f"assets/{uid}/data")
+        submissions_url = self._get_url(
+            f"assets/{uid}/data",
+            additional_query_params='query={"_validation_status.uid":"validation_status_approved"}',
+        )
 
         response_dict = self._handle_paginated_results(submissions_url)
         return response_dict
