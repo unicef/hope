@@ -236,10 +236,6 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
             adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
             adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
         )
-
-        import ipdb
-
-        ipdb.set_trace()
         return {
             "child_male": targeted_individuals.get("child_male"),
             "child_female": targeted_individuals.get("child_female"),
