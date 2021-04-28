@@ -86,6 +86,13 @@ export const importedHouseholdDetailed = gql`
       hctId
       name
     }
+    individuals {
+      edges {
+        node {
+          ...importedIndividualMinimal
+        }
+      }
+    }
   }
 `;
 

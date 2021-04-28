@@ -252,6 +252,9 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     linked_tickets = models.ManyToManyField(
         to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
     )
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
+    )
 
     @property
     def related_tickets(self):

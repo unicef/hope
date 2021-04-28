@@ -284,20 +284,27 @@ class RdiMergeTask:
                         registration_data_import=obj_hct, deduplication_golden_record_status=DUPLICATE
                     )
 
-                    create_needs_adjudication_tickets(golden_record_duplicates, "duplicates", obj_hct.business_area)
+                    create_needs_adjudication_tickets(
+                        golden_record_duplicates, "duplicates", obj_hct.business_area, registration_data_import=obj_hct
+                    )
 
                     needs_adjudication = Individual.objects.filter(
                         registration_data_import=obj_hct, deduplication_golden_record_status=NEEDS_ADJUDICATION
                     )
 
-                    create_needs_adjudication_tickets(needs_adjudication, "possible_duplicates", obj_hct.business_area)
+                    create_needs_adjudication_tickets(
+                        needs_adjudication,
+                        "possible_duplicates",
+                        obj_hct.business_area,
+                        registration_data_import=obj_hct,
+                    )
 
                     # SANCTION LIST CHECK
                     CheckAgainstSanctionListPreMergeTask.execute()
 
                     obj_hct.status = RegistrationDataImport.MERGED
                     obj_hct.save()
-                    DeduplicateTask.hard_deduplicate_documents(documents_to_create)
+                    DeduplicateTask.hard_deduplicate_documents(documents_to_create, registration_data_import=obj_hct)
                     log_create(RegistrationDataImport.ACTIVITY_LOG_MAPPING, "business_area", None, old_obj_hct, obj_hct)
         except:
             remove_document_by_matching_ids(individual_ids, IndividualDocument)

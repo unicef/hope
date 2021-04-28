@@ -15,7 +15,7 @@ from tempfile import NamedTemporaryFile
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.utils import encode_id_base64
 from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.models import Individual, Household, STATUS_ACTIVE
+from hct_mis_api.apps.household.models import Individual, Household, WORK_STATUS_CHOICE, NONE
 from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
 from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
@@ -48,7 +48,7 @@ class GenerateReportContentHelpers:
             individual.estimated_birth_date,
             individual.sex,
             individual.marital_status,
-            individual.disability,
+            len(individual.observed_disability) >= 1 and NONE not in individual.observed_disability,
             individual.observed_disability,
             individual.comms_disability,
             individual.hearing_disability,
@@ -59,7 +59,7 @@ class GenerateReportContentHelpers:
             individual.pregnant,
             individual.relationship,
             self._to_values_list(individual.households_and_roles.all(), "role"),
-            individual.work_status,
+            dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
             individual.deduplication_golden_record_status,
@@ -174,11 +174,9 @@ class GenerateReportContentHelpers:
 
     @staticmethod
     def get_payments(report: Report):
-        start_date = datetime(report.date_from.year, report.date_from.month, report.date_from.day, 0, 0, 0)
-        end_date = datetime(report.date_to.year, report.date_to.month, report.date_to.day, 23, 59, 59)
         filter_vars = {
             "business_area": report.business_area,
-            "delivery_date__range": (start_date, end_date),
+            "delivery_date__date__range": (report.date_from, report.date_to),
         }
         if report.admin_area.all().exists():
             filter_vars["household__admin_area__in"] = report.admin_area.all()
@@ -205,7 +203,7 @@ class GenerateReportContentHelpers:
             payment.status,
             payment.currency,
             payment.delivered_quantity,
-            payment.delivered_quantity_usd,
+            payment.delivered_quantity_usd or payment.delivered_quantity,
             self._format_date(payment.delivery_date),
             payment.delivery_type,
             payment.distribution_modality,
@@ -221,8 +219,7 @@ class GenerateReportContentHelpers:
         filter_vars = {
             "cash_plan_payment_verification__cash_plan__business_area": report.business_area,
             "cash_plan_payment_verification__completion_date__isnull": False,
-            "cash_plan_payment_verification__completion_date__gte": report.date_from,
-            "cash_plan_payment_verification__completion_date__lte": report.date_to,
+            "cash_plan_payment_verification__completion_date__date__range": (report.date_from, report.date_to),
         }
         if report.program:
             filter_vars["cash_plan_payment_verification__cash_plan__program"] = report.program
@@ -347,12 +344,12 @@ class GenerateReportContentHelpers:
             individual.payments_made,
             ", ".join(individual.payment_currency),
             individual.total_delivered_quantity_local,
-            individual.total_delivered_quantity_usd,
+            individual.total_delivered_quantity_usd or individual.total_delivered_quantity_local,
             individual.birth_date,
             individual.estimated_birth_date,
             individual.sex,
             individual.marital_status,
-            individual.disability,
+            len(individual.observed_disability) >= 1 and NONE not in individual.observed_disability,
             individual.observed_disability,
             individual.comms_disability,
             individual.hearing_disability,
@@ -363,7 +360,7 @@ class GenerateReportContentHelpers:
             individual.pregnant,
             individual.relationship,
             self._to_values_list(individual.households_and_roles.all(), "role"),
-            individual.work_status,
+            dict(WORK_STATUS_CHOICE).get(individual.work_status, ""),
             individual.sanction_list_possible_match,
             individual.deduplication_batch_status,
             individual.deduplication_golden_record_status,
