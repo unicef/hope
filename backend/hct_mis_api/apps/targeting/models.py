@@ -221,41 +221,35 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).values_list(
-                "id"
+            households_ids = (
+                Household.objects.filter(self.candidate_list_targeting_criteria.get_query())
+                .filter(business_area=self.business_area)
+                .values_list("id")
             )
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
-        child_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=MALE,
-        ).count()
-        child_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=FEMALE,
-        ).count()
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        )
 
-        adult_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=MALE,
-        ).count()
-        adult_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=FEMALE,
-        ).count()
+        import ipdb
+
+        ipdb.set_trace()
         return {
-            "child_male": child_male,
-            "child_female": child_female,
-            "adult_male": adult_male,
-            "adult_female": adult_female,
+            "child_male": targeted_individuals.get("child_male"),
+            "child_female": targeted_individuals.get("child_female"),
+            "adult_male": targeted_individuals.get("adult_male"),
+            "adult_female": targeted_individuals.get("adult_female"),
             "all_households": households_ids.count(),
-            "all_individuals": child_male + child_female + adult_male + adult_female,
+            "all_individuals": targeted_individuals.get("child_male")
+            + targeted_individuals.get("child_female")
+            + targeted_individuals.get("adult_male")
+            + targeted_individuals.get("adult_female"),
         }
 
     def get_criteria_string(self):
@@ -275,6 +269,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         elif self.status == TargetPopulation.STATUS_APPROVED:
             households_ids = (
                 self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
+                .filter(business_area=self.business_area)
                 .values_list("id")
                 .distinct()
             )
@@ -283,19 +278,18 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
 
-        targeted_individuals = (
-            Individual.objects.filter(household__id__in=households_ids)
-            .annotate(child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)))
-            .annotate(child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)))
-            .annotate(adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)))
-            .annotate(adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)))
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
         )
 
         return {
-            "child_male": targeted_individuals.child_male,
-            "child_female": targeted_individuals.child_female,
-            "adult_male": targeted_individuals.adult_male,
-            "adult_female": targeted_individuals.adult_female,
+            "child_male": targeted_individuals.get("child_male"),
+            "child_female": targeted_individuals.get("child_female"),
+            "adult_male": targeted_individuals.get("adult_male"),
+            "adult_female": targeted_individuals.get("adult_female"),
         }
 
     @property
