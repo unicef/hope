@@ -5,9 +5,11 @@ import * as Yup from 'yup';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
+  Checkbox,
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -34,6 +36,7 @@ import { LoadingComponent } from '../../../components/LoadingComponent';
 import { Dialog } from '../../dialogs/Dialog';
 import { DialogActions } from '../../dialogs/DialogActions';
 import { handleValidationErrors } from '../../../utils/utils';
+import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
 import { ErrorsKobo } from './errors/KoboErrors';
 import { Errors } from './errors/PlainErrors';
 
@@ -116,6 +119,8 @@ export function RegistrationDataImport(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [importType, setImportType] = useState();
   const [koboProject, setKoboProject] = useState();
+  const [onlyActiveSubmissions, setOnlyActiveSubmissions] = useState(true);
+  const [pullPictures, setPullPictures] = useState(true);
   const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const [
@@ -208,6 +213,50 @@ export function RegistrationDataImport(): React.ReactElement {
     const koboProjects = koboProjectsData?.allKoboProjects?.edges || [];
     importTypeSpecificContent = (
       <div>
+        <div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                color='primary'
+                checked={onlyActiveSubmissions}
+                onChange={(e, checked) => {
+                  setOnlyActiveSubmissions(checked);
+                  if (!koboProject) {
+                    return;
+                  }
+                  saveKoboImportDataMutate({
+                    variables: {
+                      projectId: koboProject,
+                      businessAreaSlug: businessArea,
+                      onlyActiveSubmissions: checked,
+                    },
+                  });
+                }}
+              />
+            }
+            label='Only active submissions'
+          />
+        </div>
+        <div>
+          <Field
+            name='pullPictures'
+            label='Pull pictures'
+            color='primary'
+            component={FormikCheckboxField}
+          />
+          {/*<FormControlLabel*/}
+          {/*  control={*/}
+          {/*    <Checkbox*/}
+          {/*      color='primary'*/}
+          {/*      checked={pullPictures}*/}
+          {/*      onChange={(e, checked) => {*/}
+          {/*        setPullPictures(checked);*/}
+          {/*      }}*/}
+          {/*    />*/}
+          {/*  }*/}
+          {/*  label='Pull pictures'*/}
+          {/*/>*/}
+        </div>
         <FormControl variant='outlined' margin='dense'>
           <StyledInputLabel>Import from</StyledInputLabel>
           <ComboBox
@@ -220,6 +269,7 @@ export function RegistrationDataImport(): React.ReactElement {
                 variables: {
                   projectId: e.target.value,
                   businessAreaSlug: businessArea,
+                  onlyActiveSubmissions,
                 },
               });
             }}
@@ -267,6 +317,7 @@ export function RegistrationDataImport(): React.ReactElement {
             try {
               let rdiId = null;
               if (importType === 'kobo') {
+                console.log('test test test')
                 const { data } = await createRegistrationKoboMutate({
                   variables: {
                     registrationDataImportData: {
@@ -274,6 +325,7 @@ export function RegistrationDataImport(): React.ReactElement {
                         koboImportData.saveKoboImportData.importData.id,
                       name: values.name,
                       businessAreaSlug: businessArea,
+                      pullPictures: values.pullPictures,
                     },
                   },
                 });
@@ -318,12 +370,12 @@ export function RegistrationDataImport(): React.ReactElement {
 
               if (nonValidationErrors.length > 0) {
                 showMessage(
-                  'Unexpected problem while creating Target Population',
+                  'Unexpected problem while creating Registration Data Import',
                 );
               }
             }
           }}
-          initialValues={{ name: '' }}
+          initialValues={{ name: '', pullPictures: true }}
         >
           {({ submitForm }) => (
             <Form>
@@ -391,9 +443,6 @@ export function RegistrationDataImport(): React.ReactElement {
                     color='primary'
                     variant='contained'
                     disabled={disabled}
-                    onClick={() => {
-                      submitForm();
-                    }}
                     data-cy='button-import'
                   >
                     {t('IMPORT')}

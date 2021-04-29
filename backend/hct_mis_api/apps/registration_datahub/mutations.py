@@ -54,7 +54,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
     import_data_obj = ImportData.objects.get(id=import_data_id)
 
     business_area = BusinessArea.objects.get(slug=registration_data_import_data.pop("business_area_slug"))
-
+    pull_pictures = registration_data_import_data.pop("pull_pictures", True)
     created_obj_datahub = RegistrationDataImportDatahub.objects.create(
         business_area_slug=business_area.slug,
         import_data=import_data_obj,
@@ -67,6 +67,7 @@ def create_registration_data_import_objects(registration_data_import_data, user,
         number_of_individuals=import_data_obj.number_of_individuals,
         number_of_households=import_data_obj.number_of_households,
         business_area=business_area,
+        pull_pictures=pull_pictures,
         **registration_data_import_data,
     )
     created_obj_hct.full_clean()
@@ -95,6 +96,7 @@ class RegistrationXlsxImportMutationInput(graphene.InputObjectType):
 class RegistrationKoboImportMutationInput(graphene.InputObjectType):
     import_data_id = graphene.String()
     name = graphene.String()
+    pull_pictures = graphene.Boolean()
     business_area_slug = graphene.String()
 
 
@@ -299,15 +301,16 @@ class SaveKoboProjectImportDataMutation(PermissionMutation):
     class Arguments:
         uid = Upload(required=True)
         business_area_slug = graphene.String(required=True)
+        only_active_submissions = graphene.Boolean(required=True)
 
     @classmethod
     @is_authenticated
-    def mutate(cls, root, info, uid, business_area_slug):
+    def mutate(cls, root, info, uid, business_area_slug, only_active_submissions):
         cls.has_permission(info, Permissions.RDI_IMPORT_DATA, business_area_slug)
 
         kobo_api = KoboAPI(business_area_slug)
 
-        submissions = kobo_api.get_project_submissions(uid)
+        submissions = kobo_api.get_project_submissions(uid, only_active_submissions)
 
         business_area = BusinessArea.objects.get(slug=business_area_slug)
         validator = KoboProjectImportDataInstanceValidator()

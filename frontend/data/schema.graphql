@@ -121,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  UNHCR
   WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
@@ -2078,7 +2078,7 @@ type Mutations {
   deleteRegistrationDataImport(registrationDataImportId: String!): DeleteRegistrationDataImport
   registrationXlsxImport(registrationDataImportData: RegistrationXlsxImportMutationInput!): RegistrationXlsxImportMutation
   registrationKoboImport(registrationDataImportData: RegistrationKoboImportMutationInput!): RegistrationKoboImportMutation
-  saveKoboImportData(businessAreaSlug: String!, uid: Upload!): SaveKoboProjectImportDataMutation
+  saveKoboImportData(businessAreaSlug: String!, onlyActiveSubmissions: Boolean!, uid: Upload!): SaveKoboProjectImportDataMutation
   mergeRegistrationDataImport(id: ID!, version: BigInt): MergeRegistrationDataImportMutation
   rerunDedupe(registrationDataImportDatahubId: ID!, version: BigInt): RegistrationDeduplicationMutation
   checkAgainstSanctionList(file: Upload!): CheckAgainstSanctionListMutation
@@ -2495,6 +2495,7 @@ type RegistrationDataImportNode implements Node {
   numberOfHouseholds: Int!
   datahubId: UUID
   errorMessage: String!
+  pullPictures: Boolean!
   businessArea: UserBusinessAreaNode
   grievanceticketSet(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -2542,6 +2543,7 @@ type RegistrationKoboImportMutation {
 input RegistrationKoboImportMutationInput {
   importDataId: String
   name: String
+  pullPictures: Boolean
   businessAreaSlug: String
 }
 
