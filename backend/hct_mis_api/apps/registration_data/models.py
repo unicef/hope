@@ -76,7 +76,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     number_of_households = models.PositiveIntegerField(db_index=True)
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
-
+    pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
 
     def __str__(self):

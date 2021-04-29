@@ -680,6 +680,14 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             return ", ".join(statuses)
         return STATUS_ACTIVE
 
+    @property
+    def cash_assist_status(self):
+        if self.withdrawn:
+            return STATUS_INACTIVE
+        if self.duplicate:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
+
     def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
