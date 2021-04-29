@@ -78,15 +78,19 @@ export function FinishVerificationPlan({
   };
 
   const grievanceTickets = (): number => {
-    const notReceivedCount = verificationPlan?.notReceivedCount || 0;
-    const receivedWithProblemsCount =
-      verificationPlan?.receivedWithProblemsCount || 0;
     const sampleSize = verificationPlan?.sampleSize;
     const responded = verificationPlan?.respondedCount || 0;
 
     if (sampleSize) {
+      const pendingTicketsCount = sampleSize - responded ? 1 : 0;
+      const notReceivedTicketsCount = verificationPlan?.notReceivedCount
+        ? 1
+        : 0;
+      const receivedWithProblemsTicketsCount = verificationPlan?.receivedWithProblemsCount
+        ? 1
+        : 0;
       return (
-        notReceivedCount + receivedWithProblemsCount + (sampleSize - responded)
+        pendingTicketsCount + notReceivedTicketsCount + receivedWithProblemsTicketsCount
       );
     }
     return null;
