@@ -151,10 +151,13 @@ class KoboAPI:
 
         return self._handle_request(projects_url)
 
-    def get_project_submissions(self, uid: str) -> list:
+    def get_project_submissions(self, uid: str, only_active_submissions) -> list:
+        additional_query_params = None
+        if only_active_submissions:
+            additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'
         submissions_url = self._get_url(
             f"assets/{uid}/data",
-            additional_query_params='query={"_validation_status.uid":"validation_status_approved"}',
+            additional_query_params=additional_query_params,
         )
 
         response_dict = self._handle_paginated_results(submissions_url)

@@ -26,6 +26,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
@@ -477,6 +478,7 @@ class TestRdiKoboCreateTask(TestCase):
     )
     def test_handle_image_field(self):
         task = self.RdiKoboCreateTask()
+        task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
         task.attachments = [
             {
@@ -525,6 +527,7 @@ class TestRdiKoboCreateTask(TestCase):
     )
     def test_handle_documents_and_identities(self):
         task = self.RdiKoboCreateTask()
+        task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
         task.attachments = [
             {
