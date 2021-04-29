@@ -53,7 +53,7 @@ class SendTPToDatahubTask:
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
         "unicef_id": "unicef_id",
-        "status": "status",
+        "status": "cash_assist_status",
         "full_name": "full_name",
         "family_name": "family_name",
         "given_name": "given_name",
