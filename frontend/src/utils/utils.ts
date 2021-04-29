@@ -91,12 +91,12 @@ export function cashPlanStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'STARTED':
+    case 'DISTRIBUTION_COMPLETED':
       return theme.hctPalette.green;
-    case 'COMPLETE':
-      return theme.hctPalette.gray;
+    case 'TRANSACTION_COMPLETED':
+      return theme.hctPalette.green;
     default:
-      return theme.hctPalette.oragne;
+      return theme.palette.error.main;
   }
 }
 export function paymentRecordStatusToColor(
@@ -105,6 +105,8 @@ export function paymentRecordStatusToColor(
 ): string {
   switch (status) {
     case 'TRANSACTION_SUCCESSFUL':
+      return theme.hctPalette.green;
+    case 'DISTRIBUTION_SUCCESSFUL':
       return theme.hctPalette.green;
     case 'TRANSACTION_PENDING':
       return theme.hctPalette.oragne;
