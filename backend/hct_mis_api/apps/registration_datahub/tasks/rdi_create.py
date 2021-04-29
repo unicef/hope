@@ -616,6 +616,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
     attachments = None
 
     def _handle_image_field(self, value, is_flex_field):
+        if not self.registration_data_import_mis.pull_pictures:
+            return None
         download_url = ""
         for attachment in self.attachments:
             filename = attachment.get("filename", "")
@@ -731,6 +733,9 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         registration_data_import = RegistrationDataImportDatahub.objects.select_for_update().get(
             id=registration_data_import_id,
         )
+        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
+        self.registration_data_import_mis = old_rdi_mis
+        self.registration_data_import_datahub = registration_data_import
         registration_data_import.import_done = RegistrationDataImportDatahub.STARTED
         registration_data_import.save()
 
@@ -856,7 +861,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
-        old_rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis = RegistrationDataImport.objects.get(id=registration_data_import.hct_id)
         rdi_mis.status = RegistrationDataImport.IN_REVIEW
         rdi_mis.save()

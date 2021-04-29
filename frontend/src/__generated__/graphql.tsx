@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -2859,6 +2859,7 @@ export type MutationsRegistrationKoboImportArgs = {
 
 export type MutationsSaveKoboImportDataArgs = {
   businessAreaSlug: Scalars['String'],
+  onlyActiveSubmissions: Scalars['Boolean'],
   uid: Scalars['Upload']
 };
 
@@ -4031,6 +4032,7 @@ export type RegistrationDataImportNode = Node & {
   numberOfHouseholds: Scalars['Int'],
   datahubId?: Maybe<Scalars['UUID']>,
   errorMessage: Scalars['String'],
+  pullPictures: Scalars['Boolean'],
   businessArea?: Maybe<UserBusinessAreaNode>,
   grievanceticketSet: GrievanceTicketNodeConnection,
   households: HouseholdNodeConnection,
@@ -4106,6 +4108,7 @@ export type RegistrationKoboImportMutation = {
 export type RegistrationKoboImportMutationInput = {
   importDataId?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
+  pullPictures?: Maybe<Scalars['Boolean']>,
   businessAreaSlug?: Maybe<Scalars['String']>,
 };
 
@@ -8206,7 +8209,8 @@ export type ImportedIndividualDetailedFragment = (
 
 export type SaveKoboImportDataMutationVariables = {
   businessAreaSlug: Scalars['String'],
-  projectId: Scalars['Upload']
+  projectId: Scalars['Upload'],
+  onlyActiveSubmissions: Scalars['Boolean']
 };
 
 
@@ -15345,8 +15349,8 @@ export type RegistrationDataImportQueryHookResult = ReturnType<typeof useRegistr
 export type RegistrationDataImportLazyQueryHookResult = ReturnType<typeof useRegistrationDataImportLazyQuery>;
 export type RegistrationDataImportQueryResult = ApolloReactCommon.QueryResult<RegistrationDataImportQuery, RegistrationDataImportQueryVariables>;
 export const SaveKoboImportDataDocument = gql`
-    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!) {
-  saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId) {
+    mutation SaveKoboImportData($businessAreaSlug: String!, $projectId: Upload!, $onlyActiveSubmissions: Boolean!) {
+  saveKoboImportData(businessAreaSlug: $businessAreaSlug, uid: $projectId, onlyActiveSubmissions: $onlyActiveSubmissions) {
     importData {
       id
       numberOfHouseholds
@@ -15393,6 +15397,7 @@ export function withSaveKoboImportData<TProps, TChildProps = {}>(operationOption
  *   variables: {
  *      businessAreaSlug: // value for 'businessAreaSlug'
  *      projectId: // value for 'projectId'
+ *      onlyActiveSubmissions: // value for 'onlyActiveSubmissions'
  *   },
  * });
  */
@@ -17619,7 +17624,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   deleteRegistrationDataImport?: Resolver<Maybe<ResolversTypes['DeleteRegistrationDataImport']>, ParentType, ContextType, RequireFields<MutationsDeleteRegistrationDataImportArgs, 'registrationDataImportId'>>,
   registrationXlsxImport?: Resolver<Maybe<ResolversTypes['RegistrationXlsxImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationXlsxImportArgs, 'registrationDataImportData'>>,
   registrationKoboImport?: Resolver<Maybe<ResolversTypes['RegistrationKoboImportMutation']>, ParentType, ContextType, RequireFields<MutationsRegistrationKoboImportArgs, 'registrationDataImportData'>>,
-  saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'uid'>>,
+  saveKoboImportData?: Resolver<Maybe<ResolversTypes['SaveKoboProjectImportDataMutation']>, ParentType, ContextType, RequireFields<MutationsSaveKoboImportDataArgs, 'businessAreaSlug' | 'onlyActiveSubmissions' | 'uid'>>,
   mergeRegistrationDataImport?: Resolver<Maybe<ResolversTypes['MergeRegistrationDataImportMutation']>, ParentType, ContextType, RequireFields<MutationsMergeRegistrationDataImportArgs, 'id'>>,
   rerunDedupe?: Resolver<Maybe<ResolversTypes['RegistrationDeduplicationMutation']>, ParentType, ContextType, RequireFields<MutationsRerunDedupeArgs, 'registrationDataImportDatahubId'>>,
   checkAgainstSanctionList?: Resolver<Maybe<ResolversTypes['CheckAgainstSanctionListMutation']>, ParentType, ContextType, RequireFields<MutationsCheckAgainstSanctionListArgs, 'file'>>,
@@ -17946,6 +17951,7 @@ export type RegistrationDataImportNodeResolvers<ContextType = any, ParentType ex
   numberOfHouseholds?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
   datahubId?: Resolver<Maybe<ResolversTypes['UUID']>, ParentType, ContextType>,
   errorMessage?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  pullPictures?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   grievanceticketSet?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeGrievanceticketSetArgs>,
   households?: Resolver<ResolversTypes['HouseholdNodeConnection'], ParentType, ContextType, RegistrationDataImportNodeHouseholdsArgs>,
