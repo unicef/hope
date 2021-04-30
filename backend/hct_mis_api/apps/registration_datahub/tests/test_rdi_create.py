@@ -448,7 +448,7 @@ class TestRdiKoboCreateTask(TestCase):
         individuals = ImportedIndividual.objects.all()
 
         self.assertEqual(households.count(), 2)
-        self.assertEqual(individuals.count(), 4)
+        self.assertEqual(individuals.count(), 5)
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
