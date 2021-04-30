@@ -752,6 +752,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         individuals_to_create = {}
         documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
+        individuals_to_create_list = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
@@ -810,7 +811,8 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                             individual_obj.household = household_obj if only_collector_flag is False else None
 
                             individuals_to_create[individual_obj.get_hash_key] = individual_obj
-                            current_individuals.append(individual_obj.get_hash_key)
+                            individuals_to_create_list.append(individual_obj)
+                            current_individuals.append(individual_obj)
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
@@ -838,13 +840,12 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             household_obj = self._assign_admin_areas_titles(household_obj)
             households_to_create.append(household_obj)
 
-            for ind_hash_key in current_individuals:
-                ind = individuals_to_create[ind_hash_key]
+            for ind in current_individuals:
                 ind.first_registration_date = registration_date
                 ind.last_registration_date = registration_date
 
         ImportedHousehold.objects.bulk_create(households_to_create)
-        ImportedIndividual.objects.bulk_create(individuals_to_create.values())
+        ImportedIndividual.objects.bulk_create(individuals_to_create_list)
         self._handle_collectors(collectors_to_create, individuals_to_create)
         self._handle_documents_and_identities(documents_and_identities_to_create)
 
@@ -857,7 +858,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             ["head_of_household"],
             1000,
         )
-
         registration_data_import.import_done = RegistrationDataImportDatahub.DONE
         registration_data_import.save()
 
