@@ -25,7 +25,7 @@
         "individual_questions/more_information/phone_no_i_c": "333111445",
         "individual_questions/individual_index": "1",
         "individual_questions/full_name_i_c": "Test Testowski",
-        "individual_questions/relationship_i_c": "none",
+        "individual_questions/relationship_i_c": "NON_BENEFICIARY",
         "individual_questions/individual_vulnerabilities/work_status_i_c": "1",
         "individual_questions/family_name_i_c": "Testowski",
         "individual_questions/individual_vulnerabilities/disability_i_c": "not disabled",

@@ -234,7 +234,7 @@ export function RegistrationDataImport(): React.ReactElement {
                 }}
               />
             }
-            label='Only active submissions'
+            label='Only approved submissions'
           />
         </div>
         <div>
