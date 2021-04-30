@@ -18,6 +18,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     STATUS_ERROR = "Transaction Erroneous"
     STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
     STATUS_NOT_DISTRIBUTED = "Not Distributed"
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
     STATUS_CHOICE = (
         (STATUS_SUCCESS, _("Transaction Successful")),
         (STATUS_ERROR, _("Transaction Erroneous")),
