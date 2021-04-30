@@ -158,7 +158,7 @@ class CreatePaymentVerificationMutation(PermissionMutation):
         confidence_interval = None
         margin_of_error = None
         payment_records = cash_plan.payment_records.filter(
-            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
@@ -336,7 +336,7 @@ class EditPaymentVerificationMutation(PermissionMutation):
         confidence_interval = None
         margin_of_error = None
         payment_records = cash_plan.payment_records.filter(
-            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         )
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
             excluded_admin_areas = arg("full_list_arguments").get("excluded_admin_areas", [])
