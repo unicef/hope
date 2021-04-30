@@ -753,6 +753,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         documents_and_identities_to_create = []
         collectors_to_create = defaultdict(list)
         individuals_to_create_list = []
+        external_collectors = []
         for household in self.reduced_submissions:
             submission_meta_data = get_submission_metadata(household)
             submission_exists = KoboImportedSubmission.objects.filter(**submission_meta_data).exists()
@@ -797,22 +798,19 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
                                 self._cast_and_assign(i_value, i_field, household_obj)
                             else:
                                 self._cast_and_assign(i_value, i_field, individual_obj)
-
-                        duplicated_object = individuals_to_create.get(individual_obj.get_hash_key)
-
-                        if duplicated_object is not None and only_collector_flag is True:
-                            individual_obj = duplicated_object
-                        else:
-                            if individual_obj.relationship == HEAD and only_collector_flag is False:
+                        individual_obj.last_registration_date = individual_obj.first_registration_date
+                        individual_obj.registration_data_import = registration_data_import
+                        if only_collector_flag is False:
+                            if individual_obj.relationship == HEAD:
                                 head_of_households_mapping[household_obj] = individual_obj
 
-                            individual_obj.last_registration_date = individual_obj.first_registration_date
-                            individual_obj.registration_data_import = registration_data_import
                             individual_obj.household = household_obj if only_collector_flag is False else None
 
                             individuals_to_create[individual_obj.get_hash_key] = individual_obj
                             individuals_to_create_list.append(individual_obj)
                             current_individuals.append(individual_obj)
+                        else:
+                            external_collectors.append(individual_obj)
                         documents_and_identities_to_create.append(current_individual_docs_and_identities)
 
                         if role in (ROLE_PRIMARY, ROLE_ALTERNATE):
@@ -843,6 +841,16 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for ind in current_individuals:
                 ind.first_registration_date = registration_date
                 ind.last_registration_date = registration_date
+        for individual in external_collectors:
+            duplicate = individuals_to_create.get(individual.get_hash_key)
+            if not duplicate:
+                individuals_to_create[individual.get_hash_key] = individual
+                individuals_to_create_list.append(individual)
+                continue
+            roles = collectors_to_create.get(individual.get_hash_key)
+            for role in roles:
+                if role.individual == individual:
+                    role.individual = duplicate
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create_list)
