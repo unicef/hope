@@ -215,7 +215,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "phone_no",
             "phone_no_alternative",
         )
-        values = [str(getattr(self, field)) for field in fields]
+        values = [str(getattr(self, field)).lower() for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
 

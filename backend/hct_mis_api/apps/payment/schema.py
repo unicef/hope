@@ -295,7 +295,7 @@ class Query(graphene.ObjectType):
         confidence_interval = None
         margin_of_error = None
         payment_records = cash_plan.payment_records.filter(
-            status=PaymentRecord.STATUS_SUCCESS, delivered_quantity__gt=0
+            status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION, delivered_quantity__gt=0
         )
         payment_record_count = payment_records.count()
         if sampling == CashPlanPaymentVerification.SAMPLING_FULL_LIST:
