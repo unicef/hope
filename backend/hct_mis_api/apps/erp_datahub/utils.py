@@ -29,4 +29,6 @@ def get_payment_record_delivered_quantity_in_usd(payment_record: PaymentRecord):
         or not payment_record.cash_plan.exchange_rate
     ):
         return None
+    if payment_record.currency == "USD":
+        return payment_record.delivered_quantity
     return Decimal(payment_record.delivered_quantity * payment_record.cash_plan.exchange_rate).quantize(Decimal(".01"))
