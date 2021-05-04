@@ -9,6 +9,7 @@ import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
 import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
+import { ReassignRoleUnique } from './LookUpReassignRole/ReassignRoleUnique';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};
@@ -48,6 +49,13 @@ export const ReassignRoleBox = ({
   }
   const householdsAndRoles = individual?.householdsAndRoles;
   const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
+  const reassignData = JSON.parse(
+    ticket.needsAdjudicationTicketDetails.roleReassignData,
+  );
+  const uniqueIndividual =
+    ticket.needsAdjudicationTicketDetails.possibleDuplicate.id === individual.id
+      ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
+      : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -71,6 +79,16 @@ export const ReassignRoleBox = ({
             ticket={ticket}
             household={el.household}
             individual={individual}
+          />
+        ) : null}
+        {shouldDisplayButton &&
+        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+        reassignData[el.id]?.individual !== uniqueIndividual.id ? (
+          <ReassignRoleUnique
+            individualRole={{ role: el.role, id: el.id }}
+            ticket={ticket}
+            household={household}
+            individual={uniqueIndividual}
           />
         ) : null}
       </Box>
