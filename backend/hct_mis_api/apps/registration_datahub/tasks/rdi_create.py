@@ -1,4 +1,5 @@
 import json
+import numbers
 from collections import defaultdict
 from datetime import date, datetime
 from io import BytesIO
@@ -257,6 +258,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return file
         return "" if is_field_required is True else None
 
+    def _handle_decimal_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+        value = cell.value
+        if not is_flex_field:
+            return value
+        if isinstance(value, numbers.Number):
+            return str(value)
+        return value
+
     def _handle_geopoint_field(self, value, *args, **kwargs):
         if not value:
             return ""
@@ -420,6 +429,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         complex_types = {
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
+            "DECIMAL": self._handle_decimal_field,
         }
 
         sheet_title = sheet.title.lower()
@@ -641,10 +651,18 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         y = float(geopoint[1])
         return Point(x=x, y=y, srid=4326)
 
+    def _handle_decimal_field(self, value, is_flex_field):
+        if not is_flex_field:
+            return value
+        if isinstance(value, numbers.Number):
+            return str(value)
+        return value
+
     def _cast_and_assign(self, value: Union[str, list], field: str, obj: Union[ImportedIndividual, ImportedHousehold]):
         complex_fields = {
             "IMAGE": self._handle_image_field,
             "GEOPOINT": self._handle_geopoint_field,
+            "DECIMAL": self._handle_decimal_field,
         }
         excluded = ("age",)
 
@@ -838,7 +856,6 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
             for ind in current_individuals:
                 ind.first_registration_date = registration_date
                 ind.last_registration_date = registration_date
-
 
         ImportedHousehold.objects.bulk_create(households_to_create)
         ImportedIndividual.objects.bulk_create(individuals_to_create_list)
