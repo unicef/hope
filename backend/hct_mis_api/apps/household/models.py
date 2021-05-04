@@ -617,6 +617,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict, blank=True)
+    user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.NullBooleanField()
     administration_of_rutf = models.NullBooleanField()
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
@@ -706,6 +707,16 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     class Meta:
         verbose_name = "Individual"
+
+    def set_sys_field(self, key, value):
+        if "sys" not in self.user_fields:
+            self.user_fields["sys"] = {}
+        self.user_fields["sys"][key] = value
+
+    def get_sys_field(self, key):
+        if "sys" in self.user_fields:
+            return self.user_fields["sys"][key]
+        return None
 
 
 class EntitlementCard(TimeStampedUUIDModel):
