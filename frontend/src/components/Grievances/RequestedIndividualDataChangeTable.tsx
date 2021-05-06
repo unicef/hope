@@ -122,7 +122,7 @@ function individualDataRow(
       </TableCell>
       <TableCell id={labelId} scope='row' align='left'>
         <Capitalize>
-          {row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+          {row[0] === 'sex' ? "gender" : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align='left'>
