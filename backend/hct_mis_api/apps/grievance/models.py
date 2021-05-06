@@ -258,8 +258,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def related_tickets(self):
-        yield from self.linked_tickets.all()
-        yield from self.linked_tickets_related.all()
+        combined_related_tickets = self.linked_tickets.all() | self.linked_tickets_related.all()
+        yield from combined_related_tickets
 
     @property
     def is_feedback(self):
