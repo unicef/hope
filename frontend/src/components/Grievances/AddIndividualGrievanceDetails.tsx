@@ -69,7 +69,10 @@ export function AddIndividualGrievanceDetails({
       }
       return (
         <Grid key={key} item xs={6}>
-          <LabelizedField label={key.replace(/_/g, ' ')} value={textValue} />
+          <LabelizedField
+            label={key === 'sex' ? 'GENDER' : key.replace(/_/g, ' ')}
+            value={textValue}
+          />
         </Grid>
       );
     }) || [];
