@@ -2,7 +2,7 @@ import graphene
 from django.db.models import Q, Sum, Count
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-from django_filters import CharFilter, FilterSet, OrderingFilter
+from django_filters import CharFilter, FilterSet, OrderingFilter, ModelChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType
 
@@ -27,7 +27,7 @@ from hct_mis_api.apps.core.utils import (
     chart_filters_decoder,
     chart_create_filter_query,
 )
-from hct_mis_api.apps.household.models import ROLE_NO_ROLE
+from hct_mis_api.apps.household.models import ROLE_NO_ROLE, Household
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
@@ -49,6 +49,7 @@ from hct_mis_api.apps.utils.schema import (
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
     business_area = CharFilter(field_name="business_area__slug")
+    household = ModelChoiceFilter(queryset=Household.objects.all())
 
     class Meta:
         fields = (
@@ -79,6 +80,12 @@ class PaymentRecordFilter(FilterSet):
         if is_valid_uuid(value):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
+
+    def filter_queryset(self, queryset):
+        cleaned_data = self.form.cleaned_data
+        household_object = cleaned_data.pop("household", None)
+
+        return queryset.filter(household=household_object)
 
 
 class PaymentVerificationFilter(FilterSet):
@@ -158,7 +165,6 @@ class PaymentRecordNode(BaseNodePermissionMixin, DjangoObjectType):
 
     class Meta:
         model = PaymentRecord
-        filter_fields = ["cash_plan", "household"]
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
 
