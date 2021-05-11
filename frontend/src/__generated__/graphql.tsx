@@ -21,8 +21,8 @@ export type Scalars = {
   BigInt: any,
   Date: any,
   FlexFieldsScalar: any,
-  Decimal: any,
   JSONString: any,
+  Decimal: any,
   GeoJSON: any,
   Upload: any,
 };
@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Wfp = 'WFP',
-  Unhcr = 'UNHCR'
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -278,9 +278,7 @@ export type BusinessAreaNodePaymentrecordSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -443,9 +441,7 @@ export type CashPlanNodePaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -1328,9 +1324,7 @@ export type HouseholdNodePaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -2303,6 +2297,7 @@ export type IndividualNode = Node & {
   firstRegistrationDate: Scalars['Date'],
   lastRegistrationDate: Scalars['Date'],
   flexFields?: Maybe<Scalars['FlexFieldsScalar']>,
+  userFields: Scalars['JSONString'],
   enrolledInNutritionProgramme?: Maybe<Scalars['Boolean']>,
   administrationOfRutf?: Maybe<Scalars['Boolean']>,
   unicefId: Scalars['String'],
@@ -2345,9 +2340,7 @@ export type IndividualNodePaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -4416,9 +4409,7 @@ export type ServiceProviderNodePaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -4680,9 +4671,7 @@ export type TargetPopulationNodePaymentRecordsArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -5092,9 +5081,7 @@ export type UserBusinessAreaNodePaymentrecordSetArgs = {
   before?: Maybe<Scalars['String']>,
   after?: Maybe<Scalars['String']>,
   first?: Maybe<Scalars['Int']>,
-  last?: Maybe<Scalars['Int']>,
-  cashPlan?: Maybe<Scalars['ID']>,
-  household?: Maybe<Scalars['ID']>
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -15998,6 +15985,7 @@ export type ResolversTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
@@ -16068,7 +16056,6 @@ export type ResolversTypes = {
   TicketDeleteIndividualDetailsNodeConnection: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeConnection>,
   TicketDeleteIndividualDetailsNodeEdge: ResolverTypeWrapper<TicketDeleteIndividualDetailsNodeEdge>,
   TicketDeleteIndividualDetailsNode: ResolverTypeWrapper<TicketDeleteIndividualDetailsNode>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   TicketSystemFlaggingDetailsNodeConnection: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeConnection>,
   TicketSystemFlaggingDetailsNodeEdge: ResolverTypeWrapper<TicketSystemFlaggingDetailsNodeEdge>,
   TicketSystemFlaggingDetailsNode: ResolverTypeWrapper<TicketSystemFlaggingDetailsNode>,
@@ -16320,6 +16307,7 @@ export type ResolversParentTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
+  JSONString: Scalars['JSONString'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
@@ -16390,7 +16378,6 @@ export type ResolversParentTypes = {
   TicketDeleteIndividualDetailsNodeConnection: TicketDeleteIndividualDetailsNodeConnection,
   TicketDeleteIndividualDetailsNodeEdge: TicketDeleteIndividualDetailsNodeEdge,
   TicketDeleteIndividualDetailsNode: TicketDeleteIndividualDetailsNode,
-  JSONString: Scalars['JSONString'],
   TicketSystemFlaggingDetailsNodeConnection: TicketSystemFlaggingDetailsNodeConnection,
   TicketSystemFlaggingDetailsNodeEdge: TicketSystemFlaggingDetailsNodeEdge,
   TicketSystemFlaggingDetailsNode: TicketSystemFlaggingDetailsNode,
@@ -17457,6 +17444,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   firstRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   lastRegistrationDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>,
   flexFields?: Resolver<Maybe<ResolversTypes['FlexFieldsScalar']>, ParentType, ContextType>,
+  userFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   enrolledInNutritionProgramme?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   administrationOfRutf?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>,
   unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
