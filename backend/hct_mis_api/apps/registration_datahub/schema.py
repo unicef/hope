@@ -188,6 +188,7 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
     observed_disability = graphene.List(graphene.String)
+    age = graphene.Int()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -207,6 +208,10 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_flex_fields(parent, info):
         return resolve_flex_fields_choices_to_string(parent)
+
+    @staticmethod
+    def resolve_age(parent, info):
+        return parent.age
 
     class Meta:
         model = ImportedIndividual
