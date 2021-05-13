@@ -3,6 +3,7 @@ import { gql } from 'apollo-boost';
 export const individualMinimal = gql`
   fragment individualMinimal on IndividualNode {
     id
+    age
     lastRegistrationDate
     createdAt
     updatedAt
