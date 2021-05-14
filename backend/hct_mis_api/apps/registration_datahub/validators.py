@@ -2,6 +2,7 @@ import logging
 import re
 from collections import Counter, defaultdict
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from itertools import zip_longest
 from operator import itemgetter
 from pathlib import Path
@@ -406,8 +407,10 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return False
             if value is None:
                 return True
-
-            return isinstance(value, float)
+            Decimal(value)
+            return True
+        except InvalidOperation:
+            return False
         except Exception as e:
             logger.exception(e)
             raise
