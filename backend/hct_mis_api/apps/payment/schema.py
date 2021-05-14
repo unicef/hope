@@ -82,10 +82,13 @@ class PaymentRecordFilter(FilterSet):
         return qs
 
     def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
         cleaned_data = self.form.cleaned_data
         household_object = cleaned_data.pop("household", None)
 
-        return queryset.filter(household=household_object)
+        if household_object:
+            return queryset.filter(household=household_object)
+        return queryset
 
 
 class PaymentVerificationFilter(FilterSet):
