@@ -19,7 +19,7 @@ export const headCells: HeadCell<
   {
     disablePadding: false,
     label: 'FSP',
-    id: 'service_provider__full_name',
+    id: 'serviceProvider__fullName',
     numeric: false,
   },
   {
