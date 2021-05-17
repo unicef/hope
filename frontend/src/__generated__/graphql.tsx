@@ -2170,6 +2170,7 @@ export type ImportedIndividualNode = Node & {
   documents: ImportedDocumentNodeConnection,
   identities: Array<ImportedIndividualIdentityNode>,
   role?: Maybe<Scalars['String']>,
+  age?: Maybe<Scalars['Int']>,
 };
 
 
@@ -2333,6 +2334,7 @@ export type IndividualNode = Node & {
   householdsAndRoles: Array<IndividualRoleInHouseholdNode>,
   status?: Maybe<Scalars['String']>,
   role?: Maybe<Scalars['String']>,
+  age?: Maybe<Scalars['Int']>,
 };
 
 
@@ -5491,7 +5493,7 @@ export type HouseholdDetailedFragment = (
 
 export type IndividualMinimalFragment = (
   { __typename?: 'IndividualNode' }
-  & Pick<IndividualNode, 'id' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
+  & Pick<IndividualNode, 'id' | 'age' | 'lastRegistrationDate' | 'createdAt' | 'updatedAt' | 'fullName' | 'sex' | 'unicefId' | 'birthDate' | 'maritalStatus' | 'phoneNo' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'deduplicationGoldenRecordStatus' | 'sanctionListLastCheck' | 'role' | 'relationship' | 'status'>
   & { documents: (
     { __typename?: 'DocumentNodeConnection' }
     & { edges: Array<Maybe<(
@@ -8152,7 +8154,7 @@ export type ImportedHouseholdDetailedFragment = (
 
 export type ImportedIndividualMinimalFragment = (
   { __typename?: 'ImportedIndividualNode' }
-  & Pick<ImportedIndividualNode, 'id' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
+  & Pick<ImportedIndividualNode, 'id' | 'age' | 'fullName' | 'birthDate' | 'sex' | 'role' | 'relationship' | 'deduplicationBatchStatus' | 'deduplicationGoldenRecordStatus'>
   & { deduplicationGoldenRecordResults: Maybe<Array<Maybe<(
     { __typename?: 'DeduplicationResultNode' }
     & Pick<DeduplicationResultNode, 'hitId' | 'fullName' | 'score' | 'proximityToScore' | 'age' | 'location'>
@@ -8448,6 +8450,7 @@ export const HouseholdMinimalFragmentDoc = gql`
 export const IndividualMinimalFragmentDoc = gql`
     fragment individualMinimal on IndividualNode {
   id
+  age
   lastRegistrationDate
   createdAt
   updatedAt
@@ -8912,6 +8915,7 @@ export const ImportedHouseholdMinimalFragmentDoc = gql`
 export const ImportedIndividualMinimalFragmentDoc = gql`
     fragment importedIndividualMinimal on ImportedIndividualNode {
   id
+  age
   fullName
   birthDate
   sex
@@ -17380,6 +17384,7 @@ export type ImportedIndividualNodeResolvers<ContextType = any, ParentType extend
   documents?: Resolver<ResolversTypes['ImportedDocumentNodeConnection'], ParentType, ContextType, ImportedIndividualNodeDocumentsArgs>,
   identities?: Resolver<Array<ResolversTypes['ImportedIndividualIdentityNode']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type ImportedIndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['ImportedIndividualNodeConnection'] = ResolversParentTypes['ImportedIndividualNodeConnection']> = {
@@ -17480,6 +17485,7 @@ export type IndividualNodeResolvers<ContextType = any, ParentType extends Resolv
   householdsAndRoles?: Resolver<Array<ResolversTypes['IndividualRoleInHouseholdNode']>, ParentType, ContextType>,
   status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   role?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  age?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
 };
 
 export type IndividualNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['IndividualNodeConnection'] = ResolversParentTypes['IndividualNodeConnection']> = {

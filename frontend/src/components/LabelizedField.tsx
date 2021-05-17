@@ -29,21 +29,26 @@ export function LabelizedField({
   dataCy,
   dashed = true,
 }: Props): React.ReactElement {
-  let displayValue;
+  let fieldValue;
   if (children !== undefined) {
-    displayValue = children;
+    fieldValue = children;
   } else {
-    displayValue = value;
+    fieldValue = value;
   }
-  const displayDash = dashed && displayValue !== 0 && !displayValue;
+
+  let displayValue = children;
+
+  const shouldDisplayDash = dashed && fieldValue !== 0 && !fieldValue;
+  if (shouldDisplayDash) {
+    displayValue = '-';
+  } else if (children === undefined) {
+    displayValue = <Value color='textSecondary'>{value}</Value>;
+  }
+
   return (
     <div data-cy={dataCy && `labelized-field-container-${dataCy}`}>
       <Label color='textSecondary'>{label}</Label>
-      <div>
-        {displayDash
-          ? '-'
-          : children || <Value color='textSecondary'>{value}</Value>}
-      </div>
+      <div>{displayValue}</div>
     </div>
   );
 }
