@@ -25,6 +25,9 @@ import { TotalAmountTransferredSectionByAdminAreaSection } from '../../component
 const PaddingContainer = styled.div`
   padding: 20px;
 `;
+const ChartWrapper = styled.div`
+  height: ${(props) => (props.numberOfProgrammes <= 3 ? '200px' : '400px')};
+`;
 const PadddingLeftContainer = styled.div`
   padding-left: 20px;
 `;
@@ -96,7 +99,11 @@ export function DashboardYearPage({
               data={globalData?.chartTotalTransferredCashByCountry}
             />
             <DashboardPaper title='Number of Programmes by Sector'>
-              <ProgrammesBySector data={data.chartProgrammesBySector} />
+              <ChartWrapper
+                numberOfProgrammes={data.chartProgrammesBySector.labels.length}
+              >
+                <ProgrammesBySector data={data.chartProgrammesBySector} />
+              </ChartWrapper>
             </DashboardPaper>
             <DashboardPaper title='Total Transferred by Month'>
               <TotalTransferredByMonth
