@@ -25,6 +25,9 @@ const DialogFooter = styled.div`
 const DialogContainer = styled.div`
   width: 700px;
 `;
+const ChartWrapper = styled.div`
+  height: 200px;
+`;
 const Title = styled(Box)`
   font-size: 18px;
   font-weight: normal;
@@ -71,9 +74,11 @@ export const TotalNumberOfIndividualsReachedSection = ({
           <DialogContainer>
             <Box mb={6}>
               <Title mb={6}>Individuals Reached by Age and Gender Groups</Title>
-              <IndividualsReachedByAgeAndGenderGroupsChart
-                data={chartDataIndividuals}
-              />
+              <ChartWrapper>
+                <IndividualsReachedByAgeAndGenderGroupsChart
+                  data={chartDataIndividuals}
+                />
+              </ChartWrapper>
             </Box>
             <Box>
               <Title mb={6}>
