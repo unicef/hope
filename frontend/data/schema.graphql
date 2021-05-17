@@ -1727,6 +1727,7 @@ type ImportedIndividualNode implements Node {
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities: [ImportedIndividualIdentityNode!]!
   role: String
+  age: Int
 }
 
 type ImportedIndividualNodeConnection {
@@ -1871,6 +1872,7 @@ type IndividualNode implements Node {
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   status: String
   role: String
+  age: Int
 }
 
 type IndividualNodeConnection {
