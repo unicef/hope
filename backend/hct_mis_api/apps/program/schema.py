@@ -291,10 +291,6 @@ class Query(graphene.ObjectType):
         valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
         programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
 
-        programmes_wo_cash_plus = []
-        programmes_with_cash_plus = []
-        labels = []
-
         programmes_by_sector = (
             programs.values("sector")
             .order_by("sector")

@@ -33,8 +33,11 @@ export const IndividualsReachedByAgeAndGenderGroupsChart = ({
   };
   const options = {
     cutoutPercentage: 80,
+    responsive: true,
+    maintainAspectRatio: false,
     legend: {
       position: 'right',
+      align: 'start',
       labels: {
         usePointStyle: true,
       },
