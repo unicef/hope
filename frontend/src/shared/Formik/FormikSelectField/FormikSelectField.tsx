@@ -6,7 +6,7 @@ import {
   InputLabel,
   Select,
 } from '@material-ui/core';
-import get from "lodash/get";
+import get from 'lodash/get';
 
 export const FormikSelectField = ({
   field,
@@ -16,10 +16,11 @@ export const FormikSelectField = ({
 }): React.ReactElement => {
   const isInvalid =
     get(form.errors, field.name) &&
-    (get(form.touched, field.name) || form.submitCount>0);
+    (get(form.touched, field.name) || form.submitCount > 0);
   const value = multiple
     ? field.value || otherProps.value || []
     : field.value || otherProps.value || '';
+
   return (
     <>
       <FormControl variant='outlined' margin='dense' fullWidth {...otherProps}>

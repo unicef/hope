@@ -57,6 +57,10 @@ from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateT
 from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
 
 
+def is_flex_field_attr(field):
+    return field.endswith("_i_f") or field.endswith("_h_f")
+
+
 class RdiBaseCreateTask:
     COMBINED_FIELDS = get_combined_attributes()
     FLEX_FIELDS = serialize_flex_attributes()
@@ -123,6 +127,10 @@ class RdiBaseCreateTask:
                             valid_choices.append(str(single_choice))
                 return valid_choices
             else:
+                if is_flex_field_attr(header):
+                    if isinstance(value, float) and value.is_integer():
+                        value = int(value)
+                    value = str(value)
                 if isinstance(value, str):
                     without_trailing_whitespace = value.strip()
                     if without_trailing_whitespace in choices:
@@ -671,7 +679,7 @@ class RdiKoboCreateTask(RdiBaseCreateTask):
         if field_data_dict is None or field in excluded:
             return
 
-        is_flex_field = field.endswith("_i_f") or field.endswith("_h_f")
+        is_flex_field = is_flex_field_attr(field)
 
         if field_data_dict["type"] in complex_fields:
             cast_fn = complex_fields.get(field_data_dict["type"])

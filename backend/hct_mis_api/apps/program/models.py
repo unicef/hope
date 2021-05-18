@@ -144,7 +144,7 @@ class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, Concur
     @property
     def total_number_of_households(self):
         return (
-            self.cash_plans.filter(payment_records__delivered_quantity__gte=0)
+            self.cash_plans.filter(payment_records__delivered_quantity__gt=0)
             .distinct("payment_records__household__unicef_id")
             .values_list("payment_records__household__unicef_id", flat=True)
             .count()
