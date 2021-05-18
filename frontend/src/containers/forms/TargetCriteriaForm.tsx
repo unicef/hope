@@ -210,23 +210,19 @@ export function TargetCriteriaForm({
               </DialogTitle>
             </DialogTitleWrapper>
             <DialogContent>
-              {
-                // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                // @ts-ignore
-                errors.nonFieldErrors && (
-                  <DialogError>
-                    <ul>
-                      {
-                        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-                        // @ts-ignore
-                        errors.nonFieldErrors.map((message) => (
-                          <li>{message}</li>
-                        ))
-                      }
-                    </ul>
-                  </DialogError>
-                )
-              }
+              {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+              // @ts-ignore
+              errors.nonFieldErrors && (
+                <DialogError>
+                  <ul>
+                    {// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+                    // @ts-ignore
+                    errors.nonFieldErrors.map((message) => (
+                      <li>{message}</li>
+                    ))}
+                  </ul>
+                </DialogError>
+              )}
 
               <DialogDescription>
                 All rules defined below have to be true for the entire
