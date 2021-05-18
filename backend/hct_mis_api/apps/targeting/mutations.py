@@ -254,7 +254,9 @@ class ApproveTargetPopulationMutation(ValidatedMutation):
         target_population.status = TargetPopulation.STATUS_APPROVED
         target_population.approved_by = user
         target_population.approved_at = timezone.now()
-        households = Household.objects.filter(target_population.candidate_list_targeting_criteria.get_query())
+        households = Household.objects.filter(business_area=target_population.business_area).filter(
+            target_population.candidate_list_targeting_criteria.get_query()
+        )
         target_population.households.set(households)
         target_population.save()
         log_create(
