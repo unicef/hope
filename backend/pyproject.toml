@@ -17,6 +17,7 @@ exclude = '''
 )/
 '''
 [tool.isort]
+profile = "black"
 default_section = "THIRDPARTY"
 known_first_party = [
     "account",
