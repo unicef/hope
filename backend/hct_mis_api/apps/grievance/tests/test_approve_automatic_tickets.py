@@ -1,21 +1,22 @@
 from datetime import datetime
-from parameterized import parameterized
 
 from django.core.management import call_command
+
 from django_countries.fields import Country
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
     GrievanceTicketFactory,
-    TicketSystemFlaggingDetailsFactory,
     TicketNeedsAdjudicationDetailsFactory,
+    TicketSystemFlaggingDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory
-from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
 
@@ -34,7 +35,7 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
     }
     """
     APPROVE_NEEDS_ADJUDICATION_MUTATION = """
-    mutation ApproveNeedsAdjudicationTicket($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+    mutation ApproveNeedsAdjudicationTicket($grievanceTicketId: ID!, $selectedIndividualId: ID) {
       approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
         grievanceTicket {
           id
@@ -198,5 +199,28 @@ class TestGrievanceApproveAutomaticMutation(APITestCase):
                     self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
                 ),
                 "selectedIndividualId": self.id_to_base64(self.individuals[1].id, "IndividualNode"),
+            },
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "with_permission",
+                [Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE],
+            ),
+            ("without_permission", []),
+        ]
+    )
+    def test_approve_needs_adjudication_should_allow_uncheck_selected_individual(self, _, permissions):
+        self.create_user_role_with_permissions(self.user, permissions, self.business_area)
+
+        self.snapshot_graphql_request(
+            request_string=self.APPROVE_NEEDS_ADJUDICATION_MUTATION,
+            context={"user": self.user},
+            variables={
+                "grievanceTicketId": self.id_to_base64(
+                    self.needs_adjudication_grievance_ticket.id, "GrievanceTicketNode"
+                ),
+                "selectedIndividualId": None,
             },
         )
