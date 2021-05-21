@@ -154,6 +154,7 @@ class TestExchangeRatesAPI(TestCase):
                 self.assertEqual(EXCHANGE_RATES_WITHOUT_HISTORICAL_DATA, response_dict)
 
 
+@mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestExchangeRates(TestCase):
     def test_convert_response_json_to_exchange_rates(self):
         converted_response = ExchangeRates._convert_response_json_to_exchange_rates(EXCHANGE_RATES_WITH_HISTORICAL_DATA)
@@ -205,6 +206,7 @@ class TestExchangeRates(TestCase):
             self.assertEqual(expected_result, exchange_rate)
 
 
+@mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestFixExchangeRatesCommand(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -240,6 +242,7 @@ class TestFixExchangeRatesCommand(TestCase):
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
             json=EXCHANGE_RATES_API_RESPONSE,
         )
+
         call_command("fixexchangerates", "--silent")
 
         all_payment_records = PaymentRecord.objects.all()
