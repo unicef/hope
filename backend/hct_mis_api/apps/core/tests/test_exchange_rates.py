@@ -19,7 +19,7 @@ from hct_mis_api.apps.payment.fixtures import (
     RealPaymentRecordFactory,
 )
 from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import EXCHANGE_RATES_API_RESPONSE_FULL
+from hct_mis_api.apps.core.tests.test_files.exchange_rates_api_response import EXCHANGE_RATES_API_RESPONSE
 
 
 EXCHANGE_RATES_WITH_HISTORICAL_DATA = {
@@ -238,7 +238,7 @@ class TestFixExchangeRatesCommand(TestCase):
         mocker.register_uri(
             "GET",
             "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
-            json=EXCHANGE_RATES_API_RESPONSE_FULL,
+            json=EXCHANGE_RATES_API_RESPONSE,
         )
         call_command("fixexchangerates", "--silent")
 
