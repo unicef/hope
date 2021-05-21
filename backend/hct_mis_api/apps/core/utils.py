@@ -7,7 +7,6 @@ from collections import MutableMapping, OrderedDict
 from typing import List
 
 from PIL import Image
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django_filters import OrderingFilter
 from graphql import GraphQLError
