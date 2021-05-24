@@ -11,8 +11,8 @@ const StyledTextField = styled(TextField)`
   input[type='number'] {
     -moz-appearance: textfield;
   }
-  .MuiFormHelperText-root{
-    white-space: pre-line
+  .MuiFormHelperText-root {
+    white-space: pre-line;
   }
 `;
 
@@ -23,6 +23,7 @@ export const FormikTextField = ({
   decoratorEnd,
   type,
   precision,
+  integer,
   ...otherProps
 }): React.ReactElement => {
   const isInvalid =
@@ -30,6 +31,9 @@ export const FormikTextField = ({
     (get(form.touched, field.name) || form.submitCount > 0);
   const handleKeyPress = (evt): void => {
     if (type === 'number' && ['e', 'E', '+', '-'].includes(evt.key)) {
+      evt.preventDefault();
+    }
+    if (integer && [',', '.'].includes(evt.key)) {
       evt.preventDefault();
     }
   };
