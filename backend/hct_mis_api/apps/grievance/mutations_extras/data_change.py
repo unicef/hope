@@ -580,7 +580,13 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
     Individual.objects.filter(id=individual.id).update(flex_fields=merged_flex_fields, **only_approved_data)
     new_individual = Individual.objects.get(id=individual.id)
     relationship_to_head_of_household = individual_data.get("relationship")
-    if household and relationship_to_head_of_household == HEAD:
+    if (
+        household
+        and relationship_to_head_of_household
+        and relationship_to_head_of_household.get("value") == HEAD
+        and relationship_to_head_of_household.get("approve_status")
+        and individual.relationship != HEAD
+    ):
         household.head_of_household = individual
         household.individuals.exclude(id=individual.id).update(relationship=RELATIONSHIP_UNKNOWN)
         household.save()
