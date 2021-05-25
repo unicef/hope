@@ -8103,26 +8103,6 @@
                   "ofType": null
                 },
                 "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
               }
             ],
             "type": {
@@ -12265,26 +12245,6 @@
                   "ofType": null
                 },
                 "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
               }
             ],
             "type": {
@@ -13594,6 +13554,22 @@
             "deprecationReason": null
           },
           {
+            "name": "userFields",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "JSONString",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "enrolledInNutritionProgramme",
             "description": null,
             "args": [],
@@ -13965,26 +13941,6 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -14484,6 +14440,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "age",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -14681,6 +14649,16 @@
       {
         "kind": "SCALAR",
         "name": "FlexFieldsScalar",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "JSONString",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -16141,26 +16119,6 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -18016,26 +17974,6 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -20408,26 +20346,6 @@
                   "ofType": null
                 },
                 "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
               }
             ],
             "type": {
@@ -22759,16 +22677,6 @@
             "ofType": null
           }
         ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "JSONString",
-        "description": null,
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -25408,13 +25316,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "WFP",
+            "name": "UNHCR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "UNHCR",
+            "name": "WFP",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -29669,26 +29577,6 @@
                   "ofType": null
                 },
                 "defaultValue": null
-              },
-              {
-                "name": "cashPlan",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "household",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "ID",
-                  "ofType": null
-                },
-                "defaultValue": null
               }
             ],
             "type": {
@@ -32693,6 +32581,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "age",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
               "ofType": null
             },
             "isDeprecated": false,

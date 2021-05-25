@@ -34,6 +34,8 @@ export const ProgrammesBySector = ({
   };
 
   const options = {
+    responsive: true,
+    maintainAspectRatio: false,
     legend: {
       position: 'bottom',
       labels: {
