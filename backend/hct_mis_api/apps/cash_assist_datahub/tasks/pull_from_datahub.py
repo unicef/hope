@@ -2,11 +2,11 @@ import logging
 
 from django.db import transaction
 from django.db.models import Count
-
-from sentry_sdk import configure_scope, push_scope, set_tag
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
 from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.erp_datahub.utils import (
@@ -130,6 +130,7 @@ class PullFromDatahubTask:
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
+        exchange_rates_client = ExchangeRates()
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
             self.set_cash_plan_service_provider(cash_plan_args)
@@ -140,7 +141,7 @@ class PullFromDatahubTask:
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
 
             if not cash_plan.exchange_rate:
-                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
+                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
                 cash_plan.save(update_fields=["exchange_rate"])
 
     def set_cash_plan_service_provider(self, cash_plan_args):
@@ -154,6 +155,7 @@ class PullFromDatahubTask:
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
+        exchange_rates_client = ExchangeRates()
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
                 dh_payment_record,
@@ -170,7 +172,9 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             if not payment_record.delivered_quantity_usd:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
+                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
+                    payment_record, exchange_rates_client
+                )
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
