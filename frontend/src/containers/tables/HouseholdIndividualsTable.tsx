@@ -132,7 +132,9 @@ export function HouseholdIndividualsTable({
             </TableCell>
             <TableCell align='left'>{roleChoicesDict[row.role]}</TableCell>
             <TableCell align='left'>
-              {relationshipChoicesDict[row.relationship]}
+              {household?.id === row?.household?.id
+                ? relationshipChoicesDict[row.relationship]
+                : relationshipChoicesDict.NON_BENEFICIARY}
             </TableCell>
             <TableCell align='left'>
               <UniversalMoment>{row.birthDate}</UniversalMoment>
