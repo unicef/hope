@@ -351,10 +351,6 @@ export function formatThousands(value: string): string {
   return value;
 }
 
-export function getAgeFromDob(date: string): number {
-  return moment().diff(moment(date), 'years');
-}
-
 export function targetPopulationStatusMapping(status): string {
   return TARGETING_STATES[status];
 }

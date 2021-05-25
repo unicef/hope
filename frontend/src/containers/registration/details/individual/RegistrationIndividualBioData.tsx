@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import {
   decodeIdString,
-  getAgeFromDob,
   sexToCapitalize,
   choicesToDict, renderBoolean,
 } from '../../../../utils/utils';
@@ -38,12 +37,6 @@ export function RegistrationIndividualsBioData({
   individual,
 }: RegistrationIndividualBioDataProps): React.ReactElement {
   const businessArea = useBusinessArea();
-
-  let age: number | null;
-  const { birthDate } = individual;
-  if (birthDate) {
-    age = getAgeFromDob(birthDate);
-  }
 
   const {
     data: choicesData,
@@ -130,11 +123,11 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{age}</LabelizedField>
+          <LabelizedField label='Age'>{individual.age}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <UniversalMoment>{birthDate}</UniversalMoment>
+            <UniversalMoment>{individual.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>

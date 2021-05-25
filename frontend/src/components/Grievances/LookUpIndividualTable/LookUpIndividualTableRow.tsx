@@ -3,7 +3,7 @@ import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { getAgeFromDob, sexToCapitalize } from '../../../utils/utils';
+import { sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { Pointer } from '../../Pointer';
 import { UniversalMoment } from '../../UniversalMoment';
@@ -22,10 +22,6 @@ export function LookUpIndividualTableRow({
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-  let age: number | string = 'N/A';
-  if (individual.birthDate) {
-    age = getAgeFromDob(individual.birthDate);
-  }
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
     const win = window.open(path);
@@ -60,7 +56,7 @@ export function LookUpIndividualTableRow({
       <TableCell align='left'>
         {individual.household ? individual.household.unicefId : ''}
       </TableCell>
-      <TableCell align='right'>{age}</TableCell>
+      <TableCell align='right'>{individual.age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
       <TableCell align='left'>{individual?.household?.admin2?.title||'-'}</TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>

@@ -61,7 +61,7 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        <Pointer>{decodeIdString(paymentRecord.id)}</Pointer>
+        <Pointer>{paymentRecord.caId}</Pointer>
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verifications?.edges[0]?.node.status ? (

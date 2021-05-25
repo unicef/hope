@@ -54,7 +54,7 @@ export const GrievancesChart = ({
   };
 
   return (
-    <Box mt={6} height='375px'>
+    <Box mt={6} height='300px'>
       <Doughnut data={chartData} options={options} />
     </Box>
   );

@@ -99,6 +99,7 @@ export const importedHouseholdDetailed = gql`
 export const importedIndividualMinimal = gql`
   fragment importedIndividualMinimal on ImportedIndividualNode {
     id
+    age
     fullName
     birthDate
     sex
