@@ -121,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  WFP
   UNHCR
+  WFP
 }
 
 type ApproveTargetPopulationMutation {
@@ -149,7 +149,7 @@ type BusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
-  paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
@@ -208,7 +208,7 @@ type CashPlanNode implements Node {
   totalDeliveredQuantity: Float
   totalUndeliveredQuantity: Float
   verificationStatus: CashPlanVerificationStatus!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   verifications(before: String, after: String, first: Int, last: Int): CashPlanPaymentVerificationNodeConnection!
   bankReconciliationSuccess: Int
   bankReconciliationError: Int
@@ -954,7 +954,7 @@ type HouseholdNode implements Node {
   collectIndividualData: HouseholdCollectIndividualData!
   currency: HouseholdCurrency!
   unhcrId: String!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   householdDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketHouseholdDataUpdateDetailsNodeConnection!
@@ -1727,6 +1727,7 @@ type ImportedIndividualNode implements Node {
   documents(before: String, after: String, first: Int, last: Int): ImportedDocumentNodeConnection!
   identities: [ImportedIndividualIdentityNode!]!
   role: String
+  age: Int
 }
 
 type ImportedIndividualNodeConnection {
@@ -1835,6 +1836,7 @@ type IndividualNode implements Node {
   firstRegistrationDate: Date!
   lastRegistrationDate: Date!
   flexFields: FlexFieldsScalar
+  userFields: JSONString!
   enrolledInNutritionProgramme: Boolean
   administrationOfRutf: Boolean
   unicefId: String!
@@ -1857,7 +1859,7 @@ type IndividualNode implements Node {
   whoAnswersPhone: String!
   whoAnswersAltPhone: String!
   businessArea: UserBusinessAreaNode!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
   sensitiveTicketDetails(before: String, after: String, first: Int, last: Int): TicketSensitiveDetailsNodeConnection!
   individualDataUpdateTicketDetails(before: String, after: String, first: Int, last: Int): TicketIndividualDataUpdateDetailsNodeConnection!
@@ -1870,6 +1872,7 @@ type IndividualNode implements Node {
   householdsAndRoles: [IndividualRoleInHouseholdNode!]!
   status: String
   role: String
+  age: Int
 }
 
 type IndividualNodeConnection {
@@ -2767,7 +2770,7 @@ type ServiceProviderNode implements Node {
   shortName: String!
   country: String!
   visionId: String!
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
 }
 
@@ -2867,7 +2870,7 @@ type TargetPopulationNode implements Node {
   steficonRule: SteficonRuleNode
   vulnerabilityScoreMin: Float
   vulnerabilityScoreMax: Float
-  paymentRecords(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   selections: [HouseholdSelection!]!
   totalHouseholds: Int
   totalFamilySize: Int
@@ -3298,7 +3301,7 @@ type UserBusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
-  paymentrecordSet(before: String, after: String, first: Int, last: Int, cashPlan: ID, household: ID): PaymentRecordNodeConnection!
+  paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   serviceproviderSet(before: String, after: String, first: Int, last: Int): ServiceProviderNodeConnection!
   tickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   householdSet(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
