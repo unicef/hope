@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -5411,7 +5411,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -8406,6 +8406,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   residenceStatus
   size
   totalCashReceived
+  currency
   firstRegistrationDate
   lastRegistrationDate
   status
