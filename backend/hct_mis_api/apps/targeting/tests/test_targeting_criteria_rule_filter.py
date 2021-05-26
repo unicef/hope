@@ -144,6 +144,26 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         self.assertEqual(queryset.count(), 3)
         self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
 
+    @freeze_time("2020-09-28")
+    def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(self):
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="LESS_THAN", field_name="age", arguments=[49]
+        )
+        query = rule_filter.get_query()
+        queryset = Individual.objects.filter(query).distinct()
+        self.assertEqual(queryset.count(), 4)
+        self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
+
+    @freeze_time("2020-09-29")
+    def test_rule_filter_age_lt_49_shouldn_t_contains_person_born_in_proper_year_after_and_during_birthday(self):
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="LESS_THAN", field_name="age", arguments=[49]
+        )
+        query = rule_filter.get_query()
+        queryset = Individual.objects.filter(query).distinct()
+        self.assertEqual(queryset.count(), 3)
+        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+
     def test_rule_filter_size_equals(self):
         rule_filter = TargetingCriteriaRuleFilter(comparision_method="EQUALS", field_name="size", arguments=[2])
         query = rule_filter.get_query()
