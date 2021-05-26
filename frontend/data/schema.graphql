@@ -121,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  UNHCR
   WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
