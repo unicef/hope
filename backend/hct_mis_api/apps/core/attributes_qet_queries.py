@@ -25,7 +25,7 @@ def age_to_birth_date_range_query(field_name, age_min, age_max):
     if age_min is not None:
         query_dict[f"{field_name}__lte"] = current_date - relativedelta(years=+age_min)
     if age_max is not None:
-        query_dict[f"{field_name}__gte"] = current_date - relativedelta(years=+age_max + 1)
+        query_dict[f"{field_name}__gt"] = current_date - relativedelta(years=+age_max + 1)
     return Q(**query_dict)
 
 
