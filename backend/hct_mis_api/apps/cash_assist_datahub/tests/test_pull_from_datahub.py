@@ -1,7 +1,11 @@
 import uuid
 from datetime import timedelta
+from unittest import mock
 from unittest.mock import patch, MagicMock
 
+import os
+
+import requests_mock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
@@ -17,12 +21,14 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.tests.test_exchange_rates import EXCHANGE_RATES_WITH_HISTORICAL_DATA
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import Program, CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
+@mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestPullDataFromDatahub(TestCase):
     databases = "__all__"
     program = None
@@ -170,7 +176,13 @@ class TestPullDataFromDatahub(TestCase):
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
-    def test_pull_data(self):
+    @requests_mock.Mocker()
+    def test_pull_data(self, mocker):
+        mocker.register_uri(
+            "GET",
+            "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
+            json=EXCHANGE_RATES_WITH_HISTORICAL_DATA,
+        )
         task = PullFromDatahubTask()
         task.execute()
         session = self.session
