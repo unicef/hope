@@ -21,6 +21,7 @@ from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.utils import decode_id_string, check_concurrency_version_in_mutation
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketPaymentVerificationDetails
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.models import Individual
 from hct_mis_api.apps.payment.inputs import (
     CreatePaymentVerificationInput,
@@ -462,6 +463,9 @@ class FinishCashPlanVerificationMutation(PermissionMutation):
             category=GrievanceTicket.CATEGORY_PAYMENT_VERIFICATION,
             business_area=cashplan_payment_verification.cash_plan.business_area,
         )
+
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket))
         details = TicketPaymentVerificationDetails(
             ticket=grievance_ticket,
             payment_verification_status=status,
