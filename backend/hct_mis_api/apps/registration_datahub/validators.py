@@ -88,7 +88,6 @@ class XLSXValidator(BaseValidator):
 
 class ImportDataValidator(BaseValidator):
     BUSINESS_AREA_SLUG = None
-    BUSINESS_AREA_CODE = None
     DOCUMENTS_ISSUING_COUNTRIES_MAPPING = {
         "birth_certificate_issuer_i_c": "birth_certificate_no_i_c",
         "drivers_license_issuer_i_c": "drivers_license_no_i_c",
@@ -454,7 +453,7 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
                 return True
 
             try:
-                phonenumbers.parse(value, region=self.business_area_code)
+                phonenumbers.parse(value, None)
                 return True
             except (phonenumbers.NumberParseException, TypeError):
                 return False
@@ -788,8 +787,6 @@ class UploadXLSXInstanceValidator(ImportDataInstanceValidator):
             errors.extend(self.validate_collectors(wb))
             individuals_sheet = wb["Individuals"]
             household_sheet = wb["Households"]
-            business_area_name = BusinessArea.objects.get(slug=business_area_slug).name
-            self.business_area_code = pycountry.countries.get(name=business_area_name).alpha_2
             self.image_loader = SheetImageLoader(household_sheet)
             errors.extend(self.rows_validator(household_sheet))
             self.image_loader = SheetImageLoader(individuals_sheet)
@@ -974,7 +971,7 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
                 # only check phone number
                 if field.startswith("phone_no"):
                     try:
-                        phonenumbers.parse(value, region=self.BUSINESS_AREA_CODE)
+                        phonenumbers.parse(value, None)
                     except (phonenumbers.NumberParseException, TypeError):
                         return f"Invalid phone number {value} for field {field}"
                 return
@@ -1139,7 +1136,6 @@ class KoboProjectImportDataInstanceValidator(ImportDataInstanceValidator):
 
     def validate_everything(self, submissions: list, business_area_name: str):
         try:
-            self.BUSINESS_AREA_CODE = pycountry.countries.get(name=business_area_name).alpha_2
             reduced_submissions = rename_dict_keys(submissions, get_field_name)
             docs_and_identities_to_validate = []
             errors = []
