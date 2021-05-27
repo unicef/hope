@@ -612,7 +612,8 @@ class CreateTicketNoteMutation(PermissionMutation):
         created_by = info.context.user
 
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
-
+        notification = GrievanceNotification(grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by)
+        notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
 
 

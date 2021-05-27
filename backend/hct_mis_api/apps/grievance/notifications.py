@@ -51,7 +51,7 @@ class GrievanceNotification:
         email = EmailMultiAlternatives(
             subject=subject,
             from_email=settings.EMAIL_HOST_USER,
-            to=[self.grievance_ticket.assigned_to.email],
+            to=[user_recipient.email],
             body=text_body,
         )
         email.attach_alternative(html_body, "text/html")
@@ -82,24 +82,28 @@ class GrievanceNotification:
             role__name=action_roles_dict[self.action],
             business_area=self.grievance_ticket.business_area,
         )
-        return (
-            User.objects.filter(user_roles__in=user_roles)
-            .exclude(id=self.grievance_ticket.assigned_to.id)
-            .distinct()
-            .all()
-        )
+        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        if self.grievance_ticket.assigned_to:
+            queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
+        return queryset.all()
 
     def _prepare_for_approval_recipients(self):
         user_roles = UserRole.objects.filter(
             role__name="Approver",
             business_area=self.grievance_ticket.business_area,
         )
-        return (
-            User.objects.filter(user_roles__in=user_roles)
-            .exclude(id=self.grievance_ticket.assigned_to.id)
-            .distinct()
-            .all()
-        )
+        queryset = User.objects.filter(user_roles__in=user_roles).distinct()
+        if self.grievance_ticket.assigned_to:
+            queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
+        return queryset.all()
+
+    def _prepare_add_note_bodies(self, user_recipient):
+        context = self._prepare_default_context(user_recipient)
+        created_by = self.extra_data.get("created_by")
+        context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
+        text_body = render_to_string("note_added_notification_email.txt", context=context)
+        html_body = render_to_string("note_added_notification_email.html", context=context)
+        return text_body, html_body, f"New note in Grievance & Feedback ticket has been left {self.grievance_ticket.id}"
 
     def _prepare_send_back_to_in_progress_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
@@ -113,7 +117,7 @@ class GrievanceNotification:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
         html_body = render_to_string("send_for_approve_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance ticket requiring approval  {self.grievance_ticket.id}"
+        return text_body, html_body, f"Grievance ticket requiring approval {self.grievance_ticket.id}"
 
     def _prepare_assignment_changed_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
@@ -121,7 +125,7 @@ class GrievanceNotification:
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
         return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.assigned_to}"
 
-    def _prepare_assignment_changed_user_recipients(self):
+    def _prepare_assigned_to_recipient(self):
         return [self.grievance_ticket.assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {
@@ -132,17 +136,19 @@ class GrievanceNotification:
         ACTION_SENSITIVE_CREATED: _prepare_universal_category_created_bodies,
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_send_back_to_in_progress_bodies,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_bodies,
+        ACTION_NOTES_ADDED: _prepare_add_note_bodies,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT = {
-        ACTION_ASSIGNMENT_CHANGED: _prepare_assignment_changed_user_recipients,
+        ACTION_ASSIGNMENT_CHANGED: _prepare_assigned_to_recipient,
         ACTION_SYSTEM_FLAGGING_CREATED: _prepare_universal_category_created_recipients,
         ACTION_DEDUPLICATION_CREATED: _prepare_universal_category_created_recipients,
         ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_universal_category_created_recipients,
         ACTION_SENSITIVE_CREATED: _prepare_universal_category_created_recipients,
-        ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_assignment_changed_user_recipients,
+        ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_assigned_to_recipient,
         ACTION_OVERDUE: _prepare_universal_category_created_recipients,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_recipients,
+        ACTION_NOTES_ADDED: _prepare_assigned_to_recipient,
     }
 
     @classmethod
