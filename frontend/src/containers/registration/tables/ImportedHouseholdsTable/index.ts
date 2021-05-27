@@ -1,3 +1,3 @@
-import { ImportedHouseholdTable } from './ImportedHouseholdTable';
+import {ImportedHouseholdTable} from './ImportedHouseholdTable';
 
 export { ImportedHouseholdTable };

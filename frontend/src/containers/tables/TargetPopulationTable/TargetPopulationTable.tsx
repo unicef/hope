@@ -1,15 +1,15 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
 import {
+  AllTargetPopulationsQueryVariables,
   TargetPopulationNode,
   useAllTargetPopulationsQuery,
-  AllTargetPopulationsQueryVariables,
 } from '../../../__generated__/graphql';
-import { decodeIdString } from '../../../utils/utils';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './TargetPopulationTableHeadCells';
-import { TargetPopulationTableRow } from './TargetPopulationTableRow';
+import {decodeIdString} from '../../../utils/utils';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './TargetPopulationTableHeadCells';
+import {TargetPopulationTableRow} from './TargetPopulationTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

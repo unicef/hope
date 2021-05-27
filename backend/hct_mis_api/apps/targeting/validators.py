@@ -1,7 +1,8 @@
 import logging
+
 from django.core.exceptions import ValidationError
 
-from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.core.utils import get_attr_value
 from hct_mis_api.apps.core.validators import BaseValidator

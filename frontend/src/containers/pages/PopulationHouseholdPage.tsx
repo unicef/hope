@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import get from 'lodash/get';
 import styled from 'styled-components';
-import { PageHeader } from '../../components/PageHeader';
-import { HouseholdFilters } from '../../components/population/HouseholdFilter';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { HouseholdTable } from '../tables/HouseholdTable';
-import {
-  ProgramNode,
-  useAllProgramsQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import {PageHeader} from '../../components/PageHeader';
+import {HouseholdFilters} from '../../components/population/HouseholdFilter';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {HouseholdTable} from '../tables/HouseholdTable';
+import {ProgramNode, useAllProgramsQuery, useHouseholdChoiceDataQuery,} from '../../__generated__/graphql';
+import {useDebounce} from '../../hooks/useDebounce';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {usePermissions} from '../../hooks/usePermissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
 
 const Container = styled.div`
   display: flex;

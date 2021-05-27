@@ -1,10 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
-import { DashboardPaper } from '../DashboardPaper';
-import { GrievancesChart } from '../charts/GrievancesChart';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatNumber } from '../../../utils/utils';
+import {Grid, Typography} from '@material-ui/core';
+import {DashboardPaper} from '../DashboardPaper';
+import {GrievancesChart} from '../charts/GrievancesChart';
+import {AllChartsQuery} from '../../../__generated__/graphql';
+import {formatNumber} from '../../../utils/utils';
 
 const CardTitleSmaller = styled.div`
   text-transform: capitalize;

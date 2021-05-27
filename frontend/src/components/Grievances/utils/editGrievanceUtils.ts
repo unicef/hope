@@ -1,15 +1,12 @@
 import camelCase from 'lodash/camelCase';
 import React from 'react';
 import * as Yup from 'yup';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
-import { GrievanceTicketQuery } from '../../../__generated__/graphql';
-import { AddIndividualDataChange } from '../AddIndividualDataChange';
-import { EditIndividualDataChange } from '../EditIndividualDataChange';
-import { EditHouseholdDataChange } from '../EditHouseholdDataChange';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES,} from '../../../utils/constants';
+import {thingForSpecificGrievanceType} from '../../../utils/utils';
+import {GrievanceTicketQuery} from '../../../__generated__/graphql';
+import {AddIndividualDataChange} from '../AddIndividualDataChange';
+import {EditIndividualDataChange} from '../EditIndividualDataChange';
+import {EditHouseholdDataChange} from '../EditHouseholdDataChange';
 
 interface EditValuesTypes {
   description?: string;

@@ -1,18 +1,16 @@
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.autocomplete import AutoCompleteFilter
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    MaxMinFilter,
+    TextFieldFilter,
+)
 from django import forms
 from django.contrib import admin, messages
 from django.core.validators import MinValueValidator
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-
-from admin_extra_urls.api import ExtraUrlMixin, button
-from adminfilters.autocomplete import AutoCompleteFilter
-from adminfilters.filters import (
-    ChoicesFieldComboFilter,
-    MaxMinFilter,
-    RelatedFieldComboFilter,
-    TextFieldFilter,
-)
 
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.targeting.models import (

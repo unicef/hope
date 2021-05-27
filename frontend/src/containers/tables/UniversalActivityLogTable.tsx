@@ -1,11 +1,8 @@
-import React, { ReactElement, useState } from 'react';
-import {
-  LogEntryNode,
-  useAllLogEntriesQuery,
-} from '../../__generated__/graphql';
-import { ActivityLogTable } from '../../components/ActivityLogTable/ActivityLogTable';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { decodeIdString } from '../../utils/utils';
+import React, {ReactElement, useState} from 'react';
+import {LogEntryNode, useAllLogEntriesQuery,} from '../../__generated__/graphql';
+import {ActivityLogTable} from '../../components/ActivityLogTable/ActivityLogTable';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {decodeIdString} from '../../utils/utils';
 
 interface UniversalActivityLogTableProps {
   objectId: string;

@@ -1,18 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/PageHeader';
-import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { StatusBox } from '../../../components/StatusBox';
-import {
-  targetPopulationStatusToColor,
-  targetPopulationStatusMapping,
-} from '../../../utils/utils';
-import { InProgressTargetPopulationHeaderButtons } from './InProgressTargetPopulationHeaderButtons';
-import { FinalizedTargetPopulationHeaderButtons } from './FinalizedTargetPopulationHeaderButtons';
-import { ApprovedTargetPopulationHeaderButtons } from './ApprovedTargetPopulationHeaderButtons';
+import {useTranslation} from 'react-i18next';
+import {TargetPopulationNode} from '../../../__generated__/graphql';
+import {PageHeader} from '../../../components/PageHeader';
+import {BreadCrumbsItem} from '../../../components/BreadCrumbs';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {StatusBox} from '../../../components/StatusBox';
+import {targetPopulationStatusMapping, targetPopulationStatusToColor,} from '../../../utils/utils';
+import {InProgressTargetPopulationHeaderButtons} from './InProgressTargetPopulationHeaderButtons';
+import {FinalizedTargetPopulationHeaderButtons} from './FinalizedTargetPopulationHeaderButtons';
+import {ApprovedTargetPopulationHeaderButtons} from './ApprovedTargetPopulationHeaderButtons';
 
 const HeaderWrapper = styled.div`
   display: flex;

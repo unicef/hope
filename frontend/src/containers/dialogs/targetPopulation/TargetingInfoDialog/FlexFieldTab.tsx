@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import {
-  InputAdornment,
-  TextField,
-  MenuItem,
-  FormControl,
-  Grid,
-} from '@material-ui/core';
-import { Search } from '@material-ui/icons';
-import { FlexFieldsTable } from '../../../tables/TargetPopulation/FlexFields';
-import { useAllFieldsAttributesQuery } from '../../../../__generated__/graphql';
+import {FormControl, Grid, InputAdornment, MenuItem, TextField,} from '@material-ui/core';
+import {Search} from '@material-ui/icons';
+import {FlexFieldsTable} from '../../../tables/TargetPopulation/FlexFields';
+import {useAllFieldsAttributesQuery} from '../../../../__generated__/graphql';
 import InputLabel from '../../../../shared/InputLabel';
 import Select from '../../../../shared/Select';
 

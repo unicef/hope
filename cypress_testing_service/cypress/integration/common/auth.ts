@@ -1,4 +1,4 @@
-import { Given } from 'cypress-cucumber-preprocessor/steps';
+import {Given} from 'cypress-cucumber-preprocessor/steps';
 
 Given('I login to AD as {word}', (role: string) => {
   const { adUsername, adPassword } = Cypress.env(role);

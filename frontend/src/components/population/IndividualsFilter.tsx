@@ -3,14 +3,14 @@ import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
 import CakeIcon from '@material-ui/icons/Cake';
 import WcIcon from '@material-ui/icons/Wc';
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import {Box, Grid, InputAdornment, MenuItem} from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '../../shared/InputLabel';
 import TextField from '../../shared/TextField';
 import Select from '../../shared/Select';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import {ContainerWithBorder} from '../ContainerWithBorder';
+import {FieldLabel} from '../FieldLabel';
+import {AdminAreasAutocomplete} from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

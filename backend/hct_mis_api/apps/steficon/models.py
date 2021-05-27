@@ -1,13 +1,11 @@
 from concurrency.fields import AutoIncVersionField
-from django.contrib.postgres.fields import JSONField, ArrayField, CICharField
-from django.core.exceptions import ValidationError
+from django.contrib.postgres.fields import ArrayField, CICharField
+from django.core.validators import ProhibitNullCharactersValidator
 from django.db import models
 from django.db.transaction import atomic
-from django.core.validators import ProhibitNullCharactersValidator
-
 from django.forms import model_to_dict
-from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
+
 from hct_mis_api.apps.steficon.interpreters import interpreters, mapping
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import StartEndSpaceValidator, DoubleSpaceValidator
@@ -80,8 +78,8 @@ class RuleCommit(models.Model):
     updated_by = models.ForeignKey("account.User", related_name="+", null=True, on_delete=models.PROTECT)
 
     affected_fields = ArrayField(models.CharField(max_length=100))
-    before = JSONField(help_text="The record before change", editable=False)
-    after = JSONField(help_text="The record after apply changes", editable=False)
+    before = models.JSONField(help_text="The record before change", editable=False)
+    after = models.JSONField(help_text="The record after apply changes", editable=False)
 
     class Meta:
         verbose_name = "Rule (History)"

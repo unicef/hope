@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestAllPaymentRecords::test_fetch_payment_records_only_for_single_household 1'] = {

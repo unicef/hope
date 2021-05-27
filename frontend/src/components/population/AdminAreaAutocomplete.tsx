@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { InputAdornment } from '@material-ui/core';
+import {InputAdornment} from '@material-ui/core';
 import RoomRoundedIcon from '@material-ui/icons/RoomRounded';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { useDebounce } from '../../hooks/useDebounce';
+import {useDebounce} from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasLazyQuery,
-} from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {AllAdminAreasQuery, useAllAdminAreasLazyQuery,} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: ${(props) => (props.fullWidth ? '100%' : '232px')}

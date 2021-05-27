@@ -1,15 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../utils/utils';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
+import {decodeIdString} from '../../../utils/utils';
 import {
   AllHouseholdsQuery,
   AllHouseholdsQueryVariables,
   HouseholdChoiceDataQuery,
   useAllHouseholdsQuery,
 } from '../../../__generated__/graphql';
-import { headCells } from './LookUpHouseholdTableHeadCells';
-import { LookUpHouseholdTableRow } from './LookUpHouseholdTableRow';
+import {headCells} from './LookUpHouseholdTableHeadCells';
+import {LookUpHouseholdTableRow} from './LookUpHouseholdTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

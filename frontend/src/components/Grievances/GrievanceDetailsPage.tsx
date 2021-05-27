@@ -1,11 +1,11 @@
-import { Box, Grid, Typography } from '@material-ui/core';
+import {Box, Grid, Typography} from '@material-ui/core';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { LabelizedField } from '../LabelizedField';
-import { OverviewContainer } from '../OverviewContainer';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
+import {LabelizedField} from '../LabelizedField';
+import {OverviewContainer} from '../OverviewContainer';
 import {
   decodeIdString,
   grievanceTicketStatusToColor,
@@ -13,37 +13,26 @@ import {
   reduceChoices,
   renderUserName,
 } from '../../utils/utils';
-import { LoadingComponent } from '../LoadingComponent';
-import {
-  useGrievancesChoiceDataQuery,
-  useGrievanceTicketQuery,
-  useMeQuery,
-} from '../../__generated__/graphql';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
-import { ContentLink } from '../ContentLink';
-import { StatusBox } from '../StatusBox';
-import { UniversalMoment } from '../UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { PermissionDenied } from '../PermissionDenied';
-import { Notes } from './Notes';
-import { GrievanceDetailsToolbar } from './GrievanceDetailsToolbar';
-import { PaymentIds } from './PaymentIds';
-import { OtherRelatedTickets } from './OtherRelatedTickets';
-import { AddIndividualGrievanceDetails } from './AddIndividualGrievanceDetails';
-import { RequestedIndividualDataChange } from './RequestedIndividualDataChange';
-import { RequestedHouseholdDataChange } from './RequestedHouseholdDataChange';
-import { ReassignRoleBox } from './ReassignRoleBox';
-import { DeleteIndividualGrievanceDetails } from './DeleteIndividualGrievanceDetails';
-import { FlagDetails } from './FlagDetails';
-import { NeedsAdjudicationDetails } from './NeedsAdjudicationDetails';
+import {LoadingComponent} from '../LoadingComponent';
+import {useGrievancesChoiceDataQuery, useGrievanceTicketQuery, useMeQuery,} from '../../__generated__/graphql';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES, GRIEVANCE_TICKET_STATES,} from '../../utils/constants';
+import {ContentLink} from '../ContentLink';
+import {StatusBox} from '../StatusBox';
+import {UniversalMoment} from '../UniversalMoment';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasCreatorOrOwnerPermissions, PERMISSIONS,} from '../../config/permissions';
+import {PermissionDenied} from '../PermissionDenied';
+import {Notes} from './Notes';
+import {GrievanceDetailsToolbar} from './GrievanceDetailsToolbar';
+import {PaymentIds} from './PaymentIds';
+import {OtherRelatedTickets} from './OtherRelatedTickets';
+import {AddIndividualGrievanceDetails} from './AddIndividualGrievanceDetails';
+import {RequestedIndividualDataChange} from './RequestedIndividualDataChange';
+import {RequestedHouseholdDataChange} from './RequestedHouseholdDataChange';
+import {ReassignRoleBox} from './ReassignRoleBox';
+import {DeleteIndividualGrievanceDetails} from './DeleteIndividualGrievanceDetails';
+import {FlagDetails} from './FlagDetails';
+import {NeedsAdjudicationDetails} from './NeedsAdjudicationDetails';
 
 const PaddingContainer = styled.div`
   padding: 22px;

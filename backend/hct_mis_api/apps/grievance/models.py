@@ -1,10 +1,9 @@
 import logging
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
@@ -403,7 +402,7 @@ class TicketHouseholdDataUpdateDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    household_data = JSONField(null=True)
+    household_data = models.JSONField(null=True)
 
 
 class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
@@ -416,7 +415,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    individual_data = JSONField(null=True)
+    individual_data = models.JSONField(null=True)
 
     @property
     def household(self):
@@ -433,7 +432,7 @@ class TicketAddIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    individual_data = JSONField(null=True)
+    individual_data = models.JSONField(null=True)
     approve_status = models.BooleanField(default=False)
 
 
@@ -447,7 +446,7 @@ class TicketDeleteIndividualDetails(TimeStampedUUIDModel):
         on_delete=models.CASCADE,
         null=True,
     )
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = models.JSONField(default=dict)
     approve_status = models.BooleanField(default=False)
 
     @property
@@ -464,7 +463,7 @@ class TicketSystemFlaggingDetails(TimeStampedUUIDModel):
         "sanction_list.SanctionListIndividual", related_name="+", on_delete=models.CASCADE
     )
     approve_status = models.BooleanField(default=False)
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = models.JSONField(default=dict)
 
 
 class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
@@ -476,7 +475,7 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
     selected_individual = models.ForeignKey(
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )
-    role_reassign_data = JSONField(default=dict)
+    role_reassign_data = models.JSONField(default=dict)
 
     @property
     def has_duplicated_document(self):

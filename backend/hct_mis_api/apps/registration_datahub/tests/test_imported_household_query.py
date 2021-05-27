@@ -1,15 +1,15 @@
-from parameterized import parameterized
 from django.core.management import call_command
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.registration_datahub.fixtures import ImportedHouseholdFactory
 
 
 class TestImportedHouseholdQuery(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
     query AllImportedHouseholds{

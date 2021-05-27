@@ -1,16 +1,13 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import styled from 'styled-components';
-import { TableRow } from '@material-ui/core';
-import { PaymentVerificationNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  formatCurrencyWithSymbol,
-  verificationRecordsStatusToColor,
-} from '../../../utils/utils';
-import { StatusBox } from '../../../components/StatusBox';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import {TableRow} from '@material-ui/core';
+import {PaymentVerificationNode} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {formatCurrencyWithSymbol, verificationRecordsStatusToColor,} from '../../../utils/utils';
+import {StatusBox} from '../../../components/StatusBox';
+import {AnonTableCell} from '../../../components/table/AnonTableCell';
 
 const StatusContainer = styled.div`
   min-width: 120px;

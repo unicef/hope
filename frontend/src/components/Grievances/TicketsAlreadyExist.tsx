@@ -1,12 +1,12 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import {Box, Paper, Typography} from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
 import React from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { decodeIdString } from '../../utils/utils';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LoadingComponent } from '../LoadingComponent';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {decodeIdString} from '../../utils/utils';
+import {useExistingGrievanceTicketsQuery} from '../../__generated__/graphql';
+import {ContentLink} from '../ContentLink';
+import {LoadingComponent} from '../LoadingComponent';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};

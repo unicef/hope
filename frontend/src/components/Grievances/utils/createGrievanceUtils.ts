@@ -1,9 +1,6 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../../utils/utils';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES,} from '../../../utils/constants';
+import {thingForSpecificGrievanceType} from '../../../utils/utils';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareFeedbackVariables(requiredVariables, values) {

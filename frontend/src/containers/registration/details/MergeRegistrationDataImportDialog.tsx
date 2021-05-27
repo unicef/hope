@@ -1,19 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import MergeTypeRoundedIcon from '@material-ui/icons/MergeTypeRounded';
-import {
-  RegistrationDetailedFragment,
-  useMergeRdiMutation,
-} from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import {RegistrationDetailedFragment, useMergeRdiMutation,} from '../../../__generated__/graphql';
+import {useSnackbar} from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

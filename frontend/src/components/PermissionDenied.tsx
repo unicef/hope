@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Box, Paper } from '@material-ui/core';
+import {Box, Paper} from '@material-ui/core';
 import BlockRoundedIcon from '@material-ui/icons/BlockRounded';
 
 const Container = styled.div`

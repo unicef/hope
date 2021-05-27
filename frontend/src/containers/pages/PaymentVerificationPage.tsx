@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PaymentVerificationTable } from '../tables/PaymentVerificationTable';
-import { PaymentFilters } from '../tables/PaymentVerificationTable/PaymentFilters';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {PageHeader} from '../../components/PageHeader';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ProgramNode, useAllProgramsQuery} from '../../__generated__/graphql';
+import {useDebounce} from '../../hooks/useDebounce';
+import {PaymentVerificationTable} from '../tables/PaymentVerificationTable';
+import {PaymentFilters} from '../tables/PaymentVerificationTable/PaymentFilters';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;

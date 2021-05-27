@@ -1,27 +1,24 @@
-import { Button, Grid, Typography } from '@material-ui/core';
+import {Button, Grid, Typography} from '@material-ui/core';
 import EmailIcon from '@material-ui/icons/Email';
 import CheckIcon from '@material-ui/icons/Check';
-import { GetApp } from '@material-ui/icons';
+import {GetApp} from '@material-ui/icons';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  useReportChoiceDataQuery,
-  useReportQuery,
-} from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { ContainerColumnWithBorder } from '../../components/ContainerColumnWithBorder';
-import { LabelizedField } from '../../components/LabelizedField';
-import { OverviewContainer } from '../../components/OverviewContainer';
-import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { StatusBox } from '../../components/StatusBox';
-import { reduceChoices, reportStatusToColor } from '../../utils/utils';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {useReportChoiceDataQuery, useReportQuery,} from '../../__generated__/graphql';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {ContainerColumnWithBorder} from '../../components/ContainerColumnWithBorder';
+import {LabelizedField} from '../../components/LabelizedField';
+import {OverviewContainer} from '../../components/OverviewContainer';
+import {PageHeader} from '../../components/PageHeader';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {StatusBox} from '../../components/StatusBox';
+import {reduceChoices, reportStatusToColor} from '../../utils/utils';
+import {UniversalMoment} from '../../components/UniversalMoment';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

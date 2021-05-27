@@ -1,7 +1,6 @@
-from django.contrib import admin
-
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from django.contrib import admin
 from smart_admin.mixins import DisplayAllMixin as SmartDisplayAllMixin
 
 

@@ -1,16 +1,7 @@
-import {
-  Avatar,
-  Button,
-  ClickAwayListener,
-  Grow,
-  MenuItem,
-  MenuList,
-  Paper,
-  Popper,
-} from '@material-ui/core';
+import {Avatar, Button, ClickAwayListener, Grow, MenuItem, MenuList, Paper, Popper,} from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
-import { MeQuery } from '../__generated__/graphql';
+import {MeQuery} from '../__generated__/graphql';
 
 const UserProfileButton = styled(Button)`
   && {

@@ -1,28 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-import {
-  Box,
-  Button,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from '@material-ui/core';
+import {Box, Button, Grid, InputAdornment, MenuItem, TextField,} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import {
-  HouseholdChoiceDataQuery,
-  ProgramNode,
-} from '../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
+import {KeyboardDatePicker} from '@material-ui/pickers';
+import {HouseholdChoiceDataQuery, ProgramNode,} from '../../../__generated__/graphql';
+import {ContainerWithBorder} from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { FieldLabel } from '../../FieldLabel';
+import {AdminAreasAutocomplete} from '../../population/AdminAreaAutocomplete';
+import {FieldLabel} from '../../FieldLabel';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

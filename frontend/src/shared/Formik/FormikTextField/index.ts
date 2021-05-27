@@ -1,3 +1,3 @@
-import { FormikTextField } from './FormikTextField';
+import {FormikTextField} from './FormikTextField';
 
 export { FormikTextField };

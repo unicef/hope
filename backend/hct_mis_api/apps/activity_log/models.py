@@ -1,10 +1,8 @@
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.fields import JSONField
-from django.utils.translation import ugettext_lazy as _
 from django.db import models
-from model_utils.fields import UUIDField
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_diff
 from hct_mis_api.apps.core.utils import nested_getattr
@@ -59,7 +57,7 @@ class LogEntry(models.Model):
     content_object = GenericForeignKey("content_type", "object_id")
     action = models.CharField(choices=LOG_ENTRY_ACTION_CHOICES, max_length=100, verbose_name=_("action"), db_index=True)
     object_repr = models.TextField(blank=True)
-    changes = JSONField(null=True, verbose_name=_("change message"))
+    changes = models.JSONField(null=True, verbose_name=_("change message"))
     user = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

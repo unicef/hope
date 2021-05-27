@@ -1,9 +1,9 @@
 import React from 'react';
-import { Box, Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import {Box, Grid, IconButton} from '@material-ui/core';
+import {Delete} from '@material-ui/icons';
 import styled from 'styled-components';
-import { AllIndividualsQuery } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
+import {AllIndividualsQuery} from '../../__generated__/graphql';
+import {LabelizedField} from '../LabelizedField';
 
 const DisabledDiv = styled.div`
   filter: opacity(${({ disabled }) => (disabled ? 0.5 : 1)});

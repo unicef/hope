@@ -1,13 +1,9 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import {
-  IndividualNode,
-  useIndividualPhotosLazyQuery,
-  useIndividualPhotosQuery,
-} from '../../__generated__/graphql';
+import {Box, Button, DialogContent, DialogTitle} from '@material-ui/core';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {IndividualNode, useIndividualPhotosLazyQuery,} from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useParams, Redirect } from 'react-router-dom';
-import { useCashPlanPaymentVerificationQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {Redirect, useParams} from 'react-router-dom';
+import {useCashPlanPaymentVerificationQuery} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
 
 export function CashplanVerificationRedirectPage(): React.ReactElement {
   const { id } = useParams();

@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@material-ui/core';
-import { Formik } from 'formik';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useGrievancesChoiceDataQuery } from '../../../__generated__/graphql';
-import { LookUpRelatedTicketsFilters } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
-import { LookUpRelatedTicketsTable } from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
-import { LoadingComponent } from '../../LoadingComponent';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
+import {Formik} from 'formik';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useGrievancesChoiceDataQuery} from '../../../__generated__/graphql';
+import {LookUpRelatedTicketsFilters} from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsFilters';
+import {LookUpRelatedTicketsTable} from '../LookUpRelatedTicketsTable/LookUpRelatedTicketsTable';
+import {LoadingComponent} from '../../LoadingComponent';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

@@ -1,9 +1,9 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
-import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../UniversalTable';
-import { ProgrammeTableRow } from '../SentTargeting/ProgrammeTableRow';
-import { headCells as programmeHeadCells } from '../SentTargeting/ProgrammeHeadCells';
+import {useCandidateHouseholdsListByTargetingCriteriaQuery} from '../../../../__generated__/graphql';
+import {UniversalTable} from '../../UniversalTable';
+import {ProgrammeTableRow} from '../SentTargeting/ProgrammeTableRow';
+import {headCells as programmeHeadCells} from '../SentTargeting/ProgrammeHeadCells';
 
 const TableWrapper = styled.div`
   padding: 20px;

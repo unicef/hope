@@ -1,25 +1,25 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { useTranslation } from 'react-i18next';
-import { Button, Box, makeStyles, DialogTitle } from '@material-ui/core';
-import { GetApp, Publish } from '@material-ui/icons';
-import { UniversalTable } from '../UniversalTable';
+import {useTranslation} from 'react-i18next';
+import {Box, Button, DialogTitle, makeStyles} from '@material-ui/core';
+import {GetApp, Publish} from '@material-ui/icons';
+import {UniversalTable} from '../UniversalTable';
 import {
-  useAllPaymentVerificationsQuery,
-  PaymentVerificationNode,
   AllPaymentVerificationsQueryVariables,
-  useImportXlsxCashPlanVerificationMutation,
   ImportXlsxCashPlanVerificationMutation,
+  PaymentVerificationNode,
+  useAllPaymentVerificationsQuery,
+  useImportXlsxCashPlanVerificationMutation,
   XlsxErrorNode,
 } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { Dialog } from '../../dialogs/Dialog';
-import { DialogActions } from '../../dialogs/DialogActions';
-import { DropzoneField } from '../../../components/DropzoneField';
-import { headCells } from './VerificationRecordsHeadCells';
-import { VerificationRecordsTableRow } from './VerificationRecordsTableRow';
-import { ImportErrors } from './errors/ImportErrors';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {Dialog} from '../../dialogs/Dialog';
+import {DialogActions} from '../../dialogs/DialogActions';
+import {DropzoneField} from '../../../components/DropzoneField';
+import {headCells} from './VerificationRecordsHeadCells';
+import {VerificationRecordsTableRow} from './VerificationRecordsTableRow';
+import {ImportErrors} from './errors/ImportErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
-import { TargetPopulationNode } from '../../__generated__/graphql';
-import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { OverviewContainer } from '../OverviewContainer';
+import {Grid, Typography} from '@material-ui/core';
+import {LabelizedField} from '../LabelizedField';
+import {TargetPopulationNode} from '../../__generated__/graphql';
+import {UniversalMoment} from '../UniversalMoment';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
+import {OverviewContainer} from '../OverviewContainer';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

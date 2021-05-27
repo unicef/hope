@@ -1,10 +1,10 @@
-import { Box, Grid } from '@material-ui/core';
+import {Box, Grid} from '@material-ui/core';
 import React from 'react';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
-import { thingForSpecificGrievanceType } from '../../utils/utils';
-import { LookUpHouseholdIndividual } from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
-import { LookUpPaymentRecord } from './LookUpPaymentRecord/LookUpPaymentRecord';
-import { LookUpRelatedTickets } from './LookUpRelatedTickets/LookUpRelatedTickets';
+import {GRIEVANCE_CATEGORIES} from '../../utils/constants';
+import {thingForSpecificGrievanceType} from '../../utils/utils';
+import {LookUpHouseholdIndividual} from './LookUpHouseholdIndividual/LookUpHouseholdIndividual';
+import {LookUpPaymentRecord} from './LookUpPaymentRecord/LookUpPaymentRecord';
+import {LookUpRelatedTickets} from './LookUpRelatedTickets/LookUpRelatedTickets';
 
 export const LookUpSection = ({
   onValueChange,

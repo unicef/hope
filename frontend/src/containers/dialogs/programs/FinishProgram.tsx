@@ -1,24 +1,13 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import {
-  AllProgramsQuery,
-  ProgramNode,
-  ProgramStatus,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { programCompare } from '../../../utils/utils';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { DialogActions } from '../DialogActions';
+import {Button, Dialog, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
+import {AllProgramsQuery, ProgramNode, ProgramStatus, useUpdateProgramMutation,} from '../../../__generated__/graphql';
+import {PROGRAM_QUERY} from '../../../apollo/queries/Program';
+import {ALL_PROGRAMS_QUERY} from '../../../apollo/queries/AllPrograms';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {programCompare} from '../../../utils/utils';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {DialogActions} from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

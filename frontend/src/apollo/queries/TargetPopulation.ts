@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 import {targetPopulationDetailed} from "../fragments/TargetPopulationFragments";
 
 export const TARGET_POPULATION_QUERY = gql`

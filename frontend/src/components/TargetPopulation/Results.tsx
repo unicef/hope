@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Typography, Paper, Grid } from '@material-ui/core';
-import { Pie } from 'react-chartjs-2';
-import { MiśTheme } from '../../theme';
-import { LabelizedField } from '../LabelizedField';
-import { TargetPopulationQuery } from '../../__generated__/graphql';
+import {useTranslation} from 'react-i18next';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {Pie} from 'react-chartjs-2';
+import {MiśTheme} from '../../theme';
+import {LabelizedField} from '../LabelizedField';
+import {TargetPopulationQuery} from '../../__generated__/graphql';
 
 const colors = {
   femaleChildren: '#023E90',

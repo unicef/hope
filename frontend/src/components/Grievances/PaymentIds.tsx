@@ -1,10 +1,10 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import {Box, Paper, Typography} from '@material-ui/core';
 import React from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContentLink } from '../ContentLink';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { decodeIdString } from '../../utils/utils';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ContentLink} from '../ContentLink';
+import {GrievanceTicketQuery} from '../../__generated__/graphql';
+import {decodeIdString} from '../../utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;

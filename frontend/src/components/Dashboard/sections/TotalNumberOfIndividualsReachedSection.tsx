@@ -1,19 +1,14 @@
-import { Grid, DialogContent, Button, Box } from '@material-ui/core';
+import {Box, Button, DialogContent, Grid} from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import PersonIcon from '@material-ui/icons/Person';
-import { Dialog } from '../../../containers/dialogs/Dialog';
-import { DialogActions } from '../../../containers/dialogs/DialogActions';
-import {
-  CardAmountLink,
-  CardTitle,
-  DashboardCard,
-  IconContainer,
-} from '../DashboardCard';
-import { IndividualsWithDisabilityReachedByAgeGroupsChart } from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
-import { IndividualsReachedByAgeAndGenderGroupsChart } from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatNumber } from '../../../utils/utils';
+import {Dialog} from '../../../containers/dialogs/Dialog';
+import {DialogActions} from '../../../containers/dialogs/DialogActions';
+import {CardAmountLink, CardTitle, DashboardCard, IconContainer,} from '../DashboardCard';
+import {IndividualsWithDisabilityReachedByAgeGroupsChart} from '../charts/IndividualsWithDisabilityReachedByAgeGroupsChart';
+import {IndividualsReachedByAgeAndGenderGroupsChart} from '../charts/IndividualsReachedByAgeAndGenderGroupsChart';
+import {AllChartsQuery} from '../../../__generated__/graphql';
+import {formatNumber} from '../../../utils/utils';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

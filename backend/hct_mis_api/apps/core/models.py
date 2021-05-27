@@ -1,8 +1,7 @@
 import mptt
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import JSONField
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
@@ -202,8 +201,8 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     type = models.CharField(max_length=16, choices=TYPE_CHOICE)
     name = models.CharField(max_length=255, unique=True)
     required = models.BooleanField(default=False)
-    label = JSONField(default=dict)
-    hint = JSONField(default=dict)
+    label = models.JSONField(default=dict)
+    hint = models.JSONField(default=dict)
     group = models.ForeignKey(
         "core.FlexibleAttributeGroup",
         on_delete=models.CASCADE,
@@ -218,7 +217,7 @@ class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
 
 class FlexibleAttributeGroup(SoftDeletionTreeModel):
     name = models.CharField(max_length=255, unique=True)
-    label = JSONField(default=dict)
+    label = models.JSONField(default=dict)
     required = models.BooleanField(default=False)
     repeatable = models.BooleanField(default=False)
     parent = TreeForeignKey(
@@ -242,7 +241,7 @@ class FlexibleAttributeChoice(SoftDeletableModel, TimeStampedUUIDModel):
 
     list_name = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    label = JSONField(default=dict)
+    label = models.JSONField(default=dict)
     flex_attributes = models.ManyToManyField("core.FlexibleAttribute", related_name="choices")
 
     def __str__(self):

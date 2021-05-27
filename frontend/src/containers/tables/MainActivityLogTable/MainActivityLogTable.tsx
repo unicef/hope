@@ -1,19 +1,13 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import styled from 'styled-components';
 import Collapse from '@material-ui/core/Collapse';
-import { Paper } from '@material-ui/core';
+import {Paper} from '@material-ui/core';
 import TablePagination from '@material-ui/core/TablePagination';
-import {
-  AllLogEntriesQuery,
-  LogEntryNode,
-} from '../../../__generated__/graphql';
-import {
-  ButtonPlaceHolder,
-  Row,
-} from '../../../components/ActivityLogTable/TableStyledComponents';
-import { useArrayToDict } from '../../../hooks/useArrayToDict';
-import { MainActivityLogTableRow } from './MainActivityLogTableRow';
-import { headCells } from './MainActivityLogTableHeadCells';
+import {AllLogEntriesQuery, LogEntryNode,} from '../../../__generated__/graphql';
+import {ButtonPlaceHolder, Row,} from '../../../components/ActivityLogTable/TableStyledComponents';
+import {useArrayToDict} from '../../../hooks/useArrayToDict';
+import {MainActivityLogTableRow} from './MainActivityLogTableRow';
+import {headCells} from './MainActivityLogTableHeadCells';
 
 const Table = styled.div`
   display: flex;

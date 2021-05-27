@@ -1,4 +1,4 @@
-import { When } from 'cypress-cucumber-preprocessor/steps';
+import {When} from 'cypress-cucumber-preprocessor/steps';
 
 // figures our business area slug and appends pathname to it
 When('I visit {word} in current business area', (newPath) => {

@@ -1,12 +1,4 @@
-from django.contrib import admin, messages
-from django.contrib.messages import DEFAULT_TAGS
-from django.db.models import Q
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-
 from admin_extra_urls.decorators import button
-from admin_extra_urls.mixins import ExtraUrlMixin
 from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -14,6 +6,12 @@ from adminfilters.filters import (
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from django.contrib import admin, messages
+from django.contrib.messages import DEFAULT_TAGS
+from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 
 from hct_mis_api.apps.household.models import (

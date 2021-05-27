@@ -5,11 +5,11 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import MuiAppBar from '@material-ui/core/AppBar';
 import styled from 'styled-components';
-import { makeStyles } from '@material-ui/core';
-import { MiśTheme } from '../theme';
-import { BusinessAreaSelect } from '../containers/BusinessAreaSelect';
-import { useMeQuery } from '../__generated__/graphql';
-import { UserProfileMenu } from '../containers/UserProfileMenu';
+import {makeStyles} from '@material-ui/core';
+import {MiśTheme} from '../theme';
+import {BusinessAreaSelect} from '../containers/BusinessAreaSelect';
+import {useMeQuery} from '../__generated__/graphql';
+import {UserProfileMenu} from '../containers/UserProfileMenu';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   root: {

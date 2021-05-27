@@ -1,22 +1,16 @@
-import React, { ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import React, {ReactElement} from 'react';
+import {Link} from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { Field, Formik } from 'formik';
-import {
-  Box,
-  Button,
-  DialogActions,
-  FormHelperText,
-  Grid,
-} from '@material-ui/core';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { PageHeader } from '../PageHeader';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import {Field, Formik} from 'formik';
+import {Box, Button, DialogActions, FormHelperText, Grid,} from '@material-ui/core';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {PageHeader} from '../PageHeader';
+import {BreadCrumbsItem} from '../BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikCheckboxField} from '../../shared/Formik/FormikCheckboxField';
 import {
   useAllAddIndividualFieldsQuery,
   useAllEditHouseholdFieldsQuery,
@@ -24,35 +18,24 @@ import {
   useCreateGrievanceMutation,
   useGrievancesChoiceDataQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../utils/constants';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
-import {
-  isInvalid,
-  renderUserName,
-  thingForSpecificGrievanceType,
-} from '../../utils/utils';
-import { usePermissions } from '../../hooks/usePermissions';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { PermissionDenied } from '../PermissionDenied';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
-import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
-import { AddIndividualDataChange } from './AddIndividualDataChange';
-import { EditIndividualDataChange } from './EditIndividualDataChange';
-import { EditHouseholdDataChange } from './EditHouseholdDataChange';
-import { TicketsAlreadyExist } from './TicketsAlreadyExist';
-import { prepareVariables } from './utils/createGrievanceUtils';
-import { validate } from './utils/validateGrievance';
+import {LoadingComponent} from '../LoadingComponent';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {FormikAdminAreaAutocomplete} from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES,} from '../../utils/constants';
+import {useArrayToDict} from '../../hooks/useArrayToDict';
+import {isInvalid, renderUserName, thingForSpecificGrievanceType,} from '../../utils/utils';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissionInModule, hasPermissions, PERMISSIONS,} from '../../config/permissions';
+import {PermissionDenied} from '../PermissionDenied';
+import {Consent} from './Consent';
+import {LookUpSection} from './LookUpSection';
+import {OtherRelatedTicketsCreate} from './OtherRelatedTicketsCreate';
+import {AddIndividualDataChange} from './AddIndividualDataChange';
+import {EditIndividualDataChange} from './EditIndividualDataChange';
+import {EditHouseholdDataChange} from './EditHouseholdDataChange';
+import {TicketsAlreadyExist} from './TicketsAlreadyExist';
+import {prepareVariables} from './utils/createGrievanceUtils';
+import {validate} from './utils/validateGrievance';
 
 const BoxPadding = styled.div`
   padding: 15px 0;

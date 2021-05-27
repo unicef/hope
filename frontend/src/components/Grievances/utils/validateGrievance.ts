@@ -1,9 +1,6 @@
 import camelCase from 'lodash/camelCase';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-} from '../../../utils/constants';
-import { AllAddIndividualFieldsQuery } from '../../../__generated__/graphql';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES,} from '../../../utils/constants';
+import {AllAddIndividualFieldsQuery} from '../../../__generated__/graphql';
 
 export function isEmpty(value): boolean {
   return value === undefined || value === null || value === '';

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { EditRounded, Delete, FileCopy } from '@material-ui/icons';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
-import { DeleteTargetPopulation } from '../../dialogs/targetPopulation/DeleteTargetPopulation';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { ApproveCandidateList } from '../../dialogs/targetPopulation/ApproveCandidateList';
+import {Button} from '@material-ui/core';
+import {Delete, EditRounded, FileCopy} from '@material-ui/icons';
+import {TargetPopulationNode} from '../../../__generated__/graphql';
+import {DeleteTargetPopulation} from '../../dialogs/targetPopulation/DeleteTargetPopulation';
+import {DuplicateTargetPopulation} from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import {ApproveCandidateList} from '../../dialogs/targetPopulation/ApproveCandidateList';
 
 const IconContainer = styled.span`
   button {

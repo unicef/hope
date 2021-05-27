@@ -1,7 +1,6 @@
-from difflib import _mdiff
-
 import difflib
 import json
+from difflib import _mdiff
 
 from django import template
 from django.utils.safestring import mark_safe

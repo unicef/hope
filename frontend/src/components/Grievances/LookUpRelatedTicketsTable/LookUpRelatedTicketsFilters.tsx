@@ -14,11 +14,11 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
-import { FieldLabel } from '../../FieldLabel';
-import { GrievancesChoiceDataQuery } from '../../../__generated__/graphql';
+import {KeyboardDatePicker} from '@material-ui/pickers';
+import {ContainerWithBorder} from '../../ContainerWithBorder';
+import {AdminAreasAutocomplete} from '../../population/AdminAreaAutocomplete';
+import {FieldLabel} from '../../FieldLabel';
+import {GrievancesChoiceDataQuery} from '../../../__generated__/graphql';
 
 const SearchTextField = styled(TextField)`
   flex: 1;

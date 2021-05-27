@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const UPDATE_PAYMENT_VERIFICATION_STATUS_AND_RECEIVED_AMOUNT = gql`
   mutation updatePaymentVerificationStatusAndReceivedAmount(

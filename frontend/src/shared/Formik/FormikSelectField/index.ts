@@ -1,3 +1,3 @@
-import { FormikSelectField } from './FormikSelectField';
+import {FormikSelectField} from './FormikSelectField';
 
 export { FormikSelectField }

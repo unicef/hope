@@ -1,16 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
-import { CashPlanNode } from '../__generated__/graphql';
-import { MiśTheme } from '../theme';
-import { cashPlanStatusToColor } from '../utils/utils';
-import { useBusinessArea } from '../hooks/useBusinessArea';
-import { LabelizedField } from './LabelizedField';
-import { StatusBox } from './StatusBox';
-import { UniversalMoment } from './UniversalMoment';
-import { ContainerWithBorder } from './ContainerWithBorder';
-import { OverviewContainer } from './OverviewContainer';
-import { ContentLink } from './ContentLink';
+import {Grid, Typography} from '@material-ui/core';
+import {CashPlanNode} from '../__generated__/graphql';
+import {MiśTheme} from '../theme';
+import {cashPlanStatusToColor} from '../utils/utils';
+import {useBusinessArea} from '../hooks/useBusinessArea';
+import {LabelizedField} from './LabelizedField';
+import {StatusBox} from './StatusBox';
+import {UniversalMoment} from './UniversalMoment';
+import {ContainerWithBorder} from './ContainerWithBorder';
+import {OverviewContainer} from './OverviewContainer';
+import {ContentLink} from './ContentLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;

@@ -1,3 +1,3 @@
-import { ProgrammeAutocomplete } from './ProgrammeAutocomplete';
+import {ProgrammeAutocomplete} from './ProgrammeAutocomplete';
 
 export { ProgrammeAutocomplete };

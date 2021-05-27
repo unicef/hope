@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import { Formik } from 'formik';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useDeleteTargetPopulationMutation } from '../../../__generated__/graphql';
+import {Formik} from 'formik';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useDeleteTargetPopulationMutation} from '../../../__generated__/graphql';
 
 export interface DeleteTargetPopulation {
   open: boolean;

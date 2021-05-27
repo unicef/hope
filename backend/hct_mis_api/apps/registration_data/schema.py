@@ -25,10 +25,8 @@ class RegistrationDataImportFilter(FilterSet):
         model = RegistrationDataImport
         fields = {
             "imported_by__id": ["exact"],
-            "import_date": ["exact"],
             "status": ["exact"],
             "name": ["exact", "startswith"],
-            "business_area": ["exact"],
         }
 
     order_by = CustomOrderingFilter(

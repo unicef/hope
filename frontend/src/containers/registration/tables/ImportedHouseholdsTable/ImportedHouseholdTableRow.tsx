@@ -1,12 +1,12 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
-import { decodeIdString } from '../../../../utils/utils';
-import { FlagTooltip } from '../../../../components/FlagTooltip';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import {ImportedHouseholdMinimalFragment} from '../../../../__generated__/graphql';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../../components/table/ClickableTableRow';
+import {decodeIdString} from '../../../../utils/utils';
+import {FlagTooltip} from '../../../../components/FlagTooltip';
+import {UniversalMoment} from '../../../../components/UniversalMoment';
+import {AnonTableCell} from '../../../../components/table/AnonTableCell';
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;

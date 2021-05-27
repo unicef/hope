@@ -1,20 +1,15 @@
 import React from 'react';
 import * as Yup from 'yup';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Button, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import { Formik, Field } from 'formik';
-import { useCopyTargetPopulationMutation } from '../../../__generated__/graphql';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Dialog } from '../Dialog';
-import { DialogActions } from '../DialogActions';
-import { handleValidationErrors } from '../../../utils/utils';
+import {Field, Formik} from 'formik';
+import {useCopyTargetPopulationMutation} from '../../../__generated__/graphql';
+import {FormikTextField} from '../../../shared/Formik/FormikTextField';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {Dialog} from '../Dialog';
+import {DialogActions} from '../DialogActions';
+import {handleValidationErrors} from '../../../utils/utils';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;

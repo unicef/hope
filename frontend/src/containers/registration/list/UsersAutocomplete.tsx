@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { InputAdornment } from '@material-ui/core';
+import {InputAdornment} from '@material-ui/core';
 import PersonIcon from '@material-ui/icons/Person';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import {
-  AllUsersQuery,
-  useAllUsersQuery,
-} from '../../../__generated__/graphql';
-import { useDebounce } from '../../../hooks/useDebounce';
+import {AllUsersQuery, useAllUsersQuery,} from '../../../__generated__/graphql';
+import {useDebounce} from '../../../hooks/useDebounce';
 import TextField from '../../../shared/TextField';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;

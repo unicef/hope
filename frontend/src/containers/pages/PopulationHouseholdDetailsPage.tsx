@@ -1,30 +1,30 @@
 import React from 'react';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
-import { Grid, Typography } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
-import { HouseholdDetails } from '../../components/population/HouseholdDetails';
-import { PageHeader } from '../../components/PageHeader';
+import {Grid, Typography} from '@material-ui/core';
+import {useParams} from 'react-router-dom';
+import {HouseholdDetails} from '../../components/population/HouseholdDetails';
+import {PageHeader} from '../../components/PageHeader';
 import {
   HouseholdDetailedFragment,
   HouseholdNode,
   useHouseholdChoiceDataQuery,
   useHouseholdQuery,
 } from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { HouseholdVulnerabilities } from '../../components/population/HouseholdVulnerabilities';
-import { LabelizedField } from '../../components/LabelizedField';
-import { HouseholdIndividualsTable } from '../tables/HouseholdIndividualsTable';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { PaymentRecordHouseholdTable } from '../tables/PaymentRecordHouseholdTable';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { isPermissionDeniedError } from '../../utils/utils';
-import { HouseholdCompositionTable } from '../tables/HouseholdCompositionTable';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {HouseholdVulnerabilities} from '../../components/population/HouseholdVulnerabilities';
+import {LabelizedField} from '../../components/LabelizedField';
+import {HouseholdIndividualsTable} from '../tables/HouseholdIndividualsTable';
+import {UniversalActivityLogTable} from '../tables/UniversalActivityLogTable';
+import {PaymentRecordHouseholdTable} from '../tables/PaymentRecordHouseholdTable';
+import {UniversalMoment} from '../../components/UniversalMoment';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {usePermissions} from '../../hooks/usePermissions';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {isPermissionDeniedError} from '../../utils/utils';
+import {HouseholdCompositionTable} from '../tables/HouseholdCompositionTable';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
 
 const Container = styled.div`
   padding: 20px;

@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  FormControl,
-  FormHelperText,
-  MenuItem,
-  InputLabel,
-  Select,
-} from '@material-ui/core';
+import {FormControl, FormHelperText, InputLabel, MenuItem, Select,} from '@material-ui/core';
 import get from 'lodash/get';
 
 export const FormikSelectField = ({

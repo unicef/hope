@@ -1,14 +1,14 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { IconButton, makeStyles } from '@material-ui/core';
+import {IconButton, makeStyles} from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import { LogEntryNode } from '../../__generated__/graphql';
-import { MiśTheme } from '../../theme';
-import { headCells } from './headCels';
-import { ButtonPlaceHolder, Cell, Row } from './TableStyledComponents';
+import {LogEntryNode} from '../../__generated__/graphql';
+import {MiśTheme} from '../../theme';
+import {headCells} from './headCels';
+import {ButtonPlaceHolder, Cell, Row} from './TableStyledComponents';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);

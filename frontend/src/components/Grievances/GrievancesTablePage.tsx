@@ -1,20 +1,16 @@
-import { Button } from '@material-ui/core';
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import {
-  hasPermissionInModule,
-  hasPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDebounce } from '../../hooks/useDebounce';
-import { usePermissions } from '../../hooks/usePermissions';
-import { useGrievancesChoiceDataQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { PageHeader } from '../PageHeader';
-import { PermissionDenied } from '../PermissionDenied';
-import { GrievancesFilters } from './GrievancesTable/GrievancesFilters';
-import { GrievancesTable } from './GrievancesTable/GrievancesTable';
+import {Button} from '@material-ui/core';
+import React, {useState} from 'react';
+import {Link, useParams} from 'react-router-dom';
+import {hasPermissionInModule, hasPermissions, PERMISSIONS,} from '../../config/permissions';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {useDebounce} from '../../hooks/useDebounce';
+import {usePermissions} from '../../hooks/usePermissions';
+import {useGrievancesChoiceDataQuery} from '../../__generated__/graphql';
+import {LoadingComponent} from '../LoadingComponent';
+import {PageHeader} from '../PageHeader';
+import {PermissionDenied} from '../PermissionDenied';
+import {GrievancesFilters} from './GrievancesTable/GrievancesFilters';
+import {GrievancesTable} from './GrievancesTable/GrievancesTable';
 
 export function GrievancesTablePage(): React.ReactElement {
   const businessArea = useBusinessArea();

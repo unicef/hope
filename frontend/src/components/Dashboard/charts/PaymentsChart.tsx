@@ -1,8 +1,8 @@
-import { Box } from '@material-ui/core';
+import {Box} from '@material-ui/core';
 import React from 'react';
-import { Doughnut } from 'react-chartjs-2';
-import { formatNumber, getPercentage } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {Doughnut} from 'react-chartjs-2';
+import {formatNumber, getPercentage} from '../../../utils/utils';
+import {AllChartsQuery} from '../../../__generated__/graphql';
 
 interface PaymentsChartProps {
   data: AllChartsQuery['chartPayment'];

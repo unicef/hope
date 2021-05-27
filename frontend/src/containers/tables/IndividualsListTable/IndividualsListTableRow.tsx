@@ -1,20 +1,14 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import {
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { Flag } from '../../../components/Flag';
-import {
-  choicesToDict,
-  sexToCapitalize,
-} from '../../../utils/utils';
-import { FlagTooltip } from '../../../components/FlagTooltip';
-import { LoadingComponent } from '../../../components/LoadingComponent';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import {useHistory} from 'react-router-dom';
+import {IndividualNode, useHouseholdChoiceDataQuery,} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../components/table/ClickableTableRow';
+import {Flag} from '../../../components/Flag';
+import {choicesToDict, sexToCapitalize,} from '../../../utils/utils';
+import {FlagTooltip} from '../../../components/FlagTooltip';
+import {LoadingComponent} from '../../../components/LoadingComponent';
+import {AnonTableCell} from '../../../components/table/AnonTableCell';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;

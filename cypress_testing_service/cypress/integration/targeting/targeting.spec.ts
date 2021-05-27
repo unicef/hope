@@ -1,13 +1,7 @@
-import {
-  Given,
-  When,
-  Then,
-  And,
-  Before,
-} from 'cypress-cucumber-preprocessor/steps';
-import { uuid } from 'uuidv4';
-import { api } from '../../support/api';
-import { overrideScrollingStrategy } from '../../support/utils';
+import {And, Before, Given, Then, When,} from 'cypress-cucumber-preprocessor/steps';
+import {uuid} from 'uuidv4';
+import {api} from '../../support/api';
+import {overrideScrollingStrategy} from '../../support/utils';
 import '../../support/before';
 
 Before(() => {

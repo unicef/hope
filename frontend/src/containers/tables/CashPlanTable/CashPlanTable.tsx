@@ -1,14 +1,14 @@
-import React, { ReactElement } from 'react';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import React, {ReactElement} from 'react';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
 import {
   AllCashPlansQueryVariables,
   CashPlanNode,
   ProgramNode,
   useAllCashPlansQuery,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './CashPlanTableHeadCells';
-import { CashPlanTableRow } from './CashPlanTableRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './CashPlanTableHeadCells';
+import {CashPlanTableRow} from './CashPlanTableRow';
 
 interface CashPlanTableProps {
   program: ProgramNode;

@@ -1,5 +1,5 @@
-from django.contrib import admin
 from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter, TextFieldFilter
+from django.contrib import admin
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,

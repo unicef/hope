@@ -1,11 +1,11 @@
-import React, { useState, ReactElement } from 'react';
-import { Button } from '@material-ui/core';
-import { useCreateProgramMutation } from '../../../__generated__/graphql';
-import { ProgramForm } from '../../forms/ProgramForm';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { handleValidationErrors } from '../../../utils/utils';
+import React, {ReactElement, useState} from 'react';
+import {Button} from '@material-ui/core';
+import {useCreateProgramMutation} from '../../../__generated__/graphql';
+import {ProgramForm} from '../../forms/ProgramForm';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {ALL_PROGRAMS_QUERY} from '../../../apollo/queries/AllPrograms';
+import {handleValidationErrors} from '../../../utils/utils';
 
 export function CreateProgram(): ReactElement {
   const [open, setOpen] = useState(false);

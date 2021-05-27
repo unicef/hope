@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import React, {useState} from 'react';
+import {Box, Button, DialogContent, DialogTitle} from '@material-ui/core';
 import styled from 'styled-components';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {useActivateCashPlanPaymentVerificationMutation} from '../../__generated__/graphql';
 
 export interface Props {
   cashPlanVerificationId: string;

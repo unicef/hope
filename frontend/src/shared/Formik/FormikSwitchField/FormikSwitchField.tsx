@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormHelperText, Switch } from '@material-ui/core';
+import {FormHelperText, Switch} from '@material-ui/core';
 import styled from 'styled-components';
 
 const StyledSwitch = styled.div`

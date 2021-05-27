@@ -6,9 +6,9 @@ import {
   HouseholdNode,
   useAllHouseholdsQuery,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './HouseholdTableHeadCells';
-import { HouseHoldTableRow } from './HouseholdTableRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './HouseholdTableHeadCells';
+import {HouseHoldTableRow} from './HouseholdTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

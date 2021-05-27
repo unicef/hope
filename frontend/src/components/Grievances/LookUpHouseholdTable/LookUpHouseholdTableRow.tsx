@@ -1,14 +1,11 @@
-import { Radio } from '@material-ui/core';
+import {Radio} from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  AllHouseholdsQuery,
-  HouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { Pointer } from '../../Pointer';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
-import { UniversalMoment } from '../../UniversalMoment';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {AllHouseholdsQuery, HouseholdChoiceDataQuery,} from '../../../__generated__/graphql';
+import {Pointer} from '../../Pointer';
+import {ClickableTableRow} from '../../table/ClickableTableRow';
+import {UniversalMoment} from '../../UniversalMoment';
 
 interface LookUpHouseholdTableRowProps {
   household: AllHouseholdsQuery['allHouseholds']['edges'][number]['node'];

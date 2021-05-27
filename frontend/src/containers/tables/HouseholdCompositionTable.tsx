@@ -1,15 +1,7 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@material-ui/core';
+import {Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import React, { ReactElement } from 'react';
-import { HouseholdDetailedFragment } from '../../__generated__/graphql';
+import React, {ReactElement} from 'react';
+import {HouseholdDetailedFragment} from '../../__generated__/graphql';
 
 const GreyTableCell = styled(TableCell)`
   background-color: #eeeeee;

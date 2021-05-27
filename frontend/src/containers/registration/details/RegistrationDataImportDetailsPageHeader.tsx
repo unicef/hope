@@ -1,17 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import ListItem from '@material-ui/core/ListItem';
-import {
-  RegistrationDataImportStatus,
-  RegistrationDetailedFragment,
-} from '../../../__generated__/graphql';
-import { PageHeader } from '../../../components/PageHeader';
-import { BreadCrumbsItem } from '../../../components/BreadCrumbs';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { MergeRegistrationDataImportDialog } from './MergeRegistrationDataImportDialog';
-import { RerunDedupe } from './RerunDedupe';
+import {Button} from '@material-ui/core';
+import {Link} from 'react-router-dom';
+import {RegistrationDataImportStatus, RegistrationDetailedFragment,} from '../../../__generated__/graphql';
+import {PageHeader} from '../../../components/PageHeader';
+import {BreadCrumbsItem} from '../../../components/BreadCrumbs';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {MergeRegistrationDataImportDialog} from './MergeRegistrationDataImportDialog';
+import {RerunDedupe} from './RerunDedupe';
 
 export interface RegistrationDataImportDetailsPageHeaderPropTypes {
   registration: RegistrationDetailedFragment;

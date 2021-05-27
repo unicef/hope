@@ -1,16 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
-import { reduceChoices } from '../../../utils/utils';
+import {reduceChoices} from '../../../utils/utils';
 import {
+  AllReportsQueryVariables,
   ReportChoiceDataQuery,
   ReportNode,
-  AllReportsQueryVariables,
   useAllReportsQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './ReportingHeadCells';
-import { ReportingTableRow } from './ReportingTableRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './ReportingHeadCells';
+import {ReportingTableRow} from './ReportingTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

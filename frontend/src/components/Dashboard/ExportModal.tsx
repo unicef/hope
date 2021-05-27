@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  Box,
   Button,
+  Checkbox,
   DialogContent,
   DialogTitle,
   Table,
@@ -8,20 +10,15 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Checkbox,
   Typography,
-  Box,
 } from '@material-ui/core';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import {
-  useDashboardReportChoiceDataQuery,
-  useCreateDashboardReportMutation,
-} from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {useCreateDashboardReportMutation, useDashboardReportChoiceDataQuery,} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../LoadingComponent';
+import {useSnackbar} from '../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

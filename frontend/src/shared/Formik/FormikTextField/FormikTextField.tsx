@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputAdornment, TextField } from '@material-ui/core';
+import {InputAdornment, TextField} from '@material-ui/core';
 import styled from 'styled-components';
 import get from 'lodash/get';
 

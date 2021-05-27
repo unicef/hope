@@ -1,5 +1,5 @@
-import { useMeQuery } from '../__generated__/graphql';
-import { useBusinessArea } from './useBusinessArea';
+import {useMeQuery} from '../__generated__/graphql';
+import {useBusinessArea} from './useBusinessArea';
 
 export function usePermissions(): string[] {
   const { data, loading } = useMeQuery({

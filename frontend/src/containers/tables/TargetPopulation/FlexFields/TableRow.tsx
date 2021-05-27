@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import {ClickableTableRow} from '../../../../components/table/ClickableTableRow';
 
 export function FlexFieldRow({ household }) {
 

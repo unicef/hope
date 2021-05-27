@@ -1,8 +1,5 @@
 from __future__ import absolute_import
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 from .base import *  # noqa: ignore=F403
 
 # dev overrides

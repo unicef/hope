@@ -1,14 +1,14 @@
 import styled from 'styled-components';
-import { TableCell, TableRow } from '@material-ui/core';
-import { GetApp } from '@material-ui/icons';
-import { useHistory } from 'react-router-dom';
+import {TableCell, TableRow} from '@material-ui/core';
+import {GetApp} from '@material-ui/icons';
+import {useHistory} from 'react-router-dom';
 import React from 'react';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { StatusBox } from '../../../components/StatusBox';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { formatNumber, reportStatusToColor } from '../../../utils/utils';
-import { ReportNode } from '../../../__generated__/graphql';
-import { Pointer } from '../../../components/Pointer';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {StatusBox} from '../../../components/StatusBox';
+import {UniversalMoment} from '../../../components/UniversalMoment';
+import {formatNumber, reportStatusToColor} from '../../../utils/utils';
+import {ReportNode} from '../../../__generated__/graphql';
+import {Pointer} from '../../../components/Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;

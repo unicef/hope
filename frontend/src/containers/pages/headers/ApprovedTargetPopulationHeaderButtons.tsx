@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Button, Tooltip } from '@material-ui/core';
-import { FileCopy } from '@material-ui/icons';
-import {
-  TargetPopulationNode,
-  useUnapproveTpMutation,
-} from '../../../__generated__/graphql';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { FinalizeTargetPopulation } from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import {Button, Tooltip} from '@material-ui/core';
+import {FileCopy} from '@material-ui/icons';
+import {TargetPopulationNode, useUnapproveTpMutation,} from '../../../__generated__/graphql';
+import {DuplicateTargetPopulation} from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import {FinalizeTargetPopulation} from '../../dialogs/targetPopulation/FinalizeTargetPopulation';
+import {useSnackbar} from '../../../hooks/useSnackBar';
 
 const IconContainer = styled.span`
   button {

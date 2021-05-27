@@ -1,7 +1,7 @@
 import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
-import { formatThousands } from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {HorizontalBar} from 'react-chartjs-2';
+import {formatThousands} from '../../../utils/utils';
+import {AllChartsQuery} from '../../../__generated__/graphql';
 
 interface ProgrammesBySectorProps {
   data: AllChartsQuery['chartProgrammesBySector'];

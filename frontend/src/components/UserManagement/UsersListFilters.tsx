@@ -1,12 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { InputAdornment, Grid, FormControl, MenuItem } from '@material-ui/core';
+import {FormControl, Grid, InputAdornment, MenuItem} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import { useUserChoiceDataQuery } from '../../__generated__/graphql';
-import { ContainerWithBorder } from '../ContainerWithBorder';
+import {useUserChoiceDataQuery} from '../../__generated__/graphql';
+import {ContainerWithBorder} from '../ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

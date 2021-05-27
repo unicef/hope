@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { IconButton, Collapse } from '@material-ui/core';
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
-import { XlsxErrorNode } from '../../../../__generated__/graphql';
+import {Collapse, IconButton} from '@material-ui/core';
+import {ExpandLessRounded, ExpandMoreRounded} from '@material-ui/icons';
+import {XlsxErrorNode} from '../../../../__generated__/graphql';
 
 const Error = styled.div`
   color: ${({ theme }) => theme.palette.error.dark};

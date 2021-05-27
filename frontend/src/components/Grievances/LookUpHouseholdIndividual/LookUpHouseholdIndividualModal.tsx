@@ -1,29 +1,16 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Tab,
-  Tabs,
-} from '@material-ui/core';
-import { Field, Formik } from 'formik';
-import { TabPanel } from '../../TabPanel';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  ProgramNode,
-  useAllProgramsQuery,
-  useHouseholdChoiceDataQuery,
-} from '../../../__generated__/graphql';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { LookUpHouseholdFilters } from '../LookUpHouseholdTable/LookUpHouseholdFilters';
-import { LookUpHouseholdTable } from '../LookUpHouseholdTable/LookUpHouseholdTable';
-import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
-import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { GRIEVANCE_ISSUE_TYPES } from '../../../utils/constants';
+import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Tab, Tabs,} from '@material-ui/core';
+import {Field, Formik} from 'formik';
+import {TabPanel} from '../../TabPanel';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ProgramNode, useAllProgramsQuery, useHouseholdChoiceDataQuery,} from '../../../__generated__/graphql';
+import {FormikCheckboxField} from '../../../shared/Formik/FormikCheckboxField';
+import {LookUpHouseholdFilters} from '../LookUpHouseholdTable/LookUpHouseholdFilters';
+import {LookUpHouseholdTable} from '../LookUpHouseholdTable/LookUpHouseholdTable';
+import {LookUpIndividualFilters} from '../LookUpIndividualTable/LookUpIndividualFilters';
+import {LookUpIndividualTable} from '../LookUpIndividualTable/LookUpIndividualTable';
+import {GRIEVANCE_ISSUE_TYPES} from '../../../utils/constants';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

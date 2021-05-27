@@ -1,22 +1,15 @@
-import {
-  Box,
-  FormControl,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  Paper,
-} from '@material-ui/core';
+import {Box, FormControl, Grid, InputAdornment, MenuItem, Paper,} from '@material-ui/core';
 import GroupIcon from '@material-ui/icons/Group';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
 import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ProgrammeChoiceDataQuery } from '../../../__generated__/graphql';
+import {KeyboardDatePicker} from '@material-ui/pickers';
+import {ProgrammeChoiceDataQuery} from '../../../__generated__/graphql';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
 import TextField from '../../../shared/TextField';
-import { FieldLabel } from '../../../components/FieldLabel';
+import {FieldLabel} from '../../../components/FieldLabel';
 
 const Container = styled(Paper)`
   display: flex;

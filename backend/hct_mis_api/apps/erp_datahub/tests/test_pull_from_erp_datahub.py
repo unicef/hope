@@ -3,15 +3,15 @@ from decimal import Decimal
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import PullFromErpDatahubTask
-from hct_mis_api.apps.program.fixtures import CashPlanFactory
-from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
 from hct_mis_api.apps.erp_datahub.fixtures import FundsCommitmentFactory
+from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import PullFromErpDatahubTask
 from hct_mis_api.apps.household.fixtures import create_household
+from hct_mis_api.apps.payment.fixtures import PaymentRecordFactory
+from hct_mis_api.apps.program.fixtures import CashPlanFactory
 
 
 class TestPullDataFromErpDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
     cash_plan_1 = None
     cash_plan_2 = None
     payment_record_1 = None

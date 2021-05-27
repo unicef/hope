@@ -1,25 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../../../components/PageHeader';
-import {
-  useHouseholdChoiceDataQuery,
-  useImportedHouseholdQuery,
-} from '../../../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import {
-  decodeIdString,
-  isPermissionDeniedError,
-} from '../../../../utils/utils';
-import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { PermissionDenied } from '../../../../components/PermissionDenied';
+import {useParams} from 'react-router-dom';
+import {PageHeader} from '../../../../components/PageHeader';
+import {useHouseholdChoiceDataQuery, useImportedHouseholdQuery,} from '../../../../__generated__/graphql';
+import {BreadCrumbsItem} from '../../../../components/BreadCrumbs';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {decodeIdString, isPermissionDeniedError,} from '../../../../utils/utils';
+import {usePermissions} from '../../../../hooks/usePermissions';
+import {LoadingComponent} from '../../../../components/LoadingComponent';
+import {hasPermissions, PERMISSIONS} from '../../../../config/permissions';
+import {PermissionDenied} from '../../../../components/PermissionDenied';
 import {HouseholdImportedIndividualsTable} from "../../tables/HouseholdIndividualsTable";
-import { HouseholdDetails } from './HouseholdDetails';
-import { RegistrationDetails } from './RegistrationDetails';
+import {HouseholdDetails} from './HouseholdDetails';
+import {RegistrationDetails} from './RegistrationDetails';
 
 const Container = styled.div`
   padding: 20px;

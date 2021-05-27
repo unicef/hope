@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, Paper, Grid } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {LabelizedField} from '../LabelizedField';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

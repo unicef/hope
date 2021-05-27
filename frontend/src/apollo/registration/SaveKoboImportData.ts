@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const SAVE_KOBO_IMPORT_DATA = gql`
   mutation SaveKoboImportData(

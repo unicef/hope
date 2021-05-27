@@ -4,11 +4,11 @@ from datetime import date
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
-from django.contrib.postgres.fields import JSONField, CICharField
+from django.contrib.postgres.fields import CICharField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.managers import SoftDeletableManager
@@ -288,7 +288,7 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     withdrawn = models.BooleanField(default=False, db_index=True)
     withdrawn_date = models.DateTimeField(null=True, blank=True, db_index=True)
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
-    consent = models.NullBooleanField()
+    consent = models.BooleanField(null=True)
     consent_sharing = MultiSelectField(choices=DATA_SHARING_CHOICES, default=BLANK)
     residence_status = models.CharField(max_length=255, choices=RESIDENCE_STATUS_CHOICE)
     country_origin = CountryField(blank=True, db_index=True)
@@ -337,13 +337,13 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         related_name="households",
         blank=True,
     )
-    returnee = models.NullBooleanField()
-    flex_fields = JSONField(default=dict, blank=True)
+    returnee = models.BooleanField(null=True)
+    flex_fields = models.JSONField(default=dict, blank=True)
     first_registration_date = models.DateTimeField()
     last_registration_date = models.DateTimeField()
     head_of_household = models.OneToOneField("Individual", related_name="heading_household", on_delete=models.CASCADE)
-    fchild_hoh = models.NullBooleanField()
-    child_hoh = models.NullBooleanField()
+    fchild_hoh = models.BooleanField(null=True)
+    child_hoh = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, default=BLANK, db_index=True)
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     start = models.DateTimeField(blank=True, null=True)
@@ -616,10 +616,10 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     )
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
-    flex_fields = JSONField(default=dict, blank=True)
-    user_fields = JSONField(default=dict, blank=True)
-    enrolled_in_nutrition_programme = models.NullBooleanField()
-    administration_of_rutf = models.NullBooleanField()
+    flex_fields = models.JSONField(default=dict, blank=True)
+    user_fields = models.JSONField(default=dict, blank=True)
+    enrolled_in_nutrition_programme = models.BooleanField(null=True)
+    administration_of_rutf = models.BooleanField(null=True)
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
     deduplication_golden_record_status = models.CharField(
         max_length=50,
@@ -631,13 +631,13 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         default=UNIQUE_IN_BATCH,
         choices=DEDUPLICATION_BATCH_STATUS_CHOICE,
     )
-    deduplication_golden_record_results = JSONField(default=dict)
-    deduplication_batch_results = JSONField(default=dict)
+    deduplication_golden_record_results = models.JSONField(default=dict)
+    deduplication_batch_results = models.JSONField(default=dict)
     imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)

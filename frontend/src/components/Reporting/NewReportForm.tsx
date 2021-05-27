@@ -1,34 +1,23 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import moment from 'moment';
 import * as Yup from 'yup';
 import get from 'lodash/get';
-import { Field, Form, Formik } from 'formik';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-  Paper,
-  Grid,
-} from '@material-ui/core';
+import {Field, Form, Formik} from 'formik';
+import {Button, DialogContent, DialogTitle, Grid, Paper, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import {
-  useAllProgramsQuery,
-  useCreateReportMutation,
-  useReportChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
-import { ALL_REPORTS_QUERY } from '../../apollo/queries/AllReports';
-import { FormikAdminAreaAutocompleteMultiple } from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
-import { REPORT_TYPES } from '../../utils/constants';
-import { FieldLabel } from '../FieldLabel';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikDateField} from '../../shared/Formik/FormikDateField';
+import {useAllProgramsQuery, useCreateReportMutation, useReportChoiceDataQuery,} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../LoadingComponent';
+import {ALL_REPORTS_QUERY} from '../../apollo/queries/AllReports';
+import {FormikAdminAreaAutocompleteMultiple} from '../../shared/Formik/FormikAdminAreaAutocomplete/FormikAdminAreaAutocompleteMultiple';
+import {REPORT_TYPES} from '../../utils/constants';
+import {FieldLabel} from '../FieldLabel';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

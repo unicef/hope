@@ -1,9 +1,9 @@
-import { TableCell, TableRow } from '@material-ui/core';
+import {TableCell, TableRow} from '@material-ui/core';
 import React from 'react';
 import moment from 'moment';
-import { DATE_FORMAT } from '../../../config';
-import { AllSanctionListIndividualsQuery } from '../../../__generated__/graphql';
-import { UniversalMoment } from '../../UniversalMoment';
+import {DATE_FORMAT} from '../../../config';
+import {AllSanctionListIndividualsQuery} from '../../../__generated__/graphql';
+import {UniversalMoment} from '../../UniversalMoment';
 
 export const SanctionListIndividualsTableRow = ({
   individual,

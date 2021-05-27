@@ -1,3 +1,3 @@
-import { Check } from './FormikCheckboxField';
+import {Check} from './FormikCheckboxField';
 
 export { Check as FormikCheckboxField };

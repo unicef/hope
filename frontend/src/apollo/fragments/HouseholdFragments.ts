@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const householdMinimal = gql`
   fragment householdMinimal on HouseholdNode {

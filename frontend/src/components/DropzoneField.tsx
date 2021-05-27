@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback } from 'react';
+import React, {useCallback} from 'react';
 import styled from 'styled-components';
-import { Box } from '@material-ui/core';
-import { useDropzone } from 'react-dropzone';
-import { LoadingComponent } from './LoadingComponent';
+import {Box} from '@material-ui/core';
+import {useDropzone} from 'react-dropzone';
+import {LoadingComponent} from './LoadingComponent';
 
 const DropzoneContainer = styled.div`
   width: 500px;

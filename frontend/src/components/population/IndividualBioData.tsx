@@ -1,19 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Paper, Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
-import {
-  IndividualNode,
-  useHouseholdChoiceDataQuery,
-} from '../../__generated__/graphql';
-import {
-  sexToCapitalize,
-  choicesToDict, renderBoolean,
-} from '../../utils/utils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
-import { UniversalMoment } from '../UniversalMoment';
-import { ContentLink } from '../ContentLink';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {LabelizedField} from '../LabelizedField';
+import {IndividualNode, useHouseholdChoiceDataQuery,} from '../../__generated__/graphql';
+import {choicesToDict, renderBoolean, sexToCapitalize,} from '../../utils/utils';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../LoadingComponent';
+import {UniversalMoment} from '../UniversalMoment';
+import {ContentLink} from '../ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

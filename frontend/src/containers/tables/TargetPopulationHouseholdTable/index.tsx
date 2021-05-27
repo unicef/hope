@@ -1,3 +1,3 @@
-import { TargetPopulationHouseholdTable } from './TargetPopulationHouseholdTable'
+import {TargetPopulationHouseholdTable} from './TargetPopulationHouseholdTable'
 
 export { TargetPopulationHouseholdTable }

@@ -1,10 +1,10 @@
-import { Grid, IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import { Field } from 'formik';
+import {Grid, IconButton} from '@material-ui/core';
+import {Delete} from '@material-ui/icons';
+import {Field} from 'formik';
 import React from 'react';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { AllAddIndividualFieldsQuery } from '../../__generated__/graphql';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {AllAddIndividualFieldsQuery} from '../../__generated__/graphql';
 
 export interface AgencyFieldProps {
   index: number;

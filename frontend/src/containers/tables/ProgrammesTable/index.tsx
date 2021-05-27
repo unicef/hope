@@ -1,3 +1,3 @@
-import { ProgrammesTable } from './ProgrammesTable';
+import {ProgrammesTable} from './ProgrammesTable';
 
 export { ProgrammesTable };

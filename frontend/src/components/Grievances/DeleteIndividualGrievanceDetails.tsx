@@ -1,6 +1,6 @@
 import React from 'react';
 import snakeCase from 'lodash/snakeCase';
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import {Box, Button, Grid, Paper, Typography} from '@material-ui/core';
 import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
@@ -8,12 +8,12 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveDeleteIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { LoadingComponent } from '../LoadingComponent';
-import { UniversalMoment } from '../UniversalMoment';
+import {LabelizedField} from '../LabelizedField';
+import {ConfirmationDialog} from '../ConfirmationDialog';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {LoadingComponent} from '../LoadingComponent';
+import {UniversalMoment} from '../UniversalMoment';
 
 const StyledBox = styled(Paper)`
   display: flex;

@@ -6,7 +6,6 @@ from prompt_toolkit.validation import ValidationError
 
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.household.models import (
-    Document,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,

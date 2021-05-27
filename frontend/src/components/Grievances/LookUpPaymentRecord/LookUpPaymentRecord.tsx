@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { LookUpButton } from '../LookUpButton';
-import { LookUpPaymentRecordDisplay } from './LookUpPaymentRecordDisplay';
-import { LookUpPaymentRecordModal } from './LookUpPaymentRecordModal';
+import React, {useState} from 'react';
+import {LookUpButton} from '../LookUpButton';
+import {LookUpPaymentRecordDisplay} from './LookUpPaymentRecordDisplay';
+import {LookUpPaymentRecordModal} from './LookUpPaymentRecordModal';
 
 export const LookUpPaymentRecord = ({
   onValueChange,

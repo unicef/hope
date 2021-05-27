@@ -1,26 +1,19 @@
 import React from 'react';
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  Paper,
-  Typography,
-} from '@material-ui/core';
-import { useParams } from 'react-router-dom';
+import {Avatar, Box, Button, Grid, Paper, Typography,} from '@material-ui/core';
+import {useParams} from 'react-router-dom';
 import * as Yup from 'yup';
-import { Field, Form, Formik } from 'formik';
+import {Field, Form, Formik} from 'formik';
 import styled from 'styled-components';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { UniversalMoment } from '../UniversalMoment';
-import { OverviewContainerColumn } from '../OverviewContainerColumn';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {UniversalMoment} from '../UniversalMoment';
+import {OverviewContainerColumn} from '../OverviewContainerColumn';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useCreateGrievanceTicketNoteMutation,
   useMeQuery,
 } from '../../__generated__/graphql';
-import { renderUserName } from '../../utils/utils';
+import {renderUserName} from '../../utils/utils';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

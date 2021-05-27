@@ -1,19 +1,14 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { Checkbox } from '@material-ui/core';
-import { PaymentRecordNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  decodeIdString,
-  formatCurrencyWithSymbol,
-  verificationRecordsStatusToColor,
-} from '../../../utils/utils';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
-import { StatusBox } from '../../StatusBox';
-import { Missing } from '../../Missing';
-import { Pointer } from '../../Pointer';
+import {useHistory} from 'react-router-dom';
+import {Checkbox} from '@material-ui/core';
+import {PaymentRecordNode} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {formatCurrencyWithSymbol, verificationRecordsStatusToColor,} from '../../../utils/utils';
+import {ClickableTableRow} from '../../table/ClickableTableRow';
+import {StatusBox} from '../../StatusBox';
+import {Pointer} from '../../Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;

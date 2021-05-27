@@ -1,11 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Field } from 'formik';
+import {Field} from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {FormikDateField} from '../../shared/Formik/FormikDateField';
+import {FormikDecimalField} from '../../shared/Formik/FormikDecimalField';
 
 const FlexWrapper = styled.div`
   display: flex;

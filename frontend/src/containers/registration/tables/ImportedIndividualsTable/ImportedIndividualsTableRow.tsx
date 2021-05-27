@@ -1,21 +1,14 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { TableRow } from '@material-ui/core';
-import {
-  HouseholdChoiceDataQuery,
-  ImportedIndividualMinimalFragment,
-} from '../../../../__generated__/graphql';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import {
-  choicesToDict,
-  decodeIdString,
-  sexToCapitalize,
-} from '../../../../utils/utils';
-import { DedupeResults } from '../../details/DedupeResults';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { Pointer } from '../../../../components/Pointer';
-import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import {useHistory} from 'react-router-dom';
+import {TableRow} from '@material-ui/core';
+import {HouseholdChoiceDataQuery, ImportedIndividualMinimalFragment,} from '../../../../__generated__/graphql';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {choicesToDict, decodeIdString, sexToCapitalize,} from '../../../../utils/utils';
+import {DedupeResults} from '../../details/DedupeResults';
+import {UniversalMoment} from '../../../../components/UniversalMoment';
+import {Pointer} from '../../../../components/Pointer';
+import {AnonTableCell} from '../../../../components/table/AnonTableCell';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;

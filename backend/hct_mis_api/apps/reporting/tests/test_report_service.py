@@ -1,19 +1,19 @@
-from parameterized import parameterized
 from django.core.management import call_command
 from django.test import TestCase
+from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.account.fixtures import UserFactory
-from hct_mis_api.apps.reporting.fixtures import ReportFactory
-from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
-from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.payment.fixtures import (
     CashPlanPaymentVerificationFactory,
     PaymentRecordFactory,
     PaymentVerificationFactory,
 )
+from hct_mis_api.apps.program.fixtures import CashPlanFactory, ProgramFactory
+from hct_mis_api.apps.reporting.fixtures import ReportFactory
+from hct_mis_api.apps.reporting.models import Report
 
 
 class TestGenerateReportService(TestCase):

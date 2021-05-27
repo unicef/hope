@@ -1,25 +1,21 @@
-import { Box, Button } from '@material-ui/core';
-import { useParams, Link } from 'react-router-dom';
+import {Box, Button} from '@material-ui/core';
+import {Link, useParams} from 'react-router-dom';
 import EditIcon from '@material-ui/icons/EditRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { MiśTheme } from '../../theme';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_ISSUE_TYPES,
-  GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
+import {MiśTheme} from '../../theme';
+import {BreadCrumbsItem} from '../BreadCrumbs';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_ISSUE_TYPES, GRIEVANCE_TICKET_STATES,} from '../../utils/constants';
+import {decodeIdString} from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useGrievanceTicketStatusChangeMutation,
 } from '../../__generated__/graphql';
-import { PageHeader } from '../PageHeader';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ButtonDialog } from '../ButtonDialog';
+import {PageHeader} from '../PageHeader';
+import {ConfirmationDialog} from '../ConfirmationDialog';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ButtonDialog} from '../ButtonDialog';
 
 const Separator = styled.div`
   width: 1px;

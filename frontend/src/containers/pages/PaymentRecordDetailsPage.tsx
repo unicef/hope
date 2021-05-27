@@ -1,21 +1,17 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import styled from 'styled-components';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { Button } from '@material-ui/core';
-import {
-  PaymentRecordNode,
-  useCashAssistUrlPrefixQuery,
-  usePaymentRecordQuery,
-} from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { PaymentRecordDetails } from '../../components/payments/PaymentRecordDetails';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {Button} from '@material-ui/core';
+import {PaymentRecordNode, useCashAssistUrlPrefixQuery, usePaymentRecordQuery,} from '../../__generated__/graphql';
+import {PageHeader} from '../../components/PageHeader';
+import {PaymentRecordDetails} from '../../components/payments/PaymentRecordDetails';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;

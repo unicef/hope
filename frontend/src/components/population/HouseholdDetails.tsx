@@ -1,14 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, Grid, Paper } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-} from '../../__generated__/graphql';
-import { choicesToDict, formatCurrencyWithSymbol } from '../../utils/utils';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContentLink } from '../ContentLink';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {LabelizedField} from '../LabelizedField';
+import {HouseholdChoiceDataQuery, HouseholdNode,} from '../../__generated__/graphql';
+import {choicesToDict, formatCurrencyWithSymbol} from '../../utils/utils';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ContentLink} from '../ContentLink';
 
 const Container = styled.div`
   display: flex;

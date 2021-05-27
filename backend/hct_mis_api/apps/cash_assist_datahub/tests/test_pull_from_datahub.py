@@ -24,7 +24,7 @@ from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
 class TestPullDataFromDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
     program = None
     target_population = None
     dh_cash_plan1 = None
@@ -260,7 +260,7 @@ class TestPullDataFromDatahub(TestCase):
 
 
 class TestSessionsPullDataFromDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):

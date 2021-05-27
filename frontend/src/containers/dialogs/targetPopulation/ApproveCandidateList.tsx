@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Button, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import { useApproveTpMutation } from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { DialogActions } from '../DialogActions';
-import { Dialog } from '../Dialog';
+import {useApproveTpMutation} from '../../../__generated__/graphql';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {DialogActions} from '../DialogActions';
+import {Dialog} from '../Dialog';
 
 export interface ApproveCandidateListPropTypes {
   open: boolean;

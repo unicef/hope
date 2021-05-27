@@ -4,21 +4,14 @@ import moment from 'moment';
 import SearchIcon from '@material-ui/icons/Search';
 import WcIcon from '@material-ui/icons/Wc';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import {
-  Box,
-  Button,
-  Grid,
-  InputAdornment,
-  MenuItem,
-  TextField,
-} from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import {Box, Button, Grid, InputAdornment, MenuItem, TextField,} from '@material-ui/core';
+import {KeyboardDatePicker} from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
-import { ContainerWithBorder } from '../../ContainerWithBorder';
+import {ContainerWithBorder} from '../../ContainerWithBorder';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import { FieldLabel } from '../../FieldLabel';
-import { AdminAreasAutocomplete } from '../../population/AdminAreaAutocomplete';
+import {FieldLabel} from '../../FieldLabel';
+import {AdminAreasAutocomplete} from '../../population/AdminAreaAutocomplete';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

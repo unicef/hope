@@ -1,5 +1,5 @@
-import { connect } from 'formik';
-import { useEffect } from 'react';
+import {connect} from 'formik';
+import {useEffect} from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import isEqual from 'lodash/isEqual';
 

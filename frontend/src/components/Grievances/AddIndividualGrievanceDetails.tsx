@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Typography } from '@material-ui/core';
+import {Box, Button, Grid, Paper, Typography} from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
 import {
@@ -7,11 +7,11 @@ import {
   useAllAddIndividualFieldsQuery,
   useApproveAddIndividualDataChangeMutation,
 } from '../../__generated__/graphql';
-import { LabelizedField } from '../LabelizedField';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { getFlexFieldTextValue, renderBoolean } from '../../utils/utils';
+import {LabelizedField} from '../LabelizedField';
+import {ConfirmationDialog} from '../ConfirmationDialog';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {getFlexFieldTextValue, renderBoolean} from '../../utils/utils';
 
 const StyledBox = styled(Paper)`
   display: flex;

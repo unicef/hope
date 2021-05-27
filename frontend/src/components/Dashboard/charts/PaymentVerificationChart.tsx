@@ -1,7 +1,7 @@
-import { Box } from '@material-ui/core';
+import {Box} from '@material-ui/core';
 import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {HorizontalBar} from 'react-chartjs-2';
+import {AllChartsQuery} from '../../../__generated__/graphql';
 
 interface PaymentVerificationChartProps {
   data: AllChartsQuery['chartPaymentVerification'];

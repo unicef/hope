@@ -1,13 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import { Dialog } from '../containers/dialogs/Dialog';
+import {Button, DialogActions, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
+import {Dialog} from '../containers/dialogs/Dialog';
 
 interface ConfirmationDialogProps {
   onClose?;

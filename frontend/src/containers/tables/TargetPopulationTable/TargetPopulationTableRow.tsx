@@ -1,16 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
-import { TargetPopulationNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../components/StatusBox';
-import {
-  targetPopulationStatusToColor,
-  targetPopulationStatusMapping,
-} from '../../../utils/utils';
-import { UniversalMoment } from '../../../components/UniversalMoment';
+import {useHistory} from 'react-router-dom';
+import {TargetPopulationNode} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../components/table/ClickableTableRow';
+import {StatusBox} from '../../../components/StatusBox';
+import {targetPopulationStatusMapping, targetPopulationStatusToColor,} from '../../../utils/utils';
+import {UniversalMoment} from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;

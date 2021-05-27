@@ -1,11 +1,7 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import {
-  formatCurrencyWithSymbol,
-  formatThousands,
-  getPercentage,
-} from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {Bar} from 'react-chartjs-2';
+import {formatCurrencyWithSymbol, formatThousands, getPercentage,} from '../../../utils/utils';
+import {AllChartsQuery} from '../../../__generated__/graphql';
 
 interface TotalTransferredByMonthProps {
   data: AllChartsQuery['chartTotalTransferredByMonth'];

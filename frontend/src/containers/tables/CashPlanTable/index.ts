@@ -1,3 +1,3 @@
-import { CashPlanTable } from './CashPlanTable';
+import {CashPlanTable} from './CashPlanTable';
 
 export { CashPlanTable };

@@ -1,21 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  InputAdornment,
-  MenuItem,
-  FormControl,
-  Grid,
-  Box,
-} from '@material-ui/core';
+import {Box, FormControl, Grid, InputAdornment, MenuItem,} from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
-import { Person, Search, Group } from '@material-ui/icons';
+import {Group, Person, Search} from '@material-ui/icons';
 import Select from '../../shared/Select';
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
-import { TARGETING_STATES } from '../../utils/constants';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
-import { ProgramNode } from '../../__generated__/graphql';
+import {TARGETING_STATES} from '../../utils/constants';
+import {ContainerWithBorder} from '../ContainerWithBorder';
+import {FieldLabel} from '../FieldLabel';
+import {ProgramNode} from '../../__generated__/graphql';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

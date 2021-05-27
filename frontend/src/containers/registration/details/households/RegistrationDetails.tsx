@@ -1,10 +1,10 @@
 import React from 'react';
-import { Grid, Typography } from '@material-ui/core';
+import {Grid, Typography} from '@material-ui/core';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import { useRegistrationDataImportQuery } from '../../../../__generated__/graphql';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
+import {LabelizedField} from '../../../../components/LabelizedField';
+import {useRegistrationDataImportQuery} from '../../../../__generated__/graphql';
+import {UniversalMoment} from '../../../../components/UniversalMoment';
 
 const Title = styled.div`
   width: 100%;

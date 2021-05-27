@@ -1,20 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Paper, Typography } from '@material-ui/core';
-import {
-  decodeIdString,
-  sexToCapitalize,
-  choicesToDict, renderBoolean,
-} from '../../../../utils/utils';
-import {
-  ImportedIndividualDetailedFragment,
-  useHouseholdChoiceDataQuery,
-} from '../../../../__generated__/graphql';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { ContentLink } from '../../../../components/ContentLink';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {choicesToDict, decodeIdString, renderBoolean, sexToCapitalize,} from '../../../../utils/utils';
+import {ImportedIndividualDetailedFragment, useHouseholdChoiceDataQuery,} from '../../../../__generated__/graphql';
+import {LabelizedField} from '../../../../components/LabelizedField';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../../../components/LoadingComponent';
+import {UniversalMoment} from '../../../../components/UniversalMoment';
+import {ContentLink} from '../../../../components/ContentLink';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

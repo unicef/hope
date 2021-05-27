@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
+import {Button} from '@material-ui/core';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { FileCopy } from '@material-ui/icons';
-import {
-  TargetPopulationNode,
-  useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
-import { DuplicateTargetPopulation } from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import {FileCopy} from '@material-ui/icons';
+import {TargetPopulationNode, useCashAssistUrlPrefixQuery,} from '../../../__generated__/graphql';
+import {DuplicateTargetPopulation} from '../../dialogs/targetPopulation/DuplicateTargetPopulation';
+import {LoadingComponent} from '../../../components/LoadingComponent';
 
 const IconContainer = styled.span`
   button {

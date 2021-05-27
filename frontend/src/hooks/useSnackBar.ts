@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {useHistory, useLocation} from 'react-router-dom';
 import get from 'lodash/get';
 
 export function useSnackbar(): { show; setShow; message; showMessage; dataCy?; } {

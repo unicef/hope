@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  Typography,
-} from '@material-ui/core';
+import {Box, FormControlLabel, Radio, RadioGroup, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
 
 const FormLabelContainer = styled.div`

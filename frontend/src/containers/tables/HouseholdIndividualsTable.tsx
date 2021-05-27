@@ -1,23 +1,15 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
-import {
-  HouseholdChoiceDataQuery,
-  HouseholdNode,
-  IndividualNode,
-} from '../../__generated__/graphql';
-import { Order, TableComponent } from '../../components/table/TableComponent';
-import { HeadCell } from '../../components/table/EnhancedTableHead';
-import { ClickableTableRow } from '../../components/table/ClickableTableRow';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { StatusBox } from '../../components/StatusBox';
-import {
-  choicesToDict,
-  populationStatusToColor,
-  sexToCapitalize,
-} from '../../utils/utils';
-import { UniversalMoment } from '../../components/UniversalMoment';
+import {useHistory} from 'react-router-dom';
+import {HouseholdChoiceDataQuery, HouseholdNode, IndividualNode,} from '../../__generated__/graphql';
+import {Order, TableComponent} from '../../components/table/TableComponent';
+import {HeadCell} from '../../components/table/EnhancedTableHead';
+import {ClickableTableRow} from '../../components/table/ClickableTableRow';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {StatusBox} from '../../components/StatusBox';
+import {choicesToDict, populationStatusToColor, sexToCapitalize,} from '../../utils/utils';
+import {UniversalMoment} from '../../components/UniversalMoment';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {

@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import {
-  InputAdornment,
-  TextField,
-  Grid,
-  Typography,
   Box,
   Button,
   FormControl,
+  Grid,
+  InputAdornment,
   InputLabel,
-  Select,
   MenuItem,
+  Select,
+  TextField,
+  Typography,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
-import { usePaymentVerificationStatusChoicesQuery } from '../../../__generated__/graphql';
+import {KeyboardArrowDown, KeyboardArrowUp} from '@material-ui/icons';
+import {usePaymentVerificationStatusChoicesQuery} from '../../../__generated__/graphql';
 
 const Container = styled.div`
   display: flex;

@@ -1,21 +1,15 @@
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import styled from 'styled-components';
-import { Field, Formik } from 'formik';
-import {
-  Box,
-  Button,
-  DialogActions,
-  FormHelperText,
-  Grid,
-} from '@material-ui/core';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { PageHeader } from '../PageHeader';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import {Field, Formik} from 'formik';
+import {Box, Button, DialogActions, FormHelperText, Grid,} from '@material-ui/core';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {PageHeader} from '../PageHeader';
+import {BreadCrumbsItem} from '../BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikCheckboxField} from '../../shared/Formik/FormikCheckboxField';
 import {
   GrievanceTicketDocument,
   useAllAddIndividualFieldsQuery,
@@ -27,13 +21,10 @@ import {
   useMeQuery,
   useUpdateGrievanceMutation,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikAdminAreaAutocomplete } from '../../shared/Formik/FormikAdminAreaAutocomplete';
-import {
-  GRIEVANCE_CATEGORIES,
-  GRIEVANCE_TICKET_STATES,
-} from '../../utils/constants';
+import {LoadingComponent} from '../LoadingComponent';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {FormikAdminAreaAutocomplete} from '../../shared/Formik/FormikAdminAreaAutocomplete';
+import {GRIEVANCE_CATEGORIES, GRIEVANCE_TICKET_STATES,} from '../../utils/constants';
 import {
   decodeIdString,
   isInvalid,
@@ -41,13 +32,10 @@ import {
   renderUserName,
   thingForSpecificGrievanceType,
 } from '../../utils/utils';
-import { usePermissions } from '../../hooks/usePermissions';
-import { PermissionDenied } from '../PermissionDenied';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../config/permissions';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import {usePermissions} from '../../hooks/usePermissions';
+import {PermissionDenied} from '../PermissionDenied';
+import {hasCreatorOrOwnerPermissions, PERMISSIONS,} from '../../config/permissions';
+import {useArrayToDict} from '../../hooks/useArrayToDict';
 import {
   dataChangeComponentDict,
   EmptyComponent,
@@ -55,10 +43,10 @@ import {
   prepareVariables,
   validationSchema,
 } from './utils/editGrievanceUtils';
-import { validate } from './utils/validateGrievance';
-import { Consent } from './Consent';
-import { LookUpSection } from './LookUpSection';
-import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+import {validate} from './utils/validateGrievance';
+import {Consent} from './Consent';
+import {LookUpSection} from './LookUpSection';
+import {OtherRelatedTicketsCreate} from './OtherRelatedTicketsCreate';
 
 const BoxPadding = styled.div`
   padding: 15px 0;

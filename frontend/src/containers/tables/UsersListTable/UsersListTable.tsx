@@ -1,14 +1,10 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import {
-  UserNode,
-  AllUsersQueryVariables,
-  useAllUsersQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './UsersListTableHeadCells';
-import { UsersListTableRow } from './UsersListTableRow';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {AllUsersQueryVariables, useAllUsersQuery, UserNode,} from '../../../__generated__/graphql';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './UsersListTableHeadCells';
+import {UsersListTableRow} from './UsersListTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

@@ -1,26 +1,20 @@
 import React from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
-import { Button } from '@material-ui/core';
-import { Field, Form, Formik } from 'formik';
-import { PageHeader } from '../PageHeader';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { BreadCrumbsItem } from '../BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import {
-  useAllProgramsQuery,
-  useUpdateTpMutation,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { TARGET_POPULATION_QUERY } from '../../apollo/queries/TargetPopulation';
-import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
-import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../utils/utils';
-import { CandidateListTab } from './Edit/CandidateListTab';
-import { TargetPopulationProgramme } from './TargetPopulationProgramme';
+import {useParams} from 'react-router-dom';
+import {Button} from '@material-ui/core';
+import {Field, Form, Formik} from 'formik';
+import {PageHeader} from '../PageHeader';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {BreadCrumbsItem} from '../BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {useAllProgramsQuery, useUpdateTpMutation,} from '../../__generated__/graphql';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {TARGET_POPULATION_QUERY} from '../../apollo/queries/TargetPopulation';
+import {getTargetingCriteriaVariables} from '../../utils/targetingUtils';
+import {getFullNodeFromEdgesById, handleValidationErrors,} from '../../utils/utils';
+import {CandidateListTab} from './Edit/CandidateListTab';
+import {TargetPopulationProgramme} from './TargetPopulationProgramme';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;

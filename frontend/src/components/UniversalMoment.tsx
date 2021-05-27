@@ -1,6 +1,6 @@
 import React from 'react';
 import Moment from 'react-moment';
-import { DATE_FORMAT, DATE_FORMAT_LONG } from '../config';
+import {DATE_FORMAT, DATE_FORMAT_LONG} from '../config';
 
 export interface Props {
   children: string;

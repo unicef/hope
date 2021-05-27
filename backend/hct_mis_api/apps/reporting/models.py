@@ -1,9 +1,10 @@
 from datetime import datetime
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
 
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 from hct_mis_api.apps.account.models import ChoiceArrayField
+from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 
 
 class Report(TimeStampedUUIDModel):

@@ -1,21 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
-import { InputAdornment, MenuItem, Grid } from '@material-ui/core';
+import {Grid, InputAdornment, MenuItem} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountBalanceIcon from '@material-ui/icons/AccountBalance';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import {KeyboardDatePicker} from '@material-ui/pickers';
 import moment from 'moment';
 import TextField from '../../../shared/TextField';
 import InputLabel from '../../../shared/InputLabel';
 import Select from '../../../shared/Select';
-import {
-  ProgramNode,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../__generated__/graphql';
-import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
+import {ProgramNode, useCashPlanVerificationStatusChoicesQuery,} from '../../../__generated__/graphql';
+import {ContainerWithBorder} from '../../../components/ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

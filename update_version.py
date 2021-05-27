@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from tomlkit.api import loads
 import json
+
+from tomlkit.api import loads
 
 with open("backend/pyproject.toml", "r") as f:
     toml_dict = loads(f.read())

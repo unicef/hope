@@ -1,20 +1,17 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
-import { Link } from 'react-router-dom';
-import { Grid } from '@material-ui/core';
-import { theme as themeObj } from '../../theme';
-import { choicesToDict, programStatusToColor } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
-import { StatusBox } from '../StatusBox';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { UniversalMoment } from '../UniversalMoment';
+import {Link} from 'react-router-dom';
+import {Grid} from '@material-ui/core';
+import {theme as themeObj} from '../../theme';
+import {choicesToDict, programStatusToColor} from '../../utils/utils';
+import {LabelizedField} from '../LabelizedField';
+import {StatusBox} from '../StatusBox';
+import {ProgrammeChoiceDataQuery, ProgramNode,} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {UniversalMoment} from '../UniversalMoment';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   card: {

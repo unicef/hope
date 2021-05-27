@@ -1,14 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Formik } from 'formik';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@material-ui/core';
-import { LookUpPaymentRecordTable } from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
+import {Formik} from 'formik';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
+import {LookUpPaymentRecordTable} from '../LookUpPaymentRecordTable/LookUpPaymentRecordTable';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

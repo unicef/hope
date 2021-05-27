@@ -54,7 +54,6 @@ class PaymentRecordFilter(FilterSet):
     class Meta:
         fields = (
             "cash_plan",
-            "household",
         )
         model = PaymentRecord
 

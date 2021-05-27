@@ -1,14 +1,11 @@
-import { Button } from '@material-ui/core';
+import {Button} from '@material-ui/core';
 import styled from 'styled-components';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
-import {
-  ProgramNode,
-  useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
-import { FinishProgram } from '../../dialogs/programs/FinishProgram';
-import { EditProgram } from '../../dialogs/programs/EditProgram';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import {ProgramNode, useCashAssistUrlPrefixQuery,} from '../../../__generated__/graphql';
+import {FinishProgram} from '../../dialogs/programs/FinishProgram';
+import {EditProgram} from '../../dialogs/programs/EditProgram';
+import {LoadingComponent} from '../../../components/LoadingComponent';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;

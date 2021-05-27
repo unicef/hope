@@ -1,18 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Box,
-  Paper,
-  SnackbarContent,
-  Snackbar,
-} from '@material-ui/core';
+import {useTranslation} from 'react-i18next';
+import {Box, Button, Paper, Snackbar, SnackbarContent,} from '@material-ui/core';
 import * as Sentry from '@sentry/react';
-import { useCheckAgainstSanctionListUploadMutation } from '../../__generated__/graphql';
-import { DropzoneField } from '../../components/DropzoneField';
-import { PageHeader } from '../../components/PageHeader';
+import {useCheckAgainstSanctionListUploadMutation} from '../../__generated__/graphql';
+import {DropzoneField} from '../../components/DropzoneField';
+import {PageHeader} from '../../components/PageHeader';
 
 const ButtonsContainer = styled.div`
   width: 500px;

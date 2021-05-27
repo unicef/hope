@@ -1,16 +1,16 @@
 /* eslint-disable */
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import { refType } from '@material-ui/utils';
-import Input from '@material-ui/core/Input';
 import FilledInput from '@material-ui/core/FilledInput';
-import OutlinedInput from './OutlinedInput';
-import InputLabel from './InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import Select from './Select';
+import Input from '@material-ui/core/Input';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { refType } from '@material-ui/utils';
+import clsx from 'clsx';
+import PropTypes from 'prop-types';
+import * as React from 'react';
+import InputLabel from './InputLabel';
+import OutlinedInput from './OutlinedInput';
+import Select from './Select';
 
 const variantComponent = {
     standard: Input,

@@ -1,3 +1,3 @@
-import { FormikSliderField } from './FormikSliderField';
+import {FormikSliderField} from './FormikSliderField';
 
 export { FormikSliderField };

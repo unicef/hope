@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  makeStyles,
   Paper,
   Table,
   TableBody,
@@ -8,7 +9,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  makeStyles,
 } from '@material-ui/core';
 import styled from 'styled-components';
 import React from 'react';
@@ -18,12 +18,12 @@ import {
   GrievanceTicketQuery,
   useApproveSystemFlaggingMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { Flag } from '../Flag';
-import { DATE_FORMAT } from '../../config';
-import { UniversalMoment } from '../UniversalMoment';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { ViewSanctionList } from './ViewSanctionList';
+import {ConfirmationDialog} from '../ConfirmationDialog';
+import {Flag} from '../Flag';
+import {DATE_FORMAT} from '../../config';
+import {UniversalMoment} from '../UniversalMoment';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {ViewSanctionList} from './ViewSanctionList';
 
 const StyledBox = styled(Paper)`
   display: flex;

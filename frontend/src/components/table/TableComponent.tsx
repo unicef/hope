@@ -1,5 +1,5 @@
 import React from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -8,10 +8,10 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import FindInPageIcon from '@material-ui/icons/FindInPage';
-import { Box } from '@material-ui/core';
-import { LoadingComponent } from '../LoadingComponent';
-import { EnhancedTableToolbar } from './EnhancedTableToolbar';
-import { EnhancedTableHead, HeadCell } from './EnhancedTableHead';
+import {Box} from '@material-ui/core';
+import {LoadingComponent} from '../LoadingComponent';
+import {EnhancedTableToolbar} from './EnhancedTableToolbar';
+import {EnhancedTableHead, HeadCell} from './EnhancedTableHead';
 
 export type Order = 'asc' | 'desc';
 

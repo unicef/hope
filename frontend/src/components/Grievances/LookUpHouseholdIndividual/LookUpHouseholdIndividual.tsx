@@ -1,9 +1,9 @@
-import { Box, FormHelperText } from '@material-ui/core';
-import React, { useState } from 'react';
-import { isInvalid } from '../../../utils/utils';
-import { LookUpButton } from '../LookUpButton';
-import { LookUpHouseholdIndividualDisplay } from './LookUpHouseholdIndividualDisplay';
-import { LookUpHouseholdIndividualModal } from './LookUpHouseholdIndividualModal';
+import {Box, FormHelperText} from '@material-ui/core';
+import React, {useState} from 'react';
+import {isInvalid} from '../../../utils/utils';
+import {LookUpButton} from '../LookUpButton';
+import {LookUpHouseholdIndividualDisplay} from './LookUpHouseholdIndividualDisplay';
+import {LookUpHouseholdIndividualModal} from './LookUpHouseholdIndividualModal';
 
 export const LookUpHouseholdIndividual = ({
   onValueChange,

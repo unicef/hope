@@ -1,9 +1,10 @@
+from datetime import datetime
+
 import graphene
-from graphene import relay
-from graphene_django import DjangoObjectType
 from django.db.models.functions import ExtractYear
 from django_filters import CharFilter, FilterSet, MultipleChoiceFilter, OrderingFilter, DateTimeFilter
-from datetime import datetime
+from graphene import relay
+from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -14,9 +15,9 @@ from hct_mis_api.apps.account.permissions import (
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object
-from hct_mis_api.apps.reporting.models import Report, DashboardReport
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.grievance.models import GrievanceTicket
+from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.reporting.models import Report, DashboardReport
 
 
 class ReportFilter(FilterSet):
@@ -27,7 +28,7 @@ class ReportFilter(FilterSet):
     report_type = MultipleChoiceFilter(field_name="report_type", choices=Report.REPORT_TYPES)
 
     class Meta:
-        fields = ("created_by", "report_type", "status", "business_area")
+        fields = ("created_by",)
         model = Report
 
     order_by = OrderingFilter(

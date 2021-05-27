@@ -1,12 +1,12 @@
 import React from 'react';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
 import {
+  AllSanctionListIndividualsQuery,
   AllSanctionListIndividualsQueryVariables,
   useAllSanctionListIndividualsQuery,
-  AllSanctionListIndividualsQuery,
 } from '../../../__generated__/graphql';
-import { SanctionListIndividualsTableRow } from './SanctionListIndividualsTableRow';
-import { headCells } from './SanctionListIndividualsHeadCells';
+import {SanctionListIndividualsTableRow} from './SanctionListIndividualsTableRow';
+import {headCells} from './SanctionListIndividualsHeadCells';
 
 export const SanctionListIndividualsTable = ({
   filter,

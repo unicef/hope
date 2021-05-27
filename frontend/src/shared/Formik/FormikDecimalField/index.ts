@@ -1,3 +1,3 @@
-import { FormikDecimalField } from './FormikDecimalField';
+import {FormikDecimalField} from './FormikDecimalField';
 
 export { FormikDecimalField };

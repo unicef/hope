@@ -1,20 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../../../components/PageHeader';
-import { BreadCrumbsItem } from '../../../../components/BreadCrumbs';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import {
-  decodeIdString,
-  isPermissionDeniedError,
-} from '../../../../utils/utils';
-import { useImportedIndividualQuery } from '../../../../__generated__/graphql';
-import { usePermissions } from '../../../../hooks/usePermissions';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
-import { PermissionDenied } from '../../../../components/PermissionDenied';
-import { RegistrationIndividualsBioData } from './RegistrationIndividualBioData';
-import { RegistrationIndividualVulnerabilities } from './RegistrationIndividualVulnerabilities';
+import {useParams} from 'react-router-dom';
+import {PageHeader} from '../../../../components/PageHeader';
+import {BreadCrumbsItem} from '../../../../components/BreadCrumbs';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {decodeIdString, isPermissionDeniedError,} from '../../../../utils/utils';
+import {useImportedIndividualQuery} from '../../../../__generated__/graphql';
+import {usePermissions} from '../../../../hooks/usePermissions';
+import {LoadingComponent} from '../../../../components/LoadingComponent';
+import {hasPermissions, PERMISSIONS} from '../../../../config/permissions';
+import {PermissionDenied} from '../../../../components/PermissionDenied';
+import {RegistrationIndividualsBioData} from './RegistrationIndividualBioData';
+import {RegistrationIndividualVulnerabilities} from './RegistrationIndividualVulnerabilities';
 
 const Container = styled.div`
   padding: 20px;

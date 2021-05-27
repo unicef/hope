@@ -17,7 +17,6 @@ from hct_mis_api.apps.account.models import USER_PARTNER_CHOICES, USER_STATUS_CH
 from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     Permissions,
-    hopePermissionClass,
     hopeOneOfPermissionClass, ALL_GRIEVANCES_CREATE_MODIFY,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -45,12 +44,7 @@ class UsersFilter(FilterSet):
 
     class Meta:
         model = get_user_model()
-        fields = {
-            "search": ["exact", "startswith"],
-            "status": ["exact"],
-            "partner": ["exact"],
-            "roles": ["exact"],
-        }
+        fields = ("id",)
 
     order_by = CustomOrderingFilter(
         fields=(Lower("first_name"), Lower("last_name"), "last_login", "status", "partner", "email")

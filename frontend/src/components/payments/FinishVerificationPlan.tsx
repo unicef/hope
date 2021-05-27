@@ -1,22 +1,13 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Box,
-  Typography,
-} from '@material-ui/core';
+import React, {useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {Box, Button, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import {
-  useFinishCashPlanPaymentVerificationMutation,
-  useCashPlanQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { getPercentage } from '../../utils/utils';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {useCashPlanQuery, useFinishCashPlanPaymentVerificationMutation,} from '../../__generated__/graphql';
+import {LoadingComponent} from '../LoadingComponent';
+import {getPercentage} from '../../utils/utils';
 
 export interface Props {
   cashPlanVerificationId: string;

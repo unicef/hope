@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { PageHeader } from '../../components/PageHeader';
-import { IndividualsListTable } from '../tables/IndividualsListTable';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { IndividualsFilter } from '../../components/population/IndividualsFilter';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { usePermissions } from '../../hooks/usePermissions';
+import {PageHeader} from '../../components/PageHeader';
+import {IndividualsListTable} from '../tables/IndividualsListTable';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {IndividualsFilter} from '../../components/population/IndividualsFilter';
+import {useDebounce} from '../../hooks/useDebounce';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {usePermissions} from '../../hooks/usePermissions';
 
 const Container = styled.div`
   display: flex;

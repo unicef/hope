@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestIndividualQuery::test_individual_programme_filter_0_with_permission 1'] = {

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import React from 'react';
-import { SubField } from '../../components/TargetPopulation/SubField';
-import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { FieldChooser } from '../../components/TargetPopulation/FieldChooser';
+import {SubField} from '../../components/TargetPopulation/SubField';
+import {ImportedIndividualFieldsQuery} from '../../__generated__/graphql';
+import {FieldChooser} from '../../components/TargetPopulation/FieldChooser';
 
 const Divider = styled.div`
   border-top: 1px solid #b1b1b5;

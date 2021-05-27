@@ -1,6 +1,6 @@
-import { Redirect } from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import React from 'react';
-import { useMeQuery } from '../__generated__/graphql';
+import {useMeQuery} from '../__generated__/graphql';
 
 export function DefaultRoute(): React.ReactElement {
   const { data } = useMeQuery({

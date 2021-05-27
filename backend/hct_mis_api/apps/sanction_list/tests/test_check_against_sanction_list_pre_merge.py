@@ -8,7 +8,6 @@ from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
     Individual,
     DocumentType,
-    IDENTIFICATION_TYPE_CHOICE,
     IDENTIFICATION_TYPE_NATIONAL_ID,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
@@ -20,7 +19,7 @@ from hct_mis_api.apps.sanction_list.tasks.load_xml import LoadSanctionListXMLTas
 
 @override_config(SANCTION_LIST_MATCH_SCORE=3.5)
 class TestSanctionListPreMerge(BaseElasticSearchTestCase):
-    multi_db = True
+    databases = "__all__"
 
     TEST_FILES_PATH = f"{settings.PROJECT_ROOT}/apps/sanction_list/tests/test_files"
 

@@ -4,7 +4,6 @@ import logging
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.postgres.fields import IntegerRangeField, CICharField
-from django.contrib.postgres.fields import JSONField
 from django.contrib.postgres.validators import (
     RangeMinValueValidator,
     RangeMaxValueValidator,
@@ -13,18 +12,16 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
 from django.db.models import Q, Count
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
 from psycopg2.extras import NumericRange
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
     _INDIVIDUAL,
     TYPE_SELECT_MANY,
     _HOUSEHOLD,
-    XLSX_ONLY_FIELDS,
     TARGETING_CORE_FIELDS,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -654,7 +651,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     )
     is_flex_field = models.BooleanField(default=False)
     field_name = models.CharField(max_length=50)
-    arguments = JSONField(
+    arguments = models.JSONField(
         help_text="""
             Array of arguments
             """
@@ -684,7 +681,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     )
     is_flex_field = models.BooleanField(default=False)
     field_name = models.CharField(max_length=50)
-    arguments = JSONField(
+    arguments = models.JSONField(
         help_text="""
             Array of arguments
             """

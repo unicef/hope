@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
+  Box,
   Button,
+  DialogActions,
   DialogContent,
   DialogTitle,
-  DialogActions,
   Grid,
   InputAdornment,
   TextField,
-  Box,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { useDebounce } from '../../hooks/useDebounce';
-import { SanctionListIndividualsTable } from './SanctionListIndividualsTable/SanctionListIndividualsTable';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {useDebounce} from '../../hooks/useDebounce';
+import {SanctionListIndividualsTable} from './SanctionListIndividualsTable/SanctionListIndividualsTable';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

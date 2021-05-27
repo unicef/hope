@@ -1,3 +1,3 @@
-import { FormikDateField } from './FormikDateField';
+import {FormikDateField} from './FormikDateField';
 
 export { FormikDateField };

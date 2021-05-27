@@ -1,10 +1,8 @@
-import datetime
-import random
+import logging
 import traceback
 from builtins import __build_class__
 from decimal import Decimal
 
-import dateutil
 from django.core.exceptions import ValidationError
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
@@ -15,7 +13,6 @@ from hct_mis_api.apps.household.models import Household
 from .config import config
 from .score import Score
 from .templatetags import engine
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestAlreadyExistingFilterTickets::test_filter_existing_tickets_by_household_0_with_permission 1'] = {

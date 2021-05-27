@@ -1,7 +1,8 @@
 from decimal import Decimal
+
 from hct_mis_api.apps.erp_datahub.models import FundsCommitment
-from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.payment.models import PaymentRecord
+from hct_mis_api.apps.program.models import CashPlan
 
 
 def get_exchange_rate_for_cash_plan(cash_plan: CashPlan):

@@ -14,12 +14,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import SelectMultiple
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-
 from sentry_sdk.integrations.celery import CeleryIntegration
+from single_source import get_version
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-
-from single_source import get_version
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -250,6 +248,8 @@ OTHER_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

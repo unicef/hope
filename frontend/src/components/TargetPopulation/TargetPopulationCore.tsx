@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Paper, Typography } from '@material-ui/core';
-import { TargetingCriteria } from './TargetingCriteria';
-import { Results } from './Results';
-import { TargetingHouseholds } from './TargetingHouseholds';
+import {Paper, Typography} from '@material-ui/core';
+import {TargetingCriteria} from './TargetingCriteria';
+import {Results} from './Results';
+import {TargetingHouseholds} from './TargetingHouseholds';
 
 const PaperContainer = styled(Paper)`
   display: flex;

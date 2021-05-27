@@ -1,4 +1,4 @@
-import { When, Then } from 'cypress-cucumber-preprocessor/steps';
+import {Then, When} from 'cypress-cucumber-preprocessor/steps';
 
 When('I visit {word}', (path) => {
   cy.visit(path);

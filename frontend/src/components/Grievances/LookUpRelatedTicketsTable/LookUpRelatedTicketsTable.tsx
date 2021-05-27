@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { decodeIdString, reduceChoices } from '../../../utils/utils';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
+import {decodeIdString, reduceChoices} from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
   useAllGrievanceTicketQuery,
   useGrievancesChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { headCells } from './LookUpRelatedTicketsHeadCells';
-import { LookUpRelatedTicketsTableRow } from './LookUpRelatedTicketsTableRow';
+import {headCells} from './LookUpRelatedTicketsHeadCells';
+import {LookUpRelatedTicketsTableRow} from './LookUpRelatedTicketsTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

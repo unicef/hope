@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const ALL_LOG_ENTRIES_QUERY = gql`
   query AllLogEntries(

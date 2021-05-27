@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { PageHeader } from '../../components/PageHeader';
-import { useProgrammeChoiceDataQuery } from '../../__generated__/graphql';
-import { CreateProgram } from '../dialogs/programs/CreateProgram';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { ProgrammesTable } from '../tables/ProgrammesTable/ProgrammesTable';
-import { useDebounce } from '../../hooks/useDebounce';
-import { ProgrammesFilters } from '../tables/ProgrammesTable/ProgrammesFilter';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import React, {useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {PageHeader} from '../../components/PageHeader';
+import {useProgrammeChoiceDataQuery} from '../../__generated__/graphql';
+import {CreateProgram} from '../dialogs/programs/CreateProgram';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {ProgrammesTable} from '../tables/ProgrammesTable/ProgrammesTable';
+import {useDebounce} from '../../hooks/useDebounce';
+import {ProgrammesFilters} from '../tables/ProgrammesTable/ProgrammesFilter';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 export function ProgramsPage(): React.ReactElement {
   const [filter, setFilter] = useState({

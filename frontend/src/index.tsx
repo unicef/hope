@@ -4,9 +4,9 @@ import * as Sentry from '@sentry/react';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Chart from 'chart.js';
 import setupInternalization from './i18n';
-import { App } from './App';
+import {App} from './App';
 import * as serviceWorker from './serviceWorker';
-import { FONT } from './theme';
+import {FONT} from './theme';
 
 Chart.plugins.unregister(ChartDataLabels);
 Chart.defaults.global.defaultFontFamily = FONT;

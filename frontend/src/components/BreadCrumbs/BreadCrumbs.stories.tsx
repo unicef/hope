@@ -1,9 +1,9 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { theme } from '../../theme';
-import { BreadCrumbs } from './BreadCrumbs';
-import { StoryRouter } from '../../../.storybook/StoryRouter';
+import {ThemeProvider} from '@material-ui/core';
+import {ThemeProvider as StyledThemeProvider} from 'styled-components';
+import {theme} from '../../theme';
+import {BreadCrumbs} from './BreadCrumbs';
+import {StoryRouter} from '../../../.storybook/StoryRouter';
 
 export default {
   component: BreadCrumbs,

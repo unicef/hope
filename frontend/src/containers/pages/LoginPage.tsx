@@ -1,9 +1,9 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Button, Typography } from '@material-ui/core';
+import {useLocation} from 'react-router-dom';
+import {Button, Typography} from '@material-ui/core';
 import styled from 'styled-components';
-import { LOGIN_URL } from '../../config';
-import { Logo } from '../../components/Logo'
+import {LOGIN_URL} from '../../config';
+import {Logo} from '../../components/Logo'
 
 const Container = styled.div`
   width: 100vw;

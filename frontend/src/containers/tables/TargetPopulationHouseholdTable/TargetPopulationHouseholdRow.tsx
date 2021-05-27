@@ -1,9 +1,9 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { HouseholdNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import {HouseholdNode} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../components/table/ClickableTableRow';
+import {AnonTableCell} from '../../../components/table/AnonTableCell';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;

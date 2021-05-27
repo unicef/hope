@@ -1,9 +1,9 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../UniversalTable';
-import { headCells } from './HeadCells';
-import { TargetPopulationHouseholdTableRow } from './TableRow';
+import {useGoldenRecordByTargetingCriteriaQuery} from '../../../../__generated__/graphql';
+import {UniversalTable} from '../../UniversalTable';
+import {headCells} from './HeadCells';
+import {TargetPopulationHouseholdTableRow} from './TableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

@@ -1,12 +1,8 @@
-import React, { ReactElement } from 'react';
-import {
-  AllCashPlansQuery,
-  AllCashPlansQueryVariables,
-  useAllCashPlansQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './PaymentVerificationHeadCells';
-import { PaymentVerificationTableRow } from './PaymentVerificationTableRow';
+import React, {ReactElement} from 'react';
+import {AllCashPlansQuery, AllCashPlansQueryVariables, useAllCashPlansQuery,} from '../../../__generated__/graphql';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './PaymentVerificationHeadCells';
+import {PaymentVerificationTableRow} from './PaymentVerificationTableRow';
 
 interface PaymentVerificationTableProps {
   filter;

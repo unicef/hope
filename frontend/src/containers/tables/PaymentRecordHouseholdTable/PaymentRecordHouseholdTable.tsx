@@ -1,13 +1,13 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import {
   AllPaymentRecordsQueryVariables,
   HouseholdNode,
   PaymentRecordNode,
   useAllPaymentRecordsQuery,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './PaymentRecordHouseholdTableHeadCells';
-import { PaymentRecordHouseholdTableRow } from './PaymentRecordHouseholdTableRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './PaymentRecordHouseholdTableHeadCells';
+import {PaymentRecordHouseholdTableRow} from './PaymentRecordHouseholdTableRow';
 
 interface PaymentRecordTableProps {
   household?: HouseholdNode;

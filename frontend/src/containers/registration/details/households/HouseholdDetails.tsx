@@ -1,15 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Typography, Grid } from '@material-ui/core';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import {
-  HouseholdChoiceDataQuery,
-  ImportedHouseholdDetailedFragment,
-} from '../../../../__generated__/graphql';
-import { choicesToDict } from '../../../../utils/utils';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { ContainerColumnWithBorder } from '../../../../components/ContainerColumnWithBorder';
-import { ContentLink } from '../../../../components/ContentLink';
+import {Grid, Typography} from '@material-ui/core';
+import {LabelizedField} from '../../../../components/LabelizedField';
+import {HouseholdChoiceDataQuery, ImportedHouseholdDetailedFragment,} from '../../../../__generated__/graphql';
+import {choicesToDict} from '../../../../utils/utils';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {ContainerColumnWithBorder} from '../../../../components/ContainerColumnWithBorder';
+import {ContentLink} from '../../../../components/ContentLink';
 
 const Overview = styled.div`
   display: flex;

@@ -4,16 +4,15 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import DrawerMaterial from '@material-ui/core/Drawer';
-import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { gql } from 'apollo-boost';
-import { useQuery } from '@apollo/react-hooks';
-import { theme as themeObj } from '../../theme';
-import { Logo } from '../Logo';
-import { useMeQuery } from '../../__generated__/graphql';
+import React, {useEffect, useState} from 'react';
+import {makeStyles} from '@material-ui/core';
+import {gql} from 'apollo-boost';
+import {useQuery} from '@apollo/react-hooks';
+import {theme as themeObj} from '../../theme';
+import {Logo} from '../Logo';
 import packageJson from '../../../package.json';
-import { AlertDialog } from '../AlertDialog';
-import { DrawerItems } from './DrawerItems';
+import {AlertDialog} from '../AlertDialog';
+import {DrawerItems} from './DrawerItems';
 
 const useStyles = makeStyles((theme: typeof themeObj) => ({
   toolbarHeader: {

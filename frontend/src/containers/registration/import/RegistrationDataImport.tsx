@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import styled from 'styled-components';
 import * as Yup from 'yup';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import {
   Button,
   Checkbox,
@@ -15,8 +15,8 @@ import {
   Select,
 } from '@material-ui/core';
 import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import { useDropzone } from 'react-dropzone';
-import { Field, Form, Formik } from 'formik';
+import {useDropzone} from 'react-dropzone';
+import {Field, Form, Formik} from 'formik';
 import get from 'lodash/get';
 import {
   KoboErrorNode,
@@ -29,16 +29,16 @@ import {
   useUploadImportDataXlsxFileMutation,
   XlsxRowErrorNode,
 } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { FormikTextField } from '../../../shared/Formik/FormikTextField';
-import { LoadingComponent } from '../../../components/LoadingComponent';
-import { Dialog } from '../../dialogs/Dialog';
-import { DialogActions } from '../../dialogs/DialogActions';
-import { handleValidationErrors } from '../../../utils/utils';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { ErrorsKobo } from './errors/KoboErrors';
-import { Errors } from './errors/PlainErrors';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {FormikTextField} from '../../../shared/Formik/FormikTextField';
+import {LoadingComponent} from '../../../components/LoadingComponent';
+import {Dialog} from '../../dialogs/Dialog';
+import {DialogActions} from '../../dialogs/DialogActions';
+import {handleValidationErrors} from '../../../utils/utils';
+import {FormikCheckboxField} from '../../../shared/Formik/FormikCheckboxField';
+import {ErrorsKobo} from './errors/KoboErrors';
+import {Errors} from './errors/PlainErrors';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

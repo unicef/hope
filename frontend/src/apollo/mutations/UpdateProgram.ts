@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const UPDATE_PROGRAM_MUTATION = gql`
   mutation UpdateProgram($programData: UpdateProgramInput!, $version: BigInt!) {

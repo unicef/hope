@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 import React from 'react';
-import { ActivateProgram } from '../../dialogs/programs/ActivateProgram';
-import { DeleteProgram } from '../../dialogs/programs/DeleteProgram';
-import { ProgramNode } from '../../../__generated__/graphql';
-import { EditProgram } from '../../dialogs/programs/EditProgram';
+import {ActivateProgram} from '../../dialogs/programs/ActivateProgram';
+import {DeleteProgram} from '../../dialogs/programs/DeleteProgram';
+import {ProgramNode} from '../../../__generated__/graphql';
+import {EditProgram} from '../../dialogs/programs/EditProgram';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;

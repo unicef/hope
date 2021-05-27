@@ -1,3 +1,3 @@
-import { CreateTable } from './CreateTable';
+import {CreateTable} from './CreateTable';
 
 export { CreateTable };

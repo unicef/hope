@@ -1,20 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Paper, Typography } from '@material-ui/core';
-import { StatusBox } from '../StatusBox';
+import {Grid, Paper, Typography} from '@material-ui/core';
+import {StatusBox} from '../StatusBox';
 import {
   formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
-import {
-  PaymentRecordNode,
-  PaymentVerificationNode,
-} from '../../__generated__/graphql';
-import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
-import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
+import {LabelizedField} from '../LabelizedField';
+import {PaymentRecordNode, PaymentVerificationNode,} from '../../__generated__/graphql';
+import {UniversalActivityLogTable} from '../../containers/tables/UniversalActivityLogTable';
+import {UniversalMoment} from '../UniversalMoment';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;

@@ -1,9 +1,9 @@
-import React, { ReactElement, useState, useEffect } from 'react';
-import { Order, TableComponent } from '../../components/table/TableComponent';
-import { HeadCell } from '../../components/table/EnhancedTableHead';
-import { EmptyTable } from '../../components/table/EmptyTable';
-import { columnToOrderBy } from '../../utils/utils';
-import { LoadingComponent } from '../../components/LoadingComponent';
+import React, {ReactElement, useEffect, useState} from 'react';
+import {Order, TableComponent} from '../../components/table/TableComponent';
+import {HeadCell} from '../../components/table/EnhancedTableHead';
+import {EmptyTable} from '../../components/table/EmptyTable';
+import {columnToOrderBy} from '../../utils/utils';
+import {LoadingComponent} from '../../components/LoadingComponent';
 
 interface UniversalTableProps<T, K> {
   rowsPerPageOptions?: number[];

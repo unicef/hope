@@ -1,21 +1,16 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 import styled from 'styled-components';
-import { ProgramDetails } from '../../components/programs/ProgramDetails';
-import { CashPlanTable } from '../tables/CashPlanTable';
-import {
-  ProgramNode,
-  ProgramStatus,
-  useProgrammeChoiceDataQuery,
-  useProgramQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { isPermissionDeniedError } from '../../utils/utils';
-import { ProgramDetailsPageHeader } from './headers/ProgramDetailsPageHeader';
+import {ProgramDetails} from '../../components/programs/ProgramDetails';
+import {CashPlanTable} from '../tables/CashPlanTable';
+import {ProgramNode, ProgramStatus, useProgrammeChoiceDataQuery, useProgramQuery,} from '../../__generated__/graphql';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {UniversalActivityLogTable} from '../tables/UniversalActivityLogTable';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {isPermissionDeniedError} from '../../utils/utils';
+import {ProgramDetailsPageHeader} from './headers/ProgramDetailsPageHeader';
 
 const Container = styled.div`
   && {

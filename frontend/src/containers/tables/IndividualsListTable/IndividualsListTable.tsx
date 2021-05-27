@@ -1,13 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  AllIndividualsQueryVariables,
-  IndividualNode,
-  useAllIndividualsQuery,
-} from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './IndividualsListTableHeadCells';
-import { IndividualsListTableRow } from './IndividualsListTableRow';
+import {AllIndividualsQueryVariables, IndividualNode, useAllIndividualsQuery,} from '../../../__generated__/graphql';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './IndividualsListTableHeadCells';
+import {IndividualsListTableRow} from './IndividualsListTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.sanction_list.models import (
     SanctionListIndividual,
     SanctionListIndividualDocument,
 )
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 @admin.register(SanctionListIndividual)

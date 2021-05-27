@@ -1,27 +1,20 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useParams} from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@material-ui/core';
-import { Field, Formik } from 'formik';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
+import {Field, Formik} from 'formik';
+import {useDebounce} from '../../../hooks/useDebounce';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
 import {
   GrievanceTicketDocument,
   ProgramNode,
   useAllProgramsQuery,
   useReassignRoleGrievanceMutation,
 } from '../../../__generated__/graphql';
-import { FormikCheckboxField } from '../../../shared/Formik/FormikCheckboxField';
-import { LookUpIndividualFilters } from '../LookUpIndividualTable/LookUpIndividualFilters';
-import { LookUpIndividualTable } from '../LookUpIndividualTable/LookUpIndividualTable';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import {FormikCheckboxField} from '../../../shared/Formik/FormikCheckboxField';
+import {LookUpIndividualFilters} from '../LookUpIndividualTable/LookUpIndividualFilters';
+import {LookUpIndividualTable} from '../LookUpIndividualTable/LookUpIndividualTable';
+import {useSnackbar} from '../../../hooks/useSnackBar';
 
 const DialogFooter = styled.div`
   padding: 12px 16px;

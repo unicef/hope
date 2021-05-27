@@ -1,31 +1,25 @@
 import React from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
-import { Button, Paper, Typography } from '@material-ui/core';
-import { Field, FieldArray, Form, Formik } from 'formik';
-import { PageHeader } from '../../components/PageHeader';
-import { TargetingCriteria } from '../../components/TargetPopulation/TargetingCriteria';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { Results } from '../../components/TargetPopulation/Results';
-import {
-  useCreateTpMutation,
-  useAllProgramsQuery,
-} from '../../__generated__/graphql';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { CreateTable } from '../tables/TargetPopulation/Create';
-import { getTargetingCriteriaVariables } from '../../utils/targetingUtils';
-import { TargetPopulationProgramme } from '../../components/TargetPopulation/TargetPopulationProgramme';
-import { TargetingCriteriaDisabled } from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import {
-  getFullNodeFromEdgesById,
-  handleValidationErrors,
-} from '../../utils/utils';
+import {Button, Paper, Typography} from '@material-ui/core';
+import {Field, FieldArray, Form, Formik} from 'formik';
+import {PageHeader} from '../../components/PageHeader';
+import {TargetingCriteria} from '../../components/TargetPopulation/TargetingCriteria';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {Results} from '../../components/TargetPopulation/Results';
+import {useAllProgramsQuery, useCreateTpMutation,} from '../../__generated__/graphql';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {CreateTable} from '../tables/TargetPopulation/Create';
+import {getTargetingCriteriaVariables} from '../../utils/targetingUtils';
+import {TargetPopulationProgramme} from '../../components/TargetPopulation/TargetPopulationProgramme';
+import {TargetingCriteriaDisabled} from '../../components/TargetPopulation/TargetingCriteria/TargetingCriteriaDisabled';
+import {usePermissions} from '../../hooks/usePermissions';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {getFullNodeFromEdgesById, handleValidationErrors,} from '../../utils/utils';
 
 const PaperContainer = styled(Paper)`
   display: flex;

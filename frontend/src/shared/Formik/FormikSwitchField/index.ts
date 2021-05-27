@@ -1,3 +1,3 @@
-import { FormikSwitchField } from './FormikSwitchField';
+import {FormikSwitchField} from './FormikSwitchField';
 
 export { FormikSwitchField };

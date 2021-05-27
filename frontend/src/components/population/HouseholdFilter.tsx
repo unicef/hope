@@ -1,21 +1,18 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Box, Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import {Box, Grid, InputAdornment, MenuItem} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import GroupIcon from '@material-ui/icons/Group';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import FormControl from '@material-ui/core/FormControl';
 import AssignmentIndRoundedIcon from '@material-ui/icons/AssignmentIndRounded';
-import {
-  HouseholdChoiceDataQuery,
-  ProgramNode,
-} from '../../__generated__/graphql';
+import {HouseholdChoiceDataQuery, ProgramNode,} from '../../__generated__/graphql';
 import TextField from '../../shared/TextField';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import { ContainerWithBorder } from '../ContainerWithBorder';
-import { FieldLabel } from '../FieldLabel';
-import { AdminAreasAutocomplete } from './AdminAreaAutocomplete';
+import {ContainerWithBorder} from '../ContainerWithBorder';
+import {FieldLabel} from '../FieldLabel';
+import {AdminAreasAutocomplete} from './AdminAreaAutocomplete';
 
 const TextContainer = styled(TextField)`
   input[type='number']::-webkit-inner-spin-button,

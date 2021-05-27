@@ -3,10 +3,10 @@ import logging
 from django import forms
 from django.core.exceptions import ValidationError
 
+from hct_mis_api.apps.steficon.config import config
 from hct_mis_api.apps.steficon.interpreters import mapping
 from hct_mis_api.apps.steficon.models import Rule
 from hct_mis_api.apps.steficon.widget import CodeWidget
-from hct_mis_api.apps.steficon.config import config
 
 logger = logging.getLogger(__name__)
 try:

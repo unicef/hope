@@ -2,14 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import { Typography } from '@material-ui/core';
-import { LabelizedField } from '../LabelizedField';
-import {
-  HouseholdDetailedFragment,
-  useAllHouseholdsFlexFieldsAttributesQuery,
-} from '../../__generated__/graphql';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
-import { LoadingComponent } from '../LoadingComponent';
+import {Typography} from '@material-ui/core';
+import {LabelizedField} from '../LabelizedField';
+import {HouseholdDetailedFragment, useAllHouseholdsFlexFieldsAttributesQuery,} from '../../__generated__/graphql';
+import {useArrayToDict} from '../../hooks/useArrayToDict';
+import {LoadingComponent} from '../LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

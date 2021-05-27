@@ -1,26 +1,18 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import moment from 'moment';
 import * as Yup from 'yup';
 import styled from 'styled-components';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Dialog, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { Field, Form, Formik } from 'formik';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import {
-  ProgramNode,
-  useProgrammeChoiceDataQuery,
-} from '../../__generated__/graphql';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import { selectFields } from '../../utils/utils';
-import { DialogActions } from '../dialogs/DialogActions';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import {Field, Form, Formik} from 'formik';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {ProgramNode, useProgrammeChoiceDataQuery,} from '../../__generated__/graphql';
+import {FormikRadioGroup} from '../../shared/Formik/FormikRadioGroup';
+import {FormikDateField} from '../../shared/Formik/FormikDateField';
+import {selectFields} from '../../utils/utils';
+import {DialogActions} from '../dialogs/DialogActions';
+import {FormikCheckboxField} from '../../shared/Formik/FormikCheckboxField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

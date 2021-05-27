@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField, Paper } from '@material-ui/core';
+import {Paper, TextField} from '@material-ui/core';
 import styled from 'styled-components';
 
 const StyledAutocomplete = styled(Autocomplete)`

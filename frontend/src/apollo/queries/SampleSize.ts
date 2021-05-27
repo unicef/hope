@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const SAMPLE_SIZE_QUERY = gql`
   query SampleSize($input: GetCashplanVerificationSampleSizeInput!) {

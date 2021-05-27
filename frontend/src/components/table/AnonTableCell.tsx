@@ -1,8 +1,8 @@
-import { TableCell } from '@material-ui/core';
+import {TableCell} from '@material-ui/core';
 import React from 'react';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { usePermissions } from '../../hooks/usePermissions';
-import { anon } from '../../utils/utils';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {usePermissions} from '../../hooks/usePermissions';
+import {anon} from '../../utils/utils';
 
 export const AnonTableCell = ({ children, ...props }): React.ReactElement => {
   const permissions = usePermissions();

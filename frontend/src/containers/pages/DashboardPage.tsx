@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Tab, Tabs, Typography } from '@material-ui/core';
-import { PageHeader } from '../../components/PageHeader';
-import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
-import { ExportModal } from '../../components/Dashboard/ExportModal';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
-import { DashboardYearPage } from './DashboardYearPage';
+import React, {useState} from 'react';
+import {Tab, Tabs, Typography} from '@material-ui/core';
+import {PageHeader} from '../../components/PageHeader';
+import {DashboardFilters} from '../../components/Dashboard/DashboardFilters';
+import {ExportModal} from '../../components/Dashboard/ExportModal';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {useDashboardYearsChoiceDataQuery} from '../../__generated__/graphql';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {DashboardPaper} from '../../components/Dashboard/DashboardPaper';
+import {DashboardYearPage} from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
   const permissions = usePermissions();

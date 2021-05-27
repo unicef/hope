@@ -1,16 +1,10 @@
-import React, { useState } from 'react';
-import {
-  IconButton,
-  Dialog,
-  DialogContent,
-  Tabs,
-  Tab,
-} from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import React, {useState} from 'react';
+import {Dialog, DialogContent, IconButton, Tab, Tabs,} from '@material-ui/core';
+import {Close} from '@material-ui/icons';
 import styled from 'styled-components';
-import { TabPanel } from '../../../../components/TabPanel';
+import {TabPanel} from '../../../../components/TabPanel';
 import TargetingDiagramImage from '../../../../assets/TargetingDiagramImage.png';
-import { FlexFieldTab } from './FlexFieldTab';
+import {FlexFieldTab} from './FlexFieldTab';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;

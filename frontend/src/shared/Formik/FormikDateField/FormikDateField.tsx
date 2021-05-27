@@ -1,6 +1,6 @@
 import React from 'react';
-import { InputAdornment } from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
+import {InputAdornment} from '@material-ui/core';
+import {KeyboardDatePicker} from '@material-ui/pickers';
 import moment from 'moment';
 import get from 'lodash/get';
 

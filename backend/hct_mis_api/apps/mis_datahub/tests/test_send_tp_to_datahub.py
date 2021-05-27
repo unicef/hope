@@ -1,5 +1,6 @@
 from django.core.management import call_command
 from django.test import TestCase
+from parameterized import parameterized
 
 import hct_mis_api.apps.mis_datahub.models as dh_models
 from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
@@ -22,11 +23,10 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
-from parameterized import parameterized
 
 
 class TestSendTpToDatahub(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _pre_test_commands():

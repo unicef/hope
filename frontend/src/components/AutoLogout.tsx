@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import IdleTimer from 'react-idle-timer';
-import { AUTO_LOGOUT_MILLIS } from '../config';
+import {AUTO_LOGOUT_MILLIS} from '../config';
 
 export const AutoLogout = (): React.ReactElement => {
   const idleTimer = useRef(null);

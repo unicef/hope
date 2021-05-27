@@ -1,4 +1,4 @@
-import { When, Then, And } from 'cypress-cucumber-preprocessor/steps';
+import {And, Then, When} from 'cypress-cucumber-preprocessor/steps';
 import '../../support/before';
 
 const importXlsDocument = (type) => {

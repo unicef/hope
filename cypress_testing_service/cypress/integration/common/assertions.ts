@@ -1,4 +1,4 @@
-import { Then } from 'cypress-cucumber-preprocessor/steps';
+import {Then} from 'cypress-cucumber-preprocessor/steps';
 
 // assert path within the current business area
 Then('I get taken to {word} in current business area', (pathToCheckFor) => {

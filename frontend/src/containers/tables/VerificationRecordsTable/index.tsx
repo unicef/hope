@@ -1,3 +1,3 @@
-import { VerificationRecordsTable } from './VerificationRecordsTable';
+import {VerificationRecordsTable} from './VerificationRecordsTable';
 
 export { VerificationRecordsTable };

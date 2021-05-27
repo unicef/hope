@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const IMPORTED_INDIVIDUAL_QUERY = gql`
   query ImportedIndividual($id: ID!) {

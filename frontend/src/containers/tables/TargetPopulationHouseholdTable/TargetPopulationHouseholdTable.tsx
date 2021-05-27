@@ -1,8 +1,8 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './TargetPopulationHouseholdHeadCells';
-import { TargetPopulationHouseholdTableRow } from './TargetPopulationHouseholdRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './TargetPopulationHouseholdHeadCells';
+import {TargetPopulationHouseholdTableRow} from './TargetPopulationHouseholdRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

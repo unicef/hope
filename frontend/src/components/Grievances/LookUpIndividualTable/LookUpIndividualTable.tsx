@@ -1,14 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { decodeIdString } from '../../../utils/utils';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
+import {decodeIdString} from '../../../utils/utils';
 import {
   AllIndividualsQuery,
   AllIndividualsQueryVariables,
   useAllIndividualsQuery,
 } from '../../../__generated__/graphql';
-import { headCells } from './LookUpIndividualTableHeadCells';
-import { LookUpIndividualTableRow } from './LookUpIndividualTableRow';
+import {headCells} from './LookUpIndividualTableHeadCells';
+import {LookUpIndividualTableRow} from './LookUpIndividualTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

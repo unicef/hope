@@ -1,13 +1,13 @@
 import React from 'react';
-import { Typography, Paper } from '@material-ui/core';
-import { FieldArray } from 'formik';
-import { Label } from '@material-ui/icons';
+import {Paper, Typography} from '@material-ui/core';
+import {FieldArray} from 'formik';
+import {Label} from '@material-ui/icons';
 import styled from 'styled-components';
-import { TargetPopulationHouseholdTable } from '../../../containers/tables/TargetPopulationHouseholdTable';
-import { TargetingCriteria } from '../TargetingCriteria';
-import { Results } from '../Results';
-import { useGoldenRecordByTargetingCriteriaQuery } from '../../../__generated__/graphql';
-import { getTargetingCriteriaVariables } from '../../../utils/targetingUtils';
+import {TargetPopulationHouseholdTable} from '../../../containers/tables/TargetPopulationHouseholdTable';
+import {TargetingCriteria} from '../TargetingCriteria';
+import {Results} from '../Results';
+import {useGoldenRecordByTargetingCriteriaQuery} from '../../../__generated__/graphql';
+import {getTargetingCriteriaVariables} from '../../../utils/targetingUtils';
 
 const PaperContainer = styled(Paper)`
   display: flex;

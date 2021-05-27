@@ -1,15 +1,9 @@
-import { Grid } from '@material-ui/core';
+import {Grid} from '@material-ui/core';
 import React from 'react';
 import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
-import {
-  CardAmount,
-  CardTextLight,
-  CardTitle,
-  DashboardCard,
-  IconContainer,
-} from '../DashboardCard';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatCurrencyWithSymbol } from '../../../utils/utils';
+import {CardAmount, CardTextLight, CardTitle, DashboardCard, IconContainer,} from '../DashboardCard';
+import {AllChartsQuery} from '../../../__generated__/graphql';
+import {formatCurrencyWithSymbol} from '../../../utils/utils';
 
 interface TotalAmountTransferredSectionProps {
   data: AllChartsQuery['sectionTotalTransferred'];

@@ -1,12 +1,8 @@
 import React from 'react';
-import { HorizontalBar } from 'react-chartjs-2';
+import {HorizontalBar} from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import {
-  formatNumber,
-  formatThousands,
-  getPercentage,
-} from '../../../utils/utils';
-import { AllChartsQuery } from '../../../__generated__/graphql';
+import {formatNumber, formatThousands, getPercentage,} from '../../../utils/utils';
+import {AllChartsQuery} from '../../../__generated__/graphql';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
   data: AllChartsQuery['chartIndividualsWithDisabilityReachedByAge'];

@@ -1,17 +1,8 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from '@material-ui/core';
-import {
-  RegistrationDetailedFragment,
-  useRerunDedupeMutation,
-} from '../../../__generated__/graphql';
-import { useSnackbar } from '../../../hooks/useSnackBar';
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle,} from '@material-ui/core';
+import {RegistrationDetailedFragment, useRerunDedupeMutation,} from '../../../__generated__/graphql';
+import {useSnackbar} from '../../../hooks/useSnackBar';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import React, {useState} from 'react';
+import {Box, Button, DialogContent, DialogTitle} from '@material-ui/core';
 import styled from 'styled-components';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
 
 export interface Props {
   disabled: boolean;

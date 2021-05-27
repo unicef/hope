@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceCreateDataChangeMutation::test_grievance_status_change_0_with_permission 1'] = {

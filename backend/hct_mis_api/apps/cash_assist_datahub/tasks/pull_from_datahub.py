@@ -2,8 +2,7 @@ import logging
 
 from django.db import transaction
 from django.db.models import Count
-
-from sentry_sdk import configure_scope, push_scope, set_tag
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session

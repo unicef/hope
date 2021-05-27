@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { CardTextLightLarge } from '../DashboardCard';
-import { DashboardPaper } from '../DashboardPaper';
-import { useCountryChartsLazyQuery } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { TotalAmountTransferredByAdminAreaTable } from '../TotalAmountTransferredByAdminAreaTable';
-import { LoadingComponent } from '../../LoadingComponent';
+import React, {useEffect, useState} from 'react';
+import {CardTextLightLarge} from '../DashboardCard';
+import {DashboardPaper} from '../DashboardPaper';
+import {useCountryChartsLazyQuery} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {TotalAmountTransferredByAdminAreaTable} from '../TotalAmountTransferredByAdminAreaTable';
+import {LoadingComponent} from '../../LoadingComponent';
 
 interface TotalAmountTransferredSectionByAdminAreaSectionProps {
   year: string;

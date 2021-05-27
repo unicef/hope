@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import { Box } from '@material-ui/core';
+import {Box} from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { useDebounce } from '../../hooks/useDebounce';
+import {useDebounce} from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
-import {
-  AllAdminAreasQuery,
-  useAllAdminAreasQuery,
-} from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
-import { FieldLabel } from '../FieldLabel';
+import {AllAdminAreasQuery, useAllAdminAreasQuery,} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../LoadingComponent';
+import {FieldLabel} from '../FieldLabel';
 
 const StyledAutocomplete = styled(Autocomplete)`
   width: 232px;

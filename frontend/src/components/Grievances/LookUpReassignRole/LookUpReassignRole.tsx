@@ -1,14 +1,11 @@
-import { Formik } from 'formik';
-import React, { useState } from 'react';
-import {
-  GrievanceTicketQuery,
-  useIndividualQuery,
-} from '../../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { LoadingComponent } from '../../LoadingComponent';
-import { LookUpButton } from '../LookUpButton';
-import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
-import { LookUpReassignRoleModal } from './LookUpReassignRoleModal';
+import {Formik} from 'formik';
+import React, {useState} from 'react';
+import {GrievanceTicketQuery, useIndividualQuery,} from '../../../__generated__/graphql';
+import {GRIEVANCE_CATEGORIES} from '../../../utils/constants';
+import {LoadingComponent} from '../../LoadingComponent';
+import {LookUpButton} from '../LookUpButton';
+import {LookUpReassignRoleDisplay} from './LookUpReassignRoleDisplay';
+import {LookUpReassignRoleModal} from './LookUpReassignRoleModal';
 
 export const LookUpReassignRole = ({
   household,

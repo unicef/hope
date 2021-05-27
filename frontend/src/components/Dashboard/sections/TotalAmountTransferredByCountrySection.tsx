@@ -1,9 +1,9 @@
 import React from 'react';
-import { TotalAmountTransferredByCountryChart } from '../charts/TotalAmountTransferredByCountryChart';
-import { CardTextLightLarge } from '../DashboardCard';
-import { DashboardPaper } from '../DashboardPaper';
-import { GlobalAreaChartsQuery } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
+import {TotalAmountTransferredByCountryChart} from '../charts/TotalAmountTransferredByCountryChart';
+import {CardTextLightLarge} from '../DashboardCard';
+import {DashboardPaper} from '../DashboardPaper';
+import {GlobalAreaChartsQuery} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
 
 interface TotalAmountTransferredSectionByCountryProps {
   data: GlobalAreaChartsQuery['chartTotalTransferredCashByCountry'];

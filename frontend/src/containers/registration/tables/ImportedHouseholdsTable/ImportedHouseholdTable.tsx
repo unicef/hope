@@ -1,12 +1,12 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import {
   AllImportedHouseholdsQueryVariables,
   ImportedHouseholdMinimalFragment,
   useAllImportedHouseholdsQuery,
 } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../tables/UniversalTable';
-import { ImportedHouseholdTableRow } from './ImportedHouseholdTableRow';
-import { headCells } from './ImportedHouseholdTableHeadCells';
+import {UniversalTable} from '../../../tables/UniversalTable';
+import {ImportedHouseholdTableRow} from './ImportedHouseholdTableRow';
+import {headCells} from './ImportedHouseholdTableHeadCells';
 
 export function ImportedHouseholdTable({ rdiId, businessArea }): ReactElement {
   const initialVariables = {

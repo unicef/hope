@@ -1,7 +1,7 @@
-import { red } from '@material-ui/core/colors';
-import { createMuiTheme } from '@material-ui/core/styles';
-import { css } from 'styled-components';
-import { DARK_GRAY, NAVY_BLUE } from './config/colors';
+import {red} from '@material-ui/core/colors';
+import {createMuiTheme} from '@material-ui/core/styles';
+import {css} from 'styled-components';
+import {DARK_GRAY, NAVY_BLUE} from './config/colors';
 
 // A custom theme for this app
 const muiTheme = createMuiTheme({

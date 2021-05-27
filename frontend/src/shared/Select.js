@@ -1,16 +1,16 @@
 /* eslint-disable */
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { mergeClasses } from '@material-ui/styles';
-import SelectInput from './SelectInput';
+import FilledInput from '@material-ui/core/FilledInput';
 import formControlState from '@material-ui/core/FormControl/formControlState';
 import useFormControl from '@material-ui/core/FormControl/useFormControl';
-import withStyles from '@material-ui/core/styles/withStyles';
-import ArrowDropDownIcon from '@material-ui/core/internal/svg-icons/ArrowDropDown';
 import Input from '@material-ui/core/Input';
+import ArrowDropDownIcon from '@material-ui/core/internal/svg-icons/ArrowDropDown';
 import NativeSelectInput from '@material-ui/core/NativeSelect/NativeSelectInput';
-import FilledInput from '@material-ui/core/FilledInput';
+import withStyles from '@material-ui/core/styles/withStyles';
+import { mergeClasses } from '@material-ui/styles';
+import PropTypes from 'prop-types';
+import * as React from 'react';
 import OutlinedInput from './OutlinedInput';
+import SelectInput from './SelectInput';
 
 export const styles = (theme) => ({
     /* Styles applied to the select component `root` class. */

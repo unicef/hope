@@ -1,20 +1,13 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  AllCashPlansQuery,
-  useCashPlanVerificationStatusChoicesQuery,
-} from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import {
-  choicesToDict,
-  formatCurrencyWithSymbol,
-  paymentVerificationStatusToColor,
-} from '../../../utils/utils';
-import { StatusBox } from '../../../components/StatusBox';
-import { UniversalMoment } from '../../../components/UniversalMoment';
+import {AllCashPlansQuery, useCashPlanVerificationStatusChoicesQuery,} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../components/table/ClickableTableRow';
+import {choicesToDict, formatCurrencyWithSymbol, paymentVerificationStatusToColor,} from '../../../utils/utils';
+import {StatusBox} from '../../../components/StatusBox';
+import {UniversalMoment} from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;

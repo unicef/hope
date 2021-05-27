@@ -52,7 +52,6 @@ class AdminAreaFilter(FilterSet):
         model = AdminArea
         fields = {
             "title": ["exact", "istartswith"],
-            "business_area": ["exact"],
         }
 
 
@@ -93,9 +92,6 @@ class FlexibleAttributeChoiceNode(DjangoObjectType):
         model = FlexibleAttributeChoice
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-        exclude_fields = [
-            "history",
-        ]
 
 
 class FlexibleAttributeNode(DjangoObjectType):

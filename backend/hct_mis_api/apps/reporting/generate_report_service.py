@@ -1,24 +1,24 @@
-from datetime import datetime, timedelta
-
-import logging
-import openpyxl
 import copy
-from django.core.files import File
-from openpyxl.utils import get_column_letter
-from django.db.models import Min, Max, Sum, Q, Count
-from django.contrib.postgres.aggregates.general import ArrayAgg
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
+import logging
+from datetime import datetime, timedelta
 from tempfile import NamedTemporaryFile
 
+import openpyxl
+from django.conf import settings
+from django.contrib.postgres.aggregates.general import ArrayAgg
+from django.core.files import File
+from django.core.mail import EmailMultiAlternatives
+from django.db.models import Min, Max, Sum, Q, Count
+from django.template.loader import render_to_string
+from openpyxl.utils import get_column_letter
+
 from hct_mis_api.apps.core.models import AdminArea
-from hct_mis_api.apps.core.utils import encode_id_base64
-from hct_mis_api.apps.reporting.models import Report
-from hct_mis_api.apps.household.models import Individual, Household, WORK_STATUS_CHOICE, NONE
-from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
-from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
 from hct_mis_api.apps.core.utils import decode_id_string
+from hct_mis_api.apps.core.utils import encode_id_base64
+from hct_mis_api.apps.household.models import Individual, Household, WORK_STATUS_CHOICE, NONE
+from hct_mis_api.apps.payment.models import PaymentRecord, PaymentVerification
+from hct_mis_api.apps.program.models import CashPlanPaymentVerification, CashPlan, Program
+from hct_mis_api.apps.reporting.models import Report
 
 logger = logging.getLogger(__name__)
 

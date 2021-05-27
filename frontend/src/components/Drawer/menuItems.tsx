@@ -11,7 +11,7 @@ import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import React from 'react';
-import { PERMISSIONS } from '../../config/permissions';
+import {PERMISSIONS} from '../../config/permissions';
 
 export const menuItems = [
   {

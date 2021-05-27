@@ -1,3 +1,3 @@
-import { FormikAdminAreaAutocomplete } from './FormikAdminAreaAutocomplete';
+import {FormikAdminAreaAutocomplete} from './FormikAdminAreaAutocomplete';
 
 export { FormikAdminAreaAutocomplete };

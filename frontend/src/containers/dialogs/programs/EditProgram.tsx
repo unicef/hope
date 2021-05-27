@@ -1,16 +1,13 @@
-import React, { ReactElement, useState } from 'react';
-import { Button } from '@material-ui/core';
+import React, {ReactElement, useState} from 'react';
+import {Button} from '@material-ui/core';
 import EditIcon from '@material-ui/icons/EditRounded';
-import {
-  ProgramNode,
-  useUpdateProgramMutation,
-} from '../../../__generated__/graphql';
-import { ProgramForm } from '../../forms/ProgramForm';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { PROGRAM_QUERY } from '../../../apollo/queries/Program';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { ALL_LOG_ENTRIES_QUERY } from '../../../apollo/queries/AllLogEntries';
-import { decodeIdString, handleValidationErrors } from '../../../utils/utils';
+import {ProgramNode, useUpdateProgramMutation,} from '../../../__generated__/graphql';
+import {ProgramForm} from '../../forms/ProgramForm';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {PROGRAM_QUERY} from '../../../apollo/queries/Program';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {ALL_LOG_ENTRIES_QUERY} from '../../../apollo/queries/AllLogEntries';
+import {decodeIdString, handleValidationErrors} from '../../../utils/utils';
 
 interface EditProgramProps {
   program: ProgramNode;

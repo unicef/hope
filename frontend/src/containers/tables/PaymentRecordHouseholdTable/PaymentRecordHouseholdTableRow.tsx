@@ -1,16 +1,13 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { PaymentRecordNode } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
-import { StatusBox } from '../../../components/StatusBox';
-import {
-  formatCurrencyWithSymbol,
-  paymentRecordStatusToColor,
-} from '../../../utils/utils';
-import { UniversalMoment } from '../../../components/UniversalMoment';
+import {useHistory} from 'react-router-dom';
+import {PaymentRecordNode} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ClickableTableRow} from '../../../components/table/ClickableTableRow';
+import {StatusBox} from '../../../components/StatusBox';
+import {formatCurrencyWithSymbol, paymentRecordStatusToColor,} from '../../../utils/utils';
+import {UniversalMoment} from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
   min-width: 120px;

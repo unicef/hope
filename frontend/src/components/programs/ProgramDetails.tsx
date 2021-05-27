@@ -1,17 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography } from '@material-ui/core';
-import { StatusBox } from '../StatusBox';
-import { choicesToDict, programStatusToColor } from '../../utils/utils';
-import { LabelizedField } from '../LabelizedField';
-import {
-  ProgrammeChoiceDataQuery,
-  ProgramNode,
-} from '../../__generated__/graphql';
-import { MiśTheme } from '../../theme';
-import { UniversalMoment } from '../UniversalMoment';
-import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
-import { OverviewContainer } from '../OverviewContainer';
+import {Grid, Typography} from '@material-ui/core';
+import {StatusBox} from '../StatusBox';
+import {choicesToDict, programStatusToColor} from '../../utils/utils';
+import {LabelizedField} from '../LabelizedField';
+import {ProgrammeChoiceDataQuery, ProgramNode,} from '../../__generated__/graphql';
+import {MiśTheme} from '../../theme';
+import {UniversalMoment} from '../UniversalMoment';
+import {ContainerColumnWithBorder} from '../ContainerColumnWithBorder';
+import {OverviewContainer} from '../OverviewContainer';
 
 const StatusContainer = styled.div`
   min-width: 120px;

@@ -4,7 +4,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     mark_as_duplicate_individual_and_reassign_roles,
     reassign_roles,
 )
-from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH, Document
+from hct_mis_api.apps.household.models import Individual, UNIQUE, UNIQUE_IN_BATCH
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 

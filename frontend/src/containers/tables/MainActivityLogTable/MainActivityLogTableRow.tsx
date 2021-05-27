@@ -1,25 +1,18 @@
 /* eslint-disable prefer-template */
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import moment from 'moment';
 import styled from 'styled-components';
-import { IconButton, makeStyles } from '@material-ui/core';
+import {IconButton, makeStyles} from '@material-ui/core';
 import clsx from 'clsx';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import { Link } from 'react-router-dom';
-import {
-  AllLogEntriesQuery,
-  LogEntryAction,
-} from '../../../__generated__/graphql';
-import { MiśTheme } from '../../../theme';
-import {
-  ButtonPlaceHolder,
-  Cell,
-  Row,
-} from '../../../components/ActivityLogTable/TableStyledComponents';
-import { Dashable } from '../../../components/Dashable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { headCells } from './MainActivityLogTableHeadCells';
+import {Link} from 'react-router-dom';
+import {AllLogEntriesQuery, LogEntryAction,} from '../../../__generated__/graphql';
+import {MiśTheme} from '../../../theme';
+import {ButtonPlaceHolder, Cell, Row,} from '../../../components/ActivityLogTable/TableStyledComponents';
+import {Dashable} from '../../../components/Dashable';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {headCells} from './MainActivityLogTableHeadCells';
 
 const ButtonContainer = styled.div`
   border-bottom: 1px solid rgba(224, 224, 224, 1);

@@ -1,39 +1,23 @@
-from constance.test import override_config
-
 from hct_mis_api.apps.core.base_test_case import BaseElasticSearchTestCase
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.fixtures import create_household_and_individuals
 from hct_mis_api.apps.household.models import (
-    DUPLICATE,
     FEMALE,
     HEAD,
     MALE,
-    NEEDS_ADJUDICATION,
     SON_DAUGHTER,
-    UNIQUE,
     WIFE_HUSBAND,
-    Individual,
     DocumentType,
     IDENTIFICATION_TYPE_NATIONAL_ID,
     Document,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
-from hct_mis_api.apps.registration_datahub.fixtures import (
-    RegistrationDataImportDatahubFactory,
-    create_imported_household_and_individuals,
-)
-from hct_mis_api.apps.registration_datahub.models import (
-    DUPLICATE_IN_BATCH,
-    UNIQUE_IN_BATCH,
-    ImportData,
-    ImportedIndividual,
-)
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
 
 
 class TestGoldenRecordDeduplication(BaseElasticSearchTestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):

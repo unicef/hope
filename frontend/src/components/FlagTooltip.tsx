@@ -1,8 +1,8 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Tooltip } from '@material-ui/core';
+import {makeStyles} from '@material-ui/core/styles';
+import {Tooltip} from '@material-ui/core';
 import WarningIcon from '@material-ui/icons/Warning';
-import { MiśTheme } from '../theme';
+import {MiśTheme} from '../theme';
 
 const useStyles = makeStyles((theme: MiśTheme) => ({
   warning: { color: theme.hctPalette.red },

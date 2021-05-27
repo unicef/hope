@@ -1,15 +1,15 @@
-import { Box, Paper, Typography } from '@material-ui/core';
+import {Box, Paper, Typography} from '@material-ui/core';
 import capitalize from 'lodash/capitalize';
 import React from 'react';
 import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
-import { LabelizedField } from '../LabelizedField';
-import { ContentLink } from '../ContentLink';
-import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
-import { ReassignRoleUnique } from './LookUpReassignRole/ReassignRoleUnique';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {GrievanceTicketQuery} from '../../__generated__/graphql';
+import {GRIEVANCE_CATEGORIES} from '../../utils/constants';
+import {LabelizedField} from '../LabelizedField';
+import {ContentLink} from '../ContentLink';
+import {LookUpReassignRole} from './LookUpReassignRole/LookUpReassignRole';
+import {ReassignRoleUnique} from './LookUpReassignRole/ReassignRoleUnique';
 
 const StyledBox = styled(Paper)`
   border: 1px solid ${({ theme }) => theme.hctPalette.oragne};

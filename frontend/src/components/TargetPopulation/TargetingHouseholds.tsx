@@ -1,8 +1,8 @@
 import React from 'react';
-import { TargetPopulationHouseholdTable } from '../../containers/tables/TargetPopulationHouseholdTable';
-import { useCandidateHouseholdsListByTargetingCriteriaQuery } from '../../__generated__/graphql';
-import { ApprovedTargetPopulationTable } from '../../containers/tables/TargetPopulation/ApprovedTargeting';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {TargetPopulationHouseholdTable} from '../../containers/tables/TargetPopulationHouseholdTable';
+import {useCandidateHouseholdsListByTargetingCriteriaQuery} from '../../__generated__/graphql';
+import {ApprovedTargetPopulationTable} from '../../containers/tables/TargetPopulation/ApprovedTargeting';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
 
 export function TargetingHouseholds({
   status,

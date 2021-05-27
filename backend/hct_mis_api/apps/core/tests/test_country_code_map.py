@@ -2,7 +2,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from parameterized import parameterized
 
-from hct_mis_api.apps.core.models import CountryCodeMap, CountryCodeMapManager
+from hct_mis_api.apps.core.models import CountryCodeMap
 
 
 class TestCountryCodeMap(TestCase):

@@ -1,8 +1,7 @@
 import time
 
-from django.contrib.gis.geos import Point
-
 import factory.fuzzy
+from django.contrib.gis.geos import Point
 from faker import Faker
 from pytz import utc
 

@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, InputAdornment, MenuItem } from '@material-ui/core';
+import {Grid, InputAdornment, MenuItem} from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import ViewModuleRoundedIcon from '@material-ui/icons/ViewModuleRounded';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '../shared/TextField';
 import InputLabel from '../shared/InputLabel';
 import Select from '../shared/Select';
-import { ContainerWithBorder } from './ContainerWithBorder';
+import {ContainerWithBorder} from './ContainerWithBorder';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

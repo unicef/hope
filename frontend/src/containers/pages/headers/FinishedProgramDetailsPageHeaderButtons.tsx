@@ -1,13 +1,10 @@
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { ReactivateProgram } from '../../dialogs/programs/ReactivateProgram';
-import {
-  ProgramNode,
-  useCashAssistUrlPrefixQuery,
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import {Button} from '@material-ui/core';
+import {ReactivateProgram} from '../../dialogs/programs/ReactivateProgram';
+import {ProgramNode, useCashAssistUrlPrefixQuery,} from '../../../__generated__/graphql';
+import {LoadingComponent} from '../../../components/LoadingComponent';
 
 const ButtonContainer = styled.span`
   margin: 0 ${({ theme }) => theme.spacing(2)}px;

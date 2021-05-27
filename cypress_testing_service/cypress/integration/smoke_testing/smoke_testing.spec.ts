@@ -1,4 +1,4 @@
-import { When, Then, Before } from 'cypress-cucumber-preprocessor/steps';
+import {Before, Then, When} from 'cypress-cucumber-preprocessor/steps';
 import '../../support/before';
 
 Before(() => {

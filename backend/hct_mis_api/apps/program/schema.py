@@ -46,16 +46,7 @@ class ProgramFilter(FilterSet):
     end_date = DateFilter(field_name="end_date", lookup_expr="lte")
 
     class Meta:
-        fields = (
-            "business_area",
-            "search",
-            "status",
-            "sector",
-            "number_of_households",
-            "budget",
-            "start_date",
-            "end_date",
-        )
+        fields = ("id",)
         model = Program
 
     order_by = CustomOrderingFilter(
@@ -126,7 +117,6 @@ class CashPlanFilter(FilterSet):
             "service_provider__full_name": ["exact", "startswith"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
-            "business_area": ["exact"],
         }
         model = CashPlan
 
@@ -191,7 +181,7 @@ class ChartProgramFilter(FilterSet):
     business_area = CharFilter(field_name="business_area__slug", required=True)
 
     class Meta:
-        fields = ("business_area",)
+        fields = ("id",)
         model = Program
 
     def search_filter(self, qs, name, value):

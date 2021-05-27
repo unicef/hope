@@ -1,12 +1,11 @@
 from decimal import Decimal
 
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from model_utils import Choices
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
@@ -218,8 +217,8 @@ class CashPlanPaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     margin_of_error = models.FloatField(null=True)
     rapid_pro_flow_id = models.CharField(max_length=255, blank=True)
     rapid_pro_flow_start_uuid = models.CharField(max_length=255, blank=True)
-    age_filter = JSONField(null=True)
-    excluded_admin_areas_filter = JSONField(null=True)
+    age_filter = models.JSONField(null=True)
+    excluded_admin_areas_filter = models.JSONField(null=True)
     sex_filter = models.CharField(null=True, max_length=10)
     activation_date = models.DateTimeField(null=True)
     completion_date = models.DateTimeField(null=True)

@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
@@ -24,10 +23,10 @@ snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
                         'name': 'Despite action TV after.',
                         'startDate': '2041-06-14T10:15:44',
                         'status': 'TRANSACTION_COMPLETED',
-                        'totalDeliveredQuantity': 41935107.03,
-                        'totalEntitledQuantity': 38204833.92,
+                        'totalDeliveredQuantity': '41935107.03',
+                        'totalEntitledQuantity': '38204833.92',
                         'totalPersonsCovered': 100,
-                        'totalUndeliveredQuantity': 63098825.46
+                        'totalUndeliveredQuantity': '63098825.46'
                     }
                 },
                 {
@@ -43,10 +42,10 @@ snapshots['TestCashPlanQueries::test_cash_plans_0_all_with_permission 1'] = {
                         'name': 'Far yet reveal area bar almost dinner.',
                         'startDate': '2051-11-30T00:02:09',
                         'status': 'TRANSACTION_COMPLETED',
-                        'totalDeliveredQuantity': 53477453.27,
-                        'totalEntitledQuantity': 56657648.82,
+                        'totalDeliveredQuantity': '53477453.27',
+                        'totalEntitledQuantity': '56657648.82',
                         'totalPersonsCovered': 540,
-                        'totalUndeliveredQuantity': 55497021.04
+                        'totalUndeliveredQuantity': '55497021.04'
                     }
                 }
             ]
@@ -88,10 +87,10 @@ snapshots['TestCashPlanQueries::test_cash_plans_2_single_with_permission 1'] = {
             'name': 'Far yet reveal area bar almost dinner.',
             'startDate': '2051-11-30T00:02:09',
             'status': 'TRANSACTION_COMPLETED',
-            'totalDeliveredQuantity': 53477453.27,
-            'totalEntitledQuantity': 56657648.82,
+            'totalDeliveredQuantity': '53477453.27',
+            'totalEntitledQuantity': '56657648.82',
             'totalPersonsCovered': 540,
-            'totalUndeliveredQuantity': 55497021.04
+            'totalUndeliveredQuantity': '55497021.04'
         }
     }
 }

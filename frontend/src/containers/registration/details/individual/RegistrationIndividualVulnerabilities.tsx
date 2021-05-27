@@ -2,14 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import { Typography } from '@material-ui/core';
+import {Typography} from '@material-ui/core';
 import {
   ImportedIndividualDetailedFragment,
   useAllIndividualsFlexFieldsAttributesQuery,
 } from '../../../../__generated__/graphql';
-import { LabelizedField } from '../../../../components/LabelizedField';
-import { useArrayToDict } from '../../../../hooks/useArrayToDict';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
+import {LabelizedField} from '../../../../components/LabelizedField';
+import {useArrayToDict} from '../../../../hooks/useArrayToDict';
+import {LoadingComponent} from '../../../../components/LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px

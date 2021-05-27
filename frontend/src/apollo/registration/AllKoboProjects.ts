@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const ALL_IMPORTED_HOUSEHOLDS_QUERY = gql`
   query AllKoboProjects(

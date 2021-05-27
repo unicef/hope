@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  useTargetPopulationQuery,
-  TargetPopulationNode,
-} from '../../__generated__/graphql';
-import { EditTargetPopulation } from '../../components/TargetPopulation/EditTargetPopulation';
-import { TargetPopulationCore } from '../../components/TargetPopulation/TargetPopulationCore';
-import { TargetPopulationDetails } from '../../components/TargetPopulation/TargetPopulationDetails';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { isPermissionDeniedError } from '../../utils/utils';
-import { TargetPopulationPageHeader } from './headers/TargetPopulationPageHeader';
+import React, {useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {TargetPopulationNode, useTargetPopulationQuery,} from '../../__generated__/graphql';
+import {EditTargetPopulation} from '../../components/TargetPopulation/EditTargetPopulation';
+import {TargetPopulationCore} from '../../components/TargetPopulation/TargetPopulationCore';
+import {TargetPopulationDetails} from '../../components/TargetPopulation/TargetPopulationDetails';
+import {usePermissions} from '../../hooks/usePermissions';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {isPermissionDeniedError} from '../../utils/utils';
+import {TargetPopulationPageHeader} from './headers/TargetPopulationPageHeader';
 
 export function TargetPopulationDetailsPage(): React.ReactElement {
   const { id } = useParams();

@@ -1,3 +1,3 @@
-import { SentTargetPopulationTable } from './SentProgrammePopulationTable';
+import {SentTargetPopulationTable} from './SentProgrammePopulationTable';
 
 export { SentTargetPopulationTable };

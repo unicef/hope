@@ -1,3 +1,3 @@
-import { ApprovedTargetPopulationTable } from './ApprovedTargeting';
+import {ApprovedTargetPopulationTable} from './ApprovedTargeting';
 
 export { ApprovedTargetPopulationTable };

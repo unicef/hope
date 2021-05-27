@@ -1,3 +1,3 @@
-import { FlexFieldsTable } from './FlexFieldsTable';
+import {FlexFieldsTable} from './FlexFieldsTable';
 
 export { FlexFieldsTable };

@@ -1,13 +1,13 @@
-import { Box, Paper, Typography } from '@material-ui/core';
-import React, { useState } from 'react';
+import {Box, Paper, Typography} from '@material-ui/core';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
-import { useExistingGrievanceTicketsQuery } from '../../__generated__/graphql';
-import { ContentLink } from '../ContentLink';
-import { LabelizedField } from '../LabelizedField';
-import { LoadingComponent } from '../LoadingComponent';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {decodeIdString} from '../../utils/utils';
+import {useExistingGrievanceTicketsQuery} from '../../__generated__/graphql';
+import {ContentLink} from '../ContentLink';
+import {LabelizedField} from '../LabelizedField';
+import {LoadingComponent} from '../LoadingComponent';
 
 const StyledBox = styled(Paper)`
   border-radius: 3px;

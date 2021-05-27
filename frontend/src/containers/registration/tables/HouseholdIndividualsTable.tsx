@@ -1,16 +1,12 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
-import {
-  ImportedIndividualMinimalFragment,
-  ImportedIndividualNode,
-  useHouseholdChoiceDataQuery
-} from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../../components/LoadingComponent';
+import {useHistory} from 'react-router-dom';
+import {ImportedIndividualMinimalFragment, useHouseholdChoiceDataQuery} from '../../../__generated__/graphql';
+import {LoadingComponent} from '../../../components/LoadingComponent';
 import {HeadCell} from "../../../components/table/EnhancedTableHead";
 import {useBusinessArea} from "../../../hooks/useBusinessArea";
 import {Order, TableComponent} from "../../../components/table/TableComponent";
-import { ImportedIndividualsTableRow } from './ImportedIndividualsTable/ImportedIndividualsTableRow';
+import {ImportedIndividualsTableRow} from './ImportedIndividualsTable/ImportedIndividualsTableRow';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
   {

@@ -1,20 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import { Paper } from '@material-ui/core';
-import { MainActivityLogTable } from '../tables/MainActivityLogTable/MainActivityLogTable';
-import {
-  LogEntryNode,
-  useAllLogEntriesQuery,
-} from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { ActivityLogPageFilters } from '../../components/ActivityLogPageFilters';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { EmptyTable } from '../../components/table/EmptyTable';
+import {Paper} from '@material-ui/core';
+import {MainActivityLogTable} from '../tables/MainActivityLogTable/MainActivityLogTable';
+import {LogEntryNode, useAllLogEntriesQuery,} from '../../__generated__/graphql';
+import {PageHeader} from '../../components/PageHeader';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {ActivityLogPageFilters} from '../../components/ActivityLogPageFilters';
+import {useDebounce} from '../../hooks/useDebounce';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {EmptyTable} from '../../components/table/EmptyTable';
 
 export const StyledPaper = styled(Paper)`
   margin: 20px;

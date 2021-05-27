@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@material-ui/core';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PageHeader } from '../../components/PageHeader';
-import { UsersListTable } from '../tables/UsersListTable';
-import { UsersListFilters } from '../../components/UserManagement/UsersListFilters';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {useTranslation} from 'react-i18next';
+import {Button} from '@material-ui/core';
+import {useDebounce} from '../../hooks/useDebounce';
+import {PageHeader} from '../../components/PageHeader';
+import {UsersListTable} from '../tables/UsersListTable';
+import {UsersListFilters} from '../../components/UserManagement/UsersListFilters';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Container = styled.div`
   && {

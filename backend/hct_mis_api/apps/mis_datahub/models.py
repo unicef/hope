@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
@@ -79,7 +79,7 @@ class Individual(SessionModel):
         choices=MARITAL_STATUS_CHOICE,
     )
     phone_number = models.CharField(max_length=60, null=True)
-    pregnant = models.NullBooleanField()
+    pregnant = models.BooleanField(null=True)
     sanction_list_confirmed_match = models.BooleanField(default=False)
 
     class Meta:

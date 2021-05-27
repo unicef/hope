@@ -4,8 +4,8 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import { Checkbox } from '@material-ui/core';
+import {createStyles, makeStyles} from '@material-ui/core/styles';
+import {Checkbox} from '@material-ui/core';
 
 type Order = 'asc' | 'desc';
 

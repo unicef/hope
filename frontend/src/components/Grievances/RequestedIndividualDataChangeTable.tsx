@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
@@ -8,16 +8,16 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import mapKeys from 'lodash/mapKeys';
-import { Box, Checkbox, makeStyles, Typography } from '@material-ui/core';
-import { LoadingComponent } from '../LoadingComponent';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import {Box, Checkbox, makeStyles, Typography} from '@material-ui/core';
+import {LoadingComponent} from '../LoadingComponent';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {useArrayToDict} from '../../hooks/useArrayToDict';
 import {
   AllAddIndividualFieldsQuery,
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
-import { NewValue } from './RequestedHouseholdDataChangeTable';
+import {NewValue} from './RequestedHouseholdDataChangeTable';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;

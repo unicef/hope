@@ -1,23 +1,22 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
-import startCase from 'lodash/startCase';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import mapKeys from 'lodash/mapKeys';
-import { Checkbox, makeStyles } from '@material-ui/core';
+import {Checkbox, makeStyles} from '@material-ui/core';
 import {
   AllEditHouseholdFieldsQuery,
   GrievanceTicketQuery,
   useAllEditHouseholdFieldsQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useArrayToDict } from '../../hooks/useArrayToDict';
+import {LoadingComponent} from '../LoadingComponent';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {useArrayToDict} from '../../hooks/useArrayToDict';
 
 const Capitalize = styled.span`
   text-transform: capitalize;

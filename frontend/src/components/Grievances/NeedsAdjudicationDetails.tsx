@@ -11,17 +11,17 @@ import {
   Typography,
 } from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useHistory} from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
   useApproveNeedsAdjudicationMutation,
 } from '../../__generated__/graphql';
-import { ConfirmationDialog } from '../ConfirmationDialog';
-import { UniversalMoment } from '../UniversalMoment';
-import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
+import {ConfirmationDialog} from '../ConfirmationDialog';
+import {UniversalMoment} from '../UniversalMoment';
+import {GRIEVANCE_TICKET_STATES} from '../../utils/constants';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
 
 const StyledBox = styled(Paper)`
   display: flex;

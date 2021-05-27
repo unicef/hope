@@ -1,10 +1,10 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import styled from 'styled-components';
-import { Table, TableBody, TableCell, TableRow } from '@material-ui/core';
-import { EnhancedTableHead } from '../../../../components/table/EnhancedTableHead';
-import { getComparator, stableSort } from '../../../../utils/utils';
-import { AllFieldsAttributesQuery } from '../../../../__generated__/graphql';
-import { headCells } from './HeadCells';
+import {Table, TableBody, TableCell, TableRow} from '@material-ui/core';
+import {EnhancedTableHead} from '../../../../components/table/EnhancedTableHead';
+import {getComparator, stableSort} from '../../../../utils/utils';
+import {AllFieldsAttributesQuery} from '../../../../__generated__/graphql';
+import {headCells} from './HeadCells';
 
 const TableWrapper = styled.div`
   padding: 0;

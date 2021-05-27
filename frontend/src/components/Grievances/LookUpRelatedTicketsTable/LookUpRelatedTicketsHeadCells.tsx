@@ -1,5 +1,5 @@
-import { HeadCell } from '../../table/EnhancedTableHead';
-import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import {HeadCell} from '../../table/EnhancedTableHead';
+import {AllGrievanceTicketQuery} from '../../../__generated__/graphql';
 
 export const headCells: HeadCell<
   AllGrievanceTicketQuery['allGrievanceTicket']['edges'][number]['node']

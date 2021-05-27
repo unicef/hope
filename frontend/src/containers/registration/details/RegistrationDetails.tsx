@@ -1,15 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Typography, Box } from '@material-ui/core';
-import { StatusBox } from '../../../components/StatusBox';
-import { registrationDataImportStatusToColor } from '../../../utils/utils';
-import { LabelizedField } from '../../../components/LabelizedField';
-import { UniversalMoment } from '../../../components/UniversalMoment';
-import { RegistrationDetailedFragment } from '../../../__generated__/graphql';
-import { MiśTheme } from '../../../theme';
-import { ContainerColumnWithBorder } from '../../../components/ContainerColumnWithBorder';
-import { OverviewContainer } from '../../../components/OverviewContainer';
-import { DedupeBox } from './DedupeBox';
+import {Box, Grid, Typography} from '@material-ui/core';
+import {StatusBox} from '../../../components/StatusBox';
+import {registrationDataImportStatusToColor} from '../../../utils/utils';
+import {LabelizedField} from '../../../components/LabelizedField';
+import {UniversalMoment} from '../../../components/UniversalMoment';
+import {RegistrationDetailedFragment} from '../../../__generated__/graphql';
+import {MiśTheme} from '../../../theme';
+import {ContainerColumnWithBorder} from '../../../components/ContainerColumnWithBorder';
+import {OverviewContainer} from '../../../components/OverviewContainer';
+import {DedupeBox} from './DedupeBox';
 
 const StatusContainer = styled.div`
   min-width: 120px;

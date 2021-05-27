@@ -1,13 +1,12 @@
-from django.contrib import admin
-
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
     RelatedFieldComboFilter,
     TextFieldFilter,
 )
+from django.contrib import admin
 
-from ..utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
 from .models import CashPlan, Program
+from ..utils.admin import HOPEModelAdminBase, LastSyncDateResetMixin
 
 
 @admin.register(Program)

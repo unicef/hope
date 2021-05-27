@@ -1,3 +1,3 @@
-import { HouseholdTable } from './HouseholdTable';
+import {HouseholdTable} from './HouseholdTable';
 
 export { HouseholdTable };

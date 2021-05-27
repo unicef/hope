@@ -4,7 +4,7 @@ from hct_mis_api.apps.registration_datahub.fixtures import RegistrationDataImpor
 
 
 class TestRegistrationDataImportDatahubQuery(APITestCase):
-    multi_db = True
+    databases = "__all__"
 
     ALL_REGISTRATION_DATA_IMPORT_DATAHUB_QUERY = """
     query AllRegistrationDataImportsDatahub {

@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
 import {
   AllProgramsQueryVariables,
@@ -6,9 +6,9 @@ import {
   ProgramNode,
   useAllProgramsQuery,
 } from '../../../__generated__/graphql';
-import { UniversalTable } from '../UniversalTable';
-import { headCells } from './ProgrammesHeadCells';
-import { ProgrammesTableRow } from './ProgrammesTableRow';
+import {UniversalTable} from '../UniversalTable';
+import {headCells} from './ProgrammesHeadCells';
+import {ProgrammesTableRow} from './ProgrammesTableRow';
 
 
 const TableWrapper = styled.div`

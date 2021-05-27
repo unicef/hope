@@ -1,16 +1,16 @@
-import React, { ReactElement, useState } from 'react';
+import React, {ReactElement, useState} from 'react';
 import styled from 'styled-components';
 import ExpandLess from '@material-ui/icons/ExpandLessRounded';
 import ExpandMore from '@material-ui/icons/ExpandMoreRounded';
 import Collapse from '@material-ui/core/Collapse';
-import { Paper } from '@material-ui/core';
+import {Paper} from '@material-ui/core';
 import TablePagination from '@material-ui/core/TablePagination';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import { LogEntryNode } from '../../__generated__/graphql';
-import { LogRow } from './LogRow';
-import { ButtonPlaceHolder, Row } from './TableStyledComponents';
-import { headCells } from './headCels';
+import {LogEntryNode} from '../../__generated__/graphql';
+import {LogRow} from './LogRow';
+import {ButtonPlaceHolder, Row} from './TableStyledComponents';
+import {headCells} from './headCels';
 
 const Table = styled.div`
   display: flex;

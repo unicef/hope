@@ -1,18 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import * as Yup from 'yup';
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import { AddCircleOutline } from '@material-ui/icons';
-import { FieldArray, Formik } from 'formik';
-import { useImportedIndividualFieldsQuery } from '../../__generated__/graphql';
-import { DialogActions } from '../dialogs/DialogActions';
+import {Box, Button, Dialog, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
+import {AddCircleOutline} from '@material-ui/icons';
+import {FieldArray, Formik} from 'formik';
+import {useImportedIndividualFieldsQuery} from '../../__generated__/graphql';
+import {DialogActions} from '../dialogs/DialogActions';
 import {
   chooseFieldType,
   clearField,
@@ -20,8 +13,8 @@ import {
   formatCriteriaIndividualsFiltersBlocks,
   mapCriteriaToInitialValues,
 } from '../../utils/targetingUtils';
-import { TargetingCriteriaFilter } from './TargetCriteriaFilter';
-import { TargetCriteriaFilterBlocks } from './TargetCriteriaFilterBlocks';
+import {TargetingCriteriaFilter} from './TargetCriteriaFilter';
+import {TargetCriteriaFilterBlocks} from './TargetCriteriaFilterBlocks';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

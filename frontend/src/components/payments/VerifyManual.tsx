@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Box,
-  Grid,
-} from '@material-ui/core';
+import React, {useState} from 'react';
+import {Box, Button, DialogContent, DialogTitle, Grid,} from '@material-ui/core';
 import styled from 'styled-components';
-import { Formik, Form, Field } from 'formik';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { useUpdatePaymentVerificationReceivedAndReceivedAmountMutation } from '../../__generated__/graphql';
+import {Field, Form, Formik} from 'formik';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {FormikRadioGroup} from '../../shared/Formik/FormikRadioGroup';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {useUpdatePaymentVerificationReceivedAndReceivedAmountMutation} from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

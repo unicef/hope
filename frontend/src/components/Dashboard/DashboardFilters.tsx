@@ -1,19 +1,13 @@
 import React from 'react';
-import {
-  Paper,
-  Grid,
-  MenuItem,
-  InputAdornment,
-  FormControl,
-} from '@material-ui/core';
+import {FormControl, Grid, InputAdornment, MenuItem, Paper,} from '@material-ui/core';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import styled from 'styled-components';
-import { AdminAreasAutocomplete } from '../population/AdminAreaAutocomplete';
+import {AdminAreasAutocomplete} from '../population/AdminAreaAutocomplete';
 import InputLabel from '../../shared/InputLabel';
 import Select from '../../shared/Select';
-import { useAllProgramsQuery } from '../../__generated__/graphql';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../LoadingComponent';
+import {useAllProgramsQuery} from '../../__generated__/graphql';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../LoadingComponent';
 
 const Container = styled(Paper)`
   display: flex;

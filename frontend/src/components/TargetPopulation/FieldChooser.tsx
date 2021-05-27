@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Field } from 'formik';
-import { IconButton } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
-import { CriteriaAutocomplete } from './TargetingCriteria/CriteriaAutocomplete';
+import {Field} from 'formik';
+import {IconButton} from '@material-ui/core';
+import {Delete} from '@material-ui/icons';
+import {CriteriaAutocomplete} from './TargetingCriteria/CriteriaAutocomplete';
 
 const FlexWrapper = styled.div`
   display: flex;

@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import get from 'lodash/get';
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
-import { Button, IconButton } from '@material-ui/core';
-import { Info } from '@material-ui/icons';
-import { useDebounce } from '../../hooks/useDebounce';
-import { PageHeader } from '../../components/PageHeader';
-import { TargetPopulationFilters } from '../../components/TargetPopulation/TargetPopulationFilters';
-import { TargetPopulationTable } from '../tables/TargetPopulationTable';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { TargetingInfoDialog } from '../dialogs/targetPopulation/TargetingInfoDialog';
-import { ProgramNode, useAllProgramsQuery } from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {useTranslation} from 'react-i18next';
+import {Button, IconButton} from '@material-ui/core';
+import {Info} from '@material-ui/icons';
+import {useDebounce} from '../../hooks/useDebounce';
+import {PageHeader} from '../../components/PageHeader';
+import {TargetPopulationFilters} from '../../components/TargetPopulation/TargetPopulationFilters';
+import {TargetPopulationTable} from '../tables/TargetPopulationTable';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {TargetingInfoDialog} from '../dialogs/targetPopulation/TargetingInfoDialog';
+import {ProgramNode, useAllProgramsQuery} from '../../__generated__/graphql';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Container = styled.div`
   && {

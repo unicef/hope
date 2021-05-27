@@ -1,14 +1,14 @@
-import React, { ReactElement, useState } from 'react';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../utils/utils';
+import React, {ReactElement, useState} from 'react';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {decodeIdString} from '../../../utils/utils';
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordNode,
   useLookUpPaymentRecordsQuery,
 } from '../../../__generated__/graphql';
-import { headCells } from './LookUpPaymentRecordTableHeadCells';
-import { LookUpPaymentRecordTableRow } from './LookUpPaymentRecordTableRow';
+import {headCells} from './LookUpPaymentRecordTableHeadCells';
+import {LookUpPaymentRecordTableRow} from './LookUpPaymentRecordTableRow';
 
 interface LookUpPaymentRecordTableProps {
   openInNewTab?: boolean;

@@ -1,3 +1,3 @@
-import { IndividualsListTable } from './IndividualsListTable';
+import {IndividualsListTable} from './IndividualsListTable';
 
 export { IndividualsListTable };

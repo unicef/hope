@@ -1,23 +1,20 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { IndividualsBioData } from '../../components/population/IndividualBioData';
-import {
-  IndividualNode,
-  useIndividualQuery,
-} from '../../__generated__/graphql';
-import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
-import { CashPlus } from '../../components/population/CashPlus';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { usePermissions } from '../../hooks/usePermissions';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { isPermissionDeniedError } from '../../utils/utils';
-import { IndividualPhotoModal } from '../../components/population/IndividualPhotoModal';
+import {useParams} from 'react-router-dom';
+import {PageHeader} from '../../components/PageHeader';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {IndividualsBioData} from '../../components/population/IndividualBioData';
+import {IndividualNode, useIndividualQuery,} from '../../__generated__/graphql';
+import {IndividualVulnerabilities} from '../../components/population/IndividualVunerabilities';
+import {CashPlus} from '../../components/population/CashPlus';
+import {UniversalActivityLogTable} from '../tables/UniversalActivityLogTable';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {usePermissions} from '../../hooks/usePermissions';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {isPermissionDeniedError} from '../../utils/utils';
+import {IndividualPhotoModal} from '../../components/population/IndividualPhotoModal';
 
 const Container = styled.div`
   padding: 20px;

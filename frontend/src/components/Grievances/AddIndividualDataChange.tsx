@@ -1,21 +1,18 @@
 import React from 'react';
-import { Button, Grid, Typography } from '@material-ui/core';
+import {Button, Grid, Typography} from '@material-ui/core';
 import styled from 'styled-components';
-import { Field, FieldArray } from 'formik';
+import {Field, FieldArray} from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { AddCircleOutline } from '@material-ui/icons';
+import {AddCircleOutline} from '@material-ui/icons';
 import camelCase from 'lodash/camelCase';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
-import {
-  AllAddIndividualFieldsQuery,
-  useAllAddIndividualFieldsQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { DocumentField } from './DocumentField';
-import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
-import { AgencyField } from './AgencyField';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikDateField} from '../../shared/Formik/FormikDateField';
+import {AllAddIndividualFieldsQuery, useAllAddIndividualFieldsQuery,} from '../../__generated__/graphql';
+import {LoadingComponent} from '../LoadingComponent';
+import {DocumentField} from './DocumentField';
+import {FormikBoolFieldGrievances} from './FormikBoolFieldGrievances';
+import {AgencyField} from './AgencyField';
 
 const Title = styled.div`
   width: 100%;

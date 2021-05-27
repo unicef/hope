@@ -1,37 +1,34 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
-import { Box, Grid, Typography } from '@material-ui/core';
-import { Doughnut } from 'react-chartjs-2';
-import { useParams } from 'react-router-dom';
-import { PageHeader } from '../../components/PageHeader';
-import { LabelizedField } from '../../components/LabelizedField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
-import { EditVerificationPlan } from '../../components/payments/EditVerificationPlan';
-import { ActivateVerificationPlan } from '../../components/payments/ActivateVerificationPlan';
-import { FinishVerificationPlan } from '../../components/payments/FinishVerificationPlan';
-import { DiscardVerificationPlan } from '../../components/payments/DiscardVerificationPlan';
-import {
-  useCashPlanQuery,
-  useCashPlanVerificationSamplingChoicesQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
+import {Box, Grid, Typography} from '@material-ui/core';
+import {Doughnut} from 'react-chartjs-2';
+import {useParams} from 'react-router-dom';
+import {PageHeader} from '../../components/PageHeader';
+import {LabelizedField} from '../../components/LabelizedField';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {UniversalActivityLogTable} from '../tables/UniversalActivityLogTable';
+import {EditVerificationPlan} from '../../components/payments/EditVerificationPlan';
+import {ActivateVerificationPlan} from '../../components/payments/ActivateVerificationPlan';
+import {FinishVerificationPlan} from '../../components/payments/FinishVerificationPlan';
+import {DiscardVerificationPlan} from '../../components/payments/DiscardVerificationPlan';
+import {useCashPlanQuery, useCashPlanVerificationSamplingChoicesQuery,} from '../../__generated__/graphql';
+import {LoadingComponent} from '../../components/LoadingComponent';
 import {
   choicesToDict,
   countPercentage,
   isPermissionDeniedError,
   paymentVerificationStatusToColor,
 } from '../../utils/utils';
-import { StatusBox } from '../../components/StatusBox';
-import { VerificationRecordsTable } from '../tables/VerificationRecordsTable';
-import { useDebounce } from '../../hooks/useDebounce';
-import { VerificationRecordsFilters } from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
-import { CreateVerificationPlan } from '../../components/payments/CreateVerificationPlan';
-import { UniversalMoment } from '../../components/UniversalMoment';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {StatusBox} from '../../components/StatusBox';
+import {VerificationRecordsTable} from '../tables/VerificationRecordsTable';
+import {useDebounce} from '../../hooks/useDebounce';
+import {VerificationRecordsFilters} from '../tables/VerificationRecordsTable/VerificationRecordsFilters';
+import {CreateVerificationPlan} from '../../components/payments/CreateVerificationPlan';
+import {UniversalMoment} from '../../components/UniversalMoment';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 const Container = styled.div`
   display: flex;

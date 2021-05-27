@@ -1,13 +1,13 @@
 import React from 'react';
 import get from 'lodash/get';
 import styled from 'styled-components';
-import { Box, Paper, Typography } from '@material-ui/core';
-import { Field } from 'formik';
-import { AllProgramsQuery } from '../../__generated__/graphql';
-import { OverviewContainer } from '../OverviewContainer';
-import { LoadingComponent } from '../LoadingComponent';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikSelectFieldConfirm } from './FormikSelectFieldConfirm';
+import {Box, Paper, Typography} from '@material-ui/core';
+import {Field} from 'formik';
+import {AllProgramsQuery} from '../../__generated__/graphql';
+import {OverviewContainer} from '../OverviewContainer';
+import {LoadingComponent} from '../LoadingComponent';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikSelectFieldConfirm} from './FormikSelectFieldConfirm';
 
 const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(3)}px;

@@ -1,13 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
-
-from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter, TargetingIndividualBlockRuleFilter
+from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.fixtures import create_household, create_household_and_individuals
 from hct_mis_api.apps.household.models import Household, Individual
-from freezegun import freeze_time
+from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter, TargetingIndividualBlockRuleFilter
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):

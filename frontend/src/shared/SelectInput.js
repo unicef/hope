@@ -1,16 +1,14 @@
 /* eslint-disable */
+import { isFilled } from '@material-ui/core/InputBase/utils';
+import Menu from '@material-ui/core/Menu/Menu';
+import capitalize from '@material-ui/core/utils/capitalize';
+import useControlled from '@material-ui/core/utils/useControlled';
+import useForkRef from '@material-ui/core/utils/useForkRef';
+import { refType } from '@material-ui/utils';
+import clsx from 'clsx';
+import PropTypes from 'prop-types';
 import * as React from 'react';
 import { isFragment } from 'react-is';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import capitalize from '@material-ui/core/utils/capitalize';
-import { refType } from '@material-ui/utils';
-import Menu from '@material-ui/core/Menu/Menu';
-import { isFilled } from '@material-ui/core/InputBase/utils';
-import useForkRef from '@material-ui/core/utils/useForkRef';
-import useControlled from '@material-ui/core/utils/useControlled';
-import { InputAdornment } from '@material-ui/core';
-import FlashOnIcon from '@material-ui/icons/FlashOn';
 
 function areEqualValues(a, b) {
   if (typeof b === 'object' && b !== null) {

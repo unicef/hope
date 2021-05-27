@@ -1,13 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import {
-  hasCreatorOrOwnerPermissions,
-  PERMISSIONS,
-} from '../../../config/permissions';
-import { UniversalTable } from '../../../containers/tables/UniversalTable';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
-import { decodeIdString, reduceChoices } from '../../../utils/utils';
+import {hasCreatorOrOwnerPermissions, PERMISSIONS,} from '../../../config/permissions';
+import {UniversalTable} from '../../../containers/tables/UniversalTable';
+import {usePermissions} from '../../../hooks/usePermissions';
+import {GRIEVANCE_CATEGORIES} from '../../../utils/constants';
+import {decodeIdString, reduceChoices} from '../../../utils/utils';
 import {
   AllGrievanceTicketQuery,
   AllGrievanceTicketQueryVariables,
@@ -15,9 +12,9 @@ import {
   useGrievancesChoiceDataQuery,
   useMeQuery,
 } from '../../../__generated__/graphql';
-import { LoadingComponent } from '../../LoadingComponent';
-import { headCells } from './GrievancesTableHeadCells';
-import { GrievancesTableRow } from './GrievancesTableRow';
+import {LoadingComponent} from '../../LoadingComponent';
+import {headCells} from './GrievancesTableHeadCells';
+import {GrievancesTableRow} from './GrievancesTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

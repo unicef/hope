@@ -1,10 +1,9 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { theme } from '../../../theme';
-import { Field, Form, Formik } from 'formik';
-import styled from 'styled-components';
-import { FormikRadioGroup } from './FormikRadioGroup';
+import {ThemeProvider} from '@material-ui/core';
+import styled, {ThemeProvider as StyledThemeProvider} from 'styled-components';
+import {theme} from '../../../theme';
+import {Field, Form, Formik} from 'formik';
+import {FormikRadioGroup} from './FormikRadioGroup';
 
 export default {
   component: FormikRadioGroup,

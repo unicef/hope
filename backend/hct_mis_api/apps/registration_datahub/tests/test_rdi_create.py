@@ -8,6 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from unittest import mock
 
+from PIL import Image
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.files import File
@@ -15,9 +16,7 @@ from django.core.management import call_command
 from django.db.models.fields.files import ImageFieldFile
 from django.forms import model_to_dict
 from django.test import TestCase
-
 from django_countries.fields import Country
-from PIL import Image
 
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea, AdminAreaLevel
 from hct_mis_api.apps.household.models import (
@@ -57,7 +56,7 @@ class CellMock:
 
 
 class TestRdiCreateTask(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @classmethod
     def setUpTestData(cls):
@@ -331,7 +330,7 @@ class TestRdiCreateTask(TestCase):
 
 
 class TestRdiKoboCreateTask(TestCase):
-    multi_db = True
+    databases = "__all__"
 
     @staticmethod
     def _return_test_image(*args, **kwargs):

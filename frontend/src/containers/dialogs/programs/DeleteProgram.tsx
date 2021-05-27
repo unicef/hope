@@ -1,22 +1,12 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import CloseIcon from '@material-ui/icons/CloseRounded';
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
-import {
-  AllProgramsQuery,
-  ProgramNode,
-  useDeleteProgramMutation,
-} from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { ALL_PROGRAMS_QUERY } from '../../../apollo/queries/AllPrograms';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { DialogActions } from '../DialogActions';
+import {Button, Dialog, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
+import {AllProgramsQuery, ProgramNode, useDeleteProgramMutation,} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {ALL_PROGRAMS_QUERY} from '../../../apollo/queries/AllPrograms';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {DialogActions} from '../DialogActions';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

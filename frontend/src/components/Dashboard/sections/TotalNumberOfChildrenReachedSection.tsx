@@ -1,14 +1,9 @@
-import { Grid } from '@material-ui/core';
+import {Grid} from '@material-ui/core';
 import React from 'react';
 import ChildCareIcon from '@material-ui/icons/ChildCare';
-import {
-  CardAmountSmaller,
-  CardTitle,
-  DashboardCard,
-  IconContainer,
-} from '../DashboardCard';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { formatNumber } from '../../../utils/utils';
+import {CardAmountSmaller, CardTitle, DashboardCard, IconContainer,} from '../DashboardCard';
+import {AllChartsQuery} from '../../../__generated__/graphql';
+import {formatNumber} from '../../../utils/utils';
 
 interface TotalNumberOfChildrenReachedSectionProps {
   data: AllChartsQuery['sectionChildReached'];

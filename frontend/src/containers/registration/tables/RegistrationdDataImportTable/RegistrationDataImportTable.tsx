@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, {ReactElement} from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 import {
@@ -6,11 +6,11 @@ import {
   RegistrationDataImportNode,
   useAllRegistrationDataImportsQuery,
 } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../tables/UniversalTable';
-import { decodeIdString } from '../../../../utils/utils';
-import { useBusinessArea } from '../../../../hooks/useBusinessArea';
-import { headCells } from './RegistrationDataImportTableHeadCells';
-import { RegistrationDataImportTableRow } from './RegistrationDataImportTableRow';
+import {UniversalTable} from '../../../tables/UniversalTable';
+import {decodeIdString} from '../../../../utils/utils';
+import {useBusinessArea} from '../../../../hooks/useBusinessArea';
+import {headCells} from './RegistrationDataImportTableHeadCells';
+import {RegistrationDataImportTableRow} from './RegistrationDataImportTableRow';
 
 const TableWrapper = styled.div`
   padding: 20px;

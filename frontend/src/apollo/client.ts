@@ -1,10 +1,10 @@
 import ApolloClient from 'apollo-client';
-import { createUploadLink } from 'apollo-upload-client';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { onError } from 'apollo-link-error';
-import { ApolloLink } from 'apollo-link';
-import { GraphQLError } from 'graphql';
-import { GRAPHQL_URL } from '../config';
+import {createUploadLink} from 'apollo-upload-client';
+import {InMemoryCache} from 'apollo-cache-inmemory';
+import {onError} from 'apollo-link-error';
+import {ApolloLink} from 'apollo-link';
+import {GraphQLError} from 'graphql';
+import {GRAPHQL_URL} from '../config';
 
 export class ValidationGraphQLError extends GraphQLError {
   validationErrors;

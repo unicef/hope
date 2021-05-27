@@ -1,19 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
-import {
-  Box,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
-import { KeyboardDatePicker } from '@material-ui/pickers';
-import { ContainerWithBorder } from '../../../components/ContainerWithBorder';
-import { FieldLabel } from '../../../components/FieldLabel';
+import {Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select,} from '@material-ui/core';
+import {KeyboardDatePicker} from '@material-ui/pickers';
+import {ContainerWithBorder} from '../../../components/ContainerWithBorder';
+import {FieldLabel} from '../../../components/FieldLabel';
 
 const StyledFormControl = styled(FormControl)`
   width: 232px;

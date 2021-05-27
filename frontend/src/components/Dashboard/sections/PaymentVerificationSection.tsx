@@ -1,8 +1,8 @@
-import { Box, Typography } from '@material-ui/core';
+import {Box, Typography} from '@material-ui/core';
 import React from 'react';
-import { AllChartsQuery } from '../../../__generated__/graphql';
-import { PaymentVerificationChart } from '../charts/PaymentVerificationChart';
-import { DashboardPaper } from '../DashboardPaper';
+import {AllChartsQuery} from '../../../__generated__/graphql';
+import {PaymentVerificationChart} from '../charts/PaymentVerificationChart';
+import {DashboardPaper} from '../DashboardPaper';
 
 interface PaymentVerificationSectionProps {
   data: AllChartsQuery['chartPaymentVerification'];

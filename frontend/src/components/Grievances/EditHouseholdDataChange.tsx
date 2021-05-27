@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { Button, Grid, IconButton, Typography } from '@material-ui/core';
+import React, {useEffect} from 'react';
+import {Button, Grid, IconButton, Typography} from '@material-ui/core';
 import styled from 'styled-components';
-import { Field, FieldArray, useField } from 'formik';
+import {Field, FieldArray, useField} from 'formik';
 import CalendarTodayRoundedIcon from '@material-ui/icons/CalendarTodayRounded';
-import { AddCircleOutline, Delete } from '@material-ui/icons';
+import {AddCircleOutline, Delete} from '@material-ui/icons';
 import camelCase from 'lodash/camelCase';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikDateField } from '../../shared/Formik/FormikDateField';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikDateField} from '../../shared/Formik/FormikDateField';
 import {
   AllEditHouseholdFieldsQuery,
   AllHouseholdsQuery,
@@ -15,11 +15,10 @@ import {
   useAllEditHouseholdFieldsQuery,
   useHouseholdLazyQuery,
 } from '../../__generated__/graphql';
-import { LoadingComponent } from '../LoadingComponent';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
-import { LabelizedField } from '../LabelizedField';
-import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
-import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import {LoadingComponent} from '../LoadingComponent';
+import {LabelizedField} from '../LabelizedField';
+import {FormikDecimalField} from '../../shared/Formik/FormikDecimalField';
+import {FormikBoolFieldGrievances} from './FormikBoolFieldGrievances';
 
 const Title = styled.div`
   width: 100%;

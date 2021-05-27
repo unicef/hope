@@ -1,3 +1,3 @@
-import { TargetingCriteria } from './TargetingCriteria';
+import {TargetingCriteria} from './TargetingCriteria';
 
 export { TargetingCriteria };

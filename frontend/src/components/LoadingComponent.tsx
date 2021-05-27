@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CircularProgress } from '@material-ui/core';
+import {CircularProgress} from '@material-ui/core';
 
 const Container = styled.div`
   width: 100%;

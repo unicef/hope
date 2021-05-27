@@ -1,11 +1,10 @@
 import datetime
 import logging
 
+import graphene
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
-
-import graphene
 from django_filters import (
     CharFilter,
     ChoiceFilter,
@@ -60,7 +59,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 

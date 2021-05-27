@@ -1,3 +1,3 @@
-import { PaymentVerificationTable } from './PaymentVerificationTable'
+import {PaymentVerificationTable} from './PaymentVerificationTable'
 
 export { PaymentVerificationTable }

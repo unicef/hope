@@ -1,23 +1,19 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
+import {Button} from '@material-ui/core';
+import {useParams} from 'react-router-dom';
 import OpenInNewRoundedIcon from '@material-ui/icons/OpenInNewRounded';
-import { PageHeader } from '../../components/PageHeader';
-import { CashPlanDetails } from '../../components/CashPlanDetails';
-import { PaymentRecordTable } from '../tables/PaymentRecordTable';
-import {
-  useCashPlanQuery,
-  CashPlanNode,
-  useCashAssistUrlPrefixQuery,
-} from '../../__generated__/graphql';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
-import { isPermissionDeniedError } from '../../utils/utils';
+import {PageHeader} from '../../components/PageHeader';
+import {CashPlanDetails} from '../../components/CashPlanDetails';
+import {PaymentRecordTable} from '../tables/PaymentRecordTable';
+import {CashPlanNode, useCashAssistUrlPrefixQuery, useCashPlanQuery,} from '../../__generated__/graphql';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
+import {isPermissionDeniedError} from '../../utils/utils';
 
 const Container = styled.div`
   && {

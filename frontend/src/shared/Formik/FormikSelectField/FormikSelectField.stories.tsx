@@ -1,10 +1,9 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { theme } from '../../../theme';
-import { Field, Form, Formik } from 'formik';
-import styled from 'styled-components';
-import { FormikSelectField } from './FormikSelectField';
+import {ThemeProvider} from '@material-ui/core';
+import styled, {ThemeProvider as StyledThemeProvider} from 'styled-components';
+import {theme} from '../../../theme';
+import {Field, Form, Formik} from 'formik';
+import {FormikSelectField} from './FormikSelectField';
 
 export default {
   component: FormikSelectField,

@@ -1,15 +1,15 @@
-import React, { ReactElement, useState } from 'react';
-import { FormControlLabel, Checkbox, Grid, Box } from '@material-ui/core';
+import React, {ReactElement, useState} from 'react';
+import {Box, Checkbox, FormControlLabel, Grid} from '@material-ui/core';
 import {
   AllImportedIndividualsQueryVariables,
   ImportedIndividualMinimalFragment,
   useAllImportedIndividualsQuery,
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
-import { UniversalTable } from '../../../tables/UniversalTable';
-import { LoadingComponent } from '../../../../components/LoadingComponent';
-import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
-import { headCells } from './ImportedIndividualsTableHeadCells';
+import {UniversalTable} from '../../../tables/UniversalTable';
+import {LoadingComponent} from '../../../../components/LoadingComponent';
+import {ImportedIndividualsTableRow} from './ImportedIndividualsTableRow';
+import {headCells} from './ImportedIndividualsTableHeadCells';
 
 interface ImportedIndividualsTableProps {
   rdiId?: string;

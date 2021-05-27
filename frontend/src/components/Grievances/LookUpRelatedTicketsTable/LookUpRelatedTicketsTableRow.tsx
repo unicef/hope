@@ -1,17 +1,13 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
-import { Checkbox } from '@material-ui/core';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Pointer } from '../../Pointer';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
-import { StatusBox } from '../../StatusBox';
-import {
-  decodeIdString,
-  grievanceTicketStatusToColor,
-  renderUserName,
-} from '../../../utils/utils';
-import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import {Checkbox} from '@material-ui/core';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {Pointer} from '../../Pointer';
+import {ClickableTableRow} from '../../table/ClickableTableRow';
+import {StatusBox} from '../../StatusBox';
+import {decodeIdString, grievanceTicketStatusToColor, renderUserName,} from '../../../utils/utils';
+import {AllGrievanceTicketQuery} from '../../../__generated__/graphql';
 
 const StatusContainer = styled.div`
   min-width: 120px;

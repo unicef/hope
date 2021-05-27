@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { IconButton } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
-import { TargetingCriteriaRuleObjectType } from '../../../__generated__/graphql';
+import {IconButton} from '@material-ui/core';
+import {Delete, Edit} from '@material-ui/icons';
+import {TargetingCriteriaRuleObjectType} from '../../../__generated__/graphql';
 import GreaterThanEqual from '../../../assets/GreaterThanEqual.svg';
 import LessThanEqual from '../../../assets/LessThanEqual.svg';
 

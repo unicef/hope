@@ -1,26 +1,23 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components';
-import { Grid } from '@material-ui/core';
-import { TabPanel } from '../../components/TabPanel';
-import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
-import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
-import { TotalTransferredByMonth } from '../../components/Dashboard/charts/TotalTransferredByMonth';
-import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
-import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
-import { GrievancesSection } from '../../components/Dashboard/sections/GrievancesSection';
-import { TotalNumberOfIndividualsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfIndividualsReachedSection';
-import { TotalNumberOfChildrenReachedSection } from '../../components/Dashboard/sections/TotalNumberOfChildrenReachedSection';
-import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
-import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
-import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
-import { TotalAmountTransferredSectionByCountry } from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import {
-  useAllChartsQuery,
-  useGlobalAreaChartsLazyQuery,
-} from '../../__generated__/graphql';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { TotalAmountTransferredSectionByAdminAreaSection } from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
+import {Grid} from '@material-ui/core';
+import {TabPanel} from '../../components/TabPanel';
+import {DashboardPaper} from '../../components/Dashboard/DashboardPaper';
+import {ProgrammesBySector} from '../../components/Dashboard/charts/ProgrammesBySector';
+import {TotalTransferredByMonth} from '../../components/Dashboard/charts/TotalTransferredByMonth';
+import {VolumeByDeliveryMechanism} from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
+import {PaymentsChart} from '../../components/Dashboard/charts/PaymentsChart';
+import {GrievancesSection} from '../../components/Dashboard/sections/GrievancesSection';
+import {TotalNumberOfIndividualsReachedSection} from '../../components/Dashboard/sections/TotalNumberOfIndividualsReachedSection';
+import {TotalNumberOfChildrenReachedSection} from '../../components/Dashboard/sections/TotalNumberOfChildrenReachedSection';
+import {TotalNumberOfHouseholdsReachedSection} from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
+import {TotalAmountTransferredSection} from '../../components/Dashboard/sections/TotalAmountTransferredSection';
+import {PaymentVerificationSection} from '../../components/Dashboard/sections/PaymentVerificationSection';
+import {TotalAmountTransferredSectionByCountry} from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {useAllChartsQuery, useGlobalAreaChartsLazyQuery,} from '../../__generated__/graphql';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {TotalAmountTransferredSectionByAdminAreaSection} from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;

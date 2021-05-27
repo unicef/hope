@@ -1,36 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Formik, Form, Field } from 'formik';
+import React, {useEffect, useState} from 'react';
+import {Field, Form, Formik} from 'formik';
 import styled from 'styled-components';
+import {Box, Button, DialogContent, DialogTitle, Grid, Tab, Tabs, Typography,} from '@material-ui/core';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {TabPanel} from '../TabPanel';
+import {FormikSliderField} from '../../shared/Formik/FormikSliderField';
+import {FormikRadioGroup} from '../../shared/Formik/FormikRadioGroup';
 import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Tabs,
-  Tab,
-  Typography,
-  Box,
-  Grid,
-} from '@material-ui/core';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { TabPanel } from '../TabPanel';
-import { FormikSliderField } from '../../shared/Formik/FormikSliderField';
-import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
-import {
-  useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
-  useEditCashPlanPaymentVerificationMutation,
+  useAllRapidProFlowsQuery,
   useCashPlanQuery,
+  useEditCashPlanPaymentVerificationMutation,
   useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
-import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { FormikSelectField } from '../../shared/Formik/FormikSelectField';
-import { FormikTextField } from '../../shared/Formik/FormikTextField';
-import { FormikEffect } from '../FormikEffect';
-import { CashPlan } from '../../apollo/queries/CashPlan';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
+import {FormikMultiSelectField} from '../../shared/Formik/FormikMultiSelectField';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {FormikSelectField} from '../../shared/Formik/FormikSelectField';
+import {FormikTextField} from '../../shared/Formik/FormikTextField';
+import {FormikEffect} from '../FormikEffect';
+import {CashPlan} from '../../apollo/queries/CashPlan';
+import {FormikCheckboxField} from '../../shared/Formik/FormikCheckboxField';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};

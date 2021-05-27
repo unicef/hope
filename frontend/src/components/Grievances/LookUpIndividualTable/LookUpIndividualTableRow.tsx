@@ -1,12 +1,12 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { Radio } from '@material-ui/core';
-import { AllIndividualsQuery } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { sexToCapitalize } from '../../../utils/utils';
-import { ClickableTableRow } from '../../table/ClickableTableRow';
-import { Pointer } from '../../Pointer';
-import { UniversalMoment } from '../../UniversalMoment';
+import {Radio} from '@material-ui/core';
+import {AllIndividualsQuery} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {sexToCapitalize} from '../../../utils/utils';
+import {ClickableTableRow} from '../../table/ClickableTableRow';
+import {Pointer} from '../../Pointer';
+import {UniversalMoment} from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];

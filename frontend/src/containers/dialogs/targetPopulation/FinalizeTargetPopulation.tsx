@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-  Button,
-  DialogContent,
-  DialogTitle,
-  Typography,
-} from '@material-ui/core';
+import {Button, DialogContent, DialogTitle, Typography,} from '@material-ui/core';
 import styled from 'styled-components';
-import { useFinalizeTpMutation } from '../../../__generated__/graphql';
-import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { useSnackbar } from '../../../hooks/useSnackBar';
-import { Dialog } from '../Dialog';
-import { DialogActions } from '../DialogActions';
+import {useFinalizeTpMutation} from '../../../__generated__/graphql';
+import {useBusinessArea} from '../../../hooks/useBusinessArea';
+import {useSnackbar} from '../../../hooks/useSnackBar';
+import {Dialog} from '../Dialog';
+import {DialogActions} from '../DialogActions';
 
 export interface FinalizeTargetPopulationPropTypes {
   open: boolean;

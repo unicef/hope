@@ -1,3 +1,3 @@
-import { RegistrationDataImportTable } from './RegistrationDataImportTable';
+import {RegistrationDataImportTable} from './RegistrationDataImportTable';
 
 export { RegistrationDataImportTable };

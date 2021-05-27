@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import get from 'lodash/get';
 import isFunction from 'lodash/isFunction';
 

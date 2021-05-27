@@ -1,19 +1,16 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  PaymentVerificationNode,
-  usePaymentRecordVerificationQuery,
-} from '../../__generated__/graphql';
-import { PageHeader } from '../../components/PageHeader';
-import { BreadCrumbsItem } from '../../components/BreadCrumbs';
-import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { LoadingComponent } from '../../components/LoadingComponent';
-import { VerificationRecordDetails } from '../../components/payments/VerificationRecordDetails';
-import { decodeIdString, isPermissionDeniedError } from '../../utils/utils';
-import { VerifyManual } from '../../components/payments/VerifyManual';
-import { usePermissions } from '../../hooks/usePermissions';
-import { hasPermissions, PERMISSIONS } from '../../config/permissions';
-import { PermissionDenied } from '../../components/PermissionDenied';
+import {useParams} from 'react-router-dom';
+import {PaymentVerificationNode, usePaymentRecordVerificationQuery,} from '../../__generated__/graphql';
+import {PageHeader} from '../../components/PageHeader';
+import {BreadCrumbsItem} from '../../components/BreadCrumbs';
+import {useBusinessArea} from '../../hooks/useBusinessArea';
+import {LoadingComponent} from '../../components/LoadingComponent';
+import {VerificationRecordDetails} from '../../components/payments/VerificationRecordDetails';
+import {decodeIdString, isPermissionDeniedError} from '../../utils/utils';
+import {VerifyManual} from '../../components/payments/VerifyManual';
+import {usePermissions} from '../../hooks/usePermissions';
+import {hasPermissions, PERMISSIONS} from '../../config/permissions';
+import {PermissionDenied} from '../../components/PermissionDenied';
 
 export function VerificationRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();

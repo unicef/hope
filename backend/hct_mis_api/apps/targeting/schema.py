@@ -1,4 +1,5 @@
 from typing import Union
+
 import django_filters
 import graphene
 from django.db.models import Q, Prefetch
@@ -6,9 +7,14 @@ from django.db.models.functions import Lower
 from django_filters import FilterSet, CharFilter, ModelMultipleChoiceFilter
 from graphene import relay
 from graphene_django import DjangoObjectType, DjangoConnectionField
-from graphene_django.filter import DjangoFilterConnectionField
 
 import hct_mis_api.apps.targeting.models as target_models
+from hct_mis_api.apps.account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    hopePermissionClass,
+    Permissions,
+    BaseNodePermissionMixin,
+)
 from hct_mis_api.apps.core.core_fields_attributes import CORE_FIELDS_ATTRIBUTES_DICTIONARY
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.models import FlexibleAttribute
@@ -19,12 +25,6 @@ from hct_mis_api.apps.household.schema import HouseholdNode
 from hct_mis_api.apps.program.models import Program
 from hct_mis_api.apps.targeting.validators import TargetingCriteriaInputValidator
 from hct_mis_api.apps.utils.schema import Arg
-from hct_mis_api.apps.account.permissions import (
-    DjangoPermissionFilterConnectionField,
-    hopePermissionClass,
-    Permissions,
-    BaseNodePermissionMixin,
-)
 
 
 class HouseholdFilter(FilterSet):
@@ -97,8 +97,6 @@ class TargetPopulationFilter(django_filters.FilterSet):
     class Meta:
         model = target_models.TargetPopulation
         fields = (
-            "name",
-            "created_by_name",
             "created_at",
             "updated_at",
             "status",

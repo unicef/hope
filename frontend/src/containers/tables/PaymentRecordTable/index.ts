@@ -1,3 +1,3 @@
-import { PaymentRecordTable } from './PaymentRecordTable';
+import {PaymentRecordTable} from './PaymentRecordTable';
 
 export { PaymentRecordTable };

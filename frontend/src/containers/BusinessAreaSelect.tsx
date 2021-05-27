@@ -1,9 +1,9 @@
-import { MenuItem, Select } from '@material-ui/core';
+import {MenuItem, Select} from '@material-ui/core';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import styled from 'styled-components';
-import { useMeQuery } from '../__generated__/graphql';
-import { useBusinessArea } from '../hooks/useBusinessArea';
+import {useMeQuery} from '../__generated__/graphql';
+import {useBusinessArea} from '../hooks/useBusinessArea';
 
 const CountrySelect = styled(Select)`
   && {

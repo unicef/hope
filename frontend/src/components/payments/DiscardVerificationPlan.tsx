@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
+import React, {useState} from 'react';
+import {Box, Button, DialogContent, DialogTitle} from '@material-ui/core';
 import styled from 'styled-components';
 import ClearIcon from '@material-ui/icons/Clear';
-import { Dialog } from '../../containers/dialogs/Dialog';
-import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { ErrorButtonContained } from '../ErrorButtonContained';
-import { ErrorButton } from '../ErrorButton';
-import { useSnackbar } from '../../hooks/useSnackBar';
-import { useDiscardCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
+import {Dialog} from '../../containers/dialogs/Dialog';
+import {DialogActions} from '../../containers/dialogs/DialogActions';
+import {ErrorButtonContained} from '../ErrorButtonContained';
+import {ErrorButton} from '../ErrorButton';
+import {useSnackbar} from '../../hooks/useSnackBar';
+import {useDiscardCashPlanPaymentVerificationMutation} from '../../__generated__/graphql';
 
 export interface Props {
   cashPlanVerificationId: string;

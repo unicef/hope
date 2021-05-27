@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { LookUpButton } from '../LookUpButton';
-import { LookUpRelatedTicketsDisplay } from './LookUpRelatedTicketsDisplay';
-import { LookUpRelatedTicketsModal } from './LookUpRelatedTicketsModal';
+import React, {useState} from 'react';
+import {LookUpButton} from '../LookUpButton';
+import {LookUpRelatedTicketsDisplay} from './LookUpRelatedTicketsDisplay';
+import {LookUpRelatedTicketsModal} from './LookUpRelatedTicketsModal';
 
 export const LookUpRelatedTickets = ({
   onValueChange,

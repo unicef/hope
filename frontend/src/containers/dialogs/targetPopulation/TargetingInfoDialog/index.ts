@@ -1,3 +1,3 @@
-import { TargetingInfoDialog } from './TargetingInfoDialog';
+import {TargetingInfoDialog} from './TargetingInfoDialog';
 
 export { TargetingInfoDialog };
