@@ -45,7 +45,7 @@ skip = "migrations"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "0.1.21"
+version = "0.1.24"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
@@ -111,6 +111,7 @@ argh = "^0.26.2"
 django-sysinfo = "^2.4.0"
 django-adminfilters = "^1.3.5"
 single-source = "^0.1.5"
+requests-mock = "^1.9.2"
 
 
 [tool.poetry.dev-dependencies]
