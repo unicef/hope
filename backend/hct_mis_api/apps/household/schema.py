@@ -1,42 +1,55 @@
-import graphene
+from decimal import Decimal
+
 from django.db.models import Prefetch, Q, Sum
-from django.db.models.functions import Lower
+from django.db.models.functions import Coalesce, Lower
+
+import graphene
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
     MultipleChoiceFilter,
-    BooleanFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
-    hopePermissionClass,
     hopeOneOfPermissionClass,
-    ALL_GRIEVANCES_CREATE_MODIFY,
+    hopePermissionClass,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
+from hct_mis_api.apps.core.filters import (
+    AgeRangeFilter,
+    DateRangeFilter,
+    IntegerRangeFilter,
+)
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    AdminAreaNode,
+    ChoiceObject,
+    FieldAttributeNode,
+)
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
+    chart_filters_decoder,
+    chart_permission_decorator,
     decode_id_string,
     encode_ids,
-    to_choice_object,
-    sum_lists_with_values,
-    chart_permission_decorator,
-    chart_filters_decoder,
-    resolve_flex_fields_choices_to_string,
     get_model_choices_fields,
+    resolve_flex_fields_choices_to_string,
+    sum_lists_with_values,
+    to_choice_object,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
+    AGENCY_TYPE_CHOICES,
+    DISABILITY_CHOICE,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
@@ -46,18 +59,16 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
+    SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    WORK_STATUS_CHOICE,
+    Agency,
     Document,
     DocumentType,
     Household,
     Individual,
     IndividualIdentity,
     IndividualRoleInHousehold,
-    DISABILITY_CHOICE,
-    SEVERITY_OF_DISABILITY_CHOICES,
-    WORK_STATUS_CHOICE,
-    AGENCY_TYPE_CHOICES,
-    Agency,
 )
 from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
@@ -66,8 +77,8 @@ from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
     ChartDetailedDatasetsNode,
-    SectionTotalNode,
     FlexFieldsScalar,
+    SectionTotalNode,
 )
 
 INDIVIDUALS_CHART_LABELS = [
@@ -549,7 +560,9 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
+        return Household.objects.annotate(total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0)).order_by(
+            "created_at"
+        )
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
