@@ -184,6 +184,21 @@ export const GrievanceDetailsToolbar = ({
       ],
     });
   };
+
+  const getClosingConfirmationText = (): string => {
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+      return getClosingConfirmationExtraText();
+    }
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
+      let additionalContent = '';
+      if (!ticket.systemFlaggingTicketDetails.approveStatus) {
+        additionalContent = ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
+      }
+      return `${closingConfirmationText}${additionalContent}`;
+    }
+    return closingConfirmationText;
+  }
+
   let closeButton = (
     <ConfirmationDialog
       title='Close ticket'
@@ -192,11 +207,7 @@ export const GrievanceDetailsToolbar = ({
           ? closingConfirmationText
           : getClosingConfirmationExtraText()
       }
-      content={
-        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
-          ? getClosingConfirmationExtraText()
-          : closingConfirmationText
-      }
+      content={getClosingConfirmationText()}
       continueText='close ticket'
     >
       {(confirm) => (
