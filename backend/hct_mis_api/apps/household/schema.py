@@ -186,6 +186,7 @@ class IndividualFilter(FilterSet):
             "unicef_id",
             Lower("full_name"),
             "household__id",
+            "household__unicef_id",
             "birth_date",
             "sex",
             "relationship",
