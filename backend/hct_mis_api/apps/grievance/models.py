@@ -220,6 +220,13 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         help_text=_("Date this ticket was most recently changed."),
         db_index=True,
     )
+    last_notification_sent = models.DateTimeField(
+        verbose_name=_("Modified"),
+        null=True,
+        blank=True,
+        help_text=_("Date this ticket was most recently changed."),
+        db_index=True,
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
