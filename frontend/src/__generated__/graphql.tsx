@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -2704,7 +2704,7 @@ export type MutationsApproveSystemFlaggingArgs = {
 
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId: Scalars['ID'],
+  selectedIndividualId?: Maybe<Scalars['ID']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -5794,7 +5794,7 @@ export type ApproveIndividualDataChangeMutation = (
 
 export type ApproveNeedsAdjudicationMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId: Scalars['ID']
+  selectedIndividualId?: Maybe<Scalars['ID']>
 };
 
 
@@ -9318,7 +9318,7 @@ export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof us
 export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export const ApproveNeedsAdjudicationDocument = gql`
-    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID) {
   approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
     grievanceTicket {
       id
@@ -17593,7 +17593,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId' | 'selectedIndividualId'>>,
+  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,

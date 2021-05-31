@@ -1,50 +1,64 @@
 import logging
 
-import graphene
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
+import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
 from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
 from hct_mis_api.apps.core.scalars import BigInt
 from hct_mis_api.apps.core.schema import BusinessAreaNode
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case, check_concurrency_version_in_mutation
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    to_snake_case,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
-    save_data_change_extras,
     close_add_individual_grievance_ticket,
-    close_update_individual_grievance_ticket,
-    close_update_household_grievance_ticket,
     close_delete_individual_ticket,
+    close_update_household_grievance_ticket,
+    close_update_individual_grievance_ticket,
+    save_data_change_extras,
     update_data_change_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
+from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
+    save_grievance_complaint_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.main import (
     CreateGrievanceTicketExtrasInput,
     UpdateGrievanceTicketExtrasInput,
     _no_operation_close_method,
 )
-from hct_mis_api.apps.grievance.mutations_extras.payment_verification import save_payment_verification_extras
-from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
+from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
+    save_payment_verification_extras,
+)
+from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
+    save_sensitive_grievance_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
-from hct_mis_api.apps.grievance.mutations_extras.utils import verify_required_arguments, remove_parsed_data_fields
+from hct_mis_api.apps.grievance.mutations_extras.utils import (
+    remove_parsed_data_fields,
+    verify_required_arguments,
+)
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Household,
+    Individual,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
@@ -851,13 +865,13 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        selected_individual_id = graphene.Argument(graphene.ID, required=True)
+        selected_individual_id = graphene.Argument(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, selected_individual_id, **kwargs):
+    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -870,13 +884,18 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             grievance_ticket.assigned_to == info.context.user,
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         )
-        decoded_selected_individual_id = decode_id_string(selected_individual_id)
-        selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
-        ticket_details = grievance_ticket.ticket_details
 
-        if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
-            logger.error("The selected individual is not valid, must be one of those attached to the ticket")
-            raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+        selected_individual_id = kwargs.get("selected_individual_id", None)
+        ticket_details = grievance_ticket.ticket_details
+        selected_individual = None
+
+        if selected_individual_id:
+            decoded_selected_individual_id = decode_id_string(selected_individual_id)
+            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+
+            if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
+                logger.error("The selected individual is not valid, must be one of those attached to the ticket")
+                raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
         ticket_details.selected_individual = selected_individual
         ticket_details.role_reassign_data = {}
