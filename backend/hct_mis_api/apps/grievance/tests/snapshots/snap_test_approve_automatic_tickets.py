@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_0_with_permission 1'] = {
@@ -73,4 +72,37 @@ snapshots['TestGrievanceApproveAutomaticMutation::test_approve_system_flagging_1
             ]
         }
     ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_should_allow_uncheck_selected_individual_1_without_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': None
+    },
+    'errors': [
+        {
+            'locations': [
+                {
+                    'column': 7,
+                    'line': 3
+                }
+            ],
+            'message': 'Permission Denied: User does not have correct permission.',
+            'path': [
+                'approveNeedsAdjudication'
+            ]
+        }
+    ]
+}
+
+snapshots['TestGrievanceApproveAutomaticMutation::test_approve_needs_adjudication_should_allow_uncheck_selected_individual_0_with_permission 1'] = {
+    'data': {
+        'approveNeedsAdjudication': {
+            'grievanceTicket': {
+                'id': 'R3JpZXZhbmNlVGlja2V0Tm9kZToyYjQxOWNlMy0zMjk3LTQ3ZWUtYTQ3Zi00MzQ0MmFiYWM3M2U=',
+                'needsAdjudicationTicketDetails': {
+                    'selectedIndividual': None
+                }
+            }
+        }
+    }
 }
