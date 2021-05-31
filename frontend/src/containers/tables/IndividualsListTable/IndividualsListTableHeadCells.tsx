@@ -26,7 +26,7 @@ export const headCells: HeadCell<IndividualNode>[] = [
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'household__id',
+    id: 'household__unicef_id',
     numeric: false,
     dataCy: 'household-id',
   },
