@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import auto
 
 from django.conf import settings
@@ -97,6 +98,20 @@ class GrievanceNotification:
             queryset = queryset.exclude(id=self.grievance_ticket.assigned_to.id)
         return queryset.all()
 
+    def _prepare_sensitive_reminder_bodies(self, user_recipient):
+        context = self._prepare_default_context(user_recipient)
+        context["hours_ago"] = (datetime.now() - self.grievance_ticket.created_at).hours
+        text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
+        html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
+        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.id}"
+
+    def _prepare_overdue_bodies(self, user_recipient):
+        context = self._prepare_default_context(user_recipient)
+        context["days_ago"] = (datetime.now() - self.grievance_ticket.created_at).days
+        text_body = render_to_string("overdue_notification_email.txt", context=context)
+        html_body = render_to_string("overdue_notification_email.html", context=context)
+        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.id}"
+
     def _prepare_add_note_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
         created_by = self.extra_data.get("created_by")
@@ -137,6 +152,8 @@ class GrievanceNotification:
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_send_back_to_in_progress_bodies,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_bodies,
         ACTION_NOTES_ADDED: _prepare_add_note_bodies,
+        ACTION_OVERDUE: _prepare_overdue_bodies,
+        ACTION_SENSITIVE_REMINDER: _prepare_sensitive_reminder_bodies,
     }
 
     ACTION_PREPARE_USER_RECIPIENTS_DICT = {
@@ -146,9 +163,10 @@ class GrievanceNotification:
         ACTION_PAYMENT_VERIFICATION_CREATED: _prepare_universal_category_created_recipients,
         ACTION_SENSITIVE_CREATED: _prepare_universal_category_created_recipients,
         ACTION_SEND_BACK_TO_IN_PROGRESS: _prepare_assigned_to_recipient,
-        ACTION_OVERDUE: _prepare_universal_category_created_recipients,
+        ACTION_OVERDUE: _prepare_assigned_to_recipient,
         ACTION_SEND_TO_APPROVAL: _prepare_for_approval_recipients,
         ACTION_NOTES_ADDED: _prepare_assigned_to_recipient,
+        ACTION_SENSITIVE_REMINDER: _prepare_assigned_to_recipient,
     }
 
     @classmethod

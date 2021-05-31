@@ -1,4 +1,4 @@
 {% extends 'base_notification_email.txt' %}
 {% block content %}
-    A Grievance & Feedback ticket {{ ticket_url }} for {ticket_category} has been created. You can assign it to yourself and take action.
+    A Grievance & Feedback ticket {{ ticket_url }} for {{ticket_category}} has been created. You can assign it to yourself and take action.
 {% endblock %}
