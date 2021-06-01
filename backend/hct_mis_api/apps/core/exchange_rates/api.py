@@ -28,7 +28,6 @@ class ExchangeRateAPI:
         params = {}
         if with_history is True:
             params["history"] = "yes"
-
         response = self._client.get(self.api_url, params=params)
 
         try:
