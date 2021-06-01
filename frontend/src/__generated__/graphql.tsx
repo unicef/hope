@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Wfp = 'WFP',
-  Unhcr = 'UNHCR'
+  Unhcr = 'UNHCR',
+  Wfp = 'WFP'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -342,6 +342,8 @@ export type BusinessAreaNodeTargetpopulationSetArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -1215,6 +1217,8 @@ export type HouseholdNodeTargetPopulationsArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -2959,6 +2963,8 @@ export type ProgramNodeTargetpopulationSetArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -3503,6 +3509,8 @@ export type QueryAllTargetPopulationArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -4327,6 +4335,8 @@ export type SteficonRuleNodeTargetPopulationsArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -4983,6 +4993,8 @@ export type UserBusinessAreaNodeTargetpopulationSetArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -5100,6 +5112,8 @@ export type UserNodeTargetPopulationsArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -5125,6 +5139,8 @@ export type UserNodeApprovedTargetPopulationsArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -5150,6 +5166,8 @@ export type UserNodeFinalizedTargetPopulationsArgs = {
   updatedAt?: Maybe<Scalars['DateTime']>,
   status?: Maybe<Scalars['String']>,
   households?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
   candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
   candidateListTotalIndividualsMin?: Maybe<Scalars['Int']>,
@@ -6884,8 +6902,8 @@ export type AllTargetPopulationsQueryVariables = {
   orderBy?: Maybe<Scalars['String']>,
   name?: Maybe<Scalars['String']>,
   status?: Maybe<Scalars['String']>,
-  candidateListTotalHouseholdsMin?: Maybe<Scalars['Int']>,
-  candidateListTotalHouseholdsMax?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMin?: Maybe<Scalars['Int']>,
+  numberOfHouseholdsMax?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<Scalars['String']>,
   program?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
@@ -12459,8 +12477,8 @@ export type AllSteficonRulesQueryHookResult = ReturnType<typeof useAllSteficonRu
 export type AllSteficonRulesLazyQueryHookResult = ReturnType<typeof useAllSteficonRulesLazyQuery>;
 export type AllSteficonRulesQueryResult = ApolloReactCommon.QueryResult<AllSteficonRulesQuery, AllSteficonRulesQueryVariables>;
 export const AllTargetPopulationsDocument = gql`
-    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $candidateListTotalHouseholdsMin: Int, $candidateListTotalHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
-  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, candidateListTotalHouseholdsMin: $candidateListTotalHouseholdsMin, candidateListTotalHouseholdsMax: $candidateListTotalHouseholdsMax, businessArea: $businessArea, program: $program) {
+    query AllTargetPopulations($after: String, $before: String, $first: Int, $last: Int, $orderBy: String, $name: String, $status: String, $numberOfHouseholdsMin: Int, $numberOfHouseholdsMax: Int, $businessArea: String, $program: [ID]) {
+  allTargetPopulation(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy, name: $name, status: $status, numberOfHouseholdsMin: $numberOfHouseholdsMin, numberOfHouseholdsMax: $numberOfHouseholdsMax, businessArea: $businessArea, program: $program) {
     edges {
       node {
         ...targetPopulationMinimal
@@ -12509,8 +12527,8 @@ export function withAllTargetPopulations<TProps, TChildProps = {}>(operationOpti
  *      orderBy: // value for 'orderBy'
  *      name: // value for 'name'
  *      status: // value for 'status'
- *      candidateListTotalHouseholdsMin: // value for 'candidateListTotalHouseholdsMin'
- *      candidateListTotalHouseholdsMax: // value for 'candidateListTotalHouseholdsMax'
+ *      numberOfHouseholdsMin: // value for 'numberOfHouseholdsMin'
+ *      numberOfHouseholdsMax: // value for 'numberOfHouseholdsMax'
  *      businessArea: // value for 'businessArea'
  *      program: // value for 'program'
  *   },
