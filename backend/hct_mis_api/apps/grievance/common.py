@@ -1,3 +1,6 @@
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
+
+
 def create_grievance_ticket_with_details(main_individual, possible_duplicate, business_area, **kwargs):
     from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNeedsAdjudicationDetails
 
@@ -32,6 +35,7 @@ def create_grievance_ticket_with_details(main_individual, possible_duplicate, bu
         possible_duplicate=possible_duplicate,
         selected_individual=None,
     )
+    GrievanceNotification.send_all_notifications(GrievanceNotification.prepare_notification_for_ticket_creation(ticket))
 
     return ticket, ticket_details
 

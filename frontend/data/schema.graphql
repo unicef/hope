@@ -121,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  UNHCR
   WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
@@ -660,6 +660,7 @@ type GrievanceTicketNode implements Node {
   updatedAt: DateTime!
   version: BigInt!
   userModified: DateTime
+  lastNotificationSent: DateTime
   createdBy: UserNode
   assignedTo: UserNode
   status: Int!
@@ -715,171 +716,6 @@ enum HouseholdCollectIndividualData {
   A_
   A_1
   A_0
-}
-
-enum HouseholdCurrency {
-  A_
-  AED
-  AFN
-  ALL
-  AMD
-  ANG
-  AOA
-  ARS
-  AUD
-  AWG
-  AZN
-  BAM
-  BBD
-  BDT
-  BGN
-  BHD
-  BIF
-  BMD
-  BND
-  BOB
-  BOV
-  BRL
-  BSD
-  BTN
-  BWP
-  BYN
-  BZD
-  CAD
-  CDF
-  CHF
-  CLP
-  CNY
-  COP
-  CRC
-  CUC
-  CUP
-  CVE
-  CZK
-  DJF
-  DKK
-  DOP
-  DZD
-  EGP
-  ERN
-  ETB
-  EUR
-  FJD
-  FKP
-  GBP
-  GEL
-  GHS
-  GIP
-  GMD
-  GNF
-  GTQ
-  GYD
-  HKD
-  HNL
-  HRK
-  HTG
-  HUF
-  IDR
-  ILS
-  INR
-  IQD
-  IRR
-  ISK
-  JMD
-  JOD
-  JPY
-  KES
-  KGS
-  KHR
-  KMF
-  KPW
-  KRW
-  KWD
-  KYD
-  KZT
-  LAK
-  LBP
-  LKR
-  LRD
-  LSL
-  LYD
-  MAD
-  MDL
-  MGA
-  MKD
-  MMK
-  MNT
-  MOP
-  MRU
-  MUR
-  MVR
-  MWK
-  MXN
-  MYR
-  MZN
-  NAD
-  NGN
-  NIO
-  NOK
-  NPR
-  NZD
-  OMR
-  PAB
-  PEN
-  PGK
-  PHP
-  PKR
-  PLN
-  PYG
-  QAR
-  RON
-  RSD
-  RUB
-  RWF
-  SAR
-  SBD
-  SCR
-  SDG
-  SEK
-  SGD
-  SHP
-  SLL
-  SOS
-  SRD
-  SSP
-  STN
-  SVC
-  SYP
-  SZL
-  THB
-  TJS
-  TMT
-  TND
-  TOP
-  TRY
-  TTD
-  TWD
-  TZS
-  UAH
-  UGX
-  USD
-  UYU
-  UYW
-  UZS
-  VES
-  VND
-  VUV
-  WST
-  XAF
-  XAG
-  XAU
-  XCD
-  XOF
-  XPF
-  YER
-  ZAR
-  ZMW
-  ZWL
 }
 
 type HouseholdDataChangeApproveMutation {
@@ -952,7 +788,7 @@ type HouseholdNode implements Node {
   village: String!
   registrationMethod: HouseholdRegistrationMethod!
   collectIndividualData: HouseholdCollectIndividualData!
-  currency: HouseholdCurrency!
+  currency: String
   unhcrId: String!
   paymentRecords(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
   complaintTicketDetails(before: String, after: String, first: Int, last: Int): TicketComplaintDetailsNodeConnection!
@@ -2056,7 +1892,7 @@ type Mutations {
   approveAddIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveDeleteIndividual(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
   approveSystemFlagging(approveStatus: Boolean!, grievanceTicketId: ID!, version: BigInt): SimpleApproveMutation
-  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID!, version: BigInt): NeedsAdjudicationApproveMutation
+  approveNeedsAdjudication(grievanceTicketId: ID!, selectedIndividualId: ID, version: BigInt): NeedsAdjudicationApproveMutation
   reassignRole(grievanceTicketId: ID!, householdId: ID!, householdVersion: BigInt, individualId: ID!, individualVersion: BigInt, role: String!, version: BigInt): ReassignRoleMutation
   createCashPlanPaymentVerification(input: CreatePaymentVerificationInput!): CreatePaymentVerificationMutation
   editCashPlanPaymentVerification(input: EditCashPlanPaymentVerificationInput!, version: BigInt): EditPaymentVerificationMutation

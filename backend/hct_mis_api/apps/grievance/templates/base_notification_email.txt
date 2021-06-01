@@ -1,0 +1,6 @@
+Dear {{first_name}} {{last_name}},
+
+{% block content %}
+{% endblock %}
+
+Please do not reply to this email

@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -955,6 +955,7 @@ export type GrievanceTicketNode = Node & {
   updatedAt: Scalars['DateTime'],
   version: Scalars['BigInt'],
   userModified?: Maybe<Scalars['DateTime']>,
+  lastNotificationSent?: Maybe<Scalars['DateTime']>,
   createdBy?: Maybe<UserNode>,
   assignedTo?: Maybe<UserNode>,
   status: Scalars['Int'],
@@ -1044,171 +1045,6 @@ export enum HouseholdCollectIndividualData {
   A_0 = 'A_0'
 }
 
-export enum HouseholdCurrency {
-  A = 'A_',
-  Aed = 'AED',
-  Afn = 'AFN',
-  All = 'ALL',
-  Amd = 'AMD',
-  Ang = 'ANG',
-  Aoa = 'AOA',
-  Ars = 'ARS',
-  Aud = 'AUD',
-  Awg = 'AWG',
-  Azn = 'AZN',
-  Bam = 'BAM',
-  Bbd = 'BBD',
-  Bdt = 'BDT',
-  Bgn = 'BGN',
-  Bhd = 'BHD',
-  Bif = 'BIF',
-  Bmd = 'BMD',
-  Bnd = 'BND',
-  Bob = 'BOB',
-  Bov = 'BOV',
-  Brl = 'BRL',
-  Bsd = 'BSD',
-  Btn = 'BTN',
-  Bwp = 'BWP',
-  Byn = 'BYN',
-  Bzd = 'BZD',
-  Cad = 'CAD',
-  Cdf = 'CDF',
-  Chf = 'CHF',
-  Clp = 'CLP',
-  Cny = 'CNY',
-  Cop = 'COP',
-  Crc = 'CRC',
-  Cuc = 'CUC',
-  Cup = 'CUP',
-  Cve = 'CVE',
-  Czk = 'CZK',
-  Djf = 'DJF',
-  Dkk = 'DKK',
-  Dop = 'DOP',
-  Dzd = 'DZD',
-  Egp = 'EGP',
-  Ern = 'ERN',
-  Etb = 'ETB',
-  Eur = 'EUR',
-  Fjd = 'FJD',
-  Fkp = 'FKP',
-  Gbp = 'GBP',
-  Gel = 'GEL',
-  Ghs = 'GHS',
-  Gip = 'GIP',
-  Gmd = 'GMD',
-  Gnf = 'GNF',
-  Gtq = 'GTQ',
-  Gyd = 'GYD',
-  Hkd = 'HKD',
-  Hnl = 'HNL',
-  Hrk = 'HRK',
-  Htg = 'HTG',
-  Huf = 'HUF',
-  Idr = 'IDR',
-  Ils = 'ILS',
-  Inr = 'INR',
-  Iqd = 'IQD',
-  Irr = 'IRR',
-  Isk = 'ISK',
-  Jmd = 'JMD',
-  Jod = 'JOD',
-  Jpy = 'JPY',
-  Kes = 'KES',
-  Kgs = 'KGS',
-  Khr = 'KHR',
-  Kmf = 'KMF',
-  Kpw = 'KPW',
-  Krw = 'KRW',
-  Kwd = 'KWD',
-  Kyd = 'KYD',
-  Kzt = 'KZT',
-  Lak = 'LAK',
-  Lbp = 'LBP',
-  Lkr = 'LKR',
-  Lrd = 'LRD',
-  Lsl = 'LSL',
-  Lyd = 'LYD',
-  Mad = 'MAD',
-  Mdl = 'MDL',
-  Mga = 'MGA',
-  Mkd = 'MKD',
-  Mmk = 'MMK',
-  Mnt = 'MNT',
-  Mop = 'MOP',
-  Mru = 'MRU',
-  Mur = 'MUR',
-  Mvr = 'MVR',
-  Mwk = 'MWK',
-  Mxn = 'MXN',
-  Myr = 'MYR',
-  Mzn = 'MZN',
-  Nad = 'NAD',
-  Ngn = 'NGN',
-  Nio = 'NIO',
-  Nok = 'NOK',
-  Npr = 'NPR',
-  Nzd = 'NZD',
-  Omr = 'OMR',
-  Pab = 'PAB',
-  Pen = 'PEN',
-  Pgk = 'PGK',
-  Php = 'PHP',
-  Pkr = 'PKR',
-  Pln = 'PLN',
-  Pyg = 'PYG',
-  Qar = 'QAR',
-  Ron = 'RON',
-  Rsd = 'RSD',
-  Rub = 'RUB',
-  Rwf = 'RWF',
-  Sar = 'SAR',
-  Sbd = 'SBD',
-  Scr = 'SCR',
-  Sdg = 'SDG',
-  Sek = 'SEK',
-  Sgd = 'SGD',
-  Shp = 'SHP',
-  Sll = 'SLL',
-  Sos = 'SOS',
-  Srd = 'SRD',
-  Ssp = 'SSP',
-  Stn = 'STN',
-  Svc = 'SVC',
-  Syp = 'SYP',
-  Szl = 'SZL',
-  Thb = 'THB',
-  Tjs = 'TJS',
-  Tmt = 'TMT',
-  Tnd = 'TND',
-  Top = 'TOP',
-  Try = 'TRY',
-  Ttd = 'TTD',
-  Twd = 'TWD',
-  Tzs = 'TZS',
-  Uah = 'UAH',
-  Ugx = 'UGX',
-  Usd = 'USD',
-  Uyu = 'UYU',
-  Uyw = 'UYW',
-  Uzs = 'UZS',
-  Ves = 'VES',
-  Vnd = 'VND',
-  Vuv = 'VUV',
-  Wst = 'WST',
-  Xaf = 'XAF',
-  Xag = 'XAG',
-  Xau = 'XAU',
-  Xcd = 'XCD',
-  Xof = 'XOF',
-  Xpf = 'XPF',
-  Yer = 'YER',
-  Zar = 'ZAR',
-  Zmw = 'ZMW',
-  Zwl = 'ZWL'
-}
-
 export type HouseholdDataChangeApproveMutation = {
    __typename?: 'HouseholdDataChangeApproveMutation',
   grievanceTicket?: Maybe<GrievanceTicketNode>,
@@ -1281,7 +1117,7 @@ export type HouseholdNode = Node & {
   village: Scalars['String'],
   registrationMethod: HouseholdRegistrationMethod,
   collectIndividualData: HouseholdCollectIndividualData,
-  currency: HouseholdCurrency,
+  currency?: Maybe<Scalars['String']>,
   unhcrId: Scalars['String'],
   paymentRecords: PaymentRecordNodeConnection,
   complaintTicketDetails: TicketComplaintDetailsNodeConnection,
@@ -2704,7 +2540,7 @@ export type MutationsApproveSystemFlaggingArgs = {
 
 export type MutationsApproveNeedsAdjudicationArgs = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId: Scalars['ID'],
+  selectedIndividualId?: Maybe<Scalars['ID']>,
   version?: Maybe<Scalars['BigInt']>
 };
 
@@ -5411,7 +5247,7 @@ export type XlsxRowErrorNode = {
 
 export type HouseholdMinimalFragment = (
   { __typename?: 'HouseholdNode' }
-  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
+  & Pick<HouseholdNode, 'id' | 'createdAt' | 'residenceStatus' | 'size' | 'totalCashReceived' | 'currency' | 'firstRegistrationDate' | 'lastRegistrationDate' | 'status' | 'sanctionListPossibleMatch' | 'sanctionListConfirmedMatch' | 'hasDuplicates' | 'unicefId' | 'flexFields' | 'unhcrId' | 'geopoint' | 'village' | 'address'>
   & { admin1: Maybe<(
     { __typename?: 'AdminAreaNode' }
     & Pick<AdminAreaNode, 'id' | 'title' | 'level' | 'pCode'>
@@ -5794,7 +5630,7 @@ export type ApproveIndividualDataChangeMutation = (
 
 export type ApproveNeedsAdjudicationMutationVariables = {
   grievanceTicketId: Scalars['ID'],
-  selectedIndividualId: Scalars['ID']
+  selectedIndividualId?: Maybe<Scalars['ID']>
 };
 
 
@@ -8406,6 +8242,7 @@ export const HouseholdMinimalFragmentDoc = gql`
   residenceStatus
   size
   totalCashReceived
+  currency
   firstRegistrationDate
   lastRegistrationDate
   status
@@ -9318,7 +9155,7 @@ export type ApproveIndividualDataChangeMutationHookResult = ReturnType<typeof us
 export type ApproveIndividualDataChangeMutationResult = ApolloReactCommon.MutationResult<ApproveIndividualDataChangeMutation>;
 export type ApproveIndividualDataChangeMutationOptions = ApolloReactCommon.BaseMutationOptions<ApproveIndividualDataChangeMutation, ApproveIndividualDataChangeMutationVariables>;
 export const ApproveNeedsAdjudicationDocument = gql`
-    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID!) {
+    mutation ApproveNeedsAdjudication($grievanceTicketId: ID!, $selectedIndividualId: ID) {
   approveNeedsAdjudication(grievanceTicketId: $grievanceTicketId, selectedIndividualId: $selectedIndividualId) {
     grievanceTicket {
       id
@@ -16096,7 +15933,6 @@ export type ResolversTypes = {
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
   HouseholdCollectIndividualData: HouseholdCollectIndividualData,
-  HouseholdCurrency: HouseholdCurrency,
   TicketHouseholdDataUpdateDetailsNodeConnection: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeConnection>,
   TicketHouseholdDataUpdateDetailsNodeEdge: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNodeEdge>,
   TicketHouseholdDataUpdateDetailsNode: ResolverTypeWrapper<TicketHouseholdDataUpdateDetailsNode>,
@@ -16418,7 +16254,6 @@ export type ResolversParentTypes = {
   HouseholdOrgEnumerator: HouseholdOrgEnumerator,
   HouseholdRegistrationMethod: HouseholdRegistrationMethod,
   HouseholdCollectIndividualData: HouseholdCollectIndividualData,
-  HouseholdCurrency: HouseholdCurrency,
   TicketHouseholdDataUpdateDetailsNodeConnection: TicketHouseholdDataUpdateDetailsNodeConnection,
   TicketHouseholdDataUpdateDetailsNodeEdge: TicketHouseholdDataUpdateDetailsNodeEdge,
   TicketHouseholdDataUpdateDetailsNode: TicketHouseholdDataUpdateDetailsNode,
@@ -17055,6 +16890,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   version?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>,
   userModified?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
+  lastNotificationSent?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>,
   createdBy?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   assignedTo?: Resolver<Maybe<ResolversTypes['UserNode']>, ParentType, ContextType>,
   status?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
@@ -17171,7 +17007,7 @@ export type HouseholdNodeResolvers<ContextType = any, ParentType extends Resolve
   village?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   registrationMethod?: Resolver<ResolversTypes['HouseholdRegistrationMethod'], ParentType, ContextType>,
   collectIndividualData?: Resolver<ResolversTypes['HouseholdCollectIndividualData'], ParentType, ContextType>,
-  currency?: Resolver<ResolversTypes['HouseholdCurrency'], ParentType, ContextType>,
+  currency?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   unhcrId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   paymentRecords?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, HouseholdNodePaymentRecordsArgs>,
   complaintTicketDetails?: Resolver<ResolversTypes['TicketComplaintDetailsNodeConnection'], ParentType, ContextType, HouseholdNodeComplaintTicketDetailsArgs>,
@@ -17593,7 +17429,7 @@ export type MutationsResolvers<ContextType = any, ParentType extends ResolversPa
   approveAddIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveAddIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveDeleteIndividual?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveDeleteIndividualArgs, 'approveStatus' | 'grievanceTicketId'>>,
   approveSystemFlagging?: Resolver<Maybe<ResolversTypes['SimpleApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveSystemFlaggingArgs, 'approveStatus' | 'grievanceTicketId'>>,
-  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId' | 'selectedIndividualId'>>,
+  approveNeedsAdjudication?: Resolver<Maybe<ResolversTypes['NeedsAdjudicationApproveMutation']>, ParentType, ContextType, RequireFields<MutationsApproveNeedsAdjudicationArgs, 'grievanceTicketId'>>,
   reassignRole?: Resolver<Maybe<ResolversTypes['ReassignRoleMutation']>, ParentType, ContextType, RequireFields<MutationsReassignRoleArgs, 'grievanceTicketId' | 'householdId' | 'individualId' | 'role'>>,
   createCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['CreatePaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsCreateCashPlanPaymentVerificationArgs, 'input'>>,
   editCashPlanPaymentVerification?: Resolver<Maybe<ResolversTypes['EditPaymentVerificationMutation']>, ParentType, ContextType, RequireFields<MutationsEditCashPlanPaymentVerificationArgs, 'input'>>,
