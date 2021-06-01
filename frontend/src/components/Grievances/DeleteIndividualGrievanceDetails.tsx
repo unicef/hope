@@ -84,12 +84,25 @@ export function DeleteIndividualGrievanceDetails({
         const snakeKey = snakeCase(key);
         const fieldAttribute = fieldsDict[snakeKey];
 
-        if (fieldAttribute?.type === 'SELECT_ONE') {
-          textValue = textValue === 'A_' ? null : textValue;
-          textValue = textValue
-            ? fieldAttribute.choices.find((item) => item.value === textValue)
-                .labelEn
-            : '-';
+        if (
+          fieldAttribute?.type === 'SELECT_MANY' ||
+          fieldAttribute?.type === 'SELECT_ONE'
+        ) {
+          if (value instanceof Array) {
+            textValue = value
+              .map(
+                (choice) =>
+                  fieldAttribute.choices.find((item) => item.value === choice)
+                    ?.labelEn || '-',
+              )
+              .join(', ');
+          } else {
+            textValue = textValue === 'A_' ? null : textValue;
+            textValue = textValue
+              ? fieldAttribute.choices.find((item) => item.value === textValue)
+                  .labelEn
+              : '-';
+          }
         }
         if (fieldAttribute?.type === 'DATE') {
           textValue = <UniversalMoment>{textValue}</UniversalMoment>;
@@ -97,7 +110,7 @@ export function DeleteIndividualGrievanceDetails({
         return (
           <Grid key={key} item xs={6}>
             <LabelizedField
-              label={snakeKey.replace(/_/g, ' ')}
+              label={snakeKey === "sex" ? "GENDER" : snakeKey.replace(/_/g, ' ')}
               value={textValue}
             />
           </Grid>
@@ -118,13 +131,19 @@ export function DeleteIndividualGrievanceDetails({
     }) || [];
   const allLabels = [...labels, ...documentLabels];
 
+  let dialogText =
+    'You did not approve the following individual to be withdrawn. Are you sure you want to continue?';
+  if (!ticket.deleteIndividualTicketDetails.approveStatus) {
+    dialogText =
+      'You are approving the following individual to be withdrawn. Are you sure you want to continue?';
+  }
   return (
     <StyledBox>
       <Title>
         <Box display='flex' justifyContent='space-between'>
-          <Typography variant='h6'>Individual to be deleted</Typography>
+          <Typography variant='h6'>Individual to be withdrawn</Typography>
           {canApproveDataChange && (
-            <ConfirmationDialog title='Warning' content='Are you sure?'>
+            <ConfirmationDialog title='Warning' content={dialogText}>
               {(confirm) => (
                 <Button
                   onClick={confirm(async () => {

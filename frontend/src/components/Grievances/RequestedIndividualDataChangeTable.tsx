@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import Table from '@material-ui/core/Table';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import camelCase from 'lodash/camelCase';
-import startCase from 'lodash/startCase';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
@@ -18,6 +17,7 @@ import {
   GrievanceTicketQuery,
   useAllAddIndividualFieldsQuery,
 } from '../../__generated__/graphql';
+import { NewValue } from './RequestedHouseholdDataChangeTable';
 
 const Title = styled.div`
   padding-top: ${({ theme }) => theme.spacing(4)}px;
@@ -45,12 +45,22 @@ export function CurrentValue({
       displayValue =
         field.choices.find((item) => item.value === value)?.labelEn || '-';
       break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
+      break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
       displayValue = value === null ? '-' : value ? 'Yes' : 'No';
-      break;
-    case 'SELECT_MANY':
-      displayValue = value.map((el) => startCase(camelCase(el))).join(', ');
       break;
     default:
       displayValue = value;
@@ -112,14 +122,14 @@ function individualDataRow(
       </TableCell>
       <TableCell id={labelId} scope='row' align='left'>
         <Capitalize>
-          {row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
+          {row[0] === 'sex' ? "gender" : row[0].replaceAll('_i_f', '').replaceAll('_', ' ')}
         </Capitalize>
       </TableCell>
       <TableCell align='left'>
         <CurrentValue field={field} value={currentValue} />
       </TableCell>
       <TableCell align='left'>
-        <CurrentValue field={field} value={valueDetails.value} />
+        <NewValue field={field} value={valueDetails.value} />
       </TableCell>
     </TableRow>
   );
@@ -142,6 +152,8 @@ export function RequestedIndividualDataChangeTable({
   const { selectedDocuments } = values;
   const { selectedDocumentsToRemove } = values;
   const { selectedFlexFields } = values;
+  const { selectedIdentities } = values;
+  const { selectedIdentitiesToRemove } = values;
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const individualData = {
     ...ticket.individualDataUpdateTicketDetails.individualData,
@@ -149,10 +161,16 @@ export function RequestedIndividualDataChangeTable({
   const documents = individualData?.documents;
   const previousDocuments = individualData.previous_documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const identities = individualData?.identities;
+  const previousIdentities = individualData.previous_identities;
+  const identitiesToRemove = individualData.identities_to_remove;
   const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
   delete individualData.previous_documents;
+  delete individualData.identities;
+  delete individualData.identities_to_remove;
+  delete individualData.previous_identities;
   delete individualData.flex_fields;
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
@@ -167,8 +185,19 @@ export function RequestedIndividualDataChangeTable({
     'value',
     'name',
   );
+  const identityTypeDict = useArrayToDict(
+    data?.identityTypeChoices,
+    'value',
+    'name',
+  );
 
-  if (loading || !fieldsDict || !countriesDict || !documentTypeDict) {
+  if (
+    loading ||
+    !fieldsDict ||
+    !countriesDict ||
+    !documentTypeDict ||
+    !identityTypeDict
+  ) {
     return <LoadingComponent />;
   }
 
@@ -202,6 +231,16 @@ export function RequestedIndividualDataChangeTable({
     }
     setFieldValue('selectedDocuments', newSelected);
   };
+  const handleSelectIdentity = (identityIndex): void => {
+    const newSelected = [...selectedIdentities];
+    const selectedIndex = newSelected.indexOf(identityIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(identityIndex);
+    }
+    setFieldValue('selectedIdentities', newSelected);
+  };
 
   const handleSelectDocumentToRemove = (documentIndex): void => {
     const newSelected = [...selectedDocumentsToRemove];
@@ -213,6 +252,16 @@ export function RequestedIndividualDataChangeTable({
     }
     setFieldValue('selectedDocumentsToRemove', newSelected);
   };
+  const handleSelectIdentityToRemove = (identityIndex): void => {
+    const newSelected = [...selectedIdentitiesToRemove];
+    const selectedIndex = newSelected.indexOf(identityIndex);
+    if (selectedIndex !== -1) {
+      newSelected.splice(selectedIndex, 1);
+    } else {
+      newSelected.push(identityIndex);
+    }
+    setFieldValue('selectedIdentitiesToRemove', newSelected);
+  };
 
   const isSelected = (name: string): boolean =>
     selectedBioData.includes(camelCase(name));
@@ -223,6 +272,16 @@ export function RequestedIndividualDataChangeTable({
       <TableRow>
         <TableCell align='left' />
         <TableCell align='left'>ID Type</TableCell>
+        <TableCell align='left'>Country</TableCell>
+        <TableCell align='left'>Number</TableCell>
+      </TableRow>
+    </TableHead>
+  );
+  const identitiesTableHead = (
+    <TableHead>
+      <TableRow>
+        <TableCell align='left' />
+        <TableCell align='left'>Agency</TableCell>
         <TableCell align='left'>Country</TableCell>
         <TableCell align='left'>Number</TableCell>
       </TableRow>
@@ -269,7 +328,7 @@ export function RequestedIndividualDataChangeTable({
           })}
         </TableBody>
       </Table>
-      {documents.length ? (
+      {documents?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
@@ -318,7 +377,56 @@ export function RequestedIndividualDataChangeTable({
           </Table>
         </>
       ) : null}
-      {documentsToRemove.length ? (
+      {identities?.length ? (
+        <>
+          <Title>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>Identities to be added</Typography>
+            </Box>
+          </Title>
+          <Table className={classes.table}>
+            {identitiesTableHead}
+            <TableBody>
+              {identities?.map((row, index) => {
+                return (
+                  <TableRow key={`${row.value.agency}-${row.value.agency}`}>
+                    <TableCell align='left'>
+                      {isEdit ? (
+                        <Checkbox
+                          color='primary'
+                          onChange={(): void => {
+                            handleSelectIdentity(index);
+                          }}
+                          disabled={
+                            ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          }
+                          checked={selectedIdentities.includes(index)}
+                          inputProps={{ 'aria-labelledby': 'selected' }}
+                        />
+                      ) : (
+                        selectedIdentities.includes(index) && (
+                          <GreenIcon>
+                            <CheckCircleIcon />
+                          </GreenIcon>
+                        )
+                      )}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {identityTypeDict[row.value.agency]}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {countriesDict[row.value.country]}
+                    </TableCell>
+                    <TableCell align='left'>{row.value.number}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      ) : null}
+      {documentsToRemove?.length ? (
         <>
           <Title>
             <Box display='flex' justifyContent='space-between'>
@@ -360,6 +468,56 @@ export function RequestedIndividualDataChangeTable({
                     </TableCell>
                     <TableCell align='left'>
                       {document?.document_number || '-'}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </>
+      ) : null}
+      {identitiesToRemove?.length ? (
+        <>
+          <Title>
+            <Box display='flex' justifyContent='space-between'>
+              <Typography variant='h6'>Identities to be removed</Typography>
+            </Box>
+          </Title>
+          <Table className={classes.table}>
+            {identitiesTableHead}
+            <TableBody>
+              {identitiesToRemove?.map((row, index) => {
+                const identity = previousIdentities[row.value];
+                return (
+                  <TableRow key={`${identity.label}-${identity.country}`}>
+                    <TableCell align='left'>
+                      {isEdit ? (
+                        <Checkbox
+                          onChange={(): void => {
+                            handleSelectIdentityToRemove(index);
+                          }}
+                          color='primary'
+                          disabled={
+                            ticket.status !==
+                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+                          }
+                          checked={selectedIdentitiesToRemove.includes(index)}
+                          inputProps={{ 'aria-labelledby': 'xd' }}
+                        />
+                      ) : (
+                        selectedIdentitiesToRemove.includes(index) && (
+                          <GreenIcon>
+                            <CheckCircleIcon />
+                          </GreenIcon>
+                        )
+                      )}
+                    </TableCell>
+                    <TableCell align='left'>{identity?.label || '-'}</TableCell>
+                    <TableCell align='left'>
+                      {countriesDict[identity?.country] || '-'}
+                    </TableCell>
+                    <TableCell align='left'>
+                      {identity?.number || '-'}
                     </TableCell>
                   </TableRow>
                 );

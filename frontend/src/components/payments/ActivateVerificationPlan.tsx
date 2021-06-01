@@ -5,11 +5,9 @@ import { useSnackbar } from '../../hooks/useSnackBar';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
 import { useActivateCashPlanPaymentVerificationMutation } from '../../__generated__/graphql';
-import { CashPlan } from '../../apollo/queries/CashPlan';
 
 export interface Props {
   cashPlanVerificationId: string;
-  cashPlanId: string;
 }
 
 const DialogTitleWrapper = styled.div`
@@ -29,23 +27,32 @@ const DialogContainer = styled.div`
 
 export function ActivateVerificationPlan({
   cashPlanVerificationId,
-  cashPlanId,
 }: Props): React.ReactElement {
   const [activateDialogOpen, setActivateDialogOpen] = useState(false);
 
   const { showMessage } = useSnackbar();
   const [mutate] = useActivateCashPlanPaymentVerificationMutation();
   const activate = async (): Promise<void> => {
-    const { errors } = await mutate({
-      variables: { cashPlanVerificationId },
-      refetchQueries: () => [
-        { query: CashPlan, variables: { id: cashPlanId } },
-      ],
-    });
-    if (errors) {
-      showMessage('Error while submitting');
-      return;
+    try {
+      await mutate({
+        variables: { cashPlanVerificationId },
+      });
+    } catch (error) {
+      console.log('error', error?.graphQLErrors);
+      if (
+        error?.graphQLErrors?.[0]?.validationErrors
+          ?.activateCashPlanPaymentVerification?.phone_numbers
+      ) {
+        showMessage(
+          error?.graphQLErrors?.[0]?.validationErrors?.activateCashPlanPaymentVerification?.phone_numbers.join(
+            '\n',
+          ),
+        );
+      } else {
+        showMessage('Error during activating\n');
+      }
     }
+
     showMessage('Verification plan has been activated.');
   };
   return (

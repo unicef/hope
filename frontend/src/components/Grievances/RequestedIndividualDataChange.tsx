@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
 import mapKeys from 'lodash/mapKeys';
 import camelCase from 'lodash/camelCase';
@@ -36,18 +36,26 @@ export function RequestedIndividualDataChange({
     ...ticket.individualDataUpdateTicketDetails.individualData,
   };
   let allApprovedCount = 0;
-  const documents = individualData?.documents;
-  const documentsToRemove = individualData.documents_to_remove;
-  const flexFields = individualData.flex_fields;
-  delete individualData.flex_field;
+  const documents = individualData?.documents || [];
+  const documentsToRemove = individualData.documents_to_remove || [];
+  const identities = individualData?.identities || [];
+  const identitiesToRemove = individualData.identities_to_remove || [];
+  const flexFields = individualData.flex_fields || {};
+  delete individualData.flex_fields;
   delete individualData.documents;
+  delete individualData.identities;
   delete individualData.documents_to_remove;
+  delete individualData.identities_to_remove;
   delete individualData.previous_documents;
+  delete individualData.previous_identities;
 
   const entries = Object.entries(individualData);
   const entriesFlexFields = Object.entries(flexFields);
   allApprovedCount += documents.filter((el) => el.approve_status).length;
   allApprovedCount += documentsToRemove.filter((el) => el.approve_status)
+    .length;
+  allApprovedCount += identities.filter((el) => el.approve_status).length;
+  allApprovedCount += identitiesToRemove.filter((el) => el.approve_status)
     .length;
   allApprovedCount += entries.filter(
     ([, value]: [string, { approve_status: boolean }]) => value.approve_status,
@@ -77,10 +85,67 @@ export function RequestedIndividualDataChange({
       selectedDocumentsToRemove.push(i);
     }
   }
+  const selectedIdentities = [];
+  const selectedIdentitiesToRemove = [];
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < identities?.length; i++) {
+    if (identities[i]?.approve_status) {
+      selectedIdentities.push(i);
+    }
+  }
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < identitiesToRemove?.length; i++) {
+    if (identitiesToRemove[i]?.approve_status) {
+      selectedIdentitiesToRemove.push(i);
+    }
+  }
   const shouldShowEditButton = (allChangesLength): boolean =>
     allChangesLength &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
+  const areAllApproved = (allSelected): boolean => {
+    const countAll =
+      entries.length +
+      entriesFlexFields.length +
+      documents.length +
+      documentsToRemove.length +
+      identities.length +
+      identitiesToRemove.length;
+    return allSelected === countAll;
+  };
+
+  const getApprovalButton = (allSelected, submitForm): ReactElement => {
+    if (areAllApproved(allSelected)) {
+      return (
+        <Button
+          onClick={submitForm}
+          variant='contained'
+          color='primary'
+          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        >
+          Approve
+        </Button>
+      );
+    }
+    return (
+      <ConfirmationDialog
+        title='Warning'
+        content={getConfirmationText(allSelected)}
+      >
+        {(confirm) => (
+          <Button
+            onClick={confirm(() => submitForm())}
+            variant='contained'
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          >
+            Approve
+          </Button>
+        )}
+      </ConfirmationDialog>
+    );
+  };
 
   return (
     <Formik
@@ -105,6 +170,8 @@ export function RequestedIndividualDataChange({
           .map((row) => row[0]),
         selectedDocuments,
         selectedDocumentsToRemove,
+        selectedIdentities,
+        selectedIdentitiesToRemove,
       }}
       onSubmit={async (values) => {
         const individualApproveData = values.selected.reduce((prev, curr) => {
@@ -114,6 +181,8 @@ export function RequestedIndividualDataChange({
         }, {});
         const approvedDocumentsToCreate = values.selectedDocuments;
         const approvedDocumentsToRemove = values.selectedDocumentsToRemove;
+        const approvedIdentitiesToCreate = values.selectedIdentities;
+        const approvedIdentitiesToRemove = values.selectedIdentitiesToRemove;
         const flexFieldsApproveData = values.selectedFlexFields.reduce(
           (prev, curr) => {
             // eslint-disable-next-line no-param-reassign
@@ -129,14 +198,19 @@ export function RequestedIndividualDataChange({
               individualApproveData: JSON.stringify(individualApproveData),
               approvedDocumentsToCreate,
               approvedDocumentsToRemove,
+              approvedIdentitiesToCreate,
+              approvedIdentitiesToRemove,
               flexFieldsApproveData: JSON.stringify(flexFieldsApproveData),
             },
           });
           showMessage('Changes Approved');
           const sum =
             values.selected.length +
+            values.selectedFlexFields.length +
             values.selectedDocuments.length +
-            values.selectedDocumentsToRemove.length;
+            values.selectedDocumentsToRemove.length +
+            values.selectedIdentities.length +
+            values.selectedIdentitiesToRemove.length;
           setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
@@ -146,8 +220,11 @@ export function RequestedIndividualDataChange({
       {({ submitForm, setFieldValue, values }) => {
         const allChangesLength =
           values.selected.length +
+          values.selectedFlexFields.length +
           values.selectedDocuments.length +
-          values.selectedDocumentsToRemove.length;
+          values.selectedDocumentsToRemove.length +
+          values.selectedIdentities.length +
+          values.selectedIdentitiesToRemove.length;
 
         return (
           <StyledBox>
@@ -164,26 +241,8 @@ export function RequestedIndividualDataChange({
                     EDIT
                   </Button>
                 ) : (
-                  canApproveDataChange && (
-                    <ConfirmationDialog
-                      title='Warning'
-                      content={getConfirmationText(allChangesLength)}
-                    >
-                      {(confirm) => (
-                        <Button
-                          onClick={confirm(() => submitForm())}
-                          variant='contained'
-                          color='primary'
-                          disabled={
-                            ticket.status !==
-                            GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                          }
-                        >
-                          Approve
-                        </Button>
-                      )}
-                    </ConfirmationDialog>
-                  )
+                  canApproveDataChange &&
+                  getApprovalButton(allChangesLength, submitForm)
                 )}
               </Box>
             </Title>

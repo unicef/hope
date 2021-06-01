@@ -1,5 +1,11 @@
 import React from 'react';
 import { HorizontalBar } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import {
+  formatNumber,
+  formatThousands,
+  getPercentage,
+} from '../../../utils/utils';
 import { AllChartsQuery } from '../../../__generated__/graphql';
 
 interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
@@ -9,51 +15,87 @@ interface IndividualsWithDisabilityReachedByAgeGroupsChartProps {
 export const IndividualsWithDisabilityReachedByAgeGroupsChart = ({
   data,
 }: IndividualsWithDisabilityReachedByAgeGroupsChartProps): React.ReactElement => {
-  const labels = data?.labels;
+  if (!data) return null;
+
   const chartData = {
-    labels,
+    labels: data.labels,
     datasets: [
       {
-        barPercentage: 0.8,
-        label: data?.datasets[0]?.label,
+        barPercentage: 0.4,
+        label: data.datasets[0]?.label,
         backgroundColor: '#FFAA1D',
-        data: data?.datasets[0]?.data,
+        data: [...data.datasets[0]?.data],
+        stack: 2,
       },
       {
-        barPercentage: 0.8,
-        label: data?.datasets[1]?.label,
+        barPercentage: 0.4,
+        label: data.datasets[1]?.label,
         backgroundColor: '#C3D1D8',
-        data: data?.datasets[1]?.data,
+        data: [...data.datasets[1]?.data],
+        stack: 2,
       },
     ],
   };
 
   const options = {
-    barPercentage: 0.1,
     legend: {
-      position: 'bottom',
       labels: {
-        usePointStyle: true,
-      }
+        padding: 40,
+      },
+    },
+    tooltips: {
+      mode: 'point',
+      callbacks: {
+        label: (tooltipItem, tooltipData) => {
+          return ` ${
+            tooltipData.datasets[tooltipItem.datasetIndex].label
+          }: ${formatNumber(tooltipItem.xLabel)} (${getPercentage(
+            tooltipItem.xLabel,
+            data.datasets[2].data[tooltipItem.index],
+          )})`;
+        },
+      },
     },
     scales: {
       xAxes: [
         {
-          stacked: true,
           position: 'top',
           ticks: {
-            stepSize: 1,
+            beginAtZero: true,
+            callback: formatThousands,
+            precision: 0,
+            suggestedMax: Math.max(...data.datasets[2].data) + 10,
           },
         },
       ],
       yAxes: [
         {
-          stacked: true,
           position: 'left',
+          gridLines: {
+            display: false,
+          },
         },
       ],
     },
+    plugins: {
+      datalabels: {
+        align: 'end',
+        anchor: 'end',
+        formatter: (value, { datasetIndex, dataIndex }) => {
+          if (datasetIndex === 1 && data.datasets[2].data[dataIndex]) {
+            return formatNumber(data.datasets[2].data[dataIndex]);
+          }
+          return null;
+        },
+      },
+    },
   };
 
-  return <HorizontalBar data={chartData} options={options} />;
+  return (
+    <HorizontalBar
+      data={chartData}
+      options={options}
+      plugins={[ChartDataLabels]}
+    />
+  );
 };

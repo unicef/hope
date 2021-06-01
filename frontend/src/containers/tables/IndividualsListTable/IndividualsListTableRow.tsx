@@ -10,7 +10,6 @@ import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { Flag } from '../../../components/Flag';
 import {
   choicesToDict,
-  getAgeFromDob,
   sexToCapitalize,
 } from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
@@ -39,10 +38,7 @@ export function IndividualsListTableRow({
   const relationshipChoicesDict = choicesToDict(
     choicesData.relationshipChoices,
   );
-  let age: number | string = 'N/A';
-  if (individual.birthDate) {
-    age = getAgeFromDob(individual.birthDate);
-  }
+
   const handleClick = (): void => {
     const path = `/${businessArea}/population/individuals/${individual.id}`;
     history.push(path);
@@ -58,7 +54,10 @@ export function IndividualsListTableRow({
         {individual.deduplicationGoldenRecordStatus !== 'UNIQUE' && (
           <FlagTooltip />
         )}
-        {individual.sanctionListPossibleMatch && <Flag />}
+        {(individual.sanctionListPossibleMatch ||
+          individual.sanctionListConfirmedMatch) && (
+          <Flag confirmed={individual.sanctionListConfirmedMatch} />
+        )}
       </TableCell>
       <TableCell align='left'>{individual.unicefId}</TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
@@ -68,11 +67,9 @@ export function IndividualsListTableRow({
       <TableCell align='left'>
         {relationshipChoicesDict[individual.relationship]}
       </TableCell>
-      <TableCell align='right'>{age}</TableCell>
+      <TableCell align='right'>{individual.age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>
-        {individual.household?.admin2?.title}
-      </TableCell>
+      <TableCell align='left'>{individual.household?.admin2?.title}</TableCell>
     </ClickableTableRow>
   );
 }

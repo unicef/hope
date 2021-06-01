@@ -98,8 +98,8 @@ def count_population(results: list) -> Tuple[int, int]:
                 seen_hash_keys.append(hash_key)
                 total_individuals_count += 1
                 if (
-                        reduced_submission.get("relationship_i_c", RELATIONSHIP_UNKNOWN).upper() == NON_BENEFICIARY
-                        and seen_hash_keys.count(hash_key) > 1
+                    reduced_submission.get("relationship_i_c", RELATIONSHIP_UNKNOWN).upper() == NON_BENEFICIARY
+                    and seen_hash_keys.count(hash_key) > 1
                 ):
                     total_individuals_count -= 1
 

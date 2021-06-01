@@ -62,6 +62,15 @@ function prepareSesitiveVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
+  let { flexFields } = values.individualData;
+  if (flexFields) {
+    flexFields = { ...flexFields };
+    for (const [key, value] of Object.entries(flexFields)) {
+      if (value === '') {
+        delete flexFields[key];
+      }
+    }
+  }
   return {
     variables: {
       input: {
@@ -72,7 +81,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
           issueType: {
             addIndividualIssueTypeExtras: {
               household: values.selectedHousehold?.id,
-              individualData: values.individualData,
+              individualData: { ...values.individualData, flexFields },
             },
           },
         },
@@ -118,6 +127,29 @@ function prepareEditIndividualVariables(requiredVariables, values) {
       return prev;
     }, {});
   individualData.flexFields = flexFields;
+  console.log({
+    variables: {
+      input: {
+        ...requiredVariables,
+        issueType: values.issueType,
+        linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          issueType: {
+            individualDataUpdateIssueTypeExtras: {
+              individual: values.selectedIndividual?.id,
+              individualData: {
+                ...individualData,
+                documents: values.individualDataUpdateFieldsDocuments,
+                documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+                identities: values.individualDataUpdateFieldsIdentities,
+                identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   return {
     variables: {
       input: {
@@ -132,6 +164,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
                 ...individualData,
                 documents: values.individualDataUpdateFieldsDocuments,
                 documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+                identities: values.individualDataUpdateFieldsIdentities,
+                identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
               },
             },
           },
@@ -218,7 +252,7 @@ export function prepareVariables(businessArea, values) {
     category: parseInt(values.category, 10),
     consent: values.consent,
     language: values.language,
-    admin: values?.admin?.node?.title,
+    admin: values?.admin?.node?.pCode,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(

@@ -59,7 +59,7 @@ def flex_field_individual(o):
                 "psych_distress",
                 "safety_fear",
                 "verbal_abuse",
-                None
+                None,
             ]
         ),
     }
@@ -96,6 +96,17 @@ class HouseholdFactory(factory.DjangoModelFactory):
     )
     org_name_enumerator = "Partner Organization"
     village = factory.Faker("city")
+    female_age_group_0_5_count = factory.fuzzy.FuzzyInteger(0, 3)
+    female_age_group_6_11_count = factory.fuzzy.FuzzyInteger(0, 3)
+    female_age_group_12_17_count = factory.fuzzy.FuzzyInteger(0, 3)
+    female_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
+    female_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
+    pregnant_count = factory.fuzzy.FuzzyInteger(0, 3)
+    male_age_group_0_5_count = factory.fuzzy.FuzzyInteger(0, 3)
+    male_age_group_6_11_count = factory.fuzzy.FuzzyInteger(0, 3)
+    male_age_group_12_17_count = factory.fuzzy.FuzzyInteger(0, 3)
+    male_age_group_18_59_count = factory.fuzzy.FuzzyInteger(0, 3)
+    male_age_group_60_count = factory.fuzzy.FuzzyInteger(0, 3)
 
 
 class DocumentFactory(factory.DjangoModelFactory):
@@ -211,12 +222,8 @@ def create_household_for_fixtures(household_args=None, individual_args=None):
     Individual.objects.bulk_update(individuals_to_update, ("relationship", "household"))
 
     if random.choice([True, False]) and len(individuals) >= 2:
-        IndividualRoleInHousehold.objects.create(
-            individual=individuals[0], household=household, role=ROLE_PRIMARY
-        )
-        IndividualRoleInHousehold.objects.create(
-            individual=individuals[1], household=household, role=ROLE_ALTERNATE
-        )
+        IndividualRoleInHousehold.objects.create(individual=individuals[0], household=household, role=ROLE_PRIMARY)
+        IndividualRoleInHousehold.objects.create(individual=individuals[1], household=household, role=ROLE_ALTERNATE)
     else:
         primary_collector, alternate_collector = IndividualFactory.create_batch(
             2, household=None, relationship="NON_BENEFICIARY"

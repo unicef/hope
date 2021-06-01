@@ -1,13 +1,17 @@
+import logging
+
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
-from django.utils.translation import ugettext_lazy as _
+
+logger = logging.getLogger(__name__)
 
 
 class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
@@ -214,7 +218,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         null=True,
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
-        db_index=True
+        db_index=True,
+    )
+    last_notification_sent = models.DateTimeField(
+        verbose_name=_("Modified"),
+        null=True,
+        blank=True,
+        help_text=_("Date this ticket was most recently changed."),
+        db_index=True,
     )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -240,7 +251,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         blank=True,
         help_text=_("The content of the customers query."),
     )
-    admin = models.CharField(max_length=250, blank=True)
+    admin2 = models.ForeignKey("core.AdminArea", null=True, blank=True, on_delete=models.SET_NULL)
     area = models.CharField(max_length=250, blank=True)
     language = models.TextField(blank=True)
     consent = models.BooleanField(default=True)
@@ -248,11 +259,14 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     linked_tickets = models.ManyToManyField(
         to="GrievanceTicket", through="GrievanceTicketThrough", related_name="linked_tickets_related"
     )
+    registration_data_import = models.ForeignKey(
+        "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
+    )
 
     @property
     def related_tickets(self):
-        yield from self.linked_tickets.all()
-        yield from self.linked_tickets_related.all()
+        combined_related_tickets = self.linked_tickets.all() | self.linked_tickets_related.all()
+        yield from combined_related_tickets
 
     @property
     def is_feedback(self):
@@ -302,6 +316,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         has_invalid_issue_type = should_contain_issue_types is True and self.issue_type not in issue_types
         has_issue_type_for_category_without_issue_types = bool(should_contain_issue_types is False and self.issue_type)
         if has_invalid_issue_type or has_issue_type_for_category_without_issue_types:
+            logger.error(f"Invalid issue type {self.issue_type} for selected category {self.category}")
             raise ValidationError({"issue_type": "Invalid issue type for selected category"})
 
     def save(self, *args, **kwargs):
@@ -469,6 +484,12 @@ class TicketNeedsAdjudicationDetails(TimeStampedUUIDModel):
         "household.Individual", null=True, related_name="+", on_delete=models.CASCADE
     )
     role_reassign_data = JSONField(default=dict)
+
+    @property
+    def has_duplicated_document(self):
+        documents1 = [f"{x.document_number}--{x.type_id}" for x in self.golden_records_individual.documents.all()]
+        documents2 = [f"{x.document_number}--{x.type_id}" for x in self.possible_duplicate.documents.all()]
+        return bool(set(documents1) & set(documents2))
 
 
 class TicketPaymentVerificationDetails(TimeStampedUUIDModel):

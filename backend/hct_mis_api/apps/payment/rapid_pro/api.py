@@ -1,9 +1,15 @@
+import logging
+from decimal import Decimal
+
 import requests
 from constance import config
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.household.models import Individual
+
+logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -29,6 +35,7 @@ class RapidProAPI:
         if not self.url:
             self.url = settings.RAPID_PRO_URL
         if not token:
+            logger.error(f"Token is not set for this business area, business_area={business_area.name}")
             raise TokenNotProvided("Token is not set for this business area.")
         self.url = settings.RAPID_PRO_URL
         self._client.headers.update({"Authorization": f"Token {token}"})
@@ -37,13 +44,38 @@ class RapidProAPI:
         if not is_absolute_url:
             url = f"{self._get_url()}{url}"
         response = self._client.get(url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _handle_post_request(self, url, data) -> dict:
         response = self._client.post(url=f"{self._get_url()}{url}", data=data)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e.response.text)
+
+            raise
         return response.json()
+
+    def _parse_json_urns_error(self, e, phone_numbers):
+        if e.response.status_code != 400:
+            return False
+        try:
+            error = e.response.json()
+            urns = error.get("urns")
+            if not urns:
+                return False
+            errors = []
+            for index, error in urns.items():
+                errors.append(f"{phone_numbers[int(index)]} - phone number is incorrect")
+            return errors
+
+        except:
+            return False
 
     def _get_url(self):
         return f"{self.url}/api/v2"
@@ -56,11 +88,19 @@ class RapidProAPI:
         urns = [f"{config.RAPID_PRO_PROVIDER}:{x}" for x in phone_numbers]
         data = {"flow": flow_uuid, "urns": urns, "restart_participants": True}
 
-        response = self._handle_post_request(
-            RapidProAPI.FLOW_STARTS_ENDPOINT,
-            data,
-        )
-        return response
+        try:
+            response = self._handle_post_request(
+                RapidProAPI.FLOW_STARTS_ENDPOINT,
+                data,
+            )
+            return response
+        except requests.exceptions.HTTPError as e:
+            errors = self._parse_json_urns_error(e, phone_numbers)
+            if errors:
+                logger.error("wrong phone numbers " + str(errors))
+                raise ValidationError(message={"phone_numbers": errors})
+            else:
+                raise
 
     def get_flow_runs(self):
         return self._get_paginated_results(f"{RapidProAPI.FLOW_RUNS_ENDPOINT}?responded=true")
@@ -98,7 +138,7 @@ class RapidProAPI:
             received = received_variable.get("value").upper() == variable_received_positive_string
         received_amount_variable = values.get(variable_amount_name)
         if received_variable is not None:
-            received_amount = received_amount_variable.get("value")
+            received_amount = Decimal(received_amount_variable.get("value", 0))
         return {"phone_number": phone_number, "received": received, "received_amount": received_amount}
 
     def create_group(self, name):
@@ -139,6 +179,7 @@ class RapidProAPI:
             response = self.start_flow(test_flow["uuid"], [phone_number])
             return None, response
         except Exception as e:
+            logger.exception(e)
             return str(e), None
 
     def test_connection_flow_run(self, flow_uuid, phone_number, timestamp=None):
@@ -171,4 +212,5 @@ class RapidProAPI:
                 "flow_start_status": flow_start_status,
             }
         except Exception as e:
+            logger.exception(e)
             return str(e), None

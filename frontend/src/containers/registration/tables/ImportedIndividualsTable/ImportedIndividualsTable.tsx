@@ -7,6 +7,7 @@ import {
   useHouseholdChoiceDataQuery,
 } from '../../../../__generated__/graphql';
 import { UniversalTable } from '../../../tables/UniversalTable';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTableRow';
 import { headCells } from './ImportedIndividualsTableHeadCells';
 
@@ -38,7 +39,14 @@ export function ImportedIndividualsTable({
     businessArea,
   };
 
-  const { data: choicesData } = useHouseholdChoiceDataQuery();
+  const { data: choicesData, loading } = useHouseholdChoiceDataQuery();
+
+  if (loading) return <LoadingComponent />;
+
+  if (!choicesData) {
+    return null;
+  }
+
   return (
     <>
       {showCheckbox && (

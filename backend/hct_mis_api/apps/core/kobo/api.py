@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from io import BytesIO
@@ -9,7 +10,11 @@ from requests.exceptions import RetryError
 from requests.packages.urllib3.util.retry import Retry
 
 from hct_mis_api.apps.core.kobo.common import filter_by_owner
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
+
+logger = logging.getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
@@ -44,13 +49,16 @@ class KoboAPI:
             results.extend(data["results"])
         return results
 
-    def _get_url(self, endpoint: str, append_api=True, add_limit=True):
+    def _get_url(self, endpoint: str, append_api=True, add_limit=True, additional_query_params=None):
         endpoint.strip("/")
         if endpoint != "token" and append_api is True:
             endpoint = f"api/v2/{endpoint}"
         # According to the Kobo API documentation,
         # the maximum limit per page is 30000
-        return f"{self.KPI_URL}/{endpoint}?format=json{'&limit=30000' if add_limit else ''}"
+        query_params = f"format=json{'&limit=30000' if add_limit else ''}"
+        if additional_query_params is not None:
+            query_params += f"&{additional_query_params}"
+        return f"{self.KPI_URL}/{endpoint}?{query_params}"
 
     def _get_token(self):
         self._client = requests.session()
@@ -60,13 +68,18 @@ class KoboAPI:
         token = settings.KOBO_MASTER_API_TOKEN
 
         if not token:
+            logger.error("KOBO Token is not set")
             raise TokenNotProvided("Token is not set")
 
         self._client.headers.update({"Authorization": f"token {token}"})
 
     def _handle_request(self, url) -> dict:
         response = self._client.get(url=url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         return response.json()
 
     def _post_request(self, url, data=None, files=None) -> requests.Response:
@@ -77,7 +90,7 @@ class KoboAPI:
         response = self._client.patch(url=url, data=data, files=files)
         return response
 
-    def create_template_from_file(self, bytes_io_file, template_id=""):
+    def create_template_from_file(self, bytes_io_file, xlsx_kobo_template_object, template_id=""):
         data = {
             "name": "Untitled",
             "asset_type": "template",
@@ -88,6 +101,11 @@ class KoboAPI:
         }
         if not template_id:
             asset_response = self._post_request(url=self._get_url("assets/", add_limit=False), data=data)
+            try:
+                asset_response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                logger.exception(e)
+                raise
             asset_response_dict = asset_response.json()
             asset_uid = asset_response_dict.get("uid")
         else:
@@ -109,15 +127,19 @@ class KoboAPI:
             response_dict = self._handle_request(url)
             import_status = response_dict.get("status")
             if import_status == "processing":
+                xlsx_kobo_template_object.status = XLSXKoboTemplate.PROCESSING
+                xlsx_kobo_template_object.save()
                 attempts -= 1
-                time.sleep(0.3)
+                time.sleep(1)
             else:
                 return response_dict, asset_uid
 
+        logger.error("Fetching import data took too long")
         raise RetryError("Fetching import data took too long")
 
     def get_all_projects_data(self) -> list:
         if not self.business_area:
+            logger.error("Business area is not provided")
             raise ValueError("Business area is not provided")
         projects_url = self._get_url("assets")
 
@@ -129,14 +151,24 @@ class KoboAPI:
 
         return self._handle_request(projects_url)
 
-    def get_project_submissions(self, uid: str) -> list:
-        submissions_url = self._get_url(f"assets/{uid}/data")
+    def get_project_submissions(self, uid: str, only_active_submissions) -> list:
+        additional_query_params = None
+        if only_active_submissions:
+            additional_query_params = 'query={"_validation_status.uid":"validation_status_approved"}'
+        submissions_url = self._get_url(
+            f"assets/{uid}/data",
+            additional_query_params=additional_query_params,
+        )
 
         response_dict = self._handle_paginated_results(submissions_url)
         return response_dict
 
     def get_attached_file(self, url: str) -> BytesIO:
         response = self._client.get(url=url)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         file = BytesIO(response.content)
         return file

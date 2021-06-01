@@ -61,10 +61,17 @@ export const importedHouseholdMinimal = gql`
     }
     size
     admin1
+    admin1Title
     admin2
+    admin2Title
+    flexFields
+    deviceid
+    start
     firstRegistrationDate
     lastRegistrationDate
     hasDuplicates
+    fchildHoh
+    childHoh
   }
 `;
 export const importedHouseholdDetailed = gql`
@@ -79,12 +86,20 @@ export const importedHouseholdDetailed = gql`
       hctId
       name
     }
+    individuals {
+      edges {
+        node {
+          ...importedIndividualMinimal
+        }
+      }
+    }
   }
 `;
 
 export const importedIndividualMinimal = gql`
   fragment importedIndividualMinimal on ImportedIndividualNode {
     id
+    age
     fullName
     birthDate
     sex
@@ -123,13 +138,25 @@ export const importedIndividualDetailed = gql`
     middleName
     estimatedBirthDate
     maritalStatus
+    workStatus
     pregnant
+    flexFields
+    observedDisability
+    seeingDisability
+    hearingDisability
+    physicalDisability
+    memoryDisability
+    selfcareDisability
+    commsDisability
+    disability
     documents {
       edges {
         node {
           id
+          country
           type {
             label
+            country
           }
           documentNumber
         }
@@ -139,6 +166,7 @@ export const importedIndividualDetailed = gql`
       id
       documentNumber
       type
+      country
     }
     role
     relationship

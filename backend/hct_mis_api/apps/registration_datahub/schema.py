@@ -3,7 +3,8 @@ from datetime import date
 import graphene
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
-from django.db.models import Q
+from django.db.models import Q, Prefetch
+from django.db.models.functions import Lower
 from django_filters import (
     FilterSet,
     OrderingFilter,
@@ -22,7 +23,14 @@ from hct_mis_api.apps.account.permissions import (
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.schema import ChoiceObject
-from hct_mis_api.apps.core.utils import decode_id_string, to_choice_object, encode_ids
+from hct_mis_api.apps.core.utils import (
+    decode_id_string,
+    to_choice_object,
+    encode_ids,
+    CustomOrderingFilter,
+    resolve_flex_fields_choices_to_string,
+    get_model_choices_fields,
+)
 from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
@@ -30,6 +38,8 @@ from hct_mis_api.apps.household.models import (
     NEEDS_ADJUDICATION,
     DUPLICATE_IN_BATCH,
     DEDUPLICATION_BATCH_STATUS_CHOICE,
+    ROLE_PRIMARY,
+    ROLE_ALTERNATE,
 )
 from hct_mis_api.apps.registration_datahub.models import (
     ImportedHousehold,
@@ -39,7 +49,9 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedDocumentType,
     ImportedDocument,
     ImportedIndividualIdentity,
+    ImportedIndividualRoleInHousehold,
 )
+from hct_mis_api.apps.utils.schema import Arg, FlexFieldsScalar
 
 
 class DeduplicationResultNode(graphene.ObjectType):
@@ -68,12 +80,13 @@ class ImportedHouseholdFilter(FilterSet):
         model = ImportedHousehold
         fields = ()
 
-    order_by = OrderingFilter(
+    order_by = CustomOrderingFilter(
         fields=(
             "id",
-            "head_of_household",
+            Lower("head_of_household__full_name"),
             "size",
-            "registration_date",
+            "first_registration_date",
+            "admin2_title",
         )
     )
 
@@ -118,7 +131,7 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = Arg()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
     has_duplicates = graphene.Boolean(
@@ -138,6 +151,23 @@ class ImportedHouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
             | Q(deduplication_golden_record_status__in=(DUPLICATE, NEEDS_ADJUDICATION))
         ).exists()
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_to_string(parent)
+
+    def resolve_individuals(parent, info):
+        imported_individuals_ids = list(parent.individuals.values_list("id", flat=True))
+        collectors_ids = list(
+            parent.individuals_and_roles.filter(role__in=[ROLE_PRIMARY, ROLE_ALTERNATE]).values_list("individual_id", flat=True)
+        )
+        ids = list(set(imported_individuals_ids + collectors_ids))
+
+        return ImportedIndividual.objects.filter(id__in=ids).prefetch_related(
+            Prefetch(
+                "households_and_roles",
+                queryset=ImportedIndividualRoleInHousehold.objects.filter(household=parent.id),
+            )
+        )
+
     class Meta:
         model = ImportedHousehold
         filter_fields = []
@@ -151,12 +181,14 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             Permissions.RDI_VIEW_DETAILS,
         ),
     )
-
+    flex_fields = FlexFieldsScalar()
     estimated_birth_date = graphene.Boolean(required=False)
     role = graphene.String()
     relationship = graphene.String()
     deduplication_batch_results = graphene.List(DeduplicationResultNode)
     deduplication_golden_record_results = graphene.List(DeduplicationResultNode)
+    observed_disability = graphene.List(graphene.String)
+    age = graphene.Int()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -174,11 +206,31 @@ class ImportedIndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         results = parent.deduplication_golden_record_results.get(key, {})
         return encode_ids(results, "Individual", "hit_id")
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_to_string(parent)
+
+    @staticmethod
+    def resolve_age(parent, info):
+        return parent.age
+
     class Meta:
         model = ImportedIndividual
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            ImportedIndividual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+                "work_status",
+                "collect_individual_data",
+            ],
+        )
 
 
 class RegistrationDataImportDatahubNode(DjangoObjectType):
@@ -202,6 +254,11 @@ class ImportedDocumentTypeNode(DjangoObjectType):
 
 
 class ImportedDocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+
+    def resolve_country(parent, info):
+        return getattr(parent.type.country, "name", parent.type.country)
+
     class Meta:
         model = ImportedDocument
         filter_fields = []
@@ -211,9 +268,13 @@ class ImportedDocumentNode(DjangoObjectType):
 
 class ImportedIndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = ImportedIndividualIdentity

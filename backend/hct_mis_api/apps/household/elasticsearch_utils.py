@@ -1,6 +1,10 @@
+import logging
+
 from django.core.management import CommandError
 from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import Search
 
+logger = logging.getLogger(__name__)
 
 # DEFAULT_SCRIPT = (
 #     "double tf = Math.sqrt(doc.freq); double idf = 1.0; double norm = 1/"
@@ -12,7 +16,6 @@ DEFAULT_SCRIPT = "return (1.0/doc.length)*query.boost"
 def populate_index(queryset, doc, parallel=False):
     qs = queryset.iterator()
     doc().update(qs, parallel=parallel)
-
 
 
 def _get_models(args):
@@ -31,6 +34,7 @@ def _get_models(args):
                     match_found = True
 
             if not match_found:
+                logger.error("No model or app named {}".format(arg))
                 raise CommandError("No model or app named {}".format(arg))
     else:
         models = registry.get_models()
@@ -72,3 +76,10 @@ def rebuild_search_index(models=None, options=None):
 
 def populate_all_indexes():
     _populate(models=None, options={"parallel": False, "quiet": True})
+
+
+def remove_document_by_matching_ids(id_list, document):
+    query_dict = {"query": {"terms": {"id": id_list}}}
+    search = Search(index="individuals")
+    search.update_from_dict(query_dict)
+    search.delete()

@@ -6,6 +6,7 @@ export const query = gql`
       id
       cashPlan{
         id
+        caHashId
       }
     }
   }

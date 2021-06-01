@@ -8,7 +8,6 @@ import AttachMoney from '@material-ui/icons/AttachMoney';
 import Feedback from '@material-ui/icons/Feedback';
 import TrendingUpRounded from '@material-ui/icons/TrendingUpRounded';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
-import SettingsRounded from '@material-ui/icons/SettingsRounded';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import React from 'react';
@@ -16,7 +15,7 @@ import { PERMISSIONS } from '../../config/permissions';
 
 export const menuItems = [
   {
-    name: 'Country Dashboard',
+    name: 'Dashboard',
     href: '/#',
     selectedRegexp: /^\/$/,
     icon: <DashboardIcon />,
@@ -117,12 +116,6 @@ export const menuItems = [
     selectedRegexp: /^\/users-list.*$/,
     icon: <SupervisedUserCircle />,
     permissions: [PERMISSIONS.USER_MANAGEMENT_VIEW_LIST],
-  },
-  {
-    name: 'Settings',
-    href: '/#',
-    selectedRegexp: /^\/test.*$/,
-    icon: <SettingsRounded />,
   },
   {
     name: 'Activity Log',

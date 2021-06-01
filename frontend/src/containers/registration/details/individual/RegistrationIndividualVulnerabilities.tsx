@@ -3,9 +3,13 @@ import styled from 'styled-components';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { Typography } from '@material-ui/core';
-import { ImportedIndividualDetailedFragment } from '../../../../__generated__/graphql';
+import {
+  ImportedIndividualDetailedFragment,
+  useAllIndividualsFlexFieldsAttributesQuery,
+} from '../../../../__generated__/graphql';
 import { LabelizedField } from '../../../../components/LabelizedField';
-import { Missing } from '../../../../components/Missing';
+import { useArrayToDict } from '../../../../hooks/useArrayToDict';
+import { LoadingComponent } from '../../../../components/LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -19,6 +23,10 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const Image = styled.img`
+  max-width: 150px;
+`;
+
 interface RegistrationIndividualVulnerabilitiesProps {
   individual: ImportedIndividualDetailedFragment;
 }
@@ -27,62 +35,78 @@ export function RegistrationIndividualVulnerabilities({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   individual,
 }: RegistrationIndividualVulnerabilitiesProps): React.ReactElement {
+  const { data, loading } = useAllIndividualsFlexFieldsAttributesQuery();
+  const flexAttributesDict = useArrayToDict(
+    data?.allIndividualsFlexFieldsAttributes,
+    'name',
+    '*',
+  );
+
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
+  if (!data || !flexAttributesDict) {
+    return null;
+  }
+
+  const fields = Object.entries(individual.flexFields || {}).map(
+    ([key, value]: [string, string | string[]]) => {
+      if (flexAttributesDict[key]?.type === 'IMAGE') {
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+          >
+            <Image src={value} />
+          </LabelizedField>
+        );
+      }
+      if (
+        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
+        flexAttributesDict[key]?.type === 'SELECT_ONE'
+      ) {
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+        if (value instanceof Array) {
+          newValue = value
+            .map(
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
+            )
+            .join(', ');
+        }
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={newValue}
+          />
+        );
+      }
+      return (
+        <LabelizedField
+          key={key}
+          label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+          value={value}
+        />
+      );
+    },
+  );
   return (
     <Overview>
       <Title>
         <Typography variant='h6'>Vulnerabilities</Typography>
       </Title>
       <Grid container spacing={6}>
-        <Grid item xs={4}>
-          <LabelizedField label='Disability'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Working'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Serious Illness'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Martial Status'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Age first Marriage'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Enrolled in School'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Attendance'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='School Type'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Years in School'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
-        <Grid item xs={4}>
-          <LabelizedField label='Minutes to School'>
-            <Missing />
-          </LabelizedField>
-        </Grid>
+        {fields.map((field) => (
+          <Grid item xs={4}>
+            {field}
+          </Grid>
+        ))}
       </Grid>
     </Overview>
   );

@@ -11,10 +11,8 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.airflow.filePath: "**/airflow/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.airflow.repository: "hope-airflow"
   Docker.registry: "uniappsk8sdevacr"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
@@ -36,18 +34,6 @@ stages:
               tags: |
                 $(Build.BuildId)
                 dev-latest
-          - task: Docker@2
-            displayName: Build&Push Airflow
-            inputs:
-              command: buildAndPush
-              dockerfile: $(Docker.airflow.filePath)
-              repository: $(Docker.airflow.repository)
-              containerRegistry: $(Docker.registry)
-              buildContext: "$(Build.SourcesDirectory)"
-              tags: |
-                $(Build.BuildId)
-                dev-latest
-
 
   - stage: test
     displayName: TEST
@@ -55,7 +41,6 @@ stages:
       - job: django_tests
         displayName: "[DJANGO TEST]"
         variables:
-          airflow_image: uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
           backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
@@ -72,7 +57,6 @@ stages:
               script: |
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
-               cp .env airflow/config/.env_airflow
 
           - task: DockerCompose@0
             displayName: "Run tests"
@@ -83,7 +67,6 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
-               airflow_image=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
                backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: PublishTestResults@2

@@ -3,7 +3,11 @@ import styled from 'styled-components';
 import { Button, DialogContent, DialogTitle, Box } from '@material-ui/core';
 import { Dialog } from '../../containers/dialogs/Dialog';
 import { DialogActions } from '../../containers/dialogs/DialogActions';
-import { IndividualNode } from '../../__generated__/graphql';
+import {
+  IndividualNode,
+  useIndividualPhotosLazyQuery,
+  useIndividualPhotosQuery,
+} from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -29,12 +33,19 @@ export const IndividualPhotoModal = ({
   individual,
 }: IndividualPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [getPhotos, { data, loading }] = useIndividualPhotosLazyQuery({
+    variables: { id: individual?.id },
+  });
+
   return (
     <>
       <Button
         color='primary'
         variant='outlined'
-        onClick={() => setDialogOpen(true)}
+        onClick={() => {
+          setDialogOpen(true);
+          getPhotos();
+        }}
       >
         Show Photo
       </Button>
@@ -50,7 +61,7 @@ export const IndividualPhotoModal = ({
         </DialogTitleWrapper>
         <DialogContent>
           <Box p={3}>
-            <StyledImage alt='Individual' src={individual?.photo} />
+            <StyledImage alt='Individual' src={data?.individual?.photo} />
           </Box>
         </DialogContent>
         <DialogFooter>

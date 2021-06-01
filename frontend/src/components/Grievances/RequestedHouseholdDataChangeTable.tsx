@@ -44,12 +44,22 @@ export function CurrentValue({
         displayValue =
           field.choices.find((item) => item.value === value)?.labelEn || '-';
         break;
+      case 'SELECT_MANY':
+        displayValue =
+          field.choices.find((item) => item.value === value)?.labelEn || '-';
+        if (value instanceof Array) {
+          displayValue = value
+            .map(
+              (choice) =>
+                field.choices.find((item) => item.value === choice)?.labelEn ||
+                '-',
+            )
+            .join(', ');
+        }
+        break;
       case 'BOOL':
         /* eslint-disable-next-line no-nested-ternary */
         displayValue = value === null ? '-' : value ? 'Yes' : 'No';
-        break;
-      case 'SELECT_MANY':
-        displayValue = value.map((el) => startCase(camelCase(el))).join(', ');
         break;
       default:
         displayValue = value;
@@ -66,6 +76,19 @@ export function NewValue({
     case 'SELECT_ONE':
       displayValue =
         field.choices.find((item) => item.value === value)?.labelEn || '-';
+      break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */

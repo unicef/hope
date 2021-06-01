@@ -1,27 +1,39 @@
 import logging
 from collections import namedtuple
 
-from admin_extra_urls.api import ExtraUrlMixin, action
-from adminfilters.filters import ForeignKeyFieldFilter, RelatedFieldComboFilter
-from django.contrib import admin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.forms import MultipleChoiceField, ModelChoiceField
+from django.forms import ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    ForeignKeyFieldFilter,
+    RelatedFieldComboFilter,
+)
 from requests import HTTPError
 
-from hct_mis_api.apps.account.microsoft_graph import MicrosoftGraphAPI, DJANGO_USER_MAP
-from hct_mis_api.apps.account.models import User, UserRole, Role, IncompatibleRoles
+from hct_mis_api.apps.account.microsoft_graph import (
+    DJANGO_USER_MAP,
+    MicrosoftGraphAPI,
+)
+from hct_mis_api.apps.account.models import (
+    IncompatibleRoles,
+    Role,
+    User,
+    UserRole,
+)
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
@@ -65,6 +77,9 @@ class UserRoleAdminForm(ModelForm):
         if self.instance.id:
             incompatible_userroles = incompatible_userroles.exclude(id=self.instance.id)
         if incompatible_userroles.exists():
+            logger.error(
+                f"This role is incompatible with {', '.join([userrole.role.name for userrole in incompatible_userroles])}"
+            )
             raise ValidationError(
                 {
                     "role": _(
@@ -113,23 +128,22 @@ class UserRoleInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated")
-
+    list_filter = ("is_staff", "is_superuser", "is_active")
     list_display = (
         "username",
         "email",
         "first_name",
         "last_name",
-        "job_title",
-        "status",
         "is_active",
         "is_staff",
         "is_superuser",
     )
+    readonly_fields = ("ad_uuid",)
     fieldsets = (
         (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
-            {"fields": ("first_name", "last_name", "email")},
+            {"fields": (("first_name", "last_name", "email"), "ad_uuid")},
         ),
         (
             _("Permissions"),
@@ -146,12 +160,53 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     )
     inlines = (UserRoleInline,)
 
-    @action()
+    @button()
     def privileges(self, request, pk):
         ctx = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/privileges.html", ctx)
 
-    @action()
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.ms_graph = MicrosoftGraphAPI()
+
+    def _sync_ad_data(self, user):
+        if user.ad_uuid:
+            filters = {"uuid": user.ad_uuid}
+        else:
+            filters = {"email": user.email}
+        user_data = self.ms_graph.get_user_data(**filters)
+        user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
+        for field, value in user_args.items():
+            setattr(user, field, value or "")
+        user.save()
+
+    @button(label="Sync")
+    def sync_multi(self, request):
+        not_found = []
+        try:
+            for user in User.objects.all():
+                try:
+                    self._sync_ad_data(user)
+                except Http404:
+                    not_found.append(str(user))
+            if not_found:
+                self.message_user(request, f"These users were not found: {', '.join(not_found)}", messages.WARNING)
+            else:
+                self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+
+    @button(label="Sync")
+    def sync_single(self, request, pk):
+        try:
+            self._sync_ad_data(self.get_object(request, pk))
+            self.message_user(request, "Active Directory data successfully fetched", messages.SUCCESS)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+
+    @button()
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
@@ -183,9 +238,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         try:
                             if email in existing:
                                 user = User.objects.get(email=email)
+                                self._sync_ad_data(user)
                                 results.updated.append(user)
                             else:
-                                user_data = ms_graph.get_user_data(email)
+                                user_data = ms_graph.get_user_data(email=email)
                                 user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
                                 user = User(**user_args)
                                 if user.first_name is None:
@@ -233,7 +289,7 @@ class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     search_fields = ("name",)
     form = RoleAdminForm
 
-    @action()
+    @button()
     def members(self, request, pk):
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
@@ -268,6 +324,7 @@ class IncompatibleRoleFilter(SimpleListFilter):
                 Q(role_one=self.value()) | Q(role_two=self.value()),
             )
         except (ValueError, ValidationError) as e:
+            logger.exception(e)
             raise IncorrectLookupParameters(e)
 
 

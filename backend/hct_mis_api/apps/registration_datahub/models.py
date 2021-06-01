@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date
 
@@ -6,7 +7,6 @@ from django.contrib.postgres.fields import JSONField
 from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from django_countries.fields import CountryField
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -45,6 +45,8 @@ DEDUPLICATION_BATCH_STATUS_CHOICE = (
     (NOT_PROCESSED, "Not Processed"),
 )
 
+logger = logging.getLogger(__name__)
+
 
 class ImportedHousehold(TimeStampedUUIDModel):
     consent_sign = ImageField(validators=[validate_image_file_extension], blank=True)
@@ -56,7 +58,9 @@ class ImportedHousehold(TimeStampedUUIDModel):
     address = models.CharField(max_length=255, blank=True, default=BLANK)
     country = CountryField()
     admin1 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin1_title = models.CharField(max_length=255, blank=True, default=BLANK)
     admin2 = models.CharField(max_length=255, blank=True, default=BLANK)
+    admin2_title = models.CharField(max_length=255, blank=True, default=BLANK)
     geopoint = PointField(null=True, default=None)
     female_age_group_0_5_count = models.PositiveIntegerField(default=None, null=True)
     female_age_group_6_11_count = models.PositiveIntegerField(default=None, null=True)
@@ -211,7 +215,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
             "phone_no",
             "phone_no_alternative",
         )
-        values = [str(getattr(self, field)) for field in fields]
+        values = [str(getattr(self, field)).lower() for field in fields]
 
         return sha256(";".join(values).encode()).hexdigest()
 
@@ -327,6 +331,7 @@ class ImportedDocument(TimeStampedUUIDModel):
 
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
+                logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
 

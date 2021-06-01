@@ -65,7 +65,8 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        withFlag={individual.sanctionListPossibleMatch}
+        possibleMatch={individual.sanctionListPossibleMatch}
+        confirmedMatch={individual.sanctionListConfirmedMatch}
         withTriangle={individual.deduplicationGoldenRecordStatus !== 'UNIQUE'}
       >
         {individual.photo ? (

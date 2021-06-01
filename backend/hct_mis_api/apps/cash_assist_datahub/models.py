@@ -3,8 +3,8 @@ from decimal import Decimal
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from model_utils import Choices
 
+from hct_mis_api.apps.payment.models import PaymentRecord as InternalPaymentRecord
 from hct_mis_api.apps.utils.models import AbstractSession
 
 
@@ -21,7 +21,9 @@ class SessionModel(models.Model):
 
 class TargetPopulation(SessionModel):
     mis_id = models.UUIDField()
-    ca_id = models.CharField(max_length=255,)
+    ca_id = models.CharField(
+        max_length=255,
+    )
     ca_hash_id = models.UUIDField()
 
     class Meta:
@@ -30,8 +32,12 @@ class TargetPopulation(SessionModel):
 
 class Programme(SessionModel):
     mis_id = models.UUIDField()
-    ca_id = models.CharField(max_length=255,)
-    ca_hash_id = models.CharField(max_length=255,)
+    ca_id = models.CharField(
+        max_length=255,
+    )
+    ca_hash_id = models.CharField(
+        max_length=255,
+    )
 
     class Meta:
         unique_together = ("session", "mis_id")
@@ -44,14 +50,23 @@ class CashPlan(SessionModel):
     TRANSACTION_COMPLETED_WITH_ERRORS = "Transaction Completed with Errors"
     STATUS_CHOICE = (
         (DISTRIBUTION_COMPLETED, _("Distribution Completed")),
-        (DISTRIBUTION_COMPLETED_WITH_ERRORS, _("Distribution Completed with Errors"),),
+        (
+            DISTRIBUTION_COMPLETED_WITH_ERRORS,
+            _("Distribution Completed with Errors"),
+        ),
         (TRANSACTION_COMPLETED, _("Transaction Completed")),
-        (TRANSACTION_COMPLETED_WITH_ERRORS, _("Transaction Completed with Errors"),),
+        (
+            TRANSACTION_COMPLETED_WITH_ERRORS,
+            _("Transaction Completed with Errors"),
+        ),
     )
     business_area = models.CharField(max_length=20, null=True)
     cash_plan_id = models.CharField(max_length=255)
     cash_plan_hash_id = models.UUIDField()
-    status = models.CharField(max_length=255, null=True,)
+    status = models.CharField(
+        max_length=255,
+        null=True,
+    )
     status_date = models.DateTimeField(null=True)
     name = models.CharField(max_length=255, null=True)
     distribution_level = models.CharField(max_length=255, null=True)
@@ -73,16 +88,28 @@ class CashPlan(SessionModel):
     total_persons_covered_revised = models.IntegerField(null=True)
     payment_records_count = models.IntegerField(null=True)
     total_entitled_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_entitled_quantity_revised = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     total_undelivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
 
     class Meta:
@@ -90,22 +117,6 @@ class CashPlan(SessionModel):
 
 
 class PaymentRecord(SessionModel):
-    STATUS_SUCCESS = "SUCCESS"
-    STATUS_PENDING = "PENDING"
-    STATUS_ERROR = "ERROR"
-    ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
-    ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
-    DELIVERY_TYPE_CASH = "CASH"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
-    DELIVERY_TYPE_TRANSFER = "TRANSFER"
-    ENTITLEMENT_CARD_STATUS_CHOICE = Choices(
-        (ENTITLEMENT_CARD_STATUS_ACTIVE, _("Active")), (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
-    )
-    DELIVERY_TYPE_CHOICE = (
-        (DELIVERY_TYPE_CASH, _("Cash")),
-        (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
-        (DELIVERY_TYPE_TRANSFER, _("Transfer")),
-    )
     business_area = models.CharField(max_length=20, null=True)
     status = models.CharField(max_length=255, null=True)
     status_date = models.DateTimeField(null=True)
@@ -125,14 +136,23 @@ class PaymentRecord(SessionModel):
     entitlement_card_status = models.CharField(max_length=20, null=True)
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
-        choices=DELIVERY_TYPE_CHOICE, default=DELIVERY_TYPE_CASH, max_length=20, null=True,
+        choices=InternalPaymentRecord.DELIVERY_TYPE_CHOICE,
+        default=InternalPaymentRecord.DELIVERY_TYPE_CASH,
+        max_length=24,
+        null=True,
     )
     currency = models.CharField(max_length=4, null=True)
     entitlement_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     delivered_quantity = models.DecimalField(
-        decimal_places=2, max_digits=12, validators=[MinValueValidator(Decimal("0.01"))], null=True,
+        decimal_places=2,
+        max_digits=12,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        null=True,
     )
     delivery_date = models.DateTimeField(null=True)
     service_provider_ca_id = models.CharField(max_length=255, null=True)
@@ -148,7 +168,9 @@ class ServiceProvider(SessionModel):
     ca_id = models.CharField(max_length=255)
     full_name = models.CharField(max_length=255)
     short_name = models.CharField(max_length=100)
-    country = models.CharField(max_length=3,)
+    country = models.CharField(
+        max_length=3,
+    )
     vision_id = models.CharField(max_length=255)
 
     class Meta:

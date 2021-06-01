@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.core.management import call_command
 from parameterized import parameterized
 
@@ -36,23 +37,19 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
             business_area = BusinessArea.objects.get(slug=business_area_slug)
             PaymentRecordFactory.create_batch(
                 3,
-                created_at=datetime(year=2021, day=1, month=1),
+                delivery_date=datetime(year=2021, day=1, month=1),
                 business_area=business_area,
                 delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
-                status=PaymentRecord.STATUS_SUCCESS,
-                entitlement_quantity=200.20,
                 delivered_quantity_usd=200.20,
                 cash_plan=cash_plan,
                 household=household,
             )
             PaymentRecordFactory.create_batch(
                 3,
-                created_at=datetime(year=2021, day=1, month=1),
+                delivery_date=datetime(year=2021, day=1, month=1),
                 business_area=business_area,
-                delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
-                status=PaymentRecord.STATUS_PENDING,
-                entitlement_quantity=100.10,
-                delivered_quantity_usd=0,
+                delivery_type=PaymentRecord.DELIVERY_TYPE_VOUCHER,
+                delivered_quantity_usd=100.00,
                 cash_plan=cash_plan,
                 household=household,
             )
@@ -60,8 +57,8 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
     @parameterized.expand(
         [
             (
-                    "with_permission",
-                    [Permissions.DASHBOARD_VIEW_COUNTRY],
+                "with_permission",
+                [Permissions.DASHBOARD_VIEW_COUNTRY],
             ),
             ("without_permission", []),
         ]
@@ -73,35 +70,4 @@ class TestChartTotalTransferredCashByCountry(APITestCase):
             request_string=self.CHART_TOTAL_TRANSFERRED_CASH_BY_COUNTRY_QUERY,
             context={"user": self.user},
             variables={"year": 2021},
-        )
-
-
-def generate():
-    chosen_business_areas = ("afghanistan", "botswana", "angola")
-    for business_area_slug in chosen_business_areas:
-        business_area = BusinessArea.objects.get(slug=business_area_slug)
-        (household, _) = create_household(household_args={"size": 1, "business_area": business_area},
-                                          individual_args={"business_area": business_area})
-        cash_plan = CashPlanFactory(funds_commitment="123456", exchange_rate=None, business_area=business_area)
-        PaymentRecordFactory.create_batch(
-            3,
-            created_at=datetime(year=2021, day=1, month=1),
-            business_area=business_area,
-            delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
-            status=PaymentRecord.STATUS_SUCCESS,
-            entitlement_quantity=200.20,
-            delivered_quantity_usd=200.20,
-            cash_plan=cash_plan,
-            household=household,
-        )
-        PaymentRecordFactory.create_batch(
-            3,
-            created_at=datetime(year=2021, day=1, month=1),
-            business_area=business_area,
-            delivery_type=PaymentRecord.DELIVERY_TYPE_CASH,
-            status=PaymentRecord.STATUS_PENDING,
-            entitlement_quantity=100.10,
-            delivered_quantity_usd=0,
-            cash_plan=cash_plan,
-            household=household,
         )

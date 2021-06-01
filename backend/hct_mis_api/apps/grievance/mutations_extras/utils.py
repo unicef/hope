@@ -1,5 +1,9 @@
+import logging
+
 from hct_mis_api.apps.activity_log.models import log_create
 from hct_mis_api.apps.household.models import RELATIONSHIP_UNKNOWN
+
+logger = logging.getLogger(__name__)
 
 
 def handle_role(role, household, individual):
@@ -27,9 +31,33 @@ def handle_add_document(document, individual):
 
     document_already_exists = Document.objects.filter(document_number=number, type=document_type).exists()
     if document_already_exists:
+        logger.error(f"Document with number {number} of type {type_name} for country {country} already exist")
         raise GraphQLError(f"Document with number {number} of type {type_name} for country {country} already exist")
 
     return Document(document_number=number, individual=individual, type=document_type)
+
+
+def handle_add_identity(identity, individual):
+    from django_countries.fields import Country
+    from graphql import GraphQLError
+    from hct_mis_api.apps.household.models import Agency, IndividualIdentity
+
+    agency_name = identity.get("agency")
+    country_code = identity.get("country")
+    country = Country(country_code)
+    number = identity.get("number")
+    agency_type, _ = Agency.objects.get_or_create(
+        country=country,
+        type=agency_name,
+        defaults={"country": country, "type": agency_name, "label": f"{country.name} - {agency_name}"},
+    )
+
+    identity_already_exists = IndividualIdentity.objects.filter(number=number, agency=agency_type).exists()
+    if identity_already_exists:
+        logger.error(f"Identity with number {number}, agency: {agency_name} already exist")
+        raise GraphQLError(f"Identity with number {number}, agency: {agency_name} already exist")
+
+    return IndividualIdentity(number=number, individual=individual, agency=agency_type)
 
 
 def prepare_previous_documents(documents_to_remove_with_approve_status):
@@ -52,6 +80,26 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
     return previous_documents
 
 
+def prepare_previous_identities(identities_to_remove_with_approve_status):
+    from django.shortcuts import get_object_or_404
+    from hct_mis_api.apps.core.utils import encode_id_base64
+    from hct_mis_api.apps.household.models import IndividualIdentity
+
+    previous_identities = {}
+    for identity_data in identities_to_remove_with_approve_status:
+        identity_id = identity_data.get("value")
+        identity = get_object_or_404(IndividualIdentity, id=identity_id)
+        previous_identities[identity.id] = {
+            "id": identity.id,
+            "number": identity.number,
+            "individual": encode_id_base64(identity.individual.id, "Individual"),
+            "label": identity.agency.label,
+            "country": identity.agency.country.alpha3,
+        }
+
+    return previous_identities
+
+
 def verify_required_arguments(input_data, field_name, options):
     from graphql import GraphQLError
     from hct_mis_api.apps.core.utils import nested_dict_get
@@ -61,9 +109,11 @@ def verify_required_arguments(input_data, field_name, options):
             continue
         for required in value.get("required"):
             if nested_dict_get(input_data, required) is None:
+                logger.error(f"You have to provide {required} in {key}")
                 raise GraphQLError(f"You have to provide {required} in {key}")
         for not_allowed in value.get("not_allowed"):
             if nested_dict_get(input_data, not_allowed) is not None:
+                logger.error(f"You can't provide {not_allowed} in {key}")
                 raise GraphQLError(f"You can't provide {not_allowed} in {key}")
 
 
@@ -81,6 +131,7 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
     if associated_with not in ("households", "individuals"):
+        logger.error("associated_with argument must be one of ['household', 'individual']")
         raise ValueError("associated_with argument must be one of ['household', 'individual']")
 
     all_flex_fields = serialize_flex_attributes().get(associated_with, {})
@@ -88,18 +139,22 @@ def verify_flex_fields(flex_fields_to_verify, associated_with):
     for name, value in flex_fields_to_verify.items():
         flex_field = all_flex_fields.get(name)
         if flex_field is None:
+            logger.error(f"{name} is not a correct `flex field")
             raise ValueError(f"{name} is not a correct `flex field")
         field_type = flex_field["type"]
         field_choices = set(f.get("value") for f in flex_field["choices"])
         if not isinstance(value, FIELD_TYPES_TO_INTERNAL_TYPE[field_type]) or value is None:
+            logger.error(f"invalid value type for a field {name}")
             raise ValueError(f"invalid value type for a field {name}")
 
         if field_type == TYPE_SELECT_ONE and value not in field_choices:
+            logger.error(f"invalid value: {value} for a field {name}")
             raise ValueError(f"invalid value: {value} for a field {name}")
 
         if field_type == TYPE_SELECT_MANY:
             values = set(value)
             if values.issubset(field_choices) is False:
+                logger.error(f"invalid value: {value} for a field {name}")
                 raise ValueError(f"invalid value: {value} for a field {name}")
 
 
@@ -110,8 +165,9 @@ def withdraw_individual_and_reassign_roles(ticket_details, individual_to_remove,
 
 def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_to_remove, info, unique_individual):
     old_individual_to_remove, removed_individual_household = reassign_roles(individual_to_remove, info, ticket_details)
-    mark_as_duplicate_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household,
-                                 unique_individual)
+    mark_as_duplicate_individual(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household, unique_individual
+    )
 
 
 def reassign_roles(individual_to_remove, info, ticket_details):
@@ -127,6 +183,7 @@ def reassign_roles(individual_to_remove, info, ticket_details):
         ROLE_ALTERNATE,
         ROLE_NO_ROLE,
     )
+
     old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
     roles_to_bulk_update = []
     for role_data in ticket_details.role_reassign_data.values():
@@ -162,6 +219,7 @@ def reassign_roles(individual_to_remove, info, ticket_details):
             role.individual = new_individual
             roles_to_bulk_update.append(role)
     if len(roles_to_bulk_update) != individual_to_remove.households_and_roles.exclude(role=ROLE_NO_ROLE).count():
+        logger.error("Ticket cannot be closed not all roles has been reassigned")
         raise GraphQLError("Ticket cannot be closed not all roles has been reassigned")
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
@@ -171,29 +229,35 @@ def reassign_roles(individual_to_remove, info, ticket_details):
     else:
         removed_individual_is_head = False
     if (
-            not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-            and removed_individual_is_head
+        not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
+        and removed_individual_is_head
     ):
+        logger.error("Ticket cannot be closed head of household has not been reassigned")
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
     return old_individual_to_remove, removed_individual_household
 
 
 def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):
     individual_to_remove.withdraw()
-    log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household)
+    log_and_withdraw_household_if_needed(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household
+    )
 
 
-def mark_as_duplicate_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household,
-                                 unique_individual):
+def mark_as_duplicate_individual(
+    individual_to_remove, info, old_individual_to_remove, removed_individual_household, unique_individual
+):
     individual_to_remove.mark_as_duplicate(unique_individual)
-    log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household)
+    log_and_withdraw_household_if_needed(
+        individual_to_remove, info, old_individual_to_remove, removed_individual_household
+    )
 
 
-def log_and_withdraw_household_if_needed(individual_to_remove, info, old_individual_to_remove,
-                                         removed_individual_household):
+def log_and_withdraw_household_if_needed(
+    individual_to_remove, info, old_individual_to_remove, removed_individual_household
+):
     from hct_mis_api.apps.household.models import Individual
+
     log_create(
         Individual.ACTIVITY_LOG_MAPPING,
         "business_area",

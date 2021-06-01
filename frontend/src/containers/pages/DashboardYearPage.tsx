@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Grid } from '@material-ui/core';
 import { TabPanel } from '../../components/TabPanel';
 import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { ProgrammesBySector } from '../../components/Dashboard/charts/ProgrammesBySector';
-import { PlannedBudget } from '../../components/Dashboard/charts/PlannedBudget';
+import { TotalTransferredByMonth } from '../../components/Dashboard/charts/TotalTransferredByMonth';
 import { VolumeByDeliveryMechanism } from '../../components/Dashboard/charts/VolumeByDeliveryMechanism';
 import { PaymentsChart } from '../../components/Dashboard/charts/PaymentsChart';
 import { GrievancesSection } from '../../components/Dashboard/sections/GrievancesSection';
@@ -13,14 +13,20 @@ import { TotalNumberOfChildrenReachedSection } from '../../components/Dashboard/
 import { TotalNumberOfHouseholdsReachedSection } from '../../components/Dashboard/sections/TotalNumberOfHouseholdsReachedSection';
 import { TotalAmountTransferredSection } from '../../components/Dashboard/sections/TotalAmountTransferredSection';
 import { PaymentVerificationSection } from '../../components/Dashboard/sections/PaymentVerificationSection';
-import { TotalAmountPlannedAndTransferredSection } from '../../components/Dashboard/sections/TotalAmountPlannedAndTransferredSection';
-import { TotalCashTransferredByAdministrativeAreaTable } from '../../components/Dashboard/TotalCashTransferredByAdministrativeAreaTable';
+import { TotalAmountTransferredSectionByCountry } from '../../components/Dashboard/sections/TotalAmountTransferredByCountrySection';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
-import { useAllChartsQuery } from '../../__generated__/graphql';
+import {
+  useAllChartsQuery,
+  useGlobalAreaChartsLazyQuery,
+} from '../../__generated__/graphql';
 import { LoadingComponent } from '../../components/LoadingComponent';
+import { TotalAmountTransferredSectionByAdminAreaSection } from '../../components/Dashboard/sections/TotalAmountTransferredByAdminAreaSection';
 
 const PaddingContainer = styled.div`
   padding: 20px;
+`;
+const ChartWrapper = styled.div`
+  height: ${(props) => (props.numberOfProgrammes <= 3 ? '200px' : '400px')};
 `;
 const PadddingLeftContainer = styled.div`
   padding-left: 20px;
@@ -29,7 +35,7 @@ const CardTextLight = styled.div`
   text-transform: capitalize;
   color: #a4a4a4;
   font-weight: 500;
-  font-size: 12px;
+  font-size: ${(props) => (props.large ? '16px' : '12px')};
 `;
 
 interface DashboardYearPageProps {
@@ -43,16 +49,44 @@ export function DashboardYearPage({
   filter,
 }: DashboardYearPageProps): React.ReactElement {
   const businessArea = useBusinessArea();
+  const isGlobal = businessArea === 'global';
+
+  const sharedVariables = {
+    year: parseInt(year, 10),
+  };
+
   const { data, loading } = useAllChartsQuery({
     variables: {
-      year: parseInt(year, 10),
+      ...sharedVariables,
       businessAreaSlug: businessArea,
-      program: filter.program,
-      administrativeArea: filter.administrativeArea?.node?.id,
+      ...(!isGlobal && {
+        program: filter.program,
+        administrativeArea: filter.administrativeArea?.node?.id,
+      }),
     },
   });
-  if (loading) return <LoadingComponent />;
-  if (!data) return null;
+
+  const [
+    loadGlobal,
+    { data: globalData, loading: globalLoading },
+  ] = useGlobalAreaChartsLazyQuery({
+    variables: sharedVariables,
+  });
+
+  useEffect(() => {
+    if (isGlobal) {
+      loadGlobal();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessArea]);
+
+  if (isGlobal) {
+    if (loading || globalLoading) return <LoadingComponent />;
+    if (!data || !globalData) return null;
+  } else {
+    if (loading) return <LoadingComponent />;
+    if (!data) return null;
+  }
   return (
     <TabPanel value={selectedTab} index={selectedTab}>
       <PaddingContainer>
@@ -61,25 +95,30 @@ export function DashboardYearPage({
             <TotalAmountTransferredSection
               data={data.sectionTotalTransferred}
             />
-            <TotalAmountPlannedAndTransferredSection
-              data={data.chartTotalTransferredCashByCountry}
+            <TotalAmountTransferredSectionByCountry
+              data={globalData?.chartTotalTransferredCashByCountry}
             />
             <DashboardPaper title='Number of Programmes by Sector'>
-              <ProgrammesBySector data={data.chartProgrammesBySector} />
+              <ChartWrapper
+                numberOfProgrammes={data.chartProgrammesBySector.labels.length}
+              >
+                <ProgrammesBySector data={data.chartProgrammesBySector} />
+              </ChartWrapper>
             </DashboardPaper>
-            <DashboardPaper title='Planned Budget and Total Transferred to Date'>
-              <PlannedBudget data={data.chartPlannedBudget} />
-            </DashboardPaper>
-            <DashboardPaper title='Total Cash Transferred  by Administrative Area'>
-              <TotalCashTransferredByAdministrativeAreaTable
-                data={data.tableTotalCashTransferredByAdministrativeArea?.data}
+            <DashboardPaper title='Total Transferred by Month'>
+              <TotalTransferredByMonth
+                data={data.chartTotalTransferredByMonth}
               />
             </DashboardPaper>
+            <TotalAmountTransferredSectionByAdminAreaSection
+              year={year}
+              filter={filter}
+            />
             <PaymentVerificationSection data={data.chartPaymentVerification} />
           </Grid>
           <Grid item xs={4}>
             <PadddingLeftContainer>
-              <Grid container spacing={3}>
+              <Grid container spacing={6}>
                 <Grid item xs={12}>
                   <TotalNumberOfHouseholdsReachedSection
                     data={data.sectionHouseholdsReached}
@@ -102,8 +141,14 @@ export function DashboardYearPage({
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <DashboardPaper title='Volume by Delivery Mechanism'>
-                    <CardTextLight>IN USD</CardTextLight>
+                  <DashboardPaper
+                    title='Volume by Delivery Mechanism in USD'
+                    noMarginTop
+                    extraPaddingTitle={false}
+                  >
+                    <CardTextLight large>
+                      Delivery type in CashAssist
+                    </CardTextLight>
                     <VolumeByDeliveryMechanism
                       data={data.chartVolumeByDeliveryMechanism}
                     />

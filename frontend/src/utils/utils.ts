@@ -91,12 +91,12 @@ export function cashPlanStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'STARTED':
+    case 'DISTRIBUTION_COMPLETED':
       return theme.hctPalette.green;
-    case 'COMPLETE':
-      return theme.hctPalette.gray;
+    case 'TRANSACTION_COMPLETED':
+      return theme.hctPalette.green;
     default:
-      return theme.hctPalette.oragne;
+      return theme.palette.error.main;
   }
 }
 export function paymentRecordStatusToColor(
@@ -104,9 +104,11 @@ export function paymentRecordStatusToColor(
   status: string,
 ): string {
   switch (status) {
-    case 'SUCCESS':
+    case 'TRANSACTION_SUCCESSFUL':
       return theme.hctPalette.green;
-    case 'PENDING':
+    case 'DISTRIBUTION_SUCCESSFUL':
+      return theme.hctPalette.green;
+    case 'TRANSACTION_PENDING':
       return theme.hctPalette.oragne;
     default:
       return theme.palette.error.main;
@@ -293,13 +295,47 @@ export function programCompare(
   return statusA > statusB ? 1 : -1;
 }
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(
+  amount: number,
+  onlyNumberValue = false,
+): string {
   const amountCleared = amount || 0;
   return `${amountCleared.toLocaleString('en-US', {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} USD`;
+  })}${onlyNumberValue ? '' : ' USD'}`;
+}
+
+export function formatCurrencyWithSymbol(
+  amount: number,
+  currency = 'USD',
+): string {
+  const amountCleared = amount || 0;
+  // if currency is unknown, simply format using most common formatting option, and don't show currency symbol
+  if (!currency) return formatCurrency(amountCleared, true);
+  // undefined forces to use local browser settings
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+    // enable this if decided that we always want code and not a symbol
+    currencyDisplay: 'code',
+  }).format(amountCleared);
+}
+
+export function countPercentage(
+  partialValue: number,
+  totalValue: number,
+): number {
+  if (!totalValue || !partialValue) return 0;
+  return +((partialValue / totalValue) * 100).toFixed(2);
+}
+
+export function getPercentage(
+  partialValue: number,
+  totalValue: number,
+): string {
+  return `${countPercentage(partialValue, totalValue)}%`;
 }
 
 export function formatNumber(value: number): string {
@@ -307,8 +343,12 @@ export function formatNumber(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-export function getAgeFromDob(date: string): number {
-  return moment().diff(moment(date), 'years');
+export function formatThousands(value: string): string {
+  if (!value) return value;
+  if (parseInt(value, 10) >= 10000) {
+    return `${value.toString().slice(0, -3)}k`;
+  }
+  return value;
 }
 
 export function targetPopulationStatusMapping(status): string {
@@ -421,9 +461,11 @@ export const getFullNodeFromEdgesById = (edges, id) => {
 
 export const getFlexFieldTextValue = (key, value, fieldAttribute): string => {
   let textValue = value;
+  if (!fieldAttribute) return textValue;
   if (fieldAttribute.type === 'SELECT_ONE') {
-    textValue = fieldAttribute.choices.find((item) => item.value === value)
-      .labelEn;
+    textValue =
+      fieldAttribute.choices.find((item) => item.value === value)?.labelEn ||
+      value;
   }
   if (fieldAttribute.type === 'SELECT_MANY') {
     const values = fieldAttribute.choices.filter((item) =>
@@ -459,3 +501,22 @@ export const handleValidationErrors = (
   }
   return { nonValidationErrors };
 };
+
+export function renderSomethingOrDash(something): number | string | boolean {
+  if (something === null || something === undefined) {
+    return '-';
+  }
+  return something;
+}
+
+export function renderBoolean(booleanValue: boolean): string {
+  if (booleanValue === null || booleanValue === undefined) {
+    return '-';
+  }
+  switch (booleanValue) {
+    case true:
+      return 'Yes';
+    default:
+      return 'No';
+  }
+}

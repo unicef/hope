@@ -1,5 +1,5 @@
+import logging
 from collections import Iterable
-from operator import itemgetter
 
 import graphene
 from constance import config
@@ -22,7 +22,7 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 
-from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS
+from hct_mis_api.apps.core.core_fields_attributes import FILTERABLE_CORE_FIELDS_ATTRIBUTES, XLSX_ONLY_FIELDS, ROLE_FIELD
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import IntegerFilter
 from hct_mis_api.apps.core.kobo.api import KoboAPI
@@ -37,6 +37,8 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict
 
+logger = logging.getLogger(__name__)
+
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
@@ -49,7 +51,7 @@ class AdminAreaFilter(FilterSet):
     class Meta:
         model = AdminArea
         fields = {
-            "title": ["exact", "startswith"],
+            "title": ["exact", "istartswith"],
             "business_area": ["exact"],
         }
 
@@ -247,6 +249,7 @@ def get_fields_attr_generators(flex_field):
     if flex_field is not True:
         yield from FILTERABLE_CORE_FIELDS_ATTRIBUTES
         yield from XLSX_ONLY_FIELDS
+        yield ROLE_FIELD
 
 
 def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
@@ -259,8 +262,10 @@ def resolve_assets(business_area_slug, uid: str = None, *args, **kwargs):
     try:
         assets = method
     except ObjectDoesNotExist:
+        logger.exception(f"Provided business area: {business_area_slug}, does not exist.")
         raise GraphQLError("Provided business area does not exist.")
     except AttributeError as error:
+        logger.exception(error)
         raise GraphQLError(str(error))
 
     return return_method(assets, only_deployed=kwargs.get("only_deployed", False))
@@ -298,7 +303,7 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_cash_assist_url_prefix(parent,info):
+    def resolve_cash_assist_url_prefix(parent, info):
         return config.CASH_ASSIST_URL_PREFIX
 
     def resolve_all_fields_attributes(parent, info, flex_field=None):

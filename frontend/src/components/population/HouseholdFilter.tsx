@@ -140,14 +140,8 @@ export function HouseholdFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.adminArea}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, adminArea: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, adminArea: option });
-            }}
+            onFilterChange={onFilterChange}
+            name='adminArea'
           />
         </Grid>
         <Grid item>

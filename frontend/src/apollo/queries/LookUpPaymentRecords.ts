@@ -35,7 +35,9 @@ export const LookUpPaymentRecords = gql`
           verifications {
             edges {
               node {
+                id
                 status
+                receivedAmount
               }
             }
           }

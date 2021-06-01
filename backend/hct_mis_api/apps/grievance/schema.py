@@ -1,23 +1,25 @@
-import graphene
+import datetime
+import logging
+
 from django.db import models
 from django.db.models import Q
 from django.db.models.functions import Coalesce
+
+import graphene
 from django_filters import (
-    FilterSet,
     CharFilter,
-    ModelMultipleChoiceFilter,
-    OrderingFilter,
-    MultipleChoiceFilter,
-    TypedMultipleChoiceFilter,
     ChoiceFilter,
+    FilterSet,
     ModelChoiceFilter,
+    ModelMultipleChoiceFilter,
+    MultipleChoiceFilter,
+    OrderingFilter,
+    TypedMultipleChoiceFilter,
     UUIDFilter,
 )
 from graphene import relay
 from graphene_django import DjangoObjectType
 from graphql import GraphQLError
-
-import datetime
 
 from hct_mis_api.apps.account.permissions import (
     BaseNodePermissionMixin,
@@ -26,9 +28,9 @@ from hct_mis_api.apps.account.permissions import (
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.core_fields_attributes import (
-    CORE_FIELDS_ATTRIBUTES,
-    _INDIVIDUAL,
     _HOUSEHOLD,
+    _INDIVIDUAL,
+    CORE_FIELDS_ATTRIBUTES,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
@@ -36,31 +38,33 @@ from hct_mis_api.apps.core.filters import DateTimeRangeFilter
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
 from hct_mis_api.apps.core.schema import ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
-    to_choice_object,
-    choices_to_dict,
-    nested_getattr,
+    chart_filters_decoder,
     chart_get_filtered_qs,
     chart_permission_decorator,
-    chart_filters_decoder,
+    choices_to_dict,
+    nested_getattr,
+    to_choice_object,
 )
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketNote,
-    TicketSensitiveDetails,
+    TicketAddIndividualDetails,
     TicketComplaintDetails,
     TicketDeleteIndividualDetails,
-    TicketIndividualDataUpdateDetails,
-    TicketAddIndividualDetails,
     TicketHouseholdDataUpdateDetails,
+    TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
-    TicketSystemFlaggingDetails,
+    TicketNote,
     TicketPaymentVerificationDetails,
+    TicketSensitiveDetails,
+    TicketSystemFlaggingDetails,
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import ServiceProvider, PaymentRecord
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
+
+logger = logging.getLogger(__name__)
 
 
 class GrievanceTicketFilter(FilterSet):
@@ -84,12 +88,16 @@ class GrievanceTicketFilter(FilterSet):
             "golden_records_individual": ("full_name", "unicef_id", "phone_no", "phone_no_alternative")
         },
     }
-    TICKET_TYPES_WITH_FSP = ("complaint_ticket_details", "sensitive_ticket_details")
+    TICKET_TYPES_WITH_FSP = (
+        ("complaint_ticket_details", "payment_record__service_provider"),
+        ("sensitive_ticket_details", "payment_record__service_provider"),
+        ("payment_verification_ticket_details", "payment_verifications__payment_record__service_provider"),
+    )
 
     business_area = CharFilter(field_name="business_area__slug", required=True)
     search = CharFilter(method="search_filter")
     status = TypedMultipleChoiceFilter(field_name="status", choices=GrievanceTicket.STATUS_CHOICES, coerce=int)
-    fsp = ModelMultipleChoiceFilter(method="fsp_filter", queryset=ServiceProvider.objects.all())
+    fsp = CharFilter(method="fsp_filter")
     admin = ModelMultipleChoiceFilter(
         field_name="admin", method="admin_filter", queryset=AdminArea.objects.filter(admin_area_level__admin_level=2)
     )
@@ -102,6 +110,7 @@ class GrievanceTicketFilter(FilterSet):
             "category": ["exact"],
             "area": ["exact", "startswith"],
             "assigned_to": ["exact"],
+            "registration_data_import": ["exact"],
         }
         model = GrievanceTicket
 
@@ -149,15 +158,15 @@ class GrievanceTicketFilter(FilterSet):
     def fsp_filter(self, qs, name, value):
         if value:
             q_obj = Q()
-            for ticket_type in self.TICKET_TYPES_WITH_FSP:
-                q_obj |= Q(**{f"{ticket_type}__payment_record__service_provider__in": value})
+            for ticket_type, path_to_fsp in self.TICKET_TYPES_WITH_FSP:
+                q_obj |= Q(**{f"{ticket_type}__{path_to_fsp}__full_name__istartswith": value})
 
             return qs.filter(q_obj)
         return qs
 
     def admin_filter(self, qs, name, value):
         if value:
-            return qs.filter(admin__in=[admin.title for admin in value])
+            return qs.filter(admin2__in=[admin.id for admin in value])
         return qs
 
     def permissions_filter(self, qs, name, value):
@@ -308,6 +317,7 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     individual = graphene.Field(IndividualNode)
     payment_record = graphene.Field(PaymentRecordNode)
     related_tickets = graphene.List(lambda: GrievanceTicketNode)
+    admin = graphene.String()
 
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
@@ -335,37 +345,22 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
         user = info.context.user
 
         if object_instance.category == GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE:
-            if not (
-                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value, business_area)
-                or (
-                    object_instance.created_by == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value, business_area
-                    )
-                )
-                or (
-                    object_instance.assigned_to == user
-                    and user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value, business_area)
-                )
-            ):
-                raise GraphQLError("Permission Denied")
+            perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE.value
+            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_CREATOR.value
+            owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_SENSITIVE_AS_OWNER.value
         else:
-            if not (
-                user.has_permission(Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value, business_area)
-                or (
-                    object_instance.created_by == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value, business_area
-                    )
-                )
-                or (
-                    object_instance.assigned_to == user
-                    and user.has_permission(
-                        Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value, business_area
-                    )
-                )
-            ):
-                raise GraphQLError("Permission Denied")
+            perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE.value
+            creator_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_CREATOR.value
+            owner_perm = Permissions.GRIEVANCES_VIEW_DETAILS_EXCLUDING_SENSITIVE_AS_OWNER.value
+
+        check_creator = object_instance.created_by == user and user.has_permission(creator_perm, business_area)
+        check_assignee = object_instance.assigned_to == user and user.has_permission(owner_perm, business_area)
+        if user.has_permission(perm, business_area) or check_creator or check_assignee:
+            return True
+
+        msg = "User is not active creator/assignee and does not have '{perm}' permission"
+        logger.error(msg)
+        raise GraphQLError(msg)
 
     class Meta:
         model = GrievanceTicket
@@ -384,6 +379,11 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_payment_record(grievance_ticket, info):
         return GrievanceTicketNode._search_for_lookup(grievance_ticket, "payment_record")
+
+    def resolve_admin(grievance_ticket, info):
+        if grievance_ticket.admin2:
+            return grievance_ticket.admin2.title
+        return None
 
 
 class TicketNoteNode(DjangoObjectType):
@@ -451,6 +451,8 @@ class TicketHouseholdDataUpdateDetailsNode(DjangoObjectType):
 
 
 class TicketNeedsAdjudicationDetailsNode(DjangoObjectType):
+    has_duplicated_document = graphene.Boolean()
+
     class Meta:
         model = TicketNeedsAdjudicationDetails
         exclude = ("ticket",)
@@ -492,9 +494,8 @@ class AddIndividualFiledObjectType(graphene.ObjectType):
 
 
 class ChartGrievanceTicketsNode(ChartDatasetNode):
-    total = graphene.Int()
+    total_number_of_grievances = graphene.Int()
     total_number_of_feedback = graphene.Int()
-    total_number_of_open_feedback = graphene.Int()
     total_number_of_open_sensitive = graphene.Int()
 
 
@@ -529,8 +530,10 @@ class Query(graphene.ObjectType):
         filterset_class=TicketNoteFilter,
     )
     chart_grievances = graphene.Field(
-        ChartGrievanceTicketsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        administrative_area=graphene.String(required=False)
+        ChartGrievanceTicketsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        administrative_area=graphene.String(required=False),
     )
     all_add_individuals_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
     all_edit_household_fields_attributes = graphene.List(FieldAttributeNode, description="All field datatype meta.")
@@ -660,12 +663,15 @@ class Query(graphene.ObjectType):
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_chart_grievances(self, info, business_area_slug, year, **kwargs):
         grievance_tickets = chart_get_filtered_qs(
-            GrievanceTicket, year, business_area_slug_filter={"business_area__slug": business_area_slug},
+            GrievanceTicket,
+            year,
+            business_area_slug_filter={"business_area__slug": business_area_slug},
         )
 
         filters = chart_filters_decoder(kwargs)
         if filters.get("administrative_area") is not None:
             from hct_mis_api.apps.core.models import AdminArea
+
             try:
                 grievance_tickets = grievance_tickets.filter(
                     admin=AdminArea.objects.get(id=filters.get("administrative_area")).title
@@ -683,40 +689,33 @@ class Query(graphene.ObjectType):
         days_30_from_now = datetime.date.today() - datetime.timedelta(days=30)
         days_60_from_now = datetime.date.today() - datetime.timedelta(days=60)
 
+        feedback_categories = [GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK, GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK]
+        all_open_tickets = grievance_tickets.filter(~Q(status=GrievanceTicket.STATUS_CLOSED))
+        all_closed_tickets = grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED)
+
         datasets = [
             {
                 "data": [
-                    grievance_tickets.filter(status=GrievanceTicket.STATUS_CLOSED).count(),  # Resolved
-                    grievance_tickets.filter(
-                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__gt=days_30_from_now,
-                    ).count(),  # Unresolved
-                    grievance_tickets.filter(
-                        ~Q(status=GrievanceTicket.STATUS_CLOSED),
-                        created_at__lte=days_30_from_now,
-                        created_at__gt=days_60_from_now,
+                    all_closed_tickets.count(),  # Resolved
+                    all_open_tickets.filter(
+                        created_at__gte=days_30_from_now,
+                    ).count(),  # Unresolved less than 30 days
+                    all_open_tickets.filter(
+                        created_at__lt=days_30_from_now,
+                        created_at__gte=days_60_from_now,
                     ).count(),  # Unresolved for longer than 30 days
-                    grievance_tickets.filter(
-                        ~Q(status=GrievanceTicket.STATUS_CLOSED), created_at__lt=days_60_from_now
+                    all_open_tickets.filter(
+                        created_at__lt=days_60_from_now
                     ).count(),  # Unresolved for longer than 60 days
                 ]
             },
         ]
-        print(datasets)
         return {
             "labels": grievance_status_labels,
             "datasets": datasets,
-            "total": grievance_tickets.filter(~Q(
-                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK) | ~Q(
-                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)).count(),
-            "total_number_of_open_sensitive": grievance_tickets.filter(
-                Q(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE),
-                ~Q(status=GrievanceTicket.STATUS_CLOSED)).count(),
-            "total_number_of_feedback": grievance_tickets.filter(Q(
-                category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK) | Q(
-                category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK)).count(),
-            "total_number_of_open_feedback": grievance_tickets.filter(
-                Q(category=GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK) | Q(
-                    category=GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK),
-                ~Q(status=GrievanceTicket.STATUS_CLOSED)).count(),
+            "total_number_of_grievances": grievance_tickets.exclude(category__in=feedback_categories).count(),
+            "total_number_of_feedback": grievance_tickets.filter(category__in=feedback_categories).count(),
+            "total_number_of_open_sensitive": all_open_tickets.filter(
+                category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE,
+            ).count(),
         }

@@ -1,11 +1,14 @@
-trigger:
-  batch: true
-  branches:
-    include:
-    - develop
-  paths:
-    exclude:
-    -  docs/*
+  # ========================================================================
+  #                          DEPRECATED
+  # ========================================================================
+trigger: none
+  # batch: true
+  # branches:
+  #   include:
+  #   - develop
+  # paths:
+  #   exclude:
+  #   -  docs/*
 pr: none
 resources:
   - repo: self
@@ -16,10 +19,8 @@ variables:
   # ========================================================================
   Docker.backend.filePath: "**/backend/Dockerfile"
   Docker.frontend.filePath: "**/frontend/Dockerfile"
-  Docker.airflow.filePath: "**/airflow/Dockerfile"
   Docker.backend.repository: "hope-backend"
   Docker.frontend.repository: "hope-frontend"
-  Docker.airflow.repository: "hope-airflow"
   Docker.registry: "uniappsk8sdevacr"
   Kubernetes.serviceConnection: "ICTD-HOPE-DEV-uni-apps-aks-dev-ictd-hope-dev-1593457625386"
   Kubernetes.namespace: "ictd-hope-dev"
@@ -40,21 +41,7 @@ stages:
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
-                dev-latest
-
-      - job: build_push_airflow
-        displayName: "[AIRFLOW]"
-        steps:
-          - task: Docker@2
-            displayName: Build&Push
-            inputs:
-              command: buildAndPush
-              dockerfile: $(Docker.airflow.filePath)
-              repository: $(Docker.airflow.repository)
-              containerRegistry: $(Docker.registry)
-              buildContext: "$(Build.SourcesDirectory)"
-              tags: |
-                $(Build.BuildId)
+                $(Build.SourceVersion)
                 dev-latest
 
       - job: build_push_frontend
@@ -70,6 +57,7 @@ stages:
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
+                $(Build.SourceVersion)
                 dev-latest
           - task: Docker@2
             displayName: Push
@@ -80,8 +68,8 @@ stages:
               containerRegistry: $(Docker.registry)
               tags: |
                 $(Build.BuildId)
+                $(Build.SourceVersion)
                 dev-latest
-
 
   - stage: test
     displayName: TEST
@@ -89,7 +77,6 @@ stages:
       - job: django_tests
         displayName: "[DJANGO TEST]"
         variables:
-          airflow_image: uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
           backend_image: uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
         steps:
           - task: Docker@2
@@ -106,7 +93,6 @@ stages:
               script: |
                mv deployment/docker-compose.tst.yml docker-compose.tst.yml
                mv $(Agent.TempDirectory)/.env-django-test .env
-               cp .env airflow/config/.env_airflow
 
           - task: DockerCompose@0
             displayName: "Run tests"
@@ -117,7 +103,6 @@ stages:
               action: 'Run a Docker Compose command'
               dockerComposeCommand: 'run backend ./docker-test-entrypoint.sh'
               dockerComposeFileArgs: |
-               airflow_image=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository):$(Build.BuildId)
                backend_image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId)
 
           - task: PublishTestResults@2
@@ -163,7 +148,8 @@ stages:
               overrideValues: "
                 global.env=staging,\
                 global.storageClass=default,\
-                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.BuildId),\
+                backend.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion),\
+                celery.image=uniappsk8sdevacr.azurecr.io/$(Docker.backend.repository):$(Build.SourceVersion),\
                 backend.config.STORAGE_AZURE_ACCOUNT_NAME=$(STORAGE_AZURE_ACCOUNT_NAME),\
                 backend.config.AZURE_CLIENT_ID=$(AZURE_CLIENT_ID),\
                 backend.secret.SECRET_KEY=$(SECRET_KEY),\
@@ -178,19 +164,9 @@ stages:
                 backend.secret.DATAMART_USER=$(DATAMART_USER),\
                 backend.secret.DATAMART_PASSWORD=$(DATAMART_PASSWORD),\
                 backend.secret.DATAMART_URL=$(DATAMART_URL),\
-                backend.secret.AIRFLOW__SENTRY__SENTRY_DSN=$(AIRFLOW__SENTRY__SENTRY_DSN),\
-                backend.secret.AIRFLOW__SENTRY__SENTRY_ON='$(AIRFLOW__SENTRY__SENTRY_ON)',\
-                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.BuildId),\
+                frontend.image=uniappsk8sdevacr.azurecr.io/$(Docker.frontend.repository):$(Build.SourceVersion),\
                 ingress.host=dev-hope.unitst.org,\
                 ingress.tls=true,\
-                airflow.baseUrl=dev-hope.unitst.org/airflow,\
-                airflow.airflow.baseUrl=dev-hope.unitst.org/airflow,\
-                airflow.airflow.image.repository=uniappsk8sdevacr.azurecr.io/$(Docker.airflow.repository),\
-                airflow.airflow.image.tag=$(Build.BuildId),\
-                airflow.ingress.hosts.0.name=airflow-hope-dev.unitst.org,\
-                airflow.ingress.hosts.0.tls=true,\
-                airflow.ingress.hosts.0.path=/,\
-                airflow.ingress.hosts.0.tlsSecret=aks-unitst-tls,\
                 postgresql.postgresqlPassword=$(POSTGRES_PASSWORD),\
                 registrationdatahubpostgresql.postgresqlPassword=$(REGISTRATION_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.enabled=false,\
@@ -198,5 +174,4 @@ stages:
                 cashassistdatahubpostgresql.externalDatabase.user=$(CASH_ASSIST_DATAHUB_POSTGRES_USER),\
                 cashassistdatahubpostgresql.externalDatabase.password=$(CASH_ASSIST_DATAHUB_POSTGRES_PASSWORD),\
                 cashassistdatahubpostgresql.externalDatabase.db=$(CASH_ASSIST_DATAHUB_POSTGRES_DB),\
-                airflow.externalDatabase.password=$(POSTGRES_PASSWORD),"
-
+                celeryflower.secret.FLOWER_BASIC_AUTH=$(FLOWER_BASIC_AUTH),"

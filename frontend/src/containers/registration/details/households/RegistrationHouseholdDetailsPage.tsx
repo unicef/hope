@@ -17,6 +17,7 @@ import { usePermissions } from '../../../../hooks/usePermissions';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '../../../../components/PermissionDenied';
+import {HouseholdImportedIndividualsTable} from "../../tables/HouseholdIndividualsTable";
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
 
@@ -75,16 +76,14 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         household={importedHousehold}
       />
       <Container>
-        <ImportedIndividualsTable
-          household={importedHousehold.id}
-          isOnPaper
-          rowsPerPageOptions={[5, 10, 15]}
-          title='Individuals in Household'
-          businessArea={businessArea}
+        <HouseholdImportedIndividualsTable
+          household={importedHousehold}
         />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={importedHousehold.firstRegistrationDate}
+          deviceid={importedHousehold.deviceid}
+          start={importedHousehold.start}
         />
       </Container>
     </div>

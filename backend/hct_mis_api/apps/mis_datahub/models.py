@@ -2,12 +2,12 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from hct_mis_api.apps.household.models import (
-    RELATIONSHIP_CHOICE,
-    ROLE_CHOICE,
-    MARITAL_STATUS_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
-    RESIDENCE_STATUS_CHOICE,
     IDENTIFICATION_TYPE_CHOICE,
+    INDIVIDUAL_HOUSEHOLD_STATUS,
+    MARITAL_STATUS_CHOICE,
+    RELATIONSHIP_CHOICE,
+    RESIDENCE_STATUS_CHOICE,
+    ROLE_CHOICE,
 )
 from hct_mis_api.apps.utils.models import AbstractSession
 
@@ -62,19 +62,31 @@ class Individual(SessionModel):
     family_name = models.CharField(max_length=255, null=True)
     given_name = models.CharField(max_length=255, null=True)
     middle_name = models.CharField(max_length=255, null=True)
-    sex = models.CharField(max_length=255, choices=SEX_CHOICE,)
+    sex = models.CharField(
+        max_length=255,
+        choices=SEX_CHOICE,
+    )
     date_of_birth = models.DateField()
     estimated_date_of_birth = models.BooleanField()
-    relationship = models.CharField(max_length=255, null=True, choices=RELATIONSHIP_CHOICE,)
-    marital_status = models.CharField(max_length=255, null=True, choices=MARITAL_STATUS_CHOICE,)
+    relationship = models.CharField(
+        max_length=255,
+        null=True,
+        choices=RELATIONSHIP_CHOICE,
+    )
+    marital_status = models.CharField(
+        max_length=255,
+        null=True,
+        choices=MARITAL_STATUS_CHOICE,
+    )
     phone_number = models.CharField(max_length=60, null=True)
     pregnant = models.NullBooleanField()
+    sanction_list_confirmed_match = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("session", "mis_id")
 
     def __str__(self):
-        return self.family_name
+        return self.family_name or ""
 
 
 class TargetPopulation(SessionModel):
@@ -96,7 +108,11 @@ class TargetPopulation(SessionModel):
 class IndividualRoleInHousehold(SessionModel):
     individual_mis_id = models.UUIDField()
     household_mis_id = models.UUIDField()
-    role = models.CharField(max_length=255, blank=True, choices=ROLE_CHOICE,)
+    role = models.CharField(
+        max_length=255,
+        blank=True,
+        choices=ROLE_CHOICE,
+    )
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -110,7 +126,11 @@ class TargetPopulationEntry(SessionModel):
     individual_mis_id = models.UUIDField(null=True)
     target_population_mis_id = models.UUIDField()
     vulnerability_score = models.DecimalField(
-        blank=True, null=True, decimal_places=3, max_digits=6, help_text="Written by a tool such as Corticon.",
+        blank=True,
+        null=True,
+        decimal_places=3,
+        max_digits=6,
+        help_text="Written by a tool such as Corticon.",
     )
 
     class Meta:

@@ -31,6 +31,8 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     MERGED = "MERGED"
     DEDUPLICATION_FAILED = "DEDUPLICATION_FAILED"
     DEDUPLICATION = "DEDUPLICATION"
+    IMPORT_ERROR = "IMPORT_ERROR"
+    MERGE_ERROR = "MERGE_ERROR"
     STATUS_CHOICE = (
         (IN_REVIEW, _("In Review")),
         (MERGED, _("Merged")),
@@ -38,10 +40,14 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
         (IMPORTING, _("Importing")),
         (DEDUPLICATION_FAILED, _("Deduplication Failed")),
         (DEDUPLICATION, _("Deduplication")),
+        (IMPORT_ERROR, _("Import Error")),
+        (MERGE_ERROR, _("Merge Error")),
     )
+    XLS = "XLS"
+    KOBO = "KOBO"
     DATA_SOURCE_CHOICE = (
-        ("XLS", "Excel"),
-        ("KOBO", "KoBo"),
+        (XLS, "Excel"),
+        (KOBO, "KoBo"),
     )
     name = CICharField(
         max_length=255,
@@ -70,7 +76,7 @@ class RegistrationDataImport(TimeStampedUUIDModel, ConcurrencyModel):
     number_of_households = models.PositiveIntegerField(db_index=True)
     datahub_id = models.UUIDField(null=True, default=None, db_index=True, blank=True)
     error_message = models.TextField(blank=True)
-
+    pull_pictures = models.BooleanField(default=True)
     business_area = models.ForeignKey("core.BusinessArea", null=True, on_delete=models.CASCADE)
 
     def __str__(self):

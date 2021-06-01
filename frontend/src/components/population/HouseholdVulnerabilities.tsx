@@ -6,9 +6,10 @@ import { Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import {
   HouseholdDetailedFragment,
-  useAllHouseholdsFlexFieldsAttributesQuery
+  useAllHouseholdsFlexFieldsAttributesQuery,
 } from '../../__generated__/graphql';
-import { getFlexFieldTextValue } from "../../utils/utils"
+import { useArrayToDict } from '../../hooks/useArrayToDict';
+import { LoadingComponent } from '../LoadingComponent';
 
 const Overview = styled(Paper)`
   padding: ${({ theme }) => theme.spacing(8)}px
@@ -24,32 +25,77 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
-interface HouseholdVulnerabilities {
+const Image = styled.img`
+  max-width: 150px;
+`;
+
+interface HouseholdVulnerabilitiesProps {
   household: HouseholdDetailedFragment;
 }
 
-export function HouseholdVulnerabilities({ household }): React.ReactElement {
+export function HouseholdVulnerabilities({
+  household,
+}: HouseholdVulnerabilitiesProps): React.ReactElement {
   const { data, loading } = useAllHouseholdsFlexFieldsAttributesQuery();
+  const flexAttributesDict = useArrayToDict(
+    data?.allHouseholdsFlexFieldsAttributes,
+    'name',
+    '*',
+  );
+
   if (loading) {
+    return <LoadingComponent />;
+  }
+
+  if (!data || !flexAttributesDict) {
     return null;
   }
-  const fieldsDict = data.allHouseholdsFlexFieldsAttributes.reduce(
-    (previousValue, currentValue) => {
-      // eslint-disable-next-line no-param-reassign
-      previousValue[currentValue.name] = currentValue;
-      return previousValue;
-    },
-    {},
-  );
-  const fields = Object.entries(household.flexFields || {}).map(([key, value]: [string, string|string[]]) => {
-    return (
+  const fields = Object.entries(household.flexFields || {}).map(
+    ([key, value]: [string, string | string[]]) => {
+      if (flexAttributesDict[key]?.type === 'IMAGE') {
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+          >
+            <Image src={value} />
+          </LabelizedField>
+        );
+      }
+      if (
+        flexAttributesDict[key]?.type === 'SELECT_MANY' ||
+        flexAttributesDict[key]?.type === 'SELECT_ONE'
+      ) {
+        let newValue =
+          flexAttributesDict[key].choices.find((item) => item.value === value)
+            ?.labelEn || '-';
+        if (value instanceof Array) {
+          newValue = value
+            .map(
+              (choice) =>
+                flexAttributesDict[key].choices.find(
+                  (item) => item.value === choice,
+                )?.labelEn || '-',
+            )
+            .join(', ');
+        }
+        return (
+          <LabelizedField
+            key={key}
+            label={key.replaceAll('_i_f', '').replace(/_/g, ' ')}
+            value={newValue}
+          />
+        );
+      }
+      return (
         <LabelizedField
           key={key}
           label={key.replaceAll('_h_f', '').replace(/_/g, ' ')}
-          value={getFlexFieldTextValue(key, value, fieldsDict[key])}
+          value={value}
         />
-      )
-  })
+      );
+    },
+  );
 
   return (
     <div>
@@ -58,9 +104,11 @@ export function HouseholdVulnerabilities({ household }): React.ReactElement {
           <Typography variant='h6'>Vulnerabilities</Typography>
         </Title>
         <Grid container spacing={6}>
-          <Grid item xs={4}>
-            {fields}
-          </Grid>
+          {fields.map((field) => (
+            <Grid item xs={4}>
+              {field}
+            </Grid>
+          ))}
         </Grid>
       </Overview>
     </div>

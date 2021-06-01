@@ -7,6 +7,7 @@ import { MiśTheme } from '../../theme';
 import { BreadCrumbsItem } from '../BreadCrumbs';
 import {
   GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
 import { decodeIdString } from '../../utils/utils';
@@ -18,6 +19,7 @@ import {
 import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { ButtonDialog } from '../ButtonDialog';
 
 const Separator = styled.div`
   width: 1px;
@@ -26,6 +28,23 @@ const Separator = styled.div`
     ${({ theme }: { theme: MiśTheme }) => theme.hctPalette.lightGray};
   margin: 0 28px;
 `;
+
+const countApprovedAndUnapproved = (
+  data,
+): { approved: number; notApproved: number } => {
+  let approved = 0;
+  let notApproved = 0;
+  const flattenArray = data.flat(2);
+  flattenArray.forEach((item) => {
+    if (item.approve_status === true) {
+      approved += 1;
+    } else {
+      notApproved += 1;
+    }
+  });
+
+  return { approved, notApproved };
+};
 
 export const GrievanceDetailsToolbar = ({
   ticket,
@@ -67,8 +86,89 @@ export const GrievanceDetailsToolbar = ({
     ticket.category.toString() === GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK ||
     ticket.category.toString() === GRIEVANCE_CATEGORIES.REFERRAL;
 
-  const closingConfirmationText =
-    'Are you sure you want to close the ticket ? By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found.';
+  const getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange = (): string => {
+    const householdData =
+      ticket.householdDataUpdateTicketDetails?.householdData || {};
+    const individualData =
+      ticket.individualDataUpdateTicketDetails?.individualData || {};
+    const allData = {
+      ...householdData,
+      ...individualData,
+      ...householdData?.flex_fields,
+      ...individualData?.flex_fields,
+    };
+    delete allData.previous_documents;
+    delete allData.previous_identities;
+    delete allData.flex_fields;
+
+    const { approved, notApproved } = countApprovedAndUnapproved(
+      Object.values(allData),
+    );
+    // all changes were approved
+    if (!notApproved) return '';
+
+    // no changes were approved
+    if (!approved)
+      return `You approved 0 changes, remaining proposed changes will be automatically rejected upon ticket closure.`;
+
+    // some changes were approved
+    return `You approved ${approved} change${
+      approved > 1 ? 's' : ''
+    }. Remaining change requests (${notApproved}) will be automatically rejected.`;
+  };
+
+  const getClosingConfirmationExtraTextForOtherTypes = (): string => {
+    const hasApproveOption =
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE ||
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION ||
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING;
+
+    if (!hasApproveOption) {
+      return '';
+    }
+
+    // added msg handling for
+    let confirmationMessage = '';
+    if (
+      ticket.issueType?.toString() ===
+        GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL &&
+      ticket.deleteIndividualTicketDetails?.approveStatus === false
+    ) {
+      confirmationMessage =
+        'You did not approve any changes. Are you sure you want to close the ticket?';
+    } else if (
+      ticket.issueType?.toString() === GRIEVANCE_ISSUE_TYPES.ADD_INDIVIDUAL &&
+      ticket.addIndividualTicketDetails?.approveStatus === false
+    ) {
+      confirmationMessage = 'You did not approve any changes.';
+    } else if (
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
+      ticket.systemFlaggingTicketDetails?.approveStatus === false
+    ) {
+      confirmationMessage = '';
+    } else if (
+      ticket.category?.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+      !ticket.needsAdjudicationTicketDetails?.selectedIndividual
+    ) {
+      confirmationMessage =
+        'By continuing you acknowledge that individuals in this ticket were reviewed and all were deemed unique to the system. No duplicates were found';
+    }
+
+    return confirmationMessage;
+  };
+
+  const getClosingConfirmationExtraText = (): string => {
+    switch (ticket.issueType?.toString()) {
+      case GRIEVANCE_ISSUE_TYPES.EDIT_HOUSEHOLD:
+        return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
+      case GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL:
+        return getClosingConfirmationExtraTextForIndividualAndHouseholdDataChange();
+      default:
+        return getClosingConfirmationExtraTextForOtherTypes();
+    }
+  };
+
+  const closingConfirmationText = 'Are you sure you want to close the ticket?';
 
   const changeState = (status): void => {
     mutate({
@@ -84,6 +184,56 @@ export const GrievanceDetailsToolbar = ({
       ],
     });
   };
+
+  const getClosingConfirmationText = (): string => {
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
+      return getClosingConfirmationExtraText();
+    }
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
+      let additionalContent = '';
+      if (!ticket.systemFlaggingTicketDetails.approveStatus) {
+        additionalContent = ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
+      }
+      return `${closingConfirmationText}${additionalContent}`;
+    }
+    return closingConfirmationText;
+  }
+
+  let closeButton = (
+    <ConfirmationDialog
+      title='Close ticket'
+      extraContent={
+        ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION
+          ? closingConfirmationText
+          : getClosingConfirmationExtraText()
+      }
+      content={getClosingConfirmationText()}
+      continueText='close ticket'
+    >
+      {(confirm) => (
+        <Button
+          color='primary'
+          variant='contained'
+          onClick={confirm(() => changeState(GRIEVANCE_TICKET_STATES.CLOSED))}
+        >
+          Close Ticket
+        </Button>
+      )}
+    </ConfirmationDialog>
+  );
+  if (
+    ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
+    ticket?.needsAdjudicationTicketDetails?.hasDuplicatedDocument &&
+    !ticket?.needsAdjudicationTicketDetails?.selectedIndividual
+  ) {
+    closeButton = (
+      <ButtonDialog
+        title='Duplicate Document Conflict'
+        buttonText='Close Ticket'
+        message='The individuals have matching document numbers. HOPE requires that document numbers are unique. Please resolve before closing the ticket.'
+      />
+    );
+  }
   return (
     <PageHeader
       title={`Ticket #${decodeIdString(id)}`}
@@ -153,6 +303,7 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
+                extraContent=''
                 content={closingConfirmationText}
                 continueText='close ticket'
               >
@@ -202,6 +353,7 @@ export const GrievanceDetailsToolbar = ({
             {isFeedbackType && canClose && (
               <ConfirmationDialog
                 title='Confirmation'
+                extraContent=''
                 content={closingConfirmationText}
                 continueText='close ticket'
               >
@@ -235,25 +387,7 @@ export const GrievanceDetailsToolbar = ({
                 </Button>
               </Box>
             )}
-            {canClose && (
-              <ConfirmationDialog
-                title='Confirmation'
-                content={closingConfirmationText}
-                continueText='close ticket'
-              >
-                {(confirm) => (
-                  <Button
-                    color='primary'
-                    variant='contained'
-                    onClick={confirm(() =>
-                      changeState(GRIEVANCE_TICKET_STATES.CLOSED),
-                    )}
-                  >
-                    Close Ticket
-                  </Button>
-                )}
-              </ConfirmationDialog>
-            )}
+            {canClose && closeButton}
           </>
         )}
       </Box>

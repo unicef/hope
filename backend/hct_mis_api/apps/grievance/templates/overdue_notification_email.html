@@ -1,0 +1,4 @@
+{% extends 'base_notification_email.html' %}
+{% block content %}
+   A Grievance & Feedback ticket <a href="{{ ticket_url }}">{{ ticket_id }}</a> created over {{ days_ago }} days ago requires action and attention
+{% endblock %}

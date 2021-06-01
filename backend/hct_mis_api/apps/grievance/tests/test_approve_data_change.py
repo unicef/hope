@@ -47,14 +47,18 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
       $individualApproveData: JSONString,
       $flexFieldsApproveData: JSONString, 
       $approvedDocumentsToCreate: [Int], 
-      $approvedDocumentsToRemove: [Int]
+      $approvedDocumentsToRemove: [Int],
+      $approvedIdentitiesToCreate: [Int], 
+      $approvedIdentitiesToRemove: [Int]
     ) {
       approveIndividualDataChange(
         grievanceTicketId: $grievanceTicketId, 
         individualApproveData: $individualApproveData,
         flexFieldsApproveData: $flexFieldsApproveData,
         approvedDocumentsToCreate: $approvedDocumentsToCreate, 
-        approvedDocumentsToRemove: $approvedDocumentsToRemove
+        approvedDocumentsToRemove: $approvedDocumentsToRemove,
+        approvedIdentitiesToCreate: $approvedIdentitiesToCreate, 
+        approvedIdentitiesToRemove: $approvedIdentitiesToRemove
       ) {
         grievanceTicket {
           id
@@ -98,8 +102,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type)
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type)
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="asdsdf334")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="jghhrrr")
         program_one = ProgramFactory(
             name="Test program ONE",
             business_area=BusinessArea.objects.first(),
@@ -156,7 +160,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_ADD_INDIVIDUAL,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
         )
         TicketAddIndividualDetailsFactory(
@@ -189,7 +193,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             id="acd57aa1-efd8-4c81-ac19-b8cabebe8089",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_INDIVIDUAL_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
         )
         TicketIndividualDataUpdateDetailsFactory(
@@ -220,7 +224,7 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
             id="72ee7d98-6108-4ef0-85bd-2ef20e1d5410",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_HOUSEHOLD_DATA_CHANGE_DATA_UPDATE,
-            admin=self.admin_area_1.title,
+            admin2=self.admin_area_1,
             business_area=self.business_area,
         )
         TicketHouseholdDataUpdateDetailsFactory(
@@ -276,6 +280,8 @@ class TestGrievanceApproveDataChangeMutation(APITestCase):
                 "individualApproveData": json.dumps({"givenName": True, "fullName": True, "familyName": True}),
                 "approvedDocumentsToCreate": [0],
                 "approvedDocumentsToRemove": [0],
+                "approvedIdentitiesToCreate": [],
+                "approvedIdentitiesToRemove": [],
                 "flexFieldsApproveData": json.dumps({}),
             },
         )

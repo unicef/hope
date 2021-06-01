@@ -7,11 +7,14 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
       status
       statusDate
       receivedAmount
+      isManuallyEditable
       paymentRecord {
         id
         status
         statusDate
         caId
+        caHashId
+        registrationCaId
         household {
           unicefId
           id
@@ -54,6 +57,7 @@ export const PAYMENT_RECORD_VERIFICATION_QUERY = gql`
         deliveryType
         entitlementCardIssueDate
         entitlementCardNumber
+        transactionReferenceId
         serviceProvider {
           id
           fullName

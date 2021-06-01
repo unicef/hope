@@ -9,7 +9,18 @@ export const ACTIVATE_CASH_PLAN_PAYMENT_VERIFICATION = gql`
         id
         status
         statusDate
+        verificationStatus
+        verifications {
+          edges {
+            node {
+              id
+              status
+              activationDate
+            }
+          }
+        }
       }
+      validationErrors
     }
   }
 `;

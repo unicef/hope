@@ -140,7 +140,6 @@ class TestIndividualQuery(APITestCase):
         household_one.save()
         household_two.save()
 
-
     @parameterized.expand(
         [
             ("with_permission", [Permissions.POPULATION_VIEW_INDIVIDUALS_LIST]),

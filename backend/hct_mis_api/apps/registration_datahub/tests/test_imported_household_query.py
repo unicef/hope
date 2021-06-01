@@ -13,7 +13,7 @@ class TestImportedHouseholdQuery(APITestCase):
 
     ALL_IMPORTED_HOUSEHOLD_QUERY = """
     query AllImportedHouseholds{
-      allImportedHouseholds(businessArea: "afghanistan") {
+      allImportedHouseholds(businessArea: "afghanistan", orderBy: "size") {
         edges {
           node {
             size
