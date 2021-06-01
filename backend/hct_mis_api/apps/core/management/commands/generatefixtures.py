@@ -80,7 +80,6 @@ class Command(BaseCommand):
             type=int,
             help="Creates provided amount of payment records assigned to " "household and cash plan.",
         )
-
         parser.add_argument(
             "--business-area",
             dest="business_area_amount",
@@ -91,22 +90,20 @@ class Command(BaseCommand):
             type=int,
             help="Creates provided amount of business areas with data.",
         )
-
         parser.add_argument(
             "--flush",
-            dest="flush",
-            const=True,
-            default=True,
-            action="store",
-            nargs="?",
-            type=bool,
-            help="Flush all tables in db.",
+            action="store_true",
+            help="Suppresses all user prompts.",
         )
-
         parser.add_argument(
             "--noinput",
             action="store_true",
             help="Suppresses all user prompts.",
+        )
+        parser.add_argument(
+            "--noreindex",
+            action="store_true",
+            help="Suppresses Elasticsearch reindex.",
         )
 
     def _generate_admin_areas(self, business_area):
@@ -274,6 +271,7 @@ class Command(BaseCommand):
             programme = cash_assist_datahub_fixtures.ProgrammeFactory(session=session, mis_id=mis_id)
             programme.save()
 
-        rebuild_search_index()
+        if not options['noreindex']:
+            rebuild_search_index()
 
         self.stdout.write(f"Generated fixtures in {(time.time() - start_time)} seconds")
