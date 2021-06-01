@@ -1,11 +1,10 @@
 import logging
 
+import graphene
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
-import graphene
 from graphql import GraphQLError
 
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
@@ -51,6 +50,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     remove_parsed_data_fields,
     verify_required_arguments,
 )
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
@@ -257,6 +257,9 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             assigned_to=assigned_to,
             status=GrievanceTicket.STATUS_ASSIGNED,
         )
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
+        )
         grievance_ticket.linked_tickets.set(linked_tickets)
         return grievance_ticket, extras
 
@@ -351,6 +354,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
     @classmethod
     def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
+        old_status = grievance_ticket.status
+        old_assigned_to = grievance_ticket.assigned_to
         arg = lambda name, default=None: input.get(name, default)
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
@@ -381,6 +386,19 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
         grievance_ticket.linked_tickets.set(linked_tickets)
         grievance_ticket.refresh_from_db()
+        if (
+            old_status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            back_to_in_progress_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+            )
+            back_to_in_progress_notification.send_email_notification()
+        if old_assigned_to != grievance_ticket.assigned_to:
+            assignment_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
+            )
+            assignment_notification.send_email_notification()
         return grievance_ticket, extras
 
 
@@ -555,6 +573,27 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             old_grievance_ticket,
             grievance_ticket,
         )
+        if (
+            old_grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+        ):
+            for_approval_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL
+            )
+            for_approval_notification.send_email_notification()
+        if (
+            old_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            back_to_in_progress_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+            )
+            back_to_in_progress_notification.send_email_notification()
+        if old_grievance_ticket.assigned_to != grievance_ticket.assigned_to:
+            assignment_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
+            )
+            assignment_notification.send_email_notification()
         return cls(grievance_ticket=grievance_ticket)
 
 
@@ -586,7 +625,10 @@ class CreateTicketNoteMutation(PermissionMutation):
         created_by = info.context.user
 
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
-
+        notification = GrievanceNotification(
+            grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by
+        )
+        notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
 
 
