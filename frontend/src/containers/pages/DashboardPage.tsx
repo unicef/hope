@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tab, Tabs } from '@material-ui/core';
+import { Tab, Tabs, Typography } from '@material-ui/core';
 import { PageHeader } from '../../components/PageHeader';
 import { DashboardFilters } from '../../components/Dashboard/DashboardFilters';
 import { ExportModal } from '../../components/Dashboard/ExportModal';
@@ -7,6 +7,9 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { useDashboardYearsChoiceDataQuery } from '../../__generated__/graphql';
+import { LoadingComponent } from '../../components/LoadingComponent';
+import { DashboardPaper } from '../../components/Dashboard/DashboardPaper';
 import { DashboardYearPage } from './DashboardYearPage';
 
 export function DashboardPage(): React.ReactElement {
@@ -15,9 +18,13 @@ export function DashboardPage(): React.ReactElement {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filter, setFilter] = useState({
     program: '',
-    administrativeArea: '',
+    administrativeArea: undefined,
   });
-  if (!permissions) return null;
+  const { data, loading } = useDashboardYearsChoiceDataQuery({
+    variables: { businessArea },
+  });
+  if (loading) return <LoadingComponent />;
+  if (!permissions || !data) return null;
 
   const hasPermissionToView = hasPermissions(
     PERMISSIONS.DASHBOARD_VIEW_COUNTRY,
@@ -28,20 +35,7 @@ export function DashboardPage(): React.ReactElement {
     permissions,
   );
 
-  const years = [
-    '2021',
-    '2020',
-    '2019',
-    '2018',
-    '2017',
-    '2016',
-    '2015',
-    '2014',
-    '2013',
-    '2012',
-    '2011',
-    '2010',
-  ];
+  const years = data.dashboardYearsChoices;
 
   const mappedTabs = years.map((el) => <Tab key={el} label={el} />);
   const tabs = (
@@ -68,8 +62,14 @@ export function DashboardPage(): React.ReactElement {
       </PageHeader>
       {hasPermissionToView ? (
         <>
-          {businessArea !== 'global' && (
+          {businessArea !== 'global' ? (
             <DashboardFilters filter={filter} onFilterChange={setFilter} />
+          ) : (
+            <DashboardPaper noMarginTop extraPaddingLeft color='#6f6f6f'>
+              <Typography variant='body2'>
+                All charts below show total numbers for the selected year.
+              </Typography>
+            </DashboardPaper>
           )}
           <DashboardYearPage
             selectedTab={selectedTab}

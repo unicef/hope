@@ -26,6 +26,7 @@ from hct_mis_api.apps.household.models import (
     IDENTIFICATION_TYPE_CHOICE,
 )
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
+from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.fixtures import (
     ImportedIndividualFactory,
     RegistrationDataImportDatahubFactory,
@@ -447,7 +448,7 @@ class TestRdiKoboCreateTask(TestCase):
         individuals = ImportedIndividual.objects.all()
 
         self.assertEqual(households.count(), 2)
-        self.assertEqual(individuals.count(), 4)
+        self.assertEqual(individuals.count(), 5)
 
         documents = ImportedDocument.objects.values_list("individual__full_name", flat=True)
         self.assertEqual(
@@ -477,6 +478,7 @@ class TestRdiKoboCreateTask(TestCase):
     )
     def test_handle_image_field(self):
         task = self.RdiKoboCreateTask()
+        task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
         task.attachments = [
             {
@@ -501,19 +503,19 @@ class TestRdiKoboCreateTask(TestCase):
             }
         ]
 
-        result = task._handle_image_field("image_is_not_there.gif")
+        result = task._handle_image_field("image_is_not_there.gif", False)
         self.assertEqual(result, "")
 
-        result = task._handle_image_field("signature-14_59_24.png")
+        result = task._handle_image_field("signature-14_59_24.png", False)
         self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "signature-14_59_24.png")
+        self.assertEqual(result.name, "signature-14_59_24.png", False)
 
     def test_handle_geopoint_field(self):
         geopoint = "51.107883 17.038538"
         task = self.RdiKoboCreateTask()
 
         expected = Point(x=51.107883, y=17.038538, srid=4326)
-        result = task._handle_geopoint_field(geopoint)
+        result = task._handle_geopoint_field(geopoint, False)
         self.assertEqual(result, expected)
 
     def test_cast_and_assign(self):
@@ -525,6 +527,7 @@ class TestRdiKoboCreateTask(TestCase):
     )
     def test_handle_documents_and_identities(self):
         task = self.RdiKoboCreateTask()
+        task.registration_data_import_mis = RegistrationDataImport()
         task.business_area = self.business_area
         task.attachments = [
             {

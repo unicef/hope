@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -20,6 +21,7 @@ import {
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { UniversalMoment } from '../UniversalMoment';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
+import { useBusinessArea } from '../../hooks/useBusinessArea';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -37,6 +39,11 @@ const Title = styled.div`
   padding-bottom: ${({ theme }) => theme.spacing(8)}px;
 `;
 
+const ClickableTableCell = styled(TableCell)`
+  cursor: pointer;
+  text-decoration: underline;
+`;
+
 export function NeedsAdjudicationDetails({
   ticket,
   canApprove,
@@ -44,6 +51,8 @@ export function NeedsAdjudicationDetails({
   ticket: GrievanceTicketQuery['grievanceTicket'];
   canApprove: boolean;
 }): React.ReactElement {
+  const history = useHistory();
+  const businessArea = useBusinessArea();
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -61,6 +70,20 @@ export function NeedsAdjudicationDetails({
     'Are you sure you want to mark this record as duplicate? It will be removed from Golden Records upon ticket closure.';
   const isApproved = !!details.selectedIndividual;
   const isEditable = isEditMode || !isApproved;
+
+  const isApproveDisabled = (): boolean => {
+    return (
+      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
+    );
+  };
+
+  const handleClickId = (individualId: string, entityPath: string): void => {
+    if (!individualId && !entityPath) {
+      return;
+    }
+    const path = `/${businessArea}/population/${entityPath}/${individualId}`;
+    history.push(path);
+  };
   return (
     <StyledBox>
       <Title>
@@ -87,9 +110,7 @@ export function NeedsAdjudicationDetails({
               >
                 {(confirm) => (
                   <Button
-                    disabled={
-                      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                    }
+                    disabled={isApproveDisabled()}
                     onClick={confirm(() => {
                       approve({
                         variables: {
@@ -142,12 +163,28 @@ export function NeedsAdjudicationDetails({
                 }
               />
             </TableCell>
-            <TableCell align='left'>
+            <ClickableTableCell
+              align='left'
+              onClick={() =>
+                handleClickId(
+                  details.goldenRecordsIndividual?.id,
+                  'individuals',
+                )
+              }
+            >
               {details.goldenRecordsIndividual?.unicefId}
-            </TableCell>
-            <TableCell align='left'>
+            </ClickableTableCell>
+            <ClickableTableCell
+              align='left'
+              onClick={() =>
+                handleClickId(
+                  details.goldenRecordsIndividual?.household?.id,
+                  'household',
+                )
+              }
+            >
               {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-            </TableCell>
+            </ClickableTableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
             </TableCell>
@@ -186,12 +223,25 @@ export function NeedsAdjudicationDetails({
                 }
               />
             </TableCell>
-            <TableCell align='left'>
+            <ClickableTableCell
+              align='left'
+              onClick={() =>
+                handleClickId(details.possibleDuplicate?.id, 'individuals')
+              }
+            >
               {details.possibleDuplicate?.unicefId}
-            </TableCell>
-            <TableCell align='left'>
+            </ClickableTableCell>
+            <ClickableTableCell
+              align='left'
+              onClick={() =>
+                handleClickId(
+                  details.possibleDuplicate?.household?.id,
+                  'household',
+                )
+              }
+            >
               {details.possibleDuplicate?.household?.unicefId || '-'}
-            </TableCell>
+            </ClickableTableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.fullName}
             </TableCell>

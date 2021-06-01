@@ -4,8 +4,6 @@ description: HCT MIS related glossary and terms
 
 # Glossary / Terminology
 
-
-
 <table>
   <thead>
     <tr>
@@ -73,7 +71,7 @@ description: HCT MIS related glossary and terms
     <tr>
       <td style="text-align:left">Core Attribute</td>
       <td style="text-align:left">Common in the business of any Program. Commonly used attributes for Households
-        / Individuals that change with the Country&apos;s needs - <em><b>stored within the HCT System Database. </b></em>
+        / Individuals that change with the Country&apos;s needs - <em><b>stored within the HCT System Database.</b></em>
       </td>
     </tr>
     <tr>
@@ -136,7 +134,7 @@ description: HCT MIS related glossary and terms
       <td style="text-align:left">Flexible Attributes</td>
       <td style="text-align:left">Non-Core attributes associated with a household / beneficiary. Also referred
         to as &quot;Flex Fields&quot;. These fields are less common across business
-        and have a likelihood to change. <em><b>Stored in the JSON blob. </b></em>
+        and have a likelihood to change. <em><b>Stored in the JSON blob.</b></em>
       </td>
     </tr>
     <tr>
@@ -265,13 +263,10 @@ description: HCT MIS related glossary and terms
         <p>Send a list to FSP, to pay $X to this list of Y beneficiaries. FSP pays
           them, sends a list back with duplicates, exception list or payments that
           did not go through.</p>
-        <p></p>
         <p>It can be automated or manual if bank doesn&apos;t have capacity or if
           low-tech deep field.</p>
-        <p></p>
         <p>This would potentially happen in HCR. Will get read only view of it as
           a payment record.</p>
-        <p></p>
         <p>If its not a HCR FSP how we do it is tbd, but this has to reach back to
           CashAssist potentially since the actual reconciliation has to happen in
           CA.</p>

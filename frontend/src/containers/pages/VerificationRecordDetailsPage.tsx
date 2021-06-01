@@ -55,14 +55,12 @@ export function VerificationRecordDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Payment ID ${decodeIdString(
-        paymentVerification.paymentRecord.id,
-      )}`}
+      title={`Payment ID ${paymentVerification.paymentRecord.caId}`}
       breadCrumbs={breadCrumbsItems}
     >
       {verification.verificationMethod === 'MANUAL' &&
       hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VERIFY, permissions) ? (
-        <VerifyManual paymentVerificationId={paymentVerification.id} />
+        <VerifyManual paymentVerificationId={paymentVerification.id} enabled={paymentVerification.isManuallyEditable}/>
       ) : null}
     </PageHeader>
   );

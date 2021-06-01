@@ -28,13 +28,13 @@ const ButtonContainer = styled.span`
 
 export function PaymentRecordDetailsPage(): React.ReactElement {
   const { id } = useParams();
-  const { data: caData } = useCashAssistUrlPrefixQuery();
+  const { data: caData, loading: caLoading } = useCashAssistUrlPrefixQuery();
   const { data, loading } = usePaymentRecordQuery({
     variables: { id },
   });
   const permissions = usePermissions();
   const businessArea = useBusinessArea();
-  if (loading) return <LoadingComponent />;
+  if (loading || caLoading) return <LoadingComponent />;
   if (permissions === null) return null;
   if (
     !hasPermissions(
@@ -44,7 +44,7 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
   )
     return <PermissionDenied />;
 
-  if (!data) return null;
+  if (!data || !caData) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -72,8 +72,9 @@ export function PaymentRecordDetailsPage(): React.ReactElement {
             variant='contained'
             color='primary'
             component='a'
-            disabled={!paymentRecord.caHashId}
-            href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_payment&id=/${paymentRecord.caHashId}`}
+            disabled={!paymentRecord.caHashId || !caData?.cashAssistUrlPrefix}
+            target='_blank'
+            href={`${caData?.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_payment&id=${paymentRecord.caHashId}`}
             startIcon={<OpenInNewRoundedIcon />}
           >
             Open in CashAssist

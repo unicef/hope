@@ -4,6 +4,7 @@ import { Grid, Typography } from '@material-ui/core';
 import { DashboardPaper } from '../DashboardPaper';
 import { GrievancesChart } from '../charts/GrievancesChart';
 import { AllChartsQuery } from '../../../__generated__/graphql';
+import { formatNumber } from '../../../utils/utils';
 
 const CardTitleSmaller = styled.div`
   text-transform: capitalize;
@@ -21,25 +22,25 @@ export const GrievancesSection = ({
 }: GrievancesSectionProps): React.ReactElement => {
   if (!data) return null;
   return (
-    <DashboardPaper title='Grievances'>
+    <DashboardPaper title='Grievances and Feedback'>
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <CardTitleSmaller>TOTAL NUMBER OF GRIEVANCES</CardTitleSmaller>
           <Typography variant='caption'>
-            {data?.total - data?.totalNumberOfFeedback}
+            {formatNumber(data?.totalNumberOfGrievances)}
           </Typography>
         </Grid>
         <Grid item xs={6}>
           <CardTitleSmaller>TOTAL NUMBER OF FEEDBACK</CardTitleSmaller>
           <Typography variant='caption'>
-            {data?.totalNumberOfFeedback}
+            {formatNumber(data?.totalNumberOfFeedback)}
           </Typography>
         </Grid>
       </Grid>
       <GrievancesChart data={data} />
       <CardTitleSmaller>NUMBER OF OPEN SENSITIVE GRIEVANCES</CardTitleSmaller>
       <Typography variant='caption'>
-        {data?.totalNumberOfOpenSensitive}
+        {formatNumber(data?.totalNumberOfOpenSensitive)}
       </Typography>
     </DashboardPaper>
   );

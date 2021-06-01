@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.db.models import Prefetch, Q, Sum
-from django.db.models.functions import Lower
+from django.db.models.functions import Coalesce, Lower
 
 import graphene
 from django_filters import (
+    BooleanFilter,
     CharFilter,
     FilterSet,
     ModelMultipleChoiceFilter,
@@ -11,31 +14,42 @@ from django_filters import (
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from hct_mis_api.apps.targeting.models import HouseholdSelection
 from hct_mis_api.apps.account.permissions import (
+    ALL_GRIEVANCES_CREATE_MODIFY,
     BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
+    hopeOneOfPermissionClass,
     hopePermissionClass,
 )
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
-from hct_mis_api.apps.core.filters import AgeRangeFilter, DateRangeFilter, IntegerRangeFilter
+from hct_mis_api.apps.core.filters import (
+    AgeRangeFilter,
+    DateRangeFilter,
+    IntegerRangeFilter,
+)
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import ChoiceObject, AdminAreaNode, FieldAttributeNode
+from hct_mis_api.apps.core.schema import (
+    AdminAreaNode,
+    ChoiceObject,
+    FieldAttributeNode,
+)
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
+    chart_filters_decoder,
+    chart_permission_decorator,
     decode_id_string,
     encode_ids,
-    to_choice_object,
-    chart_get_filtered_qs,
+    get_model_choices_fields,
+    resolve_flex_fields_choices_to_string,
     sum_lists_with_values,
-    chart_permission_decorator,
-    chart_filters_decoder,
-    chart_create_filter_query
+    to_choice_object,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
+    AGENCY_TYPE_CHOICES,
+    DISABILITY_CHOICE,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
@@ -45,7 +59,10 @@ from hct_mis_api.apps.household.models import (
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     ROLE_NO_ROLE,
+    SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    WORK_STATUS_CHOICE,
+    Agency,
     Document,
     DocumentType,
     Household,
@@ -53,10 +70,16 @@ from hct_mis_api.apps.household.models import (
     IndividualIdentity,
     IndividualRoleInHousehold,
 )
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import Program
-from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.registration_datahub.schema import DeduplicationResultNode
-from hct_mis_api.apps.utils.schema import ChartDatasetNode, ChartDetailedDatasetsNode, SectionTotalNode
+from hct_mis_api.apps.targeting.models import HouseholdSelection
+from hct_mis_api.apps.utils.schema import (
+    ChartDatasetNode,
+    ChartDetailedDatasetsNode,
+    FlexFieldsScalar,
+    SectionTotalNode,
+)
 
 INDIVIDUALS_CHART_LABELS = [
     "Females 0-5",
@@ -78,6 +101,7 @@ class HouseholdFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="admin_area", queryset=AdminArea.objects.filter(level=2))
+    withdrawn = BooleanFilter(field_name="withdrawn")
 
     class Meta:
         model = Household
@@ -91,6 +115,7 @@ class HouseholdFilter(FilterSet):
             "target_populations": ["exact"],
             "programs": ["exact"],
             "residence_status": ["exact"],
+            "withdrawn": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -130,7 +155,7 @@ class HouseholdFilter(FilterSet):
 
 class IndividualFilter(FilterSet):
     business_area = CharFilter(
-        field_name="household__business_area__slug",
+        field_name="business_area__slug",
     )
     age = AgeRangeFilter(field_name="birth_date")
     sex = MultipleChoiceFilter(field_name="sex", choices=SEX_CHOICE)
@@ -140,6 +165,7 @@ class IndividualFilter(FilterSet):
     admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
     status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
     excluded_id = CharFilter(method="filter_excluded_id")
+    withdrawn = BooleanFilter(field_name="withdrawn")
 
     class Meta:
         model = Individual
@@ -147,10 +173,11 @@ class IndividualFilter(FilterSet):
             "household__id": ["exact"],
             "programs": ["exact"],
             "business_area": ["exact"],
-            "full_name": ["exact", "startswith","endswith"],
+            "full_name": ["exact", "startswith", "endswith"],
             "age": ["range", "lte", "gte"],
             "sex": ["exact"],
             "household__admin_area": ["exact"],
+            "withdrawn": ["exact"],
         }
 
     order_by = CustomOrderingFilter(
@@ -159,6 +186,7 @@ class IndividualFilter(FilterSet):
             "unicef_id",
             Lower("full_name"),
             "household__id",
+            "household__unicef_id",
             "birth_date",
             "sex",
             "relationship",
@@ -197,43 +225,41 @@ class DocumentTypeNode(DjangoObjectType):
         model = DocumentType
 
 
+class AgencyNode(DjangoObjectType):
+    country = graphene.String(description="Country name")
+
+    def resolve_country(parent, info):
+        return parent.country.name
+
+    class Meta:
+        model = Agency
+
+
 class IndividualIdentityNode(DjangoObjectType):
     type = graphene.String(description="Agency type")
+    country = graphene.String(description="Agency country")
 
     def resolve_type(parent, info):
         return parent.agency.type
+
+    def resolve_country(parent, info):
+        return getattr(parent.agency.country, "name", parent.agency.country)
 
     class Meta:
         model = IndividualIdentity
 
 
 class DocumentNode(DjangoObjectType):
+    country = graphene.String(description="Document country")
+
+    def resolve_country(parent, info):
+        return getattr(parent.type.country, "name", parent.type.country)
+
     class Meta:
         model = Document
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
-
-
-class FlexFieldsScalar(graphene.Scalar):
-    """
-    Allows use of a JSON String for input / output from the GraphQL schema.
-
-    Use of this type is *not recommended* as you lose the benefits of having a defined, static
-    schema (one of the key benefits of GraphQL).
-    """
-
-    @staticmethod
-    def serialize(dt):
-        return dt
-
-    @staticmethod
-    def parse_literal(node):
-        return node
-
-    @staticmethod
-    def parse_value(value):
-        return value
 
 
 class ExtendedHouseHoldConnection(graphene.Connection):
@@ -274,6 +300,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
+    sanction_list_confirmed_match = graphene.Boolean()
     has_duplicates = graphene.Boolean(description="Mark household if any of individuals has Duplicate status")
     consent_sharing = graphene.List(graphene.String)
     admin1 = graphene.Field(AdminAreaNode)
@@ -303,6 +330,9 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
 
     def resolve_has_duplicates(parent, info):
         return parent.individuals.filter(deduplication_golden_record_status=DUPLICATE).exists()
+
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_to_string(parent)
 
     @classmethod
     def check_node_permission(cls, info, object_instance):
@@ -365,6 +395,7 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         [(x[0], x[0]) for x in RELATIONSHIP_CHOICE],
     )
     photo = graphene.String()
+    age = graphene.Int()
 
     def resolve_role(parent, info):
         role = parent.households_and_roles.first()
@@ -393,13 +424,20 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
             return parent.photo.url
         return
 
+    def resolve_flex_fields(parent, info):
+        return resolve_flex_fields_choices_to_string(parent)
+
+    @staticmethod
+    def resolve_age(parent, info):
+        return parent.age
+
     @classmethod
     def check_node_permission(cls, info, object_instance):
         super().check_node_permission(info, object_instance)
         user = info.context.user
         # if user can't simply view all individuals, we check if they can do it because of grievance
         if not user.has_permission(
-                Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
+            Permissions.POPULATION_VIEW_INDIVIDUALS_DETAILS.value, object_instance.business_area
         ):
             grievance_tickets = GrievanceTicket.objects.filter(
                 complaint_ticket_details__in=object_instance.complaint_ticket_details.all()
@@ -428,6 +466,19 @@ class IndividualNode(BaseNodePermissionMixin, DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+        convert_choices_to_enum = get_model_choices_fields(
+            Individual,
+            excluded=[
+                "seeing_disability",
+                "hearing_disability",
+                "physical_disability",
+                "memory_disability",
+                "selfcare_disability",
+                "comms_disability",
+                "work_status",
+                "collect_individual_data",
+            ],
+        )
 
 
 class Query(graphene.ObjectType):
@@ -435,43 +486,66 @@ class Query(graphene.ObjectType):
     all_households = DjangoPermissionFilterConnectionField(
         HouseholdNode,
         filterset_class=HouseholdFilter,
-        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST),),
+        permission_classes=(
+            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_HOUSEHOLDS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+        ),
     )
     individual = relay.Node.Field(IndividualNode)
     all_individuals = DjangoPermissionFilterConnectionField(
         IndividualNode,
         filterset_class=IndividualFilter,
-        permission_classes=(hopePermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST),),
+        permission_classes=(
+            hopeOneOfPermissionClass(Permissions.POPULATION_VIEW_INDIVIDUALS_LIST, *ALL_GRIEVANCES_CREATE_MODIFY),
+        ),
     )
 
     section_households_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     section_individuals_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     section_child_reached = graphene.Field(
-        SectionTotalNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        SectionTotalNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     chart_individuals_reached_by_age_and_gender = graphene.Field(
-        ChartDatasetNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        ChartDatasetNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
     chart_individuals_with_disability_reached_by_age = graphene.Field(
-        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        ChartDetailedDatasetsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
 
     residence_status_choices = graphene.List(ChoiceObject)
     sex_choices = graphene.List(ChoiceObject)
     marital_status_choices = graphene.List(ChoiceObject)
+    work_status_choices = graphene.List(ChoiceObject)
     relationship_choices = graphene.List(ChoiceObject)
     role_choices = graphene.List(ChoiceObject)
     document_type_choices = graphene.List(ChoiceObject)
+    identity_type_choices = graphene.List(ChoiceObject)
     countries_choices = graphene.List(ChoiceObject)
+    observed_disability_choices = graphene.List(ChoiceObject)
+    severity_of_disability_choices = graphene.List(ChoiceObject)
 
     all_households_flex_fields_attributes = graphene.List(FieldAttributeNode)
     all_individuals_flex_fields_attributes = graphene.List(FieldAttributeNode)
@@ -487,7 +561,9 @@ class Query(graphene.ObjectType):
         ).order_by("created_at")
 
     def resolve_all_households(self, info, **kwargs):
-        return Household.objects.annotate(total_cash=Sum("payment_records__delivered_quantity")).order_by("created_at")
+        return Household.objects.annotate(total_cash=Coalesce(Sum("payment_records__delivered_quantity"), 0)).order_by(
+            "created_at"
+        )
 
     def resolve_residence_status_choices(self, info, **kwargs):
         return to_choice_object(RESIDENCE_STATUS_CHOICE)
@@ -507,16 +583,27 @@ class Query(graphene.ObjectType):
     def resolve_document_type_choices(self, info, **kwargs):
         return to_choice_object(IDENTIFICATION_TYPE_CHOICE)
 
+    def resolve_identity_type_choices(self, info, **kwargs):
+        return to_choice_object(AGENCY_TYPE_CHOICES)
+
     def resolve_countries_choices(self, info, **kwargs):
         return to_choice_object([(alpha3, label) for (label, alpha2, alpha3) in Countries.get_countries()])
 
+    def resolve_severity_of_disability_choices(self, info, **kwargs):
+        return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
+
+    def resolve_observed_disability_choices(self, info, **kwargs):
+        return to_choice_object(DISABILITY_CHOICE)
+
+    def resolve_work_status_choices(self, info, **kwargs):
+        return to_choice_object(WORK_STATUS_CHOICE)
+
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_households_reached(self, info, business_area_slug, year, **kwargs):
-        payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
-                                                                          chart_filters_decoder(kwargs))
-        return {
-            "total": payment_records_qs.values_list("household", flat=True).distinct().count()
-        }
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
+        return {"total": payment_records_qs.values_list("household", flat=True).distinct().count()}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_individuals_reached(self, info, business_area_slug, year, **kwargs):
@@ -530,14 +617,17 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
             "household__male_age_group_18_59_count",
-            "household__male_age_group_60_count"
+            "household__male_age_group_60_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
-                                                                          chart_filters_decoder(kwargs))
-
-        household_individuals_counts = payment_records_qs.select_related('household').values_list(
-            *households_individuals_params).distinct("household__id")
-        return {"total": sum(sum_lists_with_values(household_individuals_counts, len(households_individuals_params)))}
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
+        individuals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_individuals_params)
+            .distinct("household__id")
+        )
+        return {"total": sum(sum_lists_with_values(individuals_counts, len(households_individuals_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
     def resolve_section_child_reached(self, info, business_area_slug, year, **kwargs):
@@ -549,11 +639,15 @@ class Query(graphene.ObjectType):
             "household__male_age_group_6_11_count",
             "household__male_age_group_12_17_count",
         ]
-        payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
-                                                                          chart_filters_decoder(kwargs))
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
 
-        household_child_counts = payment_records_qs.select_related('household').values_list(
-            *households_child_params).distinct("household__id")
+        household_child_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_child_params)
+            .distinct("household__id")
+        )
         return {"total": sum(sum_lists_with_values(household_child_counts, len(households_child_params)))}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
@@ -571,11 +665,13 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
-                                                                          chart_filters_decoder(kwargs))
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
 
-        household_child_counts = payment_records_qs.select_related('household').values_list(
-            *households_params).distinct("household__id")
+        household_child_counts = (
+            payment_records_qs.select_related("household").values_list(*households_params).distinct("household__id")
+        )
         return {
             "labels": INDIVIDUALS_CHART_LABELS,
             "datasets": [{"data": sum_lists_with_values(household_child_counts, len(households_params))}],
@@ -595,7 +691,7 @@ class Query(graphene.ObjectType):
             "household__male_age_group_18_59_disabled_count",
             "household__male_age_group_60_disabled_count",
         ]
-        households_params_without_disability = [
+        households_params_total = [
             "household__female_age_group_0_5_count",
             "household__female_age_group_6_11_count",
             "household__female_age_group_12_17_count",
@@ -608,39 +704,39 @@ class Query(graphene.ObjectType):
             "household__male_age_group_60_count",
         ]
 
-        payment_records_qs = get_payments_records_with_delivered_quantity(year, business_area_slug,
-                                                                          chart_filters_decoder(kwargs))
-        #aggregate with distinct by household__id is not possible
-        households_with_disability_counts = payment_records_qs.select_related('household').values_list(
-            *households_params_with_disability).distinct("household__id")
+        payment_records_qs = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
+        # aggregate with distinct by household__id is not possible
+        households_with_disability_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_params_with_disability)
+            .distinct("household__id")
+        )
+        sum_of_with_disability = sum_lists_with_values(
+            households_with_disability_counts, len(households_params_with_disability)
+        )
 
-        households_without_disability_counts = payment_records_qs.select_related('household').values_list(
-            *households_params_without_disability).distinct("household__id")
+        households_totals_counts = (
+            payment_records_qs.select_related("household")
+            .values_list(*households_params_total)
+            .distinct("household__id")
+        )
+        sum_of_totals = sum_lists_with_values(households_totals_counts, len(households_params_total))
+
+        sum_of_without_disability = []
+
+        for i, total in enumerate(sum_of_totals):
+            if not total:
+                sum_of_without_disability.append(0)
+            elif not sum_of_with_disability[i]:
+                sum_of_without_disability.append(total)
+            else:
+                sum_of_without_disability.append(total - sum_of_with_disability[i])
 
         datasets = [
-            {
-                "label": "with disability",
-                "data": sum_lists_with_values(households_with_disability_counts, len(households_params_with_disability)),
-            },
-            {
-                "label": "without disability",
-                "data": sum_lists_with_values(households_without_disability_counts, len(households_params_without_disability)),
-            },
+            {"label": "with disability", "data": sum_of_with_disability},
+            {"label": "without disability", "data": sum_of_without_disability},
+            {"label": "total", "data": sum_of_totals},
         ]
         return {"labels": INDIVIDUALS_CHART_LABELS, "datasets": datasets}
-
-
-def get_payments_records_with_delivered_quantity(year, business_area_slug, filters):
-    return chart_get_filtered_qs(
-        PaymentRecord,
-        year,
-        business_area_slug_filter={"business_area__slug": business_area_slug},
-        additional_filters={
-            "delivered_quantity_usd__gt": 0,
-            **chart_create_filter_query(
-                filters,
-                program_id_path="cash_plan__program__id",
-                administrative_area_path="cash_plan__program__admin_areas"
-            )
-        },
-    )

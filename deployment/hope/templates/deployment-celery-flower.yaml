@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hope.fullname" . }}-celery-flower
+  labels:
+    {{- include "hope.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.celeryflower.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "hope.selectorLabels" . | nindent 6 }}
+      hope/service: celery-flower
+  template:
+    metadata:
+    {{- with .Values.celeryflower.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{- include "hope.selectorLabels" . | nindent 8 }}
+        hope/service: celery-flower
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hope.serviceAccountName" . }}
+      volumes:
+      - configMap:
+          defaultMode: 511
+          name: {{ include "hope.fullname" . }}-celeryflower-entrypoint
+        name: entrypoint
+      containers:
+        - name: {{ .Chart.Name }}-celery-flower
+          securityContext:
+            {{- toYaml .Values.celeryflower.securityContext | nindent 12 }}
+          image: "{{ .Values.celeryflower.image }}"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.celeryflower.service.port }}
+              protocol: TCP
+          envFrom:
+          - secretRef:
+              name: {{ include "hope.fullname" . }}-celeryflower
+          - configMapRef:
+              name: {{ include "hope.fullname" . }}-celeryflower
+          volumeMounts:
+          - name: entrypoint
+            mountPath: /entrypoint.sh
+            subPath: entrypoint.sh
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: {{ .Values.celeryflower.service.port }}
+              httpHeaders:
+              - name: X-Health
+                value:  "Kubernetes-Health"
+              - name: Host
+                value: "kubernetes.internal"
+          resources:
+            {{- toYaml .Values.celeryflower.resources | nindent 12 }}
+      {{- with .Values.celeryflower.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celeryflower.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.celeryflower.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

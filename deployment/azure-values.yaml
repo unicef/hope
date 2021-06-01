@@ -25,8 +25,6 @@ frontend:
       cpu: "500m"
       memory: "256Mi"
 
-
-
 postgresql:
   resources:
     limits:
@@ -178,80 +176,24 @@ elasticsearch:
   nodeSelector:
     agentpool: hope
 
-airflow:
-  ingress:
-    annotations:
-      kubernetes.io/ingress.class: azure/application-gateway
-      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+celery:
+  resources:
+    limits:
+      cpu: "1500m"
+      memory: "2048Mi"
+    requests:
+      cpu: "1000m"
+      memory: "1024Mi"
   nodeSelector:
     agentpool: hope
-  worker:
-    resources:
-      limits:
-        cpu: "1"
-        memory: "4Gi"
-      requests:
-        cpu: "1"
-        memory: "512Mi"
-    nodeSelector:
-      agentpool: hope
-  scheduler:
-    resources:
-      limits:
-        cpu: "500m"
-        memory: "512Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-    nodeSelector:
-      agentpool: hope
-  redis:
-    resources:
-      limits:
-        cpu: "250m"
-        memory: "256Mi"
-      requests:
-        cpu: "250m"
-        memory: "256Mi"
-  airflow:
-    nodeSelector:
-      agentpool: hope
-    redis:
-      resources:
-        limits:
-          cpu: "250m"
-          memory: "256Mi"
-        requests:
-          cpu: "250m"
-          memory: "256Mi"
-    worker:
-      resources:
-        limits:
-          cpu: "1"
-          memory: "4Gi"
-        requests:
-          cpu: "1"
-          memory: "512Mi"
-      nodeSelector:
-        agentpool: hope
-    scheduler:
-      resources:
-        limits:
-          cpu: "500m"
-          memory: "512Mi"
-        requests:
-          cpu: "250m"
-          memory: "256Mi"
-      nodeSelector:
-        agentpool: hope
-    web:
-      resources:
-        limits:
-          cpu: "750m"
-          memory: "1024Mi"
-        requests:
-          cpu: "500m"
-          memory: "512Mi"
-      nodeSelector:
-        agentpool: hope
 
+celeryflower:
+  resources:
+    limits:
+      cpu: "600m"
+      memory: "512Mi"
+    requests:
+      cpu: "500m"
+      memory: "256Mi"
+  nodeSelector:
+    agentpool: hope

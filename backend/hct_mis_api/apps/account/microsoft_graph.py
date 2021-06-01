@@ -3,9 +3,6 @@ import logging
 import requests
 from django.conf import settings
 from django.http import Http404
-from django.contrib.auth import get_user_model
-
-from hct_mis_api.apps.core.utils import nested_getattr
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +11,7 @@ DJANGO_USER_MAP = {
     "email": "mail",
     "first_name": "givenName",
     "last_name": "surname",
+    "ad_uuid": "id",
 }
 
 
@@ -25,6 +23,7 @@ class MicrosoftGraphAPI:
 
     def get_token(self):
         if not self.azure_client_id or not self.azure_client_secret:
+            logger.error("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
             raise ValueError("Configure AZURE_CLIENT_ID and/or AZURE_CLIENT_SECRET")
 
         post_dict = {
@@ -46,17 +45,30 @@ class MicrosoftGraphAPI:
     def get_results(self, url):
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         response = requests.get(url, headers=headers)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            logger.exception(e)
+            raise
         json_response = response.json()
         return json_response
 
-    def get_user_data(self, email):
-        data = self.get_results(
-            f"https://graph.microsoft.com/beta/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
-        )
-        value = data.get("value")
-        if value is None:
-            raise Http404("")
-        if len(value) < 1:
-            raise Http404("")
-        return value[0]
+    def get_user_data(self, *, email=None, uuid=None):
+        try:
+            if uuid:
+                q = f"https://graph.microsoft.com/beta/users/{uuid}"
+                value = self.get_results(q)
+            elif email:
+                q = f"https://graph.microsoft.com/beta/users/?$filter=userType in ['Member','guest'] and mail eq '{email}'"
+                data = self.get_results(q)
+                value = data.get("value")[0]
+            else:
+                logger.error("You must provide 'uuid' or 'email' argument.")
+                raise ValueError("You must provide 'uuid' or 'email' argument.")
+        except (IndexError,):
+            logger.error(f"User not found using email={email},uuid={uuid}")
+            raise Http404("User not found")
+        if not value:
+            logger.error(f"User not found using email={email},uuid={uuid}")
+            raise Http404("User not found")
+        return value

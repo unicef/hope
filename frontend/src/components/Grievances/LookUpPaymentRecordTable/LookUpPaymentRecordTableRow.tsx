@@ -7,7 +7,7 @@ import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   decodeIdString,
-  formatCurrency,
+  formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
@@ -48,6 +48,8 @@ export function LookUpPaymentRecordTableRow({
   };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
+  const received =
+    paymentRecord?.verifications?.edges?.[0]?.node?.receivedAmount;
   return (
     <ClickableTableRow hover role='checkbox' key={paymentRecord.id}>
       <TableCell padding='checkbox'>
@@ -59,7 +61,7 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell onClick={handleClick} align='left'>
-        <Pointer>{decodeIdString(paymentRecord.id)}</Pointer>
+        <Pointer>{paymentRecord.caId}</Pointer>
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verifications?.edges[0]?.node.status ? (
@@ -75,10 +77,15 @@ export function LookUpPaymentRecordTableRow({
       </TableCell>
       <TableCell align='left'>{paymentRecord.cashPlan.name}</TableCell>
       <TableCell align='right'>
-        {formatCurrency(paymentRecord.deliveredQuantity)}
+        {formatCurrencyWithSymbol(
+          paymentRecord.deliveredQuantity,
+          paymentRecord.currency,
+        )}
       </TableCell>
       <TableCell align='right'>
-        <Missing />
+        {received === null || received === undefined
+          ? '-'
+          : formatCurrencyWithSymbol(received, paymentRecord.currency)}
       </TableCell>
     </ClickableTableRow>
   );

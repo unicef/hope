@@ -1,10 +1,15 @@
 import uuid
 from datetime import timedelta
+from unittest import mock
 from unittest.mock import patch, MagicMock
 
+import os
+
+import requests_mock
 from django.core.management import call_command
 from django.test import TestCase
 from django.utils import timezone
+from parameterized import parameterized
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
     CashPlan as DHCashPlan,
@@ -16,12 +21,14 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
 from hct_mis_api.apps.cash_assist_datahub.models import Session
 from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
 from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.tests.test_exchange_rates import EXCHANGE_RATES_WITH_HISTORICAL_DATA
 from hct_mis_api.apps.household.fixtures import create_household
 from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
 from hct_mis_api.apps.program.models import Program, CashPlan
 from hct_mis_api.apps.targeting.models import TargetPopulation
 
 
+@mock.patch.dict(os.environ, {"EXCHANGE_RATES_API_KEY": "TEST_API_KEY"})
 class TestPullDataFromDatahub(TestCase):
     multi_db = True
     program = None
@@ -33,6 +40,8 @@ class TestPullDataFromDatahub(TestCase):
     @staticmethod
     def _pre_test_commands():
         call_command("loadbusinessareas")
+        call_command("loadcountrycodes")
+
         # call_command("generatedocumenttypes")
         # business_area_with_data_sharing = BusinessArea.objects.first()
         # business_area_with_data_sharing.has_data_sharing_agreement = True
@@ -88,6 +97,17 @@ class TestPullDataFromDatahub(TestCase):
         dh_program.save()
         cls.dh_program = dh_program
 
+        dh_service_provider = DHServiceProvider()
+        dh_service_provider.session = session
+        dh_service_provider.business_area = BusinessArea.objects.first().code
+        dh_service_provider.ca_id = "123-SP-12345"
+        dh_service_provider.full_name = "SOME TEST BANK"
+        dh_service_provider.short_name = "STB"
+        dh_service_provider.country = "POL"
+        dh_service_provider.vision_id = "random-sp-vision-id"
+        dh_service_provider.save()
+        cls.dh_service_provider = dh_service_provider
+
         dh_cash_plan1 = DHCashPlan()
         dh_cash_plan1.session = session
         dh_cash_plan1.business_area = BusinessArea.objects.first().code
@@ -106,7 +126,7 @@ class TestPullDataFromDatahub(TestCase):
         dh_cash_plan1.program_mis_id = cls.program.id
         dh_cash_plan1.delivery_type = "CARD"
         dh_cash_plan1.assistance_measurement = "TEST measurement"
-        dh_cash_plan1.assistance_through = "Test Bank"
+        dh_cash_plan1.assistance_through = dh_service_provider.ca_id
         dh_cash_plan1.vision_id = "random-csh-vision-id"
         dh_cash_plan1.funds_commitment = "123"
         dh_cash_plan1.validation_alerts_count = 0
@@ -119,17 +139,6 @@ class TestPullDataFromDatahub(TestCase):
         dh_cash_plan1.total_undelivered_quantity = 0
         dh_cash_plan1.save()
         cls.dh_cash_plan1 = dh_cash_plan1
-
-        dh_service_provider = DHServiceProvider()
-        dh_service_provider.session = session
-        dh_service_provider.business_area = BusinessArea.objects.first().code
-        dh_service_provider.ca_id = "123-SP-12345"
-        dh_service_provider.full_name = "SOME TEST BANK"
-        dh_service_provider.short_name = "STB"
-        dh_service_provider.country = "POL"
-        dh_service_provider.vision_id = "random-sp-vision-id"
-        dh_service_provider.save()
-        cls.dh_service_provider = dh_service_provider
 
         dh_payment_record = DHPaymentRecord()
         dh_payment_record.session = session
@@ -167,7 +176,13 @@ class TestPullDataFromDatahub(TestCase):
         cls._setup_in_app_data()
         cls._setup_datahub_data()
 
-    def test_pull_data(self):
+    @requests_mock.Mocker()
+    def test_pull_data(self, mocker):
+        mocker.register_uri(
+            "GET",
+            "https://uniapis.unicef.org/biapi/v1/exchangerates?history=yes",
+            json=EXCHANGE_RATES_WITH_HISTORICAL_DATA,
+        )
         task = PullFromDatahubTask()
         task.execute()
         session = self.session
@@ -219,6 +234,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(cash_plan.total_entitled_quantity_revised, self.dh_cash_plan1.total_entitled_quantity_revised)
         self.assertEqual(cash_plan.total_delivered_quantity, self.dh_cash_plan1.total_delivered_quantity)
         self.assertEqual(cash_plan.total_undelivered_quantity, self.dh_cash_plan1.total_undelivered_quantity)
+        self.assertEqual(cash_plan.service_provider.ca_id, self.dh_cash_plan1.assistance_through)
 
         # payment record
         payment_record = PaymentRecord.objects.get(ca_id=self.dh_payment_record.ca_id)
@@ -250,6 +266,7 @@ class TestPullDataFromDatahub(TestCase):
         self.assertEqual(payment_record.transaction_reference_id, self.dh_payment_record.transaction_reference_id)
         self.assertEqual(payment_record.vision_id, self.dh_payment_record.vision_id)
         self.assertEqual(payment_record.service_provider_id, service_provider.id)
+        self.assertEqual(payment_record.registration_ca_id, self.dh_payment_record.registration_ca_id)
 
         self.assertIn(self.household, self.program.households.all())
 
@@ -313,3 +330,34 @@ class TestSessionsPullDataFromDatahub(TestCase):
         session1.delete()
         session2.delete()
         session3.delete()
+
+    @parameterized.expand(
+        [
+            (
+                "equal",
+                "AFG",
+                "AFG",
+            ),
+            (
+                "custom_code",
+                "AUL",
+                "AUS",
+            ),
+        ]
+    )
+    def test_country_mapping(self, _, ca_code, expected):
+        session = Session(status=Session.STATUS_READY, business_area=BusinessArea.objects.first().code)
+        session.save()
+        dh_service_provider = DHServiceProvider()
+        dh_service_provider.session = session
+        dh_service_provider.business_area = BusinessArea.objects.first().code
+        dh_service_provider.ca_id = str(uuid.uuid4())
+        dh_service_provider.full_name = "SOME TEST BANK"
+        dh_service_provider.short_name = "STB"
+        dh_service_provider.country = ca_code
+        dh_service_provider.vision_id = "random-sp-vision-id"
+        dh_service_provider.save()
+        task = PullFromDatahubTask()
+        task.copy_service_providers(session)
+        service_provider = ServiceProvider.objects.filter(ca_id=dh_service_provider.ca_id).first()
+        self.assertEqual(service_provider.country, expected)

@@ -1,4 +1,4 @@
-from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
+from adminfilters.filters import TextFieldFilter
 from django.contrib import admin
 
 from hct_mis_api.apps.registration_datahub.models import (
@@ -10,6 +10,7 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportData,
     ImportedIndividualRoleInHousehold,
     ImportedIndividualIdentity,
+    KoboImportedSubmission,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -21,11 +22,15 @@ class RegistrationDataImportDatahubAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedIndividual)
 class ImportedIndividualAdmin(HOPEModelAdminBase):
-    list_display = ('registration_data_import', 'full_name', 'sex', )
-    list_filter = (TextFieldFilter.factory('registration_data_import__name__istartswith'),
-                   )
-    date_hierarchy = 'updated_at'
-    raw_id_fields = ('household', 'registration_data_import')
+    list_display = (
+        "registration_data_import",
+        "full_name",
+        "sex",
+    )
+    list_filter = (TextFieldFilter.factory("registration_data_import__name__istartswith"),)
+    date_hierarchy = "updated_at"
+    raw_id_fields = ("household", "registration_data_import")
+
 
 @admin.register(ImportedIndividualIdentity)
 class ImportedIndividualIdentityAdmin(HOPEModelAdminBase):
@@ -54,4 +59,9 @@ class ImportedDocumentTypeAdmin(HOPEModelAdminBase):
 
 @admin.register(ImportedIndividualRoleInHousehold)
 class ImportedIndividualRoleInHouseholdAdmin(HOPEModelAdminBase):
+    pass
+
+
+@admin.register(KoboImportedSubmission)
+class KoboImportedSubmissionAdmin(HOPEModelAdminBase):
     pass

@@ -1,11 +1,10 @@
-import json
 import logging
 
 from constance import config
-from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
@@ -95,9 +94,14 @@ class CheckAgainstSanctionListPreMergeTask:
                     marked_individual = Individual.objects.filter(id=individual_hit.id).first()
                     if marked_individual:
                         possible_matches.add(marked_individual.id)
+                        household = marked_individual.household
+                        admin_level_2 = household.admin2 if household else ""
+                        area = household.village if household else ""
                         ticket = GrievanceTicket(
                             category=GrievanceTicket.CATEGORY_SYSTEM_FLAGGING,
                             business_area=marked_individual.business_area,
+                            admin2=admin_level_2,
+                            area=area,
                         )
                         ticket_details = TicketSystemFlaggingDetails(
                             ticket=ticket,
@@ -126,4 +130,8 @@ class CheckAgainstSanctionListPreMergeTask:
         )
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
+        for ticket in tickets_to_create:
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+            )
         TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)

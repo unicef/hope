@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 
@@ -13,13 +14,16 @@ from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 
 
 class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
-    STATUS_SUCCESS = "SUCCESS"
-    STATUS_PENDING = "PENDING"
-    STATUS_ERROR = "ERROR"
+    STATUS_SUCCESS = "Transaction Successful"
+    STATUS_ERROR = "Transaction Erroneous"
+    STATUS_DISTRIBUTION_SUCCESS = "Distribution Successful"
+    STATUS_NOT_DISTRIBUTED = "Not Distributed"
+    ALLOW_CREATE_VERIFICATION = (STATUS_SUCCESS, STATUS_DISTRIBUTION_SUCCESS)
     STATUS_CHOICE = (
-        (STATUS_SUCCESS, _("Success")),
-        (STATUS_PENDING, _("Pending")),
-        (STATUS_ERROR, _("Error")),
+        (STATUS_SUCCESS, _("Transaction Successful")),
+        (STATUS_ERROR, _("Transaction Erroneous")),
+        (STATUS_DISTRIBUTION_SUCCESS, _("Distribution Successful")),
+        (STATUS_NOT_DISTRIBUTED, _("Not Distributed")),
     )
     ENTITLEMENT_CARD_STATUS_ACTIVE = "ACTIVE"
     ENTITLEMENT_CARD_STATUS_INACTIVE = "INACTIVE"
@@ -28,14 +32,50 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
         (ENTITLEMENT_CARD_STATUS_INACTIVE, _("Inactive")),
     )
 
-    DELIVERY_TYPE_CASH = "CASH"
-    DELIVERY_TYPE_DEPOSIT_TO_CARD = "DEPOSIT_TO_CARD"
-    DELIVERY_TYPE_TRANSFER = "TRANSFER"
+    DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL = "Cardless cash withdrawal"
+    DELIVERY_TYPE_CASH = "Cash"
+    DELIVERY_TYPE_CASH_BY_FSP = "Cash by FSP"
+    DELIVERY_TYPE_CHEQUE = "Cheque"
+    DELIVERY_TYPE_DEPOSIT_TO_CARD = "Deposit to Card"
+    DELIVERY_TYPE_IN_KIND = "In Kind"
+    DELIVERY_TYPE_MOBILE_MONEY = "Mobile Money"
+    DELIVERY_TYPE_OTHER = "Other"
+    DELIVERY_TYPE_PRE_PAID_CARD = "Pre-paid card"
+    DELIVERY_TYPE_REFERRAL = "Referral"
+    DELIVERY_TYPE_TRANSFER = "Transfer"
+    DELIVERY_TYPE_TRANSFER_TO_ACCOUNT = "Transfer to Account"
+    DELIVERY_TYPE_VOUCHER = "Voucher"
+
+    DELIVERY_TYPES_IN_CASH = (
+        DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL,
+        DELIVERY_TYPE_CASH,
+        DELIVERY_TYPE_CASH_BY_FSP,
+        DELIVERY_TYPE_CHEQUE,
+        DELIVERY_TYPE_DEPOSIT_TO_CARD,
+        DELIVERY_TYPE_IN_KIND,
+        DELIVERY_TYPE_MOBILE_MONEY,
+        DELIVERY_TYPE_OTHER,
+        DELIVERY_TYPE_PRE_PAID_CARD,
+        DELIVERY_TYPE_REFERRAL,
+        DELIVERY_TYPE_TRANSFER,
+        DELIVERY_TYPE_TRANSFER_TO_ACCOUNT,
+    )
+    DELIVERY_TYPES_IN_VOUCHER = (DELIVERY_TYPE_VOUCHER,)
 
     DELIVERY_TYPE_CHOICE = (
+        (DELIVERY_TYPE_CARDLESS_CASH_WITHDRAWAL, _("Cardless cash withdrawal")),
         (DELIVERY_TYPE_CASH, _("Cash")),
+        (DELIVERY_TYPE_CASH_BY_FSP, _("Cash by FSP")),
+        (DELIVERY_TYPE_CHEQUE, _("Cheque")),
         (DELIVERY_TYPE_DEPOSIT_TO_CARD, _("Deposit to Card")),
+        (DELIVERY_TYPE_IN_KIND, _("In Kind")),
+        (DELIVERY_TYPE_MOBILE_MONEY, _("Mobile Money")),
+        (DELIVERY_TYPE_OTHER, _("Other")),
+        (DELIVERY_TYPE_PRE_PAID_CARD, _("Pre-paid card")),
+        (DELIVERY_TYPE_REFERRAL, _("Referral")),
         (DELIVERY_TYPE_TRANSFER, _("Transfer")),
+        (DELIVERY_TYPE_TRANSFER_TO_ACCOUNT, _("Transfer to Account")),
+        (DELIVERY_TYPE_VOUCHER, _("Voucher")),
     )
     business_area = models.ForeignKey("core.BusinessArea", on_delete=models.CASCADE)
     status = models.CharField(
@@ -78,7 +118,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     entitlement_card_issue_date = models.DateField(null=True)
     delivery_type = models.CharField(
         choices=DELIVERY_TYPE_CHOICE,
-        max_length=20,
+        max_length=24,
     )
     currency = models.CharField(
         max_length=4,
@@ -104,6 +144,7 @@ class PaymentRecord(TimeStampedUUIDModel, ConcurrencyModel):
     )
     transaction_reference_id = models.CharField(max_length=255, null=True)
     vision_id = models.CharField(max_length=255, null=True)
+    registration_ca_id = models.CharField(max_length=255, null=True)
 
 
 class ServiceProvider(TimeStampedUUIDModel):
@@ -225,13 +266,23 @@ class PaymentVerification(TimeStampedUUIDModel, ConcurrencyModel):
     )
     payment_record = models.ForeignKey("PaymentRecord", on_delete=models.CASCADE, related_name="verifications")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    status_date = models.DateField(null=True)
+    status_date = models.DateTimeField(null=True)
     received_amount = models.DecimalField(
         decimal_places=2,
         max_digits=12,
         validators=[MinValueValidator(Decimal("0.01"))],
         null=True,
     )
+
+    @property
+    def is_manually_editable(self):
+        if (
+            self.cash_plan_payment_verification.verification_method
+            != CashPlanPaymentVerification.VERIFICATION_METHOD_MANUAL
+        ):
+            return False
+        minutes_elapsed = (timezone.now() - self.status_date).total_seconds() / 60
+        return not (self.status != PaymentVerification.STATUS_PENDING and minutes_elapsed > 10)
 
     @property
     def business_area(self):

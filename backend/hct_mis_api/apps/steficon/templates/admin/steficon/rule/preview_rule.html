@@ -1,13 +1,13 @@
 {% extends "admin_extra_urls/action_page.html" %}{% load engine i18n admin_urls static admin_modify %}
-{#{% block breadcrumbs %}#}
-{#    <div class="breadcrumbs">#}
-{#        <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>#}
-{#        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>#}
-{#        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>#}
-{#        &rsaquo; <a href="{% url opts|admin_urlname:'change' rule.pk %}">{{ rule }}</a>#}
-{#        &rsaquo; Test#}
-{#    </div>#}
-{#{% endblock %}#}
+{% block extrahead %}{{ block.super }}{{ form.media }}{% endblock extrahead %}
+{% block breadcrumbs-active %}
+{% if form %}
+    &rsaquo; Test
+{% else %}
+    &rsaquo; <a href="{% url opts|admin_urlname:'preview' original.pk %}">Test</a>
+    &rsaquo; Results
+{% endif %}
+{% endblock breadcrumbs-active %}
 
 {% block content %}
     {% if form %}

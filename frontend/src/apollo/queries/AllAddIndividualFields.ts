@@ -34,5 +34,9 @@ export const AllAddIndividualFields = gql`
       name
       value
     }
+    identityTypeChoices {
+      name
+      value
+    }
   }
 `;

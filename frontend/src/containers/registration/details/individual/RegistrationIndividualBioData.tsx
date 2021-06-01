@@ -3,9 +3,8 @@ import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import {
   decodeIdString,
-  getAgeFromDob,
   sexToCapitalize,
-  choicesToDict,
+  choicesToDict, renderBoolean,
 } from '../../../../utils/utils';
 import {
   ImportedIndividualDetailedFragment,
@@ -39,12 +38,6 @@ export function RegistrationIndividualsBioData({
 }: RegistrationIndividualBioDataProps): React.ReactElement {
   const businessArea = useBusinessArea();
 
-  let age: number | null;
-  const { birthDate } = individual;
-  if (birthDate) {
-    age = getAgeFromDob(birthDate);
-  }
-
   const {
     data: choicesData,
     loading: choicesLoading,
@@ -59,6 +52,13 @@ export function RegistrationIndividualsBioData({
   const maritalStatusChoicesDict = choicesToDict(
     choicesData.maritalStatusChoices,
   );
+  const workStatusChoicesDict = choicesToDict(choicesData.workStatusChoices);
+  const observedDisabilityChoicesDict = choicesToDict(
+    choicesData.observedDisabilityChoices,
+  );
+  const severityOfDisabilityChoicesDict = choicesToDict(
+    choicesData.severityOfDisabilityChoices,
+  );
   const roleChoicesDict = choicesToDict(choicesData.roleChoices);
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3}>
@@ -67,10 +67,26 @@ export function RegistrationIndividualsBioData({
       </LabelizedField>
     </Grid>
   ));
+  const mappedIndividualDocumentsIssuers = individual.documents?.edges?.map(
+    (edge) => (
+      <Grid item xs={3} key={`${edge.node.id}-${edge.node.type.country}`}>
+        <LabelizedField label={`${edge.node.type.label} ISSUER`}>
+          {edge.node.country}
+        </LabelizedField>
+      </Grid>
+    ),
+  );
   const mappedIdentities = individual.identities?.map((item) => (
     <Grid item xs={3}>
       <LabelizedField label={`${item.type} ID`}>
         {item.documentNumber}
+      </LabelizedField>
+    </Grid>
+  ));
+  const mappedIdentitiesIssuers = individual.identities?.map((item) => (
+    <Grid item xs={3}>
+      <LabelizedField label={`${item.type} ID ISSUER`}>
+        {item.country}
       </LabelizedField>
     </Grid>
   ));
@@ -107,18 +123,16 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
-          <LabelizedField label='Age'>{age}</LabelizedField>
+          <LabelizedField label='Age'>{individual.age}</LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Date of Birth'>
-            <UniversalMoment>{birthDate}</UniversalMoment>
+            <UniversalMoment>{individual.birthDate}</UniversalMoment>
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Estimated Date of Birth'>
-            {individual.estimatedBirthDate
-              ? individual.estimatedBirthDate
-              : 'No'}
+            {renderBoolean(individual.estimatedBirthDate)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -127,17 +141,26 @@ export function RegistrationIndividualsBioData({
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
+          <LabelizedField label='Work Status'>
+            {workStatusChoicesDict[individual.workStatus]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
           <LabelizedField label='Pregnant'>
-            {individual.pregnant ? 'Yes' : 'No'}
+            {renderBoolean(individual.pregnant)}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
           <LabelizedField label='Household ID'>
-            <ContentLink
-              href={`/${businessArea}/registration-data-import/household/${individual.household.id}`}
-            >
-              {decodeIdString(individual.household.id)}
-            </ContentLink>
+            {individual?.household?.id ? (
+              <ContentLink
+                href={`/${businessArea}/registration-data-import/household/${individual?.household?.id}`}
+              >
+                {decodeIdString(individual?.household?.id)}
+              </ContentLink>
+            ) : (
+              '-'
+            )}
           </LabelizedField>
         </Grid>
         <Grid item xs={3}>
@@ -150,6 +173,46 @@ export function RegistrationIndividualsBioData({
             {relationshipChoicesDict[individual.relationship]}
           </LabelizedField>
         </Grid>
+        <Grid item xs={12}>
+          <BorderBox />
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Observed disabilities'>
+            {individual.observedDisability
+              .map((choice) => observedDisabilityChoicesDict[choice])
+              .join(', ')}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Seeing disability severity'>
+            {severityOfDisabilityChoicesDict[individual.seeingDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Hearing disability severity'>
+            {severityOfDisabilityChoicesDict[individual.hearingDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Physical disability severity'>
+            {severityOfDisabilityChoicesDict[individual.physicalDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Remembering or concentrating disability severity'>
+            {severityOfDisabilityChoicesDict[individual.memoryDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Self-care disability severity'>
+            {severityOfDisabilityChoicesDict[individual.selfcareDisability]}
+          </LabelizedField>
+        </Grid>
+        <Grid item xs={3}>
+          <LabelizedField label='Communicating disability severity'>
+            {severityOfDisabilityChoicesDict[individual.commsDisability]}
+          </LabelizedField>
+        </Grid>
         {!mappedIndividualDocuments.length &&
         !mappedIdentities.length ? null : (
           <Grid item xs={12}>
@@ -158,6 +221,14 @@ export function RegistrationIndividualsBioData({
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
+        {!mappedIndividualDocumentsIssuers.length &&
+        !mappedIdentitiesIssuers.length ? null : (
+          <Grid item xs={12}>
+            <BorderBox />
+          </Grid>
+        )}
+        {mappedIndividualDocumentsIssuers}
+        {mappedIdentitiesIssuers}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>

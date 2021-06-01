@@ -127,7 +127,8 @@ export function FlagDetails({
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual.documents.edges
-                .map((item) => moment(item.node.documentNumber))
+                .filter((item) => item.node.type.type === 'NATIONAL_ID')
+                .map((item) => item.node.documentNumber)
                 .join(', ') || '-'}
             </TableCell>
             <TableCell align='left'>Golden Record</TableCell>

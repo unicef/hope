@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -11,7 +12,7 @@ from django.contrib.postgres.validators import (
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.translation import ugettext_lazy as _
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -24,11 +25,14 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_SELECT_MANY,
     _HOUSEHOLD,
     XLSX_ONLY_FIELDS,
+    TARGETING_CORE_FIELDS,
 )
 from hct_mis_api.apps.core.models import FlexibleAttribute
 from hct_mis_api.apps.household.models import Individual, Household, MALE, FEMALE
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+
+logger = logging.getLogger(__name__)
 
 _MAX_LEN = 256
 _MIN_RANGE = 1
@@ -181,7 +185,7 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     sent_to_datahub = models.BooleanField(
         default=False,
         help_text="""
-            Flag set when TP is processed by airflow task
+            Flag set when TP is processed by celery task
             """,
         db_index=True,
     )
@@ -217,41 +221,31 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
     @property
     def candidate_stats(self):
         if self.status == TargetPopulation.STATUS_DRAFT:
-            households_ids = Household.objects.filter(self.candidate_list_targeting_criteria.get_query()).values_list(
-                "id"
+            households_ids = (
+                Household.objects.filter(self.candidate_list_targeting_criteria.get_query())
+                .filter(business_area=self.business_area)
+                .values_list("id")
             )
         else:
             households_ids = self.vulnerability_score_filtered_households.values_list("id")
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
-        child_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=MALE,
-        ).count()
-        child_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=FEMALE,
-        ).count()
-
-        adult_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=MALE,
-        ).count()
-        adult_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=FEMALE,
-        ).count()
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        )
         return {
-            "child_male": child_male,
-            "child_female": child_female,
-            "adult_male": adult_male,
-            "adult_female": adult_female,
+            "child_male": targeted_individuals.get("child_male"),
+            "child_female": targeted_individuals.get("child_female"),
+            "adult_male": targeted_individuals.get("adult_male"),
+            "adult_female": targeted_individuals.get("adult_female"),
             "all_households": households_ids.count(),
-            "all_individuals": child_male + child_female + adult_male + adult_female,
+            "all_individuals": targeted_individuals.get("child_male")
+            + targeted_individuals.get("child_female")
+            + targeted_individuals.get("adult_male")
+            + targeted_individuals.get("adult_female"),
         }
 
     def get_criteria_string(self):
@@ -269,39 +263,29 @@ class TargetPopulation(SoftDeletableModel, TimeStampedUUIDModel, ConcurrencyMode
         if self.status == TargetPopulation.STATUS_DRAFT:
             return None
         elif self.status == TargetPopulation.STATUS_APPROVED:
-            households_ids = self.vulnerability_score_filtered_households.filter(
-                self.final_list_targeting_criteria.get_query()
-            ).values_list("id")
+            households_ids = (
+                self.vulnerability_score_filtered_households.filter(self.final_list_targeting_criteria.get_query())
+                .filter(business_area=self.business_area)
+                .values_list("id")
+                .distinct()
+            )
         else:
-            households_ids = self.final_list.values_list("id")
+            households_ids = self.final_list.values_list("id").distinct()
         delta18 = relativedelta(years=+18)
         date18ago = datetime.datetime.now() - delta18
-        child_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=MALE,
-        ).count()
-        child_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__gt=date18ago,
-            sex=FEMALE,
-        ).count()
 
-        adult_male = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=MALE,
-        ).count()
-        adult_female = Individual.objects.filter(
-            household__id__in=households_ids,
-            birth_date__lte=date18ago,
-            sex=FEMALE,
-        ).count()
+        targeted_individuals = Individual.objects.filter(household__id__in=households_ids).aggregate(
+            child_male=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=MALE)),
+            child_female=Count("id", distinct=True, filter=Q(birth_date__gt=date18ago, sex=FEMALE)),
+            adult_male=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=MALE)),
+            adult_female=Count("id", distinct=True, filter=Q(birth_date__lte=date18ago, sex=FEMALE)),
+        )
+
         return {
-            "child_male": child_male,
-            "child_female": child_female,
-            "adult_male": adult_male,
-            "adult_female": adult_female,
+            "child_male": targeted_individuals.get("child_male"),
+            "child_female": targeted_individuals.get("child_female"),
+            "adult_male": targeted_individuals.get("adult_male"),
+            "adult_female": targeted_individuals.get("adult_female"),
         }
 
     @property
@@ -565,16 +549,22 @@ class TargetingCriteriaFilterMixin:
         comparision_attribute = TargetingCriteriaRuleFilter.COMPARISION_ATTRIBUTES.get(self.comparision_method)
         args_count = comparision_attribute.get("arguments")
         if self.arguments is None:
+            logger.error(f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments")
             raise ValidationError(
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} " f"arguments"
             )
         args_input_count = len(self.arguments)
         if select_many:
             if args_input_count < 1:
+                logger.error(f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument")
                 raise ValidationError(
                     f"{self.field_name} SELECT MULTIPLE CONTAINS filter query expect at least 1 argument"
                 )
         elif args_count != args_input_count:
+            logger.error(
+                f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
+                f"arguments gets {args_input_count}"
+            )
             raise ValidationError(
                 f"{self.field_name} {self.comparision_method} filter query expect {args_count} "
                 f"arguments gets {args_input_count}"
@@ -593,6 +583,7 @@ class TargetingCriteriaFilterMixin:
         core_fields = self.get_core_fields()
         core_field_attrs = [attr for attr in core_fields if attr.get("name") == self.field_name]
         if len(core_field_attrs) != 1:
+            logger.error(f"There are no Core Field Attributes associated with this fieldName {self.field_name}")
             raise ValidationError(
                 f"There are no Core Field Attributes associated with this fieldName {self.field_name}"
             )
@@ -602,9 +593,13 @@ class TargetingCriteriaFilterMixin:
             return get_query(self.comparision_method, self.arguments)
         lookup = core_field_attr.get("lookup")
         if not lookup:
+            logger.error(
+                f"Core Field Attributes associated with this fieldName {self.field_name}"
+                " doesn't have get_query method or lookup field"
+            )
             raise ValidationError(
                 f"Core Field Attributes associated with this fieldName {self.field_name}"
-                f" doesn't have get_query method or lookup field"
+                " doesn't have get_query method or lookup field"
             )
         lookup_prefix = self.get_lookup_prefix(core_field_attr["associated_with"])
         return self.get_query_for_lookup(
@@ -615,6 +610,7 @@ class TargetingCriteriaFilterMixin:
     def get_query_for_flex_field(self):
         flex_field_attr = FlexibleAttribute.objects.get(name=self.field_name)
         if not flex_field_attr:
+            logger.error(f"There are no Flex Field Attributes associated with this fieldName {self.field_name}")
             raise ValidationError(
                 f"There are no Flex Field Attributes associated with this fieldName {self.field_name}"
             )
@@ -644,7 +640,7 @@ class TargetingCriteriaRuleFilter(TimeStampedUUIDModel, TargetingCriteriaFilterM
     """
 
     def get_core_fields(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        core_fields = TARGETING_CORE_FIELDS
         return [c for c in core_fields if c.get("associated_with") == _HOUSEHOLD]
 
     comparision_method = models.CharField(
@@ -674,7 +670,7 @@ class TargetingIndividualBlockRuleFilter(TimeStampedUUIDModel, TargetingCriteria
     """
 
     def get_core_fields(self):
-        core_fields = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS
+        core_fields = TARGETING_CORE_FIELDS
         return [c for c in core_fields if c.get("associated_with") == _INDIVIDUAL]
 
     comparision_method = models.CharField(

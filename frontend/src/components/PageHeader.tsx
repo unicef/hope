@@ -60,8 +60,9 @@ interface Props {
   breadCrumbs?: BreadCrumbsItem[];
   tabs?: React.ReactElement;
   hasInputComponent?: boolean;
-  withFlag?: boolean;
   withTriangle?: boolean;
+  possibleMatch?: boolean;
+  confirmedMatch?: boolean;
 }
 
 export function PageHeader({
@@ -70,8 +71,9 @@ export function PageHeader({
   breadCrumbs = null,
   tabs = null,
   hasInputComponent,
-  withFlag = false,
+  possibleMatch = false,
   withTriangle = false,
+  confirmedMatch = false,
 }: Props): React.ReactElement {
   const history = useHistory();
   return (
@@ -93,7 +95,9 @@ export function PageHeader({
                 {breadCrumbs && <BreadCrumbs breadCrumbs={breadCrumbs} />}
                 <Typography variant='h5'>
                   {title} {withTriangle && <FlagTooltip />}{' '}
-                  {withFlag && <Flag />}
+                  {(possibleMatch || confirmedMatch) && (
+                    <Flag confirmed={confirmedMatch} />
+                  )}
                 </Typography>
               </>
             )}

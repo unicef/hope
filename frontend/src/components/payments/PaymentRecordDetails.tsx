@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { StatusBox } from '../StatusBox';
 import {
-  formatCurrency,
+  formatCurrencyWithSymbol,
   paymentRecordStatusToColor,
   verificationRecordsStatusToColor,
 } from '../../utils/utils';
@@ -12,7 +12,6 @@ import {
   PaymentRecordNode,
   PaymentVerificationNode,
 } from '../../__generated__/graphql';
-import { Missing } from '../Missing';
 import { UniversalActivityLogTable } from '../../containers/tables/UniversalActivityLogTable';
 import { UniversalMoment } from '../UniversalMoment';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
@@ -77,9 +76,10 @@ export function PaymentRecordDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='REGISTRATION GROUP'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='REGISTRATION GROUP'
+              value={paymentRecord.registrationCaId}
+            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField
@@ -124,7 +124,10 @@ export function PaymentRecordDetails({
             <Grid item xs={3}>
               <LabelizedField
                 label='AMOUNT RECEIVED'
-                value={formatCurrency(paymentVerification.receivedAmount)}
+                value={formatCurrencyWithSymbol(
+                  paymentVerification.receivedAmount,
+                  paymentRecord.currency,
+                )}
               />
             </Grid>
           </Grid>
@@ -208,9 +211,10 @@ export function PaymentRecordDetails({
             />
           </Grid>
           <Grid item xs={3}>
-            <LabelizedField label='TRANSACTION REFERENCE ID'>
-              <Missing />
-            </LabelizedField>
+            <LabelizedField
+              label='TRANSACTION REFERENCE ID'
+              value={paymentRecord.transactionReferenceId}
+            />
           </Grid>
           <Grid item xs={3}>
             <LabelizedField

@@ -10,8 +10,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import {
   choicesToDict,
-  decodeIdString,
-  formatCurrency,
+  formatCurrencyWithSymbol,
   paymentVerificationStatusToColor,
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
@@ -52,7 +51,7 @@ export function PaymentVerificationTableRow({
       role='checkbox'
       key={plan.id}
     >
-      <TableCell align='left'>{decodeIdString(plan.id)}</TableCell>
+      <TableCell align='left'>{plan.caId}</TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
@@ -61,12 +60,12 @@ export function PaymentVerificationTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='left'>{plan.assistanceThrough}</TableCell>
+      <TableCell align='left'>{plan.serviceProvider?.fullName}</TableCell>
       <TableCell align='left'>
         {deliveryTypeChoicesDict[plan.deliveryType]}
       </TableCell>
       <TableCell align='right'>
-        {formatCurrency(plan.totalDeliveredQuantity)}
+        {formatCurrencyWithSymbol(plan.totalDeliveredQuantity, plan.currency)}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{plan.startDate}</UniversalMoment> -{' '}

@@ -1,12 +1,17 @@
+import functools
+import io
+import itertools
+import logging
+import string
 from collections import MutableMapping, OrderedDict
 from typing import List
-import functools
 
-from django.core.exceptions import ValidationError
+from PIL import Image
 from django.db.models import QuerySet
-
 from django_filters import OrderingFilter
 from graphql import GraphQLError
+
+logger = logging.getLogger(__name__)
 
 
 class CaseInsensitiveTuple(tuple):
@@ -16,11 +21,12 @@ class CaseInsensitiveTuple(tuple):
 
 class LazyEvalMethodsDict(MutableMapping):
     def __init__(self, *args, **kwargs):
+        self._ignored_method_fields = kwargs.pop("ignored_method_fields", [])
         self._dict = dict(*args, **kwargs)
 
     def __getitem__(self, k):
         v = self._dict.__getitem__(k)
-        if callable(v):
+        if callable(v) and k not in self._ignored_method_fields:
             v = v()
             self.__setitem__(k, v)
         return v
@@ -192,6 +198,7 @@ def serialize_flex_attributes():
             "id": attr.id,
             "type": attr.type,
             "name": attr.name,
+            "xlsx_field": attr.name,
             "lookup": attr.name,
             "required": attr.required,
             "label": attr.label,
@@ -215,56 +222,10 @@ def get_combined_attributes():
     }
 
 
-def age_to_birth_date_range_query(field_name, age_min, age_max):
-    import datetime as dt
-
-    from django.db.models import Q
-
-    query_dict = {}
-    this_year = dt.date.today().year
-    if age_min == age_max and age_min is not None:
-        return Q(**{f"{field_name}__year": this_year - age_min})
-    if age_min is not None:
-        query_dict[f"{field_name}__year__lte"] = this_year - age_min
-    if age_max is not None:
-        query_dict[f"{field_name}__year__gte"] = this_year - age_max
-    return Q(**query_dict)
-
-
-def age_to_birth_date_query(comparision_method, args):
-    field_name = "birth_date"
-    comparision_method_args_count = {
-        "RANGE": 2,
-        "NOT_IN_RANGE": 2,
-        "EQUALS": 1,
-        "NOT_EQUALS": 1,
-        "GREATER_THAN": 1,
-        "LESS_THAN": 1,
-    }
-    args_count = comparision_method_args_count.get(comparision_method)
-    if args_count is None:
-        raise ValidationError(f"Age filter query don't supports {comparision_method} type")
-    if len(args) != args_count:
-        raise ValidationError(f"Age {comparision_method} filter query expect {args_count} arguments")
-    if comparision_method == "RANGE":
-        return age_to_birth_date_range_query(field_name, *args)
-    if comparision_method == "NOT_IN_RANGE":
-        return ~(age_to_birth_date_range_query(field_name, *args))
-    if comparision_method == "EQUALS":
-        return age_to_birth_date_range_query(field_name, args[0], args[0])
-    if comparision_method == "NOT_EQUALS":
-        return ~(age_to_birth_date_range_query(field_name, args[0], args[0]))
-    if comparision_method == "GREATER_THAN":
-        return age_to_birth_date_range_query(field_name, args[0], None)
-    if comparision_method == "LESS_THAN":
-        return age_to_birth_date_range_query(field_name, None, args[0])
-    raise ValidationError(f"Age filter query don't supports {comparision_method} type")
-
-
-def get_attr_value(name, object, default=None):
-    if isinstance(object, (MutableMapping, dict)):
-        return object.get(name, default)
-    return getattr(object, name, default)
+def get_attr_value(name, obj, default=None):
+    if isinstance(obj, (MutableMapping, dict)):
+        return obj.get(name, default)
+    return getattr(obj, name, default)
 
 
 def to_choice_object(choices):
@@ -293,9 +254,10 @@ def nested_getattr(obj, attr, default=raise_attribute_error):
 
     try:
         return functools.reduce(getattr, attr.split("."), obj)
-    except AttributeError:
+    except AttributeError as e:
         if default != raise_attribute_error:
             return default
+        logger.exception(e)
         raise
 
 
@@ -488,6 +450,7 @@ def check_concurrency_version_in_mutation(version, target):
     from graphql import GraphQLError
 
     if version != target.version:
+        logger.error(f"Someone has modified this {target} record, versions {version} != {target.version}")
         raise GraphQLError("Someone has modified this record")
 
 
@@ -528,17 +491,17 @@ def update_labels_mapping(csv_file):
         for core_field, labels in labels_mapping.items():
             old_label = (
                 json.dumps(labels["old"])
-                    .replace("\\", r"\\")
-                    .replace('"', r"\"")
-                    .replace("(", r"\(")
-                    .replace(")", r"\)")
-                    .replace("[", r"\[")
-                    .replace("]", r"\]")
-                    .replace("?", r"\?")
-                    .replace("*", r"\*")
-                    .replace("$", r"\$")
-                    .replace("^", r"\^")
-                    .replace(".", r"\.")
+                .replace("\\", r"\\")
+                .replace('"', r"\"")
+                .replace("(", r"\(")
+                .replace(")", r"\)")
+                .replace("[", r"\[")
+                .replace("]", r"\]")
+                .replace("?", r"\?")
+                .replace("*", r"\*")
+                .replace("$", r"\$")
+                .replace("^", r"\^")
+                .replace(".", r"\.")
             )
             new_label = json.dumps(labels["new"])
             new_content = re.sub(
@@ -572,13 +535,17 @@ def chart_map_choices(choices):
 
 
 def chart_get_filtered_qs(
-        obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None
+    obj, year, business_area_slug_filter: dict = None, additional_filters: dict = None, year_filter_path: str = None
 ) -> QuerySet:
     if additional_filters is None:
         additional_filters = {}
+    if year_filter_path is None:
+        year_filter = {"created_at__year": year}
+    else:
+        year_filter = {f"{year_filter_path}__year": year}
     if business_area_slug_filter is None or "global" in business_area_slug_filter.values():
         business_area_slug_filter = {}
-    return obj.objects.filter(created_at__year=year, **business_area_slug_filter, **additional_filters)
+    return obj.objects.filter(**year_filter, **business_area_slug_filter, **additional_filters)
 
 
 def parse_list_values_to_int(list_to_parse):
@@ -609,6 +576,7 @@ def chart_permission_decorator(chart_resolve=None, permissions=None):
             business_area = BusinessArea.objects.filter(slug=business_area_slug).first()
             if any(resolve_info.context.user.has_permission(per.name, business_area) for per in permissions):
                 return chart_resolve(*args, **kwargs)
+            logger.error("Permission Denied")
             raise GraphQLError("Permission Denied")
 
     return resolve_f
@@ -620,11 +588,98 @@ def chart_filters_decoder(filters):
 
 def chart_create_filter_query(filters, program_id_path="id", administrative_area_path="admin_areas"):
     filter_query = {}
-    if filters.get('program') is not None:
-        filter_query.update({program_id_path: filters.get('program')})
-    if filters.get('administrative_area') is not None:
-        filter_query.update({
-            f"{administrative_area_path}__id": filters.get('administrative_area'),
-            f"{administrative_area_path}__admin_area_level__admin_level": 2
-        })
+    if filters.get("program") is not None:
+        filter_query.update({program_id_path: filters.get("program")})
+    if filters.get("administrative_area") is not None:
+        filter_query.update(
+            {
+                f"{administrative_area_path}__id": filters.get("administrative_area"),
+                f"{administrative_area_path}__level": 2,
+            }
+        )
     return filter_query
+
+
+def admin_area1_query(comparision_method, args):
+    from django.db.models import Q
+
+    return Q(Q(admin_area__p_code=args[0]) & Q(admin_area__level=1)) | Q(
+        Q(admin_area__parent__p_code=args[0]) & Q(admin_area__parent__level=1)
+    )
+
+
+class CaIdIterator:
+    def __init__(self, name):
+        self.name = name
+        self.last_id = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.last_id += 1
+        return f"123-21-{self.name.upper()}-{self.last_id:05d}"
+
+
+def resolve_flex_fields_choices_to_string(parent):
+    from hct_mis_api.apps.core.models import FlexibleAttribute
+
+    flex_fields = dict(FlexibleAttribute.objects.values_list("name", "type"))
+    flex_fields_with_str_choices = {**parent.flex_fields}
+    for flex_field_name, value in flex_fields_with_str_choices.items():
+        flex_field = flex_fields.get(flex_field_name)
+        if flex_field is None:
+            continue
+
+        if flex_field in (FlexibleAttribute.SELECT_ONE, FlexibleAttribute.SELECT_MANY):
+            if isinstance(value, list):
+                new_value = [str(current_choice_value) for current_choice_value in value]
+            else:
+                new_value = str(value)
+            flex_fields_with_str_choices[flex_field_name] = new_value
+
+    return flex_fields_with_str_choices
+
+
+def get_model_choices_fields(model, excluded=None):
+    if excluded is None:
+        excluded = []
+
+    return [
+        field.name
+        for field in model._meta.get_fields()
+        if getattr(field, "choices", None) and field.name not in excluded
+    ]
+
+
+class SheetImageLoader:
+    """Loads all images in a sheet"""
+
+    _images = {}
+
+    def __init__(self, sheet):
+        # Holds an array of A-ZZ
+        col_holder = list(
+            itertools.chain(
+                string.ascii_uppercase,
+                ("".join(pair) for pair in itertools.product(string.ascii_uppercase, repeat=2)),
+            )
+        )
+        """Loads all sheet images"""
+        sheet_images = sheet._images
+        for image in sheet_images:
+            row = image.anchor._from.row + 1
+            col = col_holder[image.anchor._from.col]
+            self._images[f"{col}{row}"] = image._data
+
+    def image_in(self, cell):
+        """Checks if there's an image in specified cell"""
+        return cell in self._images
+
+    def get(self, cell):
+        """Retrieves image data from a cell"""
+        if cell not in self._images:
+            raise ValueError("Cell {} doesn't contain an image".format(cell))
+        else:
+            image = io.BytesIO(self._images[cell]())
+            return Image.open(image)

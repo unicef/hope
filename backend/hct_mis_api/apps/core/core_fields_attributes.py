@@ -1,13 +1,30 @@
+import logging
 from datetime import datetime
 from functools import reduce
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from pycountry import currencies
 
+from hct_mis_api.apps.core.attributes_qet_queries import (
+    age_to_birth_date_query,
+    get_birth_certificate_document_number_query,
+    get_birth_certificate_issuer_query,
+    get_other_issuer_query,
+    get_other_document_number_query,
+    get_national_id_issuer_query,
+    get_national_id_document_number_query,
+    get_national_passport_issuer_query,
+    get_national_passport_document_number_query,
+    get_electoral_card_issuer_query,
+    get_electoral_card_document_number_query,
+    get_drivers_license_document_number_query,
+    get_drivers_licensee_issuer_query,
+    get_role_query,
+)
 from hct_mis_api.apps.core.countries import Countries
+from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
-from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, age_to_birth_date_query
+from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, admin_area1_query
 from hct_mis_api.apps.household.models import (
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICE,
@@ -21,7 +38,10 @@ from hct_mis_api.apps.household.models import (
     WORK_STATUS_CHOICE,
     REGISTRATION_METHOD_CHOICES,
     YES_NO_CHOICE,
+    BLANK,
 )
+
+logger = logging.getLogger(__name__)
 
 TYPE_ID = "ID"
 TYPE_INTEGER = "INTEGER"
@@ -61,6 +81,7 @@ def country_generic_query(comparision_method, args, lookup):
         return query
     elif comparision_method == "NOT_EQUALS":
         return ~query
+    logger.error(f"Country filter query does not support {comparision_method} type")
     raise ValidationError(f"Country filter query does not support {comparision_method} type")
 
 
@@ -169,13 +190,15 @@ CORE_FIELDS_ATTRIBUTES = [
             "type": TYPE_SELECT_ONE,
             "name": "admin1",
             "lookup": "admin_area__p_code",
+            "get_query": admin_area1_query,
             "required": False,
             "label": {"English(EN)": "Household resides in which ${admin1_h_c}?"},
             "hint": "",
             "choices": lambda: AdminArea.get_admin_areas_as_choices(1),
             "associated_with": _HOUSEHOLD,
             "xlsx_field": "admin1_h_c",
-        }
+        },
+        ignored_method_fields=("get_query",),
     ),
     LazyEvalMethodsDict(
         {
@@ -439,7 +462,11 @@ CORE_FIELDS_ATTRIBUTES = [
         "required": False,
         "label": {"English(EN)": "Which currency will be used for financial questions?"},
         "hint": "",
-        "choices": [{"label": {"English(EN)": currency.name}, "value": currency.alpha_3} for currency in currencies],
+        "choices": [
+            {"label": {"English(EN)": currency_name}, "value": code}
+            for code, currency_name in CURRENCY_CHOICES
+            if code != BLANK
+        ],
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "currency_h_c",
     },
@@ -452,6 +479,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Birth certificate number"},
         "hint": "",
         "choices": [],
+        "get_query": get_birth_certificate_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_no_i_c",
     },
@@ -464,6 +492,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of birth certificate"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_birth_certificate_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "birth_certificate_issuer_i_c",
     },
@@ -488,6 +517,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Driver's license number"},
         "hint": "",
         "choices": [],
+        "get_query": get_drivers_license_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_no_i_c",
     },
@@ -500,6 +530,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of driver's license"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_drivers_licensee_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "drivers_license_issuer_i_c",
     },
@@ -524,6 +555,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Electoral card number"},
         "hint": "",
         "choices": [],
+        "get_query": get_electoral_card_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_no_i_c",
     },
@@ -536,6 +568,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of electoral card"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_electoral_card_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "electoral_card_issuer_i_c",
     },
@@ -596,6 +629,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "National passport number"},
         "hint": "",
         "choices": [],
+        "get_query": get_national_passport_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_passport_i_c",
     },
@@ -604,6 +638,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "type": TYPE_SELECT_ONE,
         "name": "national_passport_issuer",
         "lookup": "national_passport_issuer",
+        "get_query": get_national_passport_issuer_query,
         "required": False,
         "label": {"English(EN)": "Issuing country of national passport"},
         "hint": "",
@@ -632,6 +667,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "National ID number"},
         "hint": "",
         "choices": [],
+        "get_query": get_national_id_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_no_i_c",
     },
@@ -644,6 +680,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of national ID"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_national_id_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "national_id_issuer_i_c",
     },
@@ -716,6 +753,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Other ID number"},
         "hint": "",
         "choices": [],
+        "get_query": get_other_document_number_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_no_i_c",
     },
@@ -728,6 +766,7 @@ CORE_FIELDS_ATTRIBUTES = [
         "label": {"English(EN)": "Issuing country of other ID"},
         "hint": "",
         "choices": Countries.get_choices(output_code="alpha3"),
+        "get_query": get_other_issuer_query,
         "associated_with": _INDIVIDUAL,
         "xlsx_field": "other_id_issuer_i_c",
     },
@@ -1294,7 +1333,7 @@ FIELDS_EXCLUDED_FROM_RDI = {
 }
 
 KOBO_ONLY_HOUSEHOLD_FIELDS = {
-    "start_h_c": {
+    "start": {
         "id": "9da8c56a-3c65-47d9-8149-699761842ce4",
         "type": TYPE_STRING,
         "name": "start",
@@ -1306,7 +1345,7 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "start",
     },
-    "end_h_c": {
+    "end": {
         "id": "06e4c4a0-28d2-4530-be24-92623a5b48b0",
         "type": TYPE_STRING,
         "name": "end",
@@ -1320,19 +1359,21 @@ KOBO_ONLY_HOUSEHOLD_FIELDS = {
     },
 }
 
+ROLE_FIELD = {
+    "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
+    "type": TYPE_SELECT_ONE,
+    "name": "role",
+    "lookup": "role",
+    "required": True,
+    "label": {"English(EN)": "Role"},
+    "hint": "",
+    "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
+    "associated_with": _INDIVIDUAL,
+    "xlsx_field": "role_i_c",
+    "get_query": get_role_query,
+}
 KOBO_ONLY_INDIVIDUAL_FIELDS = {
-    "role_i_c": {
-        "id": "0bf5fad3-8f4f-4528-85f7-57e8a84a2a43",
-        "type": TYPE_SELECT_ONE,
-        "name": "role",
-        "lookup": "role",
-        "required": True,
-        "label": {"English(EN)": "Role"},
-        "hint": "",
-        "choices": [{"label": {"English(EN)": label}, "value": value} for value, label in ROLE_CHOICE],
-        "associated_with": _INDIVIDUAL,
-        "xlsx_field": "role_i_c",
-    },
+    "role_i_c": ROLE_FIELD,
 }
 
 XLSX_ONLY_FIELDS = [
@@ -1389,8 +1430,10 @@ def core_fields_to_separated_dict(append_household_id=True, append_xlsx=True):
     return result_dict
 
 
+TARGETING_CORE_FIELDS = CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS + [ROLE_FIELD]
 FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get("type") in FILTERABLE_TYPES]
 
-CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, CORE_FIELDS_ATTRIBUTES + XLSX_ONLY_FIELDS, {})
+CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()
+

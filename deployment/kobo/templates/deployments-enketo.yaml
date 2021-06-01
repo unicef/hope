@@ -1,0 +1,192 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kobo.fullname" . }}-enketo
+  {{- if .Values.enketo.annotations }}
+  annotations:
+    {{- toYaml .Values.enketo.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app: {{ include "kobo.labels.app" . }}
+    component: enketo
+    chart: {{ include "kobo.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- if .Values.enketo.labels }}
+    {{- toYaml .Values.enketo.labels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.enketo.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "kobo.labels.app" . }}
+      component: enketo
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "kobo.labels.app" . }}
+        component: enketo
+        release: {{ .Release.Name }}
+        {{- if .Values.enketo.podLabels }}
+        {{- toYaml .Values.enketo.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- if .Values.enketo.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.enketo.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.enketo.affinity }}
+      affinity:
+        {{- toYaml .Values.enketo.affinity | nindent 8 }}
+      {{- end }}
+  
+      containers:
+      - name: nginx
+        image: {{ .Values.nginx.image }}
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "/tmp/enketo_express_nginx/nginx_command.bash"]
+        volumeMounts:
+        {{- if .Values.ingress.tls }}
+        - name: ssl
+          mountPath: /tmp/enketo_express_secrets/
+        {{- end }}
+        - name: nginx-config
+          mountPath: /tmp/enketo_express_nginx/
+        - name: nginx-available-config
+          mountPath: /tmp/nginx_templates_available/
+        - name: config
+          mountPath: /srv/src/enketo_express/config/config.json
+          subPath: config.json
+        ports:
+          - containerPort: 80
+          - containerPort: 443
+
+      - name: enketo
+        image: {{ .Values.enketo.image }}
+        ports:
+          - containerPort: 8005
+        resources:
+          {{- toYaml .Values.enketo.resources | nindent 12 }}        
+        env:
+          - name: KOBO_SUPERUSER_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kobo.fullname" . }}
+                key: username
+          - name: KOBO_SUPERUSER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kobo.fullname" . }}
+                key: password
+          - name: ENKETO_LINKED_FORM_AND_DATA_SERVER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kobo.fullname" . }}-enketo
+                key: key
+          - name: ENKETO_ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kobo.fullname" . }}-enketo
+                key: encryption-key
+          - name: ENKETO_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "kobo.fullname" . }}-enketo
+                key: key
+          - name: ENKETO_REDIS_MAIN_PASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: {{ template "kobo.redismain.secretName" .}}
+                  key: redis-password
+          - name: ENKETO_REDIS_CACHE_PASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: {{ template "kobo.rediscache.secretName" .}}
+                  key: redis-password
+          - name: ENKETO_REDIS_MAIN_HOST
+            value: redis-main-master
+          - name: ENKETO_REDIS_CACHE_HOST
+            value: redis-cache-master
+        envFrom:
+        - secretRef:
+            name: {{ include "kobo.fullname" . }}-enketo
+        - configMapRef:
+            name: enketo-config-map
+        volumeMounts:
+        {{- if .Values.ingress.tls }}
+        - name: ssl
+          mountPath: /srv/src/enketo_express/setup/docker/secrets/
+        - name: ssl
+          mountPath: /tmp/enketo_express_secrets/
+        {{- end }}
+        - name: config
+          mountPath: /srv/src/enketo_express/config/config.json
+          subPath: config.json
+        - name: create-config-script
+          mountPath: /srv/src/enketo_express/setup/docker/create_config.py
+          subPath: create_config.py
+        - name: checksum
+          mountPath: /srv/src/enketo_express/checksum
+      initContainers:
+      - name: prepare-config
+        image: {{ .Values.enketo.image }}
+        command: ["bash", "-c", "cp /var/config.json /srv/src/enketo_express/config/config.json &&  cp -R /tmp/enketo_express_nginx/. /tmp/nginx_templates_available/"]
+        volumeMounts:
+        - name: configmap
+          mountPath: /var/config.json
+          subPath: config.json
+        - name: config
+          mountPath: /srv/src/enketo_express/config/
+        - name: css
+          mountPath: /srv/src/enketo_express/public/css
+        - name: js
+          mountPath: /srv/src/enketo_express/public/js/build
+        - name:  locales
+          mountPath: /srv/src/enketo_express/locales/build
+        - name: checksum
+          mountPath: /srv/src/enketo_express/checksum
+        - name: nginx-available-config
+          mountPath: /tmp/nginx_templates_available/
+        - name: nginx-config
+          mountPath: /tmp/enketo_express_nginx/
+      volumes:
+      - name: configmap
+        configMap:
+          name: enketo-config
+      {{- if .Values.ingress.tls }}
+      - name: ssl
+        secret:
+          secretName: {{ .Values.ingress.tlsSecret }}
+      {{- end }}
+      - name: nginx-config
+        configMap:
+          name: enketo-nginx-config
+          defaultMode: 0777
+      - name: nginx-available-config
+        emptyDir: {}
+      - name: create-config-script
+        secret:
+          secretName: {{ include "kobo.fullname" . }}-enketo-create-config-script
+      # - name: default-config
+      #   configMap:
+      #     name: enketo-default-config
+      - name: config
+        emptyDir: {}
+      - name: css
+        emptyDir: {}
+      - name: js
+        emptyDir: {}
+      - name: locales
+        emptyDir: {}
+      - name: checksum
+        emptyDir: {}
+---

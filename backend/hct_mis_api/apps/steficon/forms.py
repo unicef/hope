@@ -23,7 +23,7 @@ try:
 
 except ImportError as e:
     if config.USE_BLACK:
-        logger.error(f"Steficon is configured to use Black, bat was unable to import it: {e}")
+        logger.warning(f"Steficon is configured to use Black, but was unable to import it: {e}")
 
     def format_code(code):
         return code
@@ -46,5 +46,6 @@ class RuleForm(forms.ModelForm):
             try:
                 self.cleaned_data["definition"] = format_code(code)
             except Exception as e:
+                logger.exception(e)
                 raise ValidationError({"definition": str(e)})
         return self.cleaned_data

@@ -33,13 +33,16 @@
             "name": "AdminAreaNode"
           },
           {
+            "name": "GrievanceTicketNode"
+          },
+          {
+            "name": "RegistrationDataImportNode"
+          },
+          {
             "name": "HouseholdNode"
           },
           {
             "name": "IndividualNode"
-          },
-          {
-            "name": "RegistrationDataImportNode"
           },
           {
             "name": "PaymentRecordNode"
@@ -60,6 +63,9 @@
             "name": "ReportNode"
           },
           {
+            "name": "ServiceProviderNode"
+          },
+          {
             "name": "CashPlanPaymentVerificationNode"
           },
           {
@@ -67,9 +73,6 @@
           },
           {
             "name": "TicketPaymentVerificationDetailsNode"
-          },
-          {
-            "name": "ServiceProviderNode"
           },
           {
             "name": "TicketComplaintDetailsNode"
@@ -112,9 +115,6 @@
           },
           {
             "name": "TicketAddIndividualDetailsNode"
-          },
-          {
-            "name": "GrievanceTicketNode"
           },
           {
             "name": "TicketNoteNode"

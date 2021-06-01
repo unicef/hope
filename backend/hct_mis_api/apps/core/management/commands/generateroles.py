@@ -1,7 +1,8 @@
 from django.core.management import BaseCommand
 from django.db.models import Q
-from hct_mis_api.apps.account.permissions import Permissions
+
 from hct_mis_api.apps.account.models import Role, IncompatibleRoles
+from hct_mis_api.apps.account.permissions import Permissions
 
 
 class Command(BaseCommand):
@@ -172,6 +173,8 @@ class Command(BaseCommand):
                     Permissions.GRIEVANCES_VIEW_INDIVIDUALS_DETAILS,
                     Permissions.GRIEVANCES_CREATE,
                     Permissions.GRIEVANCES_ADD_NOTE,
+                    Permissions.GRIEVANCES_UPDATE_AS_CREATOR,
+                    Permissions.GRIEVANCES_UPDATE_AS_OWNER,
                 ],
             },
             {

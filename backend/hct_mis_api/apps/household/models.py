@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date
 
@@ -157,6 +158,12 @@ IDENTIFICATION_TYPE_DICT = {
     IDENTIFICATION_TYPE_ELECTORAL_CARD: "Electoral Card",
     IDENTIFICATION_TYPE_OTHER: "Other",
 }
+UNHCR = "UNHCR"
+WFP = "WFP"
+AGENCY_TYPE_CHOICES = {
+    (UNHCR, _("UNHCR")),
+    (WFP, _("WFP")),
+}
 STATUS_ACTIVE = "ACTIVE"
 STATUS_INACTIVE = "INACTIVE"
 STATUS_WITHDRAWN = "WITHDRAWN"
@@ -215,6 +222,8 @@ REGISTRATION_METHOD_CHOICES = (
     (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -391,6 +400,10 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
         return self.individuals.filter(sanction_list_possible_match=True).count() > 0
 
     @property
+    def sanction_list_confirmed_match(self):
+        return self.individuals.filter(sanction_list_confirmed_match=True).count() > 0
+
+    @property
     def total_cash_received(self):
         return self.payment_records.filter().aggregate(models.Sum("delivered_quantity")).get("delivered_quantity__sum")
 
@@ -420,7 +433,17 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
     photo = models.ImageField(blank=True)
     individual = models.ForeignKey("Individual", related_name="documents", on_delete=models.CASCADE)
     type = models.ForeignKey("DocumentType", related_name="documents", on_delete=models.CASCADE)
-
+    STATUS_PENDING = "PENDING"
+    STATUS_VALID = "VALID"
+    STATUS_NEED_INVESTIGATION = "NEED_INVESTIGATION"
+    STATUS_INVALID = "INVALID"
+    STATUS_CHOICES = (
+        (STATUS_PENDING, _("Pending")),
+        (STATUS_VALID, _("Valid")),
+        (STATUS_NEED_INVESTIGATION, _("Need Investigation")),
+        (STATUS_INVALID, _("Invalid")),
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     objects = models.Manager()
     existing_objects = SoftDeletableManager()
 
@@ -429,22 +452,33 @@ class Document(SoftDeletableModel, TimeStampedUUIDModel):
 
         for validator in self.type.validators:
             if not re.match(validator.regex, self.document_number):
+                logger.error("Document number is not validating")
                 raise ValidationError("Document number is not validating")
 
     class Meta:
         constraints = [
             UniqueConstraint(
-                fields=["document_number", "type"], condition=Q(is_removed=False), name="unique_if_not_removed"
+                fields=["document_number", "type"],
+                condition=Q(Q(is_removed=False) & Q(status="VALID")),
+                name="unique_if_not_removed_and_valid",
             )
         ]
 
 
 class Agency(models.Model):
-    type = models.CharField(max_length=100, unique=True)
+    type = models.CharField(max_length=100, choices=AGENCY_TYPE_CHOICES)
     label = models.CharField(
         max_length=100,
     )
     country = CountryField()
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=["type", "country"],
+                name="unique_type_and_country",
+            )
+        ]
 
     def __str__(self):
         return self.label
@@ -583,6 +617,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     first_registration_date = models.DateField()
     last_registration_date = models.DateField()
     flex_fields = JSONField(default=dict, blank=True)
+    user_fields = JSONField(default=dict, blank=True)
     enrolled_in_nutrition_programme = models.NullBooleanField()
     administration_of_rutf = models.NullBooleanField()
     unicef_id = CICharField(max_length=250, blank=True, db_index=True)
@@ -600,6 +635,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     deduplication_batch_results = JSONField(default=dict)
     imported_individual_id = models.UUIDField(null=True)
     sanction_list_possible_match = models.BooleanField(default=False)
+    sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.NullBooleanField()
     observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
@@ -645,6 +681,14 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             return ", ".join(statuses)
         return STATUS_ACTIVE
 
+    @property
+    def cash_assist_status(self):
+        if self.withdrawn:
+            return STATUS_INACTIVE
+        if self.duplicate:
+            return STATUS_INACTIVE
+        return STATUS_ACTIVE
+
     def withdraw(self):
         self.withdrawn = True
         self.withdrawn_date = timezone.now()
@@ -653,6 +697,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     def mark_as_duplicate(self, original_individual=None):
         if original_individual is not None:
             self.unicef_id = original_individual.unicef_id
+        self.documents.update(status=Document.STATUS_INVALID)
         self.duplicate = True
         self.duplicate_date = timezone.now()
         self.save()
@@ -662,6 +707,16 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
 
     class Meta:
         verbose_name = "Individual"
+
+    def set_sys_field(self, key, value):
+        if "sys" not in self.user_fields:
+            self.user_fields["sys"] = {}
+        self.user_fields["sys"][key] = value
+
+    def get_sys_field(self, key):
+        if "sys" in self.user_fields:
+            return self.user_fields["sys"][key]
+        return None
 
 
 class EntitlementCard(TimeStampedUUIDModel):

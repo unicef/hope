@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from hct_mis_api.apps.account.fixtures import UserFactory
+from hct_mis_api.apps.account.models import UserRole
 from hct_mis_api.apps.cash_assist_datahub import fixtures as cash_assist_datahub_fixtures
 from hct_mis_api.apps.cash_assist_datahub.models import Session, Programme
 from hct_mis_api.apps.core.models import BusinessArea, AdminArea
@@ -79,7 +80,16 @@ class Command(BaseCommand):
             type=int,
             help="Creates provided amount of payment records assigned to " "household and cash plan.",
         )
-
+        parser.add_argument(
+            "--business-area",
+            dest="business_area_amount",
+            const=1,
+            default=1,
+            action="store",
+            nargs="?",
+            type=int,
+            help="Creates provided amount of business areas with data.",
+        )
         parser.add_argument(
             "--flush",
             action="store_true",
@@ -96,18 +106,18 @@ class Command(BaseCommand):
             help="Suppresses Elasticsearch reindex.",
         )
 
-    def _generate_admin_areas(self):
-        call_command("loadadminareas", "--business_area", "Afghanistan")
+    def _generate_admin_areas(self, business_area):
+        call_command("loadadminareas", "--business_area", business_area.name)
 
     @staticmethod
-    def _generate_program_with_dependencies(options):
+    def _generate_program_with_dependencies(options, business_area_index):
         cash_plans_amount = options["cash_plans_amount"]
         payment_record_amount = options["payment_record_amount"]
 
         user = UserFactory()
+        business_area = BusinessArea.objects.all()[business_area_index]
 
-        program = ProgramFactory(business_area=BusinessArea.objects.first())
-        program.admin_areas.set(AdminArea.objects.order_by("?")[:3])
+        program = ProgramFactory(business_area=business_area)
         targeting_criteria = TargetingCriteriaFactory()
         rules = TargetingCriteriaRuleFactory.create_batch(random.randint(1, 3), targeting_criteria=targeting_criteria)
 
@@ -117,23 +127,23 @@ class Command(BaseCommand):
         target_population = TargetPopulationFactory(
             created_by=user,
             candidate_list_targeting_criteria=targeting_criteria,
-            business_area=BusinessArea.objects.first(),
+            business_area=business_area,
         )
         for _ in range(cash_plans_amount):
             cash_plan = CashPlanFactory.build(
                 program=program,
-                business_area=BusinessArea.objects.first(),
+                business_area=business_area,
             )
             cash_plan.save()
             for _ in range(payment_record_amount):
-                registration_data_import = RegistrationDataImportFactory(
-                    imported_by=user, business_area=BusinessArea.objects.first()
-                )
+                registration_data_import = RegistrationDataImportFactory(imported_by=user, business_area=business_area)
                 household, individuals = create_household_for_fixtures(
                     {
                         "registration_data_import": registration_data_import,
-                        "business_area": BusinessArea.objects.first(),
-                        "admin_area": AdminArea.objects.order_by("?").first(),
+                        "business_area": business_area,
+                        "admin_area": AdminArea.objects.filter(admin_area_level__business_area=business_area)
+                        .order_by("?")
+                        .first(),
                     },
                     {"registration_data_import": registration_data_import},
                 )
@@ -141,12 +151,15 @@ class Command(BaseCommand):
                     DocumentFactory(individual=individual)
 
                 household.programs.add(program)
+                if household.admin_area:
+                    program.admin_areas.add(household.admin_area)
 
                 payment_record = PaymentRecordFactory(
                     cash_plan=cash_plan,
                     household=household,
                     target_population=target_population,
                     delivered_quantity_usd=None,
+                    business_area=business_area,
                 )
                 payment_record.delivered_quantity_usd = Decimal(
                     cash_plan.exchange_rate * payment_record.delivered_quantity
@@ -157,10 +170,12 @@ class Command(BaseCommand):
                 if should_create_grievance:
                     grievance_type = random.choice(("feedback", "sensitive", "complaint"))
                     should_contain_payment_record = random.choice((True, False))
-
                     switch_dict = {
                         "feedback": lambda: GrievanceTicketFactory(
-                            admin=AdminArea.objects.filter(level=2).order_by("?").first().title
+                            admin=AdminArea.objects.filter(admin_area_level__business_area=business_area, level=2)
+                            .order_by("?")
+                            .first()
+                            .title
                         ),
                         "sensitive": lambda: SensitiveGrievanceTicketWithoutExtrasFactory(
                             household=household,
@@ -178,7 +193,7 @@ class Command(BaseCommand):
 
                 EntitlementCardFactory(household=household)
         CashPlanPaymentVerificationFactory.create_batch(1)
-        PaymentVerificationFactory.create_batch(100)
+        PaymentVerificationFactory.create_batch(10)
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -196,6 +211,7 @@ class Command(BaseCommand):
             )
         start_time = time.time()
         programs_amount = options["programs_amount"]
+        business_area_amount = options["business_area_amount"]
         business_areas = BusinessArea.objects.all().count()
         if not business_areas:
             if options["noinput"]:
@@ -223,9 +239,12 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write("Generation canceled")
                     return
-        self._generate_admin_areas()
-        for _ in range(programs_amount):
-            self._generate_program_with_dependencies(options)
+        if not UserRole.objects.count():
+            call_command("generateroles")
+        for index in range(business_area_amount):
+            self._generate_admin_areas(BusinessArea.objects.all()[index])
+            for _ in range(programs_amount):
+                self._generate_program_with_dependencies(options, index)
 
         # Data imports generation
 

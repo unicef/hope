@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -16,6 +18,8 @@ from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
 from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
 
+logger = logging.getLogger(__name__)
+
 INVITED = "INVITED"
 ACTIVE = "ACTIVE"
 INACTIVE = "INACTIVE"
@@ -33,7 +37,8 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
-    job_title = models.CharField(max_length=255, blank="")
+    job_title = models.CharField(max_length=255, blank=True)
+    ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     def __str__(self):
         if self.first_name or self.last_name:
@@ -78,13 +83,17 @@ class UserRole(TimeStampedUUIDModel):
 
 
 class Role(TimeStampedUUIDModel):
-    name = models.CharField(max_length=250, unique=True,       validators=[
+    name = models.CharField(
+        max_length=250,
+        unique=True,
+        validators=[
             MinLengthValidator(3),
             MaxLengthValidator(255),
             DoubleSpaceValidator,
             StartEndSpaceValidator,
             ProhibitNullCharactersValidator(),
-        ],)
+        ],
+    )
     permissions = ChoiceArrayField(
         models.CharField(choices=Permissions.choices(), max_length=255), null=True, blank=True
     )
@@ -103,7 +112,10 @@ def pre_save_user(sender, instance, *args, **kwargs):
 
 
 @receiver(post_save, sender=get_user_model())
-def post_save_user(sender, instance, *args, **kwargs):
+def post_save_user(sender, instance, created, *args, **kwargs):
+    if created is False:
+        return
+
     business_area = BusinessArea.objects.filter(slug="global").first()
     role = Role.objects.filter(name="Basic User").first()
     if business_area and role:
@@ -130,6 +142,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
     def clean(self):
         super().clean()
         if self.role_one == self.role_two:
+            logger.error(f"Provided roles are the same role={self.role_one}")
             raise ValidationError(_("Choose two different roles."))
         failing_users = set()
 
@@ -141,6 +154,10 @@ class IncompatibleRoles(TimeStampedUUIDModel):
                     failing_users.add(userrole.user.email)
 
         if failing_users:
+            logger.error(
+                f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
+                "Please fix them before creating this incompatible roles pair."
+            )
             raise ValidationError(
                 _(
                     f"Users: [{', '.join(failing_users)}] have these roles assigned to them in the same business area. "
@@ -153,4 +170,7 @@ class IncompatibleRoles(TimeStampedUUIDModel):
         # unique_together will take care of unique couples only if order is the same
         # since it doesn't matter if role is one or two, we need to check for reverse uniqueness as well
         if IncompatibleRoles.objects.filter(role_one=self.role_two, role_two=self.role_one).exists():
+            logger.error(
+                f"This combination of roles ({self.role_one}, {self.role_two}) already exists as incompatible pair."
+            )
             raise ValidationError(_("This combination of roles already exists as incompatible pair."))

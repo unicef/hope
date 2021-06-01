@@ -6,7 +6,7 @@ import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
 } from '../../__generated__/graphql';
-import { choicesToDict, formatCurrency } from '../../utils/utils';
+import { choicesToDict, formatCurrencyWithSymbol } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContentLink } from '../ContentLink';
 
@@ -82,6 +82,16 @@ export function HouseholdDetails({
               </LabelizedField>
             </Grid>
             <Grid item xs={3}>
+              <LabelizedField label='FEMALE CHILD HEADED HOUSEHOLD'>
+                {household.fchildHoh ? 'Yes' : 'No'}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
+              <LabelizedField label='CHILD HEADED HOUSEHOLD'>
+                {household.childHoh ? 'Yes' : 'No'}
+              </LabelizedField>
+            </Grid>
+            <Grid item xs={3}>
               <LabelizedField label='Country'>
                 {household.country}
               </LabelizedField>
@@ -149,7 +159,10 @@ export function HouseholdDetails({
         <Grid container>
           <Grid item xs={4}>
             <LabelizedField label='Total Cash Received'>
-              {formatCurrency(household.totalCashReceived)}
+              {formatCurrencyWithSymbol(
+                household.totalCashReceived,
+                household.currency,
+              )}
             </LabelizedField>
           </Grid>
           <Grid item xs={4}>

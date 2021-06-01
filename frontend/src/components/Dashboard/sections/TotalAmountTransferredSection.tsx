@@ -9,6 +9,7 @@ import {
   IconContainer,
 } from '../DashboardCard';
 import { AllChartsQuery } from '../../../__generated__/graphql';
+import { formatCurrencyWithSymbol } from '../../../utils/utils';
 
 interface TotalAmountTransferredSectionProps {
   data: AllChartsQuery['sectionTotalTransferred'];
@@ -27,7 +28,7 @@ export const TotalAmountTransferredSection = ({
         <Grid item>
           <Grid container spacing={3} alignItems='center'>
             <Grid item>
-              <CardAmount>${data?.total}</CardAmount>
+              <CardAmount>{formatCurrencyWithSymbol(data?.total)}</CardAmount>
             </Grid>
             <Grid item>
               <IconContainer bg='#d9eceb' color='#03867b'>

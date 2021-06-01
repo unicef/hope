@@ -17,7 +17,8 @@ interface EditValuesTypes {
   issueType?: string | number;
   category?: string | number;
   language: string;
-  admin: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  admin: any;
   area: string;
   selectedHousehold?;
   selectedIndividual?;
@@ -67,10 +68,15 @@ function prepareInitialValueEditIndividual(
   };
   const documents = individualData?.documents;
   const documentsToRemove = individualData.documents_to_remove;
+  const identities = individualData?.identities;
+  const identitiesToRemove = individualData.identities_to_remove;
   const flexFields = individualData.flex_fields;
   delete individualData.documents;
   delete individualData.documents_to_remove;
+  delete individualData.identities;
+  delete individualData.identities_to_remove;
   delete individualData.previous_documents;
+  delete individualData.previous_identities;
   delete individualData.flex_fields;
   const individualDataArray = Object.entries(individualData).map(
     (entry: [string, { value: string }]) => ({
@@ -88,12 +94,18 @@ function prepareInitialValueEditIndividual(
     ...individualDataArray,
     ...flexFieldsArray,
   ];
-  initialValues.individualDataUpdateFieldsDocuments = documents.map(
+  initialValues.individualDataUpdateFieldsDocuments = (documents || []).map(
     (item) => item.value,
   );
-  initialValues.individualDataUpdateDocumentsToRemove = documentsToRemove.map(
+  initialValues.individualDataUpdateDocumentsToRemove = (
+    documentsToRemove || []
+  ).map((item) => item.value);
+  initialValues.individualDataUpdateFieldsIdentities = (identities || []).map(
     (item) => item.value,
   );
+  initialValues.individualDataUpdateIdentitiesToRemove = (
+    identitiesToRemove || []
+  ).map((item) => item.value);
   return initialValues;
 }
 function prepareInitialValueEditHousehold(
@@ -143,7 +155,7 @@ export function prepareInitialValues(
     assignedTo: ticket?.assignedTo?.id || '',
     category: ticket.category || null,
     language: ticket.language || '',
-    admin: ticket.admin || '',
+    admin: ticket.admin2 ? { node: ticket.admin2 } : null,
     area: ticket.area || '',
     selectedHousehold: ticket.household || null,
     selectedIndividual: ticket.individual || null,
@@ -169,19 +181,13 @@ export function prepareInitialValues(
 export const validationSchema = Yup.object().shape({
   description: Yup.string().required('Description is required'),
   assignedTo: Yup.string().required('Assigned To is required'),
-  category: Yup.string()
-    .required('Category is required')
-    .nullable(),
+  category: Yup.string().required('Category is required').nullable(),
   admin: Yup.string().nullable(),
   area: Yup.string(),
   language: Yup.string().required('Language is required'),
   consent: Yup.bool().oneOf([true], 'Consent is required'),
-  selectedPaymentRecords: Yup.array()
-    .of(Yup.string())
-    .nullable(),
-  selectedRelatedTickets: Yup.array()
-    .of(Yup.string())
-    .nullable(),
+  selectedPaymentRecords: Yup.array().of(Yup.string()).nullable(),
+  selectedRelatedTickets: Yup.array().of(Yup.string()).nullable(),
 });
 export const EmptyComponent = (): React.ReactElement => null;
 export const dataChangeComponentDict = {
@@ -230,6 +236,15 @@ function prepareSesitiveVariables(requiredVariables, values) {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function prepareAddIndividualVariables(requiredVariables, values) {
+  let { flexFields } = values.individualData;
+  if (flexFields) {
+    flexFields = { ...flexFields };
+    for (const [key, value] of Object.entries(flexFields)) {
+      if (value === '') {
+        delete flexFields[key];
+      }
+    }
+  }
   return {
     variables: {
       input: {
@@ -237,7 +252,7 @@ function prepareAddIndividualVariables(requiredVariables, values) {
         linkedTickets: values.selectedRelatedTickets,
         extras: {
           addIndividualIssueTypeExtras: {
-            individualData: values.individualData,
+            individualData: { ...values.individualData, flexFields },
           },
         },
       },
@@ -285,6 +300,8 @@ function prepareEditIndividualVariables(requiredVariables, values) {
               ...individualData,
               documents: values.individualDataUpdateFieldsDocuments,
               documentsToRemove: values.individualDataUpdateDocumentsToRemove,
+              identities: values.individualDataUpdateFieldsIdentities,
+              identitiesToRemove: values.individualDataUpdateIdentitiesToRemove,
             },
           },
         },
@@ -365,7 +382,7 @@ export function prepareVariables(businessArea, values, ticket) {
     description: values.description,
     assignedTo: values.assignedTo,
     language: values.language,
-    admin: values?.admin?.node?.title,
+    admin: values?.admin?.node?.pCode,
     area: values.area,
   };
   const prepareFunction = thingForSpecificGrievanceType(

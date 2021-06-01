@@ -323,7 +323,7 @@ class Query(graphene.ObjectType):
             ).distinct()
         return prefetch_selections(
             target_population_model.vulnerability_score_filtered_households, target_population_model
-        ).all()
+        ).distinct().all()
 
     def resolve_final_households_list_by_targeting_criteria(
         parent, info, target_population, targeting_criteria=None, **kwargs
