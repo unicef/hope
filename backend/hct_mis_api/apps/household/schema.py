@@ -297,6 +297,7 @@ class HouseholdNode(BaseNodePermissionMixin, DjangoObjectType):
     total_cash_received = graphene.Decimal()
     country_origin = graphene.String(description="Country origin name")
     country = graphene.String(description="Country name")
+    currency = graphene.String()
     flex_fields = FlexFieldsScalar()
     selection = graphene.Field(HouseholdSelection)
     sanction_list_possible_match = graphene.Boolean()
