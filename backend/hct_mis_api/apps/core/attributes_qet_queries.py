@@ -2,16 +2,17 @@ import datetime as dt
 import logging
 
 from django.db.models import Q
+
+from dateutil.relativedelta import relativedelta
 from prompt_toolkit.validation import ValidationError
 
 from hct_mis_api.apps.core.countries import Countries
 from hct_mis_api.apps.household.models import (
-    Document,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
     IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
     IDENTIFICATION_TYPE_DRIVERS_LICENSE,
-    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_ELECTORAL_CARD,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    IDENTIFICATION_TYPE_NATIONAL_PASSPORT,
     IDENTIFICATION_TYPE_OTHER,
 )
 
@@ -19,15 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 def age_to_birth_date_range_query(field_name, age_min, age_max):
-
     query_dict = {}
-    this_year = dt.date.today().year
-    if age_min == age_max and age_min is not None:
-        return Q(**{f"{field_name}__year": this_year - age_min})
+    current_date = dt.date.today()
     if age_min is not None:
-        query_dict[f"{field_name}__year__lte"] = this_year - age_min
+        query_dict[f"{field_name}__lte"] = current_date - relativedelta(years=+age_min)
     if age_max is not None:
-        query_dict[f"{field_name}__year__gte"] = this_year - age_max
+        query_dict[f"{field_name}__gt"] = current_date - relativedelta(years=+age_max + 1)
     return Q(**query_dict)
 
 
