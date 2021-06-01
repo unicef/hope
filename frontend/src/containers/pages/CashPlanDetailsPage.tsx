@@ -40,12 +40,12 @@ export function CashPlanDetailsPage(): React.ReactElement {
   const { data, loading, error } = useCashPlanQuery({
     variables: { id },
   });
-  const { data: caData } = useCashAssistUrlPrefixQuery();
+  const { data: caData, loading: caPrefixLoading, } = useCashAssistUrlPrefixQuery();
   const businessArea = useBusinessArea();
 
-  if (loading) return <LoadingComponent />;
+  if (loading || caPrefixLoading) return <LoadingComponent />;
   if (isPermissionDeniedError(error)) return <PermissionDenied />;
-  if (!data || permissions === null) return null;
+  if (!data || !caData || permissions === null) return null;
 
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -76,7 +76,8 @@ export function CashPlanDetailsPage(): React.ReactElement {
           color='primary'
           component='a'
           disabled={!data.cashPlan.caHashId}
-          href={`${caData.cashAssistUrlPrefix}/&pagetype=entityrecord&etn=progres_cashplan&id=/${data.cashPlan.caHashId}`}
+          target="_blank"
+          href={`${caData.cashAssistUrlPrefix}&pagetype=entityrecord&etn=progres_cashplan&id=${data.cashPlan.caHashId}`}
           startIcon={<OpenInNewRoundedIcon />}
         >
           Open in CashAssist

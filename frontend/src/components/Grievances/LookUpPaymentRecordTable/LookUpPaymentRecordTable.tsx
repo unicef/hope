@@ -22,9 +22,7 @@ export function LookUpPaymentRecordTable({
 }: LookUpPaymentRecordTableProps): ReactElement {
   const businessArea = useBusinessArea();
   const initialVariables = {
-    household: initialValues.selectedHousehold
-      ? decodeIdString(initialValues.selectedHousehold.id)
-      : null,
+    household: initialValues?.selectedHousehold?.id,
     businessArea,
   };
   const [selected, setSelected] = useState(

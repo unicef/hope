@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import {
   hasPermissionInModule,
   hasPermissions,
@@ -20,12 +20,14 @@ export function GrievancesTablePage(): React.ReactElement {
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
 
+  const { id } = useParams();
   const [filter, setFilter] = useState({
     search: '',
     status: '',
     fsp: '',
     createdAtRange: '',
     admin: null,
+    registrationDataImport: id,
   });
   const debouncedFilter = useDebounce(filter, 500);
   const {

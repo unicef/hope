@@ -72,14 +72,19 @@ export function mapFiltersToInitialValues(filters): any[] {
             value: each.arguments[0],
           });
         case 'CONTAINS':
-          return mappedFilters.push({
-            ...each,
-            value:
-              // could just be each.arguments[0] maybe? added a check to cover all bases
-              // in cases I tested it was always an array which would mess up filter value
+          // eslint-disable-next-line no-case-declarations
+          let value;
+          if (each?.fieldAttribute?.type === 'SELECT_MANY') {
+            value = each.arguments;
+          } else {
+            value =
               typeof each.arguments === 'string'
                 ? each.arguments
-                : each.arguments[0],
+                : each.arguments[0];
+          }
+          return mappedFilters.push({
+            ...each,
+            value,
           });
         default:
           return mappedFilters.push({

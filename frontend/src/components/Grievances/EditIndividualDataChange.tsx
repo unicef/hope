@@ -16,11 +16,13 @@ import {
   useIndividualLazyQuery,
 } from '../../__generated__/graphql';
 import { LoadingComponent } from '../LoadingComponent';
-import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { FormikDecimalField } from '../../shared/Formik/FormikDecimalField';
 import { LabelizedField } from '../LabelizedField';
 import { NewDocumentFieldArray } from './NewDocumentFieldArray';
 import { ExistingDocumentFieldArray } from './ExistingDocumentFieldArray';
+import { FormikBoolFieldGrievances } from './FormikBoolFieldGrievances';
+import { ExistingIdentityFieldArray } from './ExistingIdentityFieldArray';
+import { NewIdentityFieldArray } from './NewIdentityFieldArray';
 
 const Title = styled.div`
   width: 100%;
@@ -96,7 +98,8 @@ export const EditIndividualDataChangeField = ({
 
     case 'BOOL':
       fieldProps = {
-        component: FormikCheckboxField,
+        component: FormikBoolFieldGrievances,
+        required: field.required,
       };
       break;
     default:
@@ -131,6 +134,19 @@ export function CurrentValue({
     case 'SELECT_ONE':
       displayValue =
         field.choices.find((item) => item.value === value)?.labelEn || '-';
+      break;
+    case 'SELECT_MANY':
+      displayValue =
+        field.choices.find((item) => item.value === value)?.labelEn || '-';
+      if (value instanceof Array) {
+        displayValue = value
+          .map(
+            (choice) =>
+              field.choices.find((item) => item.value === choice)?.labelEn ||
+              '-',
+          )
+          .join(', ');
+      }
       break;
     case 'BOOL':
       /* eslint-disable-next-line no-nested-ternary */
@@ -254,7 +270,7 @@ export const EditIndividualDataChange = ({
       values.individualDataUpdateFields.length === 0
     ) {
       setFieldValue('individualDataUpdateFields', [
-        { fieldName: null, fieldValue: '' },
+        { fieldName: null, fieldValue: null },
       ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -325,6 +341,20 @@ export const EditIndividualDataChange = ({
           individual={individual}
         />
         <NewDocumentFieldArray
+          values={values}
+          addIndividualFieldsData={addIndividualFieldsData}
+        />
+      </Box>
+      <Box mt={3}>
+        <Title>
+          <Typography variant='h6'>Identities</Typography>
+        </Title>
+        <ExistingIdentityFieldArray
+          values={values}
+          setFieldValue={setFieldValue}
+          individual={individual}
+        />
+        <NewIdentityFieldArray
           values={values}
           addIndividualFieldsData={addIndividualFieldsData}
         />

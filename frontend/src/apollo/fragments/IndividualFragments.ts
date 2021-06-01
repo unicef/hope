@@ -3,6 +3,7 @@ import { gql } from 'apollo-boost';
 export const individualMinimal = gql`
   fragment individualMinimal on IndividualNode {
     id
+    age
     lastRegistrationDate
     createdAt
     updatedAt
@@ -13,6 +14,7 @@ export const individualMinimal = gql`
     maritalStatus
     phoneNo
     sanctionListPossibleMatch
+    sanctionListConfirmedMatch
     deduplicationGoldenRecordStatus
     sanctionListLastCheck
     role
@@ -22,6 +24,7 @@ export const individualMinimal = gql`
       edges {
         node {
           id
+          country
           documentNumber
           type {
             country
@@ -29,6 +32,14 @@ export const individualMinimal = gql`
           }
         }
       }
+    }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
     }
 
     household {
@@ -90,6 +101,7 @@ export const individualDetailed = gql`
       edges {
         node {
           id
+          country
           type {
             country
             label
@@ -98,11 +110,20 @@ export const individualDetailed = gql`
         }
       }
     }
+    identities {
+      id
+      agency {
+        country
+        label
+      }
+      number
+    }
     enrolledInNutritionProgramme
     administrationOfRutf
     identities {
       number
       type
+      country
     }
     household {
       status

@@ -1,11 +1,10 @@
-from decimal import Decimal
-
 import mptt
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.contrib.gis.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
+from django_celery_beat.models import PeriodicTask
+from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
@@ -39,8 +38,8 @@ class BusinessArea(TimeStampedUUIDModel):
     region_code = models.CharField(max_length=8)
     region_name = models.CharField(max_length=8)
     kobo_username = models.CharField(max_length=255, null=True, blank=True)
-    rapid_pro_host = models.URLField(null=True)
-    rapid_pro_api_key = models.CharField(max_length=40, null=True)
+    rapid_pro_host = models.URLField(null=True, blank=True)
+    rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
     slug = models.CharField(
         max_length=250,
         unique=True,
@@ -167,23 +166,33 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         queryset = cls.objects.filter(level=admin_level)
         if business_area is not None:
             queryset.filter(admin_area_level__business_area=business_area)
-        queryset = queryset.order_by('title')
-        return [{"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code} for
-                admin_area in queryset]
+        queryset = queryset.order_by("title")
+        return [
+            {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
+            for admin_area in queryset
+        ]
 
 
 class FlexibleAttribute(SoftDeletableModel, TimeStampedUUIDModel):
     ASSOCIATED_WITH_HOUSEHOLD = 0
     ASSOCIATED_WITH_INDIVIDUAL = 1
+    STRING = "STRING"
+    IMAGE = "IMAGE"
+    INTEGER = "INTEGER"
+    DECIMAL = "DECIMAL"
+    SELECT_ONE = "SELECT_ONE"
+    SELECT_MANY = "SELECT_MANY"
+    DATE = "DATE"
+    GEOPOINT = "GEOPOINT"
     TYPE_CHOICE = Choices(
-        ("STRING", _("String")),
-        ("IMAGE", _("Image")),
-        ("INTEGER", _("Integer")),
-        ("DECIMAL", _("Decimal")),
-        ("SELECT_ONE", _("Select One")),
-        ("SELECT_MANY", _("Select Many")),
-        ("DATETIME", _("Datetime")),
-        ("GEOPOINT", _("Geopoint")),
+        (STRING, _("String")),
+        (IMAGE, _("Image")),
+        (INTEGER, _("Integer")),
+        (DECIMAL, _("Decimal")),
+        (SELECT_ONE, _("Select One")),
+        (SELECT_MANY, _("Select Many")),
+        (DATE, _("Date")),
+        (GEOPOINT, _("Geopoint")),
     )
     ASSOCIATED_WITH_CHOICES = (
         (0, _("Household")),
@@ -248,21 +257,25 @@ class XLSXKoboTemplateManager(models.Manager):
     def latest_valid(self):
         return (
             self.get_queryset()
-                .filter(status=self.model.SUCCESSFUL)
-                .exclude(template_id__exact="")
-                .order_by("-created_at")
-                .first()
+            .filter(status=self.model.SUCCESSFUL)
+            .exclude(template_id__exact="")
+            .order_by("-created_at")
+            .first()
         )
 
 
 class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     SUCCESSFUL = "SUCCESSFUL"
+    UPLOADED = "UPLOADED"
     UNSUCCESSFUL = "UNSUCCESSFUL"
     PROCESSING = "PROCESSING"
+    CONNECTION_FAILED = "CONNECTION_FAILED"
     KOBO_FORM_UPLOAD_STATUS_CHOICES = (
         (SUCCESSFUL, _("Successful")),
+        (UPLOADED, _("Successful")),
         (UNSUCCESSFUL, _("Unsuccessful")),
         (PROCESSING, _("Processing")),
+        (CONNECTION_FAILED, _("Connection failed")),
     )
 
     class Meta:
@@ -280,25 +293,41 @@ class XLSXKoboTemplate(SoftDeletableModel, TimeStampedUUIDModel):
     error_description = models.TextField(blank=True)
     status = models.CharField(max_length=200, choices=KOBO_FORM_UPLOAD_STATUS_CHOICES)
     template_id = models.CharField(max_length=200, blank=True)
+    first_connection_failed_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.file_name} - {self.created_at}"
 
 
 class CountryCodeMapManager(models.Manager):
-
     def __init__(self):
-        self._cache = {2: {}, 3: {}}
+        self._cache = {2: {}, 3: {}, "ca2": {}, "ca3": {}}
         super().__init__()
 
     def get_code(self, iso_code):
         iso_code = iso_code.upper()
-        if not self._cache[2]:
+        self.build_cache()
+        return self._cache[len(iso_code)].get(iso_code, iso_code)
+
+    def get_iso3_code(self, ca_code):
+        ca_code = ca_code.upper()
+        self.build_cache()
+
+        return self._cache["ca3"].get(ca_code, ca_code)
+
+    def get_iso2_code(self, ca_code):
+        ca_code = ca_code.upper()
+        self.build_cache()
+
+        return self._cache["ca2"].get(ca_code, ca_code)
+
+    def build_cache(self):
+        if not self._cache[2] or not self._cache[3] or not self._cache["ca2"] or not self._cache["ca3"]:
             for entry in self.all():
                 self._cache[2][entry.country.code] = entry.ca_code
                 self._cache[3][entry.country.countries.alpha3(entry.country.code)] = entry.ca_code
-
-        return self._cache[len(iso_code)].get(iso_code, iso_code)
+                self._cache["ca2"][entry.ca_code] = entry.country.code
+                self._cache["ca3"][entry.ca_code] = entry.country.countries.alpha3(entry.country.code)
 
 
 class CountryCodeMap(models.Model):
@@ -309,3 +338,21 @@ class CountryCodeMap(models.Model):
 
     class Meta:
         ordering = ("country",)
+
+
+class CustomModelEntry(ModelEntry):
+    """
+    don't update existing tasks
+    """
+
+    @classmethod
+    def from_entry(cls, name, app=None, **entry):
+        obj, _ = PeriodicTask._default_manager.get_or_create(
+            name=name,
+            defaults=cls._unpack_fields(**entry),
+        )
+        return cls(obj, app=app)
+
+
+class CustomDatabaseScheduler(DatabaseScheduler):
+    Entry = CustomModelEntry

@@ -7,10 +7,12 @@ export const householdMinimal = gql`
     residenceStatus
     size
     totalCashReceived
+    currency
     firstRegistrationDate
     lastRegistrationDate
     status
     sanctionListPossibleMatch
+    sanctionListConfirmedMatch
     hasDuplicates
     unicefId
     flexFields
@@ -92,6 +94,7 @@ export const householdDetailed = gql`
       edges {
         node {
           ...individualMinimal
+            
           birthDate
           relationship
           identities {

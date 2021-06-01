@@ -20,7 +20,7 @@ from django.conf import settings
 from django.core.signals import setting_changed
 
 DEFAULTS = {
-    "USE_BLACK": True,
+    "USE_BLACK": False,
     "BUILTIN_MODULES": ["random", "datetime", "dateutil"],
 }
 

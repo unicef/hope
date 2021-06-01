@@ -1,0 +1,4 @@
+{% extends 'base_notification_email.html' %}
+{% block content %}
+   A Sensitive Grievance ticket <a href="{{ ticket_url }}">{{ ticket_id }}</a> created over {{ hours_ago }} hours ago requires action and attention
+{% endblock %}

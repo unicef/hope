@@ -1,15 +1,23 @@
+import logging
+
 from django.db import transaction
-from django.db.models import Q, F, Prefetch
+from django.db.models import F, Prefetch, Q
 from django.utils import timezone
 
+from hct_mis_api.apps.core.models import CountryCodeMap
 from hct_mis_api.apps.core.utils import nested_getattr
 from hct_mis_api.apps.household.models import (
+    Household,
     Individual,
     IndividualRoleInHousehold,
-    Household,
 )
 from hct_mis_api.apps.mis_datahub import models as dh_mis_models
-from hct_mis_api.apps.targeting.models import TargetPopulation, HouseholdSelection
+from hct_mis_api.apps.targeting.models import (
+    HouseholdSelection,
+    TargetPopulation,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class SendTPToDatahubTask:
@@ -41,12 +49,11 @@ class SendTPToDatahubTask:
         "admin2": "admin_area.parent.title",
         "residence_status": "residence_status",
         "registration_date": "last_registration_date",
-        "country": "country.alpha3",
     }
     MAPPING_INDIVIDUAL_DICT = {
         "mis_id": "id",
         "unicef_id": "unicef_id",
-        "status": "status",
+        "status": "cash_assist_status",
         "full_name": "full_name",
         "family_name": "family_name",
         "given_name": "given_name",
@@ -59,6 +66,7 @@ class SendTPToDatahubTask:
         "phone_number": "phone_no",
         "household_mis_id": "household.id",
         "pregnant": "pregnant",
+        "sanction_list_confirmed_match": "sanction_list_confirmed_match",
     }
     MAPPING_DOCUMENT_DICT = {
         "mis_id": "id",
@@ -89,71 +97,83 @@ class SendTPToDatahubTask:
         documents_to_bulk_create = []
         tp_entries_to_bulk_create = []
 
-        program = target_population.program
-        dh_session = dh_mis_models.Session(
-            source=dh_mis_models.Session.SOURCE_MIS,
-            status=dh_mis_models.Session.STATUS_READY,
-            business_area=program.business_area.code,
-        )
-        dh_session.save()
-        target_population_selections = HouseholdSelection.objects.filter(
-            target_population__id=target_population.id, final=True
-        )
-        households = target_population.final_list.filter()
-        # individuals = Individual.objects.filter(
-        #     household__id__in=target_population.households.values_list(
-        #         "id", flat=True
-        #     )
-        # ).filter(
-        #     Q(last_sync_at__isnull=True)
-        #     | Q(last_sync_at__lte=F("updated_at"))
-        # )
+        try:
+            with transaction.atomic(using="default"):
+                with transaction.atomic(using="cash_assist_datahub_mis"):
+                    program = target_population.program
+                    dh_session = dh_mis_models.Session(
+                        source=dh_mis_models.Session.SOURCE_MIS,
+                        status=dh_mis_models.Session.STATUS_READY,
+                        business_area=program.business_area.code,
+                    )
+                    dh_session.save()
+                    target_population_selections = HouseholdSelection.objects.filter(
+                        target_population__id=target_population.id, final=True
+                    )
+                    households = target_population.final_list.filter()
+                    # individuals = Individual.objects.filter(
+                    #     household__id__in=target_population.households.values_list(
+                    #         "id", flat=True
+                    #     )
+                    # ).filter(
+                    #     Q(last_sync_at__isnull=True)
+                    #     | Q(last_sync_at__lte=F("updated_at"))
+                    # )
 
-        if program.last_sync_at is None or program.last_sync_at < program.updated_at:
-            dh_program = self.send_program(program)
-            dh_program.session = dh_session
-            dh_program.save()
-            program.last_sync_at = timezone.now()
-            program.save(update_fields=["last_sync_at"])
-        dh_target = self.send_target_population(target_population)
-        dh_target.session = dh_session
-        dh_target.save()
-        household_ids = households.values_list("id", flat=True)
+                    if program.last_sync_at is None or program.last_sync_at < program.updated_at:
+                        dh_program = self.send_program(program)
+                        dh_program.session = dh_session
+                        dh_program.save()
+                        program.last_sync_at = timezone.now()
+                        program.save(update_fields=["last_sync_at"])
+                    dh_target = self.send_target_population(target_population)
+                    dh_target.session = dh_session
+                    dh_target.save()
+                    household_ids = households.values_list("id", flat=True)
 
-        for household in households:
-            dh_household, dh_collectors_households, dh_individuals = self.send_household(
-                household,
-                program,
-                dh_session,
-                household_ids,
-            )
-            collectors_households_to_bulk_create.extend(dh_collectors_households)
-            if dh_household is not None:
-                households_to_bulk_create.append(dh_household)
-            individuals_to_bulk_create.extend(dh_individuals)
+                    for household in households:
+                        dh_household, dh_collectors_households, dh_individuals = self.send_household(
+                            household,
+                            program,
+                            dh_session,
+                            household_ids,
+                        )
+                        collectors_households_to_bulk_create.extend(dh_collectors_households)
+                        if dh_household is not None:
+                            households_to_bulk_create.append(dh_household)
+                        individuals_to_bulk_create.extend(dh_individuals)
 
-        for selection in target_population_selections:
-            dh_entry = self.send_target_entry(selection)
-            dh_entry.session = dh_session
-            tp_entries_to_bulk_create.append(dh_entry)
-        collectors_households_to_bulk_create = SendTPToDatahubTask.remove_duplicated_households(
-            collectors_households_to_bulk_create
-        )
-        households_to_bulk_create = SendTPToDatahubTask.remove_duplicated_households(households_to_bulk_create)
-        households_to_bulk_create_mis_ids = [str(x.mis_id) for x in households_to_bulk_create]
-        collectors_households_to_bulk_create = [
-            dh_collector_household
-            for dh_collector_household in collectors_households_to_bulk_create
-            if str(dh_collector_household.mis_id) not in households_to_bulk_create_mis_ids
-        ]
-        dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
-        dh_mis_models.Household.objects.bulk_create(collectors_households_to_bulk_create)
-        dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
-        dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
-        dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
-        target_population.sent_to_datahub = True
-        target_population.save()
-        households.update(last_sync_at=timezone.now())
+                    for selection in target_population_selections:
+                        dh_entry = self.send_target_entry(selection)
+                        dh_entry.session = dh_session
+                        tp_entries_to_bulk_create.append(dh_entry)
+                    collectors_households_to_bulk_create = SendTPToDatahubTask.remove_duplicated_households(
+                        collectors_households_to_bulk_create
+                    )
+                    households_to_bulk_create = SendTPToDatahubTask.remove_duplicated_households(
+                        households_to_bulk_create
+                    )
+                    households_to_bulk_create_mis_ids = [str(x.mis_id) for x in households_to_bulk_create]
+                    collectors_households_to_bulk_create = [
+                        dh_collector_household
+                        for dh_collector_household in collectors_households_to_bulk_create
+                        if str(dh_collector_household.mis_id) not in households_to_bulk_create_mis_ids
+                    ]
+                    dh_mis_models.Household.objects.bulk_create(households_to_bulk_create)
+                    dh_mis_models.Household.objects.bulk_create(collectors_households_to_bulk_create)
+                    dh_mis_models.Individual.objects.bulk_create(individuals_to_bulk_create)
+                    dh_mis_models.Document.objects.bulk_create(documents_to_bulk_create)
+                    dh_mis_models.TargetPopulationEntry.objects.bulk_create(tp_entries_to_bulk_create)
+                    target_population.sent_to_datahub = True
+                    target_population.save()
+                    households.update(last_sync_at=timezone.now())
+                    return {
+                        "program": str(program),
+                        "target_population": str(target_population),
+                    }
+        except Exception as e:
+            logger.exception(e)
+            raise
 
     def build_arg_dict(self, model_object, mapping_dict):
         args = {}
@@ -202,6 +222,7 @@ class SendTPToDatahubTask:
         dh_collectors_households = []
         dh_household = None
         is_creating = False
+        dh_household_args["country"] = CountryCodeMap.objects.get_code(household.country.code)
         if household.last_sync_at is None or household.last_sync_at <= household.updated_at:
             dh_household = dh_mis_models.Household(**dh_household_args)
             dh_household.unhcr_id = self.get_unhcr_household_id(household)
@@ -209,7 +230,6 @@ class SendTPToDatahubTask:
             is_creating = True
         else:
             dh_household = dh_mis_models.Household.objects.filter(mis_id=household.id).last()
-
         head_of_household = household.head_of_household
         collectors_ids = list(
             household.representatives.filter(
@@ -232,7 +252,7 @@ class SendTPToDatahubTask:
         ids = {head_of_household.id, *collectors_ids}
         individuals_to_create = []
         if program.individual_data_needed:
-            individuals = household.individuals.all()
+            individuals = Individual.objects.filter(Q(Q(household=household) | Q(id__in=ids)))
             for individual in individuals:
                 if self.should_send_individual(individual, household):
                     dh_individual = self.send_individual(
@@ -269,8 +289,7 @@ class SendTPToDatahubTask:
 
     def should_send_individual(self, individual, household):
         is_not_synced = individual.last_sync_at is None or individual.last_sync_at <= individual.updated_at
-        is_allowed_to_share = household.business_area.has_data_sharing_agreement
-        return is_not_synced and is_allowed_to_share
+        return is_not_synced
 
     def send_target_entry(self, target_population_selection):
         household_unhcr_id = self.get_unhcr_household_id(target_population_selection.household)
@@ -288,4 +307,6 @@ class SendTPToDatahubTask:
         return None
 
     def get_unhcr_household_id(self, household):
+        if household.unhcr_id == "":
+            return None
         return household.unhcr_id

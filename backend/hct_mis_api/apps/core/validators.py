@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ValidationError
 
 from hct_mis_api.apps.core.core_fields_attributes import (
@@ -15,6 +17,9 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_BOOL,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
+from hct_mis_api.apps.household.models import NOT_PROVIDED, RELATIONSHIP_UNKNOWN, BLANK
+
+logger = logging.getLogger(__name__)
 
 
 class BaseValidator:
@@ -48,6 +53,7 @@ class BaseValidator:
                 errors_list.append(e.message)
 
         if errors_list:
+            logger.error(", ".join(errors_list))
             raise Exception(", ".join(errors_list))
 
 
@@ -58,6 +64,11 @@ class CommonValidator(BaseValidator):
         end_date = kwargs.get("end_date")
         if start_date and end_date:
             if start_date > end_date:
+                logger.error(
+                    f"Start date cannot be greater than the end date, "
+                    f"start_date={start_date.strftime('%m/%d/%Y, %H:%M:%S')} "
+                    f"end_date={end_date.strftime('%m/%d/%Y, %H:%M:%S')}"
+                )
                 raise ValidationError("Start date cannot be greater than the end date.")
 
 
@@ -70,6 +81,7 @@ def prepare_choices_for_validation(choices_sheet):
     choices_headers_map = [col.value for col in first_row]
 
     if {"list_name", "name", "label:English(EN)"}.issubset(set(choices_headers_map)) is False:
+        logger.error("Choices sheet does not contain all required columns")
         raise ValueError("Choices sheet does not contain all required columns")
 
     for row_number in range(1, choices_sheet.nrows):
@@ -80,7 +92,6 @@ def prepare_choices_for_validation(choices_sheet):
 
         last_list_name = None
         choice_value = None
-        english_label = ""
         for cell, header_name in zip(row, choices_headers_map):
             cell_value = cell.value
             if header_name == "list_name" and cell_value != last_list_name:
@@ -93,11 +104,9 @@ def prepare_choices_for_validation(choices_sheet):
                     cell_value = cell_value.strip().upper()
 
                 choice_value = cell_value
-            elif header_name == "label:English(EN)":
-                english_label = str(cell_value).strip()
 
         if last_list_name is not None and choice_value is not None:
-            choices_mapping[last_list_name].append({"label": {"English(EN)": english_label}, "value": choice_value})
+            choices_mapping[last_list_name].append(choice_value)
 
     return choices_mapping
 
@@ -114,6 +123,9 @@ class KoboTemplateValidator:
         "date": TYPE_DATE,
         "select_multiple": TYPE_SELECT_MANY,
         "geopoint": TYPE_GEOPOINT,
+        "start": TYPE_STRING,
+        "end": TYPE_STRING,
+        "deviceid": TYPE_STRING,
     }
     EXPECTED_REQUIRED_FIELDS = (
         "country_h_c"
@@ -131,9 +143,9 @@ class KoboTemplateValidator:
         "admin2_h_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
-        {"label": {"English(EN)": "None"}, "value": ""},
-        {"label": {"English(EN)": "Not provided"}, "value": "NOT_PROVIDED"},
-        {"label": {"English(EN)": "Unknown"}, "value": "UNKNOWN"},
+        BLANK,
+        NOT_PROVIDED,
+        RELATIONSHIP_UNKNOWN,
     )
     ALL_CORE_FIELDS = (
         CORE_FIELDS_ATTRIBUTES + list(KOBO_ONLY_HOUSEHOLD_FIELDS.values()) + list(KOBO_ONLY_INDIVIDUAL_FIELDS.values())
@@ -153,6 +165,7 @@ class KoboTemplateValidator:
                 columns_names_and_numbers_mapping[column_name] = index
 
         if None in columns_names_and_numbers_mapping.values():
+            logger.error("Survey sheet does not contain all required columns")
             raise ValueError("Survey sheet does not contain all required columns")
 
         return columns_names_and_numbers_mapping
@@ -214,8 +227,6 @@ class KoboTemplateValidator:
     @classmethod
     def _check_field_type(cls, core_field, core_field_from_file, field_type):
         if field_type != core_field_from_file["type"] and core_field_from_file["type"] != "CALCULATE":
-            if field_type == TYPE_BOOL and core_field_from_file["type"] == TYPE_SELECT_ONE:
-                return
             return {
                 "field": core_field,
                 "message": f"Expected type: {field_type}, actual type: {core_field_from_file['type']}",
@@ -254,7 +265,7 @@ class KoboTemplateValidator:
                 )
 
         for file_choice in from_file_choices:
-            if file_choice not in from_file_choices:
+            if file_choice not in field_choices:
                 errors.append(
                     {
                         "field": core_field,
@@ -279,7 +290,7 @@ class KoboTemplateValidator:
         validation_errors = []
         for core_field, field_data in core_fields_in_db.items():
             field_type = field_data["type"]
-            field_choices = field_data["choices"]
+            field_choices = [choice["value"] for choice in field_data["choices"]]
             core_field_from_file = core_fields_in_file.get(core_field)
 
             field_exists_error = cls._check_if_field_exists(core_field, core_field_from_file)
@@ -287,13 +298,16 @@ class KoboTemplateValidator:
                 validation_errors.append(field_exists_error)
                 continue
 
-            field_type_error = cls._check_field_type(core_field, core_field_from_file, field_type)
-            if field_type_error:
-                validation_errors.append(field_type_error)
-
             field_required_error = cls._check_is_field_required(core_field, core_field_from_file)
             if field_required_error:
                 validation_errors.append(field_required_error)
+
+            if field_type == TYPE_BOOL and core_field_from_file["type"] == TYPE_SELECT_ONE:
+                continue
+
+            field_type_error = cls._check_field_type(core_field, core_field_from_file, field_type)
+            if field_type_error:
+                validation_errors.append(field_type_error)
 
             field_choices_errors = cls._check_field_choices(core_field, core_field_from_file, field_choices)
             if field_choices_errors:

@@ -40,8 +40,12 @@ class TestRoleReassignMutation(APITestCase):
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
-        area_type = AdminAreaLevelFactory(name="Admin type one", admin_level=2, business_area=self.business_area, )
-        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type)
+        area_type = AdminAreaLevelFactory(
+            name="Admin type one",
+            admin_level=2,
+            business_area=self.business_area,
+        )
+        self.admin_area = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="sadf3223")
         program_one = ProgramFactory(name="Test program ONE", business_area=BusinessArea.objects.first())
 
         self.household = HouseholdFactory.build(id="b5cb9bb2-a4f3-49f0-a9c8-a2f260026054")
@@ -71,19 +75,23 @@ class TestRoleReassignMutation(APITestCase):
         self.individual.refresh_from_db()
 
         self.role = IndividualRoleInHousehold.objects.create(
-            household=self.household, individual=self.individual, role=ROLE_PRIMARY,
+            household=self.household,
+            individual=self.individual,
+            role=ROLE_PRIMARY,
         )
 
         self.grievance_ticket = GrievanceTicketFactory(
             id="43c59eda-6664-41d6-9339-05efcb11da82",
             category=GrievanceTicket.CATEGORY_DATA_CHANGE,
             issue_type=GrievanceTicket.ISSUE_TYPE_DATA_CHANGE_DELETE_INDIVIDUAL,
-            admin=self.admin_area.title,
+            admin2=self.admin_area,
             business_area=self.business_area,
             status=GrievanceTicket.STATUS_FOR_APPROVAL,
         )
         TicketDeleteIndividualDetailsFactory(
-            ticket=self.grievance_ticket, individual=self.individual, approve_status=True,
+            ticket=self.grievance_ticket,
+            individual=self.individual,
+            approve_status=True,
         )
 
     def test_role_reassignment(self):
@@ -94,7 +102,9 @@ class TestRoleReassignMutation(APITestCase):
             "role": ROLE_PRIMARY,
         }
         self.graphql_request(
-            request_string=self.REASSIGN_ROLE_MUTATION, context={"user": self.user}, variables=variables,
+            request_string=self.REASSIGN_ROLE_MUTATION,
+            context={"user": self.user},
+            variables=variables,
         )
 
         self.grievance_ticket.refresh_from_db()

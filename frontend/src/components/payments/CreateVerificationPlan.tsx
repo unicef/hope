@@ -21,7 +21,7 @@ import {
   useCreateCashPlanPaymentVerificationMutation,
   useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
-  useSampleSizeQuery,
+  useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -31,6 +31,7 @@ import { FormikEffect } from '../FormikEffect';
 import { CashPlan } from '../../apollo/queries/CashPlan';
 import { FormikCheckboxField } from '../../shared/Formik/FormikCheckboxField';
 import { ButtonTooltip } from '../ButtonTooltip';
+import { getPercentage } from '../../utils/utils';
 
 const DialogTitleWrapper = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.hctPalette.lighterGray};
@@ -136,7 +137,7 @@ export function CreateVerificationPlan({
     },
   });
 
-  const { data: sampleSizesData, refetch } = useSampleSizeQuery({
+  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
     variables: prepareVariables(
       cashPlanId,
       selectedTab,
@@ -146,10 +147,9 @@ export function CreateVerificationPlan({
   });
 
   useEffect(() => {
-    if (formValues) {
-      refetch();
-    }
-  }, [refetch, formValues, sampleSizesData]);
+    loadSampleSize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValues]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -184,18 +184,20 @@ export function CreateVerificationPlan({
   };
 
   const getSampleSizePercentage = (): string => {
-    if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
-    }
-    return ` (0%)`;
+    return `(${getPercentage(
+      sampleSizesData?.sampleSize?.sampleSize,
+      sampleSizesData?.sampleSize?.paymentRecordCount,
+    )})`;
   };
+
   return (
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
-          <FormikEffect values={values} onChange={handleFormChange(values)} />
+          <FormikEffect
+            values={values}
+            onChange={() => handleFormChange(values)}
+          />
           <ButtonTooltip
             disabled={disabled}
             color='primary'
@@ -256,8 +258,11 @@ export function CreateVerificationPlan({
                       fontWeight='fontWeightBold'
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
-                      of {sampleSizesData?.sampleSize?.paymentRecordCount}
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount}{' '}
                       {getSampleSizePercentage()}
+                    </Box>
+                    <Box fontSize={12} color='#797979'>
+                      This option is recommended for RapidPro
                     </Box>
                     <Field
                       name='verificationChannel'
@@ -316,12 +321,12 @@ export function CreateVerificationPlan({
                         />
                         <Field
                           name='ageCheckbox'
-                          label='Age'
+                          label='Age of HoH'
                           component={FormikCheckboxField}
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Gender'
+                          label='Gender of HoH'
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -342,7 +347,7 @@ export function CreateVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMin'
-                                  label='Age Min'
+                                  label='Minimum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -351,7 +356,7 @@ export function CreateVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMax'
-                                  label='Age Max'
+                                  label='Maximum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -384,7 +389,7 @@ export function CreateVerificationPlan({
                       fontWeight='fontWeightBold'
                     >
                       Sample size: {sampleSizesData?.sampleSize?.sampleSize} out
-                      of {sampleSizesData?.sampleSize?.paymentRecordCount} (
+                      of {sampleSizesData?.sampleSize?.paymentRecordCount}
                       {getSampleSizePercentage()}
                     </Box>
                     <Field

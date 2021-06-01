@@ -20,9 +20,9 @@ import { FormikRadioGroup } from '../../shared/Formik/FormikRadioGroup';
 import {
   useAllRapidProFlowsQuery,
   useAllAdminAreasQuery,
-  useSampleSizeQuery,
   useEditCashPlanPaymentVerificationMutation,
   useCashPlanQuery,
+  useSampleSizeLazyQuery,
 } from '../../__generated__/graphql';
 import { FormikMultiSelectField } from '../../shared/Formik/FormikMultiSelectField';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
@@ -61,10 +61,14 @@ function prepareVariables(
   selectedTab,
   values,
   businessArea,
+  cashPlanId = null,
 ) {
   return {
     input: {
-      cashPlanPaymentVerificationId: cashPlanVerificationId,
+      ...(!cashPlanId && {
+        cashPlanPaymentVerificationId: cashPlanVerificationId,
+      }),
+      ...(cashPlanId && { cashPlanId }),
       sampling: selectedTab === 0 ? 'FULL_LIST' : 'RANDOM',
       fullListArguments:
         selectedTab === 0
@@ -88,7 +92,10 @@ function prepareVariables(
                 ? values.excludedAdminAreasRandom
                 : [],
               age: values.ageCheckbox
-                ? { min: values.filterAgeMin, max: values.filterAgeMax }
+                ? {
+                    min: values.filterAgeMin || null,
+                    max: values.filterAgeMax || null,
+                  }
                 : null,
               sex: values.sexCheckbox ? values.filterSex : null,
             }
@@ -128,15 +135,18 @@ export function EditVerificationPlan({
   const initialValues = {
     confidenceInterval: verification.confidenceInterval * 100 || 95,
     marginOfError: verification.marginOfError * 100 || 5,
-    filterAgeMin: verification.ageFilter?.min || null,
-    filterAgeMax: verification.ageFilter?.max || null,
+    filterAgeMin: verification.ageFilter?.min || '',
+    filterAgeMax: verification.ageFilter?.max || '',
     filterSex: verification.sexFilter || '',
     excludedAdminAreasFull: verification.excludedAdminAreasFilter,
     excludedAdminAreasRandom: verification.excludedAdminAreasFilter,
     verificationChannel: verification.verificationMethod || null,
     rapidProFlow: verification.rapidProFlowId || null,
-    adminCheckbox: Boolean(verification.excludedAdminAreasFilter) || false,
-    ageCheckbox: Boolean(verification.ageFilter?.min) || false,
+    adminCheckbox: verification.excludedAdminAreasFilter.length !== 0,
+    ageCheckbox:
+      Boolean(verification.ageFilter?.min) ||
+      Boolean(verification.ageFilter?.max) ||
+      false,
     sexCheckbox: Boolean(verification.sexFilter) || false,
   };
 
@@ -153,25 +163,21 @@ export function EditVerificationPlan({
       businessArea,
     },
   });
-  const variablesForSampleSizeQuery = prepareVariables(
-    cashPlanVerificationId,
-    selectedTab,
-    formValues,
-    businessArea,
-  );
-  delete variablesForSampleSizeQuery.input.cashPlanPaymentVerificationId;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  variablesForSampleSizeQuery.input.cashPlanId = cashPlanId;
-  const { data: sampleSizesData, refetch } = useSampleSizeQuery({
-    variables: variablesForSampleSizeQuery,
+
+  const [loadSampleSize, { data: sampleSizesData }] = useSampleSizeLazyQuery({
+    variables: prepareVariables(
+      cashPlanVerificationId,
+      selectedTab,
+      formValues,
+      businessArea,
+      cashPlanId,
+    ),
   });
 
   useEffect(() => {
-    if (formValues) {
-      refetch();
-    }
-  }, [refetch, formValues, sampleSizesData]);
+    loadSampleSize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formValues]);
 
   const submit = async (values): Promise<void> => {
     const { errors } = await mutate({
@@ -207,9 +213,11 @@ export function EditVerificationPlan({
 
   const getSampleSizePercentage = (): string => {
     if (sampleSizesData?.sampleSize?.paymentRecordCount !== 0) {
-      return ` (${(sampleSizesData?.sampleSize?.sampleSize /
-        sampleSizesData?.sampleSize?.paymentRecordCount) *
-        100})%`;
+      return ` (${
+        (sampleSizesData?.sampleSize?.sampleSize /
+          sampleSizesData?.sampleSize?.paymentRecordCount) *
+        100
+      })%`;
     }
     return ` (0%)`;
   };
@@ -217,7 +225,10 @@ export function EditVerificationPlan({
     <Formik initialValues={initialValues} onSubmit={submit}>
       {({ submitForm, values, setValues }) => (
         <Form>
-          <FormikEffect values={values} onChange={handleFormChange(values)} />
+          <FormikEffect
+            values={values}
+            onChange={() => handleFormChange(values)}
+          />
           <Button
             color='primary'
             variant='contained'
@@ -280,6 +291,9 @@ export function EditVerificationPlan({
                       of {sampleSizesData?.sampleSize?.paymentRecordCount}
                       {getSampleSizePercentage()}
                     </Box>
+                    <Box fontSize={12} color='#797979'>
+                      This option is recommended for RapidPro
+                    </Box>
                     <Field
                       name='verificationChannel'
                       label='Verification Channel'
@@ -337,12 +351,12 @@ export function EditVerificationPlan({
                         />
                         <Field
                           name='ageCheckbox'
-                          label='Age'
+                          label='Age of HoH'
                           component={FormikCheckboxField}
                         />
                         <Field
                           name='sexCheckbox'
-                          label='Gender'
+                          label='Gender of HoH'
                           component={FormikCheckboxField}
                         />
                       </Box>
@@ -363,7 +377,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMin'
-                                  label='Age Min'
+                                  label='Minimum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}
@@ -372,7 +386,7 @@ export function EditVerificationPlan({
                               <Grid item xs={4}>
                                 <Field
                                   name='filterAgeMax'
-                                  label='Age Max'
+                                  label='Maximum Age'
                                   type='number'
                                   color='primary'
                                   component={FormikTextField}

@@ -13,6 +13,79 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Household',
                 'choices': [
+                    {
+                        'labelEn': 'Repatriate',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': 'Population rapatriée – Personnes qui sont retournées chez elles, ou sont en cours de retours après avoir passée plusieurs semaines dans un pays étranger.',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Repatriate',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'repatriated'
+                    },
+                    {
+                        'labelEn': 'Returnee',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': 'Population retournée – Personnes qui sont retournées dans leurs zone d’origine après avoir passée plusieurs semaines dans une autre region de la RCA',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Returnee',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'returnee'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Other Residence Status',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Autres statut de résidence',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Other Residence Status',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'specific_residence_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
@@ -72,7 +145,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -83,7 +156,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -94,7 +167,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -105,7 +178,312 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Is the spouse present dureing the current registration',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Est ce que le conjoint du collecteur est présent lors de l'enregistrement?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Is the spouse present dureing the current registration',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'spouse_present_primary_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "What is the first name of ${full_name_i_c} 's mother?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de la mère de l'individu collecteur?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "What is the first name of ${full_name_i_c} 's mother?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_mother_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "What is the first name of ${full_name_i_c} 's grandmother?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de la grand-mère de l'individu collecteur?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "What is the first name of ${full_name_i_c} 's grandmother?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_grandmother_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the village of origin of ${full_name_i_c}?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Quel est le village d’origine\xa0du collecteur?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the village of origin of ${full_name_i_c}?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_origin_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'How many children did ${full_name_i_c} have in total, including those who do not reside in the household and / or those who died.',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien d’enfants le collecteur a-t-il eu au total, incluant ceux qui ne resident pas dans le ménage et/ou ceux qui sont décédés.',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'How many children did ${full_name_i_c} have in total, including those who do not reside in the household and / or those who died.',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_children_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the first name of the eldest child of ${full_name_i_c} (girl or boy)?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de l'enfant ainé du collecteur (fille ou garçon)?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the first name of the eldest child of ${full_name_i_c} (girl or boy)?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_oldest_child_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'What is the first name of the youngest child of ${full_name_i_c} (girl or boy)?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "Quel est le prénom de l'enfant cadet du collecteur (fille ou garçon)?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'What is the first name of the youngest child of ${full_name_i_c} (girl or boy)?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_youngest_child_i_f',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'How many children of ${full_name_i_c} are currently in primary school?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien d’enfants du collecteur sont actuellement à l’école primaire\xa0?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'How many children of ${full_name_i_c} are currently in primary school?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_children_school_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': "How many closed rooms are there in ${full_name_i_c} 's house?",
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Combien de pièces fermées y a-t-il dans la maison du collecteur?',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': "How many closed rooms are there in ${full_name_i_c} 's house?",
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'verif_primary_rooms_house_i_f',
+                'required': False,
+                'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'At no time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'At no time',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Some of the time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -116,7 +494,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -127,7 +505,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -138,7 +516,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -149,7 +527,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -160,7 +538,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -171,7 +549,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -182,7 +560,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -193,7 +571,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -206,7 +584,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. I have felt cheerful and in good spirits',
+                'labelEn': 'I have felt cheerful and in good spirits',
                 'labels': [
                     {
                         'label': '',
@@ -217,7 +595,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. I have felt cheerful and in good spirits',
+                        'label': 'I have felt cheerful and in good spirits',
                         'language': 'English(EN)'
                     },
                     {
@@ -233,7 +611,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -244,7 +622,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -255,7 +633,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -266,7 +644,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -277,7 +655,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -288,7 +666,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -299,7 +677,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -310,7 +688,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -321,7 +699,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -332,7 +710,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -343,7 +721,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -354,7 +732,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -367,7 +745,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. I have felt relaxed and calm',
+                'labelEn': 'I have felt relaxed and calm',
                 'labels': [
                     {
                         'label': '',
@@ -378,7 +756,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. I have felt relaxed and calm',
+                        'label': 'I have felt relaxed and calm',
                         'language': 'English(EN)'
                     },
                     {
@@ -394,7 +772,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -405,7 +783,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -416,7 +794,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -427,7 +805,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -438,7 +816,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -449,7 +827,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -460,7 +838,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -471,7 +849,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -482,7 +860,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -493,7 +871,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -504,7 +882,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -515,7 +893,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -528,7 +906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. I have felt active and vigorous',
+                'labelEn': 'I have felt active and vigorous',
                 'labels': [
                     {
                         'label': '',
@@ -539,7 +917,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. I have felt active and vigorous',
+                        'label': 'I have felt active and vigorous',
                         'language': 'English(EN)'
                     },
                     {
@@ -555,7 +933,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -566,7 +944,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -577,7 +955,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -588,7 +966,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -599,7 +977,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -610,7 +988,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -621,7 +999,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -632,7 +1010,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -643,7 +1021,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -654,7 +1032,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -665,7 +1043,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -676,7 +1054,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -689,7 +1067,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. I woke up feeling fresh and rested',
+                'labelEn': 'I woke up feeling fresh and rested',
                 'labels': [
                     {
                         'label': '',
@@ -700,7 +1078,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. I woke up feeling fresh and rested',
+                        'label': 'I woke up feeling fresh and rested',
                         'language': 'English(EN)'
                     },
                     {
@@ -716,7 +1094,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Individual',
                 'choices': [
                     {
-                        'labelEn': '0p. At no time',
+                        'labelEn': 'At no time',
                         'labels': [
                             {
                                 'label': '',
@@ -727,7 +1105,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '0p. At no time',
+                                'label': 'At no time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -738,7 +1116,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '0'
                     },
                     {
-                        'labelEn': '1p. Some of the time',
+                        'labelEn': 'Some of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -749,7 +1127,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. Some of the time',
+                                'label': 'Some of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -760,7 +1138,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. Less than half of the time',
+                        'labelEn': 'Less than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -771,7 +1149,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. Less than half of the time',
+                                'label': 'Less than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -782,7 +1160,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p More than half of the time',
+                        'labelEn': 'More than half of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -793,7 +1171,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p More than half of the time',
+                                'label': 'More than half of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -804,7 +1182,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Most of the time',
+                        'labelEn': 'Most of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -815,7 +1193,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Most of the time',
+                                'label': 'Most of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -826,7 +1204,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '4'
                     },
                     {
-                        'labelEn': '5p. All of the time',
+                        'labelEn': 'All of the time',
                         'labels': [
                             {
                                 'label': '',
@@ -837,7 +1215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '5p. All of the time',
+                                'label': 'All of the time',
                                 'language': 'English(EN)'
                             },
                             {
@@ -850,7 +1228,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. My daily life has been filled with things that interest me',
+                'labelEn': 'My daily life has been filled with things that interest me',
                 'labels': [
                     {
                         'label': '',
@@ -861,7 +1239,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. My daily life has been filled with things that interest me',
+                        'label': 'My daily life has been filled with things that interest me',
                         'language': 'English(EN)'
                     },
                     {
@@ -900,7 +1278,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'wellbeing_index_i_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Individual',
@@ -1054,7 +1432,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If the individual is a child, does he/she currently enrolled in school',
+                'labelEn': 'If the individual is a child, does he/she currently enrolled in school?',
                 'labels': [
                     {
                         'label': '',
@@ -1065,7 +1443,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If the individual is a child, does he/she currently enrolled in school',
+                        'label': 'If the individual is a child, does he/she currently enrolled in school?',
                         'language': 'English(EN)'
                     },
                     {
@@ -1264,6 +1642,79 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'school_type_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'primary',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'primary',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'primary'
+                    },
+                    {
+                        'labelEn': 'secondary',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'secondary',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'secondary'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'At what level is the child attending?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'At what level is the child attending?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'school_level_i_f',
                 'required': False,
                 'type': 'SELECT_ONE'
             },
@@ -1806,7 +2257,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'What is the average daily income of the child',
+                'labelEn': 'What is the average daily income of the child?',
                 'labels': [
                     {
                         'label': '',
@@ -1817,7 +2268,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'What is the average daily income of the child',
+                        'label': 'What is the average daily income of the child?',
                         'language': 'English(EN)'
                     },
                     {
@@ -1908,7 +2359,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If one or both have passed away, what is the reason of their death',
+                'labelEn': 'If one or both have passed away, what is the reason of their death?',
                 'labels': [
                     {
                         'label': '',
@@ -1919,7 +2370,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If one or both have passed away, what is the reason of their death',
+                        'label': 'If one or both have passed away, what is the reason of their death?',
                         'language': 'English(EN)'
                     },
                     {
@@ -2105,6 +2556,108 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'muac_i_f',
                 'required': False,
                 'type': 'INTEGER'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Picture of the measured arm circumference',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Prenez une photo de la mesure du périmètre brachial',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Picture of the measured arm circumference',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'arm_picture_i_f',
+                'required': False,
+                'type': 'IMAGE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '0'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Does the child participate in a nutritional programme?',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': "L'enfant participe-t-il a un traitement nutritionnel?",
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Does the child participate in a nutritional programme?',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'mas_treatment_i_f',
+                'required': False,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Household',
@@ -2733,7 +3286,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'If other, specify',
+                'labelEn': 'If other, please specify',
                 'labels': [
                     {
                         'label': '',
@@ -2744,7 +3297,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'If other, specify',
+                        'label': 'If other, please specify',
                         'language': 'English(EN)'
                     },
                     {
@@ -3095,7 +3648,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Packaged water (bottled water, sachets_',
+                        'labelEn': 'Packaged water (bottled water, sachets, …)',
                         'labels': [
                             {
                                 'label': '',
@@ -3106,7 +3659,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Packaged water (bottled water, sachets_',
+                                'label': 'Packaged water (bottled water, sachets, …)',
                                 'language': 'English(EN)'
                             },
                             {
@@ -3373,7 +3926,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'Packaged water (bottled water, sachets_',
+                        'labelEn': 'Packaged water (bottled water, sachets, …)',
                         'labels': [
                             {
                                 'label': '',
@@ -3384,7 +3937,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Packaged water (bottled water, sachets_',
+                                'label': 'Packaged water (bottled water, sachets, …)',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4068,7 +4621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_liter_yesterday_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -4149,7 +4702,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Do you have odor, taste color in the water?',
+                'labelEn': 'Do you have odor, taste or color in the water?',
                 'labels': [
                     {
                         'label': '',
@@ -4160,7 +4713,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Do you have odor, taste color in the water?',
+                        'label': 'Do you have odor, taste or color in the water?',
                         'language': 'English(EN)'
                     },
                     {
@@ -4339,7 +4892,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Does your latrine have door, light, ventilation?',
+                'labelEn': 'Does your latrine have a door, light and ventilation?',
                 'labels': [
                     {
                         'label': '',
@@ -4350,7 +4903,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Does your latrine have door, light, ventilation?',
+                        'label': 'Does your latrine have a door, light and ventilation?',
                         'language': 'English(EN)'
                     },
                     {
@@ -4746,7 +5299,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'no_disposal'
                     },
                     {
-                        'labelEn': 'Yes. Bags',
+                        'labelEn': 'Yes - Bags',
                         'labels': [
                             {
                                 'label': '',
@@ -4757,7 +5310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes. Bags',
+                                'label': 'Yes - Bags',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4768,7 +5321,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'yes_bags'
                     },
                     {
-                        'labelEn': 'Yes. Bins',
+                        'labelEn': 'Yes - Bins',
                         'labels': [
                             {
                                 'label': '',
@@ -4779,7 +5332,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': 'Yes. Bins',
+                                'label': 'Yes - Bins',
                                 'language': 'English(EN)'
                             },
                             {
@@ -4914,6 +5467,28 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
+                        'labelEn': 'Ashes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Ashes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'ashes'
+                    },
+                    {
                         'labelEn': 'Hand washing facilities',
                         'labels': [
                             {
@@ -4934,6 +5509,28 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                             }
                         ],
                         'value': 'hand_washing'
+                    },
+                    {
+                        'labelEn': 'None available',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'None available',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'none_available'
                     },
                     {
                         'labelEn': 'Soap',
@@ -4958,7 +5555,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'soap_material'
                     }
                 ],
-                'hint': "{'English(EN)': ''}",
+                'hint': "{'English(EN)': 'Select all that apply'}",
                 'isFlexField': True,
                 'labelEn': 'What hygiene materials are available for the family?',
                 'labels': [
@@ -4981,7 +5578,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'hygiene_materials_h_f',
                 'required': False,
-                'type': 'SELECT_ONE'
+                'type': 'SELECT_MANY'
             },
             {
                 'associatedWith': 'Household',
@@ -5076,7 +5673,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'If the sheets are in bad state but still usable, count 0.5 (1/2) a piece.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of blankets/sheets.',
+                'labelEn': 'Number of blankets/sheets',
                 'labels': [
                     {
                         'label': '',
@@ -5087,7 +5684,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of blankets/sheets.',
+                        'label': 'Number of blankets/sheets',
                         'language': 'English(EN)'
                     },
                     {
@@ -5105,7 +5702,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'Count the number of 5 litre or more saucepans as 1 piece.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of Cooking pots.',
+                'labelEn': 'Number of Cooking pots',
                 'labels': [
                     {
                         'label': '',
@@ -5116,7 +5713,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of Cooking pots.',
+                        'label': 'Number of Cooking pots',
                         'language': 'English(EN)'
                     },
                     {
@@ -5134,7 +5731,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': 'Count the number of locally-made or imported ploughing tools.'}",
                 'isFlexField': True,
-                'labelEn': 'Number of ploughing tools.',
+                'labelEn': 'Number of ploughing tools',
                 'labels': [
                     {
                         'label': '',
@@ -5145,7 +5742,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Number of ploughing tools.',
+                        'label': 'Number of ploughing tools',
                         'language': 'English(EN)'
                     },
                     {
@@ -5163,7 +5760,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '{\'English(EN)\': "Put \'-1\', if no women is present 1 complete set = 0.5 up ( eg Blouse/t-shirt)and 0.5 down (loincloths/skirts).The clothes of the mother or main woman in the household AND those of the oldest school aged girls in the house should be counted"}',
                 'isFlexField': True,
-                'labelEn': "Number of complete women's clothes.",
+                'labelEn': "Number of complete women's clothes",
                 'labels': [
                     {
                         'label': '',
@@ -5174,7 +5771,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': "Number of complete women's clothes.",
+                        'label': "Number of complete women's clothes",
                         'language': 'English(EN)'
                     },
                     {
@@ -5192,7 +5789,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': '{\'English(EN)\': "Put \'-1\', if there is no child. Take the youngest children of school going age. 0.5 for each upper piece of clothing and 0.5 for each lower piece of clothing"}',
                 'isFlexField': True,
-                'labelEn': "Number of complete children's clothes.",
+                'labelEn': "Number of complete children's clothes",
                 'labels': [
                     {
                         'label': '',
@@ -5203,7 +5800,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': "Number of complete children's clothes.",
+                        'label': "Number of complete children's clothes",
                         'language': 'English(EN)'
                     },
                     {
@@ -5242,7 +5839,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'score_NFI_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -6194,6 +6791,145 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
+                'labelEn': 'It is okay when a child gets hit at school by his teacher for misbehaving.',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'It is okay when a child gets hit at school by his teacher for misbehaving.',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'ok_teacher_hit_child_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'Always',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Always',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_always'
+                    },
+                    {
+                        'labelEn': 'Most of the time',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Most of the time',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_mostly'
+                    },
+                    {
+                        'labelEn': 'Never',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Never',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_never'
+                    },
+                    {
+                        'labelEn': 'Rarely',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Rarely',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_rarely'
+                    },
+                    {
+                        'labelEn': 'Sometimes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Sometimes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': 'level_sometimes'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
                 'labelEn': 'If someone hurts my child or something bad happens to them, it is not their fault.',
                 'labels': [
                     {
@@ -6951,7 +7687,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'cereals_tuber_score_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -6980,7 +7716,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'FCS_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -7543,7 +8279,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                'labelEn': 'Pulses, nuts & seeds: beans, chickpeas, lentils',
                 'labels': [
                     {
                         'label': '',
@@ -7554,7 +8290,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Pulses, nuts & seeds : beans, chickpeas, lentils',
+                        'label': 'Pulses, nuts & seeds: beans, chickpeas, lentils',
                         'language': 'English(EN)'
                     },
                     {
@@ -7885,7 +8621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'hdds_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -8728,7 +9464,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': 'Is there any drug addict in the family?',
+                'labelEn': 'Are there any drug addicts in the family?',
                 'labels': [
                     {
                         'label': '',
@@ -8739,7 +9475,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': 'Is there any drug addict in the family?',
+                        'label': 'Are there any drug addicts in the family?',
                         'language': 'English(EN)'
                     },
                     {
@@ -8755,7 +9491,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -8766,7 +9502,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8777,7 +9513,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -8788,7 +9524,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8799,7 +9535,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -8810,7 +9546,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8821,7 +9557,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -8832,7 +9568,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8845,7 +9581,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                'labelEn': 'Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
                 'labels': [
                     {
                         'label': '',
@@ -8856,7 +9592,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.1 Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
+                        'label': 'Sold household assets/goods (jewelry, phone, furniture, electro domestics, etc)',
                         'language': 'English(EN)'
                     },
                     {
@@ -8872,7 +9608,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -8883,7 +9619,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8894,7 +9630,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -8905,7 +9641,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8916,7 +9652,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -8927,7 +9663,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8938,7 +9674,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -8949,7 +9685,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -8962,7 +9698,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.2 Purchased food on credit or borrowed food',
+                'labelEn': 'Purchased food on credit or borrowed food',
                 'labels': [
                     {
                         'label': '',
@@ -8973,7 +9709,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.2 Purchased food on credit or borrowed food',
+                        'label': 'Purchased food on credit or borrowed food',
                         'language': 'English(EN)'
                     },
                     {
@@ -8989,7 +9725,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9000,7 +9736,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9011,7 +9747,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9022,7 +9758,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9033,7 +9769,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9044,7 +9780,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9055,7 +9791,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9066,7 +9802,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9079,7 +9815,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.3 Reduced essential non food expenditure such as education/health',
+                'labelEn': 'Reduced essential non food expenditure such as education/health',
                 'labels': [
                     {
                         'label': '',
@@ -9090,7 +9826,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.3 Reduced essential non food expenditure such as education/health',
+                        'label': 'Reduced essential non food expenditure such as education/health',
                         'language': 'English(EN)'
                     },
                     {
@@ -9106,7 +9842,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9117,7 +9853,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9128,7 +9864,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9139,7 +9875,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9150,7 +9886,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9161,7 +9897,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9172,7 +9908,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9183,7 +9919,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9196,7 +9932,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.4 Spent Savings',
+                'labelEn': 'Spent Savings',
                 'labels': [
                     {
                         'label': '',
@@ -9207,7 +9943,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.4 Spent Savings',
+                        'label': 'Spent Savings',
                         'language': 'English(EN)'
                     },
                     {
@@ -9223,7 +9959,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9234,7 +9970,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9245,7 +9981,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9256,7 +9992,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9267,7 +10003,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9278,7 +10014,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9289,7 +10025,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9300,7 +10036,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9313,7 +10049,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.5 Borrowed Money',
+                'labelEn': 'Borrowed Money',
                 'labels': [
                     {
                         'label': '',
@@ -9324,7 +10060,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.5 Borrowed Money',
+                        'label': 'Borrowed Money',
                         'language': 'English(EN)'
                     },
                     {
@@ -9340,7 +10076,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9351,7 +10087,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9362,7 +10098,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9373,7 +10109,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9384,7 +10120,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9395,7 +10131,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9406,7 +10142,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9417,7 +10153,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9430,7 +10166,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                'labelEn': 'Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
                 'labels': [
                     {
                         'label': '',
@@ -9441,7 +10177,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.6 Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
+                        'label': 'Sold productive assets or means of transport (sewing machine, wheelbarrow, bicycle, car, etc.)',
                         'language': 'English(EN)'
                     },
                     {
@@ -9457,7 +10193,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9468,7 +10204,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9479,7 +10215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9490,7 +10226,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9501,7 +10237,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9512,7 +10248,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9523,7 +10259,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9534,7 +10270,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9547,7 +10283,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                'labelEn': 'Consumed seed stocks that were to be held/saved for next season',
                 'labels': [
                     {
                         'label': '',
@@ -9558,7 +10294,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.7 Consumed seed stocks that were to be held/saved for next season',
+                        'label': 'Consumed seed stocks that were to be held/saved for next season',
                         'language': 'English(EN)'
                     },
                     {
@@ -9574,7 +10310,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9585,7 +10321,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9596,7 +10332,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9607,7 +10343,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9618,7 +10354,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9629,7 +10365,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9640,7 +10376,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9651,7 +10387,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9664,7 +10400,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.8 Withdrew children from school',
+                'labelEn': 'Withdrew children from school',
                 'labels': [
                     {
                         'label': '',
@@ -9675,7 +10411,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.8 Withdrew children from school',
+                        'label': 'Withdrew children from school',
                         'language': 'English(EN)'
                     },
                     {
@@ -9691,7 +10427,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9702,7 +10438,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9713,7 +10449,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9724,7 +10460,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9735,7 +10471,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9746,7 +10482,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9757,7 +10493,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9768,7 +10504,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9781,7 +10517,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.9 Sold house or land',
+                'labelEn': 'Sold house or land',
                 'labels': [
                     {
                         'label': '',
@@ -9792,7 +10528,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.9 Sold house or land',
+                        'label': 'Sold house or land',
                         'language': 'English(EN)'
                     },
                     {
@@ -9808,7 +10544,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9819,7 +10555,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9830,7 +10566,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9841,7 +10577,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9852,7 +10588,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9863,7 +10599,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9874,7 +10610,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -9885,7 +10621,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9898,7 +10634,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                'labelEn': 'Changed accommodation location or type in order to reduce rental expenditure',
                 'labels': [
                     {
                         'label': '',
@@ -9909,7 +10645,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.10 Changed accommodation location or type in order to reduce rental expenditure',
+                        'label': 'Changed accommodation location or type in order to reduce rental expenditure',
                         'language': 'English(EN)'
                     },
                     {
@@ -9925,7 +10661,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -9936,7 +10672,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9947,7 +10683,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -9958,7 +10694,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9969,7 +10705,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -9980,7 +10716,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -9991,7 +10727,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10002,7 +10738,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10015,7 +10751,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                'labelEn': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
                 'labels': [
                     {
                         'label': '',
@@ -10026,7 +10762,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.11 Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
+                        'label': 'Adult members of the household accepted socially degrading, exploitative, high risk or illegal temporary jobs',
                         'language': 'English(EN)'
                     },
                     {
@@ -10042,7 +10778,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10053,7 +10789,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10064,7 +10800,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10075,7 +10811,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10086,7 +10822,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10097,7 +10833,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10108,7 +10844,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10119,7 +10855,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10132,7 +10868,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.12 Sent children (under 18) family members to beg',
+                'labelEn': 'Sent children (under 18) family members to beg',
                 'labels': [
                     {
                         'label': '',
@@ -10143,7 +10879,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.12 Sent children (under 18) family members to beg',
+                        'label': 'Sent children (under 18) family members to beg',
                         'language': 'English(EN)'
                     },
                     {
@@ -10159,7 +10895,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10170,7 +10906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10181,7 +10917,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10192,7 +10928,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10203,7 +10939,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10214,7 +10950,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10225,7 +10961,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10236,7 +10972,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10249,7 +10985,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.13 Sent adult family members to beg',
+                'labelEn': 'Sent adult family members to beg',
                 'labels': [
                     {
                         'label': '',
@@ -10260,7 +10996,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.13 Sent adult family members to beg',
+                        'label': 'Sent adult family members to beg',
                         'language': 'English(EN)'
                     },
                     {
@@ -10276,7 +11012,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10287,7 +11023,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10298,7 +11034,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10309,7 +11045,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10320,7 +11056,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10331,7 +11067,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10342,7 +11078,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10353,7 +11089,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10366,7 +11102,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.14 Sold last female animals',
+                'labelEn': 'Sold last female animals',
                 'labels': [
                     {
                         'label': '',
@@ -10377,7 +11113,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.14 Sold last female animals',
+                        'label': 'Sold last female animals',
                         'language': 'English(EN)'
                     },
                     {
@@ -10393,7 +11129,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': '1p. No',
+                        'labelEn': 'No',
                         'labels': [
                             {
                                 'label': '',
@@ -10404,7 +11140,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '1p. No',
+                                'label': 'No',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10415,7 +11151,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '1'
                     },
                     {
-                        'labelEn': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
                         'labels': [
                             {
                                 'label': '',
@@ -10426,7 +11162,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '2p. No, because I have already engaged in this activity and cannot continue to do it.',
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10437,7 +11173,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '2'
                     },
                     {
-                        'labelEn': '3p. Yes',
+                        'labelEn': 'Yes',
                         'labels': [
                             {
                                 'label': '',
@@ -10448,7 +11184,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '3p. Yes',
+                                'label': 'Yes',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10459,7 +11195,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': '3'
                     },
                     {
-                        'labelEn': '4p. Not Applicable',
+                        'labelEn': 'Not Applicable',
                         'labels': [
                             {
                                 'label': '',
@@ -10470,7 +11206,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                                 'language': 'French(FR)'
                             },
                             {
-                                'label': '4p. Not Applicable',
+                                'label': 'Not Applicable',
                                 'language': 'English(EN)'
                             },
                             {
@@ -10483,7 +11219,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1.15 Married Child for financial purposes',
+                'labelEn': 'Married Child for financial purposes',
                 'labels': [
                     {
                         'label': '',
@@ -10494,7 +11230,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1.15 Married Child for financial purposes',
+                        'label': 'Married Child for financial purposes',
                         'language': 'English(EN)'
                     },
                     {
@@ -10503,6 +11239,240 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                     }
                 ],
                 'name': 'coping_strategy_child_marriage_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': 'Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Consumed wild food',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Consommé des aliments sauvages',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Consumed wild food',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_wild_food_h_f',
+                'required': False,
+                'type': 'SELECT_ONE'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                    {
+                        'labelEn': 'No',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '1'
+                    },
+                    {
+                        'labelEn': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'No, because I have already engaged in this activity and cannot continue to do it.',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '2'
+                    },
+                    {
+                        'labelEn': 'Yes',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Yes',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '3'
+                    },
+                    {
+                        'labelEn': 'Not Applicable',
+                        'labels': [
+                            {
+                                'label': '',
+                                'language': 'Arabic(AR)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'French(FR)'
+                            },
+                            {
+                                'label': 'Not Applicable',
+                                'language': 'English(EN)'
+                            },
+                            {
+                                'label': '',
+                                'language': 'Spanish(ES)'
+                            }
+                        ],
+                        'value': '4'
+                    }
+                ],
+                'hint': "{'English(EN)': ''}",
+                'isFlexField': True,
+                'labelEn': 'Spent one or more days without eating',
+                'labels': [
+                    {
+                        'label': '',
+                        'language': 'Arabic(AR)'
+                    },
+                    {
+                        'label': 'Passé un ou plusieurs jours sans manger',
+                        'language': 'French(FR)'
+                    },
+                    {
+                        'label': 'Spent one or more days without eating',
+                        'language': 'English(EN)'
+                    },
+                    {
+                        'label': '',
+                        'language': 'Spanish(ES)'
+                    }
+                ],
+                'name': 'coping_strategy_days_eating_h_f',
                 'required': False,
                 'type': 'SELECT_ONE'
             },
@@ -10541,7 +11511,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. Rely on less preferred and less expensive foods',
+                'labelEn': 'Rely on less preferred and less expensive foods',
                 'labels': [
                     {
                         'label': '',
@@ -10552,7 +11522,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. Rely on less preferred and less expensive foods',
+                        'label': 'Rely on less preferred and less expensive foods',
                         'language': 'English(EN)'
                     },
                     {
@@ -10570,7 +11540,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. Borrow food or rely on help from friends or relatives',
+                'labelEn': 'Borrow food or rely on help from friends or relatives',
                 'labels': [
                     {
                         'label': '',
@@ -10581,7 +11551,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. Borrow food or rely on help from friends or relatives',
+                        'label': 'Borrow food or rely on help from friends or relatives',
                         'language': 'English(EN)'
                     },
                     {
@@ -10599,7 +11569,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. Limit portion size at mealtime',
+                'labelEn': 'Limit portion size at mealtime',
                 'labels': [
                     {
                         'label': '',
@@ -10610,7 +11580,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. Limit portion size at mealtime',
+                        'label': 'Limit portion size at mealtime',
                         'language': 'English(EN)'
                     },
                     {
@@ -10628,7 +11598,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. Restrict consumption by adults in order for small children to eat',
+                'labelEn': 'Restrict consumption by adults in order for small children to eat',
                 'labels': [
                     {
                         'label': '',
@@ -10639,7 +11609,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. Restrict consumption by adults in order for small children to eat',
+                        'label': 'Restrict consumption by adults in order for small children to eat',
                         'language': 'English(EN)'
                     },
                     {
@@ -10657,7 +11627,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. Reduce number of meals eaten in a day',
+                'labelEn': 'Reduce number of meals eaten in a day',
                 'labels': [
                     {
                         'label': '',
@@ -10668,7 +11638,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. Reduce number of meals eaten in a day',
+                        'label': 'Reduce number of meals eaten in a day',
                         'language': 'English(EN)'
                     },
                     {
@@ -10707,7 +11677,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'RCSI_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -11200,7 +12170,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_expense_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -11229,7 +12199,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_expense_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -11237,7 +12207,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '1. Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
+                'labelEn': 'Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
                 'labels': [
                     {
                         'label': '',
@@ -11248,7 +12218,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '1. Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
+                        'label': 'Paid job with an organization/businesses (salaries, wages, bonuses, allowances, commissions, gratuities)',
                         'language': 'English(EN)'
                     },
                     {
@@ -11405,7 +12375,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '2. Profit from rental property you own',
+                'labelEn': 'Profit from rental property you own',
                 'labels': [
                     {
                         'label': '',
@@ -11416,7 +12386,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '2. Profit from rental property you own',
+                        'label': 'Profit from rental property you own',
                         'language': 'English(EN)'
                     },
                     {
@@ -11573,7 +12543,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '3. Domestic service job in someone else’s house',
+                'labelEn': 'Domestic service job in someone else’s house',
                 'labels': [
                     {
                         'label': '',
@@ -11584,7 +12554,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '3. Domestic service job in someone else’s house',
+                        'label': 'Domestic service job in someone else’s house',
                         'language': 'English(EN)'
                     },
                     {
@@ -11741,7 +12711,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '4. Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
+                'labelEn': 'Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
                 'labels': [
                     {
                         'label': '',
@@ -11752,7 +12722,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '4. Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
+                        'label': 'Payment for self-employment (selling or making things, doing repairs, providing service, etc.)',
                         'language': 'English(EN)'
                     },
                     {
@@ -11909,7 +12879,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '5. Selling of your own agricultural production',
+                'labelEn': 'Selling of your own agricultural production',
                 'labels': [
                     {
                         'label': '',
@@ -11920,7 +12890,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '5. Selling of your own agricultural production',
+                        'label': 'Selling of your own agricultural production',
                         'language': 'English(EN)'
                     },
                     {
@@ -12077,7 +13047,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '6. End of service payment',
+                'labelEn': 'End of service payment',
                 'labels': [
                     {
                         'label': '',
@@ -12088,7 +13058,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '6. End of service payment',
+                        'label': 'End of service payment',
                         'language': 'English(EN)'
                     },
                     {
@@ -12245,7 +13215,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '7. Remittances from family (abroad or employed elsewhere)',
+                'labelEn': 'Remittances from family (abroad or employed elsewhere)',
                 'labels': [
                     {
                         'label': '',
@@ -12256,7 +13226,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '7. Remittances from family (abroad or employed elsewhere)',
+                        'label': 'Remittances from family (abroad or employed elsewhere)',
                         'language': 'English(EN)'
                     },
                     {
@@ -12413,7 +13383,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '8. Gift from family/friend/other person',
+                'labelEn': 'Gift from family/friend/other person',
                 'labels': [
                     {
                         'label': '',
@@ -12424,7 +13394,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '8. Gift from family/friend/other person',
+                        'label': 'Gift from family/friend/other person',
                         'language': 'English(EN)'
                     },
                     {
@@ -12581,7 +13551,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '9. Micro-credit',
+                'labelEn': 'Micro-credit',
                 'labels': [
                     {
                         'label': '',
@@ -12592,7 +13562,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '9. Micro-credit',
+                        'label': 'Micro-credit',
                         'language': 'English(EN)'
                     },
                     {
@@ -12749,7 +13719,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '10. UNICEF child cash grant',
+                'labelEn': 'UNICEF child cash grant',
                 'labels': [
                     {
                         'label': '',
@@ -12760,7 +13730,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '10. UNICEF child cash grant',
+                        'label': 'UNICEF child cash grant',
                         'language': 'English(EN)'
                     },
                     {
@@ -12917,7 +13887,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '11. UNHCR cash transfer',
+                'labelEn': 'UNHCR cash transfer',
                 'labels': [
                     {
                         'label': '',
@@ -12928,7 +13898,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '11. UNHCR cash transfer',
+                        'label': 'UNHCR cash transfer',
                         'language': 'English(EN)'
                     },
                     {
@@ -13085,7 +14055,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '12. WFP assistance',
+                'labelEn': 'WFP assistance',
                 'labels': [
                     {
                         'label': '',
@@ -13096,7 +14066,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '12. WFP assistance',
+                        'label': 'WFP assistance',
                         'language': 'English(EN)'
                     },
                     {
@@ -13253,7 +14223,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '13. Cash transfer from an NGO, CBOs , or religious organization',
+                'labelEn': 'Cash transfer from an NGO, CBOs , or religious organization',
                 'labels': [
                     {
                         'label': '',
@@ -13264,7 +14234,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '13. Cash transfer from an NGO, CBOs , or religious organization',
+                        'label': 'Cash transfer from an NGO, CBOs , or religious organization',
                         'language': 'English(EN)'
                     },
                     {
@@ -13421,7 +14391,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '14. Cash transfer from government',
+                'labelEn': 'Cash transfer from government',
                 'labels': [
                     {
                         'label': '',
@@ -13432,7 +14402,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '14. Cash transfer from government',
+                        'label': 'Cash transfer from government',
                         'language': 'English(EN)'
                     },
                     {
@@ -13589,7 +14559,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '15. Loan (family, friend)',
+                'labelEn': 'Loan (family, friend)',
                 'labels': [
                     {
                         'label': '',
@@ -13600,7 +14570,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '15. Loan (family, friend)',
+                        'label': 'Loan (family, friend)',
                         'language': 'English(EN)'
                     },
                     {
@@ -13757,7 +14727,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '16. Loan (bank, other financial institution or organization)',
+                'labelEn': 'Loan (bank, other financial institution or organization)',
                 'labels': [
                     {
                         'label': '',
@@ -13768,7 +14738,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '16. Loan (bank, other financial institution or organization)',
+                        'label': 'Loan (bank, other financial institution or organization)',
                         'language': 'English(EN)'
                     },
                     {
@@ -13925,7 +14895,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '17. Sale of assets (including livestock, land)',
+                'labelEn': 'Sale of assets (including livestock, land)',
                 'labels': [
                     {
                         'label': '',
@@ -13936,7 +14906,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '17. Sale of assets (including livestock, land)',
+                        'label': 'Sale of assets (including livestock, land)',
                         'language': 'English(EN)'
                     },
                     {
@@ -14093,7 +15063,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '18. Income (or goods) from household enterprise (profit or otherwise)',
+                'labelEn': 'Income (or goods) from household enterprise (profit or otherwise)',
                 'labels': [
                     {
                         'label': '',
@@ -14104,7 +15074,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '18. Income (or goods) from household enterprise (profit or otherwise)',
+                        'label': 'Income (or goods) from household enterprise (profit or otherwise)',
                         'language': 'English(EN)'
                     },
                     {
@@ -14261,7 +15231,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'hint': "{'English(EN)': ''}",
                 'isFlexField': True,
-                'labelEn': '19. Any other source?',
+                'labelEn': 'Any other source?',
                 'labels': [
                     {
                         'label': '',
@@ -14272,7 +15242,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'language': 'French(FR)'
                     },
                     {
-                        'label': '19. Any other source?',
+                        'label': 'Any other source?',
                         'language': 'English(EN)'
                     },
                     {
@@ -14479,7 +15449,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'total_inc_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'DECIMAL'
             },
             {
                 'associatedWith': 'Household',
@@ -14508,7 +15478,7 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 ],
                 'name': 'round_total_income_h_f',
                 'required': False,
-                'type': 'STRING'
+                'type': 'INTEGER'
             },
             {
                 'associatedWith': 'Household',
@@ -20466,164 +21436,184 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'associatedWith': 'Household',
                 'choices': [
                     {
-                        'labelEn': 'ADB Unit of Account',
+                        'labelEn': 'Afghan afghani',
                         'labels': [
                             {
-                                'label': 'ADB Unit of Account',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XUA'
-                    },
-                    {
-                        'labelEn': 'Afghani',
-                        'labels': [
-                            {
-                                'label': 'Afghani',
+                                'label': 'Afghan afghani',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AFN'
                     },
                     {
-                        'labelEn': 'Algerian Dinar',
+                        'labelEn': 'Albanian lek',
                         'labels': [
                             {
-                                'label': 'Algerian Dinar',
+                                'label': 'Albanian lek',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ALL'
+                    },
+                    {
+                        'labelEn': 'Algerian dinar',
+                        'labels': [
+                            {
+                                'label': 'Algerian dinar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DZD'
                     },
                     {
-                        'labelEn': 'Argentine Peso',
+                        'labelEn': 'Angolan kwanza',
                         'labels': [
                             {
-                                'label': 'Argentine Peso',
+                                'label': 'Angolan kwanza',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AOA'
+                    },
+                    {
+                        'labelEn': 'Argentine peso',
+                        'labels': [
+                            {
+                                'label': 'Argentine peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ARS'
                     },
                     {
-                        'labelEn': 'Armenian Dram',
+                        'labelEn': 'Armenian dram',
                         'labels': [
                             {
-                                'label': 'Armenian Dram',
+                                'label': 'Armenian dram',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AMD'
                     },
                     {
-                        'labelEn': 'Aruban Florin',
+                        'labelEn': 'Aruban florin',
                         'labels': [
                             {
-                                'label': 'Aruban Florin',
+                                'label': 'Aruban florin',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AWG'
                     },
                     {
-                        'labelEn': 'Australian Dollar',
+                        'labelEn': 'Australian dollar',
                         'labels': [
                             {
-                                'label': 'Australian Dollar',
+                                'label': 'Australian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AUD'
                     },
                     {
-                        'labelEn': 'Azerbaijanian Manat',
+                        'labelEn': 'Azerbaijani manat',
                         'labels': [
                             {
-                                'label': 'Azerbaijanian Manat',
+                                'label': 'Azerbaijani manat',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'AZN'
                     },
                     {
-                        'labelEn': 'Bahamian Dollar',
+                        'labelEn': 'Bahamian dollar',
                         'labels': [
                             {
-                                'label': 'Bahamian Dollar',
+                                'label': 'Bahamian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BSD'
                     },
                     {
-                        'labelEn': 'Bahraini Dinar',
+                        'labelEn': 'Bahraini dinar',
                         'labels': [
                             {
-                                'label': 'Bahraini Dinar',
+                                'label': 'Bahraini dinar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BHD'
                     },
                     {
-                        'labelEn': 'Baht',
+                        'labelEn': 'Bangladeshi taka',
                         'labels': [
                             {
-                                'label': 'Baht',
+                                'label': 'Bangladeshi taka',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'THB'
+                        'value': 'BDT'
                     },
                     {
-                        'labelEn': 'Balboa',
+                        'labelEn': 'Barbados dollar',
                         'labels': [
                             {
-                                'label': 'Balboa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PAB'
-                    },
-                    {
-                        'labelEn': 'Barbados Dollar',
-                        'labels': [
-                            {
-                                'label': 'Barbados Dollar',
+                                'label': 'Barbados dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BBD'
                     },
                     {
-                        'labelEn': 'Belarusian Ruble',
+                        'labelEn': 'Belarusian ruble',
                         'labels': [
                             {
-                                'label': 'Belarusian Ruble',
+                                'label': 'Belarusian ruble',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BYN'
                     },
                     {
-                        'labelEn': 'Belize Dollar',
+                        'labelEn': 'Belize dollar',
                         'labels': [
                             {
-                                'label': 'Belize Dollar',
+                                'label': 'Belize dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BZD'
                     },
                     {
-                        'labelEn': 'Bermudian Dollar',
+                        'labelEn': 'Bermudian dollar',
                         'labels': [
                             {
-                                'label': 'Bermudian Dollar',
+                                'label': 'Bermudian dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BMD'
+                    },
+                    {
+                        'labelEn': 'Bhutanese ngultrum',
+                        'labels': [
+                            {
+                                'label': 'Bhutanese ngultrum',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BTN'
+                    },
+                    {
+                        'labelEn': 'Bolivian Mvdol (funds code)',
+                        'labels': [
+                            {
+                                'label': 'Bolivian Mvdol (funds code)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BOV'
                     },
                     {
                         'labelEn': 'Boliviano',
@@ -20636,360 +21626,300 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'BOB'
                     },
                     {
-                        'labelEn': 'Bolívar',
+                        'labelEn': 'Bosnia and Herzegovina convertible mark',
                         'labels': [
                             {
-                                'label': 'Bolívar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VEF'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Composite Unit (EURCO)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Composite Unit (EURCO)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBA'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Monetary Unit (E.M.U.-6)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Monetary Unit (E.M.U.-6)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBB'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Unit of Account 17 (E.U.A.-17)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Unit of Account 17 (E.U.A.-17)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBD'
-                    },
-                    {
-                        'labelEn': 'Bond Markets Unit European Unit of Account 9 (E.U.A.-9)',
-                        'labels': [
-                            {
-                                'label': 'Bond Markets Unit European Unit of Account 9 (E.U.A.-9)',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XBC'
-                    },
-                    {
-                        'labelEn': 'Brazilian Real',
-                        'labels': [
-                            {
-                                'label': 'Brazilian Real',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BRL'
-                    },
-                    {
-                        'labelEn': 'Brunei Dollar',
-                        'labels': [
-                            {
-                                'label': 'Brunei Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BND'
-                    },
-                    {
-                        'labelEn': 'Bulgarian Lev',
-                        'labels': [
-                            {
-                                'label': 'Bulgarian Lev',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BGN'
-                    },
-                    {
-                        'labelEn': 'Burundi Franc',
-                        'labels': [
-                            {
-                                'label': 'Burundi Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BIF'
-                    },
-                    {
-                        'labelEn': 'CFA Franc BCEAO',
-                        'labels': [
-                            {
-                                'label': 'CFA Franc BCEAO',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XOF'
-                    },
-                    {
-                        'labelEn': 'CFA Franc BEAC',
-                        'labels': [
-                            {
-                                'label': 'CFA Franc BEAC',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAF'
-                    },
-                    {
-                        'labelEn': 'CFP Franc',
-                        'labels': [
-                            {
-                                'label': 'CFP Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPF'
-                    },
-                    {
-                        'labelEn': 'Cabo Verde Escudo',
-                        'labels': [
-                            {
-                                'label': 'Cabo Verde Escudo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CVE'
-                    },
-                    {
-                        'labelEn': 'Canadian Dollar',
-                        'labels': [
-                            {
-                                'label': 'Canadian Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CAD'
-                    },
-                    {
-                        'labelEn': 'Cayman Islands Dollar',
-                        'labels': [
-                            {
-                                'label': 'Cayman Islands Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KYD'
-                    },
-                    {
-                        'labelEn': 'Chilean Peso',
-                        'labels': [
-                            {
-                                'label': 'Chilean Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CLP'
-                    },
-                    {
-                        'labelEn': 'Codes specifically reserved for testing purposes',
-                        'labels': [
-                            {
-                                'label': 'Codes specifically reserved for testing purposes',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XTS'
-                    },
-                    {
-                        'labelEn': 'Colombian Peso',
-                        'labels': [
-                            {
-                                'label': 'Colombian Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'COP'
-                    },
-                    {
-                        'labelEn': 'Comoro Franc',
-                        'labels': [
-                            {
-                                'label': 'Comoro Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KMF'
-                    },
-                    {
-                        'labelEn': 'Congolese Franc',
-                        'labels': [
-                            {
-                                'label': 'Congolese Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CDF'
-                    },
-                    {
-                        'labelEn': 'Convertible Mark',
-                        'labels': [
-                            {
-                                'label': 'Convertible Mark',
+                                'label': 'Bosnia and Herzegovina convertible mark',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'BAM'
                     },
                     {
-                        'labelEn': 'Cordoba Oro',
+                        'labelEn': 'Botswana pula',
                         'labels': [
                             {
-                                'label': 'Cordoba Oro',
+                                'label': 'Botswana pula',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'NIO'
+                        'value': 'BWP'
                     },
                     {
-                        'labelEn': 'Costa Rican Colon',
+                        'labelEn': 'Brazilian real',
                         'labels': [
                             {
-                                'label': 'Costa Rican Colon',
+                                'label': 'Brazilian real',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BRL'
+                    },
+                    {
+                        'labelEn': 'Brunei dollar',
+                        'labels': [
+                            {
+                                'label': 'Brunei dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BND'
+                    },
+                    {
+                        'labelEn': 'Bulgarian lev',
+                        'labels': [
+                            {
+                                'label': 'Bulgarian lev',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BGN'
+                    },
+                    {
+                        'labelEn': 'Burundian franc',
+                        'labels': [
+                            {
+                                'label': 'Burundian franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BIF'
+                    },
+                    {
+                        'labelEn': 'CFA franc BCEAO',
+                        'labels': [
+                            {
+                                'label': 'CFA franc BCEAO',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XOF'
+                    },
+                    {
+                        'labelEn': 'CFA franc BEAC',
+                        'labels': [
+                            {
+                                'label': 'CFA franc BEAC',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XAF'
+                    },
+                    {
+                        'labelEn': 'CFP franc (franc Pacifique)',
+                        'labels': [
+                            {
+                                'label': 'CFP franc (franc Pacifique)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XPF'
+                    },
+                    {
+                        'labelEn': 'Cambodian riel',
+                        'labels': [
+                            {
+                                'label': 'Cambodian riel',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KHR'
+                    },
+                    {
+                        'labelEn': 'Canadian dollar',
+                        'labels': [
+                            {
+                                'label': 'Canadian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CAD'
+                    },
+                    {
+                        'labelEn': 'Cape Verdean escudo',
+                        'labels': [
+                            {
+                                'label': 'Cape Verdean escudo',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CVE'
+                    },
+                    {
+                        'labelEn': 'Cayman Islands dollar',
+                        'labels': [
+                            {
+                                'label': 'Cayman Islands dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KYD'
+                    },
+                    {
+                        'labelEn': 'Chilean peso',
+                        'labels': [
+                            {
+                                'label': 'Chilean peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CLP'
+                    },
+                    {
+                        'labelEn': 'Chinese yuan',
+                        'labels': [
+                            {
+                                'label': 'Chinese yuan',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CNY'
+                    },
+                    {
+                        'labelEn': 'Colombian peso',
+                        'labels': [
+                            {
+                                'label': 'Colombian peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'COP'
+                    },
+                    {
+                        'labelEn': 'Comoro franc',
+                        'labels': [
+                            {
+                                'label': 'Comoro franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KMF'
+                    },
+                    {
+                        'labelEn': 'Congolese franc',
+                        'labels': [
+                            {
+                                'label': 'Congolese franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CDF'
+                    },
+                    {
+                        'labelEn': 'Costa Rican colon',
+                        'labels': [
+                            {
+                                'label': 'Costa Rican colon',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CRC'
                     },
                     {
-                        'labelEn': 'Cuban Peso',
+                        'labelEn': 'Croatian kuna',
                         'labels': [
                             {
-                                'label': 'Cuban Peso',
+                                'label': 'Croatian kuna',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HRK'
+                    },
+                    {
+                        'labelEn': 'Cuban convertible peso',
+                        'labels': [
+                            {
+                                'label': 'Cuban convertible peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CUC'
+                    },
+                    {
+                        'labelEn': 'Cuban peso',
+                        'labels': [
+                            {
+                                'label': 'Cuban peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CUP'
                     },
                     {
-                        'labelEn': 'Czech Koruna',
+                        'labelEn': 'Czech koruna',
                         'labels': [
                             {
-                                'label': 'Czech Koruna',
+                                'label': 'Czech koruna',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'CZK'
                     },
                     {
-                        'labelEn': 'Dalasi',
+                        'labelEn': 'Danish krone',
                         'labels': [
                             {
-                                'label': 'Dalasi',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GMD'
-                    },
-                    {
-                        'labelEn': 'Danish Krone',
-                        'labels': [
-                            {
-                                'label': 'Danish Krone',
+                                'label': 'Danish krone',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DKK'
                     },
                     {
-                        'labelEn': 'Denar',
+                        'labelEn': 'Djiboutian franc',
                         'labels': [
                             {
-                                'label': 'Denar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MKD'
-                    },
-                    {
-                        'labelEn': 'Djibouti Franc',
-                        'labels': [
-                            {
-                                'label': 'Djibouti Franc',
+                                'label': 'Djiboutian franc',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DJF'
                     },
                     {
-                        'labelEn': 'Dobra',
+                        'labelEn': 'Dominican peso',
                         'labels': [
                             {
-                                'label': 'Dobra',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'STD'
-                    },
-                    {
-                        'labelEn': 'Dominican Peso',
-                        'labels': [
-                            {
-                                'label': 'Dominican Peso',
+                                'label': 'Dominican peso',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'DOP'
                     },
                     {
-                        'labelEn': 'Dong',
+                        'labelEn': 'East Caribbean dollar',
                         'labels': [
                             {
-                                'label': 'Dong',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VND'
-                    },
-                    {
-                        'labelEn': 'East Caribbean Dollar',
-                        'labels': [
-                            {
-                                'label': 'East Caribbean Dollar',
+                                'label': 'East Caribbean dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'XCD'
                     },
                     {
-                        'labelEn': 'Egyptian Pound',
+                        'labelEn': 'Egyptian pound',
                         'labels': [
                             {
-                                'label': 'Egyptian Pound',
+                                'label': 'Egyptian pound',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'EGP'
                     },
                     {
-                        'labelEn': 'El Salvador Colon',
+                        'labelEn': 'Eritrean nakfa',
                         'labels': [
                             {
-                                'label': 'El Salvador Colon',
+                                'label': 'Eritrean nakfa',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SVC'
+                        'value': 'ERN'
                     },
                     {
-                        'labelEn': 'Ethiopian Birr',
+                        'labelEn': 'Ethiopian birr',
                         'labels': [
                             {
-                                'label': 'Ethiopian Birr',
+                                'label': 'Ethiopian birr',
                                 'language': 'English(EN)'
                             }
                         ],
@@ -21006,1164 +21936,1114 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                         'value': 'EUR'
                     },
                     {
-                        'labelEn': 'Falkland Islands Pound',
+                        'labelEn': 'Falkland Islands pound',
                         'labels': [
                             {
-                                'label': 'Falkland Islands Pound',
+                                'label': 'Falkland Islands pound',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'FKP'
                     },
                     {
-                        'labelEn': 'Fiji Dollar',
+                        'labelEn': 'Fiji dollar',
                         'labels': [
                             {
-                                'label': 'Fiji Dollar',
+                                'label': 'Fiji dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'FJD'
                     },
                     {
-                        'labelEn': 'Forint',
+                        'labelEn': 'Gambian dalasi',
                         'labels': [
                             {
-                                'label': 'Forint',
+                                'label': 'Gambian dalasi',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HUF'
+                        'value': 'GMD'
                     },
                     {
-                        'labelEn': 'Ghana Cedi',
+                        'labelEn': 'Georgian lari',
                         'labels': [
                             {
-                                'label': 'Ghana Cedi',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GHS'
-                    },
-                    {
-                        'labelEn': 'Gibraltar Pound',
-                        'labels': [
-                            {
-                                'label': 'Gibraltar Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GIP'
-                    },
-                    {
-                        'labelEn': 'Gold',
-                        'labels': [
-                            {
-                                'label': 'Gold',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAU'
-                    },
-                    {
-                        'labelEn': 'Gourde',
-                        'labels': [
-                            {
-                                'label': 'Gourde',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HTG'
-                    },
-                    {
-                        'labelEn': 'Guarani',
-                        'labels': [
-                            {
-                                'label': 'Guarani',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PYG'
-                    },
-                    {
-                        'labelEn': 'Guinea Franc',
-                        'labels': [
-                            {
-                                'label': 'Guinea Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GNF'
-                    },
-                    {
-                        'labelEn': 'Guyana Dollar',
-                        'labels': [
-                            {
-                                'label': 'Guyana Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GYD'
-                    },
-                    {
-                        'labelEn': 'Hong Kong Dollar',
-                        'labels': [
-                            {
-                                'label': 'Hong Kong Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HKD'
-                    },
-                    {
-                        'labelEn': 'Hryvnia',
-                        'labels': [
-                            {
-                                'label': 'Hryvnia',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UAH'
-                    },
-                    {
-                        'labelEn': 'Iceland Krona',
-                        'labels': [
-                            {
-                                'label': 'Iceland Krona',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ISK'
-                    },
-                    {
-                        'labelEn': 'Indian Rupee',
-                        'labels': [
-                            {
-                                'label': 'Indian Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'INR'
-                    },
-                    {
-                        'labelEn': 'Iranian Rial',
-                        'labels': [
-                            {
-                                'label': 'Iranian Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IRR'
-                    },
-                    {
-                        'labelEn': 'Iraqi Dinar',
-                        'labels': [
-                            {
-                                'label': 'Iraqi Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'IQD'
-                    },
-                    {
-                        'labelEn': 'Jamaican Dollar',
-                        'labels': [
-                            {
-                                'label': 'Jamaican Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JMD'
-                    },
-                    {
-                        'labelEn': 'Jordanian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Jordanian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'JOD'
-                    },
-                    {
-                        'labelEn': 'Kenyan Shilling',
-                        'labels': [
-                            {
-                                'label': 'Kenyan Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KES'
-                    },
-                    {
-                        'labelEn': 'Kina',
-                        'labels': [
-                            {
-                                'label': 'Kina',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PGK'
-                    },
-                    {
-                        'labelEn': 'Kip',
-                        'labels': [
-                            {
-                                'label': 'Kip',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LAK'
-                    },
-                    {
-                        'labelEn': 'Kuna',
-                        'labels': [
-                            {
-                                'label': 'Kuna',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'HRK'
-                    },
-                    {
-                        'labelEn': 'Kuwaiti Dinar',
-                        'labels': [
-                            {
-                                'label': 'Kuwaiti Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KWD'
-                    },
-                    {
-                        'labelEn': 'Kwanza',
-                        'labels': [
-                            {
-                                'label': 'Kwanza',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AOA'
-                    },
-                    {
-                        'labelEn': 'Kyat',
-                        'labels': [
-                            {
-                                'label': 'Kyat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MMK'
-                    },
-                    {
-                        'labelEn': 'Lari',
-                        'labels': [
-                            {
-                                'label': 'Lari',
+                                'label': 'Georgian lari',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'GEL'
                     },
                     {
-                        'labelEn': 'Lebanese Pound',
+                        'labelEn': 'Ghanaian cedi',
                         'labels': [
                             {
-                                'label': 'Lebanese Pound',
+                                'label': 'Ghanaian cedi',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'LBP'
+                        'value': 'GHS'
                     },
                     {
-                        'labelEn': 'Lek',
+                        'labelEn': 'Gibraltar pound',
                         'labels': [
                             {
-                                'label': 'Lek',
+                                'label': 'Gibraltar pound',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'ALL'
+                        'value': 'GIP'
                     },
                     {
-                        'labelEn': 'Lempira',
+                        'labelEn': 'Gold (one troy ounce)',
                         'labels': [
                             {
-                                'label': 'Lempira',
+                                'label': 'Gold (one troy ounce)',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'HNL'
+                        'value': 'XAU'
                     },
                     {
-                        'labelEn': 'Leone',
+                        'labelEn': 'Guatemalan quetzal',
                         'labels': [
                             {
-                                'label': 'Leone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SLL'
-                    },
-                    {
-                        'labelEn': 'Liberian Dollar',
-                        'labels': [
-                            {
-                                'label': 'Liberian Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LRD'
-                    },
-                    {
-                        'labelEn': 'Libyan Dinar',
-                        'labels': [
-                            {
-                                'label': 'Libyan Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LYD'
-                    },
-                    {
-                        'labelEn': 'Lilangeni',
-                        'labels': [
-                            {
-                                'label': 'Lilangeni',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SZL'
-                    },
-                    {
-                        'labelEn': 'Loti',
-                        'labels': [
-                            {
-                                'label': 'Loti',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LSL'
-                    },
-                    {
-                        'labelEn': 'Malagasy Ariary',
-                        'labels': [
-                            {
-                                'label': 'Malagasy Ariary',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MGA'
-                    },
-                    {
-                        'labelEn': 'Malawi Kwacha',
-                        'labels': [
-                            {
-                                'label': 'Malawi Kwacha',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MWK'
-                    },
-                    {
-                        'labelEn': 'Malaysian Ringgit',
-                        'labels': [
-                            {
-                                'label': 'Malaysian Ringgit',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MYR'
-                    },
-                    {
-                        'labelEn': 'Mauritius Rupee',
-                        'labels': [
-                            {
-                                'label': 'Mauritius Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MUR'
-                    },
-                    {
-                        'labelEn': 'Mexican Peso',
-                        'labels': [
-                            {
-                                'label': 'Mexican Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MXN'
-                    },
-                    {
-                        'labelEn': 'Moldovan Leu',
-                        'labels': [
-                            {
-                                'label': 'Moldovan Leu',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MDL'
-                    },
-                    {
-                        'labelEn': 'Moroccan Dirham',
-                        'labels': [
-                            {
-                                'label': 'Moroccan Dirham',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MAD'
-                    },
-                    {
-                        'labelEn': 'Mozambique Metical',
-                        'labels': [
-                            {
-                                'label': 'Mozambique Metical',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MZN'
-                    },
-                    {
-                        'labelEn': 'Naira',
-                        'labels': [
-                            {
-                                'label': 'Naira',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NGN'
-                    },
-                    {
-                        'labelEn': 'Nakfa',
-                        'labels': [
-                            {
-                                'label': 'Nakfa',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ERN'
-                    },
-                    {
-                        'labelEn': 'Namibia Dollar',
-                        'labels': [
-                            {
-                                'label': 'Namibia Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NAD'
-                    },
-                    {
-                        'labelEn': 'Nepalese Rupee',
-                        'labels': [
-                            {
-                                'label': 'Nepalese Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NPR'
-                    },
-                    {
-                        'labelEn': 'Netherlands Antillean Guilder',
-                        'labels': [
-                            {
-                                'label': 'Netherlands Antillean Guilder',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ANG'
-                    },
-                    {
-                        'labelEn': 'New Israeli Sheqel',
-                        'labels': [
-                            {
-                                'label': 'New Israeli Sheqel',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'ILS'
-                    },
-                    {
-                        'labelEn': 'New Taiwan Dollar',
-                        'labels': [
-                            {
-                                'label': 'New Taiwan Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TWD'
-                    },
-                    {
-                        'labelEn': 'New Zealand Dollar',
-                        'labels': [
-                            {
-                                'label': 'New Zealand Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NZD'
-                    },
-                    {
-                        'labelEn': 'Ngultrum',
-                        'labels': [
-                            {
-                                'label': 'Ngultrum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BTN'
-                    },
-                    {
-                        'labelEn': 'North Korean Won',
-                        'labels': [
-                            {
-                                'label': 'North Korean Won',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KPW'
-                    },
-                    {
-                        'labelEn': 'Norwegian Krone',
-                        'labels': [
-                            {
-                                'label': 'Norwegian Krone',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'NOK'
-                    },
-                    {
-                        'labelEn': 'Ouguiya',
-                        'labels': [
-                            {
-                                'label': 'Ouguiya',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MRO'
-                    },
-                    {
-                        'labelEn': 'Pakistan Rupee',
-                        'labels': [
-                            {
-                                'label': 'Pakistan Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PKR'
-                    },
-                    {
-                        'labelEn': 'Palladium',
-                        'labels': [
-                            {
-                                'label': 'Palladium',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPD'
-                    },
-                    {
-                        'labelEn': 'Pataca',
-                        'labels': [
-                            {
-                                'label': 'Pataca',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MOP'
-                    },
-                    {
-                        'labelEn': 'Pa’anga',
-                        'labels': [
-                            {
-                                'label': 'Pa’anga',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TOP'
-                    },
-                    {
-                        'labelEn': 'Peso Convertible',
-                        'labels': [
-                            {
-                                'label': 'Peso Convertible',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CUC'
-                    },
-                    {
-                        'labelEn': 'Peso Uruguayo',
-                        'labels': [
-                            {
-                                'label': 'Peso Uruguayo',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UYU'
-                    },
-                    {
-                        'labelEn': 'Philippine Peso',
-                        'labels': [
-                            {
-                                'label': 'Philippine Peso',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PHP'
-                    },
-                    {
-                        'labelEn': 'Platinum',
-                        'labels': [
-                            {
-                                'label': 'Platinum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XPT'
-                    },
-                    {
-                        'labelEn': 'Pound Sterling',
-                        'labels': [
-                            {
-                                'label': 'Pound Sterling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'GBP'
-                    },
-                    {
-                        'labelEn': 'Pula',
-                        'labels': [
-                            {
-                                'label': 'Pula',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BWP'
-                    },
-                    {
-                        'labelEn': 'Qatari Rial',
-                        'labels': [
-                            {
-                                'label': 'Qatari Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'QAR'
-                    },
-                    {
-                        'labelEn': 'Quetzal',
-                        'labels': [
-                            {
-                                'label': 'Quetzal',
+                                'label': 'Guatemalan quetzal',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'GTQ'
                     },
                     {
-                        'labelEn': 'Rand',
+                        'labelEn': 'Guinean franc',
                         'labels': [
                             {
-                                'label': 'Rand',
+                                'label': 'Guinean franc',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'ZAR'
+                        'value': 'GNF'
                     },
                     {
-                        'labelEn': 'Rial Omani',
+                        'labelEn': 'Guyanese dollar',
                         'labels': [
                             {
-                                'label': 'Rial Omani',
+                                'label': 'Guyanese dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'OMR'
+                        'value': 'GYD'
                     },
                     {
-                        'labelEn': 'Riel',
+                        'labelEn': 'Haitian gourde',
                         'labels': [
                             {
-                                'label': 'Riel',
+                                'label': 'Haitian gourde',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'KHR'
+                        'value': 'HTG'
                     },
                     {
-                        'labelEn': 'Romanian Leu',
+                        'labelEn': 'Honduran lempira',
                         'labels': [
                             {
-                                'label': 'Romanian Leu',
+                                'label': 'Honduran lempira',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RON'
+                        'value': 'HNL'
                     },
                     {
-                        'labelEn': 'Rufiyaa',
+                        'labelEn': 'Hong Kong dollar',
                         'labels': [
                             {
-                                'label': 'Rufiyaa',
+                                'label': 'Hong Kong dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'MVR'
+                        'value': 'HKD'
                     },
                     {
-                        'labelEn': 'Rupiah',
+                        'labelEn': 'Hungarian forint',
                         'labels': [
                             {
-                                'label': 'Rupiah',
+                                'label': 'Hungarian forint',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'HUF'
+                    },
+                    {
+                        'labelEn': 'Icelandic króna',
+                        'labels': [
+                            {
+                                'label': 'Icelandic króna',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ISK'
+                    },
+                    {
+                        'labelEn': 'Indian rupee',
+                        'labels': [
+                            {
+                                'label': 'Indian rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'INR'
+                    },
+                    {
+                        'labelEn': 'Indonesian rupiah',
+                        'labels': [
+                            {
+                                'label': 'Indonesian rupiah',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'IDR'
                     },
                     {
-                        'labelEn': 'Russian Ruble',
+                        'labelEn': 'Iranian rial',
                         'labels': [
                             {
-                                'label': 'Russian Ruble',
+                                'label': 'Iranian rial',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RUB'
+                        'value': 'IRR'
                     },
                     {
-                        'labelEn': 'Rwanda Franc',
+                        'labelEn': 'Iraqi dinar',
                         'labels': [
                             {
-                                'label': 'Rwanda Franc',
+                                'label': 'Iraqi dinar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'RWF'
+                        'value': 'IQD'
                     },
                     {
-                        'labelEn': 'SDR (Special Drawing Right)',
+                        'labelEn': 'Israeli new shekel',
                         'labels': [
                             {
-                                'label': 'SDR (Special Drawing Right)',
+                                'label': 'Israeli new shekel',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'XDR'
+                        'value': 'ILS'
                     },
                     {
-                        'labelEn': 'Saint Helena Pound',
+                        'labelEn': 'Jamaican dollar',
                         'labels': [
                             {
-                                'label': 'Saint Helena Pound',
+                                'label': 'Jamaican dollar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'SHP'
+                        'value': 'JMD'
                     },
                     {
-                        'labelEn': 'Saudi Riyal',
+                        'labelEn': 'Japanese yen',
                         'labels': [
                             {
-                                'label': 'Saudi Riyal',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SAR'
-                    },
-                    {
-                        'labelEn': 'Serbian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Serbian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'RSD'
-                    },
-                    {
-                        'labelEn': 'Seychelles Rupee',
-                        'labels': [
-                            {
-                                'label': 'Seychelles Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SCR'
-                    },
-                    {
-                        'labelEn': 'Silver',
-                        'labels': [
-                            {
-                                'label': 'Silver',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XAG'
-                    },
-                    {
-                        'labelEn': 'Singapore Dollar',
-                        'labels': [
-                            {
-                                'label': 'Singapore Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SGD'
-                    },
-                    {
-                        'labelEn': 'Sol',
-                        'labels': [
-                            {
-                                'label': 'Sol',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PEN'
-                    },
-                    {
-                        'labelEn': 'Solomon Islands Dollar',
-                        'labels': [
-                            {
-                                'label': 'Solomon Islands Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SBD'
-                    },
-                    {
-                        'labelEn': 'Som',
-                        'labels': [
-                            {
-                                'label': 'Som',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KGS'
-                    },
-                    {
-                        'labelEn': 'Somali Shilling',
-                        'labels': [
-                            {
-                                'label': 'Somali Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SOS'
-                    },
-                    {
-                        'labelEn': 'Somoni',
-                        'labels': [
-                            {
-                                'label': 'Somoni',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TJS'
-                    },
-                    {
-                        'labelEn': 'South Sudanese Pound',
-                        'labels': [
-                            {
-                                'label': 'South Sudanese Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SSP'
-                    },
-                    {
-                        'labelEn': 'Sri Lanka Rupee',
-                        'labels': [
-                            {
-                                'label': 'Sri Lanka Rupee',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'LKR'
-                    },
-                    {
-                        'labelEn': 'Sucre',
-                        'labels': [
-                            {
-                                'label': 'Sucre',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XSU'
-                    },
-                    {
-                        'labelEn': 'Sudanese Pound',
-                        'labels': [
-                            {
-                                'label': 'Sudanese Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SDG'
-                    },
-                    {
-                        'labelEn': 'Surinam Dollar',
-                        'labels': [
-                            {
-                                'label': 'Surinam Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SRD'
-                    },
-                    {
-                        'labelEn': 'Swedish Krona',
-                        'labels': [
-                            {
-                                'label': 'Swedish Krona',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SEK'
-                    },
-                    {
-                        'labelEn': 'Swiss Franc',
-                        'labels': [
-                            {
-                                'label': 'Swiss Franc',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'CHF'
-                    },
-                    {
-                        'labelEn': 'Syrian Pound',
-                        'labels': [
-                            {
-                                'label': 'Syrian Pound',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'SYP'
-                    },
-                    {
-                        'labelEn': 'Taka',
-                        'labels': [
-                            {
-                                'label': 'Taka',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'BDT'
-                    },
-                    {
-                        'labelEn': 'Tala',
-                        'labels': [
-                            {
-                                'label': 'Tala',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'WST'
-                    },
-                    {
-                        'labelEn': 'Tanzanian Shilling',
-                        'labels': [
-                            {
-                                'label': 'Tanzanian Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TZS'
-                    },
-                    {
-                        'labelEn': 'Tenge',
-                        'labels': [
-                            {
-                                'label': 'Tenge',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KZT'
-                    },
-                    {
-                        'labelEn': 'The codes assigned for transactions where no currency is involved',
-                        'labels': [
-                            {
-                                'label': 'The codes assigned for transactions where no currency is involved',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'XXX'
-                    },
-                    {
-                        'labelEn': 'Trinidad and Tobago Dollar',
-                        'labels': [
-                            {
-                                'label': 'Trinidad and Tobago Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TTD'
-                    },
-                    {
-                        'labelEn': 'Tugrik',
-                        'labels': [
-                            {
-                                'label': 'Tugrik',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'MNT'
-                    },
-                    {
-                        'labelEn': 'Tunisian Dinar',
-                        'labels': [
-                            {
-                                'label': 'Tunisian Dinar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TND'
-                    },
-                    {
-                        'labelEn': 'Turkish Lira',
-                        'labels': [
-                            {
-                                'label': 'Turkish Lira',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TRY'
-                    },
-                    {
-                        'labelEn': 'Turkmenistan New Manat',
-                        'labels': [
-                            {
-                                'label': 'Turkmenistan New Manat',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'TMT'
-                    },
-                    {
-                        'labelEn': 'UAE Dirham',
-                        'labels': [
-                            {
-                                'label': 'UAE Dirham',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'AED'
-                    },
-                    {
-                        'labelEn': 'US Dollar',
-                        'labels': [
-                            {
-                                'label': 'US Dollar',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'USD'
-                    },
-                    {
-                        'labelEn': 'Uganda Shilling',
-                        'labels': [
-                            {
-                                'label': 'Uganda Shilling',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UGX'
-                    },
-                    {
-                        'labelEn': 'Uzbekistan Sum',
-                        'labels': [
-                            {
-                                'label': 'Uzbekistan Sum',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'UZS'
-                    },
-                    {
-                        'labelEn': 'Vatu',
-                        'labels': [
-                            {
-                                'label': 'Vatu',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'VUV'
-                    },
-                    {
-                        'labelEn': 'Won',
-                        'labels': [
-                            {
-                                'label': 'Won',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'KRW'
-                    },
-                    {
-                        'labelEn': 'Yemeni Rial',
-                        'labels': [
-                            {
-                                'label': 'Yemeni Rial',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'YER'
-                    },
-                    {
-                        'labelEn': 'Yen',
-                        'labels': [
-                            {
-                                'label': 'Yen',
+                                'label': 'Japanese yen',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'JPY'
                     },
                     {
-                        'labelEn': 'Yuan Renminbi',
+                        'labelEn': 'Jordanian dinar',
                         'labels': [
                             {
-                                'label': 'Yuan Renminbi',
+                                'label': 'Jordanian dinar',
                                 'language': 'English(EN)'
                             }
                         ],
-                        'value': 'CNY'
+                        'value': 'JOD'
                     },
                     {
-                        'labelEn': 'Zambian Kwacha',
+                        'labelEn': 'Kazakhstani tenge',
                         'labels': [
                             {
-                                'label': 'Zambian Kwacha',
+                                'label': 'Kazakhstani tenge',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KZT'
+                    },
+                    {
+                        'labelEn': 'Kenyan shilling',
+                        'labels': [
+                            {
+                                'label': 'Kenyan shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KES'
+                    },
+                    {
+                        'labelEn': 'Kuwaiti dinar',
+                        'labels': [
+                            {
+                                'label': 'Kuwaiti dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KWD'
+                    },
+                    {
+                        'labelEn': 'Kyrgyzstani som',
+                        'labels': [
+                            {
+                                'label': 'Kyrgyzstani som',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KGS'
+                    },
+                    {
+                        'labelEn': 'Lao kip',
+                        'labels': [
+                            {
+                                'label': 'Lao kip',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LAK'
+                    },
+                    {
+                        'labelEn': 'Lebanese pound',
+                        'labels': [
+                            {
+                                'label': 'Lebanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LBP'
+                    },
+                    {
+                        'labelEn': 'Lesotho loti',
+                        'labels': [
+                            {
+                                'label': 'Lesotho loti',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LSL'
+                    },
+                    {
+                        'labelEn': 'Liberian dollar',
+                        'labels': [
+                            {
+                                'label': 'Liberian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LRD'
+                    },
+                    {
+                        'labelEn': 'Libyan dinar',
+                        'labels': [
+                            {
+                                'label': 'Libyan dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LYD'
+                    },
+                    {
+                        'labelEn': 'Macanese pataca',
+                        'labels': [
+                            {
+                                'label': 'Macanese pataca',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MOP'
+                    },
+                    {
+                        'labelEn': 'Macedonian denar',
+                        'labels': [
+                            {
+                                'label': 'Macedonian denar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MKD'
+                    },
+                    {
+                        'labelEn': 'Malagasy ariary',
+                        'labels': [
+                            {
+                                'label': 'Malagasy ariary',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MGA'
+                    },
+                    {
+                        'labelEn': 'Malawian kwacha',
+                        'labels': [
+                            {
+                                'label': 'Malawian kwacha',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MWK'
+                    },
+                    {
+                        'labelEn': 'Malaysian ringgit',
+                        'labels': [
+                            {
+                                'label': 'Malaysian ringgit',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MYR'
+                    },
+                    {
+                        'labelEn': 'Maldivian rufiyaa',
+                        'labels': [
+                            {
+                                'label': 'Maldivian rufiyaa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MVR'
+                    },
+                    {
+                        'labelEn': 'Mauritanian ouguiya',
+                        'labels': [
+                            {
+                                'label': 'Mauritanian ouguiya',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MRU'
+                    },
+                    {
+                        'labelEn': 'Mauritian rupee',
+                        'labels': [
+                            {
+                                'label': 'Mauritian rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MUR'
+                    },
+                    {
+                        'labelEn': 'Mexican peso',
+                        'labels': [
+                            {
+                                'label': 'Mexican peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MXN'
+                    },
+                    {
+                        'labelEn': 'Moldovan leu',
+                        'labels': [
+                            {
+                                'label': 'Moldovan leu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MDL'
+                    },
+                    {
+                        'labelEn': 'Mongolian tögrög',
+                        'labels': [
+                            {
+                                'label': 'Mongolian tögrög',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MNT'
+                    },
+                    {
+                        'labelEn': 'Moroccan dirham',
+                        'labels': [
+                            {
+                                'label': 'Moroccan dirham',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MAD'
+                    },
+                    {
+                        'labelEn': 'Mozambican metical',
+                        'labels': [
+                            {
+                                'label': 'Mozambican metical',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MZN'
+                    },
+                    {
+                        'labelEn': 'Myanmar kyat',
+                        'labels': [
+                            {
+                                'label': 'Myanmar kyat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'MMK'
+                    },
+                    {
+                        'labelEn': 'Namibian dollar',
+                        'labels': [
+                            {
+                                'label': 'Namibian dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NAD'
+                    },
+                    {
+                        'labelEn': 'Nepalese rupee',
+                        'labels': [
+                            {
+                                'label': 'Nepalese rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NPR'
+                    },
+                    {
+                        'labelEn': 'Netherlands Antillean guilder',
+                        'labels': [
+                            {
+                                'label': 'Netherlands Antillean guilder',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ANG'
+                    },
+                    {
+                        'labelEn': 'New Taiwan dollar',
+                        'labels': [
+                            {
+                                'label': 'New Taiwan dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TWD'
+                    },
+                    {
+                        'labelEn': 'New Zealand dollar',
+                        'labels': [
+                            {
+                                'label': 'New Zealand dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NZD'
+                    },
+                    {
+                        'labelEn': 'Nicaraguan córdoba',
+                        'labels': [
+                            {
+                                'label': 'Nicaraguan córdoba',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NIO'
+                    },
+                    {
+                        'labelEn': 'Nigerian naira',
+                        'labels': [
+                            {
+                                'label': 'Nigerian naira',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NGN'
+                    },
+                    {
+                        'labelEn': 'North Korean won',
+                        'labels': [
+                            {
+                                'label': 'North Korean won',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KPW'
+                    },
+                    {
+                        'labelEn': 'Norwegian krone',
+                        'labels': [
+                            {
+                                'label': 'Norwegian krone',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOK'
+                    },
+                    {
+                        'labelEn': 'Omani rial',
+                        'labels': [
+                            {
+                                'label': 'Omani rial',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OMR'
+                    },
+                    {
+                        'labelEn': 'Pakistani rupee',
+                        'labels': [
+                            {
+                                'label': 'Pakistani rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PKR'
+                    },
+                    {
+                        'labelEn': 'Panamanian balboa',
+                        'labels': [
+                            {
+                                'label': 'Panamanian balboa',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PAB'
+                    },
+                    {
+                        'labelEn': 'Papua New Guinean kina',
+                        'labels': [
+                            {
+                                'label': 'Papua New Guinean kina',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PGK'
+                    },
+                    {
+                        'labelEn': 'Paraguayan guaraní',
+                        'labels': [
+                            {
+                                'label': 'Paraguayan guaraní',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PYG'
+                    },
+                    {
+                        'labelEn': 'Peruvian sol',
+                        'labels': [
+                            {
+                                'label': 'Peruvian sol',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PEN'
+                    },
+                    {
+                        'labelEn': 'Philippine peso',
+                        'labels': [
+                            {
+                                'label': 'Philippine peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PHP'
+                    },
+                    {
+                        'labelEn': 'Polish złoty',
+                        'labels': [
+                            {
+                                'label': 'Polish złoty',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PLN'
+                    },
+                    {
+                        'labelEn': 'Pound sterling',
+                        'labels': [
+                            {
+                                'label': 'Pound sterling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'GBP'
+                    },
+                    {
+                        'labelEn': 'Qatari riyal',
+                        'labels': [
+                            {
+                                'label': 'Qatari riyal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'QAR'
+                    },
+                    {
+                        'labelEn': 'Romanian leu',
+                        'labels': [
+                            {
+                                'label': 'Romanian leu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RON'
+                    },
+                    {
+                        'labelEn': 'Russian ruble',
+                        'labels': [
+                            {
+                                'label': 'Russian ruble',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RUB'
+                    },
+                    {
+                        'labelEn': 'Rwandan franc',
+                        'labels': [
+                            {
+                                'label': 'Rwandan franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RWF'
+                    },
+                    {
+                        'labelEn': 'Saint Helena pound',
+                        'labels': [
+                            {
+                                'label': 'Saint Helena pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SHP'
+                    },
+                    {
+                        'labelEn': 'Salvadoran colón',
+                        'labels': [
+                            {
+                                'label': 'Salvadoran colón',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SVC'
+                    },
+                    {
+                        'labelEn': 'Samoan tala',
+                        'labels': [
+                            {
+                                'label': 'Samoan tala',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'WST'
+                    },
+                    {
+                        'labelEn': 'Saudi riyal',
+                        'labels': [
+                            {
+                                'label': 'Saudi riyal',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SAR'
+                    },
+                    {
+                        'labelEn': 'Serbian dinar',
+                        'labels': [
+                            {
+                                'label': 'Serbian dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'RSD'
+                    },
+                    {
+                        'labelEn': 'Seychelles rupee',
+                        'labels': [
+                            {
+                                'label': 'Seychelles rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SCR'
+                    },
+                    {
+                        'labelEn': 'Sierra Leonean leone',
+                        'labels': [
+                            {
+                                'label': 'Sierra Leonean leone',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SLL'
+                    },
+                    {
+                        'labelEn': 'Silver (one troy ounce)',
+                        'labels': [
+                            {
+                                'label': 'Silver (one troy ounce)',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'XAG'
+                    },
+                    {
+                        'labelEn': 'Singapore dollar',
+                        'labels': [
+                            {
+                                'label': 'Singapore dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SGD'
+                    },
+                    {
+                        'labelEn': 'Solomon Islands dollar',
+                        'labels': [
+                            {
+                                'label': 'Solomon Islands dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SBD'
+                    },
+                    {
+                        'labelEn': 'Somali shilling',
+                        'labels': [
+                            {
+                                'label': 'Somali shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SOS'
+                    },
+                    {
+                        'labelEn': 'South African rand',
+                        'labels': [
+                            {
+                                'label': 'South African rand',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ZAR'
+                    },
+                    {
+                        'labelEn': 'South Korean won',
+                        'labels': [
+                            {
+                                'label': 'South Korean won',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'KRW'
+                    },
+                    {
+                        'labelEn': 'South Sudanese pound',
+                        'labels': [
+                            {
+                                'label': 'South Sudanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SSP'
+                    },
+                    {
+                        'labelEn': 'Sri Lankan rupee',
+                        'labels': [
+                            {
+                                'label': 'Sri Lankan rupee',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'LKR'
+                    },
+                    {
+                        'labelEn': 'Sudanese pound',
+                        'labels': [
+                            {
+                                'label': 'Sudanese pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SDG'
+                    },
+                    {
+                        'labelEn': 'Surinamese dollar',
+                        'labels': [
+                            {
+                                'label': 'Surinamese dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SRD'
+                    },
+                    {
+                        'labelEn': 'Swazi lilangeni',
+                        'labels': [
+                            {
+                                'label': 'Swazi lilangeni',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SZL'
+                    },
+                    {
+                        'labelEn': 'Swedish krona/kronor',
+                        'labels': [
+                            {
+                                'label': 'Swedish krona/kronor',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SEK'
+                    },
+                    {
+                        'labelEn': 'Swiss franc',
+                        'labels': [
+                            {
+                                'label': 'Swiss franc',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'CHF'
+                    },
+                    {
+                        'labelEn': 'Syrian pound',
+                        'labels': [
+                            {
+                                'label': 'Syrian pound',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SYP'
+                    },
+                    {
+                        'labelEn': 'São Tomé and Príncipe dobra',
+                        'labels': [
+                            {
+                                'label': 'São Tomé and Príncipe dobra',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'STN'
+                    },
+                    {
+                        'labelEn': 'Tajikistani somoni',
+                        'labels': [
+                            {
+                                'label': 'Tajikistani somoni',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TJS'
+                    },
+                    {
+                        'labelEn': 'Tanzanian shilling',
+                        'labels': [
+                            {
+                                'label': 'Tanzanian shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TZS'
+                    },
+                    {
+                        'labelEn': 'Thai baht',
+                        'labels': [
+                            {
+                                'label': 'Thai baht',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'THB'
+                    },
+                    {
+                        'labelEn': 'Tongan paʻanga',
+                        'labels': [
+                            {
+                                'label': 'Tongan paʻanga',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TOP'
+                    },
+                    {
+                        'labelEn': 'Trinidad and Tobago dollar',
+                        'labels': [
+                            {
+                                'label': 'Trinidad and Tobago dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TTD'
+                    },
+                    {
+                        'labelEn': 'Tunisian dinar',
+                        'labels': [
+                            {
+                                'label': 'Tunisian dinar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TND'
+                    },
+                    {
+                        'labelEn': 'Turkish lira',
+                        'labels': [
+                            {
+                                'label': 'Turkish lira',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TRY'
+                    },
+                    {
+                        'labelEn': 'Turkmenistan manat',
+                        'labels': [
+                            {
+                                'label': 'Turkmenistan manat',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'TMT'
+                    },
+                    {
+                        'labelEn': 'Ugandan shilling',
+                        'labels': [
+                            {
+                                'label': 'Ugandan shilling',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UGX'
+                    },
+                    {
+                        'labelEn': 'Ukrainian hryvnia',
+                        'labels': [
+                            {
+                                'label': 'Ukrainian hryvnia',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UAH'
+                    },
+                    {
+                        'labelEn': 'Unidad previsional[14]',
+                        'labels': [
+                            {
+                                'label': 'Unidad previsional[14]',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UYW'
+                    },
+                    {
+                        'labelEn': 'United Arab Emirates dirham',
+                        'labels': [
+                            {
+                                'label': 'United Arab Emirates dirham',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'AED'
+                    },
+                    {
+                        'labelEn': 'United States dollar',
+                        'labels': [
+                            {
+                                'label': 'United States dollar',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'USD'
+                    },
+                    {
+                        'labelEn': 'Uruguayan peso',
+                        'labels': [
+                            {
+                                'label': 'Uruguayan peso',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UYU'
+                    },
+                    {
+                        'labelEn': 'Uzbekistan som',
+                        'labels': [
+                            {
+                                'label': 'Uzbekistan som',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UZS'
+                    },
+                    {
+                        'labelEn': 'Vanuatu vatu',
+                        'labels': [
+                            {
+                                'label': 'Vanuatu vatu',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VUV'
+                    },
+                    {
+                        'labelEn': 'Venezuelan bolívar soberano',
+                        'labels': [
+                            {
+                                'label': 'Venezuelan bolívar soberano',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VES'
+                    },
+                    {
+                        'labelEn': 'Vietnamese đồng',
+                        'labels': [
+                            {
+                                'label': 'Vietnamese đồng',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'VND'
+                    },
+                    {
+                        'labelEn': 'Yemeni rial',
+                        'labels': [
+                            {
+                                'label': 'Yemeni rial',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'YER'
+                    },
+                    {
+                        'labelEn': 'Zambian kwacha',
+                        'labels': [
+                            {
+                                'label': 'Zambian kwacha',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ZMW'
                     },
                     {
-                        'labelEn': 'Zimbabwe Dollar',
+                        'labelEn': 'Zimbabwean dollar',
                         'labels': [
                             {
-                                'label': 'Zimbabwe Dollar',
+                                'label': 'Zimbabwean dollar',
                                 'language': 'English(EN)'
                             }
                         ],
                         'value': 'ZWL'
-                    },
-                    {
-                        'labelEn': 'Zloty',
-                        'labels': [
-                            {
-                                'label': 'Zloty',
-                                'language': 'English(EN)'
-                            }
-                        ],
-                        'value': 'PLN'
                     }
                 ],
                 'hint': '',
@@ -43567,6 +44447,53 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'first_registration_date',
                 'required': True,
                 'type': 'DATE'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'Alternate collector',
+                        'labels': [
+                            {
+                                'label': 'Alternate collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ALTERNATE'
+                    },
+                    {
+                        'labelEn': 'None',
+                        'labels': [
+                            {
+                                'label': 'None',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NO_ROLE'
+                    },
+                    {
+                        'labelEn': 'Primary collector',
+                        'labels': [
+                            {
+                                'label': 'Primary collector',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'PRIMARY'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Role',
+                'labels': [
+                    {
+                        'label': 'Role',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'role',
+                'required': True,
+                'type': 'SELECT_ONE'
             }
         ]
     }

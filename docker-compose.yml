@@ -5,8 +5,6 @@ volumes:
   db:
   db_ca:
   db_reg:
-  db_airflow:
-  airflow:
   data_es:
   data_es_test:
 
@@ -58,7 +56,64 @@ services:
       - registration_datahub_db
       - elasticsearch
       - elasticsearch_test
-      - airflow_webserver
+
+  celery_worker:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A hct_mis_api.apps.core.celery worker -E -l info"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch
+      - elasticsearch_test
+
+  celery-beat:
+    stdin_open: true
+    tty: true
+    image: unicef/hct-mis-backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_INSTANCE=redis:6379
+    volumes:
+      - ./backend:/code/
+      - backend-data:/data
+    restart: always
+    command: "celery -A hct_mis_api.apps.core.celery beat -l INFO --scheduler hct_mis_api.apps.core.models:CustomDatabaseScheduler"
+    depends_on:
+      - backend
+      - db
+      - redis
+      - cash_assist_datahub_db
+      - registration_datahub_db
+      - elasticsearch
+      - elasticsearch_test
+
+  celery-flower:
+    image: saxix/flower:1.6
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]
+    environment:
+      - FLOWER_AUTH_PROVIDER=""
+      - FLOWER_DEBUG="1"
+      - FLOWER_ADDRESS=0.0.0.0
+    ports:
+      - "5555:5555"
+    restart: always
+    depends_on:
+      - redis
+
   db:
     image: mdillon/postgis:9.5-alpine
     volumes:
@@ -81,104 +136,6 @@ services:
       - db_reg:/data/postgres
     env_file:
       - .env
-
-  airflow_db:
-    image: postgres:9.5.15-alpine
-    volumes:
-      - db_airflow:/data/postgres
-    env_file:
-      - ./airflow/config/.env_airflow
-
-  airflow_webserver:
-    image: unicef/hct-airflow-webserver
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
-    ports:
-      - "4200:8080"
-    env_file:
-      - ./airflow/config/.env_airflow
-    restart: always
-    depends_on:
-      - airflow_db
-      - db
-      - registration_datahub_db
-      - cash_assist_datahub_db
-      - airflow_worker
-      - redis
-    links:
-      - airflow_worker
-    volumes:
-      - ./airflow/connectors:/usr/local/airflow/connectors
-      - ./airflow/dags:/usr/local/airflow/dags
-      - ./backend:/usr/local/airflow/backend
-      - backend-data:/usr/local/airflow/data
-      - backend-data:/data
-    command: webserver
-    logging:  #NOTE: noisy output silenced
-      driver: "none"
-    healthcheck:
-      test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
-      interval: 30s
-      timeout: 30s
-      retries: 3
-
-  airflow_flower:
-    image: unicef/hct-airflow-flower
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
-    restart: always
-    depends_on:
-      - airflow_db
-      - redis
-    volumes:
-      - ./airflow/connectors:/usr/local/airflow/connectors
-      - ./airflow/dags:/usr/local/airflow/dags
-      - ./backend:/usr/local/airflow/backend
-      - backend-data:/usr/local/airflow/data
-    env_file:
-      - ./airflow/config/.env_airflow
-    ports:
-      - "5555:5555"
-    command: flower
-
-  airflow_scheduler:
-    image: unicef/hct-airflow-scheduler
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
-    env_file:
-      - ./airflow/config/.env_airflow
-    restart: always
-    volumes:
-      - ./airflow/connectors:/usr/local/airflow/connectors
-      - ./airflow/dags:/usr/local/airflow/dags
-      - ./backend:/usr/local/airflow/backend
-      - backend-data:/usr/local/airflow/data
-      - backend-data:/data
-    command: scheduler
-    logging:  #NOTE: noisy output silenced
-      driver: "none"
-    depends_on:
-      - airflow_webserver
-      - airflow_db
-
-  airflow_worker:
-    image: unicef/hct-airflow-worker
-    build:
-      context: ./airflow
-      dockerfile: local.Dockerfile
-    env_file:
-      - ./airflow/config/.env_airflow
-    restart: always
-    volumes:
-      - ./airflow/dags:/usr/local/airflow/dags
-      - ./airflow/connectors:/usr/local/airflow/connectors
-      - ./backend:/usr/local/airflow/backend
-      - backend-data:/usr/local/airflow/data
-      - backend-data:/data
-    command: worker
 
   elasticsearch:
     image: unicef/hct-elasticsearch

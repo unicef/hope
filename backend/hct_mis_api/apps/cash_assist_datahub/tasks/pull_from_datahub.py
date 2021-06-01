@@ -2,20 +2,23 @@ import logging
 
 from django.db import transaction
 from django.db.models import Count
+from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
 from hct_mis_api.apps.cash_assist_datahub.models import Session
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.exchange_rates import ExchangeRates
+from hct_mis_api.apps.core.models import BusinessArea, CountryCodeMap
 from hct_mis_api.apps.core.utils import nested_getattr
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
-from hct_mis_api.apps.program.models import CashPlan, Program
-from hct_mis_api.apps.targeting.models import TargetPopulation
 from hct_mis_api.apps.erp_datahub.utils import (
     get_exchange_rate_for_cash_plan,
     get_payment_record_delivered_quantity_in_usd,
 )
+from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
+from hct_mis_api.apps.program.models import CashPlan, Program
+from hct_mis_api.apps.targeting.models import TargetPopulation
 
 log = logging.getLogger(__name__)
+
 
 class PullFromDatahubTask:
     MAPPING_CASH_PLAN_DICT = {
@@ -67,63 +70,92 @@ class PullFromDatahubTask:
         "status_date": "status_date",
         "transaction_reference_id": "transaction_reference_id",
         "vision_id": "vision_id",
+        "registration_ca_id": "registration_ca_id",
     }
     MAPPING_SERVICE_PROVIDER_DICT = {
         "ca_id": "ca_id",
         "full_name": "full_name",
         "short_name": "short_name",
-        "country": "country",
         "vision_id": "vision_id",
     }
 
-    @transaction.atomic(using="default")
-    @transaction.atomic(using="cash_assist_datahub_ca")
     def execute(self):
         grouped_session = Session.objects.values("business_area").annotate(count=Count("business_area"))
+        ret = {
+            "grouped_session": 0,
+            "skipped_due_failure": [],
+            "successes": [],
+            "failures": [],
+        }
         for group in grouped_session:
-            session_queryset = Session.objects.filter(business_area=group.get("business_area"))
+            ret["grouped_session"] += 1
+            business_area = group.get("business_area")
+            session_queryset = Session.objects.filter(business_area=business_area)
             # if any session in this business area fails omit other sessions in this business area
             if session_queryset.filter(status=Session.STATUS_FAILED).count() > 0:
+                ret["skipped_due_failure"].append(business_area)
                 continue
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
             for session in sessions:
                 try:
-                    self.copy_session(session)
+                    with transaction.atomic(using="default"):
+                        with transaction.atomic(using="cash_assist_datahub_ca"):
+                            self.copy_session(session)
+                            ret["successes"].append(session.id)
                 except Exception as e:
+                    ret["failures"].append(session.id)
+                    log.exception(e)
                     session.status = Session.STATUS_FAILED
                     session.save()
-                    log.warning(e)
+
+        return ret
 
     def build_arg_dict(self, model_object, mapping_dict):
         return {key: nested_getattr(model_object, mapping_dict[key]) for key in mapping_dict}
 
     def copy_session(self, session):
-        session.status = session.STATUS_PROCESSING
-        session.save()
-        self.copy_service_providers(session)
-        programs = self.copy_programs_ids(session)
-        Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
-        TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
-        self.copy_cash_plans(session)
-        self.copy_payment_records(session)
-        session.status = session.STATUS_COMPLETED
-        session.save()
+        with configure_scope() as scope:
+            scope.set_tag("session.ca", str(session.id))
+
+            session.status = session.STATUS_PROCESSING
+            session.save()
+            self.copy_service_providers(session)
+            programs = self.copy_programs_ids(session)
+            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
+            TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
+            self.copy_cash_plans(session)
+            self.copy_payment_records(session)
+            session.status = session.STATUS_COMPLETED
+            session.save()
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
+        exchange_rates_client = ExchangeRates()
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
+            self.set_cash_plan_service_provider(cash_plan_args)
             cash_plan_args["business_area"] = BusinessArea.objects.get(code=dh_cash_plan.business_area)
             (
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
+
             if not cash_plan.exchange_rate:
-                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan)
+                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
                 cash_plan.save(update_fields=["exchange_rate"])
+
+    def set_cash_plan_service_provider(self, cash_plan_args):
+        assistance_through = cash_plan_args.get("assistance_through")
+        if not assistance_through:
+            return
+        service_provider = ServiceProvider.objects.filter(ca_id=assistance_through).first()
+        if service_provider is None:
+            return
+        cash_plan_args["service_provider"] = service_provider
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
+        exchange_rates_client = ExchangeRates()
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
                 dh_payment_record,
@@ -140,7 +172,9 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             if not payment_record.delivered_quantity_usd:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(payment_record)
+                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
+                    payment_record, exchange_rates_client
+                )
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
@@ -153,9 +187,8 @@ class PullFromDatahubTask:
                 PullFromDatahubTask.MAPPING_SERVICE_PROVIDER_DICT,
             )
             service_provider_args["business_area"] = BusinessArea.objects.get(code=dh_service_provider.business_area)
-            (service_provider, created,) = ServiceProvider.objects.update_or_create(
-                ca_id=dh_service_provider.ca_id, defaults=service_provider_args
-            )
+            service_provider_args["country"] = CountryCodeMap.objects.get_iso3_code(dh_service_provider.country)
+            ServiceProvider.objects.update_or_create(ca_id=dh_service_provider.ca_id, defaults=service_provider_args)
 
     def copy_programs_ids(self, session):
         dh_programs = ca_models.Programme.objects.filter(session=session)

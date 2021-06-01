@@ -98,7 +98,8 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
             ? breadCrumbsItems
             : null
         }
-        withFlag={household.sanctionListPossibleMatch}
+        possibleMatch={household.sanctionListPossibleMatch}
+        confirmedMatch={household.sanctionListConfirmedMatch}
         withTriangle={household.hasDuplicates}
       />
       <HouseholdDetails

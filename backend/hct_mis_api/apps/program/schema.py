@@ -8,7 +8,7 @@ from django_filters import (
     MultipleChoiceFilter,
     OrderingFilter,
 )
-from graphene import ConnectionField, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
@@ -16,8 +16,9 @@ from hct_mis_api.apps.account.permissions import (
     DjangoPermissionFilterConnectionField,
     hopePermissionClass,
     Permissions,
+    hopeOneOfPermissionClass,
+    ALL_GRIEVANCES_CREATE_MODIFY,
 )
-
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import DecimalRangeFilter, IntegerRangeFilter
 from hct_mis_api.apps.core.schema import ChoiceObject
@@ -25,12 +26,11 @@ from hct_mis_api.apps.core.utils import (
     to_choice_object,
     CustomOrderingFilter,
     chart_map_choices,
-    chart_get_filtered_qs,
     chart_permission_decorator,
     chart_filters_decoder,
-    chart_create_filter_query
 )
 from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.payment.utils import get_payment_records_for_dashboard
 from hct_mis_api.apps.program.models import CashPlan, Program
 from hct_mis_api.apps.utils.schema import ChartDetailedDatasetsNode
 
@@ -59,8 +59,18 @@ class ProgramFilter(FilterSet):
         model = Program
 
     order_by = CustomOrderingFilter(
-        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "households_count", "budget")
+        fields=(Lower("name"), "status", "start_date", "end_date", "sector", "total_hh_count", "budget")
     )
+
+    @property
+    def qs(self):
+        return super().qs.annotate(
+            total_hh_count=Count(
+                "cash_plans__payment_records__household",
+                filter=Q(cash_plans__payment_records__delivered_quantity__gte=0),
+                distinct=True,
+            )
+        )
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -113,6 +123,7 @@ class CashPlanFilter(FilterSet):
         fields = {
             "program": ["exact"],
             "assistance_through": ["exact", "startswith"],
+            "service_provider__full_name": ["exact", "startswith"],
             "start_date": ["exact", "lte", "gte"],
             "end_date": ["exact", "lte", "gte"],
             "business_area": ["exact"],
@@ -123,9 +134,13 @@ class CashPlanFilter(FilterSet):
         fields=(
             "ca_id",
             "status",
+            "total_number_of_hh",
+            "total_entitled_quantity",
             "verification_status",
             "total_persons_covered",
             "total_delivered_quantity",
+            "total_undelivered_quantity",
+            "dispersion_date",
             "assistance_measurement",
             "assistance_through",
             "delivery_type",
@@ -133,8 +148,14 @@ class CashPlanFilter(FilterSet):
             "end_date",
             "program__name",
             "id",
+            "updated_at",
+            "service_provider__full_name",
         )
     )
+
+    @property
+    def qs(self):
+        return super().qs.annotate(total_number_of_hh=Count("payment_records"))
 
     def search_filter(self, qs, name, value):
         values = value.split(" ")
@@ -153,11 +174,17 @@ class CashPlanNode(BaseNodePermissionMixin, DjangoObjectType):
 
     bank_reconciliation_success = graphene.Int()
     bank_reconciliation_error = graphene.Int()
+    delivery_type = graphene.String()
+    total_number_of_households = graphene.Int()
+    currency = graphene.String(source="currency")
 
     class Meta:
         model = CashPlan
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
+
+    def resolve_total_number_of_households(self, info, **kwargs):
+        return self.total_number_of_households
 
 
 class ChartProgramFilter(FilterSet):
@@ -183,20 +210,22 @@ class Query(graphene.ObjectType):
         ProgramNode,
         filterset_class=ProgramFilter,
         permission_classes=(
-            hopePermissionClass(
-                Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS,
-            ),
+            hopeOneOfPermissionClass(Permissions.PRORGRAMME_VIEW_LIST_AND_DETAILS, *ALL_GRIEVANCES_CREATE_MODIFY),
         ),
     )
     chart_programmes_by_sector = graphene.Field(
         ChartDetailedDatasetsNode,
         business_area_slug=graphene.String(required=True),
         year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
-    chart_planned_budget = graphene.Field(
-        ChartDetailedDatasetsNode, business_area_slug=graphene.String(required=True), year=graphene.Int(required=True),
-        program=graphene.String(required=False), administrative_area=graphene.String(required=False)
+    chart_total_transferred_by_month = graphene.Field(
+        ChartDetailedDatasetsNode,
+        business_area_slug=graphene.String(required=True),
+        year=graphene.Int(required=True),
+        program=graphene.String(required=False),
+        administrative_area=graphene.String(required=False),
     )
 
     cash_plan = relay.Node.Field(CashPlanNode)
@@ -259,68 +288,70 @@ class Query(graphene.ObjectType):
     def resolve_chart_programmes_by_sector(self, info, business_area_slug, year, **kwargs):
         filters = chart_filters_decoder(kwargs)
         sector_choice_mapping = chart_map_choices(Program.SECTOR_CHOICE)
-        programs = chart_get_filtered_qs(
-            Program, year, business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={**chart_create_filter_query(filters)}
-        )
+        valid_payment_records = get_payment_records_for_dashboard(year, business_area_slug, filters, True)
+        programs = Program.objects.filter(cash_plans__payment_records__in=valid_payment_records).distinct()
 
+        programmes_by_sector = (
+            programs.values("sector")
+            .order_by("sector")
+            .annotate(total_count_without_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=False)))
+            .annotate(total_count_with_cash_plus=Count("id", distinct=True, filter=Q(cash_plus=True)))
+        )
+        labels = []
         programmes_wo_cash_plus = []
         programmes_with_cash_plus = []
-        labels = []
-
-        for sector in sector_choice_mapping.keys():
-            programs_by_sector = programs.filter(sector=sector)
-            program_wo_cash_count = programs_by_sector.filter(cash_plus=False).count()
-            program_with_cash_count = programs_by_sector.filter(cash_plus=True).count()
-            if program_wo_cash_count > 0 or program_with_cash_count > 0:
-                programmes_wo_cash_plus.append(program_wo_cash_count)
-                programmes_with_cash_plus.append(program_with_cash_count)
-                labels.append(sector_choice_mapping.get(sector))
+        programmes_total = []
+        for programme in programmes_by_sector:
+            labels.append(sector_choice_mapping.get(programme.get("sector")))
+            programmes_wo_cash_plus.append(programme.get("total_count_without_cash_plus") or 0)
+            programmes_with_cash_plus.append(programme.get("total_count_with_cash_plus") or 0)
+            programmes_total.append(programmes_wo_cash_plus[-1] + programmes_with_cash_plus[-1])
 
         datasets = [
-            {
-                "label": "Programmes",
-                "data": programmes_wo_cash_plus
-            },
-            {
-                "label": "Programmes with Cash+",
-                "data": programmes_with_cash_plus
-            },
+            {"label": "Programmes", "data": programmes_wo_cash_plus},
+            {"label": "Programmes with Cash+", "data": programmes_with_cash_plus},
+            {"label": "Total Programmes", "data": programmes_total},
         ]
 
         return {"labels": labels, "datasets": datasets}
 
     @chart_permission_decorator(permissions=[Permissions.DASHBOARD_VIEW_COUNTRY])
-    def resolve_chart_planned_budget(self, info, business_area_slug, year, **kwargs):
-        filters = chart_filters_decoder(kwargs)
-        programs = chart_get_filtered_qs(
-            Program,
-            year,
-            business_area_slug_filter={"business_area__slug": business_area_slug},
-            additional_filters={"start_date__year": year, "end_date__year": year, **chart_create_filter_query(filters)},
-        ).prefetch_related("cash_plans__payment_records")
+    def resolve_chart_total_transferred_by_month(self, info, business_area_slug, year, **kwargs):
+        payment_records = get_payment_records_for_dashboard(
+            year, business_area_slug, chart_filters_decoder(kwargs), True
+        )
 
-        previous_transfers_data = [0] * 12
-        cash_transfers_data = [0] * 12
-        previous_sum = 0
-        for month in range(1, 13):
-            payment_records_by_delivery_month = (
-                programs.filter(
-                    cash_plans__payment_records__status=PaymentRecord.STATUS_SUCCESS,
-                    cash_plans__payment_records__delivery_date__year=year,
-                    cash_plans__payment_records__delivery_date__month=month,
+        months_and_amounts = (
+            payment_records.values("delivery_date__month")
+            .order_by("delivery_date__month")
+            .annotate(
+                total_delivered_cash=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_CASH)
                 )
-                .values_list("cash_plans__payment_records__delivered_quantity", flat=True)
-                .distinct()
             )
-            for quantity_delivered in payment_records_by_delivery_month:
-                cash_transfers_data[month - 1] += quantity_delivered
-                previous_sum += quantity_delivered
-            previous_transfers_data[month - 1] = previous_sum
-        labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        datasets = [
-            {"label": "Previous Transfers", "data": previous_transfers_data},
-            {"label": "Cash Assistance", "data": cash_transfers_data},
-        ]
+            .annotate(
+                total_delivered_voucher=Sum(
+                    "delivered_quantity_usd", filter=Q(delivery_type__in=PaymentRecord.DELIVERY_TYPES_IN_VOUCHER)
+                )
+            )
+        )
+        months_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        previous_transfers = [0] * 12
+        cash_transfers = [0] * 12
+        voucher_transfers = [0] * 12
 
-        return {"labels": labels, "datasets": datasets}
+        for data_dict in months_and_amounts:
+            month_index = data_dict.get("delivery_date__month") - 1
+            cash_transfers[month_index] = data_dict.get("total_delivered_cash") or 0
+            voucher_transfers[month_index] = data_dict.get("total_delivered_voucher") or 0
+
+        for index in range(1, len(months_labels)):
+            previous_transfers[index] = (
+                previous_transfers[index - 1] + cash_transfers[index - 1] + voucher_transfers[index - 1]
+            )
+        datasets = [
+            {"label": "Previous Transfers", "data": previous_transfers},
+            {"label": "Voucher Transferred", "data": voucher_transfers},
+            {"label": "Cash Transferred", "data": cash_transfers},
+        ]
+        return {"labels": months_labels, "datasets": datasets}

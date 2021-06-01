@@ -1,3 +1,5 @@
+import logging
+
 import graphene
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -5,47 +7,63 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from graphql import GraphQLError
 
-from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.account.permissions import PermissionMutation, Permissions
+from hct_mis_api.apps.account.schema import UserNode
 from hct_mis_api.apps.activity_log.models import log_create
-from hct_mis_api.apps.core.models import BusinessArea
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.permissions import is_authenticated
-from hct_mis_api.apps.core.schema import BusinessAreaNode
-from hct_mis_api.apps.core.utils import decode_id_string, to_snake_case, check_concurrency_version_in_mutation
 from hct_mis_api.apps.core.scalars import BigInt
+from hct_mis_api.apps.core.schema import BusinessAreaNode
+from hct_mis_api.apps.core.utils import (
+    check_concurrency_version_in_mutation,
+    decode_id_string,
+    to_snake_case,
+)
 from hct_mis_api.apps.grievance.models import GrievanceTicket, TicketNote
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
-    save_data_change_extras,
     close_add_individual_grievance_ticket,
-    close_update_individual_grievance_ticket,
-    close_update_household_grievance_ticket,
     close_delete_individual_ticket,
+    close_update_household_grievance_ticket,
+    close_update_individual_grievance_ticket,
+    save_data_change_extras,
     update_data_change_extras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import save_grievance_complaint_extras
+from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
+    save_grievance_complaint_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.main import (
     CreateGrievanceTicketExtrasInput,
     UpdateGrievanceTicketExtrasInput,
     _no_operation_close_method,
 )
-from hct_mis_api.apps.grievance.mutations_extras.payment_verification import save_payment_verification_extras
-from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import save_sensitive_grievance_extras
+from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
+    save_payment_verification_extras,
+)
+from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
+    save_sensitive_grievance_extras,
+)
 from hct_mis_api.apps.grievance.mutations_extras.system_tickets import (
     close_needs_adjudication_ticket,
     close_system_flagging_ticket,
 )
-from hct_mis_api.apps.grievance.mutations_extras.utils import verify_required_arguments, remove_parsed_data_fields
+from hct_mis_api.apps.grievance.mutations_extras.utils import (
+    remove_parsed_data_fields,
+    verify_required_arguments,
+)
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.grievance.schema import GrievanceTicketNode, TicketNoteNode
 from hct_mis_api.apps.grievance.validators import DataChangeValidator
 from hct_mis_api.apps.household.models import (
-    Household,
-    Individual,
     HEAD,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
+    Household,
+    Individual,
     IndividualRoleInHousehold,
 )
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
+
+logger = logging.getLogger(__name__)
 
 
 class CreateGrievanceTicketInput(graphene.InputObjectType):
@@ -224,15 +242,23 @@ class CreateGrievanceTicketMutation(PermissionMutation):
         business_area_slug = arg("business_area")
         extras = arg("extras", {})
         remove_parsed_data_fields(input, ("linked_tickets", "extras", "business_area", "assigned_to"))
+        admin = input.pop("admin", None)
+        admin_object = None
+        if admin:
+            admin_object = get_object_or_404(AdminArea, p_code=admin)
         business_area = get_object_or_404(BusinessArea, slug=business_area_slug)
         assigned_to = get_object_or_404(get_user_model(), id=assigned_to_id)
         grievance_ticket = GrievanceTicket.objects.create(
             **input,
+            admin2=admin_object,
             business_area=business_area,
             created_by=user,
             user_modified=timezone.now(),
             assigned_to=assigned_to,
             status=GrievanceTicket.STATUS_ASSIGNED,
+        )
+        GrievanceNotification.send_all_notifications(
+            GrievanceNotification.prepare_notification_for_ticket_creation(grievance_ticket)
         )
         grievance_ticket.linked_tickets.set(linked_tickets)
         return grievance_ticket, extras
@@ -280,7 +306,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         arg = lambda name, default=None: input.get(name, default)
         old_grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
         grievance_ticket = get_object_or_404(GrievanceTicket, id=decode_id_string(arg("ticket_id")))
-        check_concurrency_version_in_mutation(kwargs.get('version'), grievance_ticket)
+        check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
         business_area = grievance_ticket.business_area
         cls.has_creator_or_owner_permission(
             info,
@@ -293,6 +319,7 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
         )
 
         if grievance_ticket.status == GrievanceTicket.STATUS_CLOSED:
+            logger.error("Grievance Ticket on status Closed is not editable")
             raise GraphQLError("Grievance Ticket on status Closed is not editable")
 
         if grievance_ticket.issue_type:
@@ -327,6 +354,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
 
     @classmethod
     def update_basic_data(cls, root, info, input, grievance_ticket, **kwargs):
+        old_status = grievance_ticket.status
+        old_assigned_to = grievance_ticket.assigned_to
         arg = lambda name, default=None: input.get(name, default)
         assigned_to_id = decode_id_string(arg("assigned_to"))
         linked_tickets_encoded_ids = arg("linked_tickets", [])
@@ -340,6 +369,8 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
                 setattr(grievance_ticket, field, value)
 
         if assigned_to != grievance_ticket.assigned_to:
+            if grievance_ticket.status == GrievanceTicket.STATUS_NEW and grievance_ticket.assigned_to is None:
+                grievance_ticket.status = GrievanceTicket.STATUS_ASSIGNED
             grievance_ticket.assigned_to = assigned_to
             if grievance_ticket.status in (GrievanceTicket.STATUS_ON_HOLD, GrievanceTicket.STATUS_FOR_APPROVAL):
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
@@ -347,12 +378,27 @@ class UpdateGrievanceTicketMutation(PermissionMutation):
             if grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL:
                 grievance_ticket.status = GrievanceTicket.STATUS_IN_PROGRESS
 
-
+        admin = input.pop("admin", None)
+        if admin:
+            grievance_ticket.admin2 = get_object_or_404(AdminArea, p_code=admin)
         grievance_ticket.user_modified = timezone.now()
         grievance_ticket.save()
 
         grievance_ticket.linked_tickets.set(linked_tickets)
         grievance_ticket.refresh_from_db()
+        if (
+            old_status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            back_to_in_progress_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+            )
+            back_to_in_progress_notification.send_email_notification()
+        if old_assigned_to != grievance_ticket.assigned_to:
+            assignment_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
+            )
+            assignment_notification.send_email_notification()
         return grievance_ticket, extras
 
 
@@ -510,6 +556,7 @@ class GrievanceStatusChangeMutation(PermissionMutation):
         if grievance_ticket.is_feedback:
             status_flow = POSSIBLE_FEEDBACK_STATUS_FLOW
         if status not in status_flow[grievance_ticket.status]:
+            logger.error("New status is incorrect")
             raise GraphQLError("New status is incorrect")
         if status == GrievanceTicket.STATUS_CLOSED:
             close_function = cls.get_close_function(grievance_ticket.category, grievance_ticket.issue_type)
@@ -526,6 +573,27 @@ class GrievanceStatusChangeMutation(PermissionMutation):
             old_grievance_ticket,
             grievance_ticket,
         )
+        if (
+            old_grievance_ticket.status != GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+        ):
+            for_approval_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_TO_APPROVAL
+            )
+            for_approval_notification.send_email_notification()
+        if (
+            old_grievance_ticket.status == GrievanceTicket.STATUS_FOR_APPROVAL
+            and grievance_ticket.status == GrievanceTicket.STATUS_IN_PROGRESS
+        ):
+            back_to_in_progress_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_SEND_BACK_TO_IN_PROGRESS, approver=info.context.user
+            )
+            back_to_in_progress_notification.send_email_notification()
+        if old_grievance_ticket.assigned_to != grievance_ticket.assigned_to:
+            assignment_notification = GrievanceNotification(
+                grievance_ticket, GrievanceNotification.ACTION_ASSIGNMENT_CHANGED
+            )
+            assignment_notification.send_email_notification()
         return cls(grievance_ticket=grievance_ticket)
 
 
@@ -557,7 +625,10 @@ class CreateTicketNoteMutation(PermissionMutation):
         created_by = info.context.user
 
         ticket_note = TicketNote.objects.create(ticket=grievance_ticket, description=description, created_by=created_by)
-
+        notification = GrievanceNotification(
+            grievance_ticket, GrievanceNotification.ACTION_NOTES_ADDED, created_by=created_by
+        )
+        notification.send_email_notification()
         return cls(grievance_ticket_note=ticket_note)
 
 
@@ -573,6 +644,8 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data = graphene.JSONString()
         approved_documents_to_create = graphene.List(graphene.Int)
         approved_documents_to_remove = graphene.List(graphene.Int)
+        approved_identities_to_create = graphene.List(graphene.Int)
+        approved_identities_to_remove = graphene.List(graphene.Int)
         flex_fields_approve_data = graphene.JSONString()
         version = BigInt(required=False)
 
@@ -587,6 +660,8 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
         individual_approve_data,
         approved_documents_to_create,
         approved_documents_to_remove,
+        approved_identities_to_create,
+        approved_identities_to_remove,
         flex_fields_approve_data,
         **kwargs,
     ):
@@ -620,6 +695,15 @@ class IndividualDataChangeApproveMutation(DataChangeValidator, PermissionMutatio
                         document_data["approve_status"] = True
                     else:
                         document_data["approve_status"] = False
+            elif field_name in ("identities", "identities_to_remove"):
+                for index, identity_data in enumerate(individual_data[field_name]):
+                    approved_identities_indexes = (
+                        approved_identities_to_create if field_name == "identities" else approved_identities_to_remove
+                    )
+                    if index in approved_identities_indexes:
+                        identity_data["approve_status"] = True
+                    else:
+                        identity_data["approve_status"] = False
             elif field_name == "flex_fields":
                 for flex_field_name in item.keys():
                     individual_data["flex_fields"][flex_field_name]["approve_status"] = flex_fields_approve_data.get(
@@ -754,12 +838,14 @@ class ReassignRoleMutation(graphene.Mutation):
     @classmethod
     def verify_role_choices(cls, role):
         if role not in [ROLE_PRIMARY, ROLE_ALTERNATE, HEAD]:
+            logger.error("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
             raise GraphQLError("Provided role is invalid! Please provide one of those: PRIMARY, ALTERNATE, HEAD")
 
     @classmethod
     def verify_if_role_exists(cls, household, current_individual, role):
         if role == HEAD:
             if household.head_of_household.id != current_individual.id:
+                logger.error("This individual is not a head of provided household")
                 raise GraphQLError("This individual is not a head of provided household")
         else:
             get_object_or_404(IndividualRoleInHousehold, individual=current_individual, household=household, role=role)
@@ -821,13 +907,13 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
 
     class Arguments:
         grievance_ticket_id = graphene.Argument(graphene.ID, required=True)
-        selected_individual_id = graphene.Argument(graphene.ID, required=True)
+        selected_individual_id = graphene.Argument(graphene.ID, required=False)
         version = BigInt(required=False)
 
     @classmethod
     @is_authenticated
     @transaction.atomic
-    def mutate(cls, root, info, grievance_ticket_id, selected_individual_id, **kwargs):
+    def mutate(cls, root, info, grievance_ticket_id, **kwargs):
         grievance_ticket_id = decode_id_string(grievance_ticket_id)
         grievance_ticket = get_object_or_404(GrievanceTicket, id=grievance_ticket_id)
         check_concurrency_version_in_mutation(kwargs.get("version"), grievance_ticket)
@@ -840,12 +926,18 @@ class NeedsAdjudicationApproveMutation(PermissionMutation):
             grievance_ticket.assigned_to == info.context.user,
             Permissions.GRIEVANCES_APPROVE_FLAG_AND_DEDUPE_AS_OWNER,
         )
-        decoded_selected_individual_id = decode_id_string(selected_individual_id)
-        selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
-        ticket_details = grievance_ticket.ticket_details
 
-        if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
-            raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
+        selected_individual_id = kwargs.get("selected_individual_id", None)
+        ticket_details = grievance_ticket.ticket_details
+        selected_individual = None
+
+        if selected_individual_id:
+            decoded_selected_individual_id = decode_id_string(selected_individual_id)
+            selected_individual = get_object_or_404(Individual, id=decoded_selected_individual_id)
+
+            if selected_individual not in (ticket_details.golden_records_individual, ticket_details.possible_duplicate):
+                logger.error("The selected individual is not valid, must be one of those attached to the ticket")
+                raise GraphQLError("The selected individual is not valid, must be one of those attached to the ticket")
 
         ticket_details.selected_individual = selected_individual
         ticket_details.role_reassign_data = {}

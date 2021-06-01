@@ -1,6 +1,5 @@
-from parameterized import parameterized
-
 from django.core.management import call_command
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
@@ -28,6 +27,21 @@ class TestDiscardVerificationMutation(APITestCase):
           discardCashPlanPaymentVerification(cashPlanVerificationId:$cashPlanVerificationId) {
             cashPlan{
                 name
+                verificationStatus
+                verifications {
+                    edges {
+                        node {
+                            status
+                            paymentRecordVerifications {
+                                edges {
+                                    node {
+                                        status
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
           }
         }

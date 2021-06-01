@@ -18,6 +18,11 @@ export const GrievanceTicket = gql`
       description
       language
       admin
+      admin2 {
+        id
+        title
+        pCode
+      }
       area
       assignedTo {
         id
@@ -95,6 +100,9 @@ export const GrievanceTicket = gql`
             edges {
               node {
                 id
+                type {
+                  type
+                }
                 documentNumber
               }
             }
@@ -136,7 +144,7 @@ export const GrievanceTicket = gql`
       }
       needsAdjudicationTicketDetails {
         id
-
+        hasDuplicatedDocument
         goldenRecordsIndividual {
           id
           unicefId

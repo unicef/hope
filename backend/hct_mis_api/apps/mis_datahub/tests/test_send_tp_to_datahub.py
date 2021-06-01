@@ -22,6 +22,7 @@ from hct_mis_api.apps.mis_datahub.tasks.send_tp_to_datahub import SendTPToDatahu
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 from hct_mis_api.apps.registration_data.fixtures import RegistrationDataImportFactory
 from hct_mis_api.apps.targeting.models import TargetPopulation
+from parameterized import parameterized
 
 
 class TestSendTpToDatahub(TestCase):
@@ -31,6 +32,7 @@ class TestSendTpToDatahub(TestCase):
     def _pre_test_commands():
         call_command("loadbusinessareas")
         call_command("generatedocumenttypes")
+        call_command("loadcountrycodes")
         business_area_with_data_sharing = BusinessArea.objects.first()
         business_area_with_data_sharing.has_data_sharing_agreement = True
         business_area_with_data_sharing.save()
@@ -234,8 +236,8 @@ class TestSendTpToDatahub(TestCase):
         dh_individuals = dh_models.Individual.objects.all()
         dh_documents = dh_models.Document.objects.all()
         dh_roles = dh_models.IndividualRoleInHousehold.objects.all()
-
         self.assertEqual(dh_household.count(), 1)
+        self.assertEqual(dh_household.first().unhcr_id, None)
         self.assertEqual(dh_individuals.count(), 1)
         self.assertEqual(dh_documents.count(), 0)
         self.assertEqual(dh_roles.count(), 1)
@@ -284,3 +286,18 @@ class TestSendTpToDatahub(TestCase):
         dh_households_count = dh_models.Household.objects.filter(mis_id=household.id).count()
         self.assertEqual(dh_households_count, 1)
         self.assertEqual(dh_individuals_count, 3)
+
+    @parameterized.expand(
+        [
+            ("equal", "AF", "AFG"),
+            ("custom_code", "AU", "AUL"),
+        ]
+    )
+    def test_send_household_country(self,_, iso_code2, expected_ca_code):
+        (household, individuals) = create_household(household_args={"size": 1})
+        household.country = iso_code2
+        household.save()
+        task = SendTPToDatahubTask()
+        dh_session = dh_models.Session()
+        (dh_household, *_) = task.send_household(household, self.program_individual_data_needed_true, dh_session, [])
+        self.assertEqual(dh_household.country, expected_ca_code)

@@ -187,14 +187,8 @@ export function LookUpHouseholdFilters({
         </Grid>
         <Grid item>
           <AdminAreasAutocomplete
-            value={filter.admin2 || null}
-            onChange={(e, option) => {
-              if (!option) {
-                onFilterChange({ ...filter, admin2: undefined });
-                return;
-              }
-              onFilterChange({ ...filter, admin2: option });
-            }}
+            onFilterChange={onFilterChange}
+            name='admin2'
           />
         </Grid>
         <Grid item>

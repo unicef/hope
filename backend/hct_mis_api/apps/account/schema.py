@@ -1,4 +1,5 @@
 import json
+import logging
 
 import graphene
 from django.contrib.auth import get_user_model
@@ -13,11 +14,18 @@ from graphene_django import DjangoObjectType
 from graphene_django.filter import DjangoFilterConnectionField
 
 from hct_mis_api.apps.account.models import USER_PARTNER_CHOICES, USER_STATUS_CHOICES, Role, UserRole, User
-from hct_mis_api.apps.account.permissions import DjangoPermissionFilterConnectionField, Permissions, hopePermissionClass
+from hct_mis_api.apps.account.permissions import (
+    DjangoPermissionFilterConnectionField,
+    Permissions,
+    hopePermissionClass,
+    hopeOneOfPermissionClass, ALL_GRIEVANCES_CREATE_MODIFY,
+)
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import to_choice_object, CustomOrderingFilter
+
+logger = logging.getLogger(__name__)
 
 
 def permissions_resolver(user_roles):
@@ -153,7 +161,12 @@ class Query(graphene.ObjectType):
     all_users = DjangoPermissionFilterConnectionField(
         UserNode,
         filterset_class=UsersFilter,
-        permission_classes=(hopePermissionClass(Permissions.USER_MANAGEMENT_VIEW_LIST),),
+        permission_classes=(
+            hopeOneOfPermissionClass(
+                Permissions.USER_MANAGEMENT_VIEW_LIST,
+                *ALL_GRIEVANCES_CREATE_MODIFY
+            ),
+        ),
     )
     # all_log_entries = graphene.ConnectionField(LogEntryObjectConnection, object_id=graphene.String(required=False))
     user_roles_choices = graphene.List(ChoiceObject)

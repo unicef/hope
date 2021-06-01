@@ -36,9 +36,10 @@ export const GrievancesTable = ({
     businessArea,
     search: filter.search,
     status: [filter.status],
-    fsp: [filter.fsp],
+    fsp: filter.fsp,
     createdAtRange: JSON.stringify(filter.createdAtRange),
     admin: [decodeIdString(filter?.admin?.node?.id)],
+    registrationDataImport: filter.registrationDataImport,
   };
 
   const {

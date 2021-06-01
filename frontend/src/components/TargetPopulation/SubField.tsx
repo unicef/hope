@@ -71,6 +71,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               name={`${baseName}.value.from`}
               label={`${field.fieldAttribute.labelEn} from`}
               type='number'
+              integer
               variant='outlined'
               fullWidth
               component={FormikTextField}
@@ -81,6 +82,7 @@ export const SubField = ({ field, index, baseName }): React.ReactElement => {
               name={`${baseName}.value.to`}
               label={`${field.fieldAttribute.labelEn} to`}
               type='number'
+              integer
               variant='outlined'
               fullWidth
               component={FormikTextField}

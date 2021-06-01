@@ -5,7 +5,7 @@ export const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
     label: 'Payment ID',
-    id: 'cashAssistId',
+    id: 'ca_id',
     numeric: false,
   },
   {
@@ -17,37 +17,37 @@ export const headCells: HeadCell<PaymentRecordNode>[] = [
   {
     disablePadding: false,
     label: 'Head of Household',
-    id: 'headOfHousehold',
+    id: 'head_of_household__full_name',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household ID',
-    id: 'household__household_ca_id',
+    id: 'household__unicef_id',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Household Size',
-    id: 'totalPersonCovered',
+    id: 'household__size',
     numeric: false,
   },
   {
     disablePadding: false,
     label: 'Entitlement Quantity',
-    id: 'entitlement__entitlement_quantity',
+    id: 'entitlement_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Delivered Quantity',
-    id: 'entitlement__delivered_quantity',
+    id: 'delivered_quantity',
     numeric: true,
   },
   {
     disablePadding: false,
     label: 'Delivery Date',
-    id: 'entitlement__delivery_date',
+    id: 'delivery_date',
     numeric: true,
   },
 ];

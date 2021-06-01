@@ -186,6 +186,18 @@ export function HomeRouter(): React.ReactElement {
               <EditGrievancePage />
             </Sentry.ErrorBoundary>
           </Route>
+          <Route path='/:businessArea/grievance-and-feedback/rdi/:id'>
+            <Sentry.ErrorBoundary
+              beforeCapture={(scope) => {
+                scope.setTag(
+                  'location',
+                  '/:businessArea/grievance-and-feedback',
+                );
+              }}
+            >
+              <GrievancesTablePage key='rdi' />
+            </Sentry.ErrorBoundary>
+          </Route>
           <Route path='/:businessArea/grievance-and-feedback/:id'>
             <Sentry.ErrorBoundary
               beforeCapture={(scope) => {
@@ -204,7 +216,7 @@ export function HomeRouter(): React.ReactElement {
                 );
               }}
             >
-              <GrievancesTablePage />
+              <GrievancesTablePage key='all' />
             </Sentry.ErrorBoundary>
           </Route>
           <Route path='/:businessArea/population/household'>

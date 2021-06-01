@@ -6,7 +6,10 @@ import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
 import { StatusBox } from '../../../components/StatusBox';
-import { cashPlanStatusToColor } from '../../../utils/utils';
+import {
+  cashPlanStatusToColor,
+  renderSomethingOrDash,
+} from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 
 const StatusContainer = styled.div`
@@ -51,25 +54,31 @@ export function CashPlanTableRow({
           />
         </StatusContainer>
       </TableCell>
-      <TableCell align='right'>{cashPlan.totalPersonsCovered}</TableCell>
+      <TableCell align='right'>{cashPlan.totalNumberOfHouseholds}</TableCell>
       <TableCell align='left'>{cashPlan.assistanceMeasurement}</TableCell>
       <TableCell align='right'>
-        {cashPlan.totalEntitledQuantity.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+        {renderSomethingOrDash(
+          cashPlan?.totalEntitledQuantity?.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+        )}
       </TableCell>
       <TableCell align='right'>
-        {cashPlan.totalDeliveredQuantity.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+        {renderSomethingOrDash(
+          cashPlan?.totalDeliveredQuantity?.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+        )}
       </TableCell>
       <TableCell align='right'>
-        {cashPlan.totalUndeliveredQuantity.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
+        {renderSomethingOrDash(
+          cashPlan?.totalUndeliveredQuantity?.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+        )}
       </TableCell>
       <TableCell align='left'>
         <UniversalMoment>{cashPlan.dispersionDate}</UniversalMoment>

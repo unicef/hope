@@ -1,6 +1,6 @@
 import React from 'react';
 import { InputAdornment } from '@material-ui/core';
-import { DatePicker } from '@material-ui/pickers';
+import { KeyboardDatePicker } from '@material-ui/pickers';
 import moment from 'moment';
 import get from 'lodash/get';
 
@@ -21,7 +21,7 @@ export const FormikDateField = ({
   }
 
   return (
-    <DatePicker
+    <KeyboardDatePicker
       {...field}
       {...otherProps}
       name={field.name}
@@ -39,9 +39,14 @@ export const FormikDateField = ({
         }, 0);
       }}
       onChange={(date) => {
-        field.onChange({
-          target: { value: date.format('YYYY-MM-DD'), name: field.name },
-        });
+        if (date?.isValid()) {
+          field.onChange({
+            target: {
+              value: moment(date).format('YYYY-MM-DD') || null,
+              name: field.name,
+            },
+          });
+        }
       }}
       format={dateFormat}
       InputProps={{

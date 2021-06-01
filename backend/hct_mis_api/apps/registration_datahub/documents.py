@@ -9,9 +9,11 @@ from .models import ImportedIndividual
 @registry.register_document
 class ImportedIndividualDocument(Document):
     id = fields.KeywordField(boost=0)
-    given_name = fields.TextField(analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
+    given_name = fields.TextField(
+        analyzer=name_synonym_analyzer, fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)}
+    )
     middle_name = fields.TextField(analyzer=phonetic_analyzer)
-    family_name = fields.TextField( fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
+    family_name = fields.TextField(fields={"phonetic": fields.TextField(analyzer=phonetic_analyzer)})
     full_name = fields.TextField(analyzer=phonetic_analyzer)
     birth_date = fields.DateField(similarity="boolean")
     phone_no = fields.KeywordField("phone_no.__str__", similarity="boolean")

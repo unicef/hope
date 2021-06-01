@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import styled from 'styled-components';
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Formik } from 'formik';
 import {
   GrievanceTicketQuery,
@@ -31,9 +31,10 @@ export function RequestedHouseholdDataChange({
 }): React.ReactElement {
   const { showMessage } = useSnackbar();
   const getConfirmationText = (values): string => {
-    return `You approved ${values.selected.length +
-      values.selectedFlexFields.length || 0} change${
-      values.selected.length === 1 ? '' : 's'
+    const allSelected =
+      values.selected.length + values.selectedFlexFields.length || 0;
+    return `You approved ${allSelected} change${
+      allSelected === 1 ? '' : 's'
     }, remaining proposed changes will be automatically rejected upon ticket closure.`;
   };
   const [mutate] = useApproveHouseholdDataChangeMutation();
@@ -42,7 +43,7 @@ export function RequestedHouseholdDataChange({
   };
   let allApprovedCount = 0;
   const flexFields = householdData?.flex_fields || {};
-  delete householdData.flexFields;
+  delete householdData.flex_fields;
   const flexFieldsEntries = Object.entries(flexFields);
   const entries = Object.entries(householdData);
   allApprovedCount += entries.filter(
@@ -54,9 +55,45 @@ export function RequestedHouseholdDataChange({
 
   const [isEdit, setEdit] = useState(allApprovedCount === 0);
   const shouldShowEditButton = (values): boolean =>
-    values.selected.length &&
+    (values.selected.length || values.selectedFlexFields.length) &&
     !isEdit &&
     ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
+  const areAllApproved = (values): boolean => {
+    const selectedCount =
+      values.selected.length + values.selectedFlexFields.length;
+    const countAll = entries.length + flexFieldsEntries.length;
+    return selectedCount === countAll;
+  };
+
+  const getApprovalButton = (values, submitForm): ReactElement => {
+    if (areAllApproved(values)) {
+      return (
+        <Button
+          onClick={submitForm}
+          variant='contained'
+          color='primary'
+          disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+        >
+          Approve
+        </Button>
+      );
+    }
+    return (
+      <ConfirmationDialog title='Warning' content={getConfirmationText(values)}>
+        {(confirm) => (
+          <Button
+            onClick={confirm(() => submitForm())}
+            variant='contained'
+            color='primary'
+            disabled={ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL}
+          >
+            Approve
+          </Button>
+        )}
+      </ConfirmationDialog>
+    );
+  };
   return (
     <Formik
       initialValues={{
@@ -115,25 +152,7 @@ export function RequestedHouseholdDataChange({
                   EDIT
                 </Button>
               ) : (
-                canApproveDataChange && (
-                  <ConfirmationDialog
-                    title='Warning'
-                    content={getConfirmationText(values)}
-                  >
-                    {(confirm) => (
-                      <Button
-                        onClick={confirm(() => submitForm())}
-                        variant='contained'
-                        color='primary'
-                        disabled={
-                          ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
-                        }
-                      >
-                        Approve
-                      </Button>
-                    )}
-                  </ConfirmationDialog>
-                )
+                canApproveDataChange && getApprovalButton(values, submitForm)
               )}
             </Box>
           </Title>

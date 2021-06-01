@@ -31,6 +31,7 @@ export const Allcharts = gql`
       }
       labels
       households
+      averageSampleSize
     }
     chartVolumeByDeliveryMechanism(
       businessAreaSlug: $businessAreaSlug
@@ -63,9 +64,8 @@ export const Allcharts = gql`
         data
       }
       labels
-      total
+      totalNumberOfGrievances
       totalNumberOfFeedback
-      totalNumberOfOpenFeedback
       totalNumberOfOpenSensitive
     }
     sectionHouseholdsReached(
@@ -124,26 +124,7 @@ export const Allcharts = gql`
     ) {
       total
     }
-    tableTotalCashTransferredByAdministrativeArea(
-      businessAreaSlug: $businessAreaSlug
-      year: $year
-      program: $program
-      administrativeArea: $administrativeArea
-    ) {
-      data {
-        id
-        admin2
-        totalCashTransferred
-      }
-    }
-    chartTotalTransferredCashByCountry(year: $year) {
-      datasets {
-        data
-        label
-      }
-      labels
-    }
-    chartPlannedBudget(
+    chartTotalTransferredByMonth(
       businessAreaSlug: $businessAreaSlug
       year: $year
       program: $program
