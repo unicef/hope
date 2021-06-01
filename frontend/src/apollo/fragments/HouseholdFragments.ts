@@ -7,6 +7,7 @@ export const householdMinimal = gql`
     residenceStatus
     size
     totalCashReceived
+    currency
     firstRegistrationDate
     lastRegistrationDate
     status
