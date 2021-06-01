@@ -3219,6 +3219,26 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "candidateListTotalHouseholdsMin",
                 "description": null,
                 "type": {
@@ -6793,6 +6813,26 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "candidateListTotalHouseholdsMin",
                 "description": null,
                 "type": {
@@ -7028,6 +7068,26 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "candidateListTotalHouseholdsMin",
                 "description": null,
                 "type": {
@@ -7259,6 +7319,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -8574,6 +8654,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -12681,6 +12781,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -16923,6 +17043,26 @@
                 "defaultValue": null
               },
               {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "candidateListTotalHouseholdsMin",
                 "description": null,
                 "type": {
@@ -19409,6 +19549,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
@@ -25324,13 +25484,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "WFP",
+            "name": "UNHCR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "UNHCR",
+            "name": "WFP",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
@@ -29073,6 +29233,26 @@
                     "name": "ID",
                     "ofType": null
                   }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMin",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "numberOfHouseholdsMax",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
                 },
                 "defaultValue": null
               },
