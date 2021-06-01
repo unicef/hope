@@ -1,31 +1,37 @@
-import graphene
-from django.db.models import Q, Sum, Count
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404
-from django_filters import CharFilter, FilterSet, OrderingFilter, ModelChoiceFilter
+
+import graphene
+from django_filters import (
+    CharFilter,
+    FilterSet,
+    ModelChoiceFilter,
+    OrderingFilter,
+)
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 from hct_mis_api.apps.account.permissions import (
+    BaseNodePermissionMixin,
     DjangoPermissionFilterConnectionField,
     Permissions,
     hopePermissionClass,
-    BaseNodePermissionMixin,
 )
 from hct_mis_api.apps.core.extended_connection import ExtendedConnection
 from hct_mis_api.apps.core.filters import filter_age
 from hct_mis_api.apps.core.models import AdminArea
 from hct_mis_api.apps.core.schema import ChoiceObject
 from hct_mis_api.apps.core.utils import (
-    to_choice_object,
+    CustomOrderingFilter,
+    chart_create_filter_query,
+    chart_filters_decoder,
+    chart_get_filtered_qs,
+    chart_map_choices,
+    chart_permission_decorator,
     decode_id_string,
     is_valid_uuid,
-    CustomOrderingFilter,
-    chart_map_choices,
-    chart_get_filtered_qs,
-    chart_permission_decorator,
-    chart_filters_decoder,
-    chart_create_filter_query,
+    to_choice_object,
 )
 from hct_mis_api.apps.household.models import ROLE_NO_ROLE, Household
 from hct_mis_api.apps.payment.inputs import GetCashplanVerificationSampleSizeInput
@@ -36,7 +42,10 @@ from hct_mis_api.apps.payment.models import (
     ServiceProvider,
 )
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
-from hct_mis_api.apps.payment.utils import get_number_of_samples, get_payment_records_for_dashboard
+from hct_mis_api.apps.payment.utils import (
+    get_number_of_samples,
+    get_payment_records_for_dashboard,
+)
 from hct_mis_api.apps.program.models import CashPlan
 from hct_mis_api.apps.utils.schema import (
     ChartDatasetNode,
@@ -49,7 +58,6 @@ from hct_mis_api.apps.utils.schema import (
 class PaymentRecordFilter(FilterSet):
     individual = CharFilter(method="individual_filter")
     business_area = CharFilter(field_name="business_area__slug")
-    household = ModelChoiceFilter(queryset=Household.objects.all())
 
     class Meta:
         fields = (
@@ -80,15 +88,6 @@ class PaymentRecordFilter(FilterSet):
         if is_valid_uuid(value):
             return qs.exclude(household__individuals_and_roles__role=ROLE_NO_ROLE)
         return qs
-
-    def filter_queryset(self, queryset):
-        queryset = super().filter_queryset(queryset)
-        cleaned_data = self.form.cleaned_data
-        household_object = cleaned_data.pop("household", None)
-
-        if household_object:
-            return queryset.filter(household=household_object)
-        return queryset
 
 
 class PaymentVerificationFilter(FilterSet):

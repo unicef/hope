@@ -2,12 +2,18 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
-from hct_mis_api.apps.targeting.models import TargetingCriteriaRuleFilter, TargetingIndividualBlockRuleFilter
+from freezegun import freeze_time
 
 from hct_mis_api.apps.core.models import BusinessArea
-from hct_mis_api.apps.household.fixtures import create_household, create_household_and_individuals
+from hct_mis_api.apps.household.fixtures import (
+    create_household,
+    create_household_and_individuals,
+)
 from hct_mis_api.apps.household.models import Household, Individual
-from freezegun import freeze_time
+from hct_mis_api.apps.targeting.models import (
+    TargetingCriteriaRuleFilter,
+    TargetingIndividualBlockRuleFilter,
+)
 
 
 class TargetingCriteriaRuleFilterTestCase(TestCase):
@@ -17,7 +23,7 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
         business_area = BusinessArea.objects.first()
         (household, individuals) = create_household_and_individuals(
             {"size": 1, "residence_status": "HOST", "business_area": business_area},
-            [{"birth_date": "1970-11-29"}],
+            [{"birth_date": "1970-09-29"}],
         )
         households.append(household)
         self.household_50_yo = household
@@ -132,6 +138,26 @@ class TargetingCriteriaRuleFilterTestCase(TestCase):
     def test_rule_filter_age_lt_40(self):
         rule_filter = TargetingIndividualBlockRuleFilter(
             comparision_method="LESS_THAN", field_name="age", arguments=[40]
+        )
+        query = rule_filter.get_query()
+        queryset = Individual.objects.filter(query).distinct()
+        self.assertEqual(queryset.count(), 3)
+        self.assertTrue(self.household_50_yo.pk not in [h.household.pk for h in queryset])
+
+    @freeze_time("2020-09-28")
+    def test_rule_filter_age_lt_49_should_contains_person_born_in_proper_year_before_birthday(self):
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="LESS_THAN", field_name="age", arguments=[49]
+        )
+        query = rule_filter.get_query()
+        queryset = Individual.objects.filter(query).distinct()
+        self.assertEqual(queryset.count(), 4)
+        self.assertTrue(self.household_50_yo.pk in [h.household.pk for h in queryset])
+
+    @freeze_time("2020-09-29")
+    def test_rule_filter_age_lt_49_shouldn_t_contains_person_born_in_proper_year_after_and_during_birthday(self):
+        rule_filter = TargetingIndividualBlockRuleFilter(
+            comparision_method="LESS_THAN", field_name="age", arguments=[49]
         )
         query = rule_filter.get_query()
         queryset = Individual.objects.filter(query).distinct()

@@ -73,8 +73,7 @@ export function NeedsAdjudicationDetails({
 
   const isApproveDisabled = (): boolean => {
     return (
-      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL ||
-      !selectedDuplicate
+      ticket.status !== GRIEVANCE_TICKET_STATES.FOR_APPROVAL
     );
   };
 

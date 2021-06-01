@@ -4,6 +4,7 @@ from constance import config
 from django.utils import timezone
 
 from hct_mis_api.apps.grievance.models import TicketSystemFlaggingDetails, GrievanceTicket
+from hct_mis_api.apps.grievance.notifications import GrievanceNotification
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.models import Individual, IDENTIFICATION_TYPE_NATIONAL_ID
 from hct_mis_api.apps.sanction_list.models import SanctionListIndividual
@@ -129,4 +130,8 @@ class CheckAgainstSanctionListPreMergeTask:
         )
 
         GrievanceTicket.objects.bulk_create(tickets_to_create)
+        for ticket in tickets_to_create:
+            GrievanceNotification.send_all_notifications(
+                GrievanceNotification.prepare_notification_for_ticket_creation(ticket)
+            )
         TicketSystemFlaggingDetails.objects.bulk_create(ticket_details_to_create)

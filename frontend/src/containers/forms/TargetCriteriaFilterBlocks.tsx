@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { FieldArray } from 'formik';
 import { Box, Button } from '@material-ui/core';
 import { AddCircleOutline } from '@material-ui/icons';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ImportedIndividualFieldsQuery } from '../../__generated__/graphql';
 import { chooseFieldType, clearField } from '../../utils/targetingUtils';
 import { TargetCriteriaBlockFilter } from './TargetCriteriaBlockFilter';
@@ -96,7 +96,7 @@ export function TargetCriteriaFilterBlocks({
                   values.individualsFiltersBlocks[blockIndex]
                     .individualBlockFilters.length;
                 return (
-                  <>
+                  <Fragment key={blockIndex + index.toString()}>
                     <FilterWrapper>
                       <TargetCriteriaBlockFilter
                         blockIndex={blockIndex}
@@ -126,7 +126,7 @@ export function TargetCriteriaFilterBlocks({
                         <DividerLabel>+</DividerLabel>
                       </Divider>
                     )}
-                  </>
+                  </Fragment>
                 );
               })}
               <Box display='flex' justifyContent='center'>
