@@ -1,9 +1,9 @@
 import logging
 import re
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
-from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
+from django.contrib.gis.db.models import PointField, UniqueConstraint, Q, Count
 from django.contrib.postgres.fields import JSONField, CICharField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
@@ -25,6 +25,7 @@ from hct_mis_api.apps.utils.models import (
     ConcurrencyModel,
     SoftDeletableModelWithDate,
 )
+from dateutil.relativedelta import relativedelta
 
 BLANK = ""
 IDP = "IDP"
@@ -410,6 +411,91 @@ class Household(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSyncab
     def __str__(self):
         return f"{self.unicef_id}"
 
+    def recalculate_data(self):
+        date_5yo_ago = datetime.now() - relativedelta(years=+5)
+        date_11yo_ago = datetime.now() - relativedelta(years=+11)
+        date_17yo_ago = datetime.now() - relativedelta(years=+17)
+        date_59yo_ago = datetime.now() - relativedelta(years=+17)
+        age_groups = self.individuals.aggregate(
+            female_age_group_0_5_count=Count("id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, sex=FEMALE)),
+            female_age_group_6_11_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, birth_date__lte=date_11yo_ago, sex=FEMALE)
+            ),
+            female_age_group_12_17_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_11yo_ago, birth_date__lte=date_17yo_ago, sex=FEMALE)
+            ),
+            female_age_group_18_59_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_17yo_ago, birth_date__lte=date_59yo_ago, sex=FEMALE)
+            ),
+            female_age_group_60_count=Count("id", distinct=True, filter=Q(birth_date__lte=date_59yo_ago, sex=FEMALE)),
+            male_age_group_0_5_count=Count("id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, sex=MALE)),
+            male_age_group_6_11_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, birth_date__lte=date_11yo_ago, sex=MALE)
+            ),
+            male_age_group_12_17_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_11yo_ago, birth_date__lte=date_17yo_ago, sex=MALE)
+            ),
+            male_age_group_18_59_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_17yo_ago, birth_date__lte=date_59yo_ago, sex=MALE)
+            ),
+            male_age_group_60_count=Count("id", distinct=True, filter=Q(birth_date__lte=date_59yo_ago, sex=MALE)),
+            female_age_group_0_5_disabled_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, sex=FEMALE, disability=True)
+            ),
+            female_age_group_6_11_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_5yo_ago, birth_date__lte=date_11yo_ago, sex=FEMALE, disability=True),
+            ),
+            female_age_group_12_17_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_11yo_ago, birth_date__lte=date_17yo_ago, sex=FEMALE, disability=True),
+            ),
+            female_age_group_18_59_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_17yo_ago, birth_date__lte=date_59yo_ago, sex=FEMALE, disability=True),
+            ),
+            female_age_group_60_disabled_count=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date_59yo_ago, sex=FEMALE, disability=True)
+            ),
+            male_age_group_0_5_disabled_count=Count(
+                "id", distinct=True, filter=Q(birth_date__gt=date_5yo_ago, sex=MALE, disability=True)
+            ),
+            male_age_group_6_11_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_5yo_ago, birth_date__lte=date_11yo_ago, sex=MALE, disability=True),
+            ),
+            male_age_group_12_17_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_11yo_ago, birth_date__lte=date_17yo_ago, sex=MALE, disability=True),
+            ),
+            male_age_group_18_59_disabled_count=Count(
+                "id",
+                distinct=True,
+                filter=Q(birth_date__gt=date_17yo_ago, birth_date__lte=date_59yo_ago, sex=MALE, disability=True),
+            ),
+            male_age_group_60_disabled_count=Count(
+                "id", distinct=True, filter=Q(birth_date__lte=date_59yo_ago, sex=MALE, disability=True)
+            ),
+            size=Count("id", distinct=True, filter=Q(withdrawn=False, duplicate=False)),
+        )
+        self.female_age_group_0_5_count = age_groups.get("female_age_group_0_5_count")
+        self.female_age_group_6_11_count = age_groups.get("female_age_group_6_11_count")
+        self.female_age_group_12_17_count = age_groups.get("female_age_group_12_17_count")
+        self.female_age_group_18_59_count = age_groups.get("female_age_group_18_59_count")
+        self.female_age_group_60_count = age_groups.get("female_age_group_60_count")
+
+        self.male_age_group_0_5_count = age_groups.get("male_age_group_0_5_count")
+        self.male_age_group_6_11_count = age_groups.get("male_age_group_6_11_count")
+        self.male_age_group_12_17_count = age_groups.get("male_age_group_12_17_count")
+        self.male_age_group_18_59_count = age_groups.get("male_age_group_18_59_count")
+        self.male_age_group_60_count = age_groups.get("male_age_group_60_count")
+        self.size = age_groups.get("size")
+
 
 class DocumentValidator(TimeStampedUUIDModel):
     type = models.ForeignKey("DocumentType", related_name="validators", on_delete=models.CASCADE)
@@ -717,6 +803,12 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
+    def recalculate_data(self):
+        should_be_still_pregnant = (
+            self.last_registration_date < (datetime.now() - relativedelta(months=+9)) and self.pregnant
+        )
+        self.pregnant = should_be_still_pregnant
 
 
 class EntitlementCard(TimeStampedUUIDModel):
