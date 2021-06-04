@@ -107,7 +107,6 @@ export function GrievancesFilters({
             <FieldLabel>Creation Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               label='From'
@@ -130,7 +129,6 @@ export function GrievancesFilters({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             label='To'
