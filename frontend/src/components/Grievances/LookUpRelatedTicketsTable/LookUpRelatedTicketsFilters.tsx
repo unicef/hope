@@ -113,7 +113,6 @@ export function LookUpRelatedTicketsFilters({
             <FieldLabel>Creation Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               label='From'
@@ -136,7 +135,6 @@ export function LookUpRelatedTicketsFilters({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             label='To'

@@ -106,7 +106,6 @@ export function LookUpIndividualFilters({
             <FieldLabel>Registration Date</FieldLabel>
             <KeyboardDatePicker
               variant='inline'
-              disableToolbar
               inputVariant='outlined'
               margin='dense'
               placeholder='From'
@@ -129,7 +128,6 @@ export function LookUpIndividualFilters({
         <Grid item>
           <KeyboardDatePicker
             variant='inline'
-            disableToolbar
             inputVariant='outlined'
             margin='dense'
             placeholder='To'
