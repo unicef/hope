@@ -40,6 +40,8 @@ export const GrievancesTable = ({
     createdAtRange: JSON.stringify(filter.createdAtRange),
     admin: [decodeIdString(filter?.admin?.node?.id)],
     registrationDataImport: filter.registrationDataImport,
+    category: filter.category,
+    assignedTo: filter.assignedTo,
   };
 
   const {
