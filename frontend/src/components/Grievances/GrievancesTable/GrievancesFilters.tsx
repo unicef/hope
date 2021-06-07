@@ -35,11 +35,13 @@ interface GrievancesFiltersProps {
   onFilterChange;
   filter;
   choicesData: GrievancesChoiceDataQuery;
+  usersChoices;
 }
 export function GrievancesFilters({
   onFilterChange,
   filter,
   choicesData,
+  usersChoices,
 }: GrievancesFiltersProps): React.ReactElement {
   const handleFilterChange = (e, name): void =>
     onFilterChange({ ...filter, [name]: e.target.value });
@@ -154,6 +156,50 @@ export function GrievancesFilters({
             onFilterChange={onFilterChange}
             name='admin'
           />
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Category</InputLabel>
+            <Select
+              onChange={(e) => handleFilterChange(e, 'category')}
+              variant='outlined'
+              label='Category'
+              value={filter.category || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {choicesData.grievanceTicketCategoryChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
+        </Grid>
+        <Grid item>
+          <StyledFormControl variant='outlined' margin='dense'>
+            <InputLabel>Assignee</InputLabel>
+            <Select
+              onChange={(e) => handleFilterChange(e, 'assignedTo')}
+              variant='outlined'
+              label='Assignee'
+              value={filter.assignedTo || ''}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {usersChoices.map((item) => {
+                return (
+                  <MenuItem key={item.value} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </StyledFormControl>
         </Grid>
       </Grid>
     </ContainerWithBorder>
