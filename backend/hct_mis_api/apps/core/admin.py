@@ -2,6 +2,7 @@ import logging
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.messages import ERROR
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect
@@ -10,9 +11,13 @@ from django.utils.html import format_html
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
+from adminfilters.filters import ChoicesFieldComboFilter
 from xlrd import XLRDError
 
-from hct_mis_api.apps.core.celery_tasks import upload_new_kobo_template_and_update_flex_fields_task
+from hct_mis_api.apps.core.celery_tasks import (
+    upload_new_kobo_template_and_update_flex_fields_task,
+)
+from hct_mis_api.apps.core.datamart.api import DatamartAPI
 from hct_mis_api.apps.core.models import (
     AdminArea,
     AdminAreaLevel,
@@ -25,6 +30,7 @@ from hct_mis_api.apps.core.models import (
 )
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
+from mptt.admin import MPTTModelAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +49,15 @@ class TestRapidproForm(forms.Form):
 
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("name", "slug")
-    search_fields = ("name",)
+    list_display = (
+        "name",
+        "slug",
+        "code",
+        "region_name",
+        "region_code",
+    )
+    search_fields = ("name", "slug")
+    list_filter = ("has_data_sharing_agreement", "region_name")
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
@@ -98,9 +111,61 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
 
+class AdminLevelFilter(SimpleListFilter):
+    template = "adminfilters/combobox.html"
+
+    title = "Admin Level"
+    parameter_name = "alevel"
+
+    def lookups(self, request, model_admin):
+        return [(l, f"Level {l}") for l in range(3)]
+
+    def value(self):
+        return self.used_parameters.get(self.parameter_name)
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(admin_area_level__admin_level=self.value())
+        return queryset
+
+
+class LoadAdminAreaForm(forms.Form):
+    area = forms.ModelChoiceField(BusinessArea.objects.all())
+
+
 @admin.register(AdminArea)
-class AdminAreaAdmin(admin.ModelAdmin):
-    list_display = ("title", "parent")
+class AdminAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    search_fields = (
+        "p_code",
+        "title",
+    )
+    list_display = ("title", "parent", "admin_area_level", "p_code")
+    list_filter = (AdminLevelFilter,)
+
+    @button()
+    def load_from_datamart(self, request):
+        #         business_area = BusinessArea.objects.filter(name=options["business_area"][0]).first()
+        #         api = DatamartAPI()
+        #         locations = api.get_locations_geo_data(business_area)
+        #         admin_areas = api.generate_admin_areas(locations, business_area)
+        context = self.get_common_context(request)
+        if request.method == "GET":
+            form = LoadAdminAreaForm()
+            context["form"] = form
+        else:
+            form = LoadAdminAreaForm(data=request.POST)
+            if form.is_valid():
+                try:
+                    business_area = form.cleaned_data["area"]
+                    api = DatamartAPI()
+                    locations = api.get_locations_geo_data(business_area)
+                    admin_areas = api.generate_admin_areas(locations, business_area)
+                    context["admin_areas"] = admin_areas
+                except Exception as e:
+                    context["form"] = form
+                    self.message_user(request, str(e), messages.ERROR)
+
+        return TemplateResponse(request, "core/admin/load_admin_areas.html", context)
 
 
 @admin.register(AdminAreaLevel)
@@ -108,19 +173,42 @@ class AdminAreaLevelAdmin(admin.ModelAdmin):
     list_display = ("name", "business_area")
 
 
+class FlexibleAttributeInline(admin.TabularInline):
+    model = FlexibleAttribute
+    fields = readonly_fields = ("name", "associated_with", "required")
+    extra = 0
+
+
 @admin.register(FlexibleAttribute)
 class FlexibleAttributeAdmin(admin.ModelAdmin):
-    pass
+    list_display = ("type", "name", "required")
+    list_filter = (
+        ("type", ChoicesFieldComboFilter),
+        ("associated_with", ChoicesFieldComboFilter),
+        "required",
+        "is_removed",
+    )
+    search_fields = ("name",)
 
 
 @admin.register(FlexibleAttributeGroup)
-class FlexibleAttributeGroupAdmin(admin.ModelAdmin):
-    pass
+class FlexibleAttributeGroupAdmin(MPTTModelAdmin):
+    inlines = (FlexibleAttributeInline,)
+    list_display = ("name", "parent", "required", "repeatable", "is_removed")
+    autocomplete_fields = ("parent",)
+    list_filter = ("repeatable", "required", "is_removed")
+    search_fields = ("name",)
 
 
 @admin.register(FlexibleAttributeChoice)
 class FlexibleAttributeChoiceAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "list_name",
+        "name",
+    )
+    search_fields = ("name", "list_name")
+    list_filter = ("is_removed",)
+    filter_horizontal = ("flex_attributes",)
 
 
 @admin.register(XLSXKoboTemplate)
