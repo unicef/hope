@@ -1,12 +1,13 @@
 from datetime import datetime
-from parameterized import parameterized
 
 from django.core.management import call_command
+
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
@@ -98,18 +99,55 @@ class TestGrievanceQuery(APITestCase):
     }
     """
 
+    FILTER_BY_CATEGORY = """
+    query AllGrievanceTickets($category: String) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", category: $category) {
+        edges {
+          node {
+            status
+            category
+            admin
+            language
+            description
+            consent
+            createdAt
+          }
+        }
+      }
+    }
+    """
+
+    FILTER_BY_ASSIGNED_TO = """
+    query AllGrievanceTickets($assignedTo: ID) {
+      allGrievanceTicket(businessArea: "afghanistan", orderBy: "created_at", assignedTo: $assignedTo) {
+        edges {
+          node {
+            status
+            category
+            admin
+            language
+            description
+            consent
+            createdAt
+          }
+        }
+      }
+    }
+    """
+
     def setUp(self):
         super().setUp()
         call_command("loadbusinessareas")
         self.user = UserFactory.create()
+        self.user2 = UserFactory.create()
         self.business_area = BusinessArea.objects.get(slug="afghanistan")
         area_type = AdminAreaLevelFactory(
             name="Admin type one",
             admin_level=2,
             business_area=self.business_area,
         )
-        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type,p_code="123aa123")
-        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type,p_code="sadasdasfd222")
+        self.admin_area_1 = AdminAreaFactory(title="City Test", admin_area_level=area_type, p_code="123aa123")
+        self.admin_area_2 = AdminAreaFactory(title="City Example", admin_area_level=area_type, p_code="sadasdasfd222")
 
         created_at_dates_to_set = {
             GrievanceTicket.STATUS_NEW: datetime(year=2020, month=3, day=12),
@@ -235,4 +273,55 @@ class TestGrievanceQuery(APITestCase):
             request_string=self.FILTER_BY_STATUS,
             context={"user": self.user},
             variables={"status": [str(GrievanceTicket.STATUS_IN_PROGRESS)]},
+        )
+
+    @parameterized.expand(
+        [
+            (
+                "category_positive_feedback",
+                GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK,
+            ),
+            (
+                "category_negative_feedback",
+                GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK,
+            ),
+        ]
+    )
+    def test_grievance_list_filtered_by_category(self, _, category):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_CATEGORY,
+            context={"user": self.user},
+            variables={"category": str(category)},
+        )
+
+    def test_grievance_list_filtered_by_assigned_to_correct_user(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_ASSIGNED_TO,
+            context={"user": self.user},
+            variables={"assignedTo": self.id_to_base64(self.user.id, "UserNode")},
+        )
+
+    def test_grievance_list_filtered_by_assigned_to_incorrect_user(self):
+        self.create_user_role_with_permissions(
+            self.user,
+            [Permissions.GRIEVANCES_VIEW_LIST_EXCLUDING_SENSITIVE, Permissions.GRIEVANCES_VIEW_LIST_SENSITIVE],
+            self.business_area,
+        )
+
+        self.snapshot_graphql_request(
+            request_string=self.FILTER_BY_ASSIGNED_TO,
+            context={"user": self.user},
+            variables={"assignedTo": self.id_to_base64(self.user2.id, "UserNode")},
         )
