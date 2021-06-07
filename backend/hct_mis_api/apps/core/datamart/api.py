@@ -1,9 +1,10 @@
 import logging
 
-import requests
 from django.conf import settings
-from django.contrib.gis.geos import Point, MultiPolygon, Polygon
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.core.exceptions import ValidationError
+
+import requests
 
 from hct_mis_api.apps.core.models import AdminArea, AdminAreaLevel
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatamartAPI:
-    PAGE_SIZE = 100
+    PAGE_SIZE = 10
     LOCATIONS_ENDPOINT = "/api/latest/datamart/locations/?-serializer=geo&format=json&ordering=id"
 
     def __init__(self):
@@ -24,7 +25,9 @@ class DatamartAPI:
 
     def get_locations_geo_data(self, business_area):
         return self._get_paginated_results(
-            f"{DatamartAPI.LOCATIONS_ENDPOINT}" f"&country_name={business_area.name}&page_size={DatamartAPI.PAGE_SIZE}"
+            f"{DatamartAPI.LOCATIONS_ENDPOINT}"
+            f"&country_code={business_area.code}&page_size={DatamartAPI.PAGE_SIZE}"
+            # f"{DatamartAPI.LOCATIONS_ENDPOINT}" f"&country_name={business_area.name}&page_size={DatamartAPI.PAGE_SIZE}"
         )
 
     def _features_to_multi_polygon(self, geometry):
