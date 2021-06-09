@@ -20,6 +20,7 @@ import { PageHeader } from '../PageHeader';
 import { ConfirmationDialog } from '../ConfirmationDialog';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ButtonDialog } from '../ButtonDialog';
+import { useSnackbar } from '../../hooks/useSnackBar';
 
 const Separator = styled.div`
   width: 1px;
@@ -64,6 +65,7 @@ export const GrievanceDetailsToolbar = ({
   canClose: boolean;
 }): React.ReactElement => {
   const { id } = useParams();
+  const { showMessage } = useSnackbar();
   const businessArea = useBusinessArea();
   const breadCrumbsItems: BreadCrumbsItem[] = [
     {
@@ -170,19 +172,23 @@ export const GrievanceDetailsToolbar = ({
 
   const closingConfirmationText = 'Are you sure you want to close the ticket?';
 
-  const changeState = (status): void => {
-    mutate({
-      variables: {
-        grievanceTicketId: ticket.id,
-        status,
-      },
-      refetchQueries: () => [
-        {
-          query: GrievanceTicketDocument,
-          variables: { id: ticket.id },
+  const changeState = async (status): Promise<void> => {
+    try {
+      await mutate({
+        variables: {
+          grievanceTicketId: ticket.id,
+          status,
         },
-      ],
-    });
+        refetchQueries: () => [
+          {
+            query: GrievanceTicketDocument,
+            variables: {id: ticket.id},
+          },
+        ],
+      });
+    } catch (e) {
+      e.graphQLErrors.map((x) => showMessage(x.message));
+    }
   };
 
   const getClosingConfirmationText = (): string => {
