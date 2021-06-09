@@ -42,24 +42,31 @@ export const ReassignRoleBox = ({
   const businessArea = useBusinessArea();
   let { individual } = ticket;
   let { household } = ticket;
+  let reassignData;
+  let uniqueIndividual;
+
   if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION) {
     individual = ticket.needsAdjudicationTicketDetails.selectedIndividual;
     household =
       ticket.needsAdjudicationTicketDetails.selectedIndividual?.household;
+    reassignData = JSON.parse(
+      ticket.needsAdjudicationTicketDetails.roleReassignData,
+    );
+    uniqueIndividual =
+      ticket.needsAdjudicationTicketDetails.possibleDuplicate.id === individual.id
+        ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
+        : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
+  } else if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
+    reassignData = JSON.parse(
+      ticket.systemFlaggingTicketDetails.roleReassignData,
+    );
   }
   const householdsAndRoles = individual?.householdsAndRoles;
   const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
-  const reassignData = JSON.parse(
-    ticket.needsAdjudicationTicketDetails.roleReassignData,
-  );
-  const uniqueIndividual =
-    ticket.needsAdjudicationTicketDetails.possibleDuplicate.id === individual.id
-      ? ticket.needsAdjudicationTicketDetails.goldenRecordsIndividual
-      : ticket.needsAdjudicationTicketDetails.possibleDuplicate;
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
-      <Box mb={2} mt={2}>
+      <Box mb={2} mt={2} key={el.id}>
         <Box mb={2}>
           <LabelizedField label='ROLE'>
             <>{capitalize(el.role)} Collector</>

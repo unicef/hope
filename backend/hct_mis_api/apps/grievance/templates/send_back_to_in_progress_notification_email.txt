@@ -1,0 +1,4 @@
+{% extends 'base_notification_email.txt' %}
+{% block content %}
+    Approver {{ approver }} has sent the Grievance & Feedback ticket {{ ticket_url }} for review. Please take action.
+{% endblock %}
