@@ -26,12 +26,35 @@ class FundsCommitmentAddForm(forms.ModelForm):
     funds_commitment_number = forms.CharField(required=True)
     vendor_id = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
     gl_account = forms.CharField(validators=[NumberValidator, MinLengthValidator(10)])
+    new_business_area_code = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code"
+    )
 
     class Meta:
         model = FundsCommitment
         exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
 
     def clean_business_area(self):
+        return self.cleaned_data["business_area"].code
+
+    def clean_new_business_area_code(self):
+        return self.cleaned_data["business_area"].code
+
+
+class DownPaymentAddForm(forms.ModelForm):
+    business_area = forms.ModelChoiceField(queryset=BusinessArea.objects, to_field_name="code")
+    new_business_area_code = forms.ModelChoiceField(
+        queryset=BusinessArea.objects.filter(is_split=False), to_field_name="code"
+    )
+
+    class Meta:
+        model = DownPayment
+        exclude = ("update_date", "updated_by", "mis_sync_flag", "mis_sync_date", "ca_sync_date", "ca_sync_flag")
+
+    def clean_business_area(self):
+        return self.cleaned_data["business_area"].code
+
+    def clean_new_business_area_code(self):
         return self.cleaned_data["business_area"].code
 
 
@@ -89,4 +112,5 @@ class DownPaymentAdmin(HOPEModelAdminBase):
         "ca_sync_date",
         TextFieldFilter.factory("business_area"),
     )
+    add_form = DownPaymentAddForm
     date_hierarchy = "create_date"
