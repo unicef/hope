@@ -25324,13 +25324,13 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "WFP",
+            "name": "UNHCR",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "UNHCR",
+            "name": "WFP",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null
