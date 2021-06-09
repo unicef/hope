@@ -57,7 +57,6 @@ export function RegistrationFilters({
       />
       <KeyboardDatePicker
         variant='inline'
-        disableToolbar
         inputVariant='outlined'
         margin='dense'
         label='Import Date'
