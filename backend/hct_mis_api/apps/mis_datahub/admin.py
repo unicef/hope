@@ -131,7 +131,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
-    ordering = ("timestamp",)
+    ordering = ("-timestamp",)
 
     @href()
     def target_population(self, button):
