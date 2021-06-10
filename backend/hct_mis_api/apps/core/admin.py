@@ -57,7 +57,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name")
+    list_filter = ("has_data_sharing_agreement", "region_name", "is_split")
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
