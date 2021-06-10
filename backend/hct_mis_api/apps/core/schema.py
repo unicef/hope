@@ -303,7 +303,7 @@ class Query(graphene.ObjectType):
     )
     cash_assist_url_prefix = graphene.String()
 
-    def resolve_all_admin_areas(parent, info):
+    def resolve_all_business_areas(parent, info):
         return BusinessArea.objects.filter(is_split=False)
 
     def resolve_cash_assist_url_prefix(parent, info):
