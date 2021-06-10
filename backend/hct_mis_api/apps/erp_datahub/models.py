@@ -46,7 +46,7 @@ class FundsCommitment(models.Model):
     mis_sync_date = models.DateTimeField(blank=True, null=True)
     ca_sync_flag = models.BooleanField(blank=True, null=True, default=False)
     ca_sync_date = models.DateTimeField(blank=True, null=True)
-    new_business_area_code = models.CharField(max_length=4, blank=True, null=True)
+    business_office_code = models.CharField(max_length=4, blank=True, null=True)
 
     def __str__(self):
         return self.funds_commitment_number
@@ -81,4 +81,4 @@ class DownPayment(models.Model):
     mis_sync_date = models.DateTimeField(blank=True, null=True)
     ca_sync_flag = models.BooleanField(default=False, blank=True, null=True)
     ca_sync_date = models.DateTimeField(blank=True, null=True)
-    new_business_area_code = models.CharField(max_length=4, blank=True, null=True)
+    business_office_code = models.CharField(max_length=4, blank=True, null=True)

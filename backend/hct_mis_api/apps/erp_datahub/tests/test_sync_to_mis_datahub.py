@@ -78,7 +78,7 @@ class TestSyncToMisDatahubTask(TestCase):
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
-            new_business_area_code=self.bosnia.code,
+            business_office_code=self.bosnia.code,
         )
         down_payment = DownPayment.objects.create(
             rec_serial_number="1600000009",
@@ -89,7 +89,7 @@ class TestSyncToMisDatahubTask(TestCase):
             currency_code="USD",
             posting_date=datetime.now(),
             created_by="johniak",
-            new_business_area_code=self.herzegovina.code,
+            business_office_code=self.herzegovina.code,
         )
         task = SyncToMisDatahubTask()
         task.execute()
@@ -132,7 +132,7 @@ class TestSyncToMisDatahubTask(TestCase):
             funds_commitment_number="123456",
             total_open_amount_local=1000,
             total_open_amount_usd=2000,
-            new_business_area_code=self.bosnia.code,
+            business_office_code=self.bosnia.code,
             mis_sync_flag=True,
         )
         down_payment = DownPayment.objects.create(
@@ -144,7 +144,7 @@ class TestSyncToMisDatahubTask(TestCase):
             currency_code="USD",
             posting_date=datetime.now(),
             created_by="johniak",
-            new_business_area_code=self.herzegovina.code,
+            business_office_code=self.herzegovina.code,
             mis_sync_flag=True,
         )
         task = SyncToMisDatahubTask()
