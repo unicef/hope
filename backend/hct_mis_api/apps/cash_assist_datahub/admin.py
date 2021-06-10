@@ -43,11 +43,13 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
-    ordering = ("timestamp",)
+    ordering = ("-timestamp",)
 
     @button()
     def execute_pull(self, request):
-        from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
+        from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
+            PullFromDatahubTask,
+        )
 
         if request.method == "POST":
             task = PullFromDatahubTask()
@@ -72,7 +74,9 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
         if request.method == "POST":
-            from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import PullFromDatahubTask
+            from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
+                PullFromDatahubTask,
+            )
 
             runner = PullFromDatahubTask()
             try:
