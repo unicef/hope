@@ -1,19 +1,20 @@
-import mptt
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
+
 from django_celery_beat.models import PeriodicTask
 from django_celery_beat.schedulers import DatabaseScheduler, ModelEntry
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.models import SoftDeletableModel
+
+import mptt
+from hct_mis_api.apps.core.utils import unique_slugify
+from hct_mis_api.apps.utils.models import SoftDeletionTreeModel, TimeStampedUUIDModel
 from mptt.fields import TreeForeignKey
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
-
-from hct_mis_api.apps.core.utils import unique_slugify
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, SoftDeletionTreeModel
 
 
 class BusinessArea(TimeStampedUUIDModel):
@@ -46,13 +47,21 @@ class BusinessArea(TimeStampedUUIDModel):
         db_index=True,
     )
     has_data_sharing_agreement = models.BooleanField(default=False)
+    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    is_split = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
+        if self.parent:
+            self.parent.is_split = True
+            self.parent.save()
+        if self.children.count():
+            self.is_split = True
         super(BusinessArea, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ["name"]
+        # app_label = "core"
 
     def __str__(self):
         return self.name
@@ -124,7 +133,7 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         on_delete=models.CASCADE,
     )
 
-    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="Postal Code")
+    p_code = models.CharField(max_length=32, blank=True, null=True, verbose_name="P Code")
 
     parent = TreeForeignKey(
         "self",
