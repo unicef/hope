@@ -16,10 +16,9 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from sentry_sdk.integrations.celery import CeleryIntegration
+from single_source import get_version
 
 from hct_mis_api.apps.core.tasks_schedules import TASKS_SCHEDULES
-
-from single_source import get_version
 
 PROJECT_NAME = "hct_mis_api"
 # project root and add "apps" to the path
@@ -91,6 +90,9 @@ EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "").lower() == "true"
+
+KOBO_KF_URL = os.getenv("KOBO_KF_URL", "https://kf-hope.unitst.org")
+KOBO_KC_URL = os.getenv("KOBO_KC_URL", "https://kc-hope.unitst.org")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = os.getenv("ENV")
