@@ -46,9 +46,16 @@ class BusinessArea(TimeStampedUUIDModel):
         db_index=True,
     )
     has_data_sharing_agreement = models.BooleanField(default=False)
+    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    is_split = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
+        if self.parent:
+            self.parent.is_split = True
+            self.parent.save()
+        if self.children.count():
+            self.is_split = True
         super(BusinessArea, self).save(*args, **kwargs)
 
     class Meta:
