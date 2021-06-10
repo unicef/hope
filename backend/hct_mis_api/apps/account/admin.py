@@ -57,6 +57,7 @@ class RoleAdminForm(ModelForm):
 
 class UserRoleAdminForm(ModelForm):
     role = ModelChoiceField(Role.objects.order_by("name"))
+    business_area = ModelChoiceField(BusinessArea.objects.filter(is_split=False))
 
     class Meta:
         model = UserRole
@@ -92,6 +93,12 @@ class UserRoleAdminForm(ModelForm):
 
 class UserRoleInlineFormSet(BaseInlineFormSet):
     model = UserRole
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        form.fields["business_area"].choices = [
+            (str(x.id), str(x)) for x in BusinessArea.objects.filter(is_split=False)
+        ]
 
     def clean(self):
         super().clean()

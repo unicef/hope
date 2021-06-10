@@ -18,6 +18,8 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hct_mis_api.apps.household import models as households
 from hct_mis_api.apps.mis_datahub.models import (
     Document,
+    DownPayment,
+    FundsCommitment,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -119,6 +121,16 @@ class IndividualAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+
+
+@admin.register(FundsCommitment)
+class FundsCommitmentAdmin(HUBAdminMixin):
+    pass
+
+
+@admin.register(DownPayment)
+class DownPaymentAdmin(HUBAdminMixin):
+    pass
 
 
 @admin.register(IndividualRoleInHousehold)
