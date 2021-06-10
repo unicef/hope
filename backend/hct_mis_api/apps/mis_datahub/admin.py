@@ -25,6 +25,8 @@ from hct_mis_api.apps.mis_datahub.models import (
     Session,
     TargetPopulation,
     TargetPopulationEntry,
+    FundsCommitment,
+    DownPayment,
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
@@ -119,6 +121,16 @@ class IndividualAdmin(HUBAdminMixin):
             return f"{url}?session={obj.pk}&household_mis_id={obj.mis_id}"
         else:
             button.visible = False
+
+
+@admin.register(FundsCommitment)
+class FundsCommitmentAdmin(HUBAdminMixin):
+    pass
+
+
+@admin.register(DownPayment)
+class DownPaymentAdmin(HUBAdminMixin):
+    pass
 
 
 @admin.register(IndividualRoleInHousehold)

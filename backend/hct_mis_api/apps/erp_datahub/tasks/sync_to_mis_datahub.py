@@ -13,11 +13,14 @@ class SyncToMisDatahubTask:
     def get_model_dict(model):
         model_dict = {}
         model_dict.update(model.__dict__)
+        if "_prefetched_objects_cache" in model_dict:
+            del model_dict["_prefetched_objects_cache"]
         del model_dict["_state"]
-        del model_dict["new_business_area_code"]
+        del model_dict["business_office_code"]
         return model_dict
 
-    @atomic()
+    @atomic(using="cash_assist_datahub_erp")
+    @atomic(using="default")
     def execute(self):
         # have to be list because it used in another database
 
@@ -30,10 +33,10 @@ class SyncToMisDatahubTask:
         ).filter(mis_sync_flag=False)
         down_payments_from_split_business_areas = DownPayment.objects.filter(
             business_area__in=parent_business_area_codes, mis_sync_flag=False
-        ).exclude(Q(new_business_area_code__isnull=True) | Q(new_business_area_code=""))
+        ).exclude(Q(business_office_code__isnull=True) | Q(business_office_code=""))
         funds_commitments_from_split_business_areas = FundsCommitment.objects.filter(
             business_area__in=parent_business_area_codes, mis_sync_flag=False
-        ).exclude(Q(new_business_area_code__isnull=True) | Q(new_business_area_code=""))
+        ).exclude(Q(business_office_code__isnull=True) | Q(business_office_code=""))
 
         mis_down_payments_to_create = []
         funds_commitments_to_create = []
@@ -46,11 +49,11 @@ class SyncToMisDatahubTask:
         # with changed business areas
         for down_payment in down_payments_from_split_business_areas:
             mis_down_payment = mis_models.DownPayment(**SyncToMisDatahubTask.get_model_dict(down_payment))
-            mis_down_payment.business_area = down_payment.new_business_area_code
+            mis_down_payment.business_area = down_payment.business_office_code
             mis_down_payments_to_create.append(mis_down_payment)
         for funds_commitment in funds_commitments_from_split_business_areas:
             mis_funds_commitment = mis_models.FundsCommitment(**SyncToMisDatahubTask.get_model_dict(funds_commitment))
-            mis_funds_commitment.business_area = funds_commitment.new_business_area_code
+            mis_funds_commitment.business_area = funds_commitment.business_office_code
             funds_commitments_to_create.append(mis_funds_commitment)
         mis_models.DownPayment.objects.bulk_create(mis_down_payments_to_create)
         mis_models.FundsCommitment.objects.bulk_create(funds_commitments_to_create)
