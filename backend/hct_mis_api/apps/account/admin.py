@@ -240,6 +240,26 @@ class DjAdminManager:
         self._last_response = self.client.post(url, data, allow_redirects=False)
         return self._last_response
 
+    def list_users(self):
+        regex = re.compile(
+            r"field-username.*<a.*?>(?P<username>.*)</a></t.>" r'.*field-email">(?P<mail>.*?)<',
+            re.MULTILINE + re.IGNORECASE,
+        )
+        page = 2
+        last_match = None
+        while True:
+            url = f"{self.admin_url}auth/user/?p={page}"
+            res = self._get(url)
+            self.assert_response(200)
+            matches = regex.findall(res.content.decode())
+            if matches[0] == last_match:
+                break
+            last_match = matches[0]
+            for m in matches:
+                yield m
+
+            page += 1
+
     def delete_user(self, username, pk):
         for client in [self, self.kc]:
             url = f"{client.admin_url}auth/user/{pk}/delete/"
@@ -382,18 +402,25 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button()
-    def sync_kobo_users(self, request):
-        from hct_mis_api.apps.core.kobo.api import KoboAPI
-
+    @button(label="Sync users from Kobo")
+    # @button(label="List Kobo User")
+    def kobo_users_sync(self, request):
+        ctx = self.get_common_context(request)
+        users = []
         try:
-            api = KoboAPI()._get_token()
-            for user in User.objects.all():
-                pass
-        except Exception as e:
-            self.message_user(request, str(e).messages.ERROR)
+            api = DjAdminManager()
+            api.login(request)
+            for entry in api.list_users():
+                local = User.objects.filter(email=entry[1]).first()
+                users.append([entry[0], entry[1], local])
 
-    @button()
+            ctx["users"] = users
+
+        except Exception as e:
+            self.message_user(request, str(e), messages.ERROR)
+        return TemplateResponse(request, "admin/kobo_users.html", ctx)
+
+    @button(label="Bulk upload Kobo Users")
     def kobo_import_users(self, request):
         from hct_mis_api.apps.account.forms import KoboImportUsersForm
 
@@ -438,7 +465,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                     initial={
                         "username": request.COOKIES.get("kobo_username", request.user.email),
                         "password": request.COOKIES.get("kobo_password", ""),
-                        "emails": "s.apostolico+kobo@gmail.com s.apostolico+kobo111@gmail.com s.apostolico+kobo222@gmail.com ",
+                        "emails": "",
                     }
                 )
         except Exception as e:

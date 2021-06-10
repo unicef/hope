@@ -61,6 +61,7 @@ class BusinessArea(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["name"]
+        # app_label = "core"
 
     def __str__(self):
         return self.name
