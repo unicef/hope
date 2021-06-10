@@ -3,10 +3,16 @@ import logging
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.validators import RegexValidator
+from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
+from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.html import format_html
 
 import xlrd
@@ -47,6 +53,39 @@ class TestRapidproForm(forms.Form):
     flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
 
 
+class BusinessOfficeCodeValidator(RegexValidator):
+    message = "Business office code must start with 'BO' and contains only chars"
+    regex = "BO[A-Z]{2}"
+
+
+class BusinessOfficeForm(forms.ModelForm):
+    name = forms.CharField()
+    code = forms.CharField(max_length=4, validators=[BusinessOfficeCodeValidator()])
+
+    class Meta:
+        model = BusinessArea
+        fields = ("code", "name")
+
+
+class BusinessofficeFilter(SimpleListFilter):
+    template = "adminfilters/combobox.html"
+    title = "Business Ofiice"
+    parameter_name = "bo"
+
+    def lookups(self, request, model_admin):
+        return [(1, "Is a Business Office"), (2, "Is a Business Area")]
+
+    def value(self):
+        return self.used_parameters.get(self.parameter_name)
+
+    def queryset(self, request, queryset):
+        if self.value() == "2":
+            return queryset.filter(parent_id__isnull=True)
+        elif self.value() == "1":
+            return queryset.exclude(parent_id__isnull=True)
+        return queryset
+
+
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = (
@@ -57,7 +96,44 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", "is_split")
+    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    readonly_fields = ("parent", "is_split")
+
+    @button(label="Create Business Office")
+    def split_business_area(self, request, pk):
+        context = self.get_common_context(request, pk)
+        opts = self.object._meta
+        if request.POST:
+            form = context["form"] = BusinessOfficeForm(request.POST)
+            if form.is_valid():
+                with transaction.atomic():
+                    self.object.is_split = True
+                    name = form.cleaned_data["name"]
+                    office = BusinessArea.objects.create(
+                        code=form.cleaned_data["code"],
+                        name=form.cleaned_data["name"],
+                        parent=self.object,
+                        region_code=self.object.region_code,
+                        region_name=self.object.region_name,
+                        long_name=f"Business Office: {name}",
+                        slug=slugify(name),
+                    )
+                preserved_filters = self.get_preserved_filters(request)
+
+                redirect_url = reverse(
+                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    args=(office.pk,),
+                    current_app=self.admin_site.name,
+                )
+                redirect_url = add_preserved_filters(
+                    {"preserved_filters": preserved_filters, "opts": opts}, redirect_url
+                )
+                return HttpResponseRedirect(redirect_url)
+
+        else:
+            context["form"] = BusinessOfficeForm()
+
+        return TemplateResponse(request, "core/admin/split_ba.html", context)
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
