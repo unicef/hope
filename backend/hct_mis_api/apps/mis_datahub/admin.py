@@ -18,6 +18,8 @@ from smart_admin.mixins import FieldsetMixin as SmartFieldsetMixin
 from hct_mis_api.apps.household import models as households
 from hct_mis_api.apps.mis_datahub.models import (
     Document,
+    DownPayment,
+    FundsCommitment,
     Household,
     Individual,
     IndividualRoleInHousehold,
@@ -25,8 +27,6 @@ from hct_mis_api.apps.mis_datahub.models import (
     Session,
     TargetPopulation,
     TargetPopulationEntry,
-    FundsCommitment,
-    DownPayment,
 )
 from hct_mis_api.apps.program import models as programs
 from hct_mis_api.apps.targeting import models as targeting
@@ -143,7 +143,7 @@ class SessionAdmin(SmartFieldsetMixin, HUBAdminMixin):
     list_display = ("timestamp", "id", "source", "status", "last_modified_date", "business_area")
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
-    ordering = ("timestamp",)
+    ordering = ("-timestamp",)
 
     @href()
     def target_population(self, button):
