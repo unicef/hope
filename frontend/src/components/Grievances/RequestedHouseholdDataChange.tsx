@@ -131,7 +131,8 @@ export function RequestedHouseholdDataChange({
             },
           });
           showMessage('Changes Approved');
-          setEdit(values.selected.length === 0);
+          const sum = Object.values(values).flat().length;
+          setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
         }
