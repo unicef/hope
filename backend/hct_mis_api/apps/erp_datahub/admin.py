@@ -3,6 +3,9 @@ from operator import itemgetter
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.options import IncorrectLookupParameters
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, RegexValidator
 from django.db.transaction import atomic
 from django.shortcuts import redirect
@@ -18,8 +21,8 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.erp_datahub.models import DownPayment, FundsCommitment
 from hct_mis_api.apps.erp_datahub.tasks.sync_to_mis_datahub import SyncToMisDatahubTask
-from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 from hct_mis_api.apps.mis_datahub import models as mis_models
+from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
 
 class NumberValidator(RegexValidator):
@@ -76,10 +79,34 @@ def should_show_assign_business_office(request, obj):
     return business_area.is_split and obj.business_office_code is None
 
 
+class SplitBusinessAreaFilter(SimpleListFilter):
+    template = "adminfilters/fieldcombobox.html"
+    title = "Split Business Area"
+    parameter_name = "split"
+
+    def lookups(self, request, model_admin):
+        return [(1, "Yes"), (2, "No")]
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        from hct_mis_api.apps.core.models import BusinessArea
+
+        split_codes = list(BusinessArea.objects.filter(is_split=True).values_list("code", flat=True))
+        try:
+            if self.value() == "1":
+                return queryset.filter(business_area__in=split_codes)
+            else:
+                return queryset.exclude(business_area__in=split_codes)
+        except (ValueError, ValidationError) as e:
+            raise IncorrectLookupParameters(e)
+
+
 @admin.register(FundsCommitment)
 class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("rec_serial_number", "business_area", "funds_commitment_number", "posting_date")
     list_filter = (
+        SplitBusinessAreaFilter,
         "mis_sync_date",
         "ca_sync_date",
         TextFieldFilter.factory("business_area"),
@@ -121,7 +148,9 @@ class FundsCommitmentAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     @button()
     def execute_exchange_rate_sync(self, request):
         if request.method == "POST":
-            from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import PullFromErpDatahubTask
+            from hct_mis_api.apps.erp_datahub.tasks.pull_from_erp_datahub import (
+                PullFromErpDatahubTask,
+            )
 
             task = PullFromErpDatahubTask()
             task.execute()
