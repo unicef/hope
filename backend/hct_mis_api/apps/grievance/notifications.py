@@ -141,6 +141,8 @@ class GrievanceNotification:
         return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.assigned_to}"
 
     def _prepare_assigned_to_recipient(self):
+        if self.grievance_ticket.assigned_to is None:
+            return []
         return [self.grievance_ticket.assigned_to]
 
     ACTION_PREPARE_BODIES_DICT = {
