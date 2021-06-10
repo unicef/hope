@@ -1,12 +1,18 @@
 import logging
+import re
 from collections import namedtuple
+from functools import cached_property
+from urllib.parse import unquote
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.db import models, router, transaction
 from django.db.models import Q
 from django.forms import ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
@@ -14,8 +20,10 @@ from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
+import requests
 from admin_extra_urls.api import ExtraUrlMixin, button
 from adminfilters.filters import (
     ChoicesFieldComboFilter,
@@ -24,17 +32,11 @@ from adminfilters.filters import (
 )
 from requests import HTTPError
 
-from hct_mis_api.apps.account.microsoft_graph import (
-    DJANGO_USER_MAP,
-    MicrosoftGraphAPI,
-)
-from hct_mis_api.apps.account.models import (
-    IncompatibleRoles,
-    Role,
-    User,
-    UserRole,
-)
+from hct_mis_api.apps.account.forms import KoboLoginForm
+from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
+from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -125,9 +127,144 @@ class UserRoleInline(admin.TabularInline):
     formset = UserRoleInlineFormSet
 
 
+KOBO_ACCESS_EMAIL = """
+
+You have been authorised to access to HOPE/Kobo
+
+Follow this link {kobo_url} and use below credentials:
+
+Username:{email}
+Password:{password}
+
+The HOPE team.
+"""
+
+
+class DjAdminManager:
+    regex = re.compile('class="errorlist"><li>(.*)(?=<\/li>)')
+
+    class ResponseException(Exception):
+        pass
+
+    def __init__(self, kf_host=settings.KOBO_KF_URL, kc_host=settings.KOBO_KC_URL):
+        self.admin_path = f"/admin/"
+        self.admin_url = f"{kf_host}{self.admin_path}"
+        self.login_url = f"{self.admin_url}login/"
+        self._logged = False
+        self._last_error = None
+        self._last_response = False
+        self._username = None
+        self._password = None
+        self.form_errors = []
+        if kc_host:
+            self.kc = DjAdminManager(kc_host, None)
+
+    def extract_errors(self, res):
+        self.form_errors = [msg for msg in self.regex.findall(res.content.decode())]
+        return self.form_errors
+
+    def assert_response(self, status: int, location: str = None, custom_error=None):
+        if not isinstance(status, (list, tuple)):
+            status = [status]
+        if self._last_response.status_code not in status:
+            msg = custom_error or f"Unexpected code:{self._last_response.status_code} not in {status}"
+            self._last_error = self._last_response
+            raise self.ResponseException(msg)
+
+        if location and (redir_to := self._last_response.headers.get("location", "N/A")) != location:
+            msg = custom_error or f"Unexpected redirect:{redir_to} <> {location}"
+            self._last_error = self._last_response
+            raise self.ResponseException(msg)
+
+    @cached_property
+    def client(self):
+        client = requests.Session()
+        client.headers["Referer"] = self.admin_url
+        client.headers["User-Agent"] = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/91.0.4472.77 Safari/537.36"
+        )
+        return client
+
+    def logout(self, request):
+        self._username = request.session["kobo_username"] = None
+        self._password = request.session["kobo_password"] = None
+
+    def login(self, request=None, username="", password="", twin=None):
+        if twin:
+            username = twin._username
+            password = twin._password
+        elif not username and request:
+            username = request.POST.get("kobo_username", request.session.get("kobo_username"))
+            password = request.POST.get("kobo_password", request.session.get("kobo_password"))
+        elif username:
+            self._username = username
+            self._password = password
+        try:
+            for client in (self, self.kc):
+                try:
+                    getattr(client, "_get")(client.login_url)
+                    csrftoken = getattr(client, "client").cookies["csrftoken"]
+                    getattr(client, "_post")(
+                        client.login_url,
+                        {
+                            "username": username,
+                            "password": password,
+                            "next": client.admin_url,
+                            "csrfmiddlewaretoken": csrftoken,
+                        },
+                    )
+                    getattr(client, "assert_response")(302, client.admin_url)
+                except self.ResponseException as e:
+                    raise self.ResponseException(f"Unable to login to Kobo at {client.login_url}: {e}")
+
+            if request:
+                request.session["kobo_username"] = username
+                request.session["kobo_password"] = password
+        except Exception as e:
+            logger.exception(e)
+            raise
+
+    def _get(self, url):
+        self._last_response = self.client.get(url, allow_redirects=False)
+        return self._last_response
+
+    def _post(self, url, data):
+        self._last_response = self.client.post(url, data, allow_redirects=False)
+        return self._last_response
+
+    def delete_user(self, username, pk):
+        for client in [self, self.kc]:
+            url = f"{client.admin_url}auth/user/{pk}/delete/"
+            getattr(client, "_get")(url)
+            getattr(client, "assert_response")([200, 404, 302])
+            if client._last_response.status_code == 200:
+                csrftoken = getattr(client, "client").cookies["csrftoken"]
+                getattr(client, "_post")(url, {"csrfmiddlewaretoken": csrftoken})
+                getattr(client, "assert_response")(302)
+
+    def create_user(self, username, password):
+        self._get(f"{self.admin_url}auth/user/")
+        csrftoken = self.client.cookies["csrftoken"]
+        self.assert_response(200, None, "Cannot get csrftoken")
+        self._post(
+            f"{self.admin_url}auth/user/add/",
+            data={"username": username, "password1": password, "password2": password, "csrfmiddlewaretoken": csrftoken},
+        )
+        if self._last_response.status_code == 200:
+            self.extract_errors(self._last_response)
+            self.assert_response(302, None, f"Cannot create user {username}: {self.form_errors}")
+
+        redir_to = self._last_response.headers["location"]
+        m = re.search(r"auth/user/([0-9]*)/(change/|)$", redir_to)
+        pk = m.groups()[0]
+        return pk
+
+
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
-    Results = namedtuple("Result", "created,missing,updated")
+    Results = namedtuple("Result", "created,missing,updated,errors")
     list_filter = ("is_staff", "is_superuser", "is_active")
     list_display = (
         "username",
@@ -146,6 +283,10 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             {"fields": (("first_name", "last_name", "email"), "ad_uuid")},
         ),
         (
+            _("Custom Fields"),
+            {"fields": ("custom_fields",)},
+        ),
+        (
             _("Permissions"),
             {
                 "fields": (
@@ -159,6 +300,149 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
+
+    def get_deleted_objects(self, objs, request):
+        to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
+        user = objs[0]
+        kobo_pk = user.custom_fields.get("kobo_pk", None)
+        kobo_username = user.custom_fields.get("kobo_username", None)
+        if kobo_pk:
+            to_delete.append(f"Kobo: {kobo_username}")
+        return to_delete, model_count, perms_needed, protected
+
+    def delete_view(self, request, object_id, extra_context=None):
+        if request.POST:  # The user has confirmed the deletion.
+            with transaction.atomic(using=router.db_for_write(self.model)):
+                res = self._delete_view(request, object_id, extra_context)
+        else:
+            obj: User = self.get_object(request, unquote(object_id))
+            kobo_pk = obj.custom_fields.get("kobo_pk", None)
+            extra_context = extra_context or {}
+            try:
+                api = DjAdminManager()
+                api.login(request)
+                extra_context["kobo_pk"] = kobo_pk
+                self.message_user(request, "This action will also delete linked Kobo account", messages.WARNING)
+            except Exception as e:
+                extra_context["kobo_failed"] = True
+                self.message_user(request, str(e), messages.ERROR)
+            res = super().delete_view(request, object_id, extra_context)
+
+        return res
+
+    def delete_model(self, request, obj):
+        try:
+            if "kobo_username" in obj.custom_fields:
+                api = DjAdminManager()
+                api.login(request)
+                api.delete_user(obj.custom_fields["kobo_username"], obj.custom_fields["kobo_pk"])
+            super().delete_model(request, obj)
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+            raise
+
+    @button()
+    def kobo_login(self, request):
+        cookies = {}
+        ctx = self.get_common_context(request, logged=False)
+        try:
+            if request.method == "POST":
+                form = KoboLoginForm(request.POST)
+                if form.is_valid():
+                    api = DjAdminManager()
+                    api.login(
+                        request,
+                        username=form.cleaned_data["kobo_username"],
+                        password=form.cleaned_data["kobo_password"],
+                    )
+                    self.message_user(request, "Successfully logged in", messages.SUCCESS)
+                    ctx["logged"] = True
+                else:
+                    self.message_user(request, "Invalid", messages.ERROR)
+            else:
+                form = KoboLoginForm(
+                    initial={
+                        "kobo_username": request.session.get("kobo_username", request.user.email),
+                        "kobo_password": request.session.get("kobo_password", ""),
+                    }
+                )
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+        ctx["form"] = form
+        response = TemplateResponse(request, "admin/kobo_login.html", ctx)
+        for key, value in cookies.items():
+            response.set_cookie(key, value)
+        return response
+
+    @button()
+    def sync_kobo_users(self, request):
+        from hct_mis_api.apps.core.kobo.api import KoboAPI
+
+        try:
+            api = KoboAPI()._get_token()
+            for user in User.objects.all():
+                pass
+        except Exception as e:
+            self.message_user(request, str(e).messages.ERROR)
+
+    @button()
+    def kobo_import_users(self, request):
+        from hct_mis_api.apps.account.forms import KoboImportUsersForm
+
+        cookies = {}
+        ctx = self.get_common_context(request)
+        api = DjAdminManager()
+        form = None
+        try:
+            if request.method == "POST":
+                form = KoboImportUsersForm(request.POST)
+                if form.is_valid():
+                    emails = set(form.cleaned_data["emails"].split())
+                    api.login(request)
+                    results = self.Results([], [], [], [])
+                    ctx["results"] = results
+                    for email in emails:
+                        user, created = User.objects.get_or_create(username=email, is_active=False, email=email)
+                        password = get_random_string()
+                        try:
+                            pk = api.create_user(email, password)
+                            results.created.append((email, password))
+                            user.custom_fields["kobo_username"] = email
+                            user.custom_fields["kobo_pk"] = pk
+                            user.save()
+                            send_mail(
+                                "Kobo credentials",
+                                KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
+                                settings.DEFAULT_FROM_EMAIL,
+                                [email],
+                            )
+                        except DjAdminManager.ResponseException as e:
+                            results.errors.append((email, str(e)))
+                    if results.errors:
+                        self.message_user(request, "Some error occurred", messages.ERROR)
+
+                    ctx["results"] = results
+                else:
+                    self.message_user(request, "Invalid", messages.ERROR)
+            else:
+                api.login(request)
+                form = KoboImportUsersForm(
+                    initial={
+                        "username": request.COOKIES.get("kobo_username", request.user.email),
+                        "password": request.COOKIES.get("kobo_password", ""),
+                        "emails": "s.apostolico+kobo@gmail.com s.apostolico+kobo111@gmail.com s.apostolico+kobo222@gmail.com ",
+                    }
+                )
+        except Exception as e:
+            logger.exception(e)
+            self.message_user(request, str(e), messages.ERROR)
+        ctx["form"] = form
+        response = TemplateResponse(request, "admin/kobo_import.html", ctx)
+        for key, value in cookies.items():
+            response.set_cookie(key, value)
+        return response
 
     @button()
     def privileges(self, request, pk):
@@ -231,7 +515,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 users_to_bulk_create = []
                 users_role_to_bulk_create = []
                 existing = set(User.objects.filter(email__in=emails).values_list("email", flat=True))
-                results = self.Results([], [], [])
+                results = self.Results([], [], [], [])
                 try:
                     ms_graph = MicrosoftGraphAPI()
                     for email in emails:
