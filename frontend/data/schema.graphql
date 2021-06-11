@@ -121,8 +121,8 @@ type AgencyNode {
 }
 
 enum AgencyType {
-  UNHCR
   WFP
+  UNHCR
 }
 
 type ApproveTargetPopulationMutation {
@@ -147,6 +147,9 @@ type BusinessAreaNode implements Node {
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
+  parent: UserBusinessAreaNode
+  isSplit: Boolean!
+  children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -3135,6 +3138,9 @@ type UserBusinessAreaNode implements Node {
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
+  parent: UserBusinessAreaNode
+  isSplit: Boolean!
+  children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -3177,6 +3183,7 @@ type UserNode implements Node {
   status: UserStatus!
   partner: UserPartner!
   availableForExport: Boolean!
+  customFields: JSONString!
   jobTitle: String!
   adUuid: String
   userRoles: [UserRoleNode!]!
