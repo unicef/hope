@@ -18,10 +18,10 @@ export type Scalars = {
   UUID: any,
   Arg: any,
   DateTime: any,
+  JSONString: any,
   BigInt: any,
   Date: any,
   FlexFieldsScalar: any,
-  JSONString: any,
   Decimal: any,
   GeoJSON: any,
   Upload: any,
@@ -224,8 +224,8 @@ export type AgencyNode = {
 };
 
 export enum AgencyType {
-  Unhcr = 'UNHCR',
-  Wfp = 'WFP'
+  Wfp = 'WFP',
+  Unhcr = 'UNHCR'
 }
 
 export type ApproveTargetPopulationMutation = {
@@ -250,6 +250,9 @@ export type BusinessAreaNode = Node & {
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
+  parent?: Maybe<UserBusinessAreaNode>,
+  isSplit: Scalars['Boolean'],
+  children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -263,6 +266,15 @@ export type BusinessAreaNode = Node & {
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: LogEntryNodeConnection,
+};
+
+
+export type BusinessAreaNodeChildrenArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
 };
 
 
@@ -4890,6 +4902,9 @@ export type UserBusinessAreaNode = Node & {
   rapidProApiKey?: Maybe<Scalars['String']>,
   slug: Scalars['String'],
   hasDataSharingAgreement: Scalars['Boolean'],
+  parent?: Maybe<UserBusinessAreaNode>,
+  isSplit: Scalars['Boolean'],
+  children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
   paymentrecordSet: PaymentRecordNodeConnection,
@@ -4904,6 +4919,15 @@ export type UserBusinessAreaNode = Node & {
   reports: ReportNodeConnection,
   logentrySet: LogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+
+export type UserBusinessAreaNodeChildrenArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
 };
 
 
@@ -5049,6 +5073,7 @@ export type UserNode = Node & {
   status: UserStatus,
   partner: UserPartner,
   availableForExport: Scalars['Boolean'],
+  customFields: Scalars['JSONString'],
   jobTitle: Scalars['String'],
   adUuid?: Maybe<Scalars['String']>,
   userRoles: Array<UserRoleNode>,
@@ -6537,7 +6562,8 @@ export type AllIndividualsQueryVariables = {
   excludedId?: Maybe<Scalars['String']>,
   businessArea?: Maybe<Scalars['String']>,
   adminArea?: Maybe<Scalars['ID']>,
-  withdrawn?: Maybe<Scalars['Boolean']>
+  withdrawn?: Maybe<Scalars['Boolean']>,
+  admin2?: Maybe<Array<Maybe<Scalars['ID']>>>
 };
 
 
@@ -11665,8 +11691,8 @@ export type AllHouseholdsFlexFieldsAttributesQueryHookResult = ReturnType<typeof
 export type AllHouseholdsFlexFieldsAttributesLazyQueryHookResult = ReturnType<typeof useAllHouseholdsFlexFieldsAttributesLazyQuery>;
 export type AllHouseholdsFlexFieldsAttributesQueryResult = ApolloReactCommon.QueryResult<AllHouseholdsFlexFieldsAttributesQuery, AllHouseholdsFlexFieldsAttributesQueryVariables>;
 export const AllIndividualsDocument = gql`
-    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean) {
-  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn) {
+    query AllIndividuals($before: String, $after: String, $first: Int, $last: Int, $fullNameContains: String, $sex: [String], $age: String, $orderBy: String, $search: String, $programs: [ID], $status: [String], $lastRegistrationDate: String, $householdId: UUID, $excludedId: String, $businessArea: String, $adminArea: ID, $withdrawn: Boolean, $admin2: [ID]) {
+  allIndividuals(before: $before, after: $after, first: $first, last: $last, fullName_Startswith: $fullNameContains, sex: $sex, age: $age, orderBy: $orderBy, search: $search, programs: $programs, status: $status, lastRegistrationDate: $lastRegistrationDate, household_Id: $householdId, excludedId: $excludedId, businessArea: $businessArea, household_AdminArea: $adminArea, withdrawn: $withdrawn, admin2: $admin2) {
     totalCount
     pageInfo {
       startCursor
@@ -11728,6 +11754,7 @@ export function withAllIndividuals<TProps, TChildProps = {}>(operationOptions?: 
  *      businessArea: // value for 'businessArea'
  *      adminArea: // value for 'adminArea'
  *      withdrawn: // value for 'withdrawn'
+ *      admin2: // value for 'admin2'
  *   },
  * });
  */
@@ -15801,8 +15828,11 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
   UserStatus: UserStatus,
   UserPartner: UserPartner,
+  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
+  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
+  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
   AdminAreaTypeNodeEdge: ResolverTypeWrapper<AdminAreaTypeNodeEdge>,
   AdminAreaTypeNode: ResolverTypeWrapper<AdminAreaTypeNode>,
@@ -15828,7 +15858,6 @@ export type ResolversTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   FlexFieldsScalar: ResolverTypeWrapper<Scalars['FlexFieldsScalar']>,
-  JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: ResolverTypeWrapper<DeduplicationResultNode>,
@@ -15951,8 +15980,6 @@ export type ResolversTypes = {
   RegistrationDataImportNodeConnection: ResolverTypeWrapper<RegistrationDataImportNodeConnection>,
   RegistrationDataImportNodeEdge: ResolverTypeWrapper<RegistrationDataImportNodeEdge>,
   RoleNode: ResolverTypeWrapper<RoleNode>,
-  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
-  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   ChoiceObject: ResolverTypeWrapper<ChoiceObject>,
   SanctionListIndividualNodeConnection: ResolverTypeWrapper<SanctionListIndividualNodeConnection>,
   SanctionListIndividualNodeEdge: ResolverTypeWrapper<SanctionListIndividualNodeEdge>,
@@ -16122,8 +16149,11 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime'],
   UserStatus: UserStatus,
   UserPartner: UserPartner,
+  JSONString: Scalars['JSONString'],
   UserRoleNode: UserRoleNode,
   UserBusinessAreaNode: UserBusinessAreaNode,
+  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
+  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
   AdminAreaTypeNodeEdge: AdminAreaTypeNodeEdge,
   AdminAreaTypeNode: AdminAreaTypeNode,
@@ -16149,7 +16179,6 @@ export type ResolversParentTypes = {
   IndividualMaritalStatus: IndividualMaritalStatus,
   IndividualRelationship: IndividualRelationship,
   FlexFieldsScalar: Scalars['FlexFieldsScalar'],
-  JSONString: Scalars['JSONString'],
   IndividualDeduplicationGoldenRecordStatus: IndividualDeduplicationGoldenRecordStatus,
   IndividualDeduplicationBatchStatus: IndividualDeduplicationBatchStatus,
   DeduplicationResultNode: DeduplicationResultNode,
@@ -16272,8 +16301,6 @@ export type ResolversParentTypes = {
   RegistrationDataImportNodeConnection: RegistrationDataImportNodeConnection,
   RegistrationDataImportNodeEdge: RegistrationDataImportNodeEdge,
   RoleNode: RoleNode,
-  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
-  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   ChoiceObject: ChoiceObject,
   SanctionListIndividualNodeConnection: SanctionListIndividualNodeConnection,
   SanctionListIndividualNodeEdge: SanctionListIndividualNodeEdge,
@@ -16539,6 +16566,9 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, BusinessAreaNodePaymentrecordSetArgs>,
@@ -18432,6 +18462,9 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   rapidProApiKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   slug?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
   paymentrecordSet?: Resolver<ResolversTypes['PaymentRecordNodeConnection'], ParentType, ContextType, UserBusinessAreaNodePaymentrecordSetArgs>,
@@ -18474,6 +18507,7 @@ export type UserNodeResolvers<ContextType = any, ParentType extends ResolversPar
   status?: Resolver<ResolversTypes['UserStatus'], ParentType, ContextType>,
   partner?: Resolver<ResolversTypes['UserPartner'], ParentType, ContextType>,
   availableForExport?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  customFields?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
   jobTitle?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   adUuid?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
