@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.db.models import Prefetch, Q, Sum
 from django.db.models.functions import Coalesce, Lower
 
@@ -30,11 +28,7 @@ from hct_mis_api.apps.core.filters import (
     IntegerRangeFilter,
 )
 from hct_mis_api.apps.core.models import AdminArea, FlexibleAttribute
-from hct_mis_api.apps.core.schema import (
-    AdminAreaNode,
-    ChoiceObject,
-    FieldAttributeNode,
-)
+from hct_mis_api.apps.core.schema import AdminAreaNode, ChoiceObject, FieldAttributeNode
 from hct_mis_api.apps.core.utils import (
     CustomOrderingFilter,
     chart_filters_decoder,
@@ -53,7 +47,7 @@ from hct_mis_api.apps.household.models import (
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
-    INDIVIDUAL_HOUSEHOLD_STATUS,
+    INDIVIDUAL_STATUS_CHOICES,
     MARITAL_STATUS_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
@@ -61,6 +55,9 @@ from hct_mis_api.apps.household.models import (
     ROLE_NO_ROLE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
+    STATUS_ACTIVE,
+    STATUS_DUPLICATE,
+    STATUS_WITHDRAWN,
     WORK_STATUS_CHOICE,
     Agency,
     Document,
@@ -163,7 +160,7 @@ class IndividualFilter(FilterSet):
     search = CharFilter(method="search_filter")
     last_registration_date = DateRangeFilter(field_name="last_registration_date")
     admin2 = ModelMultipleChoiceFilter(field_name="household__admin_area", queryset=AdminArea.objects.filter(level=2))
-    status = MultipleChoiceFilter(field_name="status", choices=INDIVIDUAL_HOUSEHOLD_STATUS)
+    status = MultipleChoiceFilter(choices=INDIVIDUAL_STATUS_CHOICES, method="status_filter")
     excluded_id = CharFilter(method="filter_excluded_id")
     withdrawn = BooleanFilter(field_name="withdrawn")
 
@@ -210,6 +207,17 @@ class IndividualFilter(FilterSet):
             q_obj |= Q(middle_name__startswith=value)
             q_obj |= Q(family_name__startswith=value)
         return qs.filter(q_obj)
+
+    def status_filter(self, qs, name, value):
+        q_obj = Q()
+        if STATUS_DUPLICATE in value:
+            q_obj |= Q(duplicate=True)
+        if STATUS_WITHDRAWN in value:
+            q_obj |= Q(withdrawn=True)
+        if STATUS_ACTIVE in value:
+            q_obj |= Q(duplicate=False, withdrawn=False)
+
+        return qs.filter(q_obj).distinct()
 
     def filter_excluded_id(self, qs, name, value):
         return qs.exclude(id=decode_id_string(value))
