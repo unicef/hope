@@ -5,20 +5,25 @@
         <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
         &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
         &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
-        &rsaquo; Load
+        &rsaquo; <a href="{% url opts|admin_urlname:'load_from_datamart' %}">Load from datamart</a>
     </div>
 {% endblock %}
 {% block content %}
-    {% if form %}
+    {% if run_in_background %}
+        <h1>Load has been scheduled</h1>
+    {% elif form %}
         <form method="post">
             {% csrf_token %}
             <table>{{ form.as_table }}</table>
             <input type="submit" value="Load">
         </form>
     {% else %}
-        <div>Loaded {{ admin_areas|length }} areas</div>
-        <ul>{% for aa in admin_areas %}
-            <li>{{ aa }}</li>
+        <h3>Loaded {{ admin_areas.created|add:admin_areas.updated }} areas</h3>
+        <div>Created: {{ admin_areas.created }}</div>
+        <div>Updated: {{ admin_areas.updated }}</div>
+        <div>Errors: {{ admin_areas.errors|length }}</div>
+        <ul>{% for err in admin_areas.errors %}
+            <li>{{ err.0|truncatechars:500 }}{{ err.1 }}</li>
         {% endfor %}</ul>
     {% endif %}
 {% endblock %}
