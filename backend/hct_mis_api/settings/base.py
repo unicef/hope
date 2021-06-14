@@ -436,6 +436,7 @@ CONSTANCE_CONFIG = {
         "If amount of duplicates for single individual exceeds this limit deduplication is aborted",
         "positive_integers",
     ),
+    "KOBO_APP_API_TOKEN": ("", "Kobo KPI token", str),
     # GOLDEN RECORDS SETTINGS
     "DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE": (
         6.0,
