@@ -25,7 +25,7 @@ class AdminAreaLevelFactory(factory.DjangoModelFactory):
     class Meta:
         model = AdminAreaLevel
         django_get_or_create = (
-            "country",
+            "business_area",
             "admin_level",
         )
 
