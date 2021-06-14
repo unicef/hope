@@ -315,10 +315,6 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     # country = form.cleaned_data['country']
                     # country = AdminArea.objects.get(admin_area_level=form.cleaned_data["country"])
                     country = form.cleaned_data["country"]
-                    # FIXME: remove this line (pdb)
-                    import pdb
-
-                    pdb.set_trace()
                     with transaction.atomic():
                         external_id = f"import-{int(time.time())}"
                         for row in reader:

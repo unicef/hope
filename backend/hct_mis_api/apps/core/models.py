@@ -36,12 +36,12 @@ class AdminAreaLevel(TimeStampedUUIDModel):
         "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
     )
     datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
-    # business_area = models.ForeignKey(
-    #     "BusinessArea",
-    #     on_delete=models.SET_NULL,
-    #     related_name="admin_area_level",
-    #     null=True,
-    # )
+    business_area = models.ForeignKey(
+        "BusinessArea",
+        on_delete=models.SET_NULL,
+        related_name="admin_area_level",
+        null=True,
+    )
     objects = AdminAreaLevelManager()
 
     class Meta:
