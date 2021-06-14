@@ -187,6 +187,7 @@ export function LookUpHouseholdFilters({
           <AdminAreasAutocomplete
             onFilterChange={onFilterChange}
             name='admin2'
+            value={filter.admin2}
           />
         </Grid>
         <Grid item>
