@@ -2,13 +2,14 @@ import logging
 import re
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
-from django.contrib.gis.db.models import PointField, UniqueConstraint, Q
-from django.contrib.postgres.fields import JSONField, CICharField
+from django.contrib.gis.db.models import PointField, Q, UniqueConstraint
+from django.contrib.postgres.fields import CICharField, JSONField
 from django.core.validators import MinLengthValidator, validate_image_file_extension
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+from dateutil.relativedelta import relativedelta
 from django_countries.fields import CountryField
 from model_utils import Choices
 from model_utils.managers import SoftDeletableManager
@@ -21,9 +22,9 @@ from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.utils.models import (
     AbstractSyncable,
-    TimeStampedUUIDModel,
     ConcurrencyModel,
     SoftDeletableModelWithDate,
+    TimeStampedUUIDModel,
 )
 
 BLANK = ""
@@ -160,14 +161,19 @@ IDENTIFICATION_TYPE_DICT = {
 }
 UNHCR = "UNHCR"
 WFP = "WFP"
-AGENCY_TYPE_CHOICES = {
+AGENCY_TYPE_CHOICES = (
     (UNHCR, _("UNHCR")),
     (WFP, _("WFP")),
-}
+)
 STATUS_ACTIVE = "ACTIVE"
 STATUS_INACTIVE = "INACTIVE"
 STATUS_WITHDRAWN = "WITHDRAWN"
 STATUS_DUPLICATE = "DUPLICATE"
+INDIVIDUAL_STATUS_CHOICES = (
+    (STATUS_ACTIVE, "Active"),
+    (STATUS_WITHDRAWN, "Withdrawn"),
+    (STATUS_DUPLICATE, "Duplicate"),
+)
 INDIVIDUAL_HOUSEHOLD_STATUS = ((STATUS_ACTIVE, "Active"), (STATUS_INACTIVE, "Inactive"))
 UNIQUE = "UNIQUE"
 DUPLICATE = "DUPLICATE"
