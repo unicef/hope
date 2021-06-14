@@ -204,15 +204,13 @@ class CountryFilter(SimpleListFilter):
         return AdminArea.objects.filter(admin_area_level__admin_level=0).values_list("id", "title")
 
     def value(self):
-        try:
-            return AdminArea.objects.get(id=self.used_parameters.get(self.parameter_name))
-        except AdminArea.DoesNotExist:
-            pass
+        return self.used_parameters.get(self.parameter_name)
 
     def queryset(self, request, queryset):
         try:
             if self.value():
-                return queryset.filter(tree_id=self.value().tree_id)
+                country = AdminArea.objects.get(id=self.value())
+                return queryset.filter(tree_id=country.tree_id)
         except AdminArea.DoesNotExist:
             pass
         return queryset
@@ -315,7 +313,12 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                     lines = []
                     infos = {"skipped": 0}
                     # country = form.cleaned_data['country']
-                    country = AdminArea.objects.get(admin_area_level=form.cleaned_data["country"])
+                    # country = AdminArea.objects.get(admin_area_level=form.cleaned_data["country"])
+                    country = form.cleaned_data["country"]
+                    # FIXME: remove this line (pdb)
+                    import pdb
+
+                    pdb.set_trace()
                     with transaction.atomic():
                         external_id = f"import-{int(time.time())}"
                         for row in reader:
@@ -330,7 +333,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                                     tree_id=country.tree_id, p_code=row["parent_area_code"]
                                 ).first()
                                 if parent is None:
-                                    assert level_number == 0, "Cannot find parent"
+                                    assert level_number == 0, f"Cannot find parent area for {row}"
                                 AdminArea.objects.create(
                                     external_id=external_id,
                                     title=row["area_name"],
@@ -349,7 +352,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
-                    self.message_user(request, str(e), messages.ERROR)
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             else:
                 context["form"] = form
 
