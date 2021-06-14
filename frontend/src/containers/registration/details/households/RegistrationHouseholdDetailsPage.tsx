@@ -12,12 +12,11 @@ import {
   decodeIdString,
   isPermissionDeniedError,
 } from '../../../../utils/utils';
-import { ImportedIndividualsTable } from '../../tables/ImportedIndividualsTable';
 import { usePermissions } from '../../../../hooks/usePermissions';
 import { LoadingComponent } from '../../../../components/LoadingComponent';
 import { hasPermissions, PERMISSIONS } from '../../../../config/permissions';
 import { PermissionDenied } from '../../../../components/PermissionDenied';
-import {HouseholdImportedIndividualsTable} from "../../tables/HouseholdIndividualsTable";
+import { HouseholdImportedIndividualsTable } from '../../tables/HouseholdIndividualsTable';
 import { HouseholdDetails } from './HouseholdDetails';
 import { RegistrationDetails } from './RegistrationDetails';
 
@@ -76,9 +75,7 @@ export function RegistrationHouseholdDetailsPage(): React.ReactElement {
         household={importedHousehold}
       />
       <Container>
-        <HouseholdImportedIndividualsTable
-          household={importedHousehold}
-        />
+        <HouseholdImportedIndividualsTable household={importedHousehold} />
         <RegistrationDetails
           hctId={importedHousehold.registrationDataImport.hctId}
           registrationDate={importedHousehold.firstRegistrationDate}
