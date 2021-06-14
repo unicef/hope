@@ -17,65 +17,9 @@ from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
 
-class BusinessArea(TimeStampedUUIDModel):
-    """
-    BusinessArea (EPRP called Workspace, also synonym was
-    country/region) model.
-    It's used for drop down menu in top bar in the UI. Many times
-    BusinessArea means country.
-    region_name is a short code for distinct business arease
-    <BusinessArea>
-        <BUSINESS_AREA_CODE>0120</BUSINESS_AREA_CODE>
-        <BUSINESS_AREA_NAME>Algeria</BUSINESS_AREA_NAME>
-        <BUSINESS_AREA_LONG_NAME>THE PEOPLE'S DEMOCRATIC REPUBLIC OF ALGERIA</BUSINESS_AREA_LONG_NAME>
-        <REGION_CODE>59</REGION_CODE>
-        <REGION_NAME>MENAR</REGION_NAME>
-    </BusinessArea>
-    """
-
-    code = models.CharField(max_length=10, unique=True)
-    name = models.CharField(max_length=255)
-    long_name = models.CharField(max_length=255)
-    region_code = models.CharField(max_length=8)
-    region_name = models.CharField(max_length=8)
-    kobo_username = models.CharField(max_length=255, null=True, blank=True)
-    rapid_pro_host = models.URLField(null=True, blank=True)
-    rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
-    slug = models.CharField(
-        max_length=250,
-        unique=True,
-        db_index=True,
-    )
-    has_data_sharing_agreement = models.BooleanField(default=False)
-    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
-    is_split = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        unique_slugify(self, self.name, slug_field_name="slug")
-        if self.parent:
-            self.parent.is_split = True
-            self.parent.save()
-        if self.children.count():
-            self.is_split = True
-        super(BusinessArea, self).save(*args, **kwargs)
-
-    class Meta:
-        ordering = ["name"]
-        # app_label = "core"
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def can_import_ocha_response_plans(self):
-        return any([c.details for c in self.countries.all()])
-
-    @classmethod
-    def get_business_areas_as_choices(cls):
-        return [
-            {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
-            for business_area in cls.objects.all()
-        ]
+class AdminAreaLevelManager(models.Manager):
+    def get_countries(self):
+        return self.filter(admin_level=0).order_by("country_name").values_list("id", "country_name")
 
 
 class AdminAreaLevel(TimeStampedUUIDModel):
@@ -83,24 +27,32 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     Represents an Admin Type in location-related models.
     """
 
-    name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
+    name = models.CharField(max_length=64, verbose_name=_("Name"))
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
-    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
-    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
-    business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="admin_area_level",
-        null=True,
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
+    area_code = models.CharField(max_length=8, blank=True, null=True)
+    country_name = models.CharField(max_length=100, blank=True, null=True)
+    country = models.ForeignKey(
+        "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
     )
+    datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
+    # business_area = models.ForeignKey(
+    #     "BusinessArea",
+    #     on_delete=models.SET_NULL,
+    #     related_name="admin_area_level",
+    #     null=True,
+    # )
+    objects = AdminAreaLevelManager()
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Admin Area Level"
-        unique_together = ("business_area", "admin_level")
+        unique_together = ("country_name", "admin_level")
 
     def __str__(self):
-        return "{} - {}".format(self.business_area, self.name)
+        if self.admin_level == 0:
+            return self.country_name
+        return "{} - {}".format(self.area_code, self.name)
 
 
 class AdminAreaManager(TreeManager):
@@ -162,6 +114,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
 
         return self.title
 
+    def country(self):
+        return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
+
     @property
     def geo_point(self):
         return self.point if self.point else self.geom.point_on_surface if self.geom else ""
@@ -179,6 +134,69 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         return [
             {"label": {"English(EN)": f"{admin_area.title}-{admin_area.p_code}"}, "value": admin_area.p_code}
             for admin_area in queryset
+        ]
+
+
+class BusinessArea(TimeStampedUUIDModel):
+    """
+    BusinessArea (EPRP called Workspace, also synonym was
+    country/region) model.
+    It's used for drop down menu in top bar in the UI. Many times
+    BusinessArea means country.
+    region_name is a short code for distinct business arease
+    <BusinessArea>
+        <BUSINESS_AREA_CODE>0120</BUSINESS_AREA_CODE>
+        <BUSINESS_AREA_NAME>Algeria</BUSINESS_AREA_NAME>
+        <BUSINESS_AREA_LONG_NAME>THE PEOPLE'S DEMOCRATIC REPUBLIC OF ALGERIA</BUSINESS_AREA_LONG_NAME>
+        <REGION_CODE>59</REGION_CODE>
+        <REGION_NAME>MENAR</REGION_NAME>
+    </BusinessArea>
+    """
+
+    code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=255)
+    long_name = models.CharField(max_length=255)
+    region_code = models.CharField(max_length=8)
+    region_name = models.CharField(max_length=8)
+    kobo_username = models.CharField(max_length=255, null=True, blank=True)
+    rapid_pro_host = models.URLField(null=True, blank=True)
+    rapid_pro_api_key = models.CharField(max_length=40, null=True, blank=True)
+    slug = models.CharField(
+        max_length=250,
+        unique=True,
+        db_index=True,
+    )
+    has_data_sharing_agreement = models.BooleanField(default=False)
+    parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
+    is_split = models.BooleanField(default=False)
+
+    countries = models.ManyToManyField(AdminAreaLevel, blank=True, limit_choices_to={"admin_level": 0})
+
+    def save(self, *args, **kwargs):
+        unique_slugify(self, self.name, slug_field_name="slug")
+        if self.parent:
+            self.parent.is_split = True
+            self.parent.save()
+        if self.children.count():
+            self.is_split = True
+        super(BusinessArea, self).save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["name"]
+        # app_label = "core"
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def can_import_ocha_response_plans(self):
+        return any([c.details for c in self.countries.all()])
+
+    @classmethod
+    def get_business_areas_as_choices(cls):
+        return [
+            {"label": {"English(EN)": business_area.name}, "value": business_area.slug}
+            for business_area in cls.objects.all()
         ]
 
 
