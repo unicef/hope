@@ -1,12 +1,12 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Formik } from 'formik';
+import styled from 'styled-components';
 import {
   GrievanceTicketDocument,
   useReassignRoleGrievanceMutation,
 } from '../../../__generated__/graphql';
 import { useSnackbar } from '../../../hooks/useSnackBar';
-import styled from 'styled-components';
 
 const ReassignRoleButton = styled.button`
   padding: 25px;
