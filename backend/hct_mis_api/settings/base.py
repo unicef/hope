@@ -93,6 +93,8 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "").lower() == "true"
 
 KOBO_KF_URL = os.getenv("KOBO_KF_URL", "https://kf-hope.unitst.org")
 KOBO_KC_URL = os.getenv("KOBO_KC_URL", "https://kc-hope.unitst.org")
+KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
+KOBO_APP_API_TOKEN = os.getenv("KOBO_APP_API_TOKEN", "KOBO_APP_TOKEN")
 
 # Get the ENV setting. Needs to be set in .bashrc or similar.
 ENV = os.getenv("ENV")
@@ -481,7 +483,6 @@ DATAMART_USER = os.getenv("DATAMART_USER")
 DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
 DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
 
-KOBO_MASTER_API_TOKEN = os.getenv("KOBO_MASTER_API_TOKEN", "KOBO_TOKEN")
 
 COUNTRIES_OVERRIDE = {
     "U": {
