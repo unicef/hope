@@ -1,7 +1,6 @@
 import React, { ReactElement, useState } from 'react';
 import { UniversalTable } from '../../../containers/tables/UniversalTable';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { decodeIdString } from '../../../utils/utils';
 import {
   LookUpPaymentRecordsQueryVariables,
   PaymentRecordNode,
