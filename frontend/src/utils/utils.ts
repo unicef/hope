@@ -1,4 +1,3 @@
-import moment from 'moment';
 import { GraphQLError } from 'graphql';
 import { theme as themeObj } from '../theme';
 import {
