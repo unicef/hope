@@ -29,10 +29,18 @@
         {% endif %}
         <div>
         <a class="btn btn-primary" href="{% url opts|admin_urlname:'changelist' %}">Back To user List</a>
-        <a class="btn" href="{% url opts|admin_urlname:'kobo_import_users' %}">Kobo Import</a>
+        <a class="btn" href="{% url opts|admin_urlname:'kobo_import' %}">Kobo Import</a>
         </div>
     {% elif form %}
         <h1>Import Users</h1>
+        <div>
+        Load csv file.
+        Allowed formats are:
+        <ul>
+            <li>email(email), first_name(char), last_name(char)</li>
+            <li>email(email), first_name(char), last_name(char), username(char)</li>
+        </ul>
+
         <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             {{ form.as_p }}

@@ -32,6 +32,7 @@ from adminfilters.filters import (
     ForeignKeyFieldFilter,
     RelatedFieldComboFilter,
 )
+from constance import config
 from requests import HTTPError
 
 from hct_mis_api.apps.account.forms import KoboLoginForm
@@ -430,31 +431,31 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                     for row in reader:
                         password = get_random_string()
                         email = row["email"].strip()
-                        # FIXME: remove me (print)
-                        print(111, "admin.py:439 (kobo_import)", 11111, settings.KOBO_APP_API_TOKEN)
                         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-                        # FIXME: remove me (print)
-                        print(111, "admin.py:437 (kobo_import)", url)
+                        username = row["email"].replace("@", "_").replace(".", "_").lower()
+                        results = {"errors": [], "created": []}
                         res = requests.post(
                             url,
-                            headers={"Authorization": f"Token {settings.KOBO_APP_API_TOKEN}"},
-                            # headers={'Authorization': f'Token w*)*eg+33_0v2#1&ci!xqq51jk4_z00q^!o$9h%f+**#5foz4c5-iis%qug7'},
+                            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
                             json={
-                                "username": row["email"].replace("@", "_").replace(".", "_").lower(),
+                                "username": username,
                                 "email": email,
                                 "password": password,
                                 "first_name": row["first_name"],
                                 "last_name": row["last_name"],
                             },
                         )
-                        assert res.status_code == 201, f"{res.status_code}: {res.content}"
-                        send_mail(
-                            "Kobo credentials",
-                            KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
-                            settings.DEFAULT_FROM_EMAIL,
-                            [email],
-                        )
-                        print(row)
+                        if res.status_code == 201:
+                            results["created"].append([username, row])
+                            send_mail(
+                                "Kobo credentials",
+                                KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
+                                settings.DEFAULT_FROM_EMAIL,
+                                [email],
+                            )
+                        else:
+                            results["errors"].append([row, res])
+                        context["results"] = results
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
