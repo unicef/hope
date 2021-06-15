@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatamartAPI:
-    PAGE_SIZE = 1
+    PAGE_SIZE = 10
     LOCATIONS_ENDPOINT = "/api/latest/datamart/locations/?-serializer=geo&format=json&ordering=id"
 
     def __init__(self):
