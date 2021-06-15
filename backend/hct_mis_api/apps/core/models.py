@@ -50,6 +50,8 @@ class BusinessArea(TimeStampedUUIDModel):
     parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
     is_split = models.BooleanField(default=False)
 
+    countries = models.ManyToManyField("AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0})
+
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
         if self.parent:
@@ -78,29 +80,42 @@ class BusinessArea(TimeStampedUUIDModel):
         ]
 
 
+class AdminAreaLevelManager(models.Manager):
+    def get_countries(self):
+        return self.filter(admin_level=0).order_by("country_name").values_list("id", "country_name")
+
+
 class AdminAreaLevel(TimeStampedUUIDModel):
     """
     Represents an Admin Type in location-related models.
     """
 
-    name = models.CharField(max_length=64, unique=True, verbose_name=_("Name"))
+    name = models.CharField(max_length=64, verbose_name=_("Name"))
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
-    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"))
-    real_admin_level = models.PositiveSmallIntegerField(verbose_name=_("Real Admin Level"), null=True)
+    admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
         "BusinessArea",
         on_delete=models.SET_NULL,
         related_name="admin_area_level",
         null=True,
     )
+    area_code = models.CharField(max_length=8, blank=True, null=True)
+    country_name = models.CharField(max_length=100, blank=True, null=True)
+    country = models.ForeignKey(
+        "self", blank=True, null=True, limit_choices_to={"admin_level": 0}, on_delete=models.CASCADE
+    )
+    datamart_id = models.CharField(max_length=8, blank=True, null=True, unique=True)
+    objects = AdminAreaLevelManager()
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Admin Area Level"
-        unique_together = ("business_area", "admin_level")
+        unique_together = ("country", "admin_level")
 
     def __str__(self):
-        return "{} - {}".format(self.business_area, self.name)
+        if self.admin_level == 0:
+            return self.country_name
+        return "{} - {}".format(self.area_code, self.name)
 
 
 class AdminAreaManager(TreeManager):
@@ -161,6 +176,9 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
             )
 
         return self.title
+
+    def country(self):
+        return AdminArea.objects.get(tree_id=self.tree_id, parent=None)
 
     @property
     def geo_point(self):
