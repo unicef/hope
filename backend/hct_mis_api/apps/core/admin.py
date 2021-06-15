@@ -1,17 +1,29 @@
+import csv
 import logging
+import time
 
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from django.contrib.messages import ERROR
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.validators import RegexValidator
+from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
+from django.template.defaultfilters import slugify
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.html import format_html
 
 import xlrd
 from admin_extra_urls.api import ExtraUrlMixin, button
-from adminfilters.filters import ChoicesFieldComboFilter
+from adminfilters.filters import (
+    AllValuesComboFilter,
+    ChoicesFieldComboFilter,
+    TextFieldFilter,
+)
 from xlrd import XLRDError
 
 from hct_mis_api.apps.core.celery_tasks import (
@@ -28,6 +40,7 @@ from hct_mis_api.apps.core.models import (
     FlexibleAttributeGroup,
     XLSXKoboTemplate,
 )
+from hct_mis_api.apps.core.tasks.admin_areas import load_admin_area
 from hct_mis_api.apps.core.validators import KoboTemplateValidator
 from hct_mis_api.apps.payment.rapid_pro.api import RapidProAPI
 from mptt.admin import MPTTModelAdmin
@@ -47,6 +60,39 @@ class TestRapidproForm(forms.Form):
     flow_name = forms.CharField(label="Name of the test flow", initial="Test", required=True)
 
 
+class BusinessOfficeCodeValidator(RegexValidator):
+    message = "Business office code must start with 'BO' and contains only chars"
+    regex = "BO[A-Z]{2}"
+
+
+class BusinessOfficeForm(forms.ModelForm):
+    name = forms.CharField()
+    code = forms.CharField(max_length=4, validators=[BusinessOfficeCodeValidator()])
+
+    class Meta:
+        model = BusinessArea
+        fields = ("code", "name")
+
+
+class BusinessofficeFilter(SimpleListFilter):
+    template = "adminfilters/combobox.html"
+    title = "Business Ofiice"
+    parameter_name = "bo"
+
+    def lookups(self, request, model_admin):
+        return [(1, "Is a Business Office"), (2, "Is a Business Area")]
+
+    def value(self):
+        return self.used_parameters.get(self.parameter_name)
+
+    def queryset(self, request, queryset):
+        if self.value() == "2":
+            return queryset.filter(parent_id__isnull=True)
+        elif self.value() == "1":
+            return queryset.exclude(parent_id__isnull=True)
+        return queryset
+
+
 @admin.register(BusinessArea)
 class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_display = (
@@ -57,7 +103,45 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         "region_code",
     )
     search_fields = ("name", "slug")
-    list_filter = ("has_data_sharing_agreement", "region_name", "is_split")
+    list_filter = ("has_data_sharing_agreement", "region_name", BusinessofficeFilter, "is_split")
+    readonly_fields = ("parent", "is_split")
+    filter_horizontal = ("countries",)
+
+    @button(label="Create Business Office")
+    def split_business_area(self, request, pk):
+        context = self.get_common_context(request, pk)
+        opts = self.object._meta
+        if request.POST:
+            form = context["form"] = BusinessOfficeForm(request.POST)
+            if form.is_valid():
+                with transaction.atomic():
+                    self.object.is_split = True
+                    name = form.cleaned_data["name"]
+                    office = BusinessArea.objects.create(
+                        code=form.cleaned_data["code"],
+                        name=form.cleaned_data["name"],
+                        parent=self.object,
+                        region_code=self.object.region_code,
+                        region_name=self.object.region_name,
+                        long_name=f"Business Office: {name}",
+                        slug=slugify(name),
+                    )
+                preserved_filters = self.get_preserved_filters(request)
+
+                redirect_url = reverse(
+                    "admin:%s_%s_change" % (opts.app_label, opts.model_name),
+                    args=(office.pk,),
+                    current_app=self.admin_site.name,
+                )
+                redirect_url = add_preserved_filters(
+                    {"preserved_filters": preserved_filters, "opts": opts}, redirect_url
+                )
+                return HttpResponseRedirect(redirect_url)
+
+        else:
+            context["form"] = BusinessOfficeForm()
+
+        return TemplateResponse(request, "core/admin/split_ba.html", context)
 
     @button(label="Test RapidPro Connection")
     def _test_rapidpro_connection(self, request, pk):
@@ -111,6 +195,27 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
         return TemplateResponse(request, "core/test_rapidpro.html", context)
 
 
+class CountryFilter(SimpleListFilter):
+    template = "adminfilters/combobox.html"
+    title = "Country"
+    parameter_name = "country"
+
+    def lookups(self, request, model_admin):
+        return AdminArea.objects.filter(admin_area_level__admin_level=0).values_list("id", "title")
+
+    def value(self):
+        return self.used_parameters.get(self.parameter_name)
+
+    def queryset(self, request, queryset):
+        try:
+            if self.value():
+                country = AdminArea.objects.get(id=self.value())
+                return queryset.filter(tree_id=country.tree_id)
+        except AdminArea.DoesNotExist:
+            pass
+        return queryset
+
+
 class AdminLevelFilter(SimpleListFilter):
     template = "adminfilters/combobox.html"
 
@@ -129,48 +234,155 @@ class AdminLevelFilter(SimpleListFilter):
         return queryset
 
 
-class LoadAdminAreaForm(forms.Form):
-    area = forms.ModelChoiceField(BusinessArea.objects.all())
-
-
-@admin.register(AdminArea)
-class AdminAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    search_fields = (
-        "p_code",
-        "title",
+@admin.register(AdminAreaLevel)
+class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
+    list_display = ("name", "country_name", "admin_level", "area_code")
+    list_filter = (
+        ("admin_level", AllValuesComboFilter),
+        ("country_name", AllValuesComboFilter),
     )
-    list_display = ("title", "parent", "admin_area_level", "p_code")
-    list_filter = (AdminLevelFilter,)
+    search_fields = ("name",)
+    ordering = ("country_name", "admin_level")
 
     @button()
     def load_from_datamart(self, request):
-        #         business_area = BusinessArea.objects.filter(name=options["business_area"][0]).first()
-        #         api = DatamartAPI()
-        #         locations = api.get_locations_geo_data(business_area)
-        #         admin_areas = api.generate_admin_areas(locations, business_area)
+        api = DatamartAPI()
+        for level in api.get_admin_levels():
+            try:
+                AdminAreaLevel.objects.update_or_create(
+                    datamart_id=level["id"],
+                    defaults={
+                        "name": level["name"],
+                        "country_name": level["country_name"],
+                        "area_code": level["area_code"],
+                        "admin_level": level["admin_level"],
+                    },
+                )
+            except Exception as e:
+                logger.exception(e)
+
+
+class LoadAdminAreaForm(forms.Form):
+    # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
+    country = forms.ModelChoiceField(queryset=AdminArea.objects.filter(admin_area_level__admin_level=0))
+    geometries = forms.BooleanField(required=False)
+    run_in_background = forms.BooleanField(required=False)
+
+    page_size = forms.IntegerField(required=True, validators=[lambda x: x >= 1])
+    max_records = forms.IntegerField(required=False, help_text="Leave blank for all records")
+
+
+class ImportAreaForm(forms.Form):
+    # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
+    country = forms.ModelChoiceField(queryset=AdminArea.objects.filter(admin_area_level__admin_level=0))
+    file = forms.FileField()
+
+
+@admin.register(AdminArea)
+class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
+    search_fields = ("p_code", "title")
+    list_display = ("title", "country", "parent", "tree_id", "external_id", "admin_area_level", "p_code")
+    list_filter = (
+        AdminLevelFilter,
+        CountryFilter,
+        TextFieldFilter.factory("tree_id"),
+        TextFieldFilter.factory("external_id"),
+    )
+
+    @button()
+    def import_file(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
-            form = LoadAdminAreaForm()
+            form = ImportAreaForm(initial={})
+            context["form"] = form
+        else:
+            form = ImportAreaForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                try:
+                    csv_file = form.cleaned_data["file"]
+                    # If file is too large
+                    if csv_file.multiple_chunks():
+                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+
+                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
+                    reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
+                    provided = set(reader.fieldnames)
+                    minimum_set = {"area_code", "area_level", "parent_area_code", "area_name"}
+                    if not minimum_set.issubset(provided):
+                        raise Exception(f"Invalid columns {reader.fieldnames}. {provided.difference(minimum_set)}")
+                    lines = []
+                    infos = {"skipped": 0}
+                    # country = form.cleaned_data['country']
+                    # country = AdminArea.objects.get(admin_area_level=form.cleaned_data["country"])
+                    country = form.cleaned_data["country"]
+                    with transaction.atomic():
+                        external_id = f"import-{int(time.time())}"
+                        for row in reader:
+                            if all(row.values()):
+                                level_number = int(row["area_level"])
+                                level, __ = AdminAreaLevel.objects.get_or_create(
+                                    country=country.admin_area_level,
+                                    admin_level=level_number,
+                                    defaults={"name": row.get("level_name", f"{country.title} {level_number}")},
+                                )
+                                parent = AdminArea.objects.filter(
+                                    tree_id=country.tree_id, p_code=row["parent_area_code"]
+                                ).first()
+                                if parent is None:
+                                    assert level_number == 0, f"Cannot find parent area for {row}"
+                                AdminArea.objects.create(
+                                    external_id=external_id,
+                                    title=row["area_name"],
+                                    admin_area_level=level,
+                                    p_code=row["area_code"],
+                                    parent=parent,
+                                )
+                                lines.append(row)
+                            else:
+                                infos["skipped"] += 1
+
+                    context["country"] = form.cleaned_data["country"]
+                    context["columns"] = minimum_set
+                    context["lines"] = lines
+                    context["infos"] = infos
+                except Exception as e:
+                    logger.exception(e)
+                    context["form"] = form
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
+            else:
+                context["form"] = form
+
+        return TemplateResponse(request, "core/admin/import_locations.html", context)
+
+    @button()
+    def load_from_datamart(self, request):
+        context = self.get_common_context(request)
+        if request.method == "GET":
+            form = LoadAdminAreaForm(initial={"page_size": DatamartAPI.PAGE_SIZE})
             context["form"] = form
         else:
             form = LoadAdminAreaForm(data=request.POST)
             if form.is_valid():
                 try:
-                    business_area = form.cleaned_data["area"]
-                    api = DatamartAPI()
-                    locations = api.get_locations_geo_data(business_area)
-                    admin_areas = api.generate_admin_areas(locations, business_area)
-                    context["admin_areas"] = admin_areas
+                    country = form.cleaned_data["country"]
+                    geom = form.cleaned_data["geometries"]
+                    page_size = form.cleaned_data["page_size"]
+                    max_records = form.cleaned_data["max_records"]
+                    if form.cleaned_data["run_in_background"]:
+                        load_admin_area.delay(
+                            country, geom, page_size=page_size, max_records=max_records, notify_to=[request.user.email]
+                        )
+                        context["run_in_background"] = True
+                    else:
+                        results = load_admin_area(country, geom, page_size, max_records)
+                        context["admin_areas"] = results
                 except Exception as e:
                     context["form"] = form
                     self.message_user(request, str(e), messages.ERROR)
+            else:
+                context["form"] = form
 
         return TemplateResponse(request, "core/admin/load_admin_areas.html", context)
-
-
-@admin.register(AdminAreaLevel)
-class AdminAreaLevelAdmin(admin.ModelAdmin):
-    list_display = ("name", "business_area")
 
 
 class FlexibleAttributeInline(admin.TabularInline):
