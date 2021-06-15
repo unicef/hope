@@ -1,11 +1,11 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
-import { Pointer } from '../../Pointer';
 import { UniversalMoment } from '../../UniversalMoment';
 
 interface LookUpIndividualTableRowProps {
@@ -22,13 +22,6 @@ export function LookUpIndividualTableRow({
   selectedIndividual,
 }: LookUpIndividualTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-  const handleClick = (): void => {
-    const path = `/${businessArea}/population/individuals/${individual.id}`;
-    const win = window.open(path);
-    if (win != null) {
-      win.focus();
-    }
-  };
   const renderPrograms = (): string => {
     const programNames = individual?.household?.programs?.edges?.map(
       (edge) => edge.node.name,
@@ -49,8 +42,14 @@ export function LookUpIndividualTableRow({
           inputProps={{ 'aria-label': individual.id }}
         />
       </TableCell>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{individual.unicefId}</Pointer>
+      <TableCell align='left'>
+        <Link
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/population/individuals/${individual.id}`}
+        >
+          {individual.unicefId}
+        </Link>
       </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>
@@ -58,7 +57,9 @@ export function LookUpIndividualTableRow({
       </TableCell>
       <TableCell align='right'>{individual.age}</TableCell>
       <TableCell align='left'>{sexToCapitalize(individual.sex)}</TableCell>
-      <TableCell align='left'>{individual?.household?.admin2?.title||'-'}</TableCell>
+      <TableCell align='left'>
+        {individual?.household?.admin2?.title || '-'}
+      </TableCell>
       <TableCell align='left'>{renderPrograms()}</TableCell>
       <TableCell align='left'>
         <UniversalMoment>{individual.lastRegistrationDate}</UniversalMoment>

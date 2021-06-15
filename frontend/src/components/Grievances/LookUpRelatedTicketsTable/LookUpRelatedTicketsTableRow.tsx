@@ -1,9 +1,9 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
-import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
@@ -37,13 +37,6 @@ export function LookUpRelatedTicketsTableRow({
   categoryChoices,
 }: LookUpRelatedTicketsTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-  const handleClick = (): void => {
-    const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    const win = window.open(path);
-    if (win != null) {
-      win.focus();
-    }
-  };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(ticket.id);
 
@@ -57,8 +50,14 @@ export function LookUpRelatedTicketsTableRow({
           inputProps={{ 'aria-labelledby': ticket.id }}
         />
       </TableCell>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{decodeIdString(ticket.id)}</Pointer>
+      <TableCell align='left'>
+        <Link
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
+        >
+          {decodeIdString(ticket.id)}
+        </Link>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
