@@ -65,7 +65,7 @@ class DatamartAPI:
     def get_locations_geo_data(self, business_area):
         return self._get_paginated_results(
             f"{DatamartAPI.LOCATIONS_ENDPOINT}"
-            f"&country_code={business_area.code}&page_size={DatamartAPI.PAGE_SIZE}"
+            f"&area_code={business_area.code}&page_size={DatamartAPI.PAGE_SIZE}"
             # f"{DatamartAPI.LOCATIONS_ENDPOINT}" f"&country_name={business_area.name}&page_size={DatamartAPI.PAGE_SIZE}"
         )
 
@@ -147,6 +147,7 @@ class DatamartAPI:
         results: list = []
         page = 1
         while next_url:
+            print(next_url)
             data = self._handle_get_request(next_url, is_absolute_url=True)
             next_url = data["next"]
             results.extend(data["results"]["features"])
