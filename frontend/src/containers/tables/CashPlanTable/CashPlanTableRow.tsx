@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -26,9 +26,9 @@ export function CashPlanTableRow({
 }: CashPlanTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const cashPlanPath = `/${businessArea}/cashplans/${cashPlan.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/cashplans/${cashPlan.id}`;
-    history.push(path);
+    history.push(cashPlanPath);
   };
   return (
     <ClickableTableRow
@@ -38,13 +38,15 @@ export function CashPlanTableRow({
       key={cashPlan.id}
     >
       <TableCell align='left'>
-        <div
-          style={{
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {cashPlan.caId}
-        </div>
+        <Link target='_blank' rel='noopener noreferrer' to={cashPlanPath}>
+          <div
+            style={{
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {cashPlan.caId}
+          </div>
+        </Link>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
