@@ -6,13 +6,11 @@ import { Checkbox } from '@material-ui/core';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
-  decodeIdString,
   formatCurrencyWithSymbol,
   verificationRecordsStatusToColor,
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { Missing } from '../../Missing';
 import { Pointer } from '../../Pointer';
 
 const StatusContainer = styled.div`
