@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 class AdminAreaFilter(FilterSet):
     business_area = CharFilter(
-        field_name="admin_area_level__business_area__slug",
+        field_name="admin_area_level__country__business_areas__slug",
     )
     level = IntegerFilter(
         field_name="level",
