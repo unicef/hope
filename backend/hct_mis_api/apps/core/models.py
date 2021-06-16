@@ -50,7 +50,9 @@ class BusinessArea(TimeStampedUUIDModel):
     parent = models.ForeignKey("self", related_name="children", on_delete=models.SET_NULL, null=True, blank=True)
     is_split = models.BooleanField(default=False)
 
-    countries = models.ManyToManyField("AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0})
+    countries = models.ManyToManyField(
+        "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+    )
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
@@ -114,7 +116,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
 
     def __str__(self):
         if self.admin_level == 0:
-            return self.country_name
+            return self.country_name or ""
         return "{} - {}".format(self.area_code, self.name)
 
 
@@ -168,11 +170,12 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
         ordering = ["title"]
 
     def __str__(self):
+        level_name = self.admin_area_level.name if self.admin_area_level else ''
         if self.p_code:
             return "{} ({} {})".format(
                 self.title,
-                self.admin_area_level.name,
-                "{}: {}".format("CERD" if self.admin_area_level.name == "School" else "PCode", self.p_code or ""),
+                level_name,
+                "{}: {}".format("CERD" if level_name == "School" else "PCode", self.p_code or ""),
             )
 
         return self.title
