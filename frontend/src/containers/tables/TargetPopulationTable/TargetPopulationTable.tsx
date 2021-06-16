@@ -27,8 +27,8 @@ export const TargetPopulationTable = ({
   const businessArea = useBusinessArea();
   const initialVariables: AllTargetPopulationsQueryVariables = {
     name: filter.name,
-    candidateListTotalHouseholdsMin: filter.numIndividuals.min,
-    candidateListTotalHouseholdsMax: filter.numIndividuals.max,
+    numberOfHouseholdsMin: filter.numIndividuals.min,
+    numberOfHouseholdsMax: filter.numIndividuals.max,
     status: filter.status,
     businessArea,
   };

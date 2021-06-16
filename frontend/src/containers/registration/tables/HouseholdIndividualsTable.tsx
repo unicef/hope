@@ -1,15 +1,14 @@
 import React, { ReactElement, useState } from 'react';
-import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
 import {
   ImportedIndividualMinimalFragment,
-  ImportedIndividualNode,
-  useHouseholdChoiceDataQuery
+  useHouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
 import { LoadingComponent } from '../../../components/LoadingComponent';
-import {HeadCell} from "../../../components/table/EnhancedTableHead";
-import {useBusinessArea} from "../../../hooks/useBusinessArea";
-import {Order, TableComponent} from "../../../components/table/TableComponent";
+import { HeadCell } from '../../../components/table/EnhancedTableHead';
+import {
+  Order,
+  TableComponent,
+} from '../../../components/table/TableComponent';
 import { ImportedIndividualsTableRow } from './ImportedIndividualsTable/ImportedIndividualsTableRow';
 
 const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
@@ -62,16 +61,8 @@ const headCells: HeadCell<ImportedIndividualMinimalFragment>[] = [
     numeric: false,
   },
 ];
-const StatusContainer = styled.div`
-  min-width: 120px;
-  max-width: 200px;
-`;
 
-export function HouseholdImportedIndividualsTable({
-  household,
-}): ReactElement {
-  const history = useHistory();
-  const businessArea = useBusinessArea();
+export function HouseholdImportedIndividualsTable({ household }): ReactElement {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [orderBy, setOrderBy] = useState(null);

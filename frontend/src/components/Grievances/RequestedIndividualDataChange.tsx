@@ -204,13 +204,7 @@ export function RequestedIndividualDataChange({
             },
           });
           showMessage('Changes Approved');
-          const sum =
-            values.selected.length +
-            values.selectedFlexFields.length +
-            values.selectedDocuments.length +
-            values.selectedDocumentsToRemove.length +
-            values.selectedIdentities.length +
-            values.selectedIdentitiesToRemove.length;
+          const sum = Object.values(values).flat().length;
           setEdit(sum === 0);
         } catch (e) {
           e.graphQLErrors.map((x) => showMessage(x.message));
@@ -218,13 +212,7 @@ export function RequestedIndividualDataChange({
       }}
     >
       {({ submitForm, setFieldValue, values }) => {
-        const allChangesLength =
-          values.selected.length +
-          values.selectedFlexFields.length +
-          values.selectedDocuments.length +
-          values.selectedDocumentsToRemove.length +
-          values.selectedIdentities.length +
-          values.selectedIdentitiesToRemove.length;
+        const allChangesLength = Object.values(values).flat().length;
 
         return (
           <StyledBox>
