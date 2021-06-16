@@ -340,7 +340,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
                                 lines.append(row)
                             else:
                                 infos["skipped"] += 1
-
+                    AdminArea.objects.rebuild()
                     context["country"] = form.cleaned_data["country"]
                     context["columns"] = minimum_set
                     context["lines"] = lines
