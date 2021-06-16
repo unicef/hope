@@ -7,7 +7,7 @@ faker = Faker()
 
 
 def create_fake_multipolygon():
-    from django.contrib.gis.geos import Polygon, MultiPolygon
+    from django.contrib.gis.geos import MultiPolygon, Polygon
 
     p1 = Polygon(((0, 0), (0, 1), (1, 1), (0, 0)))
     p2 = Polygon(((1, 1), (1, 2), (2, 2), (1, 1)))

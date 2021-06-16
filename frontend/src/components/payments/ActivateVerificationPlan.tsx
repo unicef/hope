@@ -38,6 +38,7 @@ export function ActivateVerificationPlan({
         variables: { cashPlanVerificationId },
       });
     } catch (error) {
+      /* eslint-disable-next-line no-console */
       console.log('error', error?.graphQLErrors);
       if (
         error?.graphQLErrors?.[0]?.validationErrors

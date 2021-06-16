@@ -1,9 +1,11 @@
+import csv
 import logging
 import re
 from collections import namedtuple
 from functools import cached_property
 from urllib.parse import unquote
 
+from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import SimpleListFilter
@@ -14,7 +16,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, router, transaction
 from django.db.models import Q
-from django.forms import ModelChoiceField, MultipleChoiceField
+from django.forms import Form, ModelChoiceField, MultipleChoiceField
 from django.forms.models import BaseInlineFormSet, ModelForm
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect
@@ -30,12 +32,14 @@ from adminfilters.filters import (
     ForeignKeyFieldFilter,
     RelatedFieldComboFilter,
 )
+from constance import config
 from requests import HTTPError
 
 from hct_mis_api.apps.account.forms import KoboLoginForm
 from hct_mis_api.apps.account.microsoft_graph import DJANGO_USER_MAP, MicrosoftGraphAPI
 from hct_mis_api.apps.account.models import IncompatibleRoles, Role, User, UserRole
 from hct_mis_api.apps.account.permissions import Permissions
+from hct_mis_api.apps.core.kobo.api import KoboAPI
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import build_arg_dict_from_dict
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -288,6 +292,10 @@ class DjAdminManager:
         return pk
 
 
+class ImportToKoboForm(forms.Form):
+    file = forms.FileField()
+
+
 @admin.register(User)
 class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     Results = namedtuple("Result", "created,missing,updated,errors")
@@ -326,6 +334,9 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
+
+    def import_kobo_users(self):
+        pass
 
     def get_deleted_objects(self, objs, request):
         to_delete, model_count, perms_needed, protected = super().get_deleted_objects(objs, request)
@@ -402,80 +413,133 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button(label="Sync users from Kobo")
-    # @button(label="List Kobo User")
-    def kobo_users_sync(self, request):
-        ctx = self.get_common_context(request)
-        users = []
-        try:
-            api = DjAdminManager()
-            api.login(request)
-            for entry in api.list_users():
-                local = User.objects.filter(email=entry[1]).first()
-                users.append([entry[0], entry[1], local])
-
-            ctx["users"] = users
-
-        except Exception as e:
-            self.message_user(request, str(e), messages.ERROR)
-        return TemplateResponse(request, "admin/kobo_users.html", ctx)
-
-    @button(label="Bulk upload Kobo Users")
-    def kobo_import_users(self, request):
-        from hct_mis_api.apps.account.forms import KoboImportUsersForm
-
-        cookies = {}
-        ctx = self.get_common_context(request)
-        api = DjAdminManager()
-        form = None
-        try:
-            if request.method == "POST":
-                form = KoboImportUsersForm(request.POST)
-                if form.is_valid():
-                    emails = set(form.cleaned_data["emails"].split())
-                    api.login(request)
-                    results = self.Results([], [], [], [])
-                    ctx["results"] = results
-                    for email in emails:
-                        user, created = User.objects.get_or_create(username=email, is_active=False, email=email)
+    @button()
+    def kobo_import(self, request):
+        context = self.get_common_context(request)
+        if request.method == "GET":
+            form = ImportToKoboForm(initial={})
+            context["form"] = form
+        else:
+            form = ImportToKoboForm(data=request.POST, files=request.FILES)
+            if form.is_valid():
+                try:
+                    csv_file = form.cleaned_data["file"]
+                    if csv_file.multiple_chunks():
+                        raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
+                    data_set = csv_file.read().decode("utf-8-sig").splitlines()
+                    reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
+                    for row in reader:
                         password = get_random_string()
-                        try:
-                            pk = api.create_user(email, password)
-                            results.created.append((email, password))
-                            user.custom_fields["kobo_username"] = email
-                            user.custom_fields["kobo_pk"] = pk
-                            user.save()
+                        email = row["email"].strip()
+                        url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
+                        username = row["email"].replace("@", "_").replace(".", "_").lower()
+                        results = {"errors": [], "created": []}
+                        res = requests.post(
+                            url,
+                            headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
+                            json={
+                                "username": username,
+                                "email": email,
+                                "password": password,
+                                "first_name": row["first_name"],
+                                "last_name": row["last_name"],
+                            },
+                        )
+                        if res.status_code == 201:
+                            results["created"].append([username, row])
                             send_mail(
                                 "Kobo credentials",
                                 KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
                                 settings.DEFAULT_FROM_EMAIL,
                                 [email],
                             )
-                        except DjAdminManager.ResponseException as e:
-                            results.errors.append((email, str(e)))
-                    if results.errors:
-                        self.message_user(request, "Some error occurred", messages.ERROR)
-
-                    ctx["results"] = results
-                else:
-                    self.message_user(request, "Invalid", messages.ERROR)
+                        else:
+                            results["errors"].append([row, res])
+                        context["results"] = results
+                except Exception as e:
+                    logger.exception(e)
+                    context["form"] = form
+                    self.message_user(request, f"{e.__class__.__name__}: {str(e)}", messages.ERROR)
             else:
-                api.login(request)
-                form = KoboImportUsersForm(
-                    initial={
-                        "username": request.COOKIES.get("kobo_username", request.user.email),
-                        "password": request.COOKIES.get("kobo_password", ""),
-                        "emails": "",
-                    }
-                )
-        except Exception as e:
-            logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
-        ctx["form"] = form
-        response = TemplateResponse(request, "admin/kobo_import.html", ctx)
-        for key, value in cookies.items():
-            response.set_cookie(key, value)
-        return response
+                context["form"] = form
+
+        return TemplateResponse(request, "admin/account/user/kobo_import.html", context)
+
+    # @button(label="Sync users from Kobo")
+    # def kobo_users_sync(self, request):
+    #     ctx = self.get_common_context(request)
+    #     users = []
+    #     try:
+    #         api = DjAdminManager()
+    #         api.login(request)
+    #         for entry in api.list_users():
+    #             local = User.objects.filter(email=entry[1]).first()
+    #             users.append([entry[0], entry[1], local])
+    #
+    #         ctx["users"] = users
+    #
+    #     except Exception as e:
+    #         self.message_user(request, str(e), messages.ERROR)
+    #     return TemplateResponse(request, "admin/kobo_users.html", ctx)
+    #
+
+    # @button(label="Bulk upload Kobo Users")
+    # def kobo_bulk_create(self, request):
+    #     from hct_mis_api.apps.account.forms import KoboImportUsersForm
+    #
+    #     cookies = {}
+    #     ctx = self.get_common_context(request)
+    #     api = DjAdminManager()
+    #     form = None
+    #     try:
+    #         if request.method == "POST":
+    #             form = KoboImportUsersForm(request.POST)
+    #             if form.is_valid():
+    #                 emails = set(form.cleaned_data["emails"].split())
+    #                 api.login(request)
+    #                 results = self.Results([], [], [], [])
+    #                 ctx["results"] = results
+    #                 for email in emails:
+    #                     user, created = User.objects.get_or_create(username=email, is_active=False, email=email)
+    #                     password = get_random_string()
+    #                     try:
+    #                         pk = api.create_user(email, password)
+    #                         results.created.append((email, password))
+    #                         user.custom_fields["kobo_username"] = email
+    #                         user.custom_fields["kobo_pk"] = pk
+    #                         user.save()
+    #                         send_mail(
+    #                             "Kobo credentials",
+    #                             KOBO_ACCESS_EMAIL.format(email=email, password=password, kobo_url=settings.KOBO_KF_URL),
+    #                             settings.DEFAULT_FROM_EMAIL,
+    #                             [email],
+    #                         )
+    #                     except DjAdminManager.ResponseException as e:
+    #                         results.errors.append((email, str(e)))
+    #                 if results.errors:
+    #                     self.message_user(request, "Some error occurred", messages.ERROR)
+    #
+    #                 ctx["results"] = results
+    #             else:
+    #                 self.message_user(request, "Invalid", messages.ERROR)
+    #         else:
+    #             api.login(request)
+    #             form = KoboImportUsersForm(
+    #                 initial={
+    #                     "username": request.COOKIES.get("kobo_username", request.user.email),
+    #                     "password": request.COOKIES.get("kobo_password", ""),
+    #                     "emails": "",
+    #                 }
+    #             )
+    #     except Exception as e:
+    #         logger.exception(e)
+    #         self.message_user(request, str(e), messages.ERROR)
+    #     ctx["form"] = form
+    #     response = TemplateResponse(request, "admin/kobo_bulk.html", ctx)
+    #     for key, value in cookies.items():
+    #         response.set_cookie(key, value)
+    #     return response
+    #
 
     @button()
     def privileges(self, request, pk):
