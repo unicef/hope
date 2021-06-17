@@ -100,6 +100,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
         on_delete=models.SET_NULL,
         related_name="admin_area_level",
         null=True,
+        blank=True
     )
     area_code = models.CharField(max_length=8, blank=True, null=True)
     country_name = models.CharField(max_length=100, blank=True, null=True)
