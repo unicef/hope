@@ -10,7 +10,6 @@ import { gql } from 'apollo-boost';
 import { useQuery } from '@apollo/react-hooks';
 import { theme as themeObj } from '../../theme';
 import { Logo } from '../Logo';
-import { useMeQuery } from '../../__generated__/graphql';
 import packageJson from '../../../package.json';
 import { AlertDialog } from '../AlertDialog';
 import { DrawerItems } from './DrawerItems';
