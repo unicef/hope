@@ -264,7 +264,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 class LoadAdminAreaForm(forms.Form):
     # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminArea.objects.filter(admin_area_level__admin_level=0))
+    country = forms.ModelChoiceField(queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by('country_name'))
     geometries = forms.BooleanField(required=False)
     run_in_background = forms.BooleanField(required=False)
 
