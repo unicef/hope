@@ -548,14 +548,14 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
-        self.ms_graph = MicrosoftGraphAPI()
 
     def _sync_ad_data(self, user):
+        ms_graph = MicrosoftGraphAPI()
         if user.ad_uuid:
             filters = {"uuid": user.ad_uuid}
         else:
             filters = {"email": user.email}
-        user_data = self.ms_graph.get_user_data(**filters)
+        user_data = ms_graph.get_user_data(**filters)
         user_args = build_arg_dict_from_dict(user_data, DJANGO_USER_MAP)
         for field, value in user_args.items():
             setattr(user, field, value or "")
