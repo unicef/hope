@@ -6,7 +6,6 @@ import { DialogActions } from '../../containers/dialogs/DialogActions';
 import {
   IndividualNode,
   useIndividualPhotosLazyQuery,
-  useIndividualPhotosQuery,
 } from '../../__generated__/graphql';
 
 const DialogTitleWrapper = styled.div`
@@ -33,7 +32,7 @@ export const IndividualPhotoModal = ({
   individual,
 }: IndividualPhotoModalProps): React.ReactElement => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [getPhotos, { data, loading }] = useIndividualPhotosLazyQuery({
+  const [getPhotos, { data }] = useIndividualPhotosLazyQuery({
     variables: { id: individual?.id },
   });
 

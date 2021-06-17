@@ -147,6 +147,9 @@ type BusinessAreaNode implements Node {
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
+  parent: UserBusinessAreaNode
+  isSplit: Boolean!
+  children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -156,7 +159,7 @@ type BusinessAreaNode implements Node {
   individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
@@ -797,7 +800,7 @@ type HouseholdNode implements Node {
   addIndividualTicketDetails(before: String, after: String, first: Int, last: Int): TicketAddIndividualDetailsNodeConnection!
   individualsAndRoles: [IndividualRoleInHouseholdNode!]!
   individuals(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   selections: [HouseholdSelection!]!
   totalCashReceived: Decimal
   selection: HouseholdSelection
@@ -2085,7 +2088,7 @@ type ProgramNode implements Node {
   individualDataNeeded: Boolean
   households(before: String, after: String, first: Int, last: Int): HouseholdNodeConnection!
   cashPlans(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   totalEntitledQuantity: Decimal
   totalDeliveredQuantity: Decimal
@@ -2191,7 +2194,7 @@ type Query {
   programScopeChoices: [ChoiceObject]
   cashPlanStatusChoices: [ChoiceObject]
   targetPopulation(id: ID!): TargetPopulationNode
-  allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
+  allTargetPopulation(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection
   goldenRecordByTargetingCriteria(targetingCriteria: TargetingCriteriaObjectType!, program: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   candidateHouseholdsListByTargetingCriteria(targetPopulation: ID!, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
   finalHouseholdsListByTargetingCriteria(targetPopulation: ID!, targetingCriteria: TargetingCriteriaObjectType, before: String, after: String, first: Int, last: Int, orderBy: String, businessArea: String): HouseholdNodeConnection
@@ -2658,7 +2661,7 @@ type SteficonRuleNode implements Node {
   language: RuleLanguage!
   createdBy: UserNode
   updatedBy: UserNode
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
 }
 
 type SteficonRuleNodeConnection {
@@ -3135,6 +3138,9 @@ type UserBusinessAreaNode implements Node {
   rapidProApiKey: String
   slug: String!
   hasDataSharingAgreement: Boolean!
+  parent: UserBusinessAreaNode
+  isSplit: Boolean!
+  children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
   paymentrecordSet(before: String, after: String, first: Int, last: Int): PaymentRecordNodeConnection!
@@ -3144,7 +3150,7 @@ type UserBusinessAreaNode implements Node {
   individualSet(before: String, after: String, first: Int, last: Int): IndividualNodeConnection!
   programSet(before: String, after: String, first: Int, last: Int, name: String): ProgramNodeConnection!
   cashplanSet(before: String, after: String, first: Int, last: Int): CashPlanNodeConnection!
-  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetpopulationSet(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationdataimportSet(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logentrySet(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!
@@ -3177,15 +3183,16 @@ type UserNode implements Node {
   status: UserStatus!
   partner: UserPartner!
   availableForExport: Boolean!
+  customFields: JSONString!
   jobTitle: String!
   adUuid: String
   userRoles: [UserRoleNode!]!
   createdTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   assignedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
-  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
-  finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  targetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  approvedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
+  finalizedTargetPopulations(before: String, after: String, first: Int, last: Int, name: String, createdByName: String, createdAt: DateTime, updatedAt: DateTime, status: String, households: [ID], numberOfHouseholdsMin: Int, numberOfHouseholdsMax: Int, candidateListTotalHouseholdsMin: Int, candidateListTotalHouseholdsMax: Int, candidateListTotalIndividualsMin: Int, candidateListTotalIndividualsMax: Int, finalListTotalHouseholdsMin: Int, finalListTotalHouseholdsMax: Int, finalListTotalIndividualsMin: Int, finalListTotalIndividualsMax: Int, businessArea: String, program: [ID], orderBy: String): TargetPopulationNodeConnection!
   registrationDataImports(before: String, after: String, first: Int, last: Int): RegistrationDataImportNodeConnection!
   reports(before: String, after: String, first: Int, last: Int): ReportNodeConnection!
   logs(before: String, after: String, first: Int, last: Int): LogEntryNodeConnection!

@@ -8,6 +8,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { useDebounce } from '../../hooks/useDebounce';
 import TextField from '../../shared/TextField';
 import {
+  AdminAreaNodeEdge,
   AllAdminAreasQuery,
   useAllAdminAreasLazyQuery,
 } from '../../__generated__/graphql';
@@ -25,11 +26,13 @@ export function AdminAreasAutocomplete({
   fullWidth,
   onFilterChange,
   name,
+  value,
 }: {
   disabled?;
   fullWidth?: boolean;
   onFilterChange;
   name: string;
+  value?: AdminAreaNodeEdge;
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [inputValue, onInputTextChange] = useState('');
@@ -57,6 +60,7 @@ export function AdminAreasAutocomplete({
   };
   return (
     <StyledAutocomplete<AllAdminAreasQuery['allAdminAreas']['edges'][number]>
+      value={value}
       fullWidth={fullWidth}
       open={open}
       filterOptions={(options1) => options1}
