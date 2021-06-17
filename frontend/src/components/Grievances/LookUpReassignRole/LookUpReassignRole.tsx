@@ -4,7 +4,10 @@ import {
   GrievanceTicketQuery,
   useIndividualQuery,
 } from '../../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../../utils/constants';
 import { LoadingComponent } from '../../LoadingComponent';
 import { LookUpButton } from '../LookUpButton';
 import { LookUpReassignRoleDisplay } from './LookUpReassignRoleDisplay';
@@ -26,21 +29,23 @@ export const LookUpReassignRole = ({
   shouldDisableButton?: boolean;
 }): React.ReactElement => {
   const [lookUpDialogOpen, setLookUpDialogOpen] = useState(false);
-  let roleReassignData;
+  let roleReassignData = null;
   switch (ticket.category.toString()) {
     case GRIEVANCE_CATEGORIES.DATA_CHANGE:
-      roleReassignData =
-        ticket?.deleteIndividualTicketDetails?.roleReassignData;
+      if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) {
+        roleReassignData = ticket?.deleteIndividualTicketDetails?.roleReassignData;
+      } else if (ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
+        roleReassignData = ticket?.individualDataUpdateTicketDetails?.roleReassignData;
+      }
       break;
     case GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING:
       roleReassignData = ticket?.systemFlaggingTicketDetails?.roleReassignData;
       break;
     case GRIEVANCE_CATEGORIES.DEDUPLICATION:
-      roleReassignData =
-        ticket?.needsAdjudicationTicketDetails?.roleReassignData;
+      roleReassignData = ticket?.needsAdjudicationTicketDetails?.roleReassignData;
       break;
     default:
-      roleReassignData = null;
+      break;
   }
   const reAssigneeRole = JSON.parse(roleReassignData)[individualRole.id];
 
