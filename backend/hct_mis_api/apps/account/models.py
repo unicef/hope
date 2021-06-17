@@ -3,20 +3,28 @@ import logging
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator, MaxLengthValidator, ProhibitNullCharactersValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    ProhibitNullCharactersValidator,
+)
 from django.db import models
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+
 from model_utils import Choices
 from model_utils.models import UUIDModel
 
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
-from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +45,8 @@ class User(AbstractUser, UUIDModel):
     available_for_export = models.BooleanField(
         default=True, help_text="Indicating if a User can be exported to CashAssist"
     )
+    custom_fields = JSONField(default=dict, blank=True)
+
     job_title = models.CharField(max_length=255, blank=True)
     ad_uuid = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
