@@ -23,31 +23,36 @@ def handle_geom(geometry):
 def load_admin_area(country, geom, page_size, max_records, notify_to=None):
     results = {"created": 0, "updated": 0, "errors": []}
     api = DatamartAPI()
-    for loc in api.get_locations(gis=geom, page_size=page_size, max_records=max_records, country=country):
+    parents_list = []
+    areas_dict = {}
+    for loc in api.get_locations(gis=geom, page_size=page_size, max_records=max_records, country=country.country_name):
         try:
             admin_area_level = AdminAreaLevel.objects.get(datamart_id=loc["gateway"])
-            if loc["parent"]:
-                parent, __ = AdminArea.objects.get_or_create(external_id=loc["parent"])
-            else:
-                parent = None
+            external_id = loc["id"]
+            parent_external_id = loc["parent"]
             values = {
                 "title": loc["name"],
                 "p_code": loc["p_code"],
                 "admin_area_level": admin_area_level,
-                "parent": parent,
             }
             if geom:
                 values["geom"] = handle_geom(loc["geom"])
                 values["point"] = Point(*loc["point"]["coordinates"])
 
-            __, created = AdminArea.objects.update_or_create(external_id=loc["id"], defaults=values)
+            admin_area, created = AdminArea.objects.update_or_create(external_id=external_id, defaults=values)
+            areas_dict[external_id] = admin_area
+            if parent_external_id:
+                parents_list.append((admin_area, parent_external_id))
             if created:
                 results["created"] += 1
             else:
                 results["updated"] += 1
         except Exception as e:
             logger.exception(e)
-            results["updated"].append((loc, f"{e.__class__.__name__}: {str(e)}"))
+            results["errors"].append((loc, f"{e.__class__.__name__}: {str(e)}"))
+    for (admin_area, parent_external_id) in parents_list:
+        admin_area.parent = areas_dict[parent_external_id]
+        admin_area.save()
     if app.current_worker_task and notify_to:
         send_mail(
             "Admin Area Successfully Loaded",
