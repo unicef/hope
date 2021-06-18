@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Checkbox } from '@material-ui/core';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -11,7 +11,6 @@ import {
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
-import { Pointer } from '../../Pointer';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -30,20 +29,10 @@ interface LookUpPaymentRecordTableRowProps {
 
 export function LookUpPaymentRecordTableRow({
   paymentRecord,
-  openInNewTab,
   selected,
   checkboxClickHandler,
 }: LookUpPaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-  const history = useHistory();
-  const handleClick = (): void => {
-    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
-    if (openInNewTab) {
-      window.open(path);
-    } else {
-      history.push(path);
-    }
-  };
   const isSelected = (name: string): boolean => selected.includes(name);
   const isItemSelected = isSelected(paymentRecord.id);
   const received =
@@ -58,8 +47,14 @@ export function LookUpPaymentRecordTableRow({
           inputProps={{ 'aria-labelledby': paymentRecord.id }}
         />
       </TableCell>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{paymentRecord.caId}</Pointer>
+      <TableCell align='left'>
+        <Link
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/payment-records/${paymentRecord.id}`}
+        >
+          {paymentRecord.caId}
+        </Link>
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verifications?.edges[0]?.node.status ? (
