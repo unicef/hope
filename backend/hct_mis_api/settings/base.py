@@ -570,4 +570,7 @@ SMART_ADMIN_SECTIONS = {
         "sites",
     ],
 }
+
+EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
+
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
