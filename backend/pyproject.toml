@@ -46,7 +46,7 @@ skip = "migrations"
 
 [tool.poetry]
 name = "HCT MIS Backend"
-version = "0.1.33"
+version = "0.1.34"
 description = "HCT MIS is UNICEF's humanitarian cash transfer platform."
 authors = ["Tivix"]
 
