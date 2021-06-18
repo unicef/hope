@@ -5,10 +5,6 @@ TASKS_SCHEDULES = {
         "task": "hct_mis_api.apps.sanction_list.celery_tasks.sync_sanction_list_task",
         "schedule": crontab(minute=0, hour=0),
     },
-    "pull_from_erp_datahub": {
-        "task": "hct_mis_api.apps.erp_datahub.celery_tasks.pull_from_erp_datahub_task",
-        "schedule": crontab(minute="*/30"),
-    },
     "pull_from_cashassist_datahub_task": {
         "task": "hct_mis_api.apps.cash_assist_datahub.celery_tasks.pull_from_cashassist_datahub_task",
         "schedule": crontab(minute=0, hour="*/1"),
