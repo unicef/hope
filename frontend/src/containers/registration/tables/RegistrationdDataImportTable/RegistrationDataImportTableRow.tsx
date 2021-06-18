@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
+import { Link, useHistory } from 'react-router-dom';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { RegistrationDataImportNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
@@ -28,9 +28,9 @@ export function RegistrationDataImportTableRow({
   const name = registrationDataImport.importedBy.firstName
     ? `${registrationDataImport.importedBy.firstName} ${registrationDataImport.importedBy.lastName}`
     : registrationDataImport.importedBy.email;
+  const importDetailsPath = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/registration-data-import/${registrationDataImport.id}`;
-    history.push(path);
+    history.push(importDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -39,7 +39,19 @@ export function RegistrationDataImportTableRow({
       role='checkbox'
       key={registrationDataImport.id}
     >
-      <TableCell align='left'>{registrationDataImport.name}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <Link
+            target='_blank'
+            rel='noopener noreferrer'
+            to={importDetailsPath}
+          >
+            {registrationDataImport.name}
+          </Link>
+        ) : (
+          registrationDataImport.name
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
