@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllCashPlansQuery,
@@ -31,9 +31,9 @@ export function PaymentVerificationTableRow({
 }: PaymentVerificationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const paymentVerificationPlanPath = `/${businessArea}/payment-verification/${plan.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-verification/${plan.id}`;
-    history.push(path);
+    history.push(paymentVerificationPlanPath);
   };
   const {
     data: statusChoicesData,
@@ -51,7 +51,19 @@ export function PaymentVerificationTableRow({
       role='checkbox'
       key={plan.id}
     >
-      <TableCell align='left'>{plan.caId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <Link
+            target='_blank'
+            rel='noopener noreferrer'
+            to={paymentVerificationPlanPath}
+          >
+            {plan.caId}
+          </Link>
+        ) : (
+          plan.caId
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

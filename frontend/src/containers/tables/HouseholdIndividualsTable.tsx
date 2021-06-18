@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -120,7 +120,15 @@ export function HouseholdIndividualsTable({
             role='checkbox'
             key={row.id}
           >
-            <TableCell align='left'>{row.unicefId}</TableCell>
+            <TableCell align='left'>
+              <Link
+                target='_blank'
+                rel='noopener noreferrer'
+                to={`/${businessArea}/population/individuals/${row.id}`}
+              >
+                {row.unicefId}
+              </Link>
+            </TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
               <StatusContainer>

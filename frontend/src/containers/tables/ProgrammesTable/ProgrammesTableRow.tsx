@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   ProgramNode,
@@ -31,10 +31,9 @@ export function ProgrammesTableRow({
 }: ProgrammesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const programDetailsPath = `/${businessArea}/programs/${program.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/programs/${program.id}`;
-    history.push(path);
+    history.push(programDetailsPath);
   };
 
   const programSectorChoiceDict = choicesToDict(
@@ -48,7 +47,11 @@ export function ProgrammesTableRow({
       role='checkbox'
       key={program.id}
     >
-      <TableCell align='left'>{program.name}</TableCell>
+      <TableCell align='left'>
+        <Link target='_blank' rel='noopener noreferrer' to={programDetailsPath}>
+          {program.name}
+        </Link>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox

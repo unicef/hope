@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -28,10 +28,9 @@ export function TargetPopulationTableRow({
 }: TargetPopulationTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
-
+  const targetPopulationDetailsPath = `/${businessArea}/target-population/${targetPopulation.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/target-population/${targetPopulation.id}`;
-    history.push(path);
+    history.push(targetPopulationDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -40,7 +39,19 @@ export function TargetPopulationTableRow({
       role='checkbox'
       key={targetPopulation.id}
     >
-      <TableCell align='left'>{targetPopulation.name}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <Link
+            target='_blank'
+            rel='noopener noreferrer'
+            to={targetPopulationDetailsPath}
+          >
+            {targetPopulation.name}
+          </Link>
+        ) : (
+          targetPopulation.name
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
