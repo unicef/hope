@@ -1,5 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
+import { Link } from 'react-router-dom';
 import { HouseholdNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -14,10 +15,9 @@ export function TargetPopulationHouseholdTableRow({
   canViewDetails,
 }): React.ReactElement {
   const businessArea = useBusinessArea();
-
+  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
-    const win = window.open(path, '_blank');
+    const win = window.open(householdDetailsPath, '_blank');
     if (win != null) {
       win.focus();
     }
@@ -29,7 +29,19 @@ export function TargetPopulationHouseholdTableRow({
       role='checkbox'
       key={household.id}
     >
-      <TableCell align='left'>{household.unicefId}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <Link
+            target='_blank'
+            rel='noopener noreferrer'
+            to={householdDetailsPath}
+          >
+            {household.unicefId}
+          </Link>
+        ) : (
+          household.unicefId
+        )}
+      </TableCell>
       <AnonTableCell>{`${household.headOfHousehold.givenName} ${household.headOfHousehold.familyName}`}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.adminArea?.title || '-'}</TableCell>

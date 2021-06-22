@@ -1,5 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
@@ -16,10 +17,9 @@ export function ImportedHouseholdTableRow({
   household,
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-
+  const householdPath = `/${businessArea}/registration-data-import/household/${household.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/registration-data-import/household/${household.id}`;
-    const win = window.open(path, '_blank');
+    const win = window.open(householdPath, '_blank');
     if (win != null) {
       win.focus();
     }
@@ -36,7 +36,11 @@ export function ImportedHouseholdTableRow({
           <FlagTooltip message='Possible duplicates' />
         )}
       </TableCell>
-      <TableCell align='left'>{decodeIdString(household.id)}</TableCell>
+      <TableCell align='left'>
+        <Link target='_blank' rel='noopener noreferrer' to={householdPath}>
+          {decodeIdString(household.id)}
+        </Link>
+      </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin2Title}</TableCell>
