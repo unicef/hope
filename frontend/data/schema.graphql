@@ -84,9 +84,14 @@ type AdminAreaTypeNode implements Node {
   updatedAt: DateTime!
   name: String!
   displayName: String
-  adminLevel: Int!
-  realAdminLevel: Int
+  adminLevel: Int
   businessArea: UserBusinessAreaNode
+  areaCode: String
+  countryName: String
+  country: AdminAreaTypeNode
+  datamartId: String
+  businessAreas(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
+  adminarealevelSet(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   adminAreas(before: String, after: String, first: Int, last: Int, title: String): AdminAreaNodeConnection!
 }
 
@@ -149,6 +154,7 @@ type BusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
+  countries(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
@@ -3058,6 +3064,8 @@ input UpdateGrievanceTicketInput {
   area: String
   language: String
   linkedTickets: [ID]
+  household: ID
+  individual: ID
   extras: UpdateGrievanceTicketExtrasInput
 }
 
@@ -3140,6 +3148,7 @@ type UserBusinessAreaNode implements Node {
   hasDataSharingAgreement: Boolean!
   parent: UserBusinessAreaNode
   isSplit: Boolean!
+  countries(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   children(before: String, after: String, first: Int, last: Int, id: UUID): UserBusinessAreaNodeConnection!
   adminAreaLevel(before: String, after: String, first: Int, last: Int): AdminAreaTypeNodeConnection!
   userRoles: [UserRoleNode!]!
