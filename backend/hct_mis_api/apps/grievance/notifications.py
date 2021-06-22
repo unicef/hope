@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.core.utils import encode_id_base64, choices_to_dict
+from hct_mis_api.apps.account.models import User, UserRole
+from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
 
@@ -138,7 +138,7 @@ class GrievanceNotification:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("assignment_change_notification_email.txt", context=context)
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.assigned_to}"
+        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
 
     def _prepare_assigned_to_recipient(self):
         if self.grievance_ticket.assigned_to is None:
