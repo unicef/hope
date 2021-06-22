@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -29,12 +29,12 @@ export function PaymentRecordTableRow({
 }: PaymentRecordTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
   const history = useHistory();
+  const paymentRecordPath = `/${businessArea}/payment-records/${paymentRecord.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/payment-records/${paymentRecord.id}`;
     if (openInNewTab) {
-      window.open(path);
+      window.open(paymentRecordPath);
     } else {
-      history.push(path);
+      history.push(paymentRecordPath);
     }
   };
   return (
@@ -44,7 +44,9 @@ export function PaymentRecordTableRow({
       role='checkbox'
       key={paymentRecord.id}
     >
-      <TableCell align='left'>{paymentRecord.caId}</TableCell>
+      <TableCell align='left'>
+        <Link to={paymentRecordPath}>{paymentRecord.caId}</Link>
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
