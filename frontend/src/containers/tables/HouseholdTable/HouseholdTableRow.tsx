@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -29,9 +29,9 @@ export function HouseHoldTableRow({
   const residenceStatusChoiceDict = choicesToDict(
     choicesData.residenceStatusChoices,
   );
+  const householdDetailsPath = `/${businessArea}/population/household/${household.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
-    history.push(path);
+    history.push(householdDetailsPath);
   };
   return (
     <ClickableTableRow
@@ -47,7 +47,15 @@ export function HouseHoldTableRow({
           <Flag confirmed={household.sanctionListConfirmedMatch} />
         )}
       </TableCell>
-      <TableCell align='left'>{household.unicefId}</TableCell>
+      <TableCell align='left'>
+        <Link
+          target='_blank'
+          rel='noopener noreferrer'
+          to={householdDetailsPath}
+        >
+          {household.unicefId}
+        </Link>
+      </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
       <TableCell align='left'>{household.admin2?.title || '-'}</TableCell>
