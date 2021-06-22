@@ -1,12 +1,12 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
-import { Pointer } from '../../Pointer';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
@@ -25,14 +25,6 @@ export function LookUpHouseholdTableRow({
   selectedHousehold,
 }: LookUpHouseholdTableRowProps): React.ReactElement {
   const businessArea = useBusinessArea();
-
-  const handleClick = (): void => {
-    const path = `/${businessArea}/population/household/${household.id}`;
-    const win = window.open(path);
-    if (win != null) {
-      win.focus();
-    }
-  };
   const renderPrograms = (): string => {
     const programNames = household.programs?.edges?.map(
       (edge) => edge.node.name,
@@ -53,8 +45,14 @@ export function LookUpHouseholdTableRow({
           inputProps={{ 'aria-label': household.id }}
         />
       </TableCell>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{household.unicefId}</Pointer>
+      <TableCell align='left'>
+        <Link
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/population/household/${household.id}`}
+        >
+          {household.unicefId}
+        </Link>
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>

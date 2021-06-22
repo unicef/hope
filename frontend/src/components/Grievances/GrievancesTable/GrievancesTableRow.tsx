@@ -1,7 +1,7 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
@@ -33,10 +33,10 @@ export function GrievancesTableRow({
 }: GrievancesTableRowProps): React.ReactElement {
   const history = useHistory();
   const businessArea = useBusinessArea();
+  const detailsPath = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
 
   const handleClick = (): void => {
-    const path = `/${businessArea}/grievance-and-feedback/${ticket.id}`;
-    history.push(path);
+    history.push(detailsPath);
   };
   return (
     <ClickableTableRow
@@ -45,7 +45,15 @@ export function GrievancesTableRow({
       role='checkbox'
       key={ticket.id}
     >
-      <TableCell align='left'>{decodeIdString(ticket.id)}</TableCell>
+      <TableCell align='left'>
+        {canViewDetails ? (
+          <Link target='_blank' rel='noopener noreferrer' to={detailsPath}>
+            {decodeIdString(ticket.id)}
+          </Link>
+        ) : (
+          decodeIdString(ticket.id)
+        )}
+      </TableCell>
       <TableCell align='left'>
         <StatusContainer>
           <StatusBox
