@@ -413,7 +413,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button()
+    @button(permission=["can_upload_to_kobo"])
     def kobo_import(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -561,7 +561,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             setattr(user, field, value or "")
         user.save()
 
-    @button(label="Sync")
+    @button(label="Sync", permission=["can_sync_with_ad"])
     def sync_multi(self, request):
         not_found = []
         try:
@@ -578,7 +578,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Sync")
+    @button(label="Sync", permission=["can_sync_with_ad"])
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
@@ -587,7 +587,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button()
+    @button(permission=["can_load_from_ad"])
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
