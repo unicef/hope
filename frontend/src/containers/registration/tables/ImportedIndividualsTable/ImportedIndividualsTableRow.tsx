@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { TableRow } from '@material-ui/core';
 import {
   HouseholdChoiceDataQuery,
   ImportedIndividualMinimalFragment,
@@ -14,8 +13,9 @@ import {
 } from '../../../../utils/utils';
 import { DedupeResults } from '../../details/DedupeResults';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
-import { Pointer } from '../../../../components/Pointer';
 import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
+import { BlackLink } from '../../../../components/BlackLink';
 
 interface ImportedIndividualsTableRowProps {
   individual: ImportedIndividualMinimalFragment;
@@ -38,14 +38,25 @@ export function ImportedIndividualsTableRow({
     choices.deduplicationGoldenRecordStatusChoices,
   );
 
+  const individualPath = `/${businessArea}/registration-data-import/individual/${individual.id}`;
   const handleClick = (): void => {
-    const path = `/${businessArea}/registration-data-import/individual/${individual.id}`;
-    history.push(path);
+    history.push(individualPath);
   };
   return (
-    <TableRow hover key={individual.id}>
-      <TableCell onClick={handleClick} align='left'>
-        <Pointer>{decodeIdString(individual.id)}</Pointer>
+    <ClickableTableRow
+      hover
+      onClick={handleClick}
+      role='checkbox'
+      key={individual.id}
+    >
+      <TableCell align='left'>
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={individualPath}
+        >
+          {decodeIdString(individual.id)}
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>{roleChoicesDict[individual.role]}</TableCell>
@@ -91,6 +102,6 @@ export function ImportedIndividualsTableRow({
           }`
         )}
       </TableCell>
-    </TableRow>
+    </ClickableTableRow>
   );
 }

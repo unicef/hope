@@ -1,6 +1,5 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ImportedHouseholdMinimalFragment } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
@@ -8,6 +7,7 @@ import { decodeIdString } from '../../../../utils/utils';
 import { FlagTooltip } from '../../../../components/FlagTooltip';
 import { UniversalMoment } from '../../../../components/UniversalMoment';
 import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../../components/BlackLink';
 
 interface PaymentRecordTableRowProps {
   household: ImportedHouseholdMinimalFragment;
@@ -37,9 +37,9 @@ export function ImportedHouseholdTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <Link target='_blank' rel='noopener noreferrer' to={householdPath}>
+        <BlackLink target='_blank' rel='noopener noreferrer' to={householdPath}>
           {decodeIdString(household.id)}
-        </Link>
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{household?.headOfHousehold?.fullName}</AnonTableCell>
       <TableCell align='right'>{household.size}</TableCell>

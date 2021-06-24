@@ -8,10 +8,10 @@ import { LabelizedField } from '../LabelizedField';
 import { TargetPopulationQuery } from '../../__generated__/graphql';
 
 const colors = {
-  femaleChildren: '#023E90',
-  maleChildren: '#029BFE',
-  femaleAdult: '#73C302',
-  maleAdult: '#F2E82C',
+  femaleChildren: '#5F02CF',
+  maleChildren: '#1D6A64',
+  femaleAdult: '#DFCCF5',
+  maleAdult: '#B1E3E0',
 };
 
 const PaperContainer = styled(Paper)`

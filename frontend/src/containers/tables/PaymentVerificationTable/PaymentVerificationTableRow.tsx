@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   AllCashPlansQuery,
@@ -15,6 +15,7 @@ import {
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -53,13 +54,13 @@ export function PaymentVerificationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <Link
+          <BlackLink
             target='_blank'
             rel='noopener noreferrer'
             to={paymentVerificationPlanPath}
           >
             {plan.caId}
-          </Link>
+          </BlackLink>
         ) : (
           plan.caId
         )}
