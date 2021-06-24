@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   IndividualNode,
   useHouseholdChoiceDataQuery,
@@ -12,6 +12,7 @@ import { choicesToDict, sexToCapitalize } from '../../../utils/utils';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { LoadingComponent } from '../../../components/LoadingComponent';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../components/BlackLink';
 
 interface IndividualsListTableRowProps {
   individual: IndividualNode;
@@ -57,13 +58,13 @@ export function IndividualsListTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={individualDetailsPath}
         >
           {individual.unicefId}
-        </Link>
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{individual.fullName}</AnonTableCell>
       <TableCell align='left'>
