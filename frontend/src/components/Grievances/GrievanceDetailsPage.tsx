@@ -469,7 +469,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </OverviewContainer>
           </ContainerColumnWithBorder>
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={9}>
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
             <PaddingContainer>

@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -18,6 +18,7 @@ import {
   sexToCapitalize,
 } from '../../utils/utils';
 import { UniversalMoment } from '../../components/UniversalMoment';
+import { BlackLink } from '../../components/BlackLink';
 
 const headCells: HeadCell<IndividualNode>[] = [
   {
@@ -121,13 +122,13 @@ export function HouseholdIndividualsTable({
             key={row.id}
           >
             <TableCell align='left'>
-              <Link
+              <BlackLink
                 target='_blank'
                 rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${row.id}`}
               >
                 {row.unicefId}
-              </Link>
+              </BlackLink>
             </TableCell>
             <TableCell align='left'>{row.fullName}</TableCell>
             <TableCell align='left'>
