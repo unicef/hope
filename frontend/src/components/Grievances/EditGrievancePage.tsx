@@ -315,7 +315,7 @@ export function EditGrievancePage(): React.ReactElement {
                         />
                         <LookUpSection
                           values={values}
-                          disabledHouseholdIndividual
+                          disabledHouseholdIndividual={values.selectedIndividual || values.selectedHousehold}
                           disabledPaymentRecords
                           onValueChange={setFieldValue}
                           errors={errors}
