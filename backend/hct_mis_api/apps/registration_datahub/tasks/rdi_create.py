@@ -274,6 +274,15 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             return str(value)
         return value
 
+    def _handle_bool_field(self, cell, is_flex_field=False, is_field_required=False, *args, **kwargs):
+        value = cell.value
+        if isinstance(value, str):
+            if value.lower() == "false":
+                return False
+            elif value.lower() == "true":
+                return True
+        return value
+
     def _handle_geopoint_field(self, value, *args, **kwargs):
         if not value:
             return ""
@@ -427,10 +436,14 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
                 "photo_i_c": self._handle_image_field,
                 "primary_collector_id": self._handle_collectors,
                 "alternate_collector_id": self._handle_collectors,
+                "pregnant_i_c": self._handle_bool_field,
             },
             "households": {
                 "consent_sign_h_c": self._handle_image_field,
                 "hh_geopoint_h_c": self._handle_geopoint_field,
+                "fchild_hoh_h_c": self._handle_bool_field,
+                "child_hoh_h_c": self._handle_bool_field,
+                "consent_h_c": self._handle_bool_field,
             },
         }
 
@@ -438,6 +451,7 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
             "GEOPOINT": self._handle_geopoint_field,
             "IMAGE": self._handle_image_field,
             "DECIMAL": self._handle_decimal_field,
+            "BOOL": self._handle_bool_field,
         }
 
         sheet_title = sheet.title.lower()
