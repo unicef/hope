@@ -1,7 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
 import { Radio } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import { AllIndividualsQuery } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../utils/utils';
