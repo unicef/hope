@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +262,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
     )
+    unicef_id = models.CharField(max_length=250, blank=True, default="")
 
     @property
     def related_tickets(self):
