@@ -10,6 +10,7 @@ import {
   TableRow,
   Typography,
 } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import React, { useState } from 'react';
 import {
@@ -47,6 +48,7 @@ export function NeedsAdjudicationDetails({
   canApprove: boolean;
 }): React.ReactElement {
   const businessArea = useBusinessArea();
+  const history = useHistory();
   const [approve] = useApproveNeedsAdjudicationMutation({
     refetchQueries: () => [
       {
@@ -74,7 +76,19 @@ export function NeedsAdjudicationDetails({
       <Title>
         <Box display='flex' justifyContent='space-between'>
           <Typography variant='h6'>Needs Adjudication Details</Typography>
-          <Box>
+          <Box gridGap={24} display='flex'>
+            <Button
+              onClick={() =>
+                history.push({
+                  pathname: `/${businessArea}/grievance-and-feedback/new-ticket`,
+                  state: { linkedTicketId: ticket.id },
+                })
+              }
+              variant='outlined'
+              color='primary'
+            >
+              Create Linked Ticket
+            </Button>
             {!isEditable && (
               <Button
                 variant='outlined'
@@ -87,7 +101,6 @@ export function NeedsAdjudicationDetails({
                 Edit
               </Button>
             )}
-
             {isEditable && canApprove && (
               <ConfirmationDialog
                 title='Confirmation'
