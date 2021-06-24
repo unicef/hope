@@ -49,10 +49,10 @@ export function GrievancesTableRow({
       <TableCell align='left'>
         {canViewDetails ? (
           <BlackLink target='_blank' rel='noopener noreferrer' to={detailsPath}>
-            {decodeIdString(ticket.id)}
+            {ticket.unicefId}
           </BlackLink>
         ) : (
-          decodeIdString(ticket.id)
+          ticket.unicefId
         )}
       </TableCell>
       <TableCell align='left'>
