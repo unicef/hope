@@ -3,9 +3,12 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.admin import site
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
+
+import adminactions.actions as actions
 from graphene_file_upload.django import FileUploadGraphQLView
 
 import hct_mis_api.apps.account.views
@@ -20,9 +23,13 @@ from hct_mis_api.apps.core.views import (
     trigger_error,
 )
 
+# register all adminactions
+actions.add_to_site(site, exclude=["export_delete_tree"])
+
 urlpatterns = [
     path("api/admin/", admin.site.urls),
     path("api/admin/call-command", call_command_view),
+    path("adminactions/", include("adminactions.urls")),
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),
