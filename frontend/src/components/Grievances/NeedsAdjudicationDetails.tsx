@@ -12,7 +12,6 @@ import {
 } from '@material-ui/core';
 import styled from 'styled-components';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -22,6 +21,7 @@ import { ConfirmationDialog } from '../ConfirmationDialog';
 import { UniversalMoment } from '../UniversalMoment';
 import { GRIEVANCE_TICKET_STATES } from '../../utils/constants';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
+import { BlackLink } from '../BlackLink';
 
 const StyledBox = styled(Paper)`
   display: flex;
@@ -150,22 +150,22 @@ export function NeedsAdjudicationDetails({
             </TableCell>
 
             <TableCell align='left'>
-              <Link
+              <BlackLink
                 target='_blank'
                 rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${details.goldenRecordsIndividual?.id}`}
               >
                 {details.goldenRecordsIndividual?.unicefId}
-              </Link>
+              </BlackLink>
             </TableCell>
             <TableCell align='left'>
-              <Link
+              <BlackLink
                 target='_blank'
                 rel='noopener noreferrer'
                 to={`/${businessArea}/population/household/${details.goldenRecordsIndividual?.household?.id}`}
               >
                 {details.goldenRecordsIndividual?.household?.unicefId || '-'}
-              </Link>
+              </BlackLink>
             </TableCell>
             <TableCell align='left'>
               {details.goldenRecordsIndividual?.fullName}
@@ -206,22 +206,22 @@ export function NeedsAdjudicationDetails({
               />
             </TableCell>
             <TableCell align='left'>
-              <Link
+              <BlackLink
                 target='_blank'
                 rel='noopener noreferrer'
                 to={`/${businessArea}/population/individuals/${details.possibleDuplicate?.id}`}
               >
                 {details.possibleDuplicate?.unicefId}
-              </Link>
+              </BlackLink>
             </TableCell>
             <TableCell align='left'>
-              <Link
+              <BlackLink
                 target='_blank'
                 rel='noopener noreferrer'
                 to={`/${businessArea}/population/household/${details.possibleDuplicate?.household?.id}`}
               >
                 {details.possibleDuplicate?.household?.unicefId || '-'}
-              </Link>
+              </BlackLink>
             </TableCell>
             <TableCell align='left'>
               {details.possibleDuplicate?.fullName}

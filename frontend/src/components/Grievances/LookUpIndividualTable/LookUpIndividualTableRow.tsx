@@ -7,6 +7,7 @@ import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { sexToCapitalize } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
+import { BlackLink } from '../../BlackLink';
 
 interface LookUpIndividualTableRowProps {
   individual: AllIndividualsQuery['allIndividuals']['edges'][number]['node'];
@@ -43,13 +44,13 @@ export function LookUpIndividualTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={`/${businessArea}/population/individuals/${individual.id}`}
         >
           {individual.unicefId}
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>{individual.fullName}</TableCell>
       <TableCell align='left'>

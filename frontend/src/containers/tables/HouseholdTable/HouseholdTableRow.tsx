@@ -1,6 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   HouseholdChoiceDataQuery,
   HouseholdNode,
@@ -12,6 +12,7 @@ import { Flag } from '../../../components/Flag';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { FlagTooltip } from '../../../components/FlagTooltip';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../components/BlackLink';
 
 interface HouseHoldTableRowProps {
   household: HouseholdNode;
@@ -48,13 +49,13 @@ export function HouseHoldTableRow({
         )}
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={householdDetailsPath}
         >
           {household.unicefId}
-        </Link>
+        </BlackLink>
       </TableCell>
       <AnonTableCell>{household.headOfHousehold.fullName}</AnonTableCell>
       <TableCell align='left'>{household.size}</TableCell>
