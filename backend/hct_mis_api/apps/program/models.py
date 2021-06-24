@@ -13,13 +13,20 @@ from django.db.models import Count, Q
 from django.utils.deconstruct import deconstructible
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+
 from model_utils.models import SoftDeletableModel
 
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
-from hct_mis_api.apps.payment.models import PaymentRecord
-from hct_mis_api.apps.payment.models import CashPlanPaymentVerification
-from hct_mis_api.apps.utils.models import AbstractSyncable, TimeStampedUUIDModel, ConcurrencyModel
-from hct_mis_api.apps.utils.validators import DoubleSpaceValidator, StartEndSpaceValidator
+from hct_mis_api.apps.payment.models import CashPlanPaymentVerification, PaymentRecord
+from hct_mis_api.apps.utils.models import (
+    AbstractSyncable,
+    ConcurrencyModel,
+    TimeStampedUUIDModel,
+)
+from hct_mis_api.apps.utils.validators import (
+    DoubleSpaceValidator,
+    StartEndSpaceValidator,
+)
 
 
 class Program(SoftDeletableModel, TimeStampedUUIDModel, AbstractSyncable, ConcurrencyModel):
@@ -234,7 +241,7 @@ class CashPlan(TimeStampedUUIDModel):
 
     @property
     def bank_reconciliation_success(self):
-        return self.payment_records.filter(status=PaymentRecord.STATUS_SUCCESS).count()
+        return self.payment_records.filter(status__in=PaymentRecord.ALLOW_CREATE_VERIFICATION).count()
 
     @property
     def bank_reconciliation_error(self):

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -12,6 +12,7 @@ import {
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
 import { AnonTableCell } from '../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -45,7 +46,7 @@ export function PaymentRecordTableRow({
       key={paymentRecord.id}
     >
       <TableCell align='left'>
-        <Link to={paymentRecordPath}>{paymentRecord.caId}</Link>
+        <BlackLink to={paymentRecordPath}>{paymentRecord.caId}</BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

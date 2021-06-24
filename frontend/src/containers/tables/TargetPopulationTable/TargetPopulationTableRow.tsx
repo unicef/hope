@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { TargetPopulationNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -11,6 +11,7 @@ import {
   targetPopulationStatusMapping,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -41,13 +42,13 @@ export function TargetPopulationTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <Link
+          <BlackLink
             target='_blank'
             rel='noopener noreferrer'
             to={targetPopulationDetailsPath}
           >
             {targetPopulation.name}
-          </Link>
+          </BlackLink>
         ) : (
           targetPopulation.name
         )}

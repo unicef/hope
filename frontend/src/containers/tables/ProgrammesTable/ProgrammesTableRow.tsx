@@ -1,6 +1,6 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   ProgramNode,
@@ -15,6 +15,7 @@ import {
 } from '../../../utils/utils';
 import { StatusBox } from '../../../components/StatusBox';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -48,9 +49,13 @@ export function ProgrammesTableRow({
       key={program.id}
     >
       <TableCell align='left'>
-        <Link target='_blank' rel='noopener noreferrer' to={programDetailsPath}>
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={programDetailsPath}
+        >
           {program.name}
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
