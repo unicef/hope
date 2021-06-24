@@ -155,31 +155,37 @@ export function PopulationHouseholdDetailsPage(): React.ReactElement {
                 </div>
               </LabelizedField>
             </Grid>
-          </Grid>
-          <hr />
-          <SubTitle variant='h6'>Data Collection</SubTitle>
-          <Grid container spacing={6}>
-            <Grid item xs={3}>
-              <LabelizedField label='Start time'>
-                <div>-</div>
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={3}>
-              <LabelizedField label='End time'>
-                <div>-</div>
-              </LabelizedField>
-            </Grid>
-            <Grid item xs={3}>
-              <LabelizedField label='Device ID'>
-                <div>-</div>
-              </LabelizedField>
-            </Grid>
             <Grid item xs={3}>
               <LabelizedField label='User name'>
                 {household.registrationDataImport.importedBy.email}
               </LabelizedField>
             </Grid>
           </Grid>
+          {household.registrationDataImport.dataSource === 'XLS' ? null : (
+            <>
+              <hr />
+              <SubTitle variant='h6'>Data Collection</SubTitle>
+              <Grid container spacing={6}>
+                <Grid item xs={3}>
+                  <LabelizedField label='Start time'>
+                    <UniversalMoment>{household.start}</UniversalMoment>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={3}>
+                  <LabelizedField label='End time'>
+                    <UniversalMoment>
+                      {household.firstRegistrationDate}
+                    </UniversalMoment>
+                  </LabelizedField>
+                </Grid>
+                <Grid item xs={3}>
+                  <LabelizedField label='Device ID'>
+                    {household.deviceid}
+                  </LabelizedField>
+                </Grid>
+              </Grid>
+            </>
+          )}
         </Overview>
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <Content>

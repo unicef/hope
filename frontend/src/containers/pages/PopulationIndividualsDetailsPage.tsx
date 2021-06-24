@@ -10,7 +10,6 @@ import {
   useIndividualQuery,
 } from '../../__generated__/graphql';
 import { IndividualVulnerabilities } from '../../components/population/IndividualVunerabilities';
-import { CashPlus } from '../../components/population/CashPlus';
 import { UniversalActivityLogTable } from '../tables/UniversalActivityLogTable';
 import { PermissionDenied } from '../../components/PermissionDenied';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
@@ -76,7 +75,6 @@ export function PopulationIndividualsDetailsPage(): React.ReactElement {
       <Container>
         <IndividualsBioData individual={individual as IndividualNode} />
         <IndividualVulnerabilities individual={individual as IndividualNode} />
-        <CashPlus individual={individual as IndividualNode} />
         {hasPermissions(PERMISSIONS.ACTIVITY_LOG_VIEW, permissions) && (
           <UniversalActivityLogTable objectId={individual.id} />
         )}
