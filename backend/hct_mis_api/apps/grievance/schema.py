@@ -2,8 +2,8 @@ import datetime
 import logging
 
 from django.db import models
-from django.db.models import Q
-from django.db.models.functions import Coalesce
+from django.db.models import F, Func, Q, Value
+from django.db.models.functions import Coalesce, LTrim, Replace, Trim
 
 import graphene
 from django_filters import (
@@ -144,10 +144,12 @@ class GrievanceTicketFilter(FilterSet):
         )
 
     def search_filter(self, qs, name, value):
+        qs = qs.annotate(unicef_id_pure=LTrim(Replace("unicef_id", Value("GRV-")), leading="0"))
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
+            # q_obj |= Q(unicef_id__iendswith=value)
+            q_obj |= Q(unicef_id_pure=value)
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:
