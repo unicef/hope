@@ -246,6 +246,7 @@ OTHER_APPS = [
     "constance",
     "admin_extra_urls",
     "adminfilters",
+    "adminactions",
     "multiselectfield",
     "mptt",
     "django_extensions",
