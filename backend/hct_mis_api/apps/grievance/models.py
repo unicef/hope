@@ -262,6 +262,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
     registration_data_import = models.ForeignKey(
         "registration_data.RegistrationDataImport", null=True, blank=True, on_delete=models.CASCADE
     )
+    unicef_id = models.CharField(max_length=250, blank=True, default="")
 
     @property
     def related_tickets(self):
