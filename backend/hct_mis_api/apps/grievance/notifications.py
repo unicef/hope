@@ -116,6 +116,7 @@ class GrievanceNotification:
         context = self._prepare_default_context(user_recipient)
         created_by = self.extra_data.get("created_by")
         context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
+        context["ticket_note"] = self.extra_data.get("ticket_note")
         text_body = render_to_string("note_added_notification_email.txt", context=context)
         html_body = render_to_string("note_added_notification_email.html", context=context)
         return (
