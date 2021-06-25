@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from hct_mis_api.apps.activity_log.utils import create_mapping_dict
 from hct_mis_api.apps.core.utils import choices_to_dict
 from hct_mis_api.apps.payment.models import PaymentVerification
-from hct_mis_api.apps.utils.models import TimeStampedUUIDModel, ConcurrencyModel
+from hct_mis_api.apps.utils.models import ConcurrencyModel, TimeStampedUUIDModel
 
 logger = logging.getLogger(__name__)
 
@@ -265,7 +265,7 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
 
     @property
     def related_tickets(self):
-        combined_related_tickets = self.linked_tickets.all() | self.linked_tickets_related.all()
+        combined_related_tickets = (self.linked_tickets.all() | self.linked_tickets_related.all()).distinct()
         yield from combined_related_tickets
 
     @property
