@@ -242,7 +242,7 @@ export const GrievanceDetailsToolbar = ({
   }
   return (
     <PageHeader
-      title={`Ticket #${decodeIdString(id)}`}
+      title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
       <Box display='flex' alignItems='center'>
