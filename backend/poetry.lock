@@ -322,7 +322,7 @@ tests = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytes
 
 [[package]]
 name = "django-adminactions"
-version = "1.10.0"
+version = "1.11.0"
 description = "Collections of useful actions to use with django.contrib.admin.ModelAdmin"
 category = "main"
 optional = false
@@ -1621,7 +1621,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "732d63c88a532b7e5a65ec441dceac0bf5498867565ba7433f5f5acfce0385ad"
+content-hash = "2c86af105cd063520f82beac4376d1f643aa002ce75486d1072553f168a0726d"
 
 [metadata.files]
 amqp = [
@@ -1771,7 +1771,7 @@ django-admin-extra-urls = [
     {file = "django-admin-extra-urls-3.3.tar.gz", hash = "sha256:7e898ccad59400fff52f6e6d970abf2c3ad4522eaea8590f84675ce3d150cd1c"},
 ]
 django-adminactions = [
-    {file = "django-adminactions-1.10.0.tar.gz", hash = "sha256:2151d8c5d2a753145f98be251e790abdd4926f3b5768cd1c307079f32492c0b0"},
+    {file = "django-adminactions-1.11.0.tar.gz", hash = "sha256:146308a95c74e5d5bc1bd1dc2bcd3919a223c81279b911fe7de5ace2c17c8af4"},
 ]
 django-adminfilters = [
     {file = "django-adminfilters-1.4.1.tar.gz", hash = "sha256:c7baed8a7a376d8766161f5ff86f59c6b700f4bbde9963601dc2a658719ad927"},

@@ -113,7 +113,7 @@ django-sysinfo = "^2.4.0"
 django-adminfilters = "^1.3.5"
 single-source = "^0.1.5"
 requests-mock = "^1.9.2"
-django-adminactions = "^1.10"
+django-adminactions = "^1.11"
 
 [tool.poetry.dev-dependencies]
 factory-boy = "2.12.0"

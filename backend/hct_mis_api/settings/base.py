@@ -576,3 +576,7 @@ SMART_ADMIN_SECTIONS = {
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
+
+# see adminactions.perms
+# set handker to AA_PERMISSION_CREATE_USE_COMMAND
+AA_PERMISSION_HANDLER = 3
