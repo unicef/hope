@@ -322,7 +322,7 @@ tests = ["coverage", "factory-boy", "django-webtest", "pdbpp", "pyquery", "pytes
 
 [[package]]
 name = "django-adminactions"
-version = "1.9"
+version = "1.10.0"
 description = "Collections of useful actions to use with django.contrib.admin.ModelAdmin"
 category = "main"
 optional = false
@@ -334,8 +334,8 @@ xlrd = ">=0.9.2"
 xlwt = "*"
 
 [package.extras]
-dev = ["isort", "pdbpp", "virtualenv", "wheel", "check-manifest", "docutils", "django-dynamic-fixture", "django-webtest", "flake8", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox"]
-test = ["pytz", "xlrd (>=0.9.2)", "xlwt", "check-manifest", "django-dynamic-fixture", "django-webtest", "flake8", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox"]
+dev = ["isort", "pdbpp", "virtualenv", "wheel", "check-manifest", "docutils", "check-manifest", "django-dynamic-fixture", "django-webtest (>1.9.6)", "flake8", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox"]
+test = ["pytz", "xlrd (>=0.9.2)", "xlwt", "check-manifest", "django-dynamic-fixture", "django-webtest (>1.9.6)", "flake8", "mock (>=1.0.1)", "modernize", "pillow", "pytest", "pytest-cache", "pytest-cov", "pytest-django", "pytest-echo", "pytest-pythonpath", "readme", "selenium (>=2.42.0)", "setuptools (>=15.0)", "tox"]
 
 [[package]]
 name = "django-adminfilters"
@@ -570,7 +570,7 @@ phonenumberslite = ["phonenumberslite (>=7.0.2)"]
 
 [[package]]
 name = "django-smart-admin"
-version = "0.5.0"
+version = "0.6.0"
 description = ""
 category = "main"
 optional = false
@@ -867,7 +867,7 @@ ipython = {version = ">=5.1.0", markers = "python_version >= \"3.4\""}
 
 [[package]]
 name = "ipython"
-version = "7.24.1"
+version = "7.25.0"
 description = "IPython: Productive Interactive Computing"
 category = "main"
 optional = false
@@ -1621,7 +1621,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.1"
-content-hash = "c1f29e74b091da8d91aedc30b6480fce9ef6f98db81c10464691e23004c7eeff"
+content-hash = "732d63c88a532b7e5a65ec441dceac0bf5498867565ba7433f5f5acfce0385ad"
 
 [metadata.files]
 amqp = [
@@ -1771,8 +1771,7 @@ django-admin-extra-urls = [
     {file = "django-admin-extra-urls-3.3.tar.gz", hash = "sha256:7e898ccad59400fff52f6e6d970abf2c3ad4522eaea8590f84675ce3d150cd1c"},
 ]
 django-adminactions = [
-    {file = "django-adminactions-1.9.tar.gz", hash = "sha256:4f9fb44c7d0d7f2d773a1c12ccf9f1a5c3892ea1b292af0c37ea4cbf315e91af"},
-    {file = "django_adminactions-1.9-py2.py3-none-any.whl", hash = "sha256:17c890d6dcde63c433d302f89c5c77a2e2368322ba6dc6a2fead1fd3fcea1ba8"},
+    {file = "django-adminactions-1.10.0.tar.gz", hash = "sha256:2151d8c5d2a753145f98be251e790abdd4926f3b5768cd1c307079f32492c0b0"},
 ]
 django-adminfilters = [
     {file = "django-adminfilters-1.4.1.tar.gz", hash = "sha256:c7baed8a7a376d8766161f5ff86f59c6b700f4bbde9963601dc2a658719ad927"},
@@ -1846,7 +1845,7 @@ django-phonenumber-field = [
     {file = "django_phonenumber_field-4.0.0-py3-none-any.whl", hash = "sha256:2ca3bb0ada0ebc164bd903a981a34f1202a4294006e520b0da961bd7ce9f20a4"},
 ]
 django-smart-admin = [
-    {file = "django-smart-admin-0.5.0.tar.gz", hash = "sha256:6d0930088a657d723ee9b0266ba37539a470b21a2e85befb522f3a182c1f7d72"},
+    {file = "django-smart-admin-0.6.0.tar.gz", hash = "sha256:2d74dc32a0ee562cad7a8db2338c3f56aa11e1cbbae9b33eddbf959a24673f0b"},
 ]
 django-storages = [
     {file = "django-storages-1.8.tar.gz", hash = "sha256:9322ab74ba6371e2e0fccc350c741686ade829e43085597b26b07ae8955a0a00"},
@@ -1964,8 +1963,8 @@ ipdb = [
     {file = "ipdb-0.13.4.tar.gz", hash = "sha256:c85398b5fb82f82399fc38c44fe3532c0dde1754abee727d8f5cfcc74547b334"},
 ]
 ipython = [
-    {file = "ipython-7.24.1-py3-none-any.whl", hash = "sha256:d513e93327cf8657d6467c81f1f894adc125334ffe0e4ddd1abbb1c78d828703"},
-    {file = "ipython-7.24.1.tar.gz", hash = "sha256:9bc24a99f5d19721fb8a2d1408908e9c0520a17fff2233ffe82620847f17f1b6"},
+    {file = "ipython-7.25.0-py3-none-any.whl", hash = "sha256:aa21412f2b04ad1a652e30564fff6b4de04726ce875eab222c8430edc6db383a"},
+    {file = "ipython-7.25.0.tar.gz", hash = "sha256:54bbd1fe3882457aaf28ae060a5ccdef97f212a741754e420028d4ec5c2291dc"},
 ]
 ipython-genutils = [
     {file = "ipython_genutils-0.2.0-py2.py3-none-any.whl", hash = "sha256:72dd37233799e619666c9f639a9da83c34013a73e8bbc79a7a6348d93c61fab8"},
