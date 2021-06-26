@@ -221,6 +221,7 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
+    "smart_admin.logs",
     "smart_admin.templates",
     "smart_admin",
     "django_sysinfo",
