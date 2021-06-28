@@ -143,7 +143,7 @@ class GrievanceNotification:
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("assignment_change_notification_email.txt", context=context)
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.assigned_to}"
+        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
 
     def _prepare_assigned_to_recipient(self):
         if self.grievance_ticket.assigned_to is None:
