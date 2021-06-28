@@ -221,6 +221,7 @@ PROJECT_APPS = [
 ]
 
 DJANGO_APPS = [
+    "smart_admin.logs",
     "smart_admin.templates",
     "smart_admin",
     "django_sysinfo",
@@ -246,6 +247,7 @@ OTHER_APPS = [
     "constance",
     "admin_extra_urls",
     "adminfilters",
+    "adminactions",
     "multiselectfield",
     "mptt",
     "django_extensions",
@@ -574,3 +576,7 @@ SMART_ADMIN_SECTIONS = {
 EXCHANGE_RATE_CACHE_EXPIRY = 1 * 60 * 60 * 24
 
 VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
+
+# see adminactions.perms
+# set handker to AA_PERMISSION_CREATE_USE_COMMAND
+AA_PERMISSION_HANDLER = 3
