@@ -4697,6 +4697,7 @@ export type TicketIndividualDataUpdateDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   individual?: Maybe<IndividualNode>,
   individualData?: Maybe<Scalars['Arg']>,
+  roleReassignData: Scalars['JSONString'],
 };
 
 export type TicketIndividualDataUpdateDetailsNodeConnection = {
@@ -7270,7 +7271,7 @@ export type GrievanceTicketQuery = (
       )> }
     )>, individualDataUpdateTicketDetails: Maybe<(
       { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
-      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData' | 'roleReassignData'>
       & { individual: Maybe<(
         { __typename?: 'IndividualNode' }
         & IndividualDetailedFragment
@@ -13300,6 +13301,7 @@ export const GrievanceTicketDocument = gql`
         ...individualDetailed
       }
       individualData
+      roleReassignData
     }
     householdDataUpdateTicketDetails {
       id
@@ -18375,6 +18377,7 @@ export type TicketIndividualDataUpdateDetailsNodeResolvers<ContextType = any, Pa
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
 };
 
 export type TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection']> = {
