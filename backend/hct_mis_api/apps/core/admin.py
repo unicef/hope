@@ -107,7 +107,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    @button(label="Create Business Office")
+    @button(label="Create Business Office", permission=["can_split"])
     def split_business_area(self, request, pk):
         context = self.get_common_context(request, pk)
         opts = self.object._meta
@@ -244,7 +244,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
     search_fields = ("name",)
     ordering = ("country_name", "admin_level")
 
-    @button()
+    @button(permission=["load_from_datamart"])
     def load_from_datamart(self, request):
         api = DatamartAPI()
         for level in api.get_admin_levels():
@@ -264,7 +264,7 @@ class AdminAreaLevelAdmin(ExtraUrlMixin, admin.ModelAdmin):
 
 class LoadAdminAreaForm(forms.Form):
     # country = forms.ChoiceField(choices=AdminAreaLevel.objects.get_countries())
-    country = forms.ModelChoiceField(queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by('country_name'))
+    country = forms.ModelChoiceField(queryset=AdminAreaLevel.objects.filter(admin_level=0).order_by("country_name"))
     geometries = forms.BooleanField(required=False)
     run_in_background = forms.BooleanField(required=False)
 
@@ -289,7 +289,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         TextFieldFilter.factory("external_id"),
     )
 
-    @button()
+    @button(permission=["import_from_csv"])
     def import_file(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -354,7 +354,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
 
         return TemplateResponse(request, "core/admin/import_locations.html", context)
 
-    @button()
+    @button(permission=["load_from_datamart"])
     def load_from_datamart(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":

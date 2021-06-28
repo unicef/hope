@@ -724,6 +724,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
             return self.user_fields["sys"][key]
         return None
 
+    def count_all_roles(self):
+        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
+
 
 class EntitlementCard(TimeStampedUUIDModel):
     ACTIVE = "ACTIVE"

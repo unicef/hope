@@ -2926,6 +2926,7 @@ type TicketIndividualDataUpdateDetailsNode implements Node {
   updatedAt: DateTime!
   individual: IndividualNode
   individualData: Arg
+  roleReassignData: JSONString!
 }
 
 type TicketIndividualDataUpdateDetailsNodeConnection {

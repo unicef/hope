@@ -69,6 +69,13 @@ class User(AbstractUser, UUIDModel):
         )
         return query.count() > 0
 
+    class Meta:
+        permissions = (
+            ("can_load_from_ad", "Can load users from ActiveDirectory"),
+            ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
+            ("can_upload_to_kobo", "Can upload users to Kobo"),
+        )
+
 
 class ChoiceArrayField(ArrayField):
     def formfield(self, **kwargs):
