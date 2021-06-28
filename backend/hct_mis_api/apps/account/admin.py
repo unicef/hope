@@ -428,12 +428,15 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
                     reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
+                    results = {"errors": [], "created": []}
                     for row in reader:
                         password = get_random_string()
                         email = row["email"].strip()
                         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-                        username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        results = {"errors": [], "created": []}
+                        if "username" in row:
+                            username = row["username"].strip()
+                        else:
+                            username = row["email"].replace("@", "_").replace(".", "_").lower()
                         res = requests.post(
                             url,
                             headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
@@ -455,7 +458,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                             )
                         else:
                             results["errors"].append([row, res])
-                        context["results"] = results
+                    context["results"] = results
+                    context["reader"] = reader
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
