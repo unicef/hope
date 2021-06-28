@@ -3,9 +3,13 @@ import capitalize from 'lodash/capitalize';
 import React from 'react';
 import WarningIcon from '@material-ui/icons/Warning';
 import styled from 'styled-components';
+import _ from 'lodash';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { GrievanceTicketQuery } from '../../__generated__/graphql';
-import { GRIEVANCE_CATEGORIES } from '../../utils/constants';
+import {
+  GRIEVANCE_CATEGORIES,
+  GRIEVANCE_ISSUE_TYPES,
+} from '../../utils/constants';
 import { LabelizedField } from '../LabelizedField';
 import { ContentLink } from '../ContentLink';
 import { LookUpReassignRole } from './LookUpReassignRole/LookUpReassignRole';
@@ -61,8 +65,19 @@ export const ReassignRoleBox = ({
       ticket.systemFlaggingTicketDetails.roleReassignData,
     );
   }
-  const householdsAndRoles = individual?.householdsAndRoles;
-  const isHeadOfHousehold = individual?.id === household?.headOfHousehold?.id;
+  let householdsAndRoles = individual?.householdsAndRoles;
+  let shouldShowReassignHoH = individual?.id === household?.headOfHousehold?.id;
+
+  if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+    ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
+    if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role)) {
+      householdsAndRoles = [];
+    }
+    if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.relationship)) {
+      shouldShowReassignHoH = false;
+    }
+  }
+
   const mappedLookUpsForExternalHouseholds = householdsAndRoles
     .filter((el) => el.role !== 'NO_ROLE')
     .map((el) => (
@@ -113,7 +128,7 @@ export const ReassignRoleBox = ({
         Upon removing you will need to select new individual(s) for this role.
       </Typography>
       <Box mt={3} display='flex' flexDirection='column'>
-        {isHeadOfHousehold && (
+        {shouldShowReassignHoH && (
           <Box mb={2} mt={2}>
             <Box mb={2}>
               <LabelizedField label='ROLE'>
