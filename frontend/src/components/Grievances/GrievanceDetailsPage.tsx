@@ -2,6 +2,7 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import _ from "lodash";
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
@@ -366,16 +367,29 @@ export function GrievanceDetailsPage(): React.ReactElement {
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
         ticket.issueType.toString() ===
           GRIEVANCE_ISSUE_TYPES.DELETE_INDIVIDUAL) ||
+      (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+        ticket.issueType.toString() ===
+          GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) ||
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING &&
         ticket?.systemFlaggingTicketDetails?.approveStatus) ||
       (ticket.category.toString() === GRIEVANCE_CATEGORIES.DEDUPLICATION &&
         ticket?.needsAdjudicationTicketDetails?.selectedIndividual);
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
+
+    let isProperDataChange = true;
+    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
+      if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role) &&
+        _.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.relationship)) {
+        isProperDataChange = false;
+      }
+    }
     return (
       isRightCategory &&
       isRightStatus &&
-      (isHeadOfHousehold || hasRolesToReassign)
+      (isHeadOfHousehold || hasRolesToReassign) &&
+      isProperDataChange
     );
   };
 
