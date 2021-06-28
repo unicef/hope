@@ -68,9 +68,7 @@ export function IndividualsBioData({
             {edge.node.documentNumber}
           </LabelizedField>
         </Box>
-        <LabelizedField label={`${edge.node.type.label} ISSUER`}>
-          {edge.node.country}
-        </LabelizedField>
+        <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
       </Box>
     </Grid>
   ));
@@ -79,11 +77,11 @@ export function IndividualsBioData({
     <Grid item xs={3} key={item.id}>
       <Box flexDirection='column'>
         <Box mb={1}>
-          <LabelizedField label={`${item.type} ID ISSUER`}>
-            {item.country}
+          <LabelizedField label={`${item.type} ID`}>
+            {item.number}
           </LabelizedField>
         </Box>
-        <LabelizedField label={`${item.type} ID`}>{item.number}</LabelizedField>
+        <LabelizedField label='issued'>{item.country}</LabelizedField>
       </Box>
     </Grid>
   ));
