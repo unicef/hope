@@ -9,16 +9,16 @@ from hct_mis_api.apps.core.attributes_qet_queries import (
     age_to_birth_date_query,
     get_birth_certificate_document_number_query,
     get_birth_certificate_issuer_query,
-    get_other_issuer_query,
-    get_other_document_number_query,
-    get_national_id_issuer_query,
-    get_national_id_document_number_query,
-    get_national_passport_issuer_query,
-    get_national_passport_document_number_query,
-    get_electoral_card_issuer_query,
-    get_electoral_card_document_number_query,
     get_drivers_license_document_number_query,
     get_drivers_licensee_issuer_query,
+    get_electoral_card_document_number_query,
+    get_electoral_card_issuer_query,
+    get_national_id_document_number_query,
+    get_national_id_issuer_query,
+    get_national_passport_document_number_query,
+    get_national_passport_issuer_query,
+    get_other_document_number_query,
+    get_other_issuer_query,
     get_role_query,
 )
 from hct_mis_api.apps.core.countries import Countries
@@ -26,19 +26,19 @@ from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import LazyEvalMethodsDict, admin_area1_query
 from hct_mis_api.apps.household.models import (
+    BLANK,
     DATA_SHARING_CHOICES,
     DISABILITY_CHOICE,
     MARITAL_STATUS_CHOICE,
     ORG_ENUMERATOR_CHOICES,
+    REGISTRATION_METHOD_CHOICES,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
     SEVERITY_OF_DISABILITY_CHOICES,
     SEX_CHOICE,
     WORK_STATUS_CHOICE,
-    REGISTRATION_METHOD_CHOICES,
     YES_NO_CHOICE,
-    BLANK,
 )
 
 logger = logging.getLogger(__name__)
@@ -1264,6 +1264,18 @@ CORE_FIELDS_ATTRIBUTES = [
         "associated_with": _HOUSEHOLD,
         "xlsx_field": "org_name_enumerator_h_c",
     },
+    {
+        "id": "69dbc5f2-039f-4671-b39f-a63d96475cab",
+        "type": TYPE_BOOL,
+        "name": "disability",
+        "lookup": "disability",
+        "required": False,
+        "label": {"English(EN)": "Individual is disabled?"},
+        "hint": "",
+        "choices": [],
+        "associated_with": _INDIVIDUAL,
+        "xlsx_field": "disability_i_c",
+    },
 ]
 
 HOUSEHOLD_ID_FIELDS = [
@@ -1436,4 +1448,3 @@ FILTERABLE_CORE_FIELDS_ATTRIBUTES = [x for x in CORE_FIELDS_ATTRIBUTES if x.get(
 CORE_FIELDS_ATTRIBUTES_DICTIONARY = reduce(_reduce_core_field_attr, TARGETING_CORE_FIELDS, {})
 
 CORE_FIELDS_SEPARATED_WITH_NAME_AS_KEY = core_fields_to_separated_dict()
-
