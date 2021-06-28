@@ -10,7 +10,6 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,

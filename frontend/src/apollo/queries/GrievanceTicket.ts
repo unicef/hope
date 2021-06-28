@@ -75,6 +75,7 @@ export const GrievanceTicket = gql`
           ...individualDetailed
         }
         individualData
+        roleReassignData
       }
       householdDataUpdateTicketDetails {
         id

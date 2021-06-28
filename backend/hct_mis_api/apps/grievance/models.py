@@ -425,6 +425,7 @@ class TicketIndividualDataUpdateDetails(TimeStampedUUIDModel):
         null=True,
     )
     individual_data = JSONField(null=True)
+    role_reassign_data = JSONField(default=dict)
 
     @property
     def household(self):
