@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 
 from snapshottest import Snapshot
 
-
 snapshots = Snapshot()
 
 snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
@@ -44413,6 +44412,43 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
                 'name': 'org_name_enumerator',
                 'required': False,
                 'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
+                    {
+                        'labelEn': 'disabled',
+                        'labels': [
+                            {
+                                'label': 'disabled',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'disabled'
+                    },
+                    {
+                        'labelEn': 'not disabled',
+                        'labels': [
+                            {
+                                'label': 'not disabled',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'not disabled'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Individual is disabled?',
+                'labels': [
+                    {
+                        'label': 'Individual is disabled?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'disability',
+                'required': False,
+                'type': 'SELECT_ONE'
             },
             {
                 'associatedWith': 'Individual',
