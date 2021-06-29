@@ -377,7 +377,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
-    const isMoreThanOneIndividual = household.individuals.totalCount !== 1;
+    const isMoreThanOneIndividual = household?.individuals?.totalCount !== 1;
 
     let isProperDataChange = true;
     if (
