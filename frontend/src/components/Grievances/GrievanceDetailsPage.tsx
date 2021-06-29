@@ -2,7 +2,7 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import _ from "lodash";
+import { isEmpty } from 'lodash';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { ContainerColumnWithBorder } from '../ContainerColumnWithBorder';
 import { LabelizedField } from '../LabelizedField';
@@ -377,15 +377,24 @@ export function GrievanceDetailsPage(): React.ReactElement {
     const isRightStatus =
       ticket.status === GRIEVANCE_TICKET_STATES.FOR_APPROVAL;
 
+    const isMoreThanOneIndividual = household.individuals.totalCount !== 1;
+
     let isProperDataChange = true;
-    if (ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
-      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL) {
-      if (_.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role) &&
-        _.isEmpty(ticket.individualDataUpdateTicketDetails.individualData.relationship)) {
+    if (
+      ticket.category.toString() === GRIEVANCE_CATEGORIES.DATA_CHANGE &&
+      ticket.issueType.toString() === GRIEVANCE_ISSUE_TYPES.EDIT_INDIVIDUAL
+    ) {
+      if (
+        isEmpty(ticket.individualDataUpdateTicketDetails.individualData.role) &&
+        isEmpty(
+          ticket.individualDataUpdateTicketDetails.individualData.relationship,
+        )
+      ) {
         isProperDataChange = false;
       }
     }
     return (
+      isMoreThanOneIndividual &&
       isRightCategory &&
       isRightStatus &&
       (isHeadOfHousehold || hasRolesToReassign) &&
@@ -483,7 +492,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             </OverviewContainer>
           </ContainerColumnWithBorder>
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={8}>
           {ticket?.category?.toString() ===
             GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING && (
             <PaddingContainer>
@@ -542,7 +551,7 @@ export function GrievanceDetailsPage(): React.ReactElement {
             <Notes notes={ticket.ticketNotes} canAddNote={canAddNote} />
           </PaddingContainer>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={4}>
           {renderRightSection()}
         </Grid>
       </Grid>
