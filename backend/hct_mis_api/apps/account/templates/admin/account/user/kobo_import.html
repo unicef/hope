@@ -15,6 +15,7 @@
 {% block content %}
     {% if results %}
         <h1>Import Results</h1>
+
         {% if results.created %}
             <h2>The following user have been added to HOPE</h2>
             {% for entry in results.created %}
@@ -37,8 +38,8 @@
         Load csv file.
         Allowed formats are:
         <ul>
-            <li>email(email), first_name(char), last_name(char)</li>
-            <li>email(email), first_name(char), last_name(char), username(char)</li>
+            <li>email(email); first_name(char); last_name(char)</li>
+            <li>email(email); first_name(char); last_name(char); username(char)</li>
         </ul>
 
         <form method="POST" id="load_users" enctype="multipart/form-data" novalidate>
