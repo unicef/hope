@@ -489,7 +489,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
         return TemplateResponse(request, "admin/account/user/kobo_import.html", context)
 
-    @button(label="Sync users from Kobo")
+    @button(label="Sync users from Kobo", permission=["can_import_from_kobo"])
     def kobo_users_sync(self, request):
         ctx = self.get_common_context(request)
         users = []
