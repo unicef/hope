@@ -14,6 +14,8 @@ from admin_extra_urls.api import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import TextFieldFilter
 
+from hct_mis_api.apps.core.models import BusinessArea
+
 logger = logging.getLogger(__name__)
 
 from hct_mis_api.apps.cash_assist_datahub.models import (
@@ -154,8 +156,12 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         if (obj.status == obj.STATUS_EMPTY) and has_content:
             warnings.append([messages.ERROR, f"Session marked as Empty but records found"])
 
-        context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
+        area = BusinessArea.objects.filter(code=obj.business_area.strip()).first()
+        context["area"] = area
+        if not area:
+            warnings.append([messages.ERROR, f"Invalid Business Area"])
 
+        context["warnings"] = [(DEFAULT_TAGS[w[0]], w[1]) for w in warnings]
         return TemplateResponse(request, "admin/cash_assist_datahub/session/inspect.html", context)
 
 

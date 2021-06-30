@@ -16,12 +16,12 @@
 
     <style>
         table.messagelist tr.warning {
-            background: #ffc url(../img/icon-alert.svg) 40px 14px no-repeat;
+            background: #ffc url({% static "admin/icon-alert.svg" %}) 40px 14px no-repeat;
             background-size: 14px auto;
         }
 
         table.messagelist tr.error {
-            background: #ffefef url(../img/icon-no.svg) 40px 12px no-repeat;
+            background: #ffefef url({% static "admin/icon-no.svg" %}) 40px 12px no-repeat;
             background-size: 14px auto;
         }
     </style>
@@ -44,6 +44,7 @@
     {% endif %}
 {% endblock %}
 {% block action-content %}
+    <h1>{{ original.business_area }}: {{ area }}</h1>
     {% if warnings %}
     <h3>Warnings</h3>
     <table class="messagelist ">
