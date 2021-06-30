@@ -74,6 +74,7 @@ class User(AbstractUser, UUIDModel):
             ("can_load_from_ad", "Can load users from ActiveDirectory"),
             ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
             ("can_upload_to_kobo", "Can upload users to Kobo"),
+            ("can_import_from_kobo", "Can import and sync users from Kobo"),
         )
 
 
