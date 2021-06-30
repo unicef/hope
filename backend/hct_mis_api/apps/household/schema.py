@@ -43,12 +43,12 @@ from hct_mis_api.apps.core.utils import (
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.household.models import (
     AGENCY_TYPE_CHOICES,
-    DISABILITY_CHOICE,
     DUPLICATE,
     DUPLICATE_IN_BATCH,
     IDENTIFICATION_TYPE_CHOICE,
     INDIVIDUAL_STATUS_CHOICES,
     MARITAL_STATUS_CHOICE,
+    OBSERVED_DISABILITY_CHOICE,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
@@ -602,7 +602,7 @@ class Query(graphene.ObjectType):
         return to_choice_object(SEVERITY_OF_DISABILITY_CHOICES)
 
     def resolve_observed_disability_choices(self, info, **kwargs):
-        return to_choice_object(DISABILITY_CHOICE)
+        return to_choice_object(OBSERVED_DISABILITY_CHOICE)
 
     def resolve_work_status_choices(self, info, **kwargs):
         return to_choice_object(WORK_STATUS_CHOICE)
