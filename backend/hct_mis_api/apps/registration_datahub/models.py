@@ -4,9 +4,14 @@ from datetime import date
 
 from django.contrib.gis.db.models import PointField
 from django.contrib.postgres.fields import JSONField
-from django.core.validators import MaxLengthValidator, MinLengthValidator, validate_image_file_extension
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    validate_image_file_extension,
+)
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+
 from django_countries.fields import CountryField
 from multiselectfield import MultiSelectField
 from phonenumber_field.modelfields import PhoneNumberField
@@ -14,13 +19,17 @@ from sorl.thumbnail import ImageField
 
 from hct_mis_api.apps.core.currencies import CURRENCY_CHOICES
 from hct_mis_api.apps.household.models import (
+    BLANK,
     DATA_SHARING_CHOICES,
     DEDUPLICATION_GOLDEN_RECORD_STATUS_CHOICE,
-    DISABILITY_CHOICE,
+    DISABILITY_CHOICES,
     IDENTIFICATION_TYPE_CHOICE,
     MARITAL_STATUS_CHOICE,
+    NOT_DISABLED,
     NOT_PROVIDED,
+    OBSERVED_DISABILITY_CHOICE,
     ORG_ENUMERATOR_CHOICES,
+    REGISTRATION_METHOD_CHOICES,
     RELATIONSHIP_CHOICE,
     RESIDENCE_STATUS_CHOICE,
     ROLE_CHOICE,
@@ -28,8 +37,6 @@ from hct_mis_api.apps.household.models import (
     SEX_CHOICE,
     UNIQUE,
     WORK_STATUS_CHOICE,
-    BLANK,
-    REGISTRATION_METHOD_CHOICES,
     YES_NO_CHOICE,
 )
 from hct_mis_api.apps.utils.models import TimeStampedUUIDModel
@@ -156,7 +163,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
         related_name="individuals",
         on_delete=models.CASCADE,
     )
-    disability = models.BooleanField(default=False)
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -181,7 +188,7 @@ class ImportedIndividual(TimeStampedUUIDModel):
     deduplication_golden_record_results = JSONField(default=dict)
     flex_fields = JSONField(default=dict)
     pregnant = models.NullBooleanField()
-    observed_disability = MultiSelectField(choices=DISABILITY_CHOICE)
+    observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)

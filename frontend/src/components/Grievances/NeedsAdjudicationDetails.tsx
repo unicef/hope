@@ -121,7 +121,7 @@ export function NeedsAdjudicationDetails({
                     variant='outlined'
                     color='primary'
                   >
-                    mark as duplicate and remove
+                    mark duplicate
                   </Button>
                 )}
               </ConfirmationDialog>

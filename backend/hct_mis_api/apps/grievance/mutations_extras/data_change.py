@@ -27,6 +27,7 @@ from hct_mis_api.apps.grievance.mutations_extras.utils import (
     handle_role,
     prepare_previous_documents,
     prepare_previous_identities,
+    reassign_roles_on_update,
     verify_flex_fields,
     withdraw_individual_and_reassign_roles,
 )
@@ -595,6 +596,7 @@ def close_update_individual_grievance_ticket(grievance_ticket, info):
         household.head_of_household = individual
         household.save()
 
+    reassign_roles_on_update(individual, ticket_details.role_reassign_data, info)
     if role_data.get("approve_status") is True:
         handle_role(role_data.get("value"), household, individual)
 

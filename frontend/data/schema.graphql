@@ -683,6 +683,7 @@ type GrievanceTicketNode implements Node {
   businessArea: UserBusinessAreaNode!
   linkedTickets(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   registrationDataImport: RegistrationDataImportNode
+  unicefId: String!
   linkedTicketsRelated(before: String, after: String, first: Int, last: Int): GrievanceTicketNodeConnection!
   ticketNotes(before: String, after: String, first: Int, last: Int): TicketNoteNodeConnection!
   complaintTicketDetails: TicketComplaintDetailsNode
@@ -2925,6 +2926,7 @@ type TicketIndividualDataUpdateDetailsNode implements Node {
   updatedAt: DateTime!
   individual: IndividualNode
   individualData: Arg
+  roleReassignData: JSONString!
 }
 
 type TicketIndividualDataUpdateDetailsNodeConnection {

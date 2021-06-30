@@ -65,7 +65,7 @@ class BusinessArea(TimeStampedUUIDModel):
 
     class Meta:
         ordering = ["name"]
-        # app_label = "core"
+        permissions = (("can_split", "Can split BusinessArea"),)
 
     def __str__(self):
         return self.name
@@ -96,11 +96,7 @@ class AdminAreaLevel(TimeStampedUUIDModel):
     display_name = models.CharField(max_length=64, blank=True, null=True, verbose_name=_("Display Name"))
     admin_level = models.PositiveSmallIntegerField(verbose_name=_("Admin Level"), blank=True, null=True)
     business_area = models.ForeignKey(
-        "BusinessArea",
-        on_delete=models.SET_NULL,
-        related_name="admin_area_level",
-        null=True,
-        blank=True
+        "BusinessArea", on_delete=models.SET_NULL, related_name="admin_area_level", null=True, blank=True
     )
     area_code = models.CharField(max_length=8, blank=True, null=True)
     country_name = models.CharField(max_length=100, blank=True, null=True)
@@ -114,6 +110,11 @@ class AdminAreaLevel(TimeStampedUUIDModel):
         ordering = ["name"]
         verbose_name = "Admin Area Level"
         unique_together = ("country", "admin_level")
+        permissions = (
+            ("load_from_datamart", "Load data from Datamart"),
+            ("can_sync_with_ad", "Can synchronise user with ActiveDirectory"),
+            ("can_upload_to_kobo", "Can upload users to Kobo"),
+        )
 
     def __str__(self):
         if self.admin_level == 0:
@@ -169,9 +170,13 @@ class AdminArea(MPTTModel, TimeStampedUUIDModel):
     class Meta:
         unique_together = ("title", "p_code")
         ordering = ["title"]
+        permissions = (
+            ("import_from_csv", "Import AdminAreas from CSV file"),
+            ("load_from_datamart", "Load data from Datamart"),
+        )
 
     def __str__(self):
-        level_name = self.admin_area_level.name if self.admin_area_level else ''
+        level_name = self.admin_area_level.name if self.admin_area_level else ""
         if self.p_code:
             return "{} ({} {})".format(
                 self.title,
