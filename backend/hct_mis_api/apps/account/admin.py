@@ -413,7 +413,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button()
+    @button(permission=["can_upload_to_kobo"])
     def kobo_import(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -428,12 +428,15 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                         raise Exception("Uploaded file is too big (%.2f MB)" % (csv_file.size(1000 * 1000)))
                     data_set = csv_file.read().decode("utf-8-sig").splitlines()
                     reader = csv.DictReader(data_set, quoting=csv.QUOTE_NONE, delimiter=";")
+                    results = {"errors": [], "created": []}
                     for row in reader:
                         password = get_random_string()
                         email = row["email"].strip()
                         url = f"{settings.KOBO_KF_URL}/authorized_application/users/"
-                        username = row["email"].replace("@", "_").replace(".", "_").lower()
-                        results = {"errors": [], "created": []}
+                        if "username" in row:
+                            username = row["username"].strip()
+                        else:
+                            username = row["email"].replace("@", "_").replace(".", "_").lower()
                         res = requests.post(
                             url,
                             headers={"Authorization": f"Token {config.KOBO_APP_API_TOKEN}"},
@@ -455,7 +458,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                             )
                         else:
                             results["errors"].append([row, res])
-                        context["results"] = results
+                    context["results"] = results
+                    context["reader"] = reader
                 except Exception as e:
                     logger.exception(e)
                     context["form"] = form
@@ -561,7 +565,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             setattr(user, field, value or "")
         user.save()
 
-    @button(label="Sync")
+    @button(label="Sync", permission=["can_sync_with_ad"])
     def sync_multi(self, request):
         not_found = []
         try:
@@ -578,7 +582,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Sync")
+    @button(label="Sync", permission=["can_sync_with_ad"])
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
@@ -587,7 +591,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button()
+    @button(permission=["can_load_from_ad"])
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 
