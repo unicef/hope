@@ -3,12 +3,14 @@ from django.utils.safestring import mark_safe
 
 from admin_extra_urls.decorators import button
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
+from adminfilters.autocomplete import AutoCompleteFilter
 from adminfilters.filters import ChoicesFieldComboFilter, TextFieldFilter
 
 from hct_mis_api.apps.payment.models import (
     CashPlanPaymentVerification,
     PaymentRecord,
     PaymentVerification,
+    ServiceProvider,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -53,7 +55,9 @@ class CashPlanPaymentVerificationAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     @button()
     def execute_sync_rapid_pro(self, request):
         if request.method == "POST":
-            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import CheckRapidProVerificationTask
+            from hct_mis_api.apps.payment.tasks.CheckRapidProVerificationTask import (
+                CheckRapidProVerificationTask,
+            )
 
             task = CheckRapidProVerificationTask()
             task.execute()
@@ -102,3 +106,10 @@ class PaymentVerificationAdmin(HOPEModelAdminBase):
                 "payment_record__household",
             )
         )
+
+
+@admin.register(ServiceProvider)
+class ServiceProviderAdmin(HOPEModelAdminBase):
+    list_display = ("full_name", "short_name", "country")
+    search_fields = ("full_name", "vision_id")
+    list_filter = (("business_area", AutoCompleteFilter),)

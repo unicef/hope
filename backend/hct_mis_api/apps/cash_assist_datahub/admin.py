@@ -177,11 +177,25 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(HOPEModelAdminBase):
+class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
-    list_filter = ("status", TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (
+        "status",
+        TextFieldFilter.factory("cash_plan_id"),
+        TextFieldFilter.factory("session__id"),
+        TextFieldFilter.factory("business_area"),
+    )
     date_hierarchy = "session__timestamp"
     raw_id_fields = ("session",)
+
+    @href()
+    def payment_records(self, button):
+        if "original" in button.context:
+            obj = button.context["original"]
+            url = reverse("admin:cash_assist_datahub_paymentrecord_changelist")
+            return f"{url}?cash_plan_ca_id|iexact={obj.cash_plan_id}"
+        else:
+            button.visible = False
 
 
 @admin.register(PaymentRecord)
@@ -192,6 +206,8 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = (
         "status",
         "delivery_type",
+        TextFieldFilter.factory("ca_id"),
+        TextFieldFilter.factory("cash_plan_ca_id"),
         TextFieldFilter.factory("session__id"),
         TextFieldFilter.factory("business_area"),
     )

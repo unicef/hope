@@ -1,7 +1,4 @@
 # Create your models here.
-import sys
-
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
 
@@ -90,12 +87,16 @@ class AbstractSession(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     SOURCE_MIS = "MIS"
     SOURCE_CA = "CA"
-    STATUS_NEW = "NEW"
-    STATUS_READY = "READY"
+    # HOPE statueses
     STATUS_PROCESSING = "PROCESSING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_FAILED = "FAILED"
+    # CA statuses
+    STATUS_NEW = "NEW"
+    STATUS_READY = "READY"
     STATUS_EMPTY = "EMPTY"
+    STATUS_LOADING = "LOADING"
+    STATUS_ERRORED = "ERRORED"
     STATUS_IGNORED = "IGNORED"
 
     source = models.CharField(
@@ -112,6 +113,8 @@ class AbstractSession(models.Model):
             (STATUS_FAILED, "Failed"),
             (STATUS_EMPTY, "Empty"),
             (STATUS_IGNORED, "Ignored"),
+            (STATUS_LOADING, "Loading"),
+            (STATUS_ERRORED, "Errored"),
         ),
     )
     last_modified_date = models.DateTimeField(auto_now=True)
