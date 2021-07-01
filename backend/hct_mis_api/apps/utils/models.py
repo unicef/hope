@@ -1,9 +1,11 @@
 # Create your models here.
-from concurrency.fields import IntegerVersionField
 from django.db import models
 from django.utils import timezone
+
+from concurrency.fields import IntegerVersionField
 from model_utils.managers import SoftDeletableManager
 from model_utils.models import UUIDModel
+
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
 
@@ -85,12 +87,17 @@ class AbstractSession(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     SOURCE_MIS = "MIS"
     SOURCE_CA = "CA"
-    STATUS_NEW = "NEW"
-    STATUS_READY = "READY"
+    # HOPE statueses
     STATUS_PROCESSING = "PROCESSING"
     STATUS_COMPLETED = "COMPLETED"
     STATUS_FAILED = "FAILED"
+    # CA statuses
+    STATUS_NEW = "NEW"
+    STATUS_READY = "READY"
     STATUS_EMPTY = "EMPTY"
+    STATUS_LOADING = "LOADING"
+    STATUS_ERRORED = "ERRORED"
+    STATUS_IGNORED = "IGNORED"
 
     source = models.CharField(
         max_length=3,
@@ -105,6 +112,9 @@ class AbstractSession(models.Model):
             (STATUS_COMPLETED, "Completed"),
             (STATUS_FAILED, "Failed"),
             (STATUS_EMPTY, "Empty"),
+            (STATUS_IGNORED, "Ignored"),
+            (STATUS_LOADING, "Loading"),
+            (STATUS_ERRORED, "Errored"),
         ),
     )
     last_modified_date = models.DateTimeField(auto_now=True)
@@ -117,8 +127,30 @@ class AbstractSession(models.Model):
             via the session.""",
     )
 
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    traceback = models.TextField(default="", blank=True, null=True)
+
     class Meta:
         abstract = True
+
+    def process_exception(self, exc, request=None):
+        try:
+            from sentry_sdk import capture_exception
+
+            err = capture_exception(exc)
+            self.sentry_id = err
+        except:
+            pass
+
+        try:
+            from django.views.debug import ExceptionReporter
+
+            reporter = ExceptionReporter(request, *sys.exc_info())
+            self.traceback = reporter.get_traceback_html()
+        except:
+            self.traceback = "N/A"
+        finally:
+            self.status = self.STATUS_FAILED
 
     def __str__(self):
         return f"#{self.id} on {self.timestamp}"
