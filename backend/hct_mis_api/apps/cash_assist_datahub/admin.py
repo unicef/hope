@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from admin_extra_urls.api import button
+from admin_extra_urls.decorators import href
 from admin_extra_urls.mixins import ExtraUrlMixin, _confirm_action
 from adminfilters.filters import TextFieldFilter
 
@@ -44,6 +45,8 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
     ordering = ("-timestamp",)
+    exclude = ("traceback",)
+    readonly_fields = ("sentry_id", "source", "business_area")
 
     @button()
     def execute_pull(self, request):
@@ -103,6 +106,20 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 "Successfully executed",
             )
 
+    @href(html_attrs={"target": "_new"})
+    def view_error_on_sentry(self, button):
+        if "original" in button.context:
+            obj = button.context["original"]
+            if obj.sentry_id:
+                return f"{settings.SENTRY_URL}?query={obj.sentry_id}"
+
+        button.visible = False
+
+    @button(visible=lambda x: x.traceback)
+    def view_error(self, request, pk):
+        context = self.get_common_context(request, pk)
+        return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
+
     @button()
     def inspect(self, request, pk):
         context = self.get_common_context(request, pk)
@@ -160,11 +177,25 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 
 @admin.register(CashPlan)
-class CashPlanAdmin(HOPEModelAdminBase):
+class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("session", "name", "status", "business_area", "cash_plan_id")
-    list_filter = ("status", TextFieldFilter.factory("session__id"), TextFieldFilter.factory("business_area"))
+    list_filter = (
+        "status",
+        TextFieldFilter.factory("cash_plan_id"),
+        TextFieldFilter.factory("session__id"),
+        TextFieldFilter.factory("business_area"),
+    )
     date_hierarchy = "session__timestamp"
     raw_id_fields = ("session",)
+
+    @href()
+    def payment_records(self, button):
+        if "original" in button.context:
+            obj = button.context["original"]
+            url = reverse("admin:cash_assist_datahub_paymentrecord_changelist")
+            return f"{url}?cash_plan_ca_id|iexact={obj.cash_plan_id}"
+        else:
+            button.visible = False
 
 
 @admin.register(PaymentRecord)
@@ -175,6 +206,8 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
     list_filter = (
         "status",
         "delivery_type",
+        TextFieldFilter.factory("ca_id"),
+        TextFieldFilter.factory("cash_plan_ca_id"),
         TextFieldFilter.factory("session__id"),
         TextFieldFilter.factory("business_area"),
     )
