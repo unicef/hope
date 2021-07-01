@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CashPlanNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../components/table/ClickableTableRow';
@@ -11,6 +11,7 @@ import {
   renderSomethingOrDash,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../../components/UniversalMoment';
+import { BlackLink } from '../../../components/BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -38,7 +39,7 @@ export function CashPlanTableRow({
       key={cashPlan.id}
     >
       <TableCell align='left'>
-        <Link target='_blank' rel='noopener noreferrer' to={cashPlanPath}>
+        <BlackLink target='_blank' rel='noopener noreferrer' to={cashPlanPath}>
           <div
             style={{
               textOverflow: 'ellipsis',
@@ -46,7 +47,7 @@ export function CashPlanTableRow({
           >
             {cashPlan.caId}
           </div>
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>
