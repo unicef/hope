@@ -10,7 +10,6 @@ import {
   GRIEVANCE_ISSUE_TYPES,
   GRIEVANCE_TICKET_STATES,
 } from '../../utils/constants';
-import { decodeIdString } from '../../utils/utils';
 import {
   GrievanceTicketDocument,
   GrievanceTicketQuery,
@@ -182,7 +181,7 @@ export const GrievanceDetailsToolbar = ({
         refetchQueries: () => [
           {
             query: GrievanceTicketDocument,
-            variables: {id: ticket.id},
+            variables: { id: ticket.id },
           },
         ],
       });
@@ -198,12 +197,13 @@ export const GrievanceDetailsToolbar = ({
     if (ticket.category.toString() === GRIEVANCE_CATEGORIES.SYSTEM_FLAGGING) {
       let additionalContent = '';
       if (!ticket.systemFlaggingTicketDetails.approveStatus) {
-        additionalContent = ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
+        additionalContent =
+          ' By continuing you acknowledge that individuals in this ticket was compared with sanction list. No matches were found';
       }
       return `${closingConfirmationText}${additionalContent}`;
     }
     return closingConfirmationText;
-  }
+  };
 
   let closeButton = (
     <ConfirmationDialog
@@ -242,7 +242,7 @@ export const GrievanceDetailsToolbar = ({
   }
   return (
     <PageHeader
-      title={`Ticket #${decodeIdString(id)}`}
+      title={`Ticket ID: ${ticket.unicefId}`}
       breadCrumbs={breadCrumbsItems}
     >
       <Box display='flex' alignItems='center'>

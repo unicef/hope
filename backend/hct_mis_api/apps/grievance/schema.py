@@ -60,7 +60,7 @@ from hct_mis_api.apps.grievance.models import (
 )
 from hct_mis_api.apps.household.models import Household, Individual
 from hct_mis_api.apps.household.schema import HouseholdNode, IndividualNode
-from hct_mis_api.apps.payment.models import PaymentRecord, ServiceProvider
+from hct_mis_api.apps.payment.models import PaymentRecord
 from hct_mis_api.apps.payment.schema import PaymentRecordNode
 from hct_mis_api.apps.utils.schema import Arg, ChartDatasetNode
 
@@ -147,7 +147,7 @@ class GrievanceTicketFilter(FilterSet):
         values = value.split(" ")
         q_obj = Q()
         for value in values:
-            q_obj |= Q(id__startswith=value)
+            q_obj |= Q(unicef_id__regex=rf"^(GRV-(0)+)?{value}$")
             for ticket_type, ticket_fields in self.SEARCH_TICKET_TYPES_LOOKUPS.items():
                 for field, lookups in ticket_fields.items():
                     for lookup in lookups:

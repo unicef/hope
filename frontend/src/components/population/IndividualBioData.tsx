@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Grid, Paper, Typography } from '@material-ui/core';
+import { Box, Grid, Paper, Typography } from '@material-ui/core';
 import { LabelizedField } from '../LabelizedField';
 import {
   IndividualNode,
@@ -8,7 +8,8 @@ import {
 } from '../../__generated__/graphql';
 import {
   sexToCapitalize,
-  choicesToDict, renderBoolean,
+  choicesToDict,
+  renderBoolean,
 } from '../../utils/utils';
 import { useBusinessArea } from '../../hooks/useBusinessArea';
 import { LoadingComponent } from '../LoadingComponent';
@@ -61,28 +62,27 @@ export function IndividualsBioData({
   );
   const mappedIndividualDocuments = individual.documents?.edges?.map((edge) => (
     <Grid item xs={3} key={edge.node.id}>
-      <LabelizedField label={edge.node.type.label}>
-        {edge.node.documentNumber}
-      </LabelizedField>
+      <Box flexDirection='column'>
+        <Box mb={1}>
+          <LabelizedField label={edge.node.type.label}>
+            {edge.node.documentNumber}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label='issued'>{edge.node.country}</LabelizedField>
+      </Box>
     </Grid>
   ));
-  const mappedIndividualDocumentsIssuers = individual.documents?.edges?.map((edge) => (
-    <Grid item xs={3} key={`${edge.node.id}-${edge.node.type.country}`}>
-      <LabelizedField label={`${edge.node.type.label} ISSUER`}>
-        {edge.node.country}
-      </LabelizedField>
-    </Grid>
-  ));
+
   const mappedIdentities = individual.identities?.map((item) => (
     <Grid item xs={3} key={item.id}>
-      <LabelizedField label={`${item.type} ID`}>{item.number}</LabelizedField>
-    </Grid>
-  ));
-  const mappedIdentitiesIssuers = individual.identities?.map((item) => (
-    <Grid item xs={3}>
-      <LabelizedField label={`${item.type} ID ISSUER`}>
-        {item.country}
-      </LabelizedField>
+      <Box flexDirection='column'>
+        <Box mb={1}>
+          <LabelizedField label={`${item.type} ID`}>
+            {item.number}
+          </LabelizedField>
+        </Box>
+        <LabelizedField label='issued'>{item.country}</LabelizedField>
+      </Box>
     </Grid>
   ));
 
@@ -216,14 +216,6 @@ export function IndividualsBioData({
         )}
         {mappedIndividualDocuments}
         {mappedIdentities}
-        {!mappedIndividualDocumentsIssuers.length &&
-        !mappedIdentitiesIssuers.length ? null : (
-            <Grid item xs={12}>
-              <BorderBox />
-            </Grid>
-        )}
-        {mappedIndividualDocumentsIssuers}
-        {mappedIdentitiesIssuers}
         <Grid item xs={12}>
           <BorderBox />
         </Grid>

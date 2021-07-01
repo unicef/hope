@@ -174,10 +174,32 @@ export type AdminAreaTypeNode = Node & {
   updatedAt: Scalars['DateTime'],
   name: Scalars['String'],
   displayName?: Maybe<Scalars['String']>,
-  adminLevel: Scalars['Int'],
-  realAdminLevel?: Maybe<Scalars['Int']>,
+  adminLevel?: Maybe<Scalars['Int']>,
   businessArea?: Maybe<UserBusinessAreaNode>,
+  areaCode?: Maybe<Scalars['String']>,
+  countryName?: Maybe<Scalars['String']>,
+  country?: Maybe<AdminAreaTypeNode>,
+  datamartId?: Maybe<Scalars['String']>,
+  businessAreas: UserBusinessAreaNodeConnection,
+  adminarealevelSet: AdminAreaTypeNodeConnection,
   adminAreas: AdminAreaNodeConnection,
+};
+
+
+export type AdminAreaTypeNodeBusinessAreasArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>,
+  id?: Maybe<Scalars['UUID']>
+};
+
+
+export type AdminAreaTypeNodeAdminarealevelSetArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -252,6 +274,7 @@ export type BusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  countries: AdminAreaTypeNodeConnection,
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -266,6 +289,14 @@ export type BusinessAreaNode = Node & {
   registrationdataimportSet: RegistrationDataImportNodeConnection,
   reports: ReportNodeConnection,
   logentrySet: LogEntryNodeConnection,
+};
+
+
+export type BusinessAreaNodeCountriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -983,6 +1014,7 @@ export type GrievanceTicketNode = Node & {
   businessArea: UserBusinessAreaNode,
   linkedTickets: GrievanceTicketNodeConnection,
   registrationDataImport?: Maybe<RegistrationDataImportNode>,
+  unicefId: Scalars['String'],
   linkedTicketsRelated: GrievanceTicketNodeConnection,
   ticketNotes: TicketNoteNodeConnection,
   complaintTicketDetails?: Maybe<TicketComplaintDetailsNode>,
@@ -4665,6 +4697,7 @@ export type TicketIndividualDataUpdateDetailsNode = Node & {
   updatedAt: Scalars['DateTime'],
   individual?: Maybe<IndividualNode>,
   individualData?: Maybe<Scalars['Arg']>,
+  roleReassignData: Scalars['JSONString'],
 };
 
 export type TicketIndividualDataUpdateDetailsNodeConnection = {
@@ -4826,6 +4859,8 @@ export type UpdateGrievanceTicketInput = {
   area?: Maybe<Scalars['String']>,
   language?: Maybe<Scalars['String']>,
   linkedTickets?: Maybe<Array<Maybe<Scalars['ID']>>>,
+  household?: Maybe<Scalars['ID']>,
+  individual?: Maybe<Scalars['ID']>,
   extras?: Maybe<UpdateGrievanceTicketExtrasInput>,
 };
 
@@ -4914,6 +4949,7 @@ export type UserBusinessAreaNode = Node & {
   hasDataSharingAgreement: Scalars['Boolean'],
   parent?: Maybe<UserBusinessAreaNode>,
   isSplit: Scalars['Boolean'],
+  countries: AdminAreaTypeNodeConnection,
   children: UserBusinessAreaNodeConnection,
   adminAreaLevel: AdminAreaTypeNodeConnection,
   userRoles: Array<UserRoleNode>,
@@ -4929,6 +4965,14 @@ export type UserBusinessAreaNode = Node & {
   reports: ReportNodeConnection,
   logentrySet: LogEntryNodeConnection,
   permissions?: Maybe<Array<Maybe<Scalars['String']>>>,
+};
+
+
+export type UserBusinessAreaNodeCountriesArgs = {
+  before?: Maybe<Scalars['String']>,
+  after?: Maybe<Scalars['String']>,
+  first?: Maybe<Scalars['Int']>,
+  last?: Maybe<Scalars['Int']>
 };
 
 
@@ -6487,7 +6531,7 @@ export type AllGrievanceTicketQuery = (
       & Pick<GrievanceTicketNodeEdge, 'cursor'>
       & { node: Maybe<(
         { __typename?: 'GrievanceTicketNode' }
-        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin'>
+        & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'createdAt' | 'userModified' | 'admin' | 'unicefId'>
         & { assignedTo: Maybe<(
           { __typename?: 'UserNode' }
           & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7181,7 +7225,7 @@ export type GrievanceTicketQuery = (
   { __typename?: 'Query' }
   & { grievanceTicket: Maybe<(
     { __typename?: 'GrievanceTicketNode' }
-    & Pick<GrievanceTicketNode, 'id' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType'>
+    & Pick<GrievanceTicketNode, 'id' | 'unicefId' | 'status' | 'category' | 'consent' | 'createdAt' | 'updatedAt' | 'description' | 'language' | 'admin' | 'area' | 'issueType'>
     & { createdBy: Maybe<(
       { __typename?: 'UserNode' }
       & Pick<UserNode, 'id' | 'firstName' | 'lastName' | 'email'>
@@ -7227,7 +7271,7 @@ export type GrievanceTicketQuery = (
       )> }
     )>, individualDataUpdateTicketDetails: Maybe<(
       { __typename?: 'TicketIndividualDataUpdateDetailsNode' }
-      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData'>
+      & Pick<TicketIndividualDataUpdateDetailsNode, 'id' | 'individualData' | 'roleReassignData'>
       & { individual: Maybe<(
         { __typename?: 'IndividualNode' }
         & IndividualDetailedFragment
@@ -11500,6 +11544,7 @@ export const AllGrievanceTicketDocument = gql`
           unicefId
           id
         }
+        unicefId
       }
     }
   }
@@ -13185,6 +13230,7 @@ export const GrievanceTicketDocument = gql`
     query GrievanceTicket($id: ID!) {
   grievanceTicket(id: $id) {
     id
+    unicefId
     status
     category
     consent
@@ -13255,6 +13301,7 @@ export const GrievanceTicketDocument = gql`
         ...individualDetailed
       }
       individualData
+      roleReassignData
     }
     householdDataUpdateTicketDetails {
       id
@@ -15849,11 +15896,11 @@ export type ResolversTypes = {
   JSONString: ResolverTypeWrapper<Scalars['JSONString']>,
   UserRoleNode: ResolverTypeWrapper<UserRoleNode>,
   UserBusinessAreaNode: ResolverTypeWrapper<UserBusinessAreaNode>,
-  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
-  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   AdminAreaTypeNodeConnection: ResolverTypeWrapper<AdminAreaTypeNodeConnection>,
   AdminAreaTypeNodeEdge: ResolverTypeWrapper<AdminAreaTypeNodeEdge>,
   AdminAreaTypeNode: ResolverTypeWrapper<AdminAreaTypeNode>,
+  UserBusinessAreaNodeConnection: ResolverTypeWrapper<UserBusinessAreaNodeConnection>,
+  UserBusinessAreaNodeEdge: ResolverTypeWrapper<UserBusinessAreaNodeEdge>,
   AdminAreaNodeConnection: ResolverTypeWrapper<AdminAreaNodeConnection>,
   AdminAreaNodeEdge: ResolverTypeWrapper<AdminAreaNodeEdge>,
   AdminAreaNode: ResolverTypeWrapper<AdminAreaNode>,
@@ -16170,11 +16217,11 @@ export type ResolversParentTypes = {
   JSONString: Scalars['JSONString'],
   UserRoleNode: UserRoleNode,
   UserBusinessAreaNode: UserBusinessAreaNode,
-  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
-  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   AdminAreaTypeNodeConnection: AdminAreaTypeNodeConnection,
   AdminAreaTypeNodeEdge: AdminAreaTypeNodeEdge,
   AdminAreaTypeNode: AdminAreaTypeNode,
+  UserBusinessAreaNodeConnection: UserBusinessAreaNodeConnection,
+  UserBusinessAreaNodeEdge: UserBusinessAreaNodeEdge,
   AdminAreaNodeConnection: AdminAreaNodeConnection,
   AdminAreaNodeEdge: AdminAreaNodeEdge,
   AdminAreaNode: AdminAreaNode,
@@ -16527,9 +16574,14 @@ export type AdminAreaTypeNodeResolvers<ContextType = any, ParentType extends Res
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   displayName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  adminLevel?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  realAdminLevel?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
+  adminLevel?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>,
   businessArea?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
+  areaCode?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  countryName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  country?: Resolver<Maybe<ResolversTypes['AdminAreaTypeNode']>, ParentType, ContextType>,
+  datamartId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  businessAreas?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeBusinessAreasArgs>,
+  adminarealevelSet?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeAdminarealevelSetArgs>,
   adminAreas?: Resolver<ResolversTypes['AdminAreaNodeConnection'], ParentType, ContextType, AdminAreaTypeNodeAdminAreasArgs>,
 };
 
@@ -16586,6 +16638,7 @@ export type BusinessAreaNodeResolvers<ContextType = any, ParentType extends Reso
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeCountriesArgs>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, BusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, BusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
@@ -16954,6 +17007,7 @@ export type GrievanceTicketNodeResolvers<ContextType = any, ParentType extends R
   businessArea?: Resolver<ResolversTypes['UserBusinessAreaNode'], ParentType, ContextType>,
   linkedTickets?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsArgs>,
   registrationDataImport?: Resolver<Maybe<ResolversTypes['RegistrationDataImportNode']>, ParentType, ContextType>,
+  unicefId?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
   linkedTicketsRelated?: Resolver<ResolversTypes['GrievanceTicketNodeConnection'], ParentType, ContextType, GrievanceTicketNodeLinkedTicketsRelatedArgs>,
   ticketNotes?: Resolver<ResolversTypes['TicketNoteNodeConnection'], ParentType, ContextType, GrievanceTicketNodeTicketNotesArgs>,
   complaintTicketDetails?: Resolver<Maybe<ResolversTypes['TicketComplaintDetailsNode']>, ParentType, ContextType>,
@@ -18323,6 +18377,7 @@ export type TicketIndividualDataUpdateDetailsNodeResolvers<ContextType = any, Pa
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   individual?: Resolver<Maybe<ResolversTypes['IndividualNode']>, ParentType, ContextType>,
   individualData?: Resolver<Maybe<ResolversTypes['Arg']>, ParentType, ContextType>,
+  roleReassignData?: Resolver<ResolversTypes['JSONString'], ParentType, ContextType>,
 };
 
 export type TicketIndividualDataUpdateDetailsNodeConnectionResolvers<ContextType = any, ParentType extends ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection'] = ResolversParentTypes['TicketIndividualDataUpdateDetailsNodeConnection']> = {
@@ -18482,6 +18537,7 @@ export type UserBusinessAreaNodeResolvers<ContextType = any, ParentType extends 
   hasDataSharingAgreement?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
   parent?: Resolver<Maybe<ResolversTypes['UserBusinessAreaNode']>, ParentType, ContextType>,
   isSplit?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>,
+  countries?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeCountriesArgs>,
   children?: Resolver<ResolversTypes['UserBusinessAreaNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeChildrenArgs>,
   adminAreaLevel?: Resolver<ResolversTypes['AdminAreaTypeNodeConnection'], ParentType, ContextType, UserBusinessAreaNodeAdminAreaLevelArgs>,
   userRoles?: Resolver<Array<ResolversTypes['UserRoleNode']>, ParentType, ContextType>,
