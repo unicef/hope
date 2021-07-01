@@ -97,6 +97,7 @@ class AbstractSession(models.Model):
     STATUS_EMPTY = "EMPTY"
     STATUS_LOADING = "LOADING"
     STATUS_ERRORED = "ERRORED"
+    STATUS_IGNORED = "IGNORED"
 
     source = models.CharField(
         max_length=3,
@@ -111,6 +112,7 @@ class AbstractSession(models.Model):
             (STATUS_COMPLETED, "Completed"),
             (STATUS_FAILED, "Failed"),
             (STATUS_EMPTY, "Empty"),
+            (STATUS_IGNORED, "Ignored"),
             (STATUS_LOADING, "Loading"),
             (STATUS_ERRORED, "Errored"),
         ),
@@ -125,8 +127,30 @@ class AbstractSession(models.Model):
             via the session.""",
     )
 
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    traceback = models.TextField(default="", blank=True, null=True)
+
     class Meta:
         abstract = True
+
+    def process_exception(self, exc, request=None):
+        try:
+            from sentry_sdk import capture_exception
+
+            err = capture_exception(exc)
+            self.sentry_id = err
+        except:
+            pass
+
+        try:
+            from django.views.debug import ExceptionReporter
+
+            reporter = ExceptionReporter(request, *sys.exc_info())
+            self.traceback = reporter.get_traceback_html()
+        except:
+            self.traceback = "N/A"
+        finally:
+            self.status = self.STATUS_FAILED
 
     def __str__(self):
         return f"#{self.id} on {self.timestamp}"
