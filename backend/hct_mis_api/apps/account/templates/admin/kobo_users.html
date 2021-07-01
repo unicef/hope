@@ -12,19 +12,38 @@
 {% endblock %}
 
 {% block content %}
-    <table>
-        <tr>
-            <th>Kobo Username</th>
-            <th>Kobo Email</th>
-            <th>Hope User</th>
-        </tr>
-        {% for entry in users %}
-        <tr>
-        <td>{{ entry.0 }}</td>
-        <td>{{ entry.1|safe }}</td>
-        <td>{{ entry.2|default_if_none:"" }}</td>
-        </tr>
-    {% endfor %}</table>
+    {% if results %}
+        {% if results.created %}
+            <h3>The following user have been added to HOPE</h3>
+            {{ results.created|join:", " }}
+        {% endif %}
+        {% if results.updated %}
+            <h3>The following users have been found in HOPE and have been updated (role added)</h3>
+            {{ results.updated|join:", " }}
+        {% endif %}
+    {% elif users %}
+        <form method="post">
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Kobo ID</th>
+                    <th>Kobo Username</th>
+                    <th>Kobo Email</th>
+                    <th>Hope User</th>
+                </tr>
+                {% for entry in users %}
+                    <tr>
+                        <td><input type="checkbox" name="kobo_id" value="{{ entry.0 }}"></td>
+                        <td>{{ entry.0 }}</td>
+                        <td>{{ entry.1 }}</td>
+                        <td>{{ entry.2|safe }}</td>
+                        <td>{{ entry.3|default_if_none:"" }}</td>
+                    </tr>
+                {% endfor %}</table>
+            <input type="submit" value="Import Selected">
+        </form>
+    {% endif %}
 {% endblock content %}
 
 {% block submit_buttons_bottom %}{% endblock %}
