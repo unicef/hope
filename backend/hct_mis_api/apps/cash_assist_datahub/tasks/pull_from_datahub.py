@@ -1,7 +1,9 @@
 import logging
+import sys
 
 from django.db import transaction
 from django.db.models import Count
+
 from sentry_sdk import configure_scope
 
 from hct_mis_api.apps.cash_assist_datahub import models as ca_models
@@ -105,7 +107,7 @@ class PullFromDatahubTask:
                 except Exception as e:
                     ret["failures"].append(session.id)
                     log.exception(e)
-                    session.status = Session.STATUS_FAILED
+                    session.process_exception(e)
                     session.save()
 
         return ret
