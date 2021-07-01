@@ -124,8 +124,8 @@ class AbstractSession(models.Model):
             via the session.""",
     )
 
-    sentry_id = models.CharField(max_length=100, default="", blank="", null=True)
-    traceback = models.TextField(default=dict, blank="", null=True)
+    sentry_id = models.CharField(max_length=100, default="", blank=True, null=True)
+    traceback = models.TextField(default="", blank=True, null=True)
 
     class Meta:
         abstract = True
