@@ -7,7 +7,11 @@ logger = logging.getLogger(__name__)
 
 
 def handle_role(role, household, individual):
-    from hct_mis_api.apps.household.models import ROLE_PRIMARY, ROLE_ALTERNATE, IndividualRoleInHousehold
+    from hct_mis_api.apps.household.models import (
+        ROLE_ALTERNATE,
+        ROLE_PRIMARY,
+        IndividualRoleInHousehold,
+    )
 
     if role in (ROLE_PRIMARY, ROLE_ALTERNATE) and household:
         already_existing_role = IndividualRoleInHousehold.objects.filter(household=household, role=role).first()
@@ -21,7 +25,8 @@ def handle_role(role, household, individual):
 def handle_add_document(document, individual):
     from django_countries.fields import Country
     from graphql import GraphQLError
-    from hct_mis_api.apps.household.models import DocumentType, Document
+
+    from hct_mis_api.apps.household.models import Document, DocumentType
 
     type_name = document.get("type")
     country_code = document.get("country")
@@ -40,6 +45,7 @@ def handle_add_document(document, individual):
 def handle_add_identity(identity, individual):
     from django_countries.fields import Country
     from graphql import GraphQLError
+
     from hct_mis_api.apps.household.models import Agency, IndividualIdentity
 
     agency_name = identity.get("agency")
@@ -62,6 +68,7 @@ def handle_add_identity(identity, individual):
 
 def prepare_previous_documents(documents_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
+
     from hct_mis_api.apps.core.utils import decode_id_string, encode_id_base64
     from hct_mis_api.apps.household.models import Document
 
@@ -82,6 +89,7 @@ def prepare_previous_documents(documents_to_remove_with_approve_status):
 
 def prepare_previous_identities(identities_to_remove_with_approve_status):
     from django.shortcuts import get_object_or_404
+
     from hct_mis_api.apps.core.utils import encode_id_base64
     from hct_mis_api.apps.household.models import IndividualIdentity
 
@@ -102,6 +110,7 @@ def prepare_previous_identities(identities_to_remove_with_approve_status):
 
 def verify_required_arguments(input_data, field_name, options):
     from graphql import GraphQLError
+
     from hct_mis_api.apps.core.utils import nested_dict_get
 
     for key, value in options.items():
@@ -125,8 +134,8 @@ def remove_parsed_data_fields(data_dict, fields_list):
 def verify_flex_fields(flex_fields_to_verify, associated_with):
     from hct_mis_api.apps.core.core_fields_attributes import (
         FIELD_TYPES_TO_INTERNAL_TYPE,
-        TYPE_SELECT_ONE,
         TYPE_SELECT_MANY,
+        TYPE_SELECT_ONE,
     )
     from hct_mis_api.apps.core.utils import serialize_flex_attributes
 
@@ -170,32 +179,41 @@ def mark_as_duplicate_individual_and_reassign_roles(ticket_details, individual_t
     )
 
 
+def get_data_from_role_data(role_data):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.core.utils import decode_id_string
+    from hct_mis_api.apps.household.models import Household, Individual
+
+    role_name = role_data.get("role")
+
+    individual_id = decode_id_string(role_data.get("individual"))
+    household_id = decode_id_string(role_data.get("household"))
+
+    old_individual = get_object_or_404(Individual, id=individual_id)
+    new_individual = get_object_or_404(Individual, id=individual_id)
+
+    household = get_object_or_404(Household, id=household_id)
+    return role_name, old_individual, new_individual, household
+
+
 def reassign_roles(individual_to_remove, info, ticket_details):
     from django.shortcuts import get_object_or_404
-    from hct_mis_api.apps.core.utils import decode_id_string
+
     from graphql import GraphQLError
+
     from hct_mis_api.apps.household.models import (
-        Household,
+        HEAD,
+        ROLE_ALTERNATE,
+        ROLE_PRIMARY,
         Individual,
         IndividualRoleInHousehold,
-        HEAD,
-        ROLE_PRIMARY,
-        ROLE_ALTERNATE,
-        ROLE_NO_ROLE,
     )
 
     old_individual_to_remove = Individual.objects.get(id=individual_to_remove.id)
     roles_to_bulk_update = []
     for role_data in ticket_details.role_reassign_data.values():
-        role_name = role_data.get("role")
-
-        individual_id = decode_id_string(role_data.get("individual"))
-        household_id = decode_id_string(role_data.get("household"))
-
-        old_new_individual = get_object_or_404(Individual, id=individual_id)
-        new_individual = get_object_or_404(Individual, id=individual_id)
-
-        household = get_object_or_404(Household, id=household_id)
+        role_name, old_new_individual, new_individual, household = get_data_from_role_data(role_data)
 
         if role_name == HEAD:
             household.head_of_household = new_individual
@@ -218,9 +236,11 @@ def reassign_roles(individual_to_remove, info, ticket_details):
             )
             role.individual = new_individual
             roles_to_bulk_update.append(role)
-    if len(roles_to_bulk_update) != individual_to_remove.households_and_roles.exclude(role=ROLE_NO_ROLE).count():
-        logger.error("Ticket cannot be closed not all roles has been reassigned")
-        raise GraphQLError("Ticket cannot be closed not all roles has been reassigned")
+    household = individual_to_remove.household
+    can_be_closed_because_of_empty_household = household.individuals.count() == 1 if household else False
+    if len(roles_to_bulk_update) != individual_to_remove.count_all_roles() and not can_be_closed_because_of_empty_household:
+        logger.error("Ticket cannot be closed, not all roles have been reassigned")
+        raise GraphQLError("Ticket cannot be closed, not all roles have been reassigned")
     if roles_to_bulk_update:
         IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
     removed_individual_household = individual_to_remove.household
@@ -230,11 +250,50 @@ def reassign_roles(individual_to_remove, info, ticket_details):
         removed_individual_is_head = False
     if (
         not any(True if HEAD in key else False for key in ticket_details.role_reassign_data.keys())
-        and removed_individual_is_head
+        and removed_individual_is_head and not can_be_closed_because_of_empty_household
     ):
         logger.error("Ticket cannot be closed head of household has not been reassigned")
         raise GraphQLError("Ticket cannot be closed head of household has not been reassigned")
     return old_individual_to_remove, removed_individual_household
+
+
+def reassign_roles_on_update(individual, role_reassign_data, info, should_log=True):
+    from django.shortcuts import get_object_or_404
+
+    from hct_mis_api.apps.household.models import (
+        HEAD,
+        ROLE_ALTERNATE,
+        ROLE_PRIMARY,
+        Individual,
+        IndividualRoleInHousehold,
+    )
+
+    roles_to_bulk_update = []
+    for role_data in role_reassign_data.values():
+        role_name, old_new_individual, new_individual, household = get_data_from_role_data(role_data)
+
+        if role_name == HEAD:
+            household.head_of_household = new_individual
+            household.save()
+            new_individual.relationship = HEAD
+            new_individual.save()
+            if should_log:
+                log_create(
+                    Individual.ACTIVITY_LOG_MAPPING,
+                    "business_area",
+                    info.context.user,
+                    old_new_individual,
+                    new_individual,
+                )
+
+        if role_name in (ROLE_PRIMARY, ROLE_ALTERNATE):
+            role = get_object_or_404(
+                IndividualRoleInHousehold, role=role_name, household=household, individual=individual
+            )
+            role.individual = new_individual
+            roles_to_bulk_update.append(role)
+    if roles_to_bulk_update:
+        IndividualRoleInHousehold.objects.bulk_update(roles_to_bulk_update, ["individual"])
 
 
 def withdraw_individual(individual_to_remove, info, old_individual_to_remove, removed_individual_household):

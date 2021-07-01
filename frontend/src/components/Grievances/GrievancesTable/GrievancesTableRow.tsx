@@ -1,17 +1,17 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
 import {
-  decodeIdString,
   grievanceTicketStatusToColor,
   renderUserName,
 } from '../../../utils/utils';
 import { UniversalMoment } from '../../UniversalMoment';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import { BlackLink } from '../../BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -47,11 +47,11 @@ export function GrievancesTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <Link target='_blank' rel='noopener noreferrer' to={detailsPath}>
-            {decodeIdString(ticket.id)}
-          </Link>
+          <BlackLink target='_blank' rel='noopener noreferrer' to={detailsPath}>
+            {ticket.unicefId}
+          </BlackLink>
         ) : (
-          decodeIdString(ticket.id)
+          ticket.unicefId
         )}
       </TableCell>
       <TableCell align='left'>
