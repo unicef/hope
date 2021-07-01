@@ -45,6 +45,8 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     date_hierarchy = "timestamp"
     list_filter = ("status", "source", TextFieldFilter.factory("business_area"))
     ordering = ("-timestamp",)
+    exclude = ("traceback",)
+    readonly_fields = ("sentry_id", "source", "business_area")
 
     @button()
     def execute_pull(self, request):
@@ -103,6 +105,20 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 ),
                 "Successfully executed",
             )
+
+    @href(html_attrs={"target": "_new"})
+    def view_error_on_sentry(self, button):
+        if "original" in button.context:
+            obj = button.context["original"]
+            if obj.sentry_id:
+                return f"{settings.SENTRY_URL}?query={obj.sentry_id}"
+
+        button.visible = False
+
+    @button(visible=lambda x: x.traceback)
+    def view_error(self, request, pk):
+        context = self.get_common_context(request, pk)
+        return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
 
     @button()
     def inspect(self, request, pk):
