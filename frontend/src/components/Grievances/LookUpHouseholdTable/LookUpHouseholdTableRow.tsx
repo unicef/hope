@@ -1,12 +1,12 @@
 import { Radio } from '@material-ui/core';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import {
   AllHouseholdsQuery,
   HouseholdChoiceDataQuery,
 } from '../../../__generated__/graphql';
+import { BlackLink } from '../../BlackLink';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { UniversalMoment } from '../../UniversalMoment';
 
@@ -46,13 +46,13 @@ export function LookUpHouseholdTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={`/${businessArea}/population/household/${household.id}`}
         >
           {household.unicefId}
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>{household.headOfHousehold.fullName}</TableCell>
       <TableCell align='left'>{household.size}</TableCell>

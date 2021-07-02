@@ -69,7 +69,7 @@ WALKING = "WALKING"
 MEMORY = "MEMORY"
 SELF_CARE = "SELF_CARE"
 COMMUNICATING = "COMMUNICATING"
-DISABILITY_CHOICE = (
+OBSERVED_DISABILITY_CHOICE = (
     (NONE, _("None")),
     (SEEING, _("Difficulty seeing (even if wearing glasses)")),
     (HEARING, _("Difficulty hearing (even if using a hearing aid)")),
@@ -227,6 +227,19 @@ REGISTRATION_METHOD_CHOICES = (
     (BLANK, _("None")),
     (HH_REGISTRATION, "Household Registration"),
     (COMMUNITY, "Community-level Registration"),
+)
+
+DISABLED = "disabled"
+NOT_DISABLED = "not disabled"
+DISABILITY_CHOICES = (
+    (
+        DISABLED,
+        "disabled",
+    ),
+    (
+        NOT_DISABLED,
+        "not disabled",
+    ),
 )
 
 logger = logging.getLogger(__name__)
@@ -613,7 +626,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         on_delete=models.CASCADE,
         null=True,
     )
-    disability = models.BooleanField(default=False)
+    disability = models.CharField(max_length=20, choices=DISABILITY_CHOICES, default=NOT_DISABLED)
     work_status = models.CharField(
         max_length=20,
         choices=WORK_STATUS_CHOICE,
@@ -644,7 +657,7 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
     sanction_list_confirmed_match = models.BooleanField(default=False)
     sanction_list_last_check = models.DateTimeField(null=True, blank=True)
     pregnant = models.NullBooleanField()
-    observed_disability = MultiSelectField(choices=DISABILITY_CHOICE, default=NONE)
+    observed_disability = MultiSelectField(choices=OBSERVED_DISABILITY_CHOICE, default=NONE)
     seeing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     hearing_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
     physical_disability = models.CharField(max_length=50, choices=SEVERITY_OF_DISABILITY_CHOICES, blank=True)
@@ -723,6 +736,9 @@ class Individual(SoftDeletableModelWithDate, TimeStampedUUIDModel, AbstractSynca
         if "sys" in self.user_fields:
             return self.user_fields["sys"][key]
         return None
+
+    def count_all_roles(self):
+        return self.households_and_roles.exclude(role=ROLE_NO_ROLE).count()
 
 
 class EntitlementCard(TimeStampedUUIDModel):

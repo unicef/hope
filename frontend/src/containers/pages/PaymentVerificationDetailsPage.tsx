@@ -32,6 +32,7 @@ import { UniversalMoment } from '../../components/UniversalMoment';
 import { usePermissions } from '../../hooks/usePermissions';
 import { hasPermissions, PERMISSIONS } from '../../config/permissions';
 import { PermissionDenied } from '../../components/PermissionDenied';
+import { BlackLink } from '../../components/BlackLink';
 
 const Container = styled.div`
   display: flex;
@@ -157,7 +158,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
 
   const toolbar = (
     <PageHeader
-      title={`Cash Plan ${cashPlan.caId}`}
+      title={
+        <BlackLink
+          target='_blank'
+          rel='noopener noreferrer'
+          to={`/${businessArea}/cashplans/${cashPlan.id}`}
+        >
+          Cash Plan {cashPlan.caId}
+        </BlackLink>
+      }
       breadCrumbs={
         hasPermissions(PERMISSIONS.PAYMENT_VERIFICATION_VIEW_LIST, permissions)
           ? breadCrumbsItems
@@ -215,7 +224,15 @@ export function PaymentVerificationDetailsPage(): React.ReactElement {
                 { label: 'PROGRAMME NAME', value: cashPlan.program.name },
                 {
                   label: 'PROGRAMME ID',
-                  value: cashPlan.program?.caId,
+                  value: (
+                    <BlackLink
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      to={`/${businessArea}/programs/${cashPlan.program.id}`}
+                    >
+                      {cashPlan.program?.caId}
+                    </BlackLink>
+                  ),
                 },
                 {
                   label: 'PAYMENT RECORDS',

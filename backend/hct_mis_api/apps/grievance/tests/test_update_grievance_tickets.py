@@ -1,32 +1,40 @@
 from datetime import date
-from parameterized import parameterized
 
 from django.core.management import call_command
+
 from django_countries.fields import Country
+from parameterized import parameterized
 
 from hct_mis_api.apps.account.fixtures import UserFactory
 from hct_mis_api.apps.account.permissions import Permissions
 from hct_mis_api.apps.core.base_test_case import APITestCase
-from hct_mis_api.apps.core.fixtures import AdminAreaLevelFactory, AdminAreaFactory
+from hct_mis_api.apps.core.fixtures import AdminAreaFactory, AdminAreaLevelFactory
 from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.grievance.fixtures import (
+    GrievanceComplaintTicketWithoutExtrasFactory,
     GrievanceTicketFactory,
+    SensitiveGrievanceTicketWithoutExtrasFactory,
     TicketAddIndividualDetailsFactory,
-    TicketIndividualDataUpdateDetailsFactory,
     TicketHouseholdDataUpdateDetailsFactory,
+    TicketIndividualDataUpdateDetailsFactory,
 )
 from hct_mis_api.apps.grievance.models import GrievanceTicket
-from hct_mis_api.apps.household.fixtures import HouseholdFactory, IndividualFactory, DocumentFactory
+from hct_mis_api.apps.household.fixtures import (
+    DocumentFactory,
+    HouseholdFactory,
+    IndividualFactory,
+    create_household,
+)
 from hct_mis_api.apps.household.models import (
-    SINGLE,
-    ROLE_PRIMARY,
-    IDENTIFICATION_TYPE_NATIONAL_ID,
-    DocumentType,
-    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
-    MALE,
     DIVORCED,
     FEMALE,
+    IDENTIFICATION_TYPE_BIRTH_CERTIFICATE,
+    IDENTIFICATION_TYPE_NATIONAL_ID,
+    MALE,
     RELATIONSHIP_UNKNOWN,
+    ROLE_PRIMARY,
+    SINGLE,
+    DocumentType,
 )
 from hct_mis_api.apps.program.fixtures import ProgramFactory
 
@@ -520,3 +528,141 @@ class TestUpdateGrievanceTickets(APITestCase):
             self.assertEqual(self.positive_feedback_grievance_ticket.admin2, self.admin_area_2)
             self.assertEqual(self.positive_feedback_grievance_ticket.language, "Spanish")
             self.assertNotEqual(self.positive_feedback_grievance_ticket.area, "Example Town")
+
+    @parameterized.expand(
+        [
+            (
+                "SensitiveGrievanceTicket",
+                SensitiveGrievanceTicketWithoutExtrasFactory,
+            ),
+            (
+                "GrievanceComplaintTicket",
+                GrievanceComplaintTicketWithoutExtrasFactory,
+            ),
+        ]
+    )
+    def test_set_household_if_not_set(self, _, factory):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
+
+        ticket = factory()
+        ticket.ticket.status = GrievanceTicket.STATUS_NEW
+        ticket.ticket.save()
+        household, _ = create_household()
+        ticket_id = self.id_to_base64(ticket.ticket.id, "GrievanceTicketNode")
+        household_id = self.id_to_base64(household.id, "HouseholdNode")
+
+        self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=self._prepare_input_data(ticket_id, household_id),
+        )
+        ticket.refresh_from_db()
+
+        self.assertEqual(ticket.household, household)
+
+    @parameterized.expand(
+        [
+            (
+                "SensitiveGrievanceTicket",
+                SensitiveGrievanceTicketWithoutExtrasFactory,
+            ),
+            (
+                "GrievanceComplaintTicket",
+                GrievanceComplaintTicketWithoutExtrasFactory,
+            ),
+        ]
+    )
+    def test_set_individual_if_not_set(self, _, factory):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
+
+        ticket = factory()
+        ticket.ticket.status = GrievanceTicket.STATUS_NEW
+        ticket.ticket.save()
+        _, individuals = create_household()
+        ticket_id = self.id_to_base64(ticket.ticket.id, "GrievanceTicketNode")
+        individual_id = self.id_to_base64(individuals[0].id, "IndividualNode")
+
+        self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
+        )
+        ticket.refresh_from_db()
+
+        self.assertEqual(ticket.individual, individuals[0])
+
+    @parameterized.expand(
+        [
+            (
+                "SensitiveGrievanceTicket",
+                SensitiveGrievanceTicketWithoutExtrasFactory,
+            ),
+            (
+                "GrievanceComplaintTicket",
+                GrievanceComplaintTicketWithoutExtrasFactory,
+            ),
+        ]
+    )
+    def test_raise_exception_if_household_already_set(self, _, factory):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
+
+        household, _ = create_household()
+        ticket = factory(household=self.household_one)
+        ticket.ticket.status = GrievanceTicket.STATUS_NEW
+        ticket.ticket.save()
+        ticket_id = self.id_to_base64(ticket.ticket.id, "GrievanceTicketNode")
+        household_id = self.id_to_base64(household.id, "HouseholdNode")
+
+        response = self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=self._prepare_input_data(ticket_id, household_id),
+        )
+        ticket.refresh_from_db()
+
+        self.assertTrue("Cannot change household" in response["errors"][0]["message"])
+
+    @parameterized.expand(
+        [
+            (
+                "SensitiveGrievanceTicket",
+                SensitiveGrievanceTicketWithoutExtrasFactory,
+            ),
+            (
+                "GrievanceComplaintTicket",
+                GrievanceComplaintTicketWithoutExtrasFactory,
+            ),
+        ]
+    )
+    def test_raise_exception_if_individual_already_set(self, _, factory):
+        self.create_user_role_with_permissions(self.user, [Permissions.GRIEVANCES_UPDATE], self.business_area)
+
+        household, individuals = create_household()
+        ticket = factory(individual=individuals[1])
+        ticket.ticket.status = GrievanceTicket.STATUS_NEW
+        ticket.ticket.save()
+        ticket_id = self.id_to_base64(ticket.ticket.id, "GrievanceTicketNode")
+        individual_id = self.id_to_base64(individuals[0].id, "IndividualNode")
+
+        response = self.graphql_request(
+            request_string=self.UPDATE_GRIEVANCE_TICKET_MUTATION,
+            context={"user": self.user},
+            variables=self._prepare_input_data(ticket_id, individual_id=individual_id),
+        )
+        ticket.refresh_from_db()
+
+        self.assertTrue("Cannot change individual" in response["errors"][0]["message"])
+
+    def _prepare_input_data(self, ticket_id, household_id=None, individual_id=None):
+        return {
+            "input": {
+                "description": "New Description",
+                "assignedTo": self.id_to_base64(self.user_two.id, "UserNode"),
+                "admin": self.admin_area_1.p_code,
+                "language": "Polish, English",
+                "area": "Example Town",
+                "ticketId": ticket_id,
+                "household": household_id,
+                "individual": individual_id,
+            }
+        }
