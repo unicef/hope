@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from enum import auto
 
@@ -9,6 +10,7 @@ from hct_mis_api.apps.account.models import User, UserRole
 from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
+logger = logging.getLogger(__name__)
 
 class GrievanceNotification:
     ACTION_ASSIGNMENT_CHANGED = auto()
@@ -59,8 +61,11 @@ class GrievanceNotification:
         return email
 
     def send_email_notification(self):
-        for email in self.emails:
-            email.send()
+        try:
+            for email in self.emails:
+                email.send()
+        except Exception as e:
+            logger.exception(e)
 
     def _prepare_universal_category_created_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
