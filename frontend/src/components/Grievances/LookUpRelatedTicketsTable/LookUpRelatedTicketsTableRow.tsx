@@ -1,7 +1,6 @@
 import TableCell from '@material-ui/core/TableCell';
 import styled from 'styled-components';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Checkbox } from '@material-ui/core';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
@@ -12,6 +11,7 @@ import {
   renderUserName,
 } from '../../../utils/utils';
 import { AllGrievanceTicketQuery } from '../../../__generated__/graphql';
+import { BlackLink } from '../../BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -51,13 +51,13 @@ export function LookUpRelatedTicketsTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={`/${businessArea}/grievance-and-feedback/${ticket.id}`}
         >
           {decodeIdString(ticket.id)}
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         <StatusContainer>

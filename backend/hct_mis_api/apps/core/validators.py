@@ -6,18 +6,18 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     CORE_FIELDS_ATTRIBUTES,
     KOBO_ONLY_HOUSEHOLD_FIELDS,
     KOBO_ONLY_INDIVIDUAL_FIELDS,
-    TYPE_GEOPOINT,
-    TYPE_SELECT_MANY,
+    TYPE_BOOL,
     TYPE_DATE,
     TYPE_DECIMAL,
-    TYPE_INTEGER,
-    TYPE_STRING,
-    TYPE_SELECT_ONE,
+    TYPE_GEOPOINT,
     TYPE_IMAGE,
-    TYPE_BOOL,
+    TYPE_INTEGER,
+    TYPE_SELECT_MANY,
+    TYPE_SELECT_ONE,
+    TYPE_STRING,
 )
 from hct_mis_api.apps.core.utils import xlrd_rows_iterator
-from hct_mis_api.apps.household.models import NOT_PROVIDED, RELATIONSHIP_UNKNOWN, BLANK
+from hct_mis_api.apps.household.models import BLANK, NOT_PROVIDED, RELATIONSHIP_UNKNOWN
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,7 @@ class CommonValidator(BaseValidator):
 
 def prepare_choices_for_validation(choices_sheet):
     from collections import defaultdict
+
     import xlrd
 
     choices_mapping = defaultdict(list)
@@ -141,6 +142,7 @@ class KoboTemplateValidator:
         # temporarily disabled from checking
         "admin1_h_c",
         "admin2_h_c",
+        "disability_i_c",
     )
     CHOICES_EXCLUDED_FROM_CHECKING = (
         BLANK,

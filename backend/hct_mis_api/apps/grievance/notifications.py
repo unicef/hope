@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from enum import auto
 
@@ -5,10 +6,11 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from hct_mis_api.apps.account.models import Role, User, UserRole
-from hct_mis_api.apps.core.utils import encode_id_base64, choices_to_dict
+from hct_mis_api.apps.account.models import User, UserRole
+from hct_mis_api.apps.core.utils import choices_to_dict, encode_id_base64
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 
+logger = logging.getLogger(__name__)
 
 class GrievanceNotification:
     ACTION_ASSIGNMENT_CHANGED = auto()
@@ -22,7 +24,7 @@ class GrievanceNotification:
     ACTION_OVERDUE = auto()
     ACTION_SEND_TO_APPROVAL = auto()
 
-    def __init__(self, grievance_ticket, action, **kwargs):
+    def __init__(self, grievance_ticket: GrievanceTicket, action, **kwargs):
         self.grievance_ticket = grievance_ticket
         self.action = action
         self.extra_data = kwargs
@@ -35,7 +37,7 @@ class GrievanceNotification:
             "first_name": user_recipient.first_name,
             "last_name": user_recipient.last_name,
             "ticket_url": f'{protocol}://{settings.FRONTEND_HOST}/{self.grievance_ticket.business_area.slug}/grievance-and-feedback/{encode_id_base64(self.grievance_ticket.id, "GrievanceTicket")}',
-            "ticket_id": self.grievance_ticket.id,
+            "ticket_id": self.grievance_ticket.unicef_id,
             "ticket_category": choices_to_dict(GrievanceTicket.CATEGORY_CHOICES)[self.grievance_ticket.category],
         }
         return context
@@ -59,8 +61,11 @@ class GrievanceNotification:
         return email
 
     def send_email_notification(self):
-        for email in self.emails:
-            email.send()
+        try:
+            for email in self.emails:
+                email.send()
+        except Exception as e:
+            logger.exception(e)
 
     def _prepare_universal_category_created_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
@@ -103,22 +108,27 @@ class GrievanceNotification:
         context["hours_ago"] = (datetime.now() - self.grievance_ticket.created_at).days * 24
         text_body = render_to_string("sensitive_reminder_notification_email.txt", context=context)
         html_body = render_to_string("sensitive_reminder_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.id}"
+        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
 
     def _prepare_overdue_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
         context["days_ago"] = (datetime.now() - self.grievance_ticket.created_at).days
         text_body = render_to_string("overdue_notification_email.txt", context=context)
         html_body = render_to_string("overdue_notification_email.html", context=context)
-        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.id}"
+        return text_body, html_body, f"Overdue Grievance ticket requiring attention {self.grievance_ticket.unicef_id}"
 
     def _prepare_add_note_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
         created_by = self.extra_data.get("created_by")
         context["created_by"] = f"{created_by.first_name} {created_by.last_name}"
+        context["ticket_note"] = self.extra_data.get("ticket_note")
         text_body = render_to_string("note_added_notification_email.txt", context=context)
         html_body = render_to_string("note_added_notification_email.html", context=context)
-        return text_body, html_body, f"New note in Grievance & Feedback ticket has been left {self.grievance_ticket.id}"
+        return (
+            text_body,
+            html_body,
+            f"New note in Grievance & Feedback ticket has been left {self.grievance_ticket.unicef_id}",
+        )
 
     def _prepare_send_back_to_in_progress_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
@@ -126,19 +136,19 @@ class GrievanceNotification:
         context["approver"] = f"{approver.first_name} {approver.last_name}"
         text_body = render_to_string("send_back_to_in_progress_notification_email.txt", context=context)
         html_body = render_to_string("send_back_to_in_progress_notification_email.html", context=context)
-        return text_body, html_body, f"Review of Grievance & Feedback ticket {self.grievance_ticket.id}"
+        return text_body, html_body, f"Review of Grievance & Feedback ticket {self.grievance_ticket.unicef_id}"
 
     def _prepare_for_approval_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("send_for_approve_notification_email.txt", context=context)
         html_body = render_to_string("send_for_approve_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance ticket requiring approval {self.grievance_ticket.id}"
+        return text_body, html_body, f"Grievance ticket requiring approval {self.grievance_ticket.unicef_id}"
 
     def _prepare_assignment_changed_bodies(self, user_recipient):
         context = self._prepare_default_context(user_recipient)
         text_body = render_to_string("assignment_change_notification_email.txt", context=context)
         html_body = render_to_string("assignment_change_notification_email.html", context=context)
-        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.assigned_to}"
+        return text_body, html_body, f"Grievance & Feedback ticket assigned {self.grievance_ticket.id}"
 
     def _prepare_assigned_to_recipient(self):
         if self.grievance_ticket.assigned_to is None:

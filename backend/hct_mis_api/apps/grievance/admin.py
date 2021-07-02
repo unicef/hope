@@ -1,15 +1,20 @@
 from django.contrib import admin
-from adminfilters.filters import ChoicesFieldComboFilter, RelatedFieldComboFilter, TextFieldFilter
+
+from adminfilters.filters import (
+    ChoicesFieldComboFilter,
+    RelatedFieldComboFilter,
+    TextFieldFilter,
+)
 
 from hct_mis_api.apps.grievance.models import (
     GrievanceTicket,
-    TicketNote,
+    TicketAddIndividualDetails,
     TicketComplaintDetails,
-    TicketSensitiveDetails,
+    TicketDeleteIndividualDetails,
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
-    TicketAddIndividualDetails,
-    TicketDeleteIndividualDetails,
+    TicketNote,
+    TicketSensitiveDetails,
 )
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
 
@@ -26,6 +31,7 @@ class GrievanceTicketAdmin(HOPEModelAdminBase):
         TextFieldFilter.factory("assigned_to__username__istartswith"),
         "updated_at",
     )
+    readonly_fields = ("unicef_id",)
 
 
 @admin.register(TicketNote)
