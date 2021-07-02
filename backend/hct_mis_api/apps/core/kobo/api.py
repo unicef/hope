@@ -15,7 +15,6 @@ from hct_mis_api.apps.core.models import BusinessArea, XLSXKoboTemplate
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
 
 
 class TokenNotProvided(Exception):
