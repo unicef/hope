@@ -43,7 +43,11 @@ export function DeleteIndividualGrievanceDetails({
   const rolesReassignedCount = Object.keys(
     JSON.parse(ticket.deleteIndividualTicketDetails.roleReassignData),
   ).length;
-  const approveEnabled = isForApproval && rolesCount === rolesReassignedCount;
+  const isOneIndividual = ticket?.household?.individuals?.totalCount === 1;
+
+  const approveEnabled =
+    (isOneIndividual && isForApproval) ||
+    (isForApproval && rolesCount === rolesReassignedCount);
 
   const { data, loading } = useAllAddIndividualFieldsQuery();
   const [mutate] = useApproveDeleteIndividualDataChangeMutation();
@@ -110,7 +114,9 @@ export function DeleteIndividualGrievanceDetails({
         return (
           <Grid key={key} item xs={6}>
             <LabelizedField
-              label={snakeKey === "sex" ? "GENDER" : snakeKey.replace(/_/g, ' ')}
+              label={
+                snakeKey === 'sex' ? 'GENDER' : snakeKey.replace(/_/g, ' ')
+              }
               value={textValue}
             />
           </Grid>

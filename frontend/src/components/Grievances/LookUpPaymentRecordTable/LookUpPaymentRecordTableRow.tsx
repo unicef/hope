@@ -1,7 +1,6 @@
 import styled from 'styled-components';
 import TableCell from '@material-ui/core/TableCell';
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Checkbox } from '@material-ui/core';
 import { PaymentRecordNode } from '../../../__generated__/graphql';
 import { useBusinessArea } from '../../../hooks/useBusinessArea';
@@ -11,6 +10,7 @@ import {
 } from '../../../utils/utils';
 import { ClickableTableRow } from '../../table/ClickableTableRow';
 import { StatusBox } from '../../StatusBox';
+import { BlackLink } from '../../BlackLink';
 
 const StatusContainer = styled.div`
   min-width: 120px;
@@ -48,13 +48,13 @@ export function LookUpPaymentRecordTableRow({
         />
       </TableCell>
       <TableCell align='left'>
-        <Link
+        <BlackLink
           target='_blank'
           rel='noopener noreferrer'
           to={`/${businessArea}/payment-records/${paymentRecord.id}`}
         >
           {paymentRecord.caId}
-        </Link>
+        </BlackLink>
       </TableCell>
       <TableCell align='left'>
         {paymentRecord.verifications?.edges[0]?.node.status ? (

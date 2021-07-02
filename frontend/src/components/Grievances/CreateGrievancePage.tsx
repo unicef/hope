@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import * as Yup from 'yup';
 import { Field, Formik } from 'formik';
@@ -103,9 +103,12 @@ const validationSchema = Yup.object().shape({
 });
 
 export function CreateGrievancePage(): React.ReactElement {
+  const history = useHistory();
   const businessArea = useBusinessArea();
   const permissions = usePermissions();
   const { showMessage } = useSnackbar();
+
+  const linkedTicketId = history.location.state?.linkedTicketId;
 
   const initialValues = {
     description: '',
@@ -118,7 +121,7 @@ export function CreateGrievancePage(): React.ReactElement {
     selectedHousehold: null,
     selectedIndividual: null,
     selectedPaymentRecords: [],
-    selectedRelatedTickets: [],
+    selectedRelatedTickets: linkedTicketId ? [linkedTicketId] : [],
     identityVerified: false,
     issueType: null,
   };

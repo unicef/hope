@@ -1,10 +1,11 @@
 import React from 'react';
 import TableCell from '@material-ui/core/TableCell';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { HouseholdNode } from '../../../../__generated__/graphql';
 import { useBusinessArea } from '../../../../hooks/useBusinessArea';
 import { ClickableTableRow } from '../../../../components/table/ClickableTableRow';
 import { AnonTableCell } from '../../../../components/table/AnonTableCell';
+import { BlackLink } from '../../../../components/BlackLink';
 
 interface TargetPopulationHouseholdTableRowProps {
   household: HouseholdNode;
@@ -30,13 +31,13 @@ export function ProgrammeTableRow({
     >
       <TableCell align='left'>
         {canViewDetails ? (
-          <Link
+          <BlackLink
             target='_blank'
             rel='noopener noreferrer'
             to={householdDetailsPath}
           >
             {household.unicefId}
-          </Link>
+          </BlackLink>
         ) : (
           household.unicefId
         )}
