@@ -132,7 +132,6 @@ class PullFromDatahubTask:
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
-        exchange_rates_client = ExchangeRates()
         for dh_cash_plan in dh_cash_plans:
             cash_plan_args = self.build_arg_dict(dh_cash_plan, PullFromDatahubTask.MAPPING_CASH_PLAN_DICT)
             self.set_cash_plan_service_provider(cash_plan_args)
@@ -141,10 +140,13 @@ class PullFromDatahubTask:
                 cash_plan,
                 created,
             ) = CashPlan.objects.update_or_create(ca_id=dh_cash_plan.cash_plan_id, defaults=cash_plan_args)
-
-            if not cash_plan.exchange_rate:
-                cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
-                cash_plan.save(update_fields=["exchange_rate"])
+            try:
+                if not cash_plan.exchange_rate:
+                    exchange_rates_client = ExchangeRates()
+                    cash_plan.exchange_rate = get_exchange_rate_for_cash_plan(cash_plan, exchange_rates_client)
+                    cash_plan.save(update_fields=["exchange_rate"])
+            except Exception as e:
+                log.exception(e)
 
     def set_cash_plan_service_provider(self, cash_plan_args):
         assistance_through = cash_plan_args.get("assistance_through")
@@ -157,7 +159,7 @@ class PullFromDatahubTask:
 
     def copy_payment_records(self, session):
         dh_payment_records = ca_models.PaymentRecord.objects.filter(session=session)
-        exchange_rates_client = ExchangeRates()
+
         for dh_payment_record in dh_payment_records:
             payment_record_args = self.build_arg_dict(
                 dh_payment_record,
@@ -174,9 +176,13 @@ class PullFromDatahubTask:
                 created,
             ) = PaymentRecord.objects.update_or_create(ca_id=dh_payment_record.ca_id, defaults=payment_record_args)
             if not payment_record.delivered_quantity_usd:
-                payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
-                    payment_record, exchange_rates_client
-                )
+                try:
+                    exchange_rates_client = ExchangeRates()
+                    payment_record.delivered_quantity_usd = get_payment_record_delivered_quantity_in_usd(
+                        payment_record, exchange_rates_client
+                    )
+                except Exception as e:
+                    log.exception(e)
                 payment_record.save(update_fields=["delivered_quantity_usd"])
             if payment_record.household and payment_record.cash_plan and payment_record.cash_plan.program:
                 payment_record.household.programs.add(payment_record.cash_plan.program)
