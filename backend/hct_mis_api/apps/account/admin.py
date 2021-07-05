@@ -1,7 +1,7 @@
 import csv
 import logging
 import re
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from functools import cached_property
 from urllib.parse import unquote
 
@@ -331,26 +331,40 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
     )
     readonly_fields = ("ad_uuid",)
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
+        # (None, {"fields": ("username", "password")}),
         (
             _("Personal info"),
-            {"fields": (("first_name", "last_name", "email"), "ad_uuid")},
+            {
+                "fields": (
+                    "username",
+                    "password",
+                    (
+                        "first_name",
+                        "last_name",
+                    ),
+                    ("email", "ad_uuid"),
+                )
+            },
         ),
         (
             _("Custom Fields"),
-            {"fields": ("custom_fields",)},
+            {"classes": ["collapse"], "fields": ("custom_fields",)},
         ),
         (
             _("Permissions"),
             {
+                "classes": ["collapse"],
                 "fields": (
-                    "is_active",
-                    "is_staff",
-                    "is_superuser",
+                    (
+                        "is_active",
+                        "is_staff",
+                        "is_superuser",
+                    ),
+                    ("groups",),
                 ),
             },
         ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Important dates"), {"classes": ["collapse"], "fields": ("last_login", "date_joined")}),
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
@@ -399,7 +413,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             self.message_user(request, str(e), messages.ERROR)
             raise
 
-    @button()
+    @button(permission="account.can_add_user")
     def kobo_login(self, request):
         cookies = {}
         ctx = self.get_common_context(request, logged=False)
@@ -433,7 +447,25 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button(label="Import Kobo CSV", permission=["can_upload_to_kobo"])
+    @button(label="Permissions", permission="account.can_upload_to_kobo")
+    def permissions(self, request, pk):
+        context = self.get_common_context(request, pk)
+        user: User = context["original"]
+        all_perms = user.get_all_permissions()
+        context["permissions"] = [p.split(".") for p in sorted(all_perms)]
+        ba_perms = defaultdict(list)
+        ba_roles = defaultdict(list)
+        for role in user.user_roles.all():
+            ba_roles[role.business_area.slug].append(role.role)
+
+        for role in user.user_roles.values_list("business_area__slug", flat=True).distinct("business_area"):
+            ba_perms[role].extend(user.permissions_in_business_area(role))
+
+        context["business_ares_permissions"] = dict(ba_perms)
+        context["business_ares_roles"] = dict(ba_roles)
+        return TemplateResponse(request, "admin/account/user/perms.html", context)
+
+    @button(label="Import Kobo CSV", permission="account.can_upload_to_kobo")
     def kobo_import(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -489,7 +521,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
         return TemplateResponse(request, "admin/account/user/kobo_import.html", context)
 
-    @button(label="Sync users from Kobo", permission=["can_import_from_kobo"])
+    @button(label="Sync users from Kobo", permission="account.can_import_from_kobo")
     def kobo_users_sync(self, request):
         ctx = self.get_common_context(request)
         users = []
@@ -549,7 +581,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             setattr(user, field, value or "")
         user.save()
 
-    @button(label="Sync", permission=["can_sync_with_ad"])
+    @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_multi(self, request):
         not_found = []
         try:
@@ -566,7 +598,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Sync", permission=["can_sync_with_ad"])
+    @button(label="Sync", permission="can_sync_with_ad")
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
@@ -575,7 +607,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(permission=["can_load_from_ad"])
+    @button(permission="account.can_load_from_ad")
     def load_ad_users(self, request):
         from hct_mis_api.apps.account.forms import LoadUsersForm
 

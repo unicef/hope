@@ -48,32 +48,24 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     exclude = ("traceback",)
     readonly_fields = ("sentry_id", "source", "business_area")
 
-    @button()
-    def execute_pull(self, request):
+    @button(permission="account.can_debug")
+    def pull(self, request):
         from hct_mis_api.apps.cash_assist_datahub.tasks.pull_from_datahub import (
             PullFromDatahubTask,
         )
 
-        if request.method == "POST":
-            task = PullFromDatahubTask()
-            task.execute()
-            self.message_user(request, "Cash Assist Pull Finished", messages.SUCCESS)
-        else:
-            return _confirm_action(
-                self,
-                request,
-                self.execute_pull,
-                mark_safe(
-                    """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
-                        <h3>Import will only be simulated</h3> 
-                        """
-                ),
-                "Successfully executed",
-                template="admin_extra_urls/confirm.html",
-            )
+        try:
+            ret = PullFromDatahubTask().execute()
+            if ret["failures"]:
+                raise Exception(ret)
+            else:
+                self.message_user(request, ret, messages.SUCCESS)
+        except Exception as e:
+            msg = f"{e.__class__.__name__}: {str(e)}"
+            self.message_user(request, msg, messages.ERROR)
 
-    @button(label="test import", permission=lambda r, o: r.user.is_superuser)
-    def execute(self, request, pk):
+    @button(label="test import", permission="account.can_debug")
+    def simulate_import(self, request, pk):
         context = self.get_common_context(request, pk, title="Test Import")
         session: Session = context["original"]
         if request.method == "POST":
@@ -90,14 +82,20 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
             except RollbackException:
                 self.message_user(request, "Test Completed", messages.SUCCESS)
             except Exception as e:
-                self.message_user(request, str(e), messages.ERROR)
+                msg = f"{e.__class__.__name__}: {str(e)}"
+                if session.sentry_id:
+                    url = f"{settings.SENTRY_URL}?query={session.sentry_id}"
+                    sentry_url = f'<a href="{url}" target="_sentry" >View on Sentry<a/>'
+                    msg = mark_safe(f"{msg} - {sentry_url}")
+
+                self.message_user(request, msg, messages.ERROR)
                 logger.exception(e)
 
         else:
             return _confirm_action(
                 self,
                 request,
-                self.execute,
+                self.simulate_import,
                 mark_safe(
                     """<h1>DO NOT CONTINUE IF YOU ARE NOT SURE WHAT YOU ARE DOING</h1>                
                 <h3>Import will only be simulated</h3> 
@@ -106,7 +104,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 "Successfully executed",
             )
 
-    @href(html_attrs={"target": "_new"})
+    @href(html_attrs={"target": "_new"}, permission="account.can_debug")
     def view_error_on_sentry(self, button):
         if "original" in button.context:
             obj = button.context["original"]
@@ -115,12 +113,12 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
         button.visible = False
 
-    @button(visible=lambda x: x.traceback)
+    @button(visible=lambda x: x.traceback, permission="account.can_debug")
     def view_error(self, request, pk):
         context = self.get_common_context(request, pk)
         return TemplateResponse(request, "admin/cash_assist_datahub/session/debug.html", context)
 
-    @button()
+    @button(permission="account.can_inspect")
     def inspect(self, request, pk):
         context = self.get_common_context(request, pk)
         obj: Session = context["original"]
@@ -212,7 +210,7 @@ class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
         TextFieldFilter.factory("business_area"),
     )
 
-    @button()
+    @button(permission="account.can_inspect")
     def inspect(self, request, pk):
         opts = self.model._meta
         payment_record: PaymentRecord = PaymentRecord.objects.get(pk=pk)

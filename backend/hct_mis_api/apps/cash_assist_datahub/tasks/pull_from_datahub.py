@@ -100,16 +100,10 @@ class PullFromDatahubTask:
             sessions = session_queryset.filter(status=Session.STATUS_READY).order_by("-last_modified_date")
             for session in sessions:
                 try:
-                    with transaction.atomic(using="default"):
-                        with transaction.atomic(using="cash_assist_datahub_ca"):
-                            self.copy_session(session)
-                            ret["successes"].append(session.id)
+                    self.copy_session(session)
+                    ret["successes"].append(session.id)
                 except Exception as e:
                     ret["failures"].append(session.id)
-                    log.exception(e)
-                    session.process_exception(e)
-                    session.save()
-
         return ret
 
     def build_arg_dict(self, model_object, mapping_dict):
@@ -118,17 +112,35 @@ class PullFromDatahubTask:
     def copy_session(self, session):
         with configure_scope() as scope:
             scope.set_tag("session.ca", str(session.id))
-
-            session.status = session.STATUS_PROCESSING
+            STATUS = session.STATUS_PROCESSING
+            TB = ""
+            SID = ""
+            session.status = STATUS
             session.save()
-            self.copy_service_providers(session)
-            programs = self.copy_programs_ids(session)
-            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
-            TargetPopulation.objects.bulk_update(self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"])
-            self.copy_cash_plans(session)
-            self.copy_payment_records(session)
-            session.status = session.STATUS_COMPLETED
-            session.save()
+            try:
+                with transaction.atomic(using="default"):
+                    with transaction.atomic(using="cash_assist_datahub_ca"):
+                        try:
+                            self.copy_service_providers(session)
+                            programs = self.copy_programs_ids(session)
+                            Program.objects.bulk_update(programs, ["ca_id", "ca_hash_id"])
+                            TargetPopulation.objects.bulk_update(
+                                self.copy_target_population_ids(session), ["ca_id", "ca_hash_id"]
+                            )
+                            self.copy_cash_plans(session)
+                            self.copy_payment_records(session)
+                            STATUS = session.STATUS_COMPLETED
+                        except Exception as e:
+                            session.process_exception(e)
+                            STATUS = session.status
+                            TB = session.traceback
+                            SID = session.sentry_id
+                            raise
+            finally:
+                session.sentry_id = SID
+                session.traceback = TB
+                session.status = STATUS
+                session.save()
 
     def copy_cash_plans(self, session):
         dh_cash_plans = ca_models.CashPlan.objects.filter(session=session)
