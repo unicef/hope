@@ -26,6 +26,7 @@ from hct_mis_api.apps.cash_assist_datahub.models import (
     TargetPopulation,
 )
 from hct_mis_api.apps.household import models as people
+from hct_mis_api.apps.payment import models as payment
 from hct_mis_api.apps.program import models as program
 from hct_mis_api.apps.targeting import models as targeting
 from hct_mis_api.apps.utils.admin import HOPEModelAdminBase
@@ -126,6 +127,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         context["data"] = {}
         warnings = []
         errors = 0
+        errors = 0
         has_content = False
         if settings.SENTRY_URL:
             context["sentry_url"] = f"{settings.SENTRY_URL}?query=session.ca%3A%22{obj.pk}%22"
@@ -144,7 +146,7 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
         for model in [Programme, CashPlan, TargetPopulation, PaymentRecord, ServiceProvider]:
             count = model.objects.filter(session=pk).count()
             has_content = has_content or count
-            context["data"][model] = {"count": count, "errors": [], "meta": model._meta}
+            context["data"][model] = {"count": count, "warnings": [], "errors": [], "meta": model._meta}
 
         for prj in Programme.objects.filter(session=pk):
             if not program.Program.objects.filter(id=prj.mis_id).exists():
@@ -156,7 +158,20 @@ class SessionAdmin(ExtraUrlMixin, HOPEModelAdminBase):
                 errors += 1
                 context["data"][TargetPopulation]["errors"].append(f"TargetPopulation {tp.mis_id} not found in HOPE")
 
+        svs = []
+        for sv in ServiceProvider.objects.filter(session=pk):
+            svs.append(sv.ca_id)
+            if not payment.ServiceProvider.objects.filter(ca_id=sv.ca_id).exists():
+                errors += 1
+                context["data"][ServiceProvider]["warnings"].append(f"ServiceProvider {sv.ca_id} not found in HOPE")
+
         for pr in PaymentRecord.objects.filter(session=pk):
+            if pr.service_provider_ca_id not in svs:
+                errors += 1
+                context["data"][PaymentRecord]["errors"].append(
+                    f"PaymentRecord uses ServiceProvider {pr.service_provider_ca_id} that is not present in the Session"
+                )
+
             if not people.Household.objects.filter(id=pr.household_mis_id).exists():
                 errors += 1
                 context["data"][PaymentRecord]["errors"].append(
@@ -198,12 +213,13 @@ class CashPlanAdmin(ExtraUrlMixin, HOPEModelAdminBase):
 
 @admin.register(PaymentRecord)
 class PaymentRecordAdmin(ExtraUrlMixin, admin.ModelAdmin):
-    list_display = ("session", "business_area", "status", "full_name")
+    list_display = ("session", "business_area", "status", "full_name", "service_provider_ca_id")
     raw_id_fields = ("session",)
     date_hierarchy = "session__timestamp"
     list_filter = (
         "status",
         "delivery_type",
+        "service_provider_ca_id",
         TextFieldFilter.factory("ca_id"),
         TextFieldFilter.factory("cash_plan_ca_id"),
         TextFieldFilter.factory("session__id"),
