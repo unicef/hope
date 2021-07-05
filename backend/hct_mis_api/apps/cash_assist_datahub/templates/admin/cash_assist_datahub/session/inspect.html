@@ -58,15 +58,17 @@
     <table>
         <tr>
             <th style="width: 10%;white-space:nowrap; ">Component</th>
-            <th style="width: 5%">#&nbsp;Records</th>
+            <th style="width: 5%" colspan="2">#&nbsp;Records</th>
+{#            <td style="width: 10px">-</td>#}
             <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a></th>
-            <td style="width: 10px">-</td>
         </tr>
 
         {% for model, info in data.items %}
             <tr>
                 <th>{{ info.meta.verbose_name_plural|title }}</th>
                 <td>{{ info.count }}</td>
+                <td><a href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                </td>
                 <td><a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
                 <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
                     {% for err in info.warnings %}
@@ -76,8 +78,6 @@
                         <tr class="error"><td>-  {{ err }}</td> </tr>
                     {% endfor %}
                 </table>
-                </td>
-                <td><a href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
                 </td>
             </tr>
         {% endfor %}
