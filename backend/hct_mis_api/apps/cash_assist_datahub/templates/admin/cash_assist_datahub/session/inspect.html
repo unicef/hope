@@ -45,36 +45,39 @@
 {% block action-content %}
     {% if warnings %}
     <h3>Warnings</h3>
-    <table class="messagelist ">
+    <table class="messagelist "  width="100%">
         {% for level, warn in warnings %}
             <tr class="{{ level }}">
-                <th>{{ level|upper }}</th>
+                <th width="10%">{{ level|upper }}</th>
                 <td>{{ warn }}</td>
             </tr>
         {% endfor %}
     </table>
     {% endif %}
+    <div style="margin: 10px"></div>
     <table>
         <tr>
-            <th>Component</th>
-            <th># Records</th>
-            <th><a href="javascript:django.jQuery('ul.errors').toggle();"># Errors</a></th>
-            <td>-</td>
+            <th style="width: 10%;white-space:nowrap; ">Component</th>
+            <th style="width: 5%">#&nbsp;Records</th>
+            <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a></th>
+            <td style="width: 10px">-</td>
         </tr>
 
         {% for model, info in data.items %}
             <tr>
                 <th>{{ info.meta.verbose_name_plural|title }}</th>
                 <td>{{ info.count }}</td>
-                <td><a href="javascript:django.jQuery('ul.{{ info.meta.model_name }}').toggle();">{{ info.errors|length }}</a>
-                <ul class="errors {{ info.meta.model_name }}" style="display: none">
-                    {% for err in info.errors %}
-                        <li>{{ err }} </li>
+                <td><a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
+                <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
+                    {% for err in info.warnings %}
+                        <tr class="warning"><td>- {{ err }}</td> </tr>
                     {% endfor %}
-                </ul>
+                    {% for err in info.errors %}
+                        <tr class="error"><td>-  {{ err }}</td> </tr>
+                    {% endfor %}
+                </table>
                 </td>
-                <td><a
-                        href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                <td><a href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
                 </td>
             </tr>
         {% endfor %}
