@@ -14,7 +14,7 @@ import packageJson from '../../../package.json';
 import { AlertDialog } from '../AlertDialog';
 import { DrawerItems } from './DrawerItems';
 
-const matchColorToWindowOrigin = () => {
+const matchColorToWindowOrigin = (): string => {
   const url = window.location.href;
   if (url.includes('trn')) {
     return '#BF360C';
