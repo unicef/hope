@@ -684,16 +684,62 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         return TemplateResponse(request, "admin/load_users.html", ctx)
 
 
+class PermissionFilter(SimpleListFilter):
+    title = "Permission Name"
+    parameter_name = "perm"
+    template = "adminfilters/combobox.html"
+
+    def lookups(self, request, model_admin):
+        return Permissions.choices()
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        return queryset.filter(permissions__contains=[self.value()])
+
+
 @admin.register(Role)
 class RoleAdmin(ExtraUrlMixin, HOPEModelAdminBase):
     list_display = ("name",)
     search_fields = ("name",)
     form = RoleAdminForm
+    list_filter = (PermissionFilter,)
 
     @button()
     def members(self, request, pk):
         url = reverse("admin:account_userrole_changelist")
         return HttpResponseRedirect(f"{url}?role__id__exact={pk}")
+
+    @button()
+    def matrix(self, request):
+        ctx = self.get_common_context(request, action="Matrix")
+        matrix1 = {}
+        matrix2 = {}
+        perms = sorted([str(x.value) for x in Permissions])
+        roles = Role.objects.order_by("name")
+        for perm in perms:
+            granted_to_roles = []
+            for role in roles:
+                if perm in role.permissions:
+                    granted_to_roles.append("X")
+                else:
+                    granted_to_roles.append("")
+            matrix1[perm] = granted_to_roles
+
+        for role in roles:
+            values = []
+            for perm in perms:
+                if perm in role.permissions:
+                    values.append("X")
+                else:
+                    values.append("")
+            matrix2[role.name] = values
+
+        ctx["permissions"] = perms
+        ctx["roles"] = roles.values_list("name", flat=True)
+        ctx["matrix1"] = matrix1
+        ctx["matrix2"] = matrix2
+        return TemplateResponse(request, "admin/account/role/matrix.html", ctx)
 
 
 @admin.register(UserRole)
@@ -733,3 +779,24 @@ class IncompatibleRoleFilter(SimpleListFilter):
 class IncompatibleRolesAdmin(HOPEModelAdminBase):
     list_display = ("role_one", "role_two")
     list_filter = (IncompatibleRoleFilter,)
+
+
+from django.contrib.admin import site
+from django.contrib.auth.admin import GroupAdmin as _GroupAdmin
+from django.contrib.auth.models import Group
+
+site.unregister(Group)
+
+
+@admin.register(Group)
+class GroupAdmin(ExtraUrlMixin, _GroupAdmin):
+    @button(permission=lambda request, group: request.user.is_superuser)
+    def import_fixture(self, request):
+        from adminactions.helpers import import_fixture as _import_fixture
+
+        return _import_fixture(self, request)
+
+    @button()
+    def show_members(self, request, pk):
+        ctx = self.get_common_context(request, pk)
+        return TemplateResponse(request, "admin/account/group/members.html", ctx)
