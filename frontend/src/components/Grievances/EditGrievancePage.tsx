@@ -53,12 +53,12 @@ import {
   EmptyComponent,
   prepareInitialValues,
   prepareVariables,
-  validationSchema,
 } from './utils/editGrievanceUtils';
 import { validate } from './utils/validateGrievance';
 import { Consent } from './Consent';
 import { LookUpSection } from './LookUpSection';
 import { OtherRelatedTicketsCreate } from './OtherRelatedTicketsCreate';
+import { validationSchema } from "./utils/validationSchema";
 
 const BoxPadding = styled.div`
   padding: 15px 0;
@@ -375,7 +375,7 @@ export function EditGrievancePage(): React.ReactElement {
                             fullWidth
                             disabled={Boolean(ticket.language)}
                             variant='outlined'
-                            label='Languages Spoken*'
+                            label='Languages Spoken'
                             component={FormikTextField}
                           />
                         </Grid>
