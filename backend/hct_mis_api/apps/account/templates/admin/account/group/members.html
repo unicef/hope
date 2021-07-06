@@ -1,0 +1,48 @@
+{% extends "admin/change_form.html" %}{% load staticfiles %}
+{% block content %}
+    <input type="text" style="width: 578px;padding:10px;margin-bottom:10px" id="filterInput" placeholder="Search for names..">
+    <table><tr>
+    {% for user in original.user_set.all %}
+        <td><a href="{% url "admin:account_user_change" user.pk %}">{{ user }}</a></td>
+    {% endfor %}
+{% endblock content %}
+{% block footer %}
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script>
+
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        (function ($) {
+
+            $('#filterInput').on('keyup', delay(function () {
+                let filter = this.value.toUpperCase();
+                $('table tr').each(function (i, el) {
+                    let txt = $(el).find('td').text();
+                    if (txt.toUpperCase().indexOf(filter) > -1) {
+                        $(el).closest('.section').show();
+                        $(el).show();
+                    } else {
+                        $(el).hide();
+                    }
+                    {# $('table').each(function (i, t) {#}
+                    {#    if ($(t).find('tr:visible').length === 0) {#}
+                    {#        $(t).hide()#}
+                    {#    }#}
+                    {# }); #}
+                });
+            }, 300)).trigger('keyup').focus();
+
+        })(django.jQuery)
+
+    </script>
+    <div id="footer"></div>{% endblock %}
