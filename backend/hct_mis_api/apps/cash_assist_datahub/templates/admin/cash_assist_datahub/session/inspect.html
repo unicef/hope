@@ -4,14 +4,14 @@
     {{ media }}
     {{ adminform.media }}
 
-<script type="text/javascript" src="/api/static/admin/js/vendor/jquery/jquery.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/jquery.init.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/core.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/admin/RelatedObjectLookups.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/actions.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/urlify.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/prepopulate.js"></script>
-<script type="text/javascript" src="/api/static/admin/js/vendor/xregexp/xregexp.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/jquery.init.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/core.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/actions.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/urlify.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/prepopulate.js"></script>
+    <script type="text/javascript" src="/api/static/admin/js/vendor/xregexp/xregexp.js"></script>
 
     <style>
         table.messagelist tr.warning {
@@ -44,40 +44,48 @@
 {% endblock %}
 {% block action-content %}
     {% if warnings %}
-    <h3>Warnings</h3>
-    <table class="messagelist "  width="100%">
-        {% for level, warn in warnings %}
-            <tr class="{{ level }}">
-                <th width="10%">{{ level|upper }}</th>
-                <td>{{ warn }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+        <h3>Warnings</h3>
+        <table class="messagelist " width="100%">
+            {% for level, warn in warnings %}
+                <tr class="{{ level }}">
+                    <th width="10%">{{ level|upper }}</th>
+                    <td>{{ warn }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     {% endif %}
     <div style="margin: 10px"></div>
     <table>
         <tr>
             <th style="width: 10%;white-space:nowrap; ">Component</th>
             <th style="width: 5%" colspan="2">#&nbsp;Records</th>
-{#            <td style="width: 10px">-</td>#}
-            <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a></th>
+            {#            <td style="width: 10px">-</td>#}
+            <th style="width: 90%"><a href="javascript:django.jQuery('table.errors').toggle();"># Warnings/Errors</a>
+            </th>
         </tr>
 
         {% for model, info in data.items %}
             <tr>
                 <th>{{ info.meta.verbose_name_plural|title }}</th>
                 <td>{{ info.count }}</td>
-                <td><a href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                <td>
+                    <a target="{{ model }}"
+                       href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
                 </td>
-                <td><a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
-                <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
-                    {% for err in info.warnings %}
-                        <tr class="warning"><td>- {{ err }}</td> </tr>
-                    {% endfor %}
-                    {% for err in info.errors %}
-                        <tr class="error"><td>-  {{ err }}</td> </tr>
-                    {% endfor %}
-                </table>
+                <td>
+                    <a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
+                    <table width="100%" class="errors messagelist {{ info.meta.model_name }}" style="display: none">
+                        {% for err in info.warnings %}
+                            <tr class="warning">
+                                <td>- {{ err }}</td>
+                            </tr>
+                        {% endfor %}
+                        {% for err in info.errors %}
+                            <tr class="error">
+                                <td>- {{ err }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </td>
             </tr>
         {% endfor %}
