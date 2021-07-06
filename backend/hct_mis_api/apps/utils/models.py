@@ -1,4 +1,7 @@
 # Create your models here.
+import logging
+import sys
+
 from django.db import models
 from django.utils import timezone
 
@@ -8,6 +11,8 @@ from model_utils.models import UUIDModel
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+
+logger = logging.getLogger(__name__)
 
 
 class TimeStampedUUIDModel(UUIDModel):
@@ -147,10 +152,13 @@ class AbstractSession(models.Model):
 
             reporter = ExceptionReporter(request, *sys.exc_info())
             self.traceback = reporter.get_traceback_html()
-        except:
+        except Exception as e:
+            logger.exception(e)
             self.traceback = "N/A"
         finally:
             self.status = self.STATUS_FAILED
+
+        return self.sentry_id
 
     def __str__(self):
         return f"#{self.id} on {self.timestamp}"
