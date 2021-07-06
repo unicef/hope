@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 from django.db.models import Q
 
+from sentry_sdk import configure_scope
+
 from hct_mis_api.apps.core.celery import app
 from hct_mis_api.apps.grievance.models import GrievanceTicket
 from hct_mis_api.apps.grievance.notifications import GrievanceNotification
@@ -53,12 +55,17 @@ def periodic_grievances_notifications():
         .exclude(category=GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE)
     )
     for ticket in sensitive_tickets_to_notify:
-        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
-        notification.send_email_notification()
-        ticket.last_notification_sent = datetime.now()
-        ticket.save()
+        with configure_scope() as scope:
+            scope.set_tag("business_area", ticket.business_area)
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_SENSITIVE_REMINDER)
+            notification.send_email_notification()
+            ticket.last_notification_sent = datetime.now()
+            ticket.save()
+
     for ticket in other_tickets_to_notify:
-        notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
-        notification.send_email_notification()
-        ticket.last_notification_sent = datetime.now()
-        ticket.save()
+        with configure_scope() as scope:
+            scope.set_tag("business_area", ticket.business_area)
+            notification = GrievanceNotification(ticket, GrievanceNotification.ACTION_OVERDUE)
+            notification.send_email_notification()
+            ticket.last_notification_sent = datetime.now()
+            ticket.save()
