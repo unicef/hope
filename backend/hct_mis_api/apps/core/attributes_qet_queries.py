@@ -121,3 +121,15 @@ def get_documents_issuer_query(document_type, country_alpha3):
 
 def get_role_query(_, args):
     return Q(households_and_roles__role=args[0])
+
+
+def get_full_name_and_address_query(_, args):
+    return get_full_name_query(_, args) | get_address_query(_, args)
+
+
+def get_full_name_query(_, args):
+    return Q(head_of_household__full_name__icontains=args[0])
+
+
+def get_address_query(_, args):
+    return Q(address__icontains=args[0])

@@ -44453,6 +44453,130 @@ snapshots['TestMetaDataFilterType::test_core_meta_type_query 1'] = {
             {
                 'associatedWith': 'Individual',
                 'choices': [
+                    {
+                        'labelEn': 'Birth Certificate',
+                        'labels': [
+                            {
+                                'label': 'Birth Certificate',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'BIRTH_CERTIFICATE'
+                    },
+                    {
+                        'labelEn': "Driver's License",
+                        'labels': [
+                            {
+                                'label': "Driver's License",
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'DRIVERS_LICENSE'
+                    },
+                    {
+                        'labelEn': 'Electoral Card',
+                        'labels': [
+                            {
+                                'label': 'Electoral Card',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'ELECTORAL_CARD'
+                    },
+                    {
+                        'labelEn': 'National ID',
+                        'labels': [
+                            {
+                                'label': 'National ID',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NATIONAL_ID'
+                    },
+                    {
+                        'labelEn': 'National Passport',
+                        'labels': [
+                            {
+                                'label': 'National Passport',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NATIONAL_PASSPORT'
+                    },
+                    {
+                        'labelEn': 'Not Available',
+                        'labels': [
+                            {
+                                'label': 'Not Available',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'NOT_AVAILABLE'
+                    },
+                    {
+                        'labelEn': 'Other',
+                        'labels': [
+                            {
+                                'label': 'Other',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'OTHER'
+                    },
+                    {
+                        'labelEn': 'Scope ID',
+                        'labels': [
+                            {
+                                'label': 'Scope ID',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'SCOPE_ID'
+                    },
+                    {
+                        'labelEn': 'Unhcr ID',
+                        'labels': [
+                            {
+                                'label': 'Unhcr ID',
+                                'language': 'English(EN)'
+                            }
+                        ],
+                        'value': 'UNHCR_ID'
+                    }
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'What type of identification document is provided?',
+                'labels': [
+                    {
+                        'label': 'What type of identification document is provided?',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'id_type',
+                'required': False,
+                'type': 'SELECT_MANY'
+            },
+            {
+                'associatedWith': 'Household',
+                'choices': [
+                ],
+                'hint': '',
+                'isFlexField': False,
+                'labelEn': 'Indicate the name and address of the main employer',
+                'labels': [
+                    {
+                        'label': 'Indicate the name and address of the main employer',
+                        'language': 'English(EN)'
+                    }
+                ],
+                'name': 'employer',
+                'required': False,
+                'type': 'STRING'
+            },
+            {
+                'associatedWith': 'Individual',
+                'choices': [
                 ],
                 'hint': '',
                 'isFlexField': False,
