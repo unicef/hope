@@ -598,7 +598,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             logger.exception(e)
             self.message_user(request, str(e), messages.ERROR)
 
-    @button(label="Sync", permission="can_sync_with_ad")
+    @button(label="Sync", permission="account.can_sync_with_ad")
     def sync_single(self, request, pk):
         try:
             self._sync_ad_data(self.get_object(request, pk))
