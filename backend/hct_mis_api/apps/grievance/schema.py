@@ -53,6 +53,7 @@ from hct_mis_api.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
     TicketNote,
     TicketPaymentVerificationDetails,
     TicketPositiveFeedbackDetails,
@@ -478,6 +479,14 @@ class TicketPaymentVerificationDetailsNode(DjangoObjectType):
 class TicketPositiveFeedbackDetailsNode(DjangoObjectType):
     class Meta:
         model = TicketPositiveFeedbackDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketNegativeFeedbackDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection

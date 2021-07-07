@@ -30,6 +30,7 @@ from hct_mis_api.apps.grievance.mutations_extras.data_change import (
     update_data_change_extras,
 )
 from hct_mis_api.apps.grievance.mutations_extras.feedback import (
+    save_negative_feedback_extras,
     save_positive_feedback_extras,
 )
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
@@ -43,6 +44,7 @@ from hct_mis_api.apps.grievance.mutations_extras.main import (
 from hct_mis_api.apps.grievance.mutations_extras.payment_verification import (
     save_payment_verification_extras,
 )
+from hct_mis_api.apps.grievance.mutations_extras.referral import save_referral_extras
 from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     save_sensitive_grievance_extras,
 )
@@ -230,6 +232,8 @@ class CreateGrievanceTicketMutation(PermissionMutation):
             GrievanceTicket.CATEGORY_GRIEVANCE_COMPLAINT: save_grievance_complaint_extras,
             GrievanceTicket.CATEGORY_SENSITIVE_GRIEVANCE: save_sensitive_grievance_extras,
             GrievanceTicket.CATEGORY_POSITIVE_FEEDBACK: save_positive_feedback_extras,
+            GrievanceTicket.CATEGORY_NEGATIVE_FEEDBACK: save_negative_feedback_extras,
+            GrievanceTicket.CATEGORY_REFERRAL: save_referral_extras,
         }
         save_extra_method = save_extra_methods.get(category)
         grievances = [grievance_ticket]
