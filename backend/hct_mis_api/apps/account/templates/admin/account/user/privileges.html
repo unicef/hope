@@ -1,0 +1,120 @@
+{% extends "admin/change_form.html" %}{% load staticfiles %}
+{% block content %}
+    <div>
+        {% if original.is_superuser %}
+            <b>SUPERUSER</b>
+        {% endif %}
+        {% if original.is_staff %}
+            <b>STAFF</b>
+        {% endif %}
+    </div>
+    <table>
+        <tr>
+            {% for ba in business_ares_permissions %}
+                <td><label><input name="{{ ba }}" type="checkbox" value="{{ ba }}" checked>
+                    {{ ba }}</label></td>
+            {% endfor %}
+            <td><label><input type="checkbox" value="dj_admin" checked> Admin</label></td>
+        </tr>
+    </table>
+
+    <input type="text" style="width: 578px;padding:10px;margin-bottom:10px" id="filterInput"
+           placeholder="Search for names..">
+
+    <div class="tab-tabs">
+        <h1><a href="#" style="font-weight:800;margin-right: 40px" class="tab" data-bind="roles">Roles</a>
+            <a href="#" class="tab" data-bind="perms">Permissions</a></h1>
+    </div>
+    <div class="tab-content">
+        <div id="roles">
+            {% for ba, roles in business_ares_roles.items %}
+                <h2 class="section {{ ba }}">{{ ba }}</h2>
+                <table id="perm_{{ ba }}">{% for role in roles %}
+                    <tr>
+                        <td>{{ role }}</td>
+                    </tr>
+                {% endfor %}</table>
+            {% endfor %}</div>
+        <div id="perms" style="display: none;">
+            {% for ba, perms in business_ares_permissions.items %}
+                <h2 class="section {{ ba }}">{{ ba }}</h2>
+                <table id="perm_{{ ba }}">{% for perm in perms %}
+                    <tr>
+                        <td>{{ perm }}</td>
+                    </tr>
+                {% endfor %}</table>
+            {% endfor %}
+
+            <h2 class="section dj_admin">Admin Permissions</h2>
+            <table id="perm_dj_admin">
+                {% for perm in permissions %}
+                    <tr>
+                        <td>{{ perm.0 }}</td>
+                        <td>{{ perm.1 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+{% endblock content %}
+{% block footer %}
+    <script type="text/javascript" src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
+    <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
+    <script>
+
+        function delay(callback, ms) {
+            var timer = 0;
+            return function () {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    callback.apply(context, args);
+                }, ms || 0);
+            };
+        }
+
+        (function ($) {
+            $(".tab").on("click", function (e) {
+                $('.tab-tabs a').css("font-weight", 100)
+                $('.tab-content div').hide();
+                $(this, 'h1').css("font-weight", 800)
+                var sel = $(this).data('bind');
+                $('#' + sel).show();
+            });
+
+            $("input[type=checkbox]").on("click", function (e) {
+                var target_id = $(this).val();
+                var $target = $("table[id=\"perm_" + target_id + "\"]");
+                var $title = $("h2.section." + target_id);
+                if ($(this).is(":checked")) {
+                    $target.show();
+                    $title.show();
+                } else {
+                    $target.hide();
+                    $title.hide();
+                }
+            });
+
+            $("#filterInput").on("keyup", delay(function () {
+                let filter = this.value.toUpperCase();
+                $("table tr").each(function (i, el) {
+                    let txt = $(el).find("td").text();
+                    if (txt.toUpperCase().indexOf(filter) > -1) {
+                        $(el).closest(".section").show();
+                        $(el).show();
+                    } else {
+                        $(el).hide();
+                    }
+                    {# $('table').each(function (i, t) {#}
+                    {#    if ($(t).find('tr:visible').length === 0) {#}
+                    {#        $(t).hide()#}
+                    {#    }#}
+                    {# }); #}
+                });
+            }, 300)).trigger("keyup").focus();
+
+        })(django.jQuery);
+
+    </script>
+    <div id="footer"></div>{% endblock %}
