@@ -42,4 +42,18 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.CreateModel(
+            name='TicketReferralDetails',
+            fields=[
+                ('id', model_utils.fields.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
+                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
+                ('household', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='referral_ticket_details', to='household.Household')),
+                ('individual', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='referral_ticket_details', to='household.Individual')),
+                ('ticket', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='referral_ticket_details', to='grievance.GrievanceTicket')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
     ]
