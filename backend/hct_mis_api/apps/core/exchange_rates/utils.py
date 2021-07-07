@@ -11,7 +11,7 @@ def fix_exchange_rates(all=None):
     all_payment_records = PaymentRecord.objects.all()
     if not all:
         all_payment_records = all_payment_records.filter(
-            Q(delivered_quantity_usd__is_null=True) | Q(delivered_quantity_usd=0)
+            Q(delivered_quantity_usd__isnull=True) | Q(delivered_quantity_usd=0)
         )
     exchange_rates_client = ExchangeRates()
 
