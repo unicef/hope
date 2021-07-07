@@ -486,7 +486,6 @@ DATAMART_USER = os.getenv("DATAMART_USER")
 DATAMART_PASSWORD = os.getenv("DATAMART_PASSWORD")
 DATAMART_URL = os.getenv("DATAMART_URL", "https://datamart-dev.unicef.io")
 
-
 COUNTRIES_OVERRIDE = {
     "U": {
         "name": _("Unknown or Not Applicable"),
@@ -580,3 +579,10 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 # see adminactions.perms
 # set handker to AA_PERMISSION_CREATE_USE_COMMAND
 AA_PERMISSION_HANDLER = 3
+
+
+def filter_environment(key):
+    return False
+
+
+SYSINFO = {"filter_environment": "hct_mis_api.settings.base.filter_environment"}
