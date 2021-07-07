@@ -1,16 +1,23 @@
 import graphene
 
 from hct_mis_api.apps.grievance.mutations_extras.data_change import (
+    AddIndividualIssueTypeExtras,
     HouseholdDataUpdateIssueTypeExtras,
     IndividualDataUpdateIssueTypeExtras,
     IndividualDeleteIssueTypeExtras,
-    AddIndividualIssueTypeExtras,
+    UpdateAddIndividualIssueTypeExtras,
     UpdateHouseholdDataUpdateIssueTypeExtras,
     UpdateIndividualDataUpdateIssueTypeExtras,
-    UpdateAddIndividualIssueTypeExtras,
 )
-from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import GrievanceComplaintTicketExtras
-from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import SensitiveGrievanceTicketExtras
+from hct_mis_api.apps.grievance.mutations_extras.feedback import (
+    PositiveFeedbackTicketExtras,
+)
+from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
+    GrievanceComplaintTicketExtras,
+)
+from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
+    SensitiveGrievanceTicketExtras,
+)
 
 
 class IssueTypeExtrasInput(graphene.InputObjectType):
@@ -23,6 +30,7 @@ class IssueTypeExtrasInput(graphene.InputObjectType):
 class CategoryExtrasInput(graphene.InputObjectType):
     sensitive_grievance_ticket_extras = SensitiveGrievanceTicketExtras()
     grievance_complaint_ticket_extras = GrievanceComplaintTicketExtras()
+    positive_feedback_ticket_extras = PositiveFeedbackTicketExtras()
 
 
 class CreateGrievanceTicketExtrasInput(graphene.InputObjectType):
