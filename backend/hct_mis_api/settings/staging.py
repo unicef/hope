@@ -16,9 +16,6 @@ WWW_ROOT = "http://%s/" % DOMAIN_NAME
 # other
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# CACHE
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "TIMEOUT": 1800}}
-
 # STORAGE
 STATIC_LOCATION = "static"
 MEDIA_LOCATION = "media"
