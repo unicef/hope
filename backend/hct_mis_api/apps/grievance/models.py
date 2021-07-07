@@ -35,6 +35,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
             "sensitive_ticket_details.individual": "individual",
             "positive_feedback_ticket_details.household": "household",
             "positive_feedback_ticket_details.individual": "individual",
+            "negative_feedback_ticket_details.household": "household",
+            "negative_feedback_ticket_details.individual": "individual",
             "household_data_update_ticket_details.household": "household",
             "household_data_update_ticket_details.household_data": "household_data",
             "individual_data_update_ticket_details.individual": "individual",
@@ -232,8 +234,8 @@ class GrievanceTicket(TimeStampedUUIDModel, ConcurrencyModel):
         },
         CATEGORY_PAYMENT_VERIFICATION: "",
         CATEGORY_GRIEVANCE_COMPLAINT: "complaint_ticket_details",
-        CATEGORY_NEGATIVE_FEEDBACK: None,
-        CATEGORY_REFERRAL: None,
+        CATEGORY_NEGATIVE_FEEDBACK: "negative_feedback_ticket_details",
+        CATEGORY_REFERRAL: "referral_ticket_details",
         CATEGORY_POSITIVE_FEEDBACK: "positive_feedback_ticket_details",
         CATEGORY_NEEDS_ADJUDICATION: "needs_adjudication_ticket_details",
         CATEGORY_SYSTEM_FLAGGING: "system_flagging_ticket_details",
@@ -544,6 +546,24 @@ class TicketPositiveFeedbackDetails(TimeStampedUUIDModel):
     individual = models.ForeignKey(
         "household.Individual",
         related_name="positive_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+
+class TicketNegativeFeedbackDetails(TimeStampedUUIDModel):
+    ticket = models.OneToOneField(
+        "grievance.GrievanceTicket", related_name="negative_feedback_ticket_details", on_delete=models.CASCADE
+    )
+    household = models.ForeignKey(
+        "household.Household",
+        related_name="negative_feedback_ticket_details",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    individual = models.ForeignKey(
+        "household.Individual",
+        related_name="negative_feedback_ticket_details",
         on_delete=models.CASCADE,
         null=True,
     )
