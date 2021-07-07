@@ -1,6 +1,6 @@
 import logging
 
-from django.core.management import call_command
+from hct_mis_api.apps.core.exchange_rates.utils import fix_exchange_rates
 
 from hct_mis_api.apps.core.celery import app
 
@@ -25,7 +25,7 @@ def pull_from_cashassist_datahub_task():
 @app.task
 def fix_exchange_rates_task():
     try:
-        call_command("fixexchangerates")
+        fix_exchange_rates()
     except Exception as e:
         logger.exception(e)
         raise
