@@ -447,8 +447,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
             response.set_cookie(key, value)
         return response
 
-    @button(label="Permissions", permission="account.can_upload_to_kobo")
-    def permissions(self, request, pk):
+    @button()
+    def privileges(self, request, pk):
         context = self.get_common_context(request, pk)
         user: User = context["original"]
         all_perms = user.get_all_permissions()
@@ -463,7 +463,7 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
 
         context["business_ares_permissions"] = dict(ba_perms)
         context["business_ares_roles"] = dict(ba_roles)
-        return TemplateResponse(request, "admin/account/user/perms.html", context)
+        return TemplateResponse(request, "admin/account/user/privileges.html", context)
 
     @button(label="Import Kobo CSV", permission="account.can_upload_to_kobo")
     def kobo_import(self, request):
@@ -560,11 +560,6 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 logger.exception(e)
                 self.message_user(request, str(e), messages.ERROR)
         return TemplateResponse(request, "admin/kobo_users.html", ctx)
-
-    @button()
-    def privileges(self, request, pk):
-        ctx = self.get_common_context(request, pk)
-        return TemplateResponse(request, "admin/privileges.html", ctx)
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
