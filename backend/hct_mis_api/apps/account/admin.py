@@ -214,7 +214,7 @@ class DjAdminManager:
         try:
             for client in (self, self.kc):
                 try:
-                    getattr(client, "_get")(client.login_url)
+                    page = getattr(client, "_get")(client.login_url)
                     csrftoken = getattr(client, "client").cookies["csrftoken"]
                     getattr(client, "_post")(
                         client.login_url,
@@ -226,7 +226,7 @@ class DjAdminManager:
                         },
                     )
                     getattr(client, "assert_response")(302, client.admin_url)
-                except self.ResponseException as e:
+                except Exception as e:
                     raise self.ResponseException(f"Unable to login to Kobo at {client.login_url}: {e}")
 
             if request:
@@ -440,7 +440,8 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
                 )
         except Exception as e:
             logger.exception(e)
-            self.message_user(request, str(e), messages.ERROR)
+            self.message_user(request, f"{e.__class__.__name__}: {e}", messages.ERROR)
+
         ctx["form"] = form
         response = TemplateResponse(request, "admin/kobo_login.html", ctx)
         for key, value in cookies.items():
