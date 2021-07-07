@@ -16,6 +16,7 @@ from hct_mis_api.apps.grievance.mutations_extras.feedback import (
 from hct_mis_api.apps.grievance.mutations_extras.grievance_complaint import (
     GrievanceComplaintTicketExtras,
 )
+from hct_mis_api.apps.grievance.mutations_extras.referral import ReferralTicketExtras
 from hct_mis_api.apps.grievance.mutations_extras.sensitive_grievance import (
     SensitiveGrievanceTicketExtras,
 )
@@ -33,6 +34,7 @@ class CategoryExtrasInput(graphene.InputObjectType):
     grievance_complaint_ticket_extras = GrievanceComplaintTicketExtras()
     positive_feedback_ticket_extras = PositiveFeedbackTicketExtras()
     negative_feedback_ticket_extras = NegativeFeedbackTicketExtras()
+    referral_ticket_extras = ReferralTicketExtras()
 
 
 class CreateGrievanceTicketExtrasInput(graphene.InputObjectType):
