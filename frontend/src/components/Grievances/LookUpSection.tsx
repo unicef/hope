@@ -61,24 +61,26 @@ export const LookUpSection = ({
       {renderedLookupRelatedTickets}
     </Grid>
   );
+
+  const householdIndividualRelatedTicketsLookups = (
+    <Grid container alignItems='center'>
+      <Grid container>{renderedLookupHouseholdIndividual}</Grid>
+      {renderedLookupRelatedTickets}
+    </Grid>
+  );
   const lookupDict = {
-    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: (
-      <Grid container alignItems='center'>
-        <Grid container>{renderedLookupHouseholdIndividual}</Grid>
-        {renderedLookupRelatedTickets}
-      </Grid>
-    ),
+    [GRIEVANCE_CATEGORIES.DATA_CHANGE]: householdIndividualRelatedTicketsLookups,
     [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: allThree,
     [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: allThree,
+    [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: householdIndividualRelatedTicketsLookups,
+    [GRIEVANCE_CATEGORIES.REFERRAL]: householdIndividualRelatedTicketsLookups,
   };
   return thingForSpecificGrievanceType(
     { category: values.category },
     lookupDict,
     renderedLookupRelatedTickets,
     {
-      [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: false,
-      [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: false,
-      [GRIEVANCE_CATEGORIES.REFERRAL]: false,
       [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: false,
       [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: false,
       [GRIEVANCE_CATEGORIES.DATA_CHANGE]: false,
