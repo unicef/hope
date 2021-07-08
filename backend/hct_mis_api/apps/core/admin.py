@@ -107,7 +107,7 @@ class BusinessAreaAdmin(ExtraUrlMixin, admin.ModelAdmin):
     readonly_fields = ("parent", "is_split")
     filter_horizontal = ("countries",)
 
-    @button(label="Create Business Office", permission=["can_split"])
+    @button(label="Create Business Office", permission=["core.can_split_business_area"])
     def split_business_area(self, request, pk):
         context = self.get_common_context(request, pk)
         opts = self.object._meta
@@ -289,7 +289,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
         TextFieldFilter.factory("external_id"),
     )
 
-    @button(permission=["import_from_csv"])
+    @button(permission="core.import_from_csv_adminarea")
     def import_file(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
@@ -354,7 +354,7 @@ class AdminAreaAdmin(ExtraUrlMixin, MPTTModelAdmin):
 
         return TemplateResponse(request, "core/admin/import_locations.html", context)
 
-    @button(permission=["load_from_datamart"])
+    @button(permission="core.load_from_datamart_adminarea")
     def load_from_datamart(self, request):
         context = self.get_common_context(request)
         if request.method == "GET":
