@@ -54,9 +54,7 @@ class BusinessArea(TimeStampedUUIDModel):
     countries = models.ManyToManyField(
         "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
     )
-    deduplication_batch_duplicate_score = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
+    deduplication_batch_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results equal or above this score are considered duplicates",
@@ -69,17 +67,13 @@ class BusinessArea(TimeStampedUUIDModel):
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
 
-    deduplication_golden_duplicate_score = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
+    deduplication_golden_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results equal or above this score are considered duplicates",
     )
 
-    deduplication_golden_record_duplicate_score = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
+    deduplication_golden_record_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results equal or above this score are considered duplicates",
@@ -90,9 +84,7 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_golden_record_duplicates_allowed = models.IntegerField(
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
-    deduplication_golden_record_min_score = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
+    deduplication_golden_record_min_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results below the minimum score will not be taken into account",
