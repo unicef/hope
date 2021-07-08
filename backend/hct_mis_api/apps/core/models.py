@@ -67,12 +67,6 @@ class BusinessArea(TimeStampedUUIDModel):
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
 
-    deduplication_golden_duplicate_score = models.FloatField(
-        default=6.0,
-        validators=[MinValueValidator(0.0)],
-        help_text="Results equal or above this score are considered duplicates",
-    )
-
     deduplication_golden_record_duplicate_score = models.FloatField(
         default=6.0,
         validators=[MinValueValidator(0.0)],
@@ -85,7 +79,7 @@ class BusinessArea(TimeStampedUUIDModel):
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
     deduplication_golden_record_min_score = models.FloatField(
-        default=6.0,
+        default=11.0,
         validators=[MinValueValidator(0.0)],
         help_text="Results below the minimum score will not be taken into account",
     )
