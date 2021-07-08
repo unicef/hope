@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import ugettext_lazy as _
 
 from django_celery_beat.models import PeriodicTask
@@ -52,6 +53,35 @@ class BusinessArea(TimeStampedUUIDModel):
 
     countries = models.ManyToManyField(
         "AdminAreaLevel", blank=True, limit_choices_to={"admin_level": 0}, related_name="business_areas"
+    )
+    deduplication_batch_duplicate_score = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+
+    deduplication_batch_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_batch_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
+    )
+
+    deduplication_golden_duplicate_score = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results equal or above this score are considered duplicates",
+    )
+
+    deduplication_golden_duplicates_percentage = models.IntegerField(
+        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
+    )
+    deduplication_golden_duplicates_allowed = models.IntegerField(
+        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
 
     def save(self, *args, **kwargs):
