@@ -28,8 +28,8 @@ actions.add_to_site(site, exclude=["export_delete_tree"])
 
 urlpatterns = [
     path("api/admin/", admin.site.urls),
-    path("api/admin/call-command", call_command_view),
-    path("adminactions/", include("adminactions.urls")),
+    path("api/explorer/", include("explorer.urls")),
+    path("api/admin/adminactions/", include("adminactions.urls")),
     path("", homepage),
     path("_health", homepage),
     path("api/_health", homepage),
