@@ -26,7 +26,10 @@ from hct_mis_api.apps.household.models import (
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedIndividual,
+    RegistrationDataImportDatahub,
+)
 
 log = logging.getLogger(__name__)
 
