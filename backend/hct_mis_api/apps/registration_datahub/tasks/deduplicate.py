@@ -368,7 +368,7 @@ class DeduplicateTask:
             elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - cls.th.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
+                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])

@@ -83,6 +83,13 @@ class BusinessArea(TimeStampedUUIDModel):
     deduplication_golden_duplicates_allowed = models.IntegerField(
         default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
     )
+    deduplication_golden_record_min_score = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        default=6.0,
+        validators=[MinValueValidator(0.0)],
+        help_text="Results below the minimum score will not be taken into account",
+    )
 
     def save(self, *args, **kwargs):
         unique_slugify(self, self.name, slug_field_name="slug")
