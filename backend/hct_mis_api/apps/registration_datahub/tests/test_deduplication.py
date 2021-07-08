@@ -56,11 +56,11 @@ class TestBatchDeduplication(BaseElasticSearchTestCase):
             region_name="SAR",
             has_data_sharing_agreement=True,
             deduplication_batch_duplicate_score=14.0,
+            deduplication_batch_duplicates_percentage=100,
+            deduplication_batch_duplicates_allowed=10,
             deduplication_golden_record_min_score=11.0,
             deduplication_golden_record_duplicate_score=14.0,
-            deduplication_batch_duplicates_percentage=100,
             deduplication_golden_record_duplicates_percentage=100,
-            deduplication_batch_duplicates_allowed=10,
             deduplication_golden_record_duplicates_allowed=10,
         )
         cls.registration_data_import_datahub = RegistrationDataImportDatahubFactory(
