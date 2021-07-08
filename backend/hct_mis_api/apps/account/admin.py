@@ -212,7 +212,9 @@ class DjAdminManager:
             self._username = username
             self._password = password
         try:
-            for client in (self, self.kc):
+            # FIXME add self.kc
+            #
+            for client in (self,):
                 try:
                     page = getattr(client, "_get")(client.login_url)
                     csrftoken = getattr(client, "client").cookies["csrftoken"]
@@ -368,6 +370,11 @@ class UserAdmin(ExtraUrlMixin, BaseUserAdmin):
         (_("Job Title"), {"fields": ("job_title",)}),
     )
     inlines = (UserRoleInline,)
+
+    @button()
+    def inspect(self, request, pk):
+        context = self.get_common_context(request, pk, logged=False)
+        return TemplateResponse(request, "admin/account/user/inspect.html", context)
 
     def kobo_user(self, obj):
         return obj.custom_fields.get("kobo_username")
