@@ -67,7 +67,8 @@ django-extensions = "2.2.6"
 elasticsearch-dsl ="^7.0.0"
 django-elasticsearch-dsl = "7.1.4"
 django-constance = { version = "2.7.0", extras = ["redis"] }
-django-auditlog = { git = "https://github.com/Tivix/django-auditlog.git", branch="master" }
+#django-auditlog = { git = "https://github.com/Tivix/django-auditlog.git", branch="master" }
+django-auditlog = { url = "https://github.com/Tivix/django-auditlog/archive/refs/heads/master.zip" }
 django-admin-extra-urls = "^3.3"
 unittest-xml-reporting = "3.0.4"
 django-multiselectfield = "0.1.12"
