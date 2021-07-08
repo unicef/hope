@@ -1,31 +1,61 @@
 import logging
+from dataclasses import dataclass, fields
 from time import sleep
 
-from constance import config
 from django.db.models import Q
+
+from constance import config
 from django_countries.fields import Country
 from elasticsearch_dsl import connections
 
 from hct_mis_api.apps.activity_log.models import log_create
+from hct_mis_api.apps.core.models import BusinessArea
 from hct_mis_api.apps.core.utils import to_dict
 from hct_mis_api.apps.grievance.common import create_grievance_ticket_with_details
 from hct_mis_api.apps.household.documents import IndividualDocument
 from hct_mis_api.apps.household.elasticsearch_utils import populate_index
 from hct_mis_api.apps.household.models import (
-    Individual,
     DUPLICATE,
-    NEEDS_ADJUDICATION,
-    UNIQUE,
-    NOT_PROCESSED,
     DUPLICATE_IN_BATCH,
+    NEEDS_ADJUDICATION,
+    NOT_PROCESSED,
+    UNIQUE,
     UNIQUE_IN_BATCH,
     Document,
+    Individual,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.documents import ImportedIndividualDocument
-from hct_mis_api.apps.registration_datahub.models import ImportedIndividual
+from hct_mis_api.apps.registration_datahub.models import (
+    ImportedIndividual,
+    RegistrationDataImportDatahub,
+)
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class Thresholds:
+    # use 0 to check django-constance values are loaded
+    DEDUPLICATION_BATCH_DUPLICATE_SCORE: float = 0.0
+    DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE: int = 0
+    DEDUPLICATION_BATCH_DUPLICATES_ALLOWED: int = 0
+
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE: float = 0.0
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE: int = 0
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 0
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 0
+
+    def __post_init__(self):
+        for f in fields(self):
+            setattr(self, f.name, getattr(config, f.name))
+
+    @classmethod
+    def from_business_area(cls, ba):
+        t = cls()
+        for f in fields(cls):
+            setattr(t, f.name, getattr(ba, f.name.lower()))
+        return t
 
 
 class DeduplicateTask:
@@ -37,6 +67,7 @@ class DeduplicateTask:
 
     FUZZINESS = "AUTO:3,6"
     business_area = None
+    thresholds: Thresholds = None
 
     @classmethod
     def _prepare_query_dict(cls, individual, fields, min_score):
@@ -333,7 +364,7 @@ class DeduplicateTask:
             elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
+                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
@@ -421,7 +452,7 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
         )
         # noinspection PyTypeChecker
         query_dict["query"]["bool"]["filter"] = [
@@ -429,7 +460,7 @@ class DeduplicateTask:
         ]
         return cls._get_duplicates_tuple(
             query_dict,
-            config.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_BATCH_DUPLICATE_SCORE,
             ImportedIndividualDocument,
             individual,
         )
@@ -494,14 +525,14 @@ class DeduplicateTask:
         query_dict = cls._prepare_query_dict(
             individual,
             fields,
-            config.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
+            cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
         )
         query_dict["query"]["bool"]["filter"] = [
-            {"term": {"business_area": cls.business_area}},
+            {"term": {"business_area": cls.business_area.slug}},
         ]
         return cls._get_duplicates_tuple(
             query_dict,
-            config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE,
+            cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE,
             IndividualDocument,
             individual,
         )
@@ -543,10 +574,11 @@ class DeduplicateTask:
     @classmethod
     def deduplicate_individuals(cls, registration_data_import, individuals=None):
         cls._wait_until_health_green()
-        if not registration_data_import:
-            cls.business_area = individuals[0].business_area.slug
+        if registration_data_import:
+            cls.set_thresholds(registration_data_import)
         else:
-            cls.business_area = registration_data_import.business_area.slug
+            cls.set_thresholds(individuals[0].registration_data_import)
+
         (
             all_duplicates,
             all_possible_duplicates,
@@ -565,7 +597,9 @@ class DeduplicateTask:
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals):
         cls._wait_until_health_green()
-        cls.business_area = individuals[0].business_area.slug
+        cls.set_thresholds(individuals[0].registration_data_import)
+        # cls.business_area = individuals[0].business_area
+
         to_bulk_update_results = []
         for individual in individuals:
             (
@@ -621,19 +655,33 @@ class DeduplicateTask:
         )
 
     @classmethod
+    def set_thresholds(cls, registration_data):
+        # registration_data
+        if isinstance(registration_data, RegistrationDataImportDatahub):
+            cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
+        elif isinstance(registration_data, RegistrationDataImport):
+            cls.business_area = registration_data.business_area
+        else:
+            raise ValueError(f"Invalid type ({type(registration_data)}) for 'registration_data'")
+
+        cls.thresholds = Thresholds.from_business_area(cls.business_area)
+
+    @classmethod
     def deduplicate_imported_individuals(cls, registration_data_import_datahub):
+        cls.set_thresholds(registration_data_import_datahub)
+
         imported_individuals = ImportedIndividual.objects.filter(
             registration_data_import=registration_data_import_datahub
         )
         populate_index(imported_individuals, ImportedIndividualDocument)
         cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
-        cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
-            (imported_individuals.count() or 1) * (config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
         allowed_duplicates_golden_record_amount = round(
-            (imported_individuals.count() or 1) * (config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
+            (imported_individuals.count() or 1)
+            * (cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE / 100)
         )
 
         all_duplicates = []
@@ -678,18 +726,18 @@ class DeduplicateTask:
             checked_individuals_ids.append(imported_individual.id)
             to_bulk_update_results.append(imported_individual)
 
-            if len(results_data_imported["duplicates"]) > config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
+            if len(results_data_imported["duplicates"]) > cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED:
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({config.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
+                    f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_ALLOWED})"
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
 
-            if len(results_data["duplicates"]) > config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED:
+            if len(results_data["duplicates"]) > cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED:
                 message = (
                     "The number of individuals deemed duplicate with an individual record of the batch "
-                    f"exceed the maximum allowed ({config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
+                    f"exceed the maximum allowed ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED})"
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
@@ -708,22 +756,22 @@ class DeduplicateTask:
 
             if batch_amount_exceeded:
                 message = (
-                    f"The percentage of records ({config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records ({cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a batch has reached the maximum number."
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
             elif golden_record_amount_exceeded:
                 message = (
-                    f"The percentage of records ({config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records ({cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a population has reached the maximum number."
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
                 break
             elif batch_amount_exceeded and golden_record_amount_exceeded:
                 message = (
-                    f"The percentage of records (batch: {config.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%, "
-                    f"population: {config.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
+                    f"The percentage of records (batch: {cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE}%, "
+                    f"population: {cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE}%), "
                     "deemed as 'duplicate', within a batch and population has reached the maximum number."
                 )
                 cls.set_error_message_and_status(registration_data_import, message)
