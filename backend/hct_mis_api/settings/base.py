@@ -253,6 +253,7 @@ OTHER_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "explorer",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + OTHER_APPS + PROJECT_APPS
@@ -580,3 +581,33 @@ VERSION = get_version(__name__, Path(PROJECT_ROOT).parent, default_return=None)
 # see adminactions.perms
 # set handker to AA_PERMISSION_CREATE_USE_COMMAND
 AA_PERMISSION_HANDLER = 3
+
+EXPLORER_CONNECTIONS = {
+    "default": "default",
+    "HUB MIS": "cash_assist_datahub_mis",
+    "HUB CA": "cash_assist_datahub_ca",
+    "HUB ERP": "cash_assist_datahub_erp",
+    "HUB Reg": "registration_datahub",
+}
+EXPLORER_DEFAULT_CONNECTION = "default"
+EXPLORER_PERMISSION_VIEW = lambda r: r.user.is_superuser
+EXPLORER_PERMISSION_CHANGE = lambda r: r.user.is_superuser
+
+# EXPLORER_SCHEMA_INCLUDE_TABLE_PREFIXES = (
+#     'hct_mis_api',
+# )
+# EXPLORER_SCHEMA_EXCLUDE_TABLE_PREFIXES = (
+#     'django.contrib.auth',
+#     'django.contrib.contenttypes',
+#     'django_site',
+#     'django_session',
+#     'django.contrib.sessions',
+#     'django.contrib.admin',
+#     'django_celery',
+#     'django_celery.beat',
+#     'django_celery_beat',
+#     'django_celery_results',
+#     'django_migrations',
+#     'social_auth',
+#     'django_admin',
+# )
