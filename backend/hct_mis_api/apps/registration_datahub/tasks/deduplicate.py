@@ -529,7 +529,7 @@ class DeduplicateTask:
             cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE,
         )
         query_dict["query"]["bool"]["filter"] = [
-            {"term": {"business_area": cls.business_area}},
+            {"term": {"business_area": cls.business_area.slug}},
         ]
         return cls._get_duplicates_tuple(
             query_dict,
@@ -575,10 +575,11 @@ class DeduplicateTask:
     @classmethod
     def deduplicate_individuals(cls, registration_data_import, individuals=None):
         cls._wait_until_health_green()
-        if not registration_data_import:
-            cls.business_area = individuals[0].business_area.slug
+        if registration_data_import:
+            cls.set_thresholds(registration_data_import)
         else:
-            cls.business_area = registration_data_import.business_area.slug
+            cls.set_thresholds(individuals[0].business_area)
+
         (
             all_duplicates,
             all_possible_duplicates,
@@ -597,7 +598,9 @@ class DeduplicateTask:
     @classmethod
     def deduplicate_individuals_from_other_source(cls, individuals):
         cls._wait_until_health_green()
-        cls.business_area = individuals[0].business_area.slug
+        cls.set_thresholds(individuals[0].registration_data_import)
+        # cls.business_area = individuals[0].business_area
+
         to_bulk_update_results = []
         for individual in individuals:
             (
@@ -667,7 +670,6 @@ class DeduplicateTask:
         populate_index(imported_individuals, ImportedIndividualDocument)
         cls._wait_until_health_green()
         registration_data_import = RegistrationDataImport.objects.get(id=registration_data_import_datahub.hct_id)
-        cls.business_area = registration_data_import_datahub.business_area_slug
         allowed_duplicates_batch_amount = round(
             (imported_individuals.count() or 1) * (cls.thresholds.DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE / 100)
         )
