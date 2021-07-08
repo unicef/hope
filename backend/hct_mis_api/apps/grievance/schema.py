@@ -53,8 +53,11 @@ from hct_mis_api.apps.grievance.models import (
     TicketHouseholdDataUpdateDetails,
     TicketIndividualDataUpdateDetails,
     TicketNeedsAdjudicationDetails,
+    TicketNegativeFeedbackDetails,
     TicketNote,
     TicketPaymentVerificationDetails,
+    TicketPositiveFeedbackDetails,
+    TicketReferralDetails,
     TicketSensitiveDetails,
     TicketSystemFlaggingDetails,
 )
@@ -322,11 +325,9 @@ class GrievanceTicketNode(BaseNodePermissionMixin, DjangoObjectType):
     @staticmethod
     def _search_for_lookup(grievance_ticket_obj, lookup_name):
         for field, lookups in GrievanceTicket.FIELD_TICKET_TYPES_LOOKUPS.items():
-            # print(grievance_ticket_obj.status, lookup_name)
             extras_field = getattr(grievance_ticket_obj, field, None)
             if extras_field is None:
                 continue
-            # print(extras_field)
             real_lookup = lookup_name
             for lookup in lookups:
                 if isinstance(lookup, dict):
@@ -471,6 +472,30 @@ class TicketSystemFlaggingDetailsNode(DjangoObjectType):
 class TicketPaymentVerificationDetailsNode(DjangoObjectType):
     class Meta:
         model = TicketPaymentVerificationDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketPositiveFeedbackDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketPositiveFeedbackDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketNegativeFeedbackDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketNegativeFeedbackDetails
+        exclude = ("ticket",)
+        interfaces = (relay.Node,)
+        connection_class = ExtendedConnection
+
+
+class TicketReferralDetailsNode(DjangoObjectType):
+    class Meta:
+        model = TicketReferralDetails
         exclude = ("ticket",)
         interfaces = (relay.Node,)
         connection_class = ExtendedConnection
