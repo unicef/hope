@@ -578,7 +578,7 @@ class DeduplicateTask:
         if registration_data_import:
             cls.set_thresholds(registration_data_import)
         else:
-            cls.set_thresholds(individuals[0].business_area)
+            cls.set_thresholds(individuals[0].registration_data_import)
 
         (
             all_duplicates,
