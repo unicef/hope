@@ -71,7 +71,7 @@
                 <td>{{ info.count }}</td>
                 <td>
                     <a target="{{ model }}"
-                       href="{% url info.meta|admin_urlname:'changelist' %}?session|id={{ original.pk }}">visit</a>
+                       href="{% url info.meta|admin_urlname:'changelist' %}?registration_data_import|name|istartswith={{ original.name }}">visit</a>
                 </td>
                 <td>
                     <a href="javascript:django.jQuery('table.{{ info.meta.model_name }}').toggle();">{{ info.warnings|length }}/{{ info.errors|length }}</a>
