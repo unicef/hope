@@ -1,5 +1,6 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
+from decimal import Decimal
 from time import sleep
 
 from django.db.models import Q
@@ -36,29 +37,23 @@ log = logging.getLogger(__name__)
 
 @dataclass
 class Thresholds:
-    DEDUPLICATION_BATCH_DUPLICATE_SCORE: float = 6.0
+    DEDUPLICATION_BATCH_DUPLICATE_SCORE = Decimal("6.0")
     DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE: int = 50
     DEDUPLICATION_BATCH_DUPLICATES_ALLOWED: int = 5
-    DEDUPLICATION_GOLDEN_DUPLICATE_SCORE: float = 6.0
-    DEDUPLICATION_GOLDEN_DUPLICATES_PERCENTAGE: int = 50
-    DEDUPLICATION_GOLDEN_DUPLICATES_ALLOWED: int = 5
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATE_SCORE = Decimal("11.0")
+    DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE: int = 5
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_PERCENTAGE: int = 50
+    DEDUPLICATION_GOLDEN_RECORD_DUPLICATES_ALLOWED: int = 5
 
     def __post_init__(self):
-        for f in self.fields():
-            setattr(f, f, getattr(config, f))
+        for f in fields(self):
+            setattr(self, f.name, getattr(config, f.name))
 
     @classmethod
     def from_business_area(cls, ba):
         t = cls()
-        for f in [
-            "DEDUPLICATION_BATCH_DUPLICATE_SCORE",
-            "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE",
-            "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED",
-            "DEDUPLICATION_GOLDEN_DUPLICATE_SCORE",
-            "DEDUPLICATION_GOLDEN_DUPLICATES_PERCENTAGE",
-            "DEDUPLICATION_GOLDEN_DUPLICATES_ALLOWED",
-        ]:
-            setattr(t, f, getattr(ba, f.lower()))
+        for f in fields(cls):
+            setattr(t, f.name, getattr(ba, f.name.lower()))
         return t
 
 
@@ -363,12 +358,14 @@ class DeduplicateTask:
             if score >= duplicate_score:
                 duplicates.append(individual_hit.id)
                 original_individuals_ids_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - duplicate_score
+                results_core_data["proximity_to_score"] = float(Decimal(score) - duplicate_score)
                 results_data["duplicates"].append(results_core_data)
             elif document == IndividualDocument:
                 possible_duplicates.append(individual_hit.id)
                 original_individuals_ids_possible_duplicates.append(individual.id)
-                results_core_data["proximity_to_score"] = score - cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
+                results_core_data["proximity_to_score"] = float(
+                    Decimal(score) - cls.thresholds.DEDUPLICATION_GOLDEN_RECORD_MIN_SCORE
+                )
                 results_data["possible_duplicates"].append(results_core_data)
         log.debug(f"INDIVIDUAL {individual}")
         log.debug([(r.full_name, r.meta.score) for r in results])
