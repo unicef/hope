@@ -656,8 +656,13 @@ class DeduplicateTask:
         )
 
     @classmethod
-    def set_thresholds(cls, registration_data_import_datahub):
-        cls.business_area = BusinessArea.objects.get(slug=registration_data_import_datahub.business_area_slug)
+    def set_thresholds(cls, registration_data):
+        # registration_data
+        if isinstance(registration_data, RegistrationDataImportDatahub):
+            cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
+        elif isinstance(registration_data, RegistrationDataImport):
+            cls.business_area = registration_data.business_area
+
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
     @classmethod
