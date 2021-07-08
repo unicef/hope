@@ -47,8 +47,15 @@ class Thresholds:
     @classmethod
     def from_business_area(cls, ba):
         t = cls()
-        for f in t.fields():
-            setattr(t, f, getattr(ba, f.lower))
+        for f in [
+            "DEDUPLICATION_BATCH_DUPLICATE_SCORE",
+            "DEDUPLICATION_BATCH_DUPLICATES_PERCENTAGE",
+            "DEDUPLICATION_BATCH_DUPLICATES_ALLOWED",
+            "DEDUPLICATION_GOLDEN_DUPLICATE_SCORE",
+            "DEDUPLICATION_GOLDEN_DUPLICATES_PERCENTAGE",
+            "DEDUPLICATION_GOLDEN_DUPLICATES_ALLOWED",
+        ]:
+            setattr(t, f, getattr(ba, f.lower()))
         return t
 
 
