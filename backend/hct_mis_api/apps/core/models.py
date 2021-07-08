@@ -77,12 +77,6 @@ class BusinessArea(TimeStampedUUIDModel):
         help_text="Results equal or above this score are considered duplicates",
     )
 
-    deduplication_golden_duplicates_percentage = models.IntegerField(
-        default=50, help_text="If percentage of duplicates is higher or equal to this setting, deduplication is aborted"
-    )
-    deduplication_golden_duplicates_allowed = models.IntegerField(
-        default=5, help_text="If amount of duplicates for single individual exceeds this limit deduplication is aborted"
-    )
     deduplication_golden_record_duplicate_score = models.DecimalField(
         max_digits=3,
         decimal_places=1,
