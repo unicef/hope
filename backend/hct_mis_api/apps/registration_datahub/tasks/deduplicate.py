@@ -662,6 +662,8 @@ class DeduplicateTask:
             cls.business_area = BusinessArea.objects.get(slug=registration_data.business_area_slug)
         elif isinstance(registration_data, RegistrationDataImport):
             cls.business_area = registration_data.business_area
+        else:
+            raise ValueError(f"Invalid type ({type(registration_data)}) for 'registration_data'")
 
         cls.thresholds = Thresholds.from_business_area(cls.business_area)
 
