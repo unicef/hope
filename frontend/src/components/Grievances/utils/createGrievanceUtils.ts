@@ -6,12 +6,60 @@ import {
 import { thingForSpecificGrievanceType } from '../../../utils/utils';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function prepareFeedbackVariables(requiredVariables, values) {
+function preparePositiveFeedbackVariables(requiredVariables, values) {
   return {
     variables: {
       input: {
         ...requiredVariables,
         linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          category: {
+            positiveFeedbackTicketExtras: {
+              household: values.selectedHousehold?.id,
+              individual: values.selectedIndividual?.id,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function prepareNegativeFeedbackVariables(requiredVariables, values) {
+  return {
+    variables: {
+      input: {
+        ...requiredVariables,
+        linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          category: {
+            negativeFeedbackTicketExtras: {
+              household: values.selectedHousehold?.id,
+              individual: values.selectedIndividual?.id,
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function prepareReferralVariables(requiredVariables, values) {
+  return {
+    variables: {
+      input: {
+        ...requiredVariables,
+        linkedTickets: values.selectedRelatedTickets,
+        extras: {
+          category: {
+            referralTicketExtras: {
+              household: values.selectedHousehold?.id,
+              individual: values.selectedIndividual?.id,
+            },
+          },
+        },
       },
     },
   };
@@ -201,9 +249,9 @@ function prepareDefaultVariables(requiredVariables, values) {
 }
 
 export const prepareVariablesDict = {
-  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: prepareFeedbackVariables,
-  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: prepareFeedbackVariables,
-  [GRIEVANCE_CATEGORIES.REFERRAL]: prepareFeedbackVariables,
+  [GRIEVANCE_CATEGORIES.NEGATIVE_FEEDBACK]: prepareNegativeFeedbackVariables,
+  [GRIEVANCE_CATEGORIES.POSITIVE_FEEDBACK]: preparePositiveFeedbackVariables,
+  [GRIEVANCE_CATEGORIES.REFERRAL]: prepareReferralVariables,
   [GRIEVANCE_CATEGORIES.GRIEVANCE_COMPLAINT]: prepareGrievanceComplaintVariables,
   [GRIEVANCE_CATEGORIES.SENSITIVE_GRIEVANCE]: prepareSesitiveVariables,
   [GRIEVANCE_CATEGORIES.DATA_CHANGE]: {
