@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class IdManagementConfig(AppConfig):
-    name = "id_management"
+    name = "hct_mis_api.apps.id_management"
