@@ -2,16 +2,18 @@ import json
 import numbers
 from collections import defaultdict
 from datetime import date, datetime
+from functools import partial
 from io import BytesIO
 from typing import Union
 
-import openpyxl
-from dateutil.parser import parse
 from django.contrib.gis.geos import Point
 from django.core.files import File
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
+
+import openpyxl
+from dateutil.parser import parse
 from django_countries.fields import Country
 
 from hct_mis_api.apps.activity_log.models import log_create
@@ -24,21 +26,24 @@ from hct_mis_api.apps.core.core_fields_attributes import (
     TYPE_STRING,
 )
 from hct_mis_api.apps.core.kobo.api import KoboAPI
-from hct_mis_api.apps.core.kobo.common import KOBO_FORM_INDIVIDUALS_COLUMN_NAME, get_field_name
-from hct_mis_api.apps.core.models import BusinessArea, AdminArea
+from hct_mis_api.apps.core.kobo.common import (
+    KOBO_FORM_INDIVIDUALS_COLUMN_NAME,
+    get_field_name,
+)
+from hct_mis_api.apps.core.models import AdminArea, BusinessArea
 from hct_mis_api.apps.core.utils import (
+    SheetImageLoader,
     get_combined_attributes,
     rename_dict_keys,
     serialize_flex_attributes,
-    SheetImageLoader,
 )
 from hct_mis_api.apps.household.models import (
     HEAD,
     IDENTIFICATION_TYPE_DICT,
+    IDENTIFICATION_TYPE_OTHER,
     NON_BENEFICIARY,
     ROLE_ALTERNATE,
     ROLE_PRIMARY,
-    IDENTIFICATION_TYPE_OTHER,
 )
 from hct_mis_api.apps.registration_data.models import RegistrationDataImport
 from hct_mis_api.apps.registration_datahub.models import (
@@ -50,11 +55,14 @@ from hct_mis_api.apps.registration_datahub.models import (
     ImportedIndividual,
     ImportedIndividualIdentity,
     ImportedIndividualRoleInHousehold,
-    RegistrationDataImportDatahub,
     KoboImportedSubmission,
+    RegistrationDataImportDatahub,
 )
 from hct_mis_api.apps.registration_datahub.tasks.deduplicate import DeduplicateTask
-from hct_mis_api.apps.registration_datahub.tasks.utils import collectors_str_ids_to_list, get_submission_metadata
+from hct_mis_api.apps.registration_datahub.tasks.utils import (
+    collectors_str_ids_to_list,
+    get_submission_metadata,
+)
 
 
 def is_flex_field_attr(field):
@@ -455,21 +463,19 @@ class RdiXlsxCreateTask(RdiBaseCreateTask):
         }
 
         sheet_title = sheet.title.lower()
+        if sheet_title == "households":
+            obj = partial(ImportedHousehold, registration_data_import=registration_data_import)
+        elif sheet_title == "individuals":
+            obj = partial(ImportedIndividual, registration_data_import=registration_data_import)
+        else:
+            raise ValueError(f"Unhandled sheet label '{sheet.title}'")
 
         first_row = sheet[1]
         households_to_update = []
         for row in sheet.iter_rows(min_row=3):
             if not any([cell.value for cell in row]):
                 continue
-
-            if sheet_title == "households":
-                obj_to_create = ImportedHousehold(
-                    registration_data_import=registration_data_import,
-                )
-            else:
-                obj_to_create = ImportedIndividual(
-                    registration_data_import=registration_data_import,
-                )
+            obj_to_create = obj()
 
             household_id = None
             for cell, header_cell in zip(row, first_row):
